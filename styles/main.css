@@ -1,0 +1,63 @@
+@import url("reset.css");
+@import url("global.css");
+
+@import url("header.css");
+@import url("map.css");
+@import url("modal.css");
+@import url("sidebar.css");
+
+@import url("bootstrap.css");
+
+.header-view
+{
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	height:50px;
+}
+
+.sidebar-view
+{
+	position:absolute;
+	top:50px;
+	left:0px;
+	width:300px;
+	bottom:0px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.sidebar-view.visible
+{
+	left:-300px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.map-view
+{
+	position:absolute;
+	top:50px;
+	left:300px;
+	right:0px;
+	bottom:0px;	
+	
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.map-view.full
+{
+	left:0px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}

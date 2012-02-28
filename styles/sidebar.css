@@ -1,0 +1,133 @@
+.sidebar-view
+{
+	background-color:white;
+	box-shadow:inset -5px 0px 5px -2px rgba(0,0,0,0.6);
+	background-image: url('../assets/sidebar-thatch.jpg');
+}
+
+.sidebar-view .black-overlay
+{
+	position:absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	background-color:black;
+	opacity:0;
+	pointer-events: none;
+	
+	-webkit-transition: opacity .3s linear;
+    -moz-transition: opacity .3s linear;
+    -o-transition: opacity .3s linear;
+    -ms-transition: opacity .3s linear;
+}
+
+.divider
+{
+	height:2px;
+	width:100%;
+	background-color:rgba(0,0,0,.2);
+	border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.sidebar-view .black-overlay.visible
+{
+	-webkit-transition: opacity .3s linear;
+    -moz-transition: opacity .3s linear;
+    -o-transition: opacity .3s linear;
+    -ms-transition: opacity .3s linear;
+	opacity:.5;
+}
+
+.sidebar-view .data-container
+{
+	position:relative;
+	top:20px;
+	left:20px;
+	right:20px;
+}
+
+.sidebar-view .data-container .accordion-group
+{
+	width:87%;
+	border:none;
+}
+
+.sidebar-view .data-container .accordion-inner
+{
+	border:none;
+	background-color:rgba(0,0,0,.15);
+	color:#ccc;
+	box-shadow: inset 0px 0px 10px rgba(0, 0, 0, .3);
+	height:45px;
+	height:100%;
+	-webkit-border-bottom-right-radius: 7px;
+	-webkit-border-bottom-left-radius: 7px;
+	-moz-border-bottom-right-radius: 7px;
+	-moz-border-bottom-left-radius: 7px;
+	border-bottom-right-radius: 7px;
+	border-bottom-left-radius: 7px;
+}
+
+.sidebar-view .data-container .accordion-inner .data-toggle
+{
+	height:40px;
+	margin-top:10px;
+}
+
+.sidebar-view .data-container .accordion-inner .data-toggle p
+{
+	padding-top:5px;
+	float:left;
+}
+
+.sidebar-view .data-container .accordion-inner .data-toggle .btn-group
+{
+	float:right;
+}
+
+.accordion-toggle.btn.btn-inverse
+{
+	border:none;
+	text-align:left;
+}
+
+.toggle-group
+{
+	width:87%;
+	background-color:rgba(0,0,0,.15);
+	box-shadow: inset 0px 0px 10px rgba(0, 0, 0, .3);
+	border-radius:7px;
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
+	padding:0px;
+	margin:0px;
+}
+
+.toggle-group .data-toggle
+{
+	height:25px;
+	padding:15px;
+
+}
+
+.toggle-group .data-toggle p
+{
+	padding-top:5px;
+	float:left;
+}
+
+.toggle-group .data-toggle .btn-group
+{
+	float:right;
+}
+
+.input-prepend
+{
+	padding-top:15px;
+}
+
+.input-prepend .span2
+{
+	width:158px;
+}
