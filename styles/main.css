@@ -3,6 +3,7 @@
 
 @import url("header.css");
 @import url("map.css");
+@import url("mapgl.css");
 @import url("modal.css");
 @import url("sidebar.css");
 
@@ -54,6 +55,37 @@
 }
 
 .map-view.full
+{
+	left:0px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.mapgl-view
+{
+	position:absolute;
+	top:50px;
+	left:300px;
+	right:0px;
+	bottom:0px;	
+	
+	width:100%;
+	height:100%;
+	
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.mapgl-view canvas
+{	
+
+}
+
+.mapgl-view.full
 {
 	left:0px;
 	-webkit-transition: all .3s linear;

@@ -10,7 +10,7 @@ window.MapView = Backbone.View.extend({
 	
 	    this.template = _.template(tpl.get('map'));
 	
-		_.bindAll(this, "updateMapStyle");
+		//_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
 

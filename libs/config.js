@@ -1,8 +1,7 @@
-/* App UI variables */
+//STAND IN VARIABLES FOR GOOGLE FUSION TABLES
 
 var map_zoom			= 8;
 var mobileVisible		= true;
-/* Data variables (Google Fusion Tables) */
 
 var zoom_key 			= 0; 
 var layers				= new Object(); layers['squares'] = null; layers['dots'] = null;
@@ -25,3 +24,23 @@ var tbl_data		= new Array(
 							"2172158", "2172158",	//  9..10
 							"2168932", "2168932",	// 11..12
 							"2084852", "2084852", "2084852", "2084852", "2084852", "2084852", "2084852", "2084852"); // 13..20
+							
+//STAND IN VARIABLES FOR THREE.JS
+							
+var radius = 6371,
+tilt = 0.41,
+rotationSpeed = 0.1,
+
+cloudsScale = 1.005,
+moonScale = 0.23,
+
+height = window.innerHeight,
+width  = window.innerWidth,
+
+container, stats,
+
+camera, controls, scene, renderer,
+geometry, meshPlanet, meshClouds, meshMoon,
+dirLight, ambientLight,
+
+clock = new THREE.Clock();

@@ -23,7 +23,7 @@ var AppRouter = Backbone.Router.extend({
 		
 	    if (!this.mapView)
 		{
-            this.mapView = new MapView({
+            this.mapView = new MapGLView({
 				collection: this.readingsCollection,
 				vent: self.vent
 			});
@@ -34,7 +34,7 @@ var AppRouter = Backbone.Router.extend({
     },
 });
 
-tpl.loadTemplates(['map','header','sidebar', 'modal'],
+tpl.loadTemplates(['map', 'mapgl', 'header','sidebar', 'modal'],
     function () {
         app = new AppRouter();
         Backbone.history.start();
