@@ -43,11 +43,9 @@ window.MapGLView = Backbone.View.extend({
 		$(this.el).html(this.template());
 		
 		container = this.el;
-		console.log($(this.el).width());
-		console.log($(this.el).height());
 		scene = new THREE.Scene();
 
-		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0x000000, antialias: true } );
+		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0xffffff, antialias: true } );
 		renderer.setSize( width, height );
 		renderer.sortObjects = false;
 		renderer.autoClear = false;
@@ -86,7 +84,7 @@ window.MapGLView = Backbone.View.extend({
 		dirLight.position.set( -1, 0, 1 ).normalize();
 		scene.add( dirLight );
 
-		var planetTexture = THREE.ImageUtils.loadTexture( "textures/planets/earth_atmos_2048.jpg" ),
+		var planetTexture = THREE.ImageUtils.loadTexture( "textures/planets/earth_white.jpg" ),
 		cloudsTexture     = THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_1024.png" ),
 		normalTexture     = THREE.ImageUtils.loadTexture( "textures/planets/earth_normal_2048.jpg" ),
 		specularTexture   = THREE.ImageUtils.loadTexture( "textures/planets/earth_specular_2048.jpg" );
@@ -143,9 +141,6 @@ window.MapGLView = Backbone.View.extend({
 		scene.add( meshClouds );
 
 
-
-
-
 		// stars
 
 		var i,
@@ -163,12 +158,12 @@ window.MapGLView = Backbone.View.extend({
 
 		var stars,
 		starsMaterials = [
-			new THREE.ParticleBasicMaterial( { color: 0x555555, size: 2, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0x555555, size: 1, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0x333333, size: 2, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0x3a3a3a, size: 1, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0x1a1a1a, size: 2, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0x1a1a1a, size: 1, sizeAttenuation: false } )
+			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
+			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } ),
+			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
+			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } ),
+			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
+			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } )
 		];
 
 		for ( i = 10; i < 30; i ++ ) {
