@@ -10,7 +10,7 @@
 		  <div id="collapseOne" class="accordion-body collapse">
 		    <div class="accordion-inner">
 				<div class="data-toggle">
-					<p>Safecast Dataset</p>
+					<p>Safecast DATER</p>
 					<div class="btn-group" data-toggle="buttons-radio">
 					  <button class="btn btn-primary active">On</button>
 					  <button class="btn btn-primary">Off</button>
@@ -51,24 +51,6 @@
 		</div>
 		<div class="accordion-group">
 		  <div class="accordion-heading">
-		    <a class="accordion-toggle btn btn-inverse" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-		      <i class="icon-map-marker icon-white"></i> Japan Census Data
-		    </a>
-		  </div>
-		  <div id="collapseTwo" class="accordion-body collapse">
-		    <div class="accordion-inner">
-				<div class="data-toggle">
-					<p>Census</p>
-					<div class="btn-group" data-toggle="buttons-radio">
-					  <button class="btn active">Visible</button>
-					  <button class="btn">Hidden</button>
-					</div>
-				</div>
-		    </div>
-		  </div>
-		</div>
-		<div class="accordion-group">
-		  <div class="accordion-heading">
 		    <a class="accordion-toggle btn btn-inverse" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
 		      <i class="icon-map-marker icon-white"></i> Twitter sentiment
 		    </a>
@@ -94,35 +76,22 @@
 	<div class="toggle-group">
 		<div class="data-toggle">
 			<p>Timeline</p>
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button class="btn active">Visible</button>
-				<button class="btn">Hidden</button>
+			<div class="btn-group">
+				<button class="btn btn-inverse" data-toggle="buttons-checkbox"><i class="icon-eye-open icon-white"></i> Visible</button>
 			</div>
 		</div>
 		<div class="divider"></div>
 		<div class="data-toggle">
 			<p>Comments</p>
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button class="btn">Visible</button>
-				<button class="btn active">Hidden</button>
+			<div class="btn-group">
+				<button class="btn btn-inverse" data-toggle="buttons-checkbox"><i class="icon-eye-open icon-white"></i> Visible</button>
 			</div>
 		</div>
 		<div class="divider"></div>
 		<div class="data-toggle">
 			<p>Alerts</p>
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button class="btn active">Visible</button>
-				<button class="btn">Hidden</button>
-			</div>
-		</div>
-	</div>
-	<div class="toggle-group" id="themeToggleGroup">
-		<div class="data-toggle">
-			<p>Theme</p>
-			<div class="btn-group" data-toggle="buttons-radio">
-				<button id="dark_theme" class="btn active">Dark</button>
-				<button id="light_theme" class="btn">Light</button>
-				<button id="standard_theme" class="btn">Standard</button>
+			<div class="btn-group">
+				<button class="btn btn-inverse" data-toggle="buttons-checkbox"><i class="icon-eye-open icon-white"></i> Visible</button>
 			</div>
 		</div>
 	</div>
@@ -130,8 +99,18 @@
 		<div class="data-toggle">
 			<p>Display</p>
 			<div class="btn-group" data-toggle="buttons-radio">
-				<button id="display2D" class="btn">Flat map</button>
-				<button id="display3D" class="btn">3D Globe</button>
+				<button id="display2D" class="btn btn-inverse">Flat map</button>
+				<button id="display3D" class="btn btn-inverse">3D Globe</button>
+			</div>
+		</div>
+	</div>
+	<div class="toggle-group" id="themeToggleGroup">
+		<div class="data-toggle">
+			<p>Theme</p>
+			<div class="btn-group" data-toggle="buttons-radio">
+				<button id="dark_theme" class="btn btn-inverse active">Dark</button>
+				<button id="light_theme" class="btn btn-inverse">Light</button>
+				<button id="standard_theme" class="btn btn-inverse">Standard</button>
 			</div>
 		</div>
 	</div>

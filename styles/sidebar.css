@@ -95,8 +95,9 @@
 .toggle-group
 {
 	width:87%;
-	background-color:rgba(0,0,0,.15);
+	background-color:rgba(0,0,0,.1);
 	box-shadow: inset 0px 0px 10px rgba(0, 0, 0, .3);
+	border:1px solid rgba(0,0,0,.4);
 	border-radius:7px;
 	-moz-border-radius:7px;
 	-webkit-border-radius:7px;

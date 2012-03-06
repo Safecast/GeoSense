@@ -1,7 +1,7 @@
 window.MapGLView = Backbone.View.extend({
 
     tagName: 'div',
-	className: 'map-gl-view',
+	className: 'map-gl',
 	
     events: {
     },

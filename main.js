@@ -51,6 +51,13 @@ var AppRouter = Backbone.Router.extend({
         $('body').append(this.sideBarView.render().el);
     },
 
+	addData:function (options)
+	{
+		console.log('Adding data: ' + options);
+	 	num_data_sources +=1;
+		console.log('total data sources: ' + num_data_sources);
+	},
+
 });
 
 tpl.loadTemplates(['map', 'map-gl', 'header','sidebar', 'modal','add-data'],

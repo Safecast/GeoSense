@@ -13,7 +13,6 @@ window.SideBarView = Backbone.View.extend({
     },
 
     initialize: function(options) {
-	    
 	    this.template = _.template(tpl.get('sidebar'));
 		this.vent = options.vent;
 		this.page = options.page;
@@ -23,12 +22,14 @@ window.SideBarView = Backbone.View.extend({
     render: function() {
 		$(this.el).html(this.template());	
 		
+		console.log('this.page : ' + this.page);
+		
 		if(this.page == 'map')
 		{
 			this.$('#display2D').addClass('active');
 			
 		}
-		else if (this.page =='mapgl')
+		else if (this.page =='map-gl')
 		{
 			this.$('#themeToggleGroup').hide();
 			this.$('#display3D').addClass('active');
@@ -61,11 +62,11 @@ window.SideBarView = Backbone.View.extend({
 		window.location.href = '/#globe';
 	},
 	addDataClicked: function() {
-		this.modalView = new ModalView();
-        $('body').append(this.modalView.render().el);
-		this.modalView.setTitle('Add your super awesome data source');
-		this.modalView.setBody('Body copy goes here!');
+		this.addDataView = new AddDataView();
+        $('body').append(this.addDataView.render().el);
 		$('#myModal').modal('toggle');
+		
+		app.addData('safecast');
 	},
 
 });

@@ -1,4 +1,4 @@
-window.AddData = Backbone.View.extend({
+window.AddDataView = Backbone.View.extend({
 
     tagName: 'div',
 	className: 'add-data-view',
