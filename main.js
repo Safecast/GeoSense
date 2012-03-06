@@ -2,21 +2,17 @@ var AppRouter = Backbone.Router.extend({
 
     routes:{
         "":"map",
-		"gl":"mapGL",
+		"globe":"mapGL",
     },
 
     initialize:function () {
-	
+		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
 	
         this.headerView = new HeaderView({vent: this.vent});
         $('body').append(this.headerView.render().el);
 
-		this.sideBarView = new SideBarView({vent: this.vent});
-        $('body').append(this.sideBarView.render().el);
-
 		this.readingsCollection = new ReadingCollection();
-
     },
 
     map:function () {
@@ -31,7 +27,10 @@ var AppRouter = Backbone.Router.extend({
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
 			this.readingsCollection.fetch();
-        } 
+        }
+
+		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
+        $('body').append(this.sideBarView.render().el);
     },
 
 	mapGL:function () {
@@ -47,6 +46,9 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
 			this.readingsCollection.fetch();
         }
+
+		this.sideBarView = new SideBarView({vent: this.vent, page: 'mapgl'});
+        $('body').append(this.sideBarView.render().el);
     },
 
 });
@@ -54,5 +56,5 @@ var AppRouter = Backbone.Router.extend({
 tpl.loadTemplates(['map', 'mapgl', 'header','sidebar', 'modal'],
     function () {
         app = new AppRouter();
-        Backbone.history.start();
+        Backbone.history.start({ pushState: true });
 });
