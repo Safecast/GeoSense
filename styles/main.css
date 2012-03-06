@@ -3,8 +3,9 @@
 
 @import url("header.css");
 @import url("map.css");
-@import url("mapgl.css");
+@import url("map-gl.css");
 @import url("modal.css");
+@import url("add-data.css");
 @import url("sidebar.css");
 
 @import url("bootstrap.css");

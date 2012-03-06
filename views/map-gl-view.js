@@ -1,14 +1,14 @@
 window.MapGLView = Backbone.View.extend({
 
     tagName: 'div',
-	className: 'mapgl-view',
+	className: 'map-gl-view',
 	
     events: {
     },
 
     initialize: function(options) {
 	
-	    this.template = _.template(tpl.get('mapgl'));
+	    this.template = _.template(tpl.get('map-gl'));
 	
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);

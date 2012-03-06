@@ -61,7 +61,11 @@ window.SideBarView = Backbone.View.extend({
 		window.location.href = '/#globe';
 	},
 	addDataClicked: function() {
-		console.log('adddata');
+		this.modalView = new ModalView();
+        $('body').append(this.modalView.render().el);
+		this.modalView.setTitle('Add your super awesome data source');
+		this.modalView.setBody('Body copy goes here!');
+		$('#myModal').modal('toggle');
 	},
 
 });

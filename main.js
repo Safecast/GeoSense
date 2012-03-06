@@ -47,13 +47,13 @@ var AppRouter = Backbone.Router.extend({
 			this.readingsCollection.fetch();
         }
 
-		this.sideBarView = new SideBarView({vent: this.vent, page: 'mapgl'});
+		this.sideBarView = new SideBarView({vent: this.vent, page: 'map-gl'});
         $('body').append(this.sideBarView.render().el);
     },
 
 });
 
-tpl.loadTemplates(['map', 'mapgl', 'header','sidebar', 'modal'],
+tpl.loadTemplates(['map', 'map-gl', 'header','sidebar', 'modal','add-data'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });
