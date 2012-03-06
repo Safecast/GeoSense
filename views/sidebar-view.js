@@ -26,9 +26,11 @@ window.SideBarView = Backbone.View.extend({
 		if(this.page == 'map')
 		{
 			this.$('#display2D').addClass('active');
+			
 		}
 		else if (this.page =='mapgl')
 		{
+			this.$('#themeToggleGroup').hide();
 			this.$('#display3D').addClass('active');
 		}
 					
@@ -48,14 +50,14 @@ window.SideBarView = Backbone.View.extend({
 	},
 	
 	display2DClicked: function() {
-		app.navigate("", {trigger: true});
 		//Todo: Replace with proper routing
+		app.navigate("", {trigger: false});
 		window.location.href = '';
 	},
 
 	display3DClicked: function() {
-		app.navigate("globe", {trigger: true});
 		//Todo: Replace with proper routing
+		app.navigate("globe", {trigger: false});
 		window.location.href = '/#globe';
 	},
 	addDataClicked: function() {
