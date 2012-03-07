@@ -12,9 +12,11 @@ window.MapView = Backbone.View.extend({
 	
 		_.bindAll(this, "updateMapStyle");
 		_.bindAll(this, "setMapLocation");
-
+		_.bindAll(this, "initD3");
+		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
+		options.vent.bind("initD3", this.initD3);
 
 		this.markers = {};
 		this.markerArray = [];
@@ -60,22 +62,19 @@ window.MapView = Backbone.View.extend({
 		this.updateMapStyle('dark');
 		
 		//Default Location
-		this.setMapLocation('japan');
+		this.setMapLocation('california');
 		
 		//Render Fusion Maps
 		this.initSafecastFusionMap();
-	},
+},
 	
 	setMapZoom: function(zoom)
 	{
 		map_zoom = zoom;
-		console.log(map_zoom);
 	},
 	
 	setMapLocation: function(addr)
-	{		
-		console.log('map: ' + this.map);
-		
+	{				
 		var self = this;
 		
 		geocoder = new google.maps.Geocoder();
@@ -192,6 +191,60 @@ window.MapView = Backbone.View.extend({
 			if(mobileVisible)
 				layers['dots'].setMap(this.map);	
 		}			
+	},
+	
+	initD3: function(options)
+	{
+		var self = this;
+		
+		d3.json(options.url, function(data) {
+		  var overlay = new google.maps.OverlayView();
+
+		  // Add the container when the overlay is added to the map.
+		  overlay.onAdd = function() {
+
+		    var layer = d3.select(this.getPanes().overlayLayer).append("div")
+		        .attr("class", "stations");
+
+		    // Draw each marker as a separate SVG element.
+		    // We could use a single SVG, but what size would it have?
+		    overlay.draw = function() {
+		      var projection = this.getProjection(),
+		          padding = 10;
+
+		      var marker = layer.selectAll("svg")
+		          .data(d3.entries(data))
+		          .each(transform) // update existing markers
+		        .enter().append("svg:svg")
+		          .each(transform)
+		          .attr("class", "marker");
+
+		      // Add a circle.
+		      marker.append("svg:circle")
+		          .attr("r", 4.5)
+		          .attr("cx", padding)
+		          .attr("cy", padding);
+
+		      // Add a label.
+		      marker.append("svg:text")
+		          .attr("x", padding + 7)
+		          .attr("y", padding)
+		          .attr("dy", ".31em")
+		          .text(function(d) { return d.key; });
+
+		      function transform(d) {
+		        d = new google.maps.LatLng(d.value[1], d.value[0]);
+		        d = projection.fromLatLngToDivPixel(d);
+		        return d3.select(this)
+		            .style("left", (d.x - padding) + "px")
+		            .style("top", (d.y - padding) + "px");
+		      }
+		    };
+		  };
+
+		  // Bind our overlay to the map…
+		  overlay.setMap(self.map);
+		});
 	},
 
     addOne: function(reading) {

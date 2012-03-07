@@ -21,9 +21,7 @@ window.SideBarView = Backbone.View.extend({
 
     render: function() {
 		$(this.el).html(this.template());	
-		
-		console.log('this.page : ' + this.page);
-		
+				
 		if(this.page == 'map')
 		{
 			this.$('#display2D').addClass('active');
@@ -62,10 +60,9 @@ window.SideBarView = Backbone.View.extend({
 		window.location.href = '/#globe';
 	},
 	addDataClicked: function() {
-		this.addDataView = new AddDataView();
+		this.addDataView = new AddDataView({vent: this.vent});
         $('body').append(this.addDataView.render().el);
-		$('#myModal').modal('toggle');
-		
+		$('#addDataModal').modal('toggle');
 		app.addData('safecast');
 	},
 

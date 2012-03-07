@@ -53,9 +53,9 @@ var AppRouter = Backbone.Router.extend({
 
 	addData:function (options)
 	{
-		console.log('Adding data: ' + options);
+		//console.log('Adding data: ' + options);
 	 	num_data_sources +=1;
-		console.log('total data sources: ' + num_data_sources);
+		//console.log('total data sources: ' + num_data_sources);
 	},
 
 });
