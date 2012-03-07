@@ -18,14 +18,15 @@
 }
 
 .stations svg {
-  width:50px;
-  height:50px;
+  width:150px;
+  height:150px;
   padding-right: 100px;
   font: 10px sans-serif;
+  fill:#ffffff;
+  opacity:.9;
 }
 
 .stations circle {
-  fill: brown;
-  stroke: black;
-  stroke-width: 1.5px;
+  fill: #049cdb;
+  opacity:.8;
 }
