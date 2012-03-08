@@ -12,11 +12,11 @@ window.MapView = Backbone.View.extend({
 	
 		_.bindAll(this, "updateMapStyle");
 		_.bindAll(this, "setMapLocation");
-		_.bindAll(this, "initD3");
+		_.bindAll(this, "addExternalData");
 		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
-		options.vent.bind("initD3", this.initD3);
+		options.vent.bind("addExternalData", this.addExternalData);
 
 		this.markers = {};
 		this.markerArray = [];
@@ -193,7 +193,7 @@ window.MapView = Backbone.View.extend({
 		}			
 	},
 	
-	initD3: function(options)
+	addExternalData: function(options)
 	{
 		var self = this;
 		
