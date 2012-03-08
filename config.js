@@ -3,9 +3,9 @@ Temporary & app-wide variables
 */
 
 var num_data_sources = 0;
+var data = [];
 
-//STAND IN VARIABLES FOR GOOGLE FUSION TABLES
-
+//VARIABLES FOR GOOGLE FUSION TABLES
 var map_zoom = 8;
 var mobileVisible = true;
 
@@ -31,8 +31,7 @@ var tbl_data = new Array(
 				"2168932", "2168932",	// 11..12
 				"2084852", "2084852", "2084852", "2084852", "2084852", "2084852", "2084852", "2084852"); // 13..20
 							
-//STAND IN VARIABLES FOR THREE.JS
-							
+//VARIABLES FOR THREE.JS							
 var radius = 6371,
 tilt = 0.41,
 rotationSpeed = 0.1,

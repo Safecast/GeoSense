@@ -1,8 +1,14 @@
-ReadingCollection = Backbone.Collection.extend({
+DataCollection = Backbone.Collection.extend({
 
     model: Data,
-	localStorage: new Store("readings"),
-
+	url:  '/data/stations.json',
+	localStorage: new Store("data"),
+	
+	
+	parse:function(res){                    
+		return res.items;
+	},
+	
     done: function() {
       return this.filter(function(reading){ return reading.get('done'); });
     },
@@ -20,4 +26,4 @@ ReadingCollection = Backbone.Collection.extend({
       return reading.get('order');
     }
 
-  });
+ });

@@ -17,6 +17,9 @@ window.SideBarView = Backbone.View.extend({
 		this.vent = options.vent;
 		this.page = options.page;
 		
+		_.bindAll(this, "renderDataToggles");
+	 	options.vent.bind("renderDataToggles", this.renderDataToggles);
+		
     },
 
     render: function() {
@@ -35,6 +38,24 @@ window.SideBarView = Backbone.View.extend({
 					
         return this;
     },
+
+	renderDataToggles: function(){
+		
+		for (i=1; i<= num_data_sources; i++)
+		{
+			this.addDataToggle({number:i});
+		}
+	},
+
+	addDataToggle: function(options) {
+		console.log('adding data: ' + options.number);
+		this.$('#accordion').append('<div class="accordion-group"><div class="accordion-heading"><a class="accordion-toggle btn btn-inverse" data-toggle="collapse" data-parent="#accordion" href="#collapse'+ options.number +'><i class="icon-map-marker icon-white"></i> Data Title</a></div><div id="collapse'+options.number+'" class="accordion-body collapse"><div class="accordion-inner"><div class="data-toggle"><p>Data</p><div class="btn-group" data-toggle="buttons-radio"><button class="btn active">Visible</button><button class="btn">Hidden</button></div></div></div></div></div>');
+		
+	},
+	
+	removeDataToggle: function() {
+		
+	},
 
 	lightFilterClicked: function() {
 		this.vent.trigger("updateMapStyle", 'light');
@@ -59,11 +80,11 @@ window.SideBarView = Backbone.View.extend({
 		app.navigate("globe", {trigger: false});
 		window.location.href = '/#globe';
 	},
+	
 	addDataClicked: function() {
 		this.addDataView = new AddDataView({vent: this.vent});
         $('body').append(this.addDataView.render().el);
 		$('#addDataModal').modal('toggle');
-		app.addData('safecast');
 	},
 
 });

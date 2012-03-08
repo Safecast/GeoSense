@@ -51,11 +51,12 @@ var AppRouter = Backbone.Router.extend({
         $('body').append(this.sideBarView.render().el);
     },
 
-	addData:function (options)
+	addData:function (url)
 	{
-		//console.log('Adding data: ' + options);
 	 	num_data_sources +=1;
-		//console.log('total data sources: ' + num_data_sources);
+		data[num_data_sources] = new DataCollection();
+		this.vent.trigger("addExternalData", {url: url}); 
+		this.vent.trigger("renderDataToggles", {}); 
 	},
 
 });

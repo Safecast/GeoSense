@@ -20,7 +20,7 @@ window.AddDataView = Backbone.View.extend({
 	dataButtonClicked: function() {
 		//Todo: Verify string URL
 		var urlPath = this.$('#dataInput').val();
-		this.vent.trigger("addExternalData", { url: urlPath }); 
+		app.addData(urlPath);
 	},
 
 });
