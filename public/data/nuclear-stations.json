@@ -1,0 +1,2243 @@
+[
+	{
+		"Country": "ARGENTINA",
+		"Name": "ATUCHA",
+		"Location": "-34,-59.166672",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "ARGENTINA",
+		"Name": "EMBALSE",
+		"Location": "-32.23333,-64.433327",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "ARMENIA",
+		"Name": "ARMENIA",
+		"Location": "40.166672,44.133331",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "BELGIUM",
+		"Name": "BR",
+		"Location": "51.216671,5.0833302",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "BELGIUM",
+		"Name": "DOEL",
+		"Location": "51.333328,4.25",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "BELGIUM",
+		"Name": "TIHANGE",
+		"Location": "50.51667,5.28333",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "BRAZIL",
+		"Name": "ANGRA",
+		"Location": "-23.008329,-44.473888",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "BULGARIA",
+		"Name": "KOZLODUY",
+		"Location": "43.75,23.633329",
+		"Total number of reactors": "6",
+		"Active Reactors": "6",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "BRUCE",
+		"Location": "44.333328,-81.599998",
+		"Total number of reactors": "8",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "4"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "DARLINGTON",
+		"Location": "43.883331,-78.699997",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "DOUGLAS POINT",
+		"Location": "44.333328,-81.599998",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "GENTILLY",
+		"Location": "46.400002,-72.316673",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "NPD",
+		"Location": "46.200001,-77.699997",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "PICKERING",
+		"Location": "43.816669,-79.066673",
+		"Total number of reactors": "8",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "4"
+	},
+	{
+		"Country": "CANADA",
+		"Name": "POINT LEPREAU",
+		"Location": "45.066669,-66.466667",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CHINA",
+		"Name": "GUANGDONG",
+		"Location": "22.6,114.53333",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CHINA",
+		"Name": "LINGAO",
+		"Location": "22.6,114.54194",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CHINA",
+		"Name": "QINSHAN",
+		"Location": "30.450001,120.93333",
+		"Total number of reactors": "5",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "4",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CHINA",
+		"Name": "TIANWAN",
+		"Location": "34.683331,119.44667",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CZECH REPUBLIC",
+		"Name": "DUKOVANY",
+		"Location": "49.083328,16.133329",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "CZECH REPUBLIC",
+		"Name": "TEMELIN",
+		"Location": "49.166672,14.26667",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FINLAND",
+		"Name": "LOVIISA",
+		"Location": "60.366669,26.35",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FINLAND",
+		"Name": "OLKILUOTO",
+		"Location": "61.23333,21.433331",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "BELLEVILLE",
+		"Location": "47.5075,2.8775001",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "BLAYAIS",
+		"Location": "45.26083,-0.68861002",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "BUGEY",
+		"Location": "45.795559,5.27",
+		"Total number of reactors": "5",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "CATTENOM",
+		"Location": "49.413609,6.2163901",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "CHINON",
+		"Location": "47.23333,0.18333",
+		"Total number of reactors": "7",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "3"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "CHOOZ",
+		"Location": "50.09,4.7894402",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "CIVAUX",
+		"Location": "46.4575,0.65916997",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "CREYS-MALVILLE",
+		"Location": "45.76667,5.46667",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "CRUAS",
+		"Location": "44.63139,4.7555599",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "DAMPIERRE",
+		"Location": "47.733891,2.5161099",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "MONTS D'ARREE",
+		"Location": "48.349998,-3.8666699",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "FESSENHEIM",
+		"Location": "47.906391,7.56528",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "FLAMANVILLE",
+		"Location": "49.535831,-1.88139",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "PHENIX",
+		"Location": "44.150002,4.6999998",
+		"Total number of reactors": "3",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "GOLFECH",
+		"Location": "44.099998,0.86667001",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "GRAVELINES",
+		"Location": "51.016109,2.14417",
+		"Total number of reactors": "6",
+		"Active Reactors": "6",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "NOGENT",
+		"Location": "48.51722,3.52",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "PALUEL",
+		"Location": "49.858059,0.63305998",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "PENLY",
+		"Location": "49.975559,1.2119401",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "ST. ALBAN",
+		"Location": "45.404999,4.7555599",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "ST. LAURENT",
+		"Location": "47.72028,1.57917",
+		"Total number of reactors": "4",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "FRANCE",
+		"Name": "TRICASTIN",
+		"Location": "44.32972,4.7322202",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "AVR JUELICH",
+		"Location": "50.916672,6.4000001",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "BIBLIS",
+		"Location": "49.716671,8.4166698",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "BROKDORF",
+		"Location": "53.849998,9.3500004",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "BRUNSBUETTEL",
+		"Location": "53.916672,9.1166697",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "EMSLAND",
+		"Location": "52.466671,7.3166699",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "GRAFENRHEINFELD",
+		"Location": "49.98333,10.18333",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "GREIFSWALD",
+		"Location": "54.133331,13.66667",
+		"Total number of reactors": "5",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "5"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "GROHNDE",
+		"Location": "52.033329,9.4166698",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "GUNDREMMINGEN",
+		"Location": "48.51667,10.4",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "HDR GROSSWELZHEIM",
+		"Location": "50.055561,8.9833298",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "ISAR",
+		"Location": "48.599998,12.3",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "KNK",
+		"Location": "49.099998,8.4333296",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "KRUEMMEL",
+		"Location": "53.400002,10.43333",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "LINGEN",
+		"Location": "52.48333,7.3000002",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "MUELHEIM-KAERLICH",
+		"Location": "50.416672,7.4833298",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "MZFR",
+		"Location": "49.099998,8.4333296",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "NECKARWESTHEIM",
+		"Location": "49.033329,9.1666698",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "NIEDERAICHBACH",
+		"Location": "48.599998,12.31667",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "OBRIGHEIM",
+		"Location": "49.366669,9.0833302",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "PHILIPPSBURG",
+		"Location": "49.25,8.4499998",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "RHEINSBERG",
+		"Location": "53.150002,13",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "STADE",
+		"Location": "53.616669,9.53333",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "THTR",
+		"Location": "51.683331,7.9833298",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "UNTERWESER",
+		"Location": "53.433331,8.46667",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "VAK KAHL",
+		"Location": "50.044441,8.9833298",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "GERMANY",
+		"Name": "WUERGASSEN",
+		"Location": "51.633331,9.3999996",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "HUNGARY",
+		"Name": "PAKS",
+		"Location": "46.572498,18.85417",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "INDIA",
+		"Name": "KAIGA",
+		"Location": "14.86667,74.449997",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "INDIA",
+		"Name": "KAKRAPAR",
+		"Location": "21.26667,73.400002",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "INDIA",
+		"Name": "KALPAKKAM",
+		"Location": "12.58333,80.183327",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "INDIA",
+		"Name": "NARORA",
+		"Location": "28.183331,78.366669",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "INDIA",
+		"Name": "RAJASTHAN",
+		"Location": "24.883329,75.633331",
+		"Total number of reactors": "4",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "INDIA",
+		"Name": "TARAPUR",
+		"Location": "19.83333,72.666672",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "IRAN",
+		"Name": "BUSHEHR",
+		"Location": "28.85,50.883331",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "ITALY",
+		"Name": "CAORSO",
+		"Location": "45.066669,9.8666697",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "ITALY",
+		"Name": "ENRICO FERMI",
+		"Location": "45.183331,8.28333",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "ITALY",
+		"Name": "GARIGLIANO",
+		"Location": "41.26667,13.83333",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "ITALY",
+		"Name": "LATINA",
+		"Location": "41.400002,12.76667",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "FUGEN ATR",
+		"Location": "35.75,136.01666",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "FUKUSHIMA-DAIICHI",
+		"Location": "37.416672,141.03333",
+		"Total number of reactors": "6",
+		"Active Reactors": "6",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "FUKUSHIMA-DAINI",
+		"Location": "37.316669,141.03333",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "GENKAI",
+		"Location": "33.51667,129.83333",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "HAMAOKA",
+		"Location": "34.616669,138.14999",
+		"Total number of reactors": "5",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "HIGASHI DORI",
+		"Location": "41.26667,141.31667",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "IKATA",
+		"Location": "33.48333,132.31667",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "KASHIWAZAKI KARIWA",
+		"Location": "37.416672,138.58333",
+		"Total number of reactors": "7",
+		"Active Reactors": "7",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "MIHAMA",
+		"Location": "35.700001,135.96667",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "MONJU",
+		"Location": "35.76667,136",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "OHI",
+		"Location": "35.533329,135.64999",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "ONAGAWA",
+		"Location": "38.400002,141.5",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "SENDAI",
+		"Location": "31.816669,130.18333",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "SHIKA",
+		"Location": "37.049999,136.73334",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "SHIMANE",
+		"Location": "35.533329,133",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "TAKAHAMA",
+		"Location": "35.51667,135.51666",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "TOKAI",
+		"Location": "36.462502,140.61",
+		"Total number of reactors": "3",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "TOMARI",
+		"Location": "43.033329,140.51666",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "JAPAN",
+		"Name": "TSURUGA",
+		"Location": "35.749722,136.02055",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "KAZAKHSTAN",
+		"Name": "BN",
+		"Location": "43.599998,51.283329",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "REPUBLIC OF KOREA",
+		"Name": "KORI",
+		"Location": "35.316669,129.3",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "REPUBLIC OF KOREA",
+		"Name": "ULCHIN",
+		"Location": "37.099998,129.38333",
+		"Total number of reactors": "6",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "REPUBLIC OF KOREA",
+		"Name": "WOLSONG",
+		"Location": "35.716671,129.48334",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "REPUBLIC OF KOREA",
+		"Name": "YONGGWANG",
+		"Location": "35.416672,126.41667",
+		"Total number of reactors": "6",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "LITHUANIA",
+		"Name": "IGNALINA",
+		"Location": "55.599998,26.48333",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "MEXICO",
+		"Name": "LAGUNA VERDE",
+		"Location": "19.725,-96.387497",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "NETHERLANDS",
+		"Name": "BORSSELE",
+		"Location": "51.433331,3.7",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "NETHERLANDS",
+		"Name": "DODEWAARD",
+		"Location": "51.933331,5.6500001",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "PAKISTAN",
+		"Name": "CHASNUPP",
+		"Location": "32.666672,71.48333",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "PAKISTAN",
+		"Name": "KANUPP",
+		"Location": "24.85,66.800003",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "ROMANIA",
+		"Name": "CERNAVODA",
+		"Location": "44.316669,28.01667",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "BALAKOVO",
+		"Location": "51.916672,47.366669",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "BELOYARSKY",
+		"Location": "56.849998,61.316669",
+		"Total number of reactors": "3",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "BILIBINO",
+		"Location": "68.050003,166.45",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "KALININ",
+		"Location": "57.916672,35.083328",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "KOLA",
+		"Location": "67.466667,32.466671",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "KURSK",
+		"Location": "51.683331,35.616669",
+		"Total number of reactors": "5",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "LENINGRAD",
+		"Location": "59.833328,29.033331",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "NOVOVORONEZH",
+		"Location": "51.283329,39.216671",
+		"Total number of reactors": "5",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "ROSTOV",
+		"Location": "47.599998,42.116669",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "RUSSIA",
+		"Name": "SMOLENSK",
+		"Location": "54.166672,33.23333",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SLOVAKIA",
+		"Name": "BOHUNICE",
+		"Location": "48.5,17.683331",
+		"Total number of reactors": "5",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "SLOVAKIA",
+		"Name": "MOCHOVCE",
+		"Location": "48.25,18.450001",
+		"Total number of reactors": "4",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SLOVENIA",
+		"Name": "KRSKO",
+		"Location": "45.916672,15.53333",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SOUTH AFRICA",
+		"Name": "KOEBERG",
+		"Location": "-33.650002,18.41667",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "ALMARAZ",
+		"Location": "39.80806,-5.6969399",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "ASCO",
+		"Location": "41.200001,0.56667",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "COFRENTES",
+		"Location": "39.216671,-1.05",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "JOSE CABRERA",
+		"Location": "40.349998,-2.8166699",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "SANTA MARIA DE GARONA",
+		"Location": "42.76667,-3.21667",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "TRILLO",
+		"Location": "40.683331,-2.5999999",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SPAIN",
+		"Name": "VANDELLOS",
+		"Location": "40.966671,0.88332999",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "SWEDEN",
+		"Name": "AGESTA",
+		"Location": "59.583328,17.33333",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "SWEDEN",
+		"Name": "BARSEBECK",
+		"Location": "55.75,12.91667",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "SWEDEN",
+		"Name": "FORSMARK",
+		"Location": "60.400002,18.183331",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SWEDEN",
+		"Name": "OSKARSHAMN",
+		"Location": "57.416672,16.66667",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SWEDEN",
+		"Name": "RINGHALS",
+		"Location": "57.25,12.11667",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SWITZERLAND",
+		"Name": "BEZNAU",
+		"Location": "47.566669,8.2333298",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SWITZERLAND",
+		"Name": "GOESGEN",
+		"Location": "47.366669,7.9833298",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SWITZERLAND",
+		"Name": "LEIBSTADT",
+		"Location": "47.604721,8.1816702",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "SWITZERLAND",
+		"Name": "MUEHLEBERG",
+		"Location": "46.966671,7.2666702",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "TAIWAN",
+		"Name": "CHIN SHAN",
+		"Location": "25.283331,121.56667",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "TAIWAN",
+		"Name": "KUOSHENG",
+		"Location": "25.216669,121.65",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "TAIWAN",
+		"Name": "LUNG-MEI",
+		"Location": "24.41667,121.71667",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "2",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "TAIWAN",
+		"Name": "MAANSHAN",
+		"Location": "21.966669,120.75",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UKRAINE",
+		"Name": "CHERNOBYL",
+		"Location": "51.383331,30.1",
+		"Total number of reactors": "4",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "3"
+	},
+	{
+		"Country": "UKRAINE",
+		"Name": "KHMELNITSKI",
+		"Location": "50.599998,26.549999",
+		"Total number of reactors": "4",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "3",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UKRAINE",
+		"Name": "ROVNO",
+		"Location": "51.333328,25.883329",
+		"Total number of reactors": "4",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "1",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UKRAINE",
+		"Name": "SOUTH UKRAINE",
+		"Location": "47.816669,31.216669",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UKRAINE",
+		"Name": "ZAPOROZHE",
+		"Location": "47.48333,34.633331",
+		"Total number of reactors": "6",
+		"Active Reactors": "6",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "BERKELEY",
+		"Location": "51.683331,-2.5",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "BRADWELL",
+		"Location": "51.73333,0.89999998",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "CALDER HALL",
+		"Location": "54.416672,-3.5",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "CHAPELCROSS",
+		"Location": "55.01667,-3.21806",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "DOUNREAY",
+		"Location": "58.568329,-3.7761099",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "DUNGENESS",
+		"Location": "50.916672,0.96666998",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "HARTLEPOOL",
+		"Location": "54.633331,-1.1833301",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "HEYSHAM",
+		"Location": "54.033329,-2.9000001",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "HINKLEY POINT",
+		"Location": "51.200001,-3.1333301",
+		"Total number of reactors": "4",
+		"Active Reactors": "4",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "HUNTERSTON",
+		"Location": "55.716671,-4.8833299",
+		"Total number of reactors": "4",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "OLDBURY",
+		"Location": "51.650002,-2.5666699",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "SIZEWELL",
+		"Location": "52.216671,1.61667",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "TORNESS",
+		"Location": "55.966671,-2.4000001",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "TRAWSFYNYDD",
+		"Location": "52.933331,-3.95",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "WINDSCALE",
+		"Location": "54.416672,-3.5",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "WINFRITH",
+		"Location": "50.683331,-2.26667",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED KINGDOM",
+		"Name": "WYLFA",
+		"Location": "53.416672,-4.4833298",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "ARKANSAS ONE",
+		"Location": "35.226669,-93.230827",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BEAVER VALLEY",
+		"Location": "40.621941,-80.433891",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BIG ROCK POINT",
+		"Location": "45.359169,-85.194717",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BONUS",
+		"Location": "18.35,-67.25",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BRAIDWOOD",
+		"Location": "41.24361,-88.228889",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BROWNS FERRY",
+		"Location": "34.70417,-87.118607",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BRUNSWICK",
+		"Location": "33.958328,-78.010559",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "BYRON",
+		"Location": "42.075001,-89.281937",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "CALLAWAY",
+		"Location": "38.758331,-91.78167",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "CALVERT CLIFFS",
+		"Location": "38.434719,-76.44194",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "CATAWBA",
+		"Location": "35.051392,-81.069443",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "CLINTON",
+		"Location": "40.17194,-88.834167",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "COMANCHE PEAK",
+		"Location": "32.297779,-97.785004",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "COOPER",
+		"Location": "40.361938,-95.641113",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "CRYSTAL RIVER",
+		"Location": "28.95722,-82.698891",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "CVTR",
+		"Location": "34.265282,-81.333328",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "DAVIS BESSE",
+		"Location": "41.597221,-83.086388",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "DIABLO CANYON",
+		"Location": "35.21167,-120.85444",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "DONALD COOK",
+		"Location": "41.976109,-86.566391",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "DRESDEN",
+		"Location": "41.389721,-88.271111",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "DUANE ARNOLD",
+		"Location": "42.100559,-91.777222",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "ELK RIVER",
+		"Location": "45.299999,-93.583328",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "ENRICO FERMI",
+		"Location": "41.963329,-83.258614",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "FARLEY",
+		"Location": "31.22278,-85.112503",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "FITZPATRICK",
+		"Location": "43.523891,-76.398331",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "FORT CALHOUN",
+		"Location": "41.520828,-96.076668",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "FORT ST. VRAIN",
+		"Location": "40.244438,-104.87417",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "GRAND GULF",
+		"Location": "32.0075,-91.048058",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "H.B. ROBINSON",
+		"Location": "34.405281,-80.158607",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "HADDAM NECK",
+		"Location": "41.481941,-72.499168",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "HATCH",
+		"Location": "31.93417,-82.344437",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "HOPE CREEK",
+		"Location": "39.467781,-75.538063",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "HUMBOLDT BAY",
+		"Location": "40.74194,-124.20806",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "INDIAN POINT",
+		"Location": "41.271389,-73.952499",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "KEWAUNEE",
+		"Location": "44.34306,-87.53611",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "LACROSSE",
+		"Location": "43.560001,-91.228333",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "LASALLE",
+		"Location": "41.243889,-88.67083",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "LIMERICK",
+		"Location": "40.220001,-75.589996",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "MAINE YANKEE",
+		"Location": "43.950562,-69.696114",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "MCGUIRE",
+		"Location": "35.43222,-80.948334",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "MILLSTONE",
+		"Location": "41.308609,-72.16806",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "MONTICELLO",
+		"Location": "45.333328,-93.848328",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "NINE MILE POINT",
+		"Location": "43.522221,-76.410004",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "NORTH ANNA",
+		"Location": "38.060829,-77.790558",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "OCONEE",
+		"Location": "34.791672,-82.898613",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "OYSTER CREEK",
+		"Location": "39.814171,-74.20639",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PALISADES",
+		"Location": "42.32222,-86.315277",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PALO VERDE",
+		"Location": "33.389721,-112.86194",
+		"Total number of reactors": "3",
+		"Active Reactors": "3",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PATHFINDER",
+		"Location": "43.566669,-96.699997",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PEACH BOTTOM",
+		"Location": "39.758888,-76.269173",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PERRY",
+		"Location": "41.801109,-81.143333",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PILGRIM",
+		"Location": "41.944439,-70.579437",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "POINT BEACH",
+		"Location": "44.28083,-87.53611",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "PRAIRIE ISLAND",
+		"Location": "44.619438,-92.633057",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "QUAD CITIES",
+		"Location": "41.726109,-90.309998",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "RANCHO SECO",
+		"Location": "38.346111,-121.11889",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "R.E. GINNA",
+		"Location": "43.291672,-77.308891",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "RIVER BEND",
+		"Location": "30.757219,-91.331673",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SALEM",
+		"Location": "39.46278,-75.535828",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SAN ONOFRE",
+		"Location": "33.370281,-117.55694",
+		"Total number of reactors": "3",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SEABROOK",
+		"Location": "42.89806,-70.851387",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SEQUOYAH",
+		"Location": "35.223331,-85.087784",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SHEARON HARRIS",
+		"Location": "35.633331,-78.956108",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SOUTH TEXAS",
+		"Location": "28.795,-96.048058",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "ST. LUCIE",
+		"Location": "27.34861,-80.246391",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SURRY",
+		"Location": "37.165562,-76.698334",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "SUSQUEHANNA",
+		"Location": "41.091671,-76.148613",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "THREE MILE ISLAND",
+		"Location": "40.153061,-76.724998",
+		"Total number of reactors": "2",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "TROJAN",
+		"Location": "46.040829,-122.88444",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "TURKEY POINT",
+		"Location": "25.434999,-80.33139",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "VERMONT YANKEE",
+		"Location": "42.780281,-72.515831",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "VIRGIL C. SUMMER",
+		"Location": "34.29583,-81.320282",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "VOGTLE",
+		"Location": "33.141941,-81.764717",
+		"Total number of reactors": "2",
+		"Active Reactors": "2",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "WATERFORD",
+		"Location": "29.995001,-90.471107",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "WATTS BAR",
+		"Location": "35.602779,-84.790283",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "WOLF CREEK",
+		"Location": "38.238892,-95.688889",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "WPPSS",
+		"Location": "46.47139,-119.33306",
+		"Total number of reactors": "1",
+		"Active Reactors": "1",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "0"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "YANKEE NPS",
+		"Location": "42.728062,-72.924721",
+		"Total number of reactors": "1",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "1"
+	},
+	{
+		"Country": "UNITED STATES",
+		"Name": "ZION",
+		"Location": "42.44556,-87.802223",
+		"Total number of reactors": "2",
+		"Active Reactors": "0",
+		"Reactors Under Construction": "0",
+		"Shut Down Reactors": "2"
+	}
+]
