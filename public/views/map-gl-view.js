@@ -9,9 +9,6 @@ window.MapGLView = Backbone.View.extend({
     initialize: function(options) {
 	
 	    this.template = _.template(tpl.get('map-gl'));
-	
-		this.collection.bind('add',   this.addOne, this);
-		this.collection.bind('reset', this.addAll, this);
 				
 		this.animate();
     },
@@ -45,7 +42,7 @@ window.MapGLView = Backbone.View.extend({
 		container = this.el;
 		scene = new THREE.Scene();
 
-		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0x00000, antialias: true } );
+		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0xededed, antialias: true } );
 		renderer.setSize( width, height );
 		renderer.sortObjects = false;
 		renderer.autoClear = false;

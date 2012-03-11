@@ -177,7 +177,7 @@ window.MapView = Backbone.View.extend({
 				zoom_key = tbl_data[7];
 			}
 			
-			layers['squares'] = new google.maps.FusionTablesLayer({ query: {select: 'grid', from: zoom_key, where: ''} });
+			layers['squares'] = new google.maps.FusionTablesLayer({ query: {select: 'grid', from: tbl_data[18], where: ''} });
 			layers['squares'].setOptions({ suppressInfoWindows : true});
 			listeners['squares'] = google.maps.event.addListener(layers['squares'], 'click', function(e) {app.updateDataPointInfo(e)});
 			if(mobileVisible)
