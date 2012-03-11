@@ -21,8 +21,8 @@ window.MapView = Backbone.View.extend({
 		this.markers = {};
 		this.markerArray = [];
 	
-		this.collection.bind('add',   this.addOne, this);
-		this.collection.bind('reset', this.addAll, this);
+		//this.collection.bind('add',   this.addOne, this);
+		//this.collection.bind('reset', this.addAll, this);
 		
 		// Uncomment to temporarily create entries in local storage
 		//this.collection.create({
@@ -33,7 +33,7 @@ window.MapView = Backbone.View.extend({
     },
 
     render: function() {
-		$(this.el).html(this.template());		
+		$(this.el).html(this.template());				
         return this;
     },
 

@@ -1,7 +1,6 @@
 ReadingCollection = Backbone.Collection.extend({
 
     model: Reading,
-	localStorage: new Store("readings"),
 
     done: function() {
       return this.filter(function(reading){ return reading.get('done'); });

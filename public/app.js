@@ -12,7 +12,9 @@ var AppRouter = Backbone.Router.extend({
         this.headerView = new HeaderView({vent: this.vent});
         $('body').append(this.headerView.render().el);
 
-		this.readingsCollection = new ReadingCollection();
+//		this.readingsCollection = new ReadingCollection();
+		this.commentCollection = new CommentCollection();
+		
     },
 
     map:function () {
@@ -21,15 +23,15 @@ var AppRouter = Backbone.Router.extend({
 	    if (!this.mapView)
 		{
             this.mapView = new MapView({
-				collection: this.readingsCollection,
+				//collection: this.readingsCollection,
 				vent: self.vent
 			});
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
-			this.readingsCollection.fetch();
+			//this.readingsCollection.fetch();
         }
-
-		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
+		this.commentCollection.fetch();
+		this.sideBarView = new SideBarView({collection: this.commentCollection, vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
     },
 

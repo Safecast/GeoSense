@@ -19,6 +19,12 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "renderDataToggles");
 	 	options.vent.bind("renderDataToggles", this.renderDataToggles);		
+		
+		this.collection.bind('add',   this.addOne, this);
+	    this.collection.bind('reset', this.addAll, this);
+	    this.collection.bind('all',   this.render, this);
+
+	    //this.collection.fetch();
     },
 
     render: function() {
@@ -86,6 +92,19 @@ window.SideBarView = Backbone.View.extend({
 		this.addDataView = new AddDataView({vent: this.vent});
         $('body').append(this.addDataView.render().el);
 		$('#addDataModal').modal('toggle');
+		this.collection.create({text: 'hello sir bob!'});
 	},
+	
+	addOne: function(comment) {
+		var self = this;
+		console.log('comment: ' + comment.get('text'))	
+    },
+
+    addAll: function() {
+      var self = this;
+		this.collection.each(function(comment){ 
+		self.addOne(comment);
+	 	});
+    }
 
 });
