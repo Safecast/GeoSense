@@ -14,7 +14,6 @@ process.addListener('uncaughtException', function (err, stack) {
 	if (airbrake) { airbrake.notify(err); }
 });
 
-
 var nowjs = require("now");
 var connect = require('connect');
 var express = require('express');
@@ -29,6 +28,7 @@ var sessionStore = new RedisStore;
 var app = module.exports = express.createServer();
 app.listen(siteConf.port, null);
 
+//NOW
 var nowjs = require("now");
 var everyone = nowjs.initialize(app);
 
@@ -40,13 +40,9 @@ nowjs.on("disconnect", function(){
   console.log("Left: " + this.now.name);
 });
 
-
 everyone.now.distributeMessage = function(message){
   everyone.now.receiveMessage(this.now.name, message);
 };
-
-// Setup socket.io server
-//var socketIo = new require('./lib/socket-io-server.js')(app, sessionStore);
 
 var authentication = new require('./lib/authentication.js')(app, siteConf);
 // Setup groups for CSS / JS assets
@@ -145,15 +141,6 @@ app.configure('production', function(){
 	});
 });
 
-// Template helpers
-app.dynamicHelpers({
-	'assetsCacheHashes': function(req, res) {
-		return assetsMiddleware.cacheHashes;
-	}
-	, 'session': function(req, res) {
-		return req.session;
-	}
-});
 
 // Error handling
 app.error(function(err, req, res, next){
@@ -174,7 +161,54 @@ function NotFound(msg){
 	Error.captureStackTrace(this, arguments.callee);
 }
 
+// Database
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1/geo');
+
+var Schema = mongoose.Schema
+     , ObjectId = Schema.ObjectID;
+
+var Comment = new Schema({
+       lat      	: Number
+     , lon       	: Number
+     , username  	: { type: String, required: true, trim: true }
+     , comment     	: { type: String, required: true, trim: true }
+   });
+
+var Comment = mongoose.model('Comment', Comment);
+
+app.get('/comments', function(req,res){
+    Comment.find({}, function(error, data){
+        res.json(data);
+		console.log('data'+data);
+    });
+});
+
+app.get('/addcomment/:lat/:lon/:text/:username', function(req, res){
+	console.log('get');
+    var comment_data = {
+        lat: req.params.lat
+      , lon: req.params.lon
+	  , username: req.params.username
+      , comment: req.params.comment
+    };
+
+    var comment = new Comment(comment_data);
+
+    comment_data.save( function(error, data){
+        if(error){
+			console.log(error);
+            res.json(error);
+        }
+        else{
+			console.log(data);
+            res.json(data);
+        }
+    });
+});
+
 // Routing
+
 app.all('/', function(req, res) {
 	// Set example session uid for use with socket.io.
 	if (!req.session.uid) {
@@ -185,7 +219,6 @@ app.all('/', function(req, res) {
 	});
 	res.render('index');
 });
-
 
 // If all fails, hit em with the 404
 app.all('*', function(req, res){
