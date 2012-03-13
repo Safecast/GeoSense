@@ -21,16 +21,18 @@ everyone.now.distributeMessage = function(message){
   everyone.now.receiveMessage(this.now.name, message);
 };
 
+//App
 mongoose.connect('mongodb://localhost/geo');
 
 app.configure(function(){
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(path.join(application_root, "public")));
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-  app.set('views', path.join(application_root, "views"));
+ 	app.use(express.bodyParser());
+	app.use(express.methodOverride());
+  	app.use(app.router);
+  	app.use(express.static(path.join(application_root, "public")));
+  	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+  	app.set('views', path.join(application_root, "views"));
 });
+
 
 ///////////
 // DATA API

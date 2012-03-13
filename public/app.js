@@ -54,9 +54,7 @@ var AppRouter = Backbone.Router.extend({
 	addData:function (options)
 	{
 		var self = this;
-		
-		console.log(options.title);
-		
+				
 		//Request JSON
 		var jqxhr = $.getJSON(options.url, function(data) {})
 		.success(function(data) { 
