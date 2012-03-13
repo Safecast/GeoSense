@@ -13,20 +13,13 @@
 	height:100%;
 }
 
-.stations, .stations svg {
-  position: absolute;
-}
-
-.stations svg {
-  width:150px;
-  height:150px;
-  padding-right: 100px;
-  font: 10px sans-serif;
-  fill:#ffffff;
-  opacity:.9;
-}
-
-.stations circle {
-  fill: #049cdb;
-  opacity:.8;
+.data
+{
+	width:10px;
+	height:10px;
+	background-color:red;
+	border-radius:10px;
+	opacity:.5;
+	box-shadow: 0 0 10px red;
+	
 }

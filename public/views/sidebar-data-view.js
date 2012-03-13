@@ -58,8 +58,7 @@ window.SideBarDataView = Backbone.View.extend({
 		var self = this;
 		$(this.el).fadeOut('fast',function()
 		{
-			self.collection.empty({_id: self._id});
-			self.collection.remove();
+			self.collection.destroy();
 		});
    	},
 });

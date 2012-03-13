@@ -20,18 +20,10 @@ window.MapView = Backbone.View.extend({
 		options.vent.bind("addExternalData", this.addExternalData);
 		options.vent.bind("drawExternalData", this.drawExternalData);		
 	
-		this.markers = {};
-		this.markerArray = [];
-	
-		this.collection.bind('add',   this.addOne, this);
-		this.collection.bind('reset', this.addAll, this);
+		//this.markerArray = [];
+		this.collections = {};
+		this.markers = [];
 		
-		// Uncomment to temporarily create entries in local storage
-		//this.collection.create({
-		//	text: 'reading',
-		//	lat:  38.0,
-	    //    lon: -97.0
-		//});
     },
 
     render: function() {
@@ -69,6 +61,15 @@ window.MapView = Backbone.View.extend({
 		//Render Fusion Maps
 		this.initSafecastFusionMap();
 },
+	
+	addCollection: function(id, collection)
+	{
+		this.collections[id] = collection;
+		
+		this.collection.bind('add',   this.addOne, this);
+		this.collection.bind('reset', this.addAll, this);
+		
+	},
 	
 	setMapZoom: function(zoom)
 	{
@@ -258,11 +259,21 @@ window.MapView = Backbone.View.extend({
 		latlngArray = new google.maps.LatLng(lat, lng);
 		//console.log('lat: ' + lat + ' lon: ' +lng);
 
+/*
 		var marker = new google.maps.Marker({
 			map: this.map,
 			position: latlngArray,
 			draggable: false
 		})
+*/		
+		var marker = new RichMarker({
+			map: this.map,
+	 		position: new google.maps.LatLng(lat, lng),
+			draggable: true,
+			flat: true,
+			anchor: RichMarkerPosition.MIDDLE,
+			content: '<div class="data"></div>'
+		});
 	},
 
     addOne: function(data) {

@@ -11,8 +11,18 @@ var AppRouter = Backbone.Router.extend({
 	
         this.headerView = new HeaderView({vent: this.vent});
         $('body').append(this.headerView.render().el);
-
-		this.commentCollection = new CommentCollection();
+		
+		//Gather distinct collections
+		$.ajax({
+			type: 'GET',
+			url: '/api/collection/distinct',
+			success: function(data) {
+				console.log('fetched distinct collections: ' + data);
+			},
+			error: function() {
+				console.error('failed to fetch distinct collections');
+			}
+		})
     },
 
     map:function () {
@@ -21,15 +31,13 @@ var AppRouter = Backbone.Router.extend({
 	    if (!this.mapView)
 		{
             this.mapView = new MapView({
-				collection: this.commentCollection,
 				vent: self.vent
 			});
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
 			//this.readingsCollection.fetch();
         }
-		this.commentCollection.fetch();
-		this.sideBarView = new SideBarView({collection: this.commentCollection, vent: this.vent, page: 'map'});
+		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
     },
 
@@ -58,14 +66,26 @@ var AppRouter = Backbone.Router.extend({
 		//Request JSON
 		var jqxhr = $.getJSON(options.url, function(data) {})
 		.success(function(data) { 
-			
-			console.log("hey " + dataCollection[num_data_sources]);
-			
+						
 			//First increment total number of data sources
 			num_data_sources +=1;
 
 			//Create collection
-			dataCollection[num_data_sources] = new DataCollection();
+			pointCollection[num_data_sources] = new PointCollection({
+				collectionId:num_data_sources
+			});
+			
+			//Create DB entry for new collection
+			$.ajax({
+				type: 'POST',
+				url: this.url,
+				success: function() {
+					console.log('deleted collection: ' + self.collectionId);
+				},
+				error: function() {
+					console.error('failed to delete collection: ' + this.collectionId);
+				}
+			})
 			
 			//We build a review table in the response, should be moved to edit view
 			$('.add-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
@@ -80,7 +100,7 @@ var AppRouter = Backbone.Router.extend({
 					if(key == 'Location')
 					{
 						self.vent.trigger("drawExternalData",val);	
-						dataCollection[num_data_sources].create({name:'point',location:val, datasetid:num_data_sources});
+						pointCollection[num_data_sources].create({name:'point',location:val});
 					}
 				});
 				
@@ -90,12 +110,10 @@ var AppRouter = Backbone.Router.extend({
 			$('.add-data-view .modal-body .data-table .table').append(table);
 			
 			//Activate data toggles in adddata view
-			self.vent.trigger("toggleAddDataToolTips",dataCollection[num_data_sources]);
+			self.vent.trigger("toggleAddDataToolTips",pointCollection[num_data_sources]);
 			
 			//Add SideBar
-			dataCollection[num_data_sources].fetch();
-			console.log('options.title: ' +options.title);
-			this.sideBarDataView = new SideBarDataView({collection:dataCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
+			this.sideBarDataView = new SideBarDataView({collection:pointCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
 			$('#accordion').append(this.sideBarDataView.render().el);
 			
 		})

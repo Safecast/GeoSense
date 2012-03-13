@@ -1,10 +1,10 @@
-Data = Backbone.Model.extend({
+Point = Backbone.Model.extend({
 	
 	idAttribute: "_id",
 	
 	defaults: function() {
 	      return {
-			datasetid: null,
+			collectionid: null,
 	        name:  'data point',
 	        location: '0,0',
 			lat: 0,

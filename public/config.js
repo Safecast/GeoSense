@@ -5,7 +5,7 @@ Temporary & app-wide variables
 //Total number of data sources associated with each account
 //Update this number per session
 var num_data_sources = 0;
-var dataCollection = new Array();
+var pointCollection = new Array();
 
 var defaultMapStyle = 'light';
 var defaultMapLocation = 'california'

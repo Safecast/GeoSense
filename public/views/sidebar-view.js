@@ -19,12 +19,7 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "renderDataToggles");
 	 	options.vent.bind("renderDataToggles", this.renderDataToggles);		
-		
-		this.collection.bind('add',   this.addOne, this);
-	    this.collection.bind('reset', this.addAll, this);
-	    this.collection.bind('all',   this.render, this);
 
-	    //this.collection.fetch();
     },
 
     render: function() {
@@ -86,6 +81,10 @@ window.SideBarView = Backbone.View.extend({
 	},
 	
 	addDataClicked: function() {
+		
+		//$.get('/tweets', function(data) {
+			//console.log(data);
+		//});
 		
 		if(this.addDataView)
 			this.addDataView.remove();
