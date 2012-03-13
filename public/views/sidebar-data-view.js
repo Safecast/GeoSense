@@ -17,9 +17,8 @@ window.SideBarDataView = Backbone.View.extend({
 		
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);
-		this.collection.bind('remove', this.remove, this);
 
-		console.log("data id: " + this._id + " length: " + this.collection.length);
+		console.log("dataset id: " + this._id + " length: " + this.collection.length);
     },
 
     render: function() {
@@ -53,14 +52,11 @@ window.SideBarDataView = Backbone.View.extend({
 
 	removeDataClicked: function()
 	{
-		this.remove();
-		this.collection.empty({_id: this._id});
-		this.collection.remove();
+		var self = this;
+		$(this.el).fadeOut('fast',function()
+		{
+			self.collection.empty({_id: self._id});
+			self.collection.remove();
+		});
    	},
-
-	remove: function()
-	{
-		$(this.el).remove();
-	}
-
 });
