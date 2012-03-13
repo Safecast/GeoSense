@@ -13,7 +13,6 @@ var AppRouter = Backbone.Router.extend({
         $('body').append(this.headerView.render().el);
 
 		this.commentCollection = new CommentCollection();
-		this.dataCollection = new DataCollection();
     },
 
     map:function () {
@@ -22,7 +21,7 @@ var AppRouter = Backbone.Router.extend({
 	    if (!this.mapView)
 		{
             this.mapView = new MapView({
-				collection: this.dataCollection,
+				collection: this.commentCollection,
 				vent: self.vent
 			});
 			$('body').append(this.mapView.render().el);
@@ -55,16 +54,21 @@ var AppRouter = Backbone.Router.extend({
 	addData:function (options)
 	{
 		var self = this;
-			
+		
+		console.log(options.url);
+		
 		//Request JSON
 		var jqxhr = $.getJSON(options.url, function(data) {})
 		.success(function(data) { 
+			
+			console.log("hey " + dataCollection[num_data_sources]);
 			
 			//First increment total number of data sources
 			num_data_sources +=1;
 
 			//Create collection
 			dataCollection[num_data_sources] = new DataCollection();
+			
 			
 			//We build a review table in the response, should be moved to edit view
 			$('.add-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
@@ -91,19 +95,16 @@ var AppRouter = Backbone.Router.extend({
 			//Activate data toggles in adddata view
 			self.vent.trigger("toggleAddDataToolTips",dataCollection[num_data_sources]);
 			
-		})
-		.error(function() { alert("Error loading your file"); })
-		.complete(function() { 
-			
 			//Add SideBar
-			dataCollection[num_data_sources].fetch();
+			//dataCollection[num_data_sources].fetch();
 			self.sideBarDataView = new SideBarDataView({collection:dataCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
 			$('#accordion').append(self.sideBarDataView.render().el);
 
 			self.vent.trigger("bindCollections",{});
 			
-			
-		});
+		})
+		.error(function() { alert("Error loading your file"); })
+		.complete(function() {});
 		
 		//Trigger Google Map render
 		//this.vent.trigger("addExternalData", {url:options.url});
