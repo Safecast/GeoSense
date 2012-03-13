@@ -14,14 +14,11 @@ window.MapView = Backbone.View.extend({
 		_.bindAll(this, "setMapLocation");
 		_.bindAll(this, "addExternalData");
 		_.bindAll(this, "drawExternalData");
-		_.bindAll(this, "bindCollections");
 		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
 		options.vent.bind("addExternalData", this.addExternalData);
-		options.vent.bind("drawExternalData", this.drawExternalData);
-		options.vent.bind("bindCollections", this.bindCollections);
-		
+		options.vent.bind("drawExternalData", this.drawExternalData);		
 	
 		this.markers = {};
 		this.markerArray = [];
@@ -36,11 +33,6 @@ window.MapView = Backbone.View.extend({
 	    //    lon: -97.0
 		//});
     },
-
-	bindCollections: function(collection)
-	{	
-	
-	},
 
     render: function() {
 		$(this.el).html(this.template());				

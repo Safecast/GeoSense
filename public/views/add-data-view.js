@@ -19,8 +19,9 @@ window.AddDataView = Backbone.View.extend({
 	
 	dataButtonClicked: function() {
 		//Todo: Verify string URL
+		var dataTitle = this.$('#titleInput').val();
 		var urlPath = this.$('#dataInput').val();
-		app.addData({url:urlPath});
+		app.addData({url:urlPath, title:dataTitle});
 	},
 
 });

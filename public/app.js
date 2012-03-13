@@ -55,7 +55,7 @@ var AppRouter = Backbone.Router.extend({
 	{
 		var self = this;
 		
-		console.log(options.url);
+		console.log(options.title);
 		
 		//Request JSON
 		var jqxhr = $.getJSON(options.url, function(data) {})
@@ -68,7 +68,6 @@ var AppRouter = Backbone.Router.extend({
 
 			//Create collection
 			dataCollection[num_data_sources] = new DataCollection();
-			
 			
 			//We build a review table in the response, should be moved to edit view
 			$('.add-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
@@ -96,11 +95,10 @@ var AppRouter = Backbone.Router.extend({
 			self.vent.trigger("toggleAddDataToolTips",dataCollection[num_data_sources]);
 			
 			//Add SideBar
-			//dataCollection[num_data_sources].fetch();
-			self.sideBarDataView = new SideBarDataView({collection:dataCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
-			$('#accordion').append(self.sideBarDataView.render().el);
-
-			self.vent.trigger("bindCollections",{});
+			dataCollection[num_data_sources].fetch();
+			console.log('options.title: ' +options.title);
+			this.sideBarDataView = new SideBarDataView({collection:dataCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
+			$('#accordion').append(this.sideBarDataView.render().el);
 			
 		})
 		.error(function() { alert("Error loading your file"); })

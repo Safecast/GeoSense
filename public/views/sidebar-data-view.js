@@ -26,12 +26,15 @@ window.SideBarDataView = Backbone.View.extend({
 				
 		if(this.title != '')
 		{
-			dataTitle = this.title + " ("+ this.collection.length + ")";
+			dataTitle = this.title;
 		}
 		else
 		{
 			dataTitle = "Untitled Data";
 		}
+		
+		dataTitle += " ("+ this.collection.length + ")";
+		
 		this.$("a").html('<i class="icon-map-marker icon-white"></i> ' + dataTitle);
 		this.$("a").attr("href", "#collapse" + this.number);
 		this.$("#collapse").attr("id", "collapse" + this.number);
