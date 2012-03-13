@@ -1,29 +1,14 @@
 DataCollection = Backbone.Collection.extend({
 
-    model: Data,
-	url:  '/data/stations.json',
-	localStorage: new Store("data"),
+	model: Data,
+	url: '/api/data',
 	
-	
-	parse:function(res){                    
-		return res.items;
-	},
-	
-    done: function() {
-      return this.filter(function(reading){ return reading.get('done'); });
-    },
+	empty: function(options) {
+	    for(i=this.length-1; i>=0; i--) {
+	        var model = this.at(i);
+			if(model.get('datasetid') == options._id)
+	        	model.destroy();
+	    };
+	}
 
-    remaining: function() {
-      return this.without.apply(this, this.done());
-    },
-
-    nextOrder: function() {
-      if (!this.length) return 1;
-      return this.last().get('order') + 1;
-    },
-
-    comparator: function(reading) {
-      return reading.get('order');
-    }
-
- });
+});

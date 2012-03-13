@@ -21,12 +21,7 @@ everyone.now.distributeMessage = function(message){
   everyone.now.receiveMessage(this.now.name, message);
 };
 
-// model
 mongoose.connect('mongodb://localhost/geo');
-
-var Comment = mongoose.model('Comment', new mongoose.Schema({
-  text: String,
-}));
 
 app.configure(function(){
   app.use(express.bodyParser());
@@ -37,6 +32,87 @@ app.configure(function(){
   app.set('views', path.join(application_root, "views"));
 });
 
+///////////
+// DATA API
+///////////
+
+var Data = mongoose.model('Data', new mongoose.Schema({
+	text: String,
+	location: String,
+}));
+
+app.get('/data', function(req, res){
+  res.render('data', {title: "All Data"});
+});
+
+app.get('/api/data', function(req, res){
+  return Data.find(function(err, datasets) {
+    return res.send(datasets);
+  });
+});
+
+app.get('/api/data/:id', function(req, res){
+  return Data.findById(req.params.id, function(err, data) {
+    if (!err) {
+      return res.send(data);
+    }
+  });
+});
+
+app.put('/api/data/:id', function(req, res){
+  return Data.findById(req.params.id, function(err, data) {
+	data.datasetid 		= req.body.datasetid;
+    data.name 			= req.body.name;
+    data.location 		= req.body.location;
+	data.lat 			= req.body.lat;
+	data.lon 			= req.body.lon;
+	data.val		 	= req.body.val;
+
+    return data.save(function(err) {
+      if (!err) {
+        console.log("updated");
+      }
+      return res.send(data);
+    });
+  });
+});
+
+app.post('/api/data', function(req, res){
+  var data;
+  data = new Data({
+	datasetid: 		req.body.datasetid,
+    name: 		req.body.name,
+	location: 	req.body.location,
+	lat: 		req.body.lat,
+	lon: 		req.body.lon,
+	val: 		req.body.val,
+  });
+  data.save(function(err) {
+    if (!err) {
+      return console.log("created");
+    }
+  });
+  return res.send(data);
+});
+
+app.delete('/api/data/:id', function(req, res){
+  return Data.findById(req.params.id, function(err, data) {
+    return data.remove(function(err) {
+      if (!err) {
+        console.log("removed");
+        return res.send('')
+      }
+    });
+  });
+});
+
+/////////////
+//COMMENT API
+/////////////
+
+var Comment = mongoose.model('Comment', new mongoose.Schema({
+  text: String,
+}));
 app.get('/comment', function(req, res){
   res.render('comment', {title: "All Comments"});
 });

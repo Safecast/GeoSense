@@ -13,16 +13,21 @@ window.MapView = Backbone.View.extend({
 		_.bindAll(this, "updateMapStyle");
 		_.bindAll(this, "setMapLocation");
 		_.bindAll(this, "addExternalData");
+		_.bindAll(this, "drawExternalData");
+		_.bindAll(this, "bindCollections");
 		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
 		options.vent.bind("addExternalData", this.addExternalData);
-
+		options.vent.bind("drawExternalData", this.drawExternalData);
+		options.vent.bind("bindCollections", this.bindCollections);
+		
+	
 		this.markers = {};
 		this.markerArray = [];
 	
-		//this.collection.bind('add',   this.addOne, this);
-		//this.collection.bind('reset', this.addAll, this);
+		this.collection.bind('add',   this.addOne, this);
+		this.collection.bind('reset', this.addAll, this);
 		
 		// Uncomment to temporarily create entries in local storage
 		//this.collection.create({
@@ -31,6 +36,11 @@ window.MapView = Backbone.View.extend({
 	    //    lon: -97.0
 		//});
     },
+
+	bindCollections: function(collection)
+	{	
+	
+	},
 
     render: function() {
 		$(this.el).html(this.template());				
@@ -195,15 +205,10 @@ window.MapView = Backbone.View.extend({
 	
 	addExternalData: function(options)
 	{
-		
-	
-
-		
 		var self = this;
-		
+				
 		d3.json(options.url, function(data) {
 		  var overlay = new google.maps.OverlayView();
-
 		  // Add the container when the overlay is added to the map.
 		  overlay.onAdd = function() {
 
@@ -244,7 +249,6 @@ window.MapView = Backbone.View.extend({
 		        return d3.select(this)
 		            .style("left", (d.x - padding) + "px")
 		            .style("top", (d.y - padding) + "px");
-				
 		      }
 		    };
 		  };	
@@ -253,38 +257,28 @@ window.MapView = Backbone.View.extend({
 		});
 	},
 	
-	drawExternalData:function()
+	drawExternalData:function(val)
 	{
-	console.log('woop!' + data);
-	
-	jQuery.each(data, function()
-	{
-	    console.log(this.country); // For example
-	});
+		var input = val.substring(0, val.length);
+		var latlngStr = input.split(",",2);
+		var lat = parseFloat(latlngStr[0]);
+		var lng = parseFloat(latlngStr[1]);
+		latlngArray = new google.maps.LatLng(lat, lng);
+		//console.log('lat: ' + lat + ' lon: ' +lng);
 
-		
-	},
-
-    addOne: function(reading) {
-		var self = this;
-				
-		var markerObj = {};
-		markerObj.lat = reading.get('lat');
-		markerObj.lon = reading.get('lon');
-		markerObj.text = reading.get('text');
-			
 		var marker = new google.maps.Marker({
 			map: this.map,
-			position: new google.maps.LatLng(38, -97),
+			position: latlngArray,
 			draggable: false
-		});	
+		})
+	},
+
+    addOne: function(data) {
+		var self = this;
     },
 
     addAll: function() {
-      var self = this;
-		this.collection.each(function(reading){ 
-		self.addOne(reading);
-	 	});
+		var self = this;
     }
   
 });

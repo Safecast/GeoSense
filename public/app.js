@@ -12,9 +12,8 @@ var AppRouter = Backbone.Router.extend({
         this.headerView = new HeaderView({vent: this.vent});
         $('body').append(this.headerView.render().el);
 
-//		this.readingsCollection = new ReadingCollection();
 		this.commentCollection = new CommentCollection();
-		
+		this.dataCollection = new DataCollection();
     },
 
     map:function () {
@@ -23,7 +22,7 @@ var AppRouter = Backbone.Router.extend({
 	    if (!this.mapView)
 		{
             this.mapView = new MapView({
-				//collection: this.readingsCollection,
+				collection: this.dataCollection,
 				vent: self.vent
 			});
 			$('body').append(this.mapView.render().el);
@@ -53,10 +52,62 @@ var AppRouter = Backbone.Router.extend({
         $('body').append(this.sideBarView.render().el);
     },
 
-	addData:function (url)
+	addData:function (options)
 	{
-	 	num_data_sources +=1;
-		this.vent.trigger("renderDataToggles", {url: url}); 
+		var self = this;
+			
+		//Request JSON
+		var jqxhr = $.getJSON(options.url, function(data) {})
+		.success(function(data) { 
+			
+			//First increment total number of data sources
+			num_data_sources +=1;
+
+			//Create collection
+			dataCollection[num_data_sources] = new DataCollection();
+			
+			//We build a review table in the response, should be moved to edit view
+			$('.add-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
+			
+			var table;
+			for(var i = 0; i < data.length; ++i)
+			{
+				table += "<tr>";
+				
+				$.each(data[i], function(key, val) { 
+					table += '<td rel="tooltip" title="'+key+'" class="tooltip-test">' + val + '</td>';
+					if(key == 'Location')
+					{
+						self.vent.trigger("drawExternalData",val);	
+						dataCollection[num_data_sources].create({name:'point',location:val, datasetid:num_data_sources});
+					}
+				});
+				
+				table += "</tr>";				
+			}
+			
+			$('.add-data-view .modal-body .data-table .table').append(table);
+			
+			//Activate data toggles in adddata view
+			self.vent.trigger("toggleAddDataToolTips",dataCollection[num_data_sources]);
+			
+		})
+		.error(function() { alert("Error loading your file"); })
+		.complete(function() { 
+			
+			//Add SideBar
+			dataCollection[num_data_sources].fetch();
+			self.sideBarDataView = new SideBarDataView({collection:dataCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
+			$('#accordion').append(self.sideBarDataView.render().el);
+
+			self.vent.trigger("bindCollections",{});
+			
+			
+		});
+		
+		//Trigger Google Map render
+		//this.vent.trigger("addExternalData", {url:options.url});
+		//this.vent.trigger("renderDataToggles", {collection:this.dataCollection, url: options.url}); 
 	},
 
 });

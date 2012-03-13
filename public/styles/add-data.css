@@ -1,3 +1,14 @@
-#dataInput {
+.add-data-view .modal-body .well.form-inline .input-large
+{
 	width:375px;
+}
+.add-data-view .modal-body .well.form-inline .input-small
+{
+	width:200px;
+}
+
+.add-data-view .modal-body .data-table
+{
+	max-height:200px;
+	overflow:scroll;
 }

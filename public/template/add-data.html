@@ -8,10 +8,13 @@
 		<label>Adding data is simple. Paste a URL below and go.</label>
 		
     	<div class="well form-inline">
-		  <input type="text" id="dataInput" class="input-large" placeholder="URL to XML, CSV, or JSON format data file...">
-		  <a href="#" data-dismiss="modal" id="dataButton" class="btn btn-primary">Add the data!</a>
-		</div>
+		  <input type="text" id="titleInput" class="input-small" placeholder="Title of your data"></input>
+		  <br><br>
+		  <input type="text" id="dataInput" class="input-large" placeholder="URL to XML, CSV, or JSON format data file..." value="data/reactors.json"></input>
+		  <a href="#"  id="dataButton" class="btn btn-primary">Add the data!</a>
+		</div>		
     </p>
+	<div class="data-table" id="dataTable"></div>
   </div>
   <div class="modal-footer">
     <a href="#" data-dismiss="modal" class="btn">Close</a>

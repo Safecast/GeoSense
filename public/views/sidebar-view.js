@@ -30,6 +30,8 @@ window.SideBarView = Backbone.View.extend({
     render: function() {
 		$(this.el).html(this.template());	
 				
+		
+		
 		if(this.page == 'map')
 		{
 			this.$('#display2D').addClass('active');
@@ -46,12 +48,7 @@ window.SideBarView = Backbone.View.extend({
 
 	renderDataToggles: function(url){
 		
-		this.$('#accordion').empty();
-		
-		for (i=1; i<= num_data_sources; i++)
-		{
-			this.addDataToggle({number:i,url:url});
-		}
+
 	},
 
 	addDataToggle: function(options) {
@@ -89,15 +86,18 @@ window.SideBarView = Backbone.View.extend({
 	},
 	
 	addDataClicked: function() {
+		
+		if(this.addDataView)
+			this.addDataView.remove();
+			
 		this.addDataView = new AddDataView({vent: this.vent});
         $('body').append(this.addDataView.render().el);
 		$('#addDataModal').modal('toggle');
-		this.collection.create({text: 'hello sir bob!'});
 	},
 	
 	addOne: function(comment) {
 		var self = this;
-		console.log('comment: ' + comment.get('text'))	
+		//console.log('comment: ' + comment.get('text'))	
     },
 
     addAll: function() {
