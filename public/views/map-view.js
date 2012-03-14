@@ -12,14 +12,13 @@ window.MapView = Backbone.View.extend({
 	
 		_.bindAll(this, "updateMapStyle");
 		_.bindAll(this, "setMapLocation");
-		_.bindAll(this, "drawExternalData");
 		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
-		options.vent.bind("drawExternalData", this.drawExternalData);		
 	
 		this.collections = {};
-		this.markers = [];
+		this.markers = {};
+		this.markerArray = [];
 		
     },
 
@@ -57,17 +56,16 @@ window.MapView = Backbone.View.extend({
 		
 		//Render Fusion Maps
 		this.initSafecastFusionMap();
-},
+	},
 	
 	addCollection: function(id, collection)
 	{
-		//console.log('adding collectionid ' + id + ' to map view as ' + collection.length);
+		var self = this;
 		this.collections[id] = collection;
-
-		//console.log(this.collections[id]);
-		//this.collection[id].bind('add',   this.addOne, this);
-		//this.collection[id].bind('reset', this.addAll, this);
+		this.collections[id].bind('reset', this.reset, this);
+		this.collections[id].bind('add', this.addOne, this);
 		
+		this.drawMarkers(id);
 	},
 	
 	setMapZoom: function(zoom)
@@ -195,31 +193,90 @@ window.MapView = Backbone.View.extend({
 		}			
 	},
 	
-	drawExternalData:function(val)
-	{
-		var input = val.substring(0, val.length);
-		var latlngStr = input.split(",",2);
-		var lat = parseFloat(latlngStr[0]);
-		var lng = parseFloat(latlngStr[1]);
-		latlngArray = new google.maps.LatLng(lat, lng);
-	
-		var marker = new RichMarker({
-			map: this.map,
-	 		position: new google.maps.LatLng(lat, lng),
-			draggable: true,
-			flat: true,
-			anchor: RichMarkerPosition.MIDDLE,
-			content: '<div class="data"></div>'
+	drawMarkers:function(id)
+	{	
+		var self = this;
+		this.collections[id].each(function (model) {
+			self.addOne(model);
 		});
 	},
+	
+	_removeAllMarkers: function() {
+		// Remove all markers
+		if (this.markerArray.length > 0) {
+			for (i in this.markerArray) {
+				this.markerArray[i].setMap(null);
+			}
+		}
+		this.markerArray = [];
+		this.markers = {};
+	},
+	
+	reset: function() {
+		console.log('reset');
+		var self = this,
+			firstFetch = this.markers === null;
+		
+		if (!this.started)
+			this.start();
+		
+		self._removeAllMarkers();
+		
+		this.collection.each(function (model) {
+			self.addOne(model);
+		});
+		
+		if (this.fetches == 0)
+			this.showAllMarkers();
+		this.fetches++;
+		
+		this._updateBanner();
+		
+		var center = this.getCenter();
+		this.previousFetchCenter = new google.maps.LatLng(center.lat, center.long);
+		
+		if (this.selectedModel) {
+			if (this.markers[this.selectedModel.get('id')])
+				this.select(this.selectedModel);
+			else
+				this.deselect()
+		}
+	},
 
-    addOne: function(data) {
-		var self = this;
-		console.log('OMG');
+    addOne: function(model) {
+			var self = this;
+			
+			var markerObj = {};
+			markerObj.id = model.get('_id'); //May be the wrong ID
+			markerObj.name = model.get('name');
+			markerObj.location = model.get('location');
+			markerObj.lat = model.get('lat');
+			markerObj.lon = model.get('lon');
+			markerObj.val = model.get('val');
+		
+			//If location is a single string, parse it
+			var input = markerObj.location.substring(0, markerObj.location.length);
+			var latlngStr = input.split(",",2);
+			var lat = parseFloat(latlngStr[0]);
+			var lng = parseFloat(latlngStr[1]);
+			latlngArray = new google.maps.LatLng(lat, lng);
+			
+			var marker = new google.maps.Marker({
+				map: this.map,
+				position: latlngArray,
+				draggable: false
+			});
+
+			this.markerArray.push(marker);
+			this.markers[markerObj.id] = marker;
+
+			google.maps.event.addListener(marker, 'click', function() {	
+				console.log(markerObj.location);
+			});
     },
 
     addAll: function() {
-		var self = this;
+		var self = this;		
     }
   
 });

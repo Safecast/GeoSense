@@ -96,7 +96,6 @@ var AppRouter = Backbone.Router.extend({
 					table += '<td rel="tooltip" title="'+key+'" class="tooltip-test">' + val + '</td>';
 					if(key == 'Location')
 					{
-						self.vent.trigger("drawExternalData",val);	
 						pointCollection[num_data_sources].create({name:'point',location:val});
 					}
 				});
@@ -111,6 +110,10 @@ var AppRouter = Backbone.Router.extend({
 			
 			//Append a new side bar view
 			self.addSideBarDataView({collectionId:num_data_sources,title:options.title});
+			
+			//If MapView, add new markers
+				self.addMapCollection(num_data_sources, pointCollection[num_data_sources]);	
+			
 			
 		})
 		.error(function() { alert("Error loading your file"); })
@@ -141,7 +144,7 @@ var AppRouter = Backbone.Router.extend({
 						pointCollection[this.index].fetch({success: function() {
 							//Add a new sidebar data view once data is fetched
 							self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-							if(this.mapView)
+							if(self.mapView)
 								self.addMapCollection(scope.index, pointCollection[scope.index]);	
 							
 						}});
