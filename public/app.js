@@ -18,13 +18,15 @@ var AppRouter = Backbone.Router.extend({
 			type: 'GET',
 			url: '/api/collection/distinct',
 			success: function(data) {
-				
+		
+				//Save the distinct collection Id(s) to app scope
 				num_data_sources = data.length;
+				
 				for(i=0;i<num_data_sources;i++)
 				{
 					// For each distinct data source, add an existing data source to the app.
 					// This binds a data model and sidebar data view
-					self.addExistingDataSources(i+1);
+					self.addExistingDataSources(data[i]);
 				}
 			},
 			error: function() {
@@ -32,6 +34,16 @@ var AppRouter = Backbone.Router.extend({
 			}
 		})
     },
+
+	maxValue: function( array ){
+	    return Math.max.apply( Math, array );
+	},
+	
+	uniqid: function ()
+	{
+	    var newDate = new Date;
+	    return newDate.getTime();
+	},
 
     map:function () {
 		var self = this;
@@ -69,17 +81,18 @@ var AppRouter = Backbone.Router.extend({
 	addData:function (options)
 	{
 		var self = this;
-				
+		var uniqid = this.uniqid();
+		
 		//Request JSON
 		var jqxhr = $.getJSON(options.url, function(data) {})
 		.success(function(data) { 
 						
 			//First increment total number of data sources
 			num_data_sources +=1;
-
+			
 			//Create collection
 			pointCollection[num_data_sources] = new PointCollection({
-				collectionId:num_data_sources,
+				collectionId:uniqid,
 				title:options.title,
 				newData:true,
 			});
@@ -112,7 +125,7 @@ var AppRouter = Backbone.Router.extend({
 			self.addSideBarDataView({collectionId:num_data_sources,title:options.title});
 			
 			//If MapView, add new markers
-				self.addMapCollection(num_data_sources, pointCollection[num_data_sources]);	
+			self.addMapCollection(uniqid, pointCollection[num_data_sources]);	
 			
 			
 		})
@@ -123,6 +136,7 @@ var AppRouter = Backbone.Router.extend({
 	addExistingDataSources: function(index)
 	{
 		var self = this;
+		
 		//First we look up the pointcollection for name & collectionid
 		$.ajax({
 			type: 'GET',
@@ -140,6 +154,7 @@ var AppRouter = Backbone.Router.extend({
 						pointCollection[this.index] = new PointCollection({
 							collectionId:index,
 							title:'title',
+							newData:false,
 						});
 						pointCollection[this.index].fetch({success: function() {
 							//Add a new sidebar data view once data is fetched

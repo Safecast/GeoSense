@@ -12,12 +12,13 @@ PointCollection = Backbone.Collection.extend({
 	},
 	
 	createAssociativeIndex: function()
-	{		
+	{	
+		var self = this;
 		$.ajax({
 			type: 'POST',
 			url: '/api/pointcollection/' + this.collectionId + '/' + this.title,
 			success: function(data) {
-				console.log('created associated collection: ' + data);
+				console.log('created associated collection: ' + self.collectionId);
 			},
 			error: function() {
 				console.error('failed to create an associated collection');
@@ -40,6 +41,7 @@ PointCollection = Backbone.Collection.extend({
 		});
 		
 		this.destroyAssociativeIndex(options);
+		this.reset();
 	},
 	
 	destroyAssociativeIndex: function() {

@@ -54,6 +54,9 @@ window.SideBarDataView = Backbone.View.extend({
 		$(this.el).fadeOut('fast',function()
 		{
 			self.collection.destroy();
+			num_data_sources --;
+			console.log(num_data_sources);
+			
 		});
    	},
 });

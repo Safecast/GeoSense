@@ -64,8 +64,8 @@ window.MapView = Backbone.View.extend({
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
-		
-		this.drawMarkers(id);
+		this.collections[id].fetch();
+		//this.drawMarkers(id);
 	},
 	
 	setMapZoom: function(zoom)
@@ -193,18 +193,11 @@ window.MapView = Backbone.View.extend({
 		}			
 	},
 	
-	drawMarkers:function(id)
-	{	
-		var self = this;
-		this.collections[id].each(function (model) {
-			self.addOne(model);
-		});
-	},
-	
 	_removeAllMarkers: function() {
 		// Remove all markers
+		
 		if (this.markerArray.length > 0) {
-			for (i in this.markerArray) {
+			for (i in this.markerArray) {				
 				this.markerArray[i].setMap(null);
 			}
 		}
@@ -212,35 +205,17 @@ window.MapView = Backbone.View.extend({
 		this.markers = {};
 	},
 	
-	reset: function() {
-		console.log('reset');
-		var self = this,
-			firstFetch = this.markers === null;
+	reset: function(model) {
+		var self = this;
 		
-		if (!this.started)
-			this.start();
+		console.log('resetting ' + model);
 		
 		self._removeAllMarkers();
 		
-		this.collection.each(function (model) {
+		this.collections[model.collectionId].each(function (model) {
 			self.addOne(model);
 		});
-		
-		if (this.fetches == 0)
-			this.showAllMarkers();
-		this.fetches++;
-		
-		this._updateBanner();
-		
-		var center = this.getCenter();
-		this.previousFetchCenter = new google.maps.LatLng(center.lat, center.long);
-		
-		if (this.selectedModel) {
-			if (this.markers[this.selectedModel.get('id')])
-				this.select(this.selectedModel);
-			else
-				this.deselect()
-		}
+			
 	},
 
     addOne: function(model) {
@@ -261,10 +236,13 @@ window.MapView = Backbone.View.extend({
 			var lng = parseFloat(latlngStr[1]);
 			latlngArray = new google.maps.LatLng(lat, lng);
 			
-			var marker = new google.maps.Marker({
+			var marker = new RichMarker({
 				map: this.map,
-				position: latlngArray,
-				draggable: false
+		 		position: latlngArray,
+				draggable: true,
+				flat: true,
+				anchor: RichMarkerPosition.MIDDLE,
+				content: '<div class="data"></div>'
 			});
 
 			this.markerArray.push(marker);
