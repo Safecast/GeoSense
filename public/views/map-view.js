@@ -207,9 +207,7 @@ window.MapView = Backbone.View.extend({
 	
 	reset: function(model) {
 		var self = this;
-		
-		console.log('resetting ' + model);
-		
+				
 		self._removeAllMarkers();
 		
 		this.collections[model.collectionId].each(function (model) {
