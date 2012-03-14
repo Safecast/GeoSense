@@ -107,10 +107,10 @@ window.MapGLView = Backbone.View.extend({
 		dirLight.position.set( -1, 0, 1 ).normalize();
 		scene.add( dirLight );
 
-		var planetTexture = THREE.ImageUtils.loadTexture( "textures/planets/earth_white.jpg" ),
-		cloudsTexture     = THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_1024.png" ),
-		normalTexture     = THREE.ImageUtils.loadTexture( "textures/planets/earth_normal_2048.jpg" ),
-		specularTexture   = THREE.ImageUtils.loadTexture( "textures/planets/earth_specular_2048.jpg" );
+		var planetTexture = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_white.jpg" ),
+		cloudsTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_clouds_1024.png" ),
+		normalTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_normal_2048.jpg" ),
+		specularTexture   = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_specular_2048.jpg" );
 
 		var shader = THREE.ShaderUtils.lib[ "normal" ],
 		uniforms = THREE.UniformsUtils.clone( shader.uniforms );
