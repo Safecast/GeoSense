@@ -34,7 +34,6 @@ window.SideBarDataView = Backbone.View.extend({
 		this.$("a").attr("href", "#collapse" + this.collectionId);
 		this.$("#collapse").attr("id", "collapse" + this.collectionId);
 		
-		console.log('length: ' + this.collection.length);
         return this;
     },
 

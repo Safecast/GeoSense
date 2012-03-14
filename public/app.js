@@ -142,7 +142,10 @@ var AppRouter = Backbone.Router.extend({
 						pointCollection[this.index].fetch({success: function() {
 							//Add a new sidebar data view once data is fetched
 							self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
+							self.addMapCollection(scope.index, pointCollection[scope.index]);	
+							
 						}});
+						
 					},
 					error: function() {
 						console.error('failed to fetch existing data source');
@@ -159,6 +162,11 @@ var AppRouter = Backbone.Router.extend({
 		//Add SideBar
 		this.sideBarDataView = new SideBarDataView({collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title});
 		$('#accordion').append(this.sideBarDataView.render().el);
+	},
+	
+	addMapCollection: function(id, collection)
+	{
+		this.mapView.addCollection(id, collection);
 	},
 
 });
