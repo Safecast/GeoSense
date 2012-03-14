@@ -13,11 +13,19 @@ var AppRouter = Backbone.Router.extend({
         $('body').append(this.headerView.render().el);
 		
 		//Gather distinct collections
+		//This returns an array containing collectionid for lookup
 		$.ajax({
 			type: 'GET',
 			url: '/api/collection/distinct',
 			success: function(data) {
-				console.log('fetched distinct collections: ' + data);
+				
+				num_data_sources = data.length;
+				for(i=0;i<num_data_sources;i++)
+				{
+					// For each distinct data source, add an existing data source to the app.
+					// This binds a data model and sidebar data view
+					self.addExistingDataSources(i+1);
+				}
 			},
 			error: function() {
 				console.error('failed to fetch distinct collections');
@@ -72,7 +80,9 @@ var AppRouter = Backbone.Router.extend({
 
 			//Create collection
 			pointCollection[num_data_sources] = new PointCollection({
-				collectionId:num_data_sources
+				collectionId:num_data_sources,
+				title:options.title,
+				newData:true,
 			});
 			
 			//We build a review table in the response, should be moved to edit view
@@ -100,17 +110,55 @@ var AppRouter = Backbone.Router.extend({
 			//Activate data toggles in adddata view
 			self.vent.trigger("toggleAddDataToolTips",pointCollection[num_data_sources]);
 			
-			//Add SideBar
-			this.sideBarDataView = new SideBarDataView({collection:pointCollection[num_data_sources], vent: self.vent, _id:num_data_sources, url: options.url, number: num_data_sources, title:options.title});
-			$('#accordion').append(this.sideBarDataView.render().el);
+			//Append a new side bar view
+			self.addSideBarDataView({collectionId:num_data_sources,title:options.title});
 			
 		})
 		.error(function() { alert("Error loading your file"); })
 		.complete(function() {});
-		
-		//Trigger Google Map render
-		//this.vent.trigger("addExternalData", {url:options.url});
-		//this.vent.trigger("renderDataToggles", {collection:this.dataCollection, url: options.url}); 
+	},
+	
+	addExistingDataSources: function(index)
+	{
+		var self = this;
+		//First we look up the pointcollection for name & collectionid
+		$.ajax({
+			type: 'GET',
+			url: '/api/pointcollection/' + index,
+			success: function(data) {
+				var name = data[0].name;
+				//Now look up all points related to this collectionid
+				$.ajax({
+					type: 'GET',
+					url: '/api/collection/' + index,
+					success: function(data) {
+						var scope = this;
+						scope.index = index;
+						
+						pointCollection[this.index] = new PointCollection({
+							collectionId:index,
+							title:'title',
+						});
+						pointCollection[this.index].fetch({success: function() {
+							//Add a new sidebar data view once data is fetched
+							self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
+						}});
+					},
+					error: function() {
+						console.error('failed to fetch existing data source');
+					}
+				});
+			},
+			error: function() {
+				console.error('failed to fetch existing data source');
+			}
+		})	
+	},
+	
+	addSideBarDataView:function (options) {
+		//Add SideBar
+		this.sideBarDataView = new SideBarDataView({collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title});
+		$('#accordion').append(this.sideBarDataView.render().el);
 	},
 
 });

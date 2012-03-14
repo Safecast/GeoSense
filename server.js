@@ -54,8 +54,6 @@ var twit = new twitter({
 	access_token_secret: '6vX7aDY6WJjtYyokwkaLRS5FchC3f9I42gzTjRCpc'
 })
 
-
-
 //App
 mongoose.connect('mongodb://localhost/geo');
 
@@ -98,7 +96,7 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 	collectionid: Number,
 }));
 
-var DataCollection = mongoose.model('DataCollection', new mongoose.Schema({
+var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: Number,
 	name: String,
 }));
@@ -247,19 +245,53 @@ app.delete('/api/collection/:id', function(req, res){
   });
 });
 
-app.post('/api/datacollection/:id', function(req, res){
+//Associative Collection (keeps track of collection id & name)
+
+app.get('/api/pointcollection/:id', function(req, res){
+	PointCollection.find({collectionid:req.params.id}, function(err, point) {
+		if (!err) {
+			res.send(point);
+		}
+		else
+		{
+			res.send('ooops', 500);
+		}
+  });
+});
+
+app.get('/api/pointcollections', function(req, res){
+  PointCollection.find(function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+app.post('/api/pointcollection/:id/:name', function(req, res){
+	
 	var collection;
-	  collection = new DataCollection({
+	  collection = new PointCollection({
 		collectionid: req.params.id,
-	    name: req.body.name,
+	    name: req.params.name,
 	  });
-	  point.save(function(err) {
+	  collection.save(function(err) {
 	    if (!err) {
 		 	res.send(point);
 	    } else
 		{
 			res.send('oops', 500);
 		}
+	  });
+});
+
+app.delete('/api/pointcollection/:id', function(req, res){
+	
+	PointCollection.remove({collectionid:req.params.id}, function(err) {
+	      if (!err) {
+	        console.log("removed pointcollection");
+	        res.send('')
+	      }
+	      else {
+			res.send('oops', 500);
+		  }
 	  });
 });
 
