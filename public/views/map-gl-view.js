@@ -6,6 +6,38 @@ window.MapGLView = Backbone.View.extend({
     events: {
     },
 
+
+	degtoRad: function(x) {
+ 		return x*Math.PI/180;
+	},
+
+	radtoDeg: function(x) {
+		return x*180/Math.PI;
+	},
+
+	convertSphericalToCartesian: function(lat, lon, radiusOffset) {    
+		r = radius;
+		if (radiusOffset) {
+			r += radiusOffset;
+		}
+		var x = r * Math.cos(lat)*Math.cos(lon);    
+		var y = r * Math.cos(lat)*Math.sin(lon);    
+		var z = r * Math.sin(lat);    
+		return new THREE.Vector3(x, y, z);
+	},
+
+	convertCartesianToSpherical: function(v) {    
+		var r = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);     
+		var lat = this.radtoDeg(Math.asin(v.z / r));    
+		var lon = this.radtoDeg(Math.atan2(v.y, v.x));    
+		return [lat, lon];
+	},
+
+
+
+
+
+
     initialize: function(options) {
 	
 	    this.template = _.template(tpl.get('map-gl'));
@@ -51,6 +83,7 @@ window.MapGLView = Backbone.View.extend({
 
 		renderer.gammaInput = true;
 		renderer.gammaOutput = true;
+
 
 		//
 
@@ -116,7 +149,6 @@ window.MapGLView = Backbone.View.extend({
 			lights: true
 		});
 
-
 		// planet
 
 		geometry = new THREE.SphereGeometry( radius, 100, 50 );
@@ -126,7 +158,6 @@ window.MapGLView = Backbone.View.extend({
 		meshPlanet.rotation.y = 0;
 		meshPlanet.rotation.z = tilt;
 		scene.add( meshPlanet );
-
 
 		// clouds
 
@@ -180,7 +211,48 @@ window.MapGLView = Backbone.View.extend({
 			scene.add( stars );
 
 		}
-						
+
+
+		// quick bar chart test
+
+		var dataPoints = [
+			[0, -100, 1.5],
+			[60.737686, -45.087891, .8],
+			[57.515823, -63.984375, .25],
+			[12.21118, -84.023437, .6],
+			[1.054628, 115.3125, .9],
+			[65.07213, -23.203125, 1] 
+		];
+
+		var barHeight = 3000;
+		var barWidth = 300;
+		var barRadiusOffset = 0;
+		for (var i = 0; i < dataPoints.length; i++) {
+			var color = Math.random() * 0xffffff;
+			var materials = [];
+			for ( var c = 0; c < 6; c ++ ) {
+				//materials.push( new THREE.MeshBasicMaterial( { color: color, transparent: true, blending: THREE.AdditiveBlending } ) );
+				materials.push( new THREE.MeshLambertMaterial( { color: color, shading: THREE.FlatShading } ) );
+			}
+
+			var barH = dataPoints[i][2] * barHeight;
+			var cube = new THREE.Mesh( new THREE.CubeGeometry(barWidth, barWidth, barH, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
+			cube.position = this.convertSphericalToCartesian(dataPoints[i][0], dataPoints[i][1], barRadiusOffset + barH / 2);
+			cube.lookAt(meshPlanet.position);
+			scene.add( cube );   
+
+			var sphereGeometry = new THREE.SphereGeometry( barWidth * .7, 100, 50 );
+			sphereGeometry.computeTangents();
+			var sphere = new THREE.Mesh(sphereGeometry, materialNormalMap );
+			sphere.position = cube.position;
+			scene.add(sphere);
+		}
+
+		light = new THREE.DirectionalLight( 0xffffff );
+		light.position.set( 0, radius * 2, radius * 2 );
+		scene.add( light );
+				
+
         return this;
     },
 
