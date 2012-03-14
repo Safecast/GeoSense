@@ -60,7 +60,6 @@ var AppRouter = Backbone.Router.extend({
 			});
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
-			this.readingsCollection.fetch();
         }
 
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map-gl'});
