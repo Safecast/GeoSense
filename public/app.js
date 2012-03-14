@@ -75,18 +75,6 @@ var AppRouter = Backbone.Router.extend({
 				collectionId:num_data_sources
 			});
 			
-			//Create DB entry for new collection
-			$.ajax({
-				type: 'POST',
-				url: this.url,
-				success: function() {
-					console.log('deleted collection: ' + self.collectionId);
-				},
-				error: function() {
-					console.error('failed to delete collection: ' + this.collectionId);
-				}
-			})
-			
 			//We build a review table in the response, should be moved to edit view
 			$('.add-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
 			
