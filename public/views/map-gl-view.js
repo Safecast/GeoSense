@@ -6,42 +6,43 @@ window.MapGLView = Backbone.View.extend({
     events: {
     },
 
+    widgets: [],
+    world: null,
 
-	degtoRad: function(x) {
+
+	degToRad: function(x) {
  		return x*Math.PI/180;
 	},
 
-	radtoDeg: function(x) {
+	radToDeg: function(x) {
 		return x*180/Math.PI;
 	},
 
 	convertSphericalToCartesian: function(lat, lon, radiusOffset) {    
-		r = radius;
+		var r = radius;
 		if (radiusOffset) {
 			r += radiusOffset;
 		}
-		var x = r * Math.cos(lat)*Math.cos(lon);    
-		var y = r * Math.cos(lat)*Math.sin(lon);    
-		var z = r * Math.sin(lat);    
+		var rLat = this.degToRad(lat);
+		var rLon = this.degToRad(lon);
+		
+		var x = r * Math.cos(rLat)*Math.cos(rLon);    
+		var y = r * Math.cos(rLat)*Math.sin(rLon);
+		var z = r * Math.sin(rLat)*-1;    
+
+ 
 		return new THREE.Vector3(x, y, z);
 	},
 
 	convertCartesianToSpherical: function(v) {    
 		var r = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);     
-		var lat = this.radtoDeg(Math.asin(v.z / r));    
-		var lon = this.radtoDeg(Math.atan2(v.y, v.x));    
+		var lat = this.radToDeg(Math.asin(v.z / r));    
+		var lon = this.radToDeg(Math.atan2(v.y, v.x));    
 		return [lat, lon];
 	},
 
-
-
-
-
-
     initialize: function(options) {
-	
 	    this.template = _.template(tpl.get('map-gl'));
-				
 		this.animate();
     },
 
@@ -57,8 +58,14 @@ window.MapGLView = Backbone.View.extend({
 		
 		var delta = clock.getDelta();
 
-		meshPlanet.rotation.y += rotationSpeed * delta;
-		meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
+		//meshPlanet.rotation.y += rotationSpeed * delta;
+		//meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
+
+		//this.world.rotation.y += rotationSpeed * delta;
+
+		for (var i = 0; i < this.widgets.length; i++) {
+			//this.widgets[i].rotateAroundWorldAxis();
+		}
 
 		var angle = delta * rotationSpeed;
 
@@ -89,8 +96,11 @@ window.MapGLView = Backbone.View.extend({
 
 		container.appendChild( renderer.domElement );
 
+		this.world = new THREE.Object3D();
+		scene.add(this.world);
+
 		camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 50, 1e7 );
-		camera.position.z = radius * 7;
+		camera.position.z = radius * 6;
 		scene.add( camera );
 
 		controls = new THREE.TrackballControls( camera, renderer.domElement );
@@ -155,9 +165,9 @@ window.MapGLView = Backbone.View.extend({
 		geometry.computeTangents();
 
 		meshPlanet = new THREE.Mesh( geometry, materialNormalMap );
-		meshPlanet.rotation.y = 0;
-		meshPlanet.rotation.z = tilt;
-		scene.add( meshPlanet );
+		//meshPlanet.rotation.y = 0;
+		//world.rotation.z = tilt;
+		this.world.add( meshPlanet );
 
 		// clouds
 
@@ -165,9 +175,8 @@ window.MapGLView = Backbone.View.extend({
 
 		meshClouds = new THREE.Mesh( geometry, materialClouds );
 		meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
-		meshClouds.rotation.z = tilt;
-		scene.add( meshClouds );
-
+		//meshClouds.rotation.z = tilt;
+		this.world.add( meshClouds );
 
 		// stars
 
@@ -216,16 +225,33 @@ window.MapGLView = Backbone.View.extend({
 		// quick bar chart test
 
 		var dataPoints = [
-			[0, -100, 1.5],
+			[0, 0, 1.5],
+			//[10, 10, .25],
+			//[10, -10, .5],
+			[-10, -5, .5],
+			
+
+
+			//[90, 0, 1.5]
+			//,[80, 10, .25]
+			//,[70, 20, .125]
+			//,[80, 0, .5]
+			//[0, -90, 1.5]
+
+
+			//,[-19.47695,46.230469, 1]
+//			,[-51.876491,-59.216309,1]
+
+			/*,
 			[60.737686, -45.087891, .8],
 			[57.515823, -63.984375, .25],
 			[12.21118, -84.023437, .6],
 			[1.054628, 115.3125, .9],
-			[65.07213, -23.203125, 1] 
+			[65.07213, -23.203125, 1]*/ 
 		];
 
 		var barHeight = 3000;
-		var barWidth = 300;
+		var barWidth = 100;
 		var barRadiusOffset = 0;
 		for (var i = 0; i < dataPoints.length; i++) {
 			var color = Math.random() * 0xffffff;
@@ -239,17 +265,23 @@ window.MapGLView = Backbone.View.extend({
 			var cube = new THREE.Mesh( new THREE.CubeGeometry(barWidth, barWidth, barH, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
 			cube.position = this.convertSphericalToCartesian(dataPoints[i][0], dataPoints[i][1], barRadiusOffset + barH / 2);
 			cube.lookAt(meshPlanet.position);
-			scene.add( cube );   
+			this.world.add( cube );   
+			this.widgets.push(cube);
 
 			var sphereGeometry = new THREE.SphereGeometry( barWidth * .7, 100, 50 );
 			sphereGeometry.computeTangents();
 			var sphere = new THREE.Mesh(sphereGeometry, materialNormalMap );
 			sphere.position = cube.position;
-			scene.add(sphere);
+			this.world.add(sphere);
+
+			this.widgets.push(sphere);
 		}
 
-		light = new THREE.DirectionalLight( 0xffffff );
+		var light = new THREE.DirectionalLight( 0xffffff );
 		light.position.set( 0, radius * 2, radius * 2 );
+		scene.add( light );
+		var light = new THREE.DirectionalLight( 0xffffff );
+		light.position.set(radius * 2, radius * 2, 0 );
 		scene.add( light );
 				
 
