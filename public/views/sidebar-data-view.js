@@ -9,16 +9,11 @@ window.SideBarDataView = Backbone.View.extend({
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('sidebar-data'));
-		this.vent = options.vent;
-		this.number = options.number;
+		this.collectionId = options.collectionId;
 		this.title = options.title;
-		this.url = options.url	
-		this._id = options._id
-		
+				
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);
-
-		console.log("dataset id: " + this._id + " length: " + this.collection.length);
     },
 
     render: function() {
@@ -36,8 +31,8 @@ window.SideBarDataView = Backbone.View.extend({
 		dataTitle += " ("+ this.collection.length + ")";
 		
 		this.$("a").html('<i class="icon-map-marker icon-white"></i> ' + dataTitle);
-		this.$("a").attr("href", "#collapse" + this.number);
-		this.$("#collapse").attr("id", "collapse" + this.number);
+		this.$("a").attr("href", "#collapse" + this.collectionId);
+		this.$("#collapse").attr("id", "collapse" + this.collectionId);
 		
         return this;
     },
@@ -59,6 +54,7 @@ window.SideBarDataView = Backbone.View.extend({
 		$(this.el).fadeOut('fast',function()
 		{
 			self.collection.destroy();
+			num_data_sources --;			
 		});
    	},
 });

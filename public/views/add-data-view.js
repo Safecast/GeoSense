@@ -21,7 +21,15 @@ window.AddDataView = Backbone.View.extend({
 		//Todo: Verify string URL
 		var dataTitle = this.$('#titleInput').val();
 		var urlPath = this.$('#dataInput').val();
-		app.addData({url:urlPath, title:dataTitle});
+		
+		if(dataTitle != '' && urlPath != '')
+		{
+			app.addData({url:urlPath, title:dataTitle});
+		}
+		else
+		{
+			this.$('.modal-body .alert').show();
+		}
 	},
 
 });

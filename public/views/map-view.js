@@ -12,17 +12,13 @@ window.MapView = Backbone.View.extend({
 	
 		_.bindAll(this, "updateMapStyle");
 		_.bindAll(this, "setMapLocation");
-		_.bindAll(this, "addExternalData");
-		_.bindAll(this, "drawExternalData");
 		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	 	options.vent.bind("setMapLocation", this.setMapLocation);
-		options.vent.bind("addExternalData", this.addExternalData);
-		options.vent.bind("drawExternalData", this.drawExternalData);		
 	
-		//this.markerArray = [];
 		this.collections = {};
-		this.markers = [];
+		this.markers = {};
+		this.markerArray = [];
 		
     },
 
@@ -60,15 +56,16 @@ window.MapView = Backbone.View.extend({
 		
 		//Render Fusion Maps
 		this.initSafecastFusionMap();
-},
+	},
 	
 	addCollection: function(id, collection)
 	{
+		var self = this;
 		this.collections[id] = collection;
-		
-		this.collection.bind('add',   this.addOne, this);
-		this.collection.bind('reset', this.addAll, this);
-		
+		this.collections[id].bind('reset', this.reset, this);
+		this.collections[id].bind('add', this.addOne, this);
+		this.collections[id].fetch();
+		//this.drawMarkers(id);
 	},
 	
 	setMapZoom: function(zoom)
@@ -196,92 +193,66 @@ window.MapView = Backbone.View.extend({
 		}			
 	},
 	
-	addExternalData: function(options)
-	{
-		var self = this;
-				
-		d3.json(options.url, function(data) {
-		  var overlay = new google.maps.OverlayView();
-		  // Add the container when the overlay is added to the map.
-		  overlay.onAdd = function() {
-
-		    var layer = d3.select(this.getPanes().overlayLayer).append("div")
-		        .attr("class", "stations");
-
-		    // Draw each marker as a separate SVG element.
-		    // We could use a single SVG, but what size would it have?
-		    overlay.draw = function() {
-		      var projection = this.getProjection(),
-		          padding = 10;
-
-		      var marker = layer.selectAll("svg")
-		          .data(d3.entries(data))
-		          .each(transform) // update existing markers
-		        .enter().append("svg:svg")
-		          .each(transform)
-		          .attr("class", "marker");
-
-		      // Add a circle.
-		      marker.append("svg:circle")
-		          .attr("r", 4.5)
-		          .attr("cx", padding)
-		          .attr("cy", padding);
-
-		      // Add a label.
-			
-		      marker.append("svg:text")
-		          .attr("x", padding + 7)
-		          .attr("y", padding)
-		          .attr("dy", ".31em")
-		          .text(function(d) { return d.key; });
-			
-		      function transform(d) {
-
-		        d = new google.maps.LatLng(d.value[1], d.value[0]);
-		        d = projection.fromLatLngToDivPixel(d);
-		        return d3.select(this)
-		            .style("left", (d.x - padding) + "px")
-		            .style("top", (d.y - padding) + "px");
-		      }
-		    };
-		  };	
-
-		  overlay.setMap(self.map);
-		});
+	_removeAllMarkers: function() {
+		// Remove all markers
+		
+		if (this.markerArray.length > 0) {
+			for (i in this.markerArray) {				
+				this.markerArray[i].setMap(null);
+			}
+		}
+		this.markerArray = [];
+		this.markers = {};
 	},
 	
-	drawExternalData:function(val)
-	{
-		var input = val.substring(0, val.length);
-		var latlngStr = input.split(",",2);
-		var lat = parseFloat(latlngStr[0]);
-		var lng = parseFloat(latlngStr[1]);
-		latlngArray = new google.maps.LatLng(lat, lng);
-		//console.log('lat: ' + lat + ' lon: ' +lng);
-
-/*
-		var marker = new google.maps.Marker({
-			map: this.map,
-			position: latlngArray,
-			draggable: false
-		})
-*/		
-		var marker = new RichMarker({
-			map: this.map,
-	 		position: new google.maps.LatLng(lat, lng),
-			draggable: true,
-			flat: true,
-			anchor: RichMarkerPosition.MIDDLE,
-			content: '<div class="data"></div>'
+	reset: function(model) {
+		var self = this;
+				
+		self._removeAllMarkers();
+		
+		this.collections[model.collectionId].each(function (model) {
+			self.addOne(model);
 		});
+			
 	},
 
-    addOne: function(data) {
-		var self = this;
+    addOne: function(model) {
+			var self = this;
+			
+			var markerObj = {};
+			markerObj.id = model.get('_id'); //May be the wrong ID
+			markerObj.name = model.get('name');
+			markerObj.location = model.get('location');
+			markerObj.lat = model.get('lat');
+			markerObj.lon = model.get('lon');
+			markerObj.val = model.get('val');
+		
+			//If location is a single string, parse it
+			var input = markerObj.location.substring(0, markerObj.location.length);
+			var latlngStr = input.split(",",2);
+			var lat = parseFloat(latlngStr[0]);
+			var lng = parseFloat(latlngStr[1]);
+			latlngArray = new google.maps.LatLng(lat, lng);
+			
+			var marker = new RichMarker({
+				map: this.map,
+		 		position: latlngArray,
+				draggable: true,
+				flat: true,
+				anchor: RichMarkerPosition.MIDDLE,
+				content: '<div class="data"></div>'
+			});
+
+			this.markerArray.push(marker);
+			this.markers[markerObj.id] = marker;
+
+			google.maps.event.addListener(marker, 'click', function() {	
+				console.log(markerObj.location);
+			});
     },
 
     addAll: function() {
-		var self = this;
+		var self = this;		
     }
   
 });

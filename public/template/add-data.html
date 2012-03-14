@@ -8,12 +8,16 @@
 		<label>Adding data is simple. Paste a URL below and go.</label>
 		
     	<div class="well form-inline">
-		  <input type="text" id="titleInput" class="input-small" placeholder="Title of your data"></input>
+		  <input type="text" id="titleInput" class="input-small" placeholder="Title of your data" value="Data"></input>
 		  <br><br>
 		  <input type="text" id="dataInput" class="input-large" placeholder="URL to XML, CSV, or JSON format data file..." value="data/reactors.json"></input>
 		  <a href="#"  id="dataButton" class="btn btn-primary">Add the data!</a>
 		</div>		
     </p>
+	<div class="alert alert-error">
+	        <a class="close" data-dismiss="alert">×</a>
+	        <strong>Oops</strong> both a title and valid path are required to add a data set.
+	      </div>
 	<div class="data-table" id="dataTable"></div>
   </div>
   <div class="modal-footer">
