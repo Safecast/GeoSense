@@ -39,7 +39,7 @@ window.HeaderView = Backbone.View.extend({
 			$('#settingsButton').html('<i class="icon-arrow-right icon-white"></i> Show Settings');
 			$('.sidebar-view').addClass('visible');
 			$('.map-view').addClass('full');
-			$('.mapgl-view').addClass('full');
+			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
 			this.sidebarstate = '';
 		}
@@ -48,7 +48,7 @@ window.HeaderView = Backbone.View.extend({
 			$('#settingsButton').html('<i class="icon-arrow-left icon-white"></i> Hide Settings');
 			$('.sidebar-view').removeClass('visible');
 			$('.map-view').removeClass('full');
-			$('.mapgl-view').removeClass('full');
+			$('.map-gl-view').removeClass('full');
 			$('.sidebar-view .black-overlay').removeClass('visible');
 			this.sidebarstate = 'hidden';
 		}	

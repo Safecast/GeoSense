@@ -1,11 +1,10 @@
 window.MapGLView = Backbone.View.extend({
 
     tagName: 'div',
-	className: 'map-gl',
+	className: 'map-gl-view',
 	
     events: {
     },
-
 
 	degtoRad: function(x) {
  		return x*Math.PI/180;
@@ -33,15 +32,9 @@ window.MapGLView = Backbone.View.extend({
 		return [lat, lon];
 	},
 
-
-
-
-
-
     initialize: function(options) {
 	
-	    this.template = _.template(tpl.get('map-gl'));
-				
+	    this.template = _.template(tpl.get('map-gl'));	
 		this.animate();
     },
 

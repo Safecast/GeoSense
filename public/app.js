@@ -141,7 +141,8 @@ var AppRouter = Backbone.Router.extend({
 						pointCollection[this.index].fetch({success: function() {
 							//Add a new sidebar data view once data is fetched
 							self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-							self.addMapCollection(scope.index, pointCollection[scope.index]);	
+							if(this.mapView)
+								self.addMapCollection(scope.index, pointCollection[scope.index]);	
 							
 						}});
 						

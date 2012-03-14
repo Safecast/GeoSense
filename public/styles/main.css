@@ -65,7 +65,7 @@
     -ms-transition: all .3s linear;
 }
 
-.mapgl-view
+.map-gl-view
 {
 	position:absolute;
 	top:50px;
@@ -82,12 +82,12 @@
     -ms-transition: all .3s linear;
 }
 
-.mapgl-view canvas
+.map-gl-view canvas
 {	
 
 }
 
-.mapgl-view.full
+.map-gl-view.full
 {
 	left:0px;
 	-webkit-transition: all .3s linear;

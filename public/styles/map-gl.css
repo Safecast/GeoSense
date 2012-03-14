@@ -1,4 +1,4 @@
-.map-gl
+.map-gl-view
 {
 	position:absolute;
 	top:0;
@@ -7,7 +7,7 @@
 	right:0;
 }
 
-.map-gl .map
+.map-gl-view .map
 {
 	width:100%;
 	height:100%;
