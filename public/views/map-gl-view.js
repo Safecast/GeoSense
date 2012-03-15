@@ -61,32 +61,31 @@ window.MapGLView = Backbone.View.extend({
 		this.collections[id].fetch();
 	},
 
-	getDataWidget: function(model)
+	createPointWidget: function(lat, lng, val, initObj)
 	{
+		var barHeight = 3000;
+		var barWidth = 200;
+		var barRadiusOffset = 0;
+		var materials = [];
 
+		for (var c = 0; c < 6; c ++ ) {
+			materials.push( new THREE.MeshBasicMaterial( { color: initObj.color, transparent: true, blending: THREE.AdditiveBlending } ) );
+			//materials.push( new THREE.MeshLambertMaterial( { color: color, shading: THREE.FlatShading } ) );
+		}
+
+		var barH = val * barHeight;
+		var cube = new THREE.Mesh( new THREE.CubeGeometry(barWidth, barWidth, barH, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
+		cube.position = this.convertSphericalToCartesian(lat, lng, barRadiusOffset + barH / 2);
+		cube.lookAt(meshPlanet.position);
+	
+		return cube;
 	},
 
-    addOne: function(model) 
-    {
-		console.log(model);
-		var self = this;
-		
-		var markerObj = {};
-		markerObj.id = model.get('_id'); //May be the wrong ID
-		markerObj.name = model.get('name');
-		markerObj.location = model.get('location');
-		markerObj.lat = model.get('lat');
-		markerObj.lon = model.get('lon');
-		markerObj.val = model.get('val');
-	
-		//If location is a single string, parse it
-		var input = markerObj.location.substring(0, markerObj.location.length);
-		var latlngStr = input.split(",",2);
-		var lat = parseFloat(latlngStr[0]);
-		var lng = parseFloat(latlngStr[1]);
-		latlngArray = new google.maps.LatLng(lat, lng);
-		console.log(latlngArray);
-    },
+	addPointWidget: function(widget) 
+	{
+		this.world.add(widget);   
+		this.widgets.push(widget);
+	},
 	
 	reset: function(model) {
 		var self = this;
@@ -269,18 +268,6 @@ window.MapGLView = Backbone.View.extend({
 		// quick bar chart test
 
 		var dataPoints = [
-			[0, 0, .25],
-			[45, 0, .25],
-			[-45, 0, .25],
-			[0, -90, .25],
-			[45, -90, .25],
-			[-45, -90, 1.25],
-			[0, 90, .25],
-			[45, 90, 1.25],
-			[-45, 90, .25],
-		];
-
-		var dataPoints = [
 			[0, 0, 1],
 			//[45, 0, 1],
 			[0, 45, 1],
@@ -307,24 +294,18 @@ window.MapGLView = Backbone.View.extend({
 			0x00ffff,
 		];
 
-		var barHeight = 3000;
-		var barWidth = 200;
-		var barRadiusOffset = 0;
+		/*
 		for (var i = 0; i < dataPoints.length; i++) {
-			var color = colors[i % colors.length];
-			var materials = [];
-			for ( var c = 0; c < 6; c ++ ) {
-				materials.push( new THREE.MeshBasicMaterial( { color: color, transparent: true, blending: THREE.AdditiveBlending } ) );
-				//materials.push( new THREE.MeshLambertMaterial( { color: color, shading: THREE.FlatShading } ) );
-			}
 
-			var barH = dataPoints[i][2] * barHeight;
-			var cube = new THREE.Mesh( new THREE.CubeGeometry(barWidth, barWidth, barH, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
-			cube.position = this.convertSphericalToCartesian(dataPoints[i][0], dataPoints[i][1], barRadiusOffset + barH / 2);
-			cube.lookAt(meshPlanet.position);
-			this.world.add( cube );   
-			this.widgets.push(cube);
+			this.addPointWidget(this.createPointWidget(
+				dataPoints[i][0], dataPoints[i][1], dataPoints[i][2], {
+					color: colors[i % colors.length]
+				}));
+
 		}
+		*/
+
+
 
 		/*var light = new THREE.DirectionalLight( 0xffffff );
 		light.position.set( 0, radius * 2, radius * 2 );
@@ -339,12 +320,36 @@ window.MapGLView = Backbone.View.extend({
         return this;
     },
 
+
 	start: function() {
 	
 	},
 	
-    addOne: function(reading) {
+    addOne: function(model) 
+    {
 		var self = this;
+		
+		var markerObj = {};
+		markerObj.id = model.get('_id'); //May be the wrong ID
+		markerObj.name = model.get('name');
+		markerObj.location = model.get('location');
+		markerObj.lat = model.get('lat');
+		markerObj.lon = model.get('lon');
+		markerObj.val = model.get('val');
+	
+		var input = markerObj.location.substring(0, markerObj.location.length);
+		var latlngStr = input.split(",",2);
+		var lat = parseFloat(latlngStr[0]);
+		var lng = parseFloat(latlngStr[1]);
+		latlngArray = new google.maps.LatLng(lat, lng);
+
+
+		this.addPointWidget(this.createPointWidget(
+			lat, lng, 1, {
+				color: 0xff00000
+			}));
+
+
     },
 
     addAll: function() {
