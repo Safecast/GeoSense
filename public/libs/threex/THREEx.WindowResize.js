@@ -43,6 +43,3 @@ THREEx.WindowResize	= function(renderer, camera){
 		}
 	};
 }
-
-console.log('**********');
-console.log(THREEx.WindowResize);
