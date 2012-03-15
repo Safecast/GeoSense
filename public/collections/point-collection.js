@@ -41,7 +41,7 @@ PointCollection = Backbone.Collection.extend({
 		});
 		
 		this.destroyAssociativeIndex(options);
-		this.reset();
+		//this.reset();
 	},
 	
 	destroyAssociativeIndex: function() {

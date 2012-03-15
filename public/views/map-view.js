@@ -66,7 +66,7 @@ window.MapView = Backbone.View.extend({
 		this.collections[id].bind('add', this.addOne, this);
 		this.collections[id].fetch();
 		//this.drawMarkers(id);
-	},
+	}, 
 	
 	setMapZoom: function(zoom)
 	{
@@ -193,9 +193,8 @@ window.MapView = Backbone.View.extend({
 		}			
 	},
 	
-	_removeAllMarkers: function() {
-		// Remove all markers
-		
+	removeMarkers: function() {
+	
 		if (this.markerArray.length > 0) {
 			for (i in this.markerArray) {				
 				this.markerArray[i].setMap(null);
@@ -205,10 +204,25 @@ window.MapView = Backbone.View.extend({
 		this.markers = {};
 	},
 	
+	removeMarkersByCollection: function(model) {
+		
+		
+		if (this.markerArray.length > 0) {
+			for (i in this.markerArray) {
+				if(this.markerArray[i].collectionId == model.collectionId)
+				{
+					this.markerArray[i].setMap(null)
+				}
+			}
+		}
+		//this.markerArray = [];
+		//this.markers = {};	
+	},
+	
 	reset: function(model) {
 		var self = this;
-				
-		self._removeAllMarkers();
+		
+		self.removeMarkersByCollection(model);
 		
 		this.collections[model.collectionId].each(function (model) {
 			self.addOne(model);
@@ -220,7 +234,7 @@ window.MapView = Backbone.View.extend({
 			var self = this;
 			
 			var markerObj = {};
-			markerObj.id = model.get('_id'); //May be the wrong ID
+			markerObj.id = model.get('collectionid'); //May be the wrong ID
 			markerObj.name = model.get('name');
 			markerObj.location = model.get('location');
 			markerObj.lat = model.get('lat');
@@ -240,7 +254,8 @@ window.MapView = Backbone.View.extend({
 				draggable: true,
 				flat: true,
 				anchor: RichMarkerPosition.MIDDLE,
-				content: '<div class="data"></div>'
+				content: '<div class="data"></div>',
+				collectionId: markerObj.id,
 			});
 
 			this.markerArray.push(marker);

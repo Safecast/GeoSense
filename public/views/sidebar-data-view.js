@@ -51,10 +51,12 @@ window.SideBarDataView = Backbone.View.extend({
 	removeDataClicked: function()
 	{
 		var self = this;
+		
 		$(this.el).fadeOut('fast',function()
 		{
 			self.collection.destroy();
-			num_data_sources --;			
+			//num_data_sources --;			
 		});
+		self.collection.reset();
    	},
 });
