@@ -54,14 +54,11 @@ window.MapGLView = Backbone.View.extend({
     },
 
 	addCollection: function(id, collection)
-	{
-		
+	{	
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
 		this.collections[id].fetch();
-		console.log('addCollection');
-
 	},
 
 	getDataWidget: function(model)
@@ -89,27 +86,14 @@ window.MapGLView = Backbone.View.extend({
 		var lng = parseFloat(latlngStr[1]);
 		latlngArray = new google.maps.LatLng(lat, lng);
 		console.log(latlngArray);
-		
-		var marker = new RichMarker({
-			//map: this.map,
-	 		position: latlngArray,
-			draggable: true,
-			flat: true,
-			anchor: RichMarkerPosition.MIDDLE,
-			content: '<div class="data"></div>'
-		});
-
-		/*
-
-		this.markerArray.push(marker);
-		this.markers[markerObj.id] = marker;
-
-		google.maps.event.addListener(marker, 'click', function() {	
-			console.log(markerObj.location);
-		});
-
-		*/
     },
+	
+	reset: function(model) {
+		var self = this;
+		this.collections[model.collectionId].each(function (model) {
+			self.addOne(model);
+		});
+	},
 	
 	animate: function() {
 		var self = this;
@@ -126,7 +110,6 @@ window.MapGLView = Backbone.View.extend({
 		//meshPlanet.rotation.y += rotationSpeed * delta;
 		this.world.rotation.y += rotationSpeed * delta;
 		meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
-
 
 		var angle = delta * rotationSpeed;
 

@@ -125,8 +125,7 @@ var AppRouter = Backbone.Router.extend({
 			self.addSideBarDataView({collectionId:num_data_sources,title:options.title});
 			
 			//If MapView, add new markers
-			self.addMapCollection(uniqid, pointCollection[num_data_sources]);	
-			
+			self.addMapCollection(uniqid, pointCollection[num_data_sources]);		
 			
 		})
 		.error(function() { alert("Error loading your file"); })
