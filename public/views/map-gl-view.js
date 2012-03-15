@@ -18,6 +18,8 @@ window.MapGLView = Backbone.View.extend({
 		return x*180/Math.PI;
 	},
 
+	latLngRotationMatrix: new THREE.Matrix4(),
+
 	convertSphericalToCartesian: function(lat, lon, radiusOffset) {    
 		var r = radius;
 		if (radiusOffset) {
@@ -33,11 +35,7 @@ window.MapGLView = Backbone.View.extend({
 
 		console.log(lat+','+lon+' ==> '+x+','+y+','+z);
 
-		var m = new THREE.Matrix4();
-		m.setRotationAxis(new THREE.Vector3(1, 0, 0), -Math.PI/2);
-		return m.multiplyVector3(vec);
- 
-		return vec;
+		return this.latLngRotationMatrix.multiplyVector3(vec);
 	},
 
 	convertCartesianToSpherical: function(v) {    
@@ -50,6 +48,8 @@ window.MapGLView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('map-gl'));
 		this.animate();
+
+		this.latLngRotationMatrix.setRotationAxis(new THREE.Vector3(1, 0, 0), -Math.PI/2);
     },
 
 	animate: function() {
