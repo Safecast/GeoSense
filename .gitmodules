@@ -1,0 +1,3 @@
+[submodule "public/libs/threex"]
+	path = public/libs/threex
+	url = git://github.com/jeromeetienne/threex.git

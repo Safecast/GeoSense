@@ -28,10 +28,16 @@ window.MapGLView = Backbone.View.extend({
 		
 		var x = r * Math.cos(rLat)*Math.cos(rLon);    
 		var y = r * Math.cos(rLat)*Math.sin(rLon);
-		var z = r * Math.sin(rLat)*-1;    
+		var z = r * Math.sin(rLat);
+		var vec = new THREE.Vector3(x, y, z);
 
+		console.log(lat+','+lon+' ==> '+x+','+y+','+z);
+
+		var m = new THREE.Matrix4();
+		m.setRotationAxis(new THREE.Vector3(1, 0, 0), -Math.PI/2);
+		return m.multiplyVector3(vec);
  
-		return new THREE.Vector3(x, y, z);
+		return vec;
 	},
 
 	convertCartesianToSpherical: function(v) {    
@@ -59,13 +65,9 @@ window.MapGLView = Backbone.View.extend({
 		var delta = clock.getDelta();
 
 		//meshPlanet.rotation.y += rotationSpeed * delta;
-		//meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
+		this.world.rotation.y += rotationSpeed * delta;
+		meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
 
-		//this.world.rotation.y += rotationSpeed * delta;
-
-		for (var i = 0; i < this.widgets.length; i++) {
-			//this.widgets[i].rotateAroundWorldAxis();
-		}
 
 		var angle = delta * rotationSpeed;
 
@@ -81,7 +83,7 @@ window.MapGLView = Backbone.View.extend({
 		container = this.el;
 		scene = new THREE.Scene();
 
-		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0xededed, antialias: true } );
+		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0x111111, antialias: true } );
 		renderer.setSize( width, height );
 		renderer.sortObjects = false;
 		renderer.autoClear = false;
@@ -120,11 +122,11 @@ window.MapGLView = Backbone.View.extend({
 
 		controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
 
-		dirLight = new THREE.DirectionalLight( 0xFFFFFF );
+		dirLight = new THREE.DirectionalLight( 0xdddddd );
 		dirLight.position.set( -1, 0, 1 ).normalize();
 		scene.add( dirLight );
 
-		var planetTexture = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_white.jpg" ),
+		var planetTexture = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_white_debug.jpg" ),
 		cloudsTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_clouds_1024.png" ),
 		normalTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_normal_2048.jpg" ),
 		specularTexture   = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_specular_2048.jpg" );
@@ -144,7 +146,7 @@ window.MapGLView = Backbone.View.extend({
 
 		uniforms[ "uDiffuseColor" ].value.setHex( 0xffffff );
 		uniforms[ "uSpecularColor" ].value.setHex( 0x666666 );
-		uniforms[ "uAmbientColor" ].value.setHex( 0x000000 );
+		uniforms[ "uAmbientColor" ].value.setHex( 0x333333 );
 
 		uniforms[ "uShininess" ].value = 20;
 
@@ -166,12 +168,12 @@ window.MapGLView = Backbone.View.extend({
 
 		meshPlanet = new THREE.Mesh( geometry, materialNormalMap );
 		//meshPlanet.rotation.y = 0;
-		//world.rotation.z = tilt;
+		this.world.rotation.z = tilt;
 		this.world.add( meshPlanet );
 
 		// clouds
 
-		var materialClouds = new THREE.MeshLambertMaterial( { color: 0xffffff, map: cloudsTexture, transparent:true } );
+		var materialClouds = new THREE.MeshLambertMaterial( { color: 0xffffff, ambient: 0x030303, map: cloudsTexture, transparent:true } );
 
 		meshClouds = new THREE.Mesh( geometry, materialClouds );
 		meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
@@ -193,7 +195,7 @@ window.MapGLView = Backbone.View.extend({
 
 		}
 
-		var stars,
+		/*var stars,
 		starsMaterials = [
 			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
 			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } ),
@@ -219,46 +221,59 @@ window.MapGLView = Backbone.View.extend({
 
 			scene.add( stars );
 
-		}
+		}*/
 
 
 		// quick bar chart test
 
 		var dataPoints = [
-			[0, 0, 1.5],
-			//[10, 10, .25],
-			//[10, -10, .5],
-			[-10, -5, .5],
-			
+			[0, 0, .25],
+			[45, 0, .25],
+			[-45, 0, .25],
+			[0, -90, .25],
+			[45, -90, .25],
+			[-45, -90, 1.25],
+			[0, 90, .25],
+			[45, 90, 1.25],
+			[-45, 90, .25],
+		];
 
+		var dataPoints = [
+			[0, 0, 1],
+			//[45, 0, 1],
+			[0, 45, 1],
+			[-45, -45, 1],
+			[0, -90, 1],
+			[45, -90, 1],
 
-			//[90, 0, 1.5]
-			//,[80, 10, .25]
-			//,[70, 20, .125]
-			//,[80, 0, .5]
-			//[0, -90, 1.5]
+			[-34.578952,-58.40332, 1],
+			[-12.21118,49.746094, 1],
+			[38.272689,15.556641, 1],
+			[-41.508577,174.287109, 1],
+			[25,45, 1],
 
+			//[-25, 45, 2],
+			//[25, -90, 3],
+			//[-25, -90, 4],
+		];
 
-			//,[-19.47695,46.230469, 1]
-//			,[-51.876491,-59.216309,1]
-
-			/*,
-			[60.737686, -45.087891, .8],
-			[57.515823, -63.984375, .25],
-			[12.21118, -84.023437, .6],
-			[1.054628, 115.3125, .9],
-			[65.07213, -23.203125, 1]*/ 
+		var colors = [
+			0xff0000,
+			0x00ff00,
+			0x0000ff,
+			0xffff00,
+			0x00ffff,
 		];
 
 		var barHeight = 3000;
-		var barWidth = 100;
+		var barWidth = 200;
 		var barRadiusOffset = 0;
 		for (var i = 0; i < dataPoints.length; i++) {
-			var color = Math.random() * 0xffffff;
+			var color = colors[i % colors.length];
 			var materials = [];
 			for ( var c = 0; c < 6; c ++ ) {
-				//materials.push( new THREE.MeshBasicMaterial( { color: color, transparent: true, blending: THREE.AdditiveBlending } ) );
-				materials.push( new THREE.MeshLambertMaterial( { color: color, shading: THREE.FlatShading } ) );
+				materials.push( new THREE.MeshBasicMaterial( { color: color, transparent: true, blending: THREE.AdditiveBlending } ) );
+				//materials.push( new THREE.MeshLambertMaterial( { color: color, shading: THREE.FlatShading } ) );
 			}
 
 			var barH = dataPoints[i][2] * barHeight;
@@ -267,23 +282,17 @@ window.MapGLView = Backbone.View.extend({
 			cube.lookAt(meshPlanet.position);
 			this.world.add( cube );   
 			this.widgets.push(cube);
-
-			var sphereGeometry = new THREE.SphereGeometry( barWidth * .7, 100, 50 );
-			sphereGeometry.computeTangents();
-			var sphere = new THREE.Mesh(sphereGeometry, materialNormalMap );
-			sphere.position = cube.position;
-			this.world.add(sphere);
-
-			this.widgets.push(sphere);
 		}
 
-		var light = new THREE.DirectionalLight( 0xffffff );
+		/*var light = new THREE.DirectionalLight( 0xffffff );
 		light.position.set( 0, radius * 2, radius * 2 );
-		scene.add( light );
-		var light = new THREE.DirectionalLight( 0xffffff );
-		light.position.set(radius * 2, radius * 2, 0 );
-		scene.add( light );
+		scene.add( light );*/
+
+		scene.add(new THREE.AmbientLight( 0xffffff ));
 				
+
+		THREEx.WindowResize(renderer, camera);
+
 
         return this;
     },
