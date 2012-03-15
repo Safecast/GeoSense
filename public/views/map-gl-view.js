@@ -33,7 +33,7 @@ window.MapGLView = Backbone.View.extend({
 		var z = r * Math.sin(rLat);
 		var vec = new THREE.Vector3(x, y, z);
 
-		console.log(lat+','+lon+' ==> '+x+','+y+','+z);
+		//console.log(lat+','+lon+' ==> '+x+','+y+','+z);
 
 		return this.latLngRotationMatrix.multiplyVector3(vec);
 	},
@@ -61,32 +61,6 @@ window.MapGLView = Backbone.View.extend({
 		this.collections[id].fetch();
 	},
 
-	createPointWidget: function(lat, lng, val, initObj)
-	{
-		var barHeight = 3000;
-		var barWidth = 200;
-		var barRadiusOffset = 0;
-		var materials = [];
-
-		for (var c = 0; c < 6; c ++ ) {
-			materials.push( new THREE.MeshBasicMaterial( { color: initObj.color, transparent: true, blending: THREE.AdditiveBlending } ) );
-			//materials.push( new THREE.MeshLambertMaterial( { color: color, shading: THREE.FlatShading } ) );
-		}
-
-		var barH = val * barHeight;
-		var cube = new THREE.Mesh( new THREE.CubeGeometry(barWidth, barWidth, barH, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
-		cube.position = this.convertSphericalToCartesian(lat, lng, barRadiusOffset + barH / 2);
-		cube.lookAt(meshPlanet.position);
-	
-		return cube;
-	},
-
-	addPointWidget: function(widget) 
-	{
-		this.world.add(widget);   
-		this.widgets.push(widget);
-	},
-	
 	reset: function(model) {
 		var self = this;
 		this.collections[model.collectionId].each(function (model) {
@@ -324,6 +298,19 @@ window.MapGLView = Backbone.View.extend({
 	start: function() {
 	
 	},
+
+	createPointWidget: function(cls, lat, lng, val, initObj)
+	{
+		var position = this.convertSphericalToCartesian(lat, lng);
+		return new cls(position, val, initObj);
+	},
+
+	addPointWidget: function(widget) 
+	{
+		widget.object3D.lookAt(meshPlanet.position);
+		this.world.add(widget.object3D);   
+		this.widgets.push(widget.object3D);
+	},
 	
     addOne: function(model) 
     {
@@ -344,11 +331,10 @@ window.MapGLView = Backbone.View.extend({
 		latlngArray = new google.maps.LatLng(lat, lng);
 
 
-		this.addPointWidget(this.createPointWidget(
+		this.addPointWidget(this.createPointWidget(THREEx.PointWidget,
 			lat, lng, 1, {
 				color: 0xff00000
 			}));
-
 
     },
 
