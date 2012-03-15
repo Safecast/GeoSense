@@ -50,8 +50,67 @@ window.MapGLView = Backbone.View.extend({
 		this.animate();
 
 		this.latLngRotationMatrix.setRotationAxis(new THREE.Vector3(1, 0, 0), -Math.PI/2);
+		this.collections = {};
     },
 
+	addCollection: function(id, collection)
+	{
+		
+		this.collections[id] = collection;
+		this.collections[id].bind('reset', this.reset, this);
+		this.collections[id].bind('add', this.addOne, this);
+		this.collections[id].fetch();
+		console.log('addCollection');
+
+	},
+
+	getDataWidget: function(model)
+	{
+
+	},
+
+    addOne: function(model) 
+    {
+		console.log(model);
+		var self = this;
+		
+		var markerObj = {};
+		markerObj.id = model.get('_id'); //May be the wrong ID
+		markerObj.name = model.get('name');
+		markerObj.location = model.get('location');
+		markerObj.lat = model.get('lat');
+		markerObj.lon = model.get('lon');
+		markerObj.val = model.get('val');
+	
+		//If location is a single string, parse it
+		var input = markerObj.location.substring(0, markerObj.location.length);
+		var latlngStr = input.split(",",2);
+		var lat = parseFloat(latlngStr[0]);
+		var lng = parseFloat(latlngStr[1]);
+		latlngArray = new google.maps.LatLng(lat, lng);
+		console.log(latlngArray);
+		
+		var marker = new RichMarker({
+			//map: this.map,
+	 		position: latlngArray,
+			draggable: true,
+			flat: true,
+			anchor: RichMarkerPosition.MIDDLE,
+			content: '<div class="data"></div>'
+		});
+
+		/*
+
+		this.markerArray.push(marker);
+		this.markers[markerObj.id] = marker;
+
+		google.maps.event.addListener(marker, 'click', function() {	
+			console.log(markerObj.location);
+		});
+
+		*/
+    },
+	
 	animate: function() {
 		var self = this;
 		var loopTimer = 16;
