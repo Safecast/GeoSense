@@ -11,6 +11,9 @@ var AppRouter = Backbone.Router.extend({
 	
         this.headerView = new HeaderView({vent: this.vent});
         $('body').append(this.headerView.render().el);
+
+		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
+        $('body').append(this.sideBarView.render().el);
 		
 		//Gather distinct collections
 		//This returns an array containing collectionid for lookup
@@ -48,6 +51,12 @@ var AppRouter = Backbone.Router.extend({
     map:function () {
 		var self = this;
 		
+		if(this.mapView)
+		{
+			this.mapView.remove();
+			this.mapView = null;
+		}
+		
 	    if (!this.mapView)
 		{
             this.mapView = new MapView({
@@ -57,15 +66,20 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
 			//this.readingsCollection.fetch();
         }
-		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
-        $('body').append(this.sideBarView.render().el);
     },
 
 	mapGL:function () {
 		var self = this;
 		
-	    if (!this.mapView)
+		
+		if(this.mapView)
 		{
+			this.mapView.remove();
+			this.mapView = null;
+		}
+				
+	    if (!this.mapView)
+		{			
             this.mapView = new MapGLView({
 				collection: this.readingsCollection,
 				vent: self.vent
@@ -74,8 +88,8 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
-		this.sideBarView = new SideBarView({vent: this.vent, page: 'map-gl'});
-        $('body').append(this.sideBarView.render().el);
+		console.log(pointCollection);
+
     },
 
 	addData:function (options)
@@ -160,7 +174,6 @@ var AppRouter = Backbone.Router.extend({
 							self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
 							if(self.mapView)
 								self.addMapCollection(scope.index, pointCollection[scope.index]);	
-							
 						}});
 						
 					},
