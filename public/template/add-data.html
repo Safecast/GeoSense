@@ -20,10 +20,8 @@
 		</ul>
 		<div id="myTabContent" class="tab-content">
 			<div class="tab-pane fade" id="XML">
-				<input type="text" id="dataInput" class="input-large" placeholder="URL to XML, CSV, or JSON format data file..." value="data/reactors.json"></input>
 			</div>
 			<div class="tab-pane fade" id="CSV">
-				<input type="text" id="dataInput" class="input-large" placeholder="Select a file..." value="data/reactors.json"></input>
 			</div>
 			<div class="tab-pane fade active in" id="JSON">
 				<div class="form-inline">
@@ -32,7 +30,6 @@
 			    </div><br>
 			</div>
 			<div class="tab-pane fade" id="GoogleFusion">
-				<input type="text" id="dataInput" class="input-large" placeholder="URL to XML, CSV, or JSON format data file..." value="data/reactors.json"></input>
 			</div>
 		</div>
     </div>
@@ -40,8 +37,14 @@
 	<!-- Review data -->
 	<div class="review">
 		<label>Almost there! Drag the labels below onto their matching columns</label>
-    	<div class="well form-inline">
-			<div class="label" id="dragLabel">Drag me!</div>
+    	<div class="well">
+			<div>
+			    <span class="label lat" id="dragLabel">Latitude</span>
+			    <span class="label lng" id="dragLabel">Longitude</span>
+			    <span class="label location" id="dragLabel">Latitude, Longitude</span>
+			    <span class="label name" id="dragLabel">Name</span>
+			    <span class="label intensity" id="dragLabel">Intensity</span>
+			</div>
 		</div>	
 		<div class="data-table" id="dataTable"></div>
     </div>
@@ -50,9 +53,10 @@
 	<div class="alert alert-error">
 	        <a class="close" data-dismiss="alert">×</a>
 	        <strong>Oops</strong> both a title and valid path are required to add a data set.
-	      </div>
+	   </div>
   </div>
   <div class="modal-footer">
+	<a href="#"  id="dataConfirmButton" class="btn btn-success">Confirm and Add</a>
 	<a href="#"  id="dataButton" class="btn btn-primary">Next: Review Data</a>
     <a href="#" data-dismiss="modal" class="btn">Close</a>
   </div>

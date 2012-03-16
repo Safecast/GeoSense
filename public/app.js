@@ -71,7 +71,6 @@ var AppRouter = Backbone.Router.extend({
 	mapGL:function () {
 		var self = this;
 		
-		
 		if(this.mapView)
 		{
 			this.mapView.remove();
@@ -88,62 +87,45 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
-		console.log(pointCollection);
-
     },
 
 	addData:function (options)
 	{
 		var self = this;
 		var uniqid = this.uniqid();
+		var title = options.title
+		var data = options.data;
 		
-		//Request JSON
-		var jqxhr = $.getJSON(options.url, function(data) {})
-		.success(function(data) { 
-						
-			//First increment total number of data sources
-			num_data_sources +=1;
-			
-			//Create collection
-			pointCollection[num_data_sources] = new PointCollection({
-				collectionId:uniqid,
-				title:options.title,
-				newData:true,
-			});
-			
-			//We build a review table in the response, should be moved to edit view
-			$('.add-data-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
-			
-			var table;
-			for(var i = 0; i < data.length; ++i)
-			{
-				table += "<tr>";
+		//First increment total number of data sources
+		num_data_sources +=1;
+		
+		//Create collection
+		pointCollection[num_data_sources] = new PointCollection({
+			collectionId:uniqid,
+			title:title,
+			newData:true,
+		});
+		
+		for(var i = 0; i < data.length; ++i)
+		{
+			$.each(data[i], function(key, val) { 
 				
-				$.each(data[i], function(key, val) { 
-					table += '<td rel="tooltip" title="'+key+'" class="tooltip-test">' + val + '</td>';
-					if(key == 'Location')
-					{
-						pointCollection[num_data_sources].create({name:'point',location:val});
-					}
-				});
-				
-				table += "</tr>";				
-			}
+				if(key == 'Location')
+				{
+					pointCollection[num_data_sources].create({name:'point',location:val});
+				}
+			});	
+		}
+		
+		//Activate data toggles in adddata view
+		self.vent.trigger("toggleAddDataToolTips",pointCollection[num_data_sources]);
+		
+		//Append a new side bar view
+		self.addSideBarDataView({collectionId:num_data_sources,title:title});
+		
+		//If MapView, add new markers
+		self.addMapCollection(uniqid, pointCollection[num_data_sources]);		
 			
-			$('.add-data-view .modal-body .review .data-table .table').append(table);
-			
-			//Activate data toggles in adddata view
-			self.vent.trigger("toggleAddDataToolTips",pointCollection[num_data_sources]);
-			
-			//Append a new side bar view
-			self.addSideBarDataView({collectionId:num_data_sources,title:options.title});
-			
-			//If MapView, add new markers
-			self.addMapCollection(uniqid, pointCollection[num_data_sources]);		
-			
-		})
-		.error(function() { alert("Error loading your file"); })
-		.complete(function() {});
 	},
 	
 	addExistingDataSources: function(index)
