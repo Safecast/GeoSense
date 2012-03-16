@@ -201,7 +201,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['map', 'map-gl', 'header','sidebar','sidebar-data', 'modal','add-data'],
+tpl.loadTemplates(['map', 'map-gl', 'header','sidebar','sidebar-data', 'modal','add-data','edit-data'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });
