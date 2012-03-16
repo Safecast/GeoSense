@@ -1,10 +1,33 @@
-.add-data-view .modal-body .well.form-inline .input-large
+.add-data-view .modal-body .add .tab-content .input-large
 {
-	width:375px;
+	width:440px;
+	height:40px;
+	font-size:15pt;
+	line-height:28px;
 }
-.add-data-view .modal-body .well.form-inline .input-small
+
+.add-data-view .modal-body .add .tab-content .btn.large
 {
-	width:200px;
+	width:50px;
+	height:40px;
+}
+
+.add-data-view .modal-body .add .tab-content .btn.large p
+{
+	padding-top:10px;
+	font-size:10pt;
+	font-weight:bold;
+	color:#666;
+}
+
+.add-data-view .modal-body .add .well.form-inline .input-small
+{
+	width:335px;
+}
+
+.add-data-view .modal-body .add .well.form-inline .color-picker
+{
+	width:100px;
 }
 
 .add-data-view .modal-body .data-table
@@ -16,4 +39,28 @@
 .add-data-view .modal-body .alert
 {
 	display:none;
+}
+
+
+.add-data-view .modal-body .add
+{
+	display:block;
+}
+
+
+.add-data-view .modal-body .review
+{
+	display:none;
+}
+
+.add-data-view .modal.large
+{
+
+}
+
+.add-data-view .modal-body .add .nav.nav-tabs .label
+{
+	position:relative;
+	top:7px;
+	margin-right:10px;
 }

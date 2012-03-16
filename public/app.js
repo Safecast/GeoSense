@@ -112,7 +112,7 @@ var AppRouter = Backbone.Router.extend({
 			});
 			
 			//We build a review table in the response, should be moved to edit view
-			$('.add-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
+			$('.add-data-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
 			
 			var table;
 			for(var i = 0; i < data.length; ++i)
@@ -130,7 +130,7 @@ var AppRouter = Backbone.Router.extend({
 				table += "</tr>";				
 			}
 			
-			$('.add-data-view .modal-body .data-table .table').append(table);
+			$('.add-data-view .modal-body .review .data-table .table').append(table);
 			
 			//Activate data toggles in adddata view
 			self.vent.trigger("toggleAddDataToolTips",pointCollection[num_data_sources]);
