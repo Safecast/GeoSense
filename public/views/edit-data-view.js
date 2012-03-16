@@ -14,11 +14,9 @@ window.EditDataView = Backbone.View.extend({
 
     render: function() {
 		$(this.el).html(this.template());	
-		
-		console.log(this.collection);
+				
 		//Build a review table
 		var table;
-		
 		$('.edit-data-view .modal-body .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
 		
 		for(var i = 0; i < this.collection.length; ++i)

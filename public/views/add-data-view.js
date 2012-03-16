@@ -14,12 +14,22 @@ window.AddDataView = Backbone.View.extend({
 
     render: function() {
 		$(this.el).html(this.template());
+		var self = this;
+		this.$('#dragLabel').draggable();
+		
+		this.$('#dragLabel').droppable( {
+		    drop: self.handleDropEvent
+		} );
 		
 		this.$(".color-picker").miniColors();
-		console.log(this.$(".color-picker"));
 				
         return this;
     },
+
+	handleDropEvent:function ( event, ui ) {
+	  var draggable = ui.draggable;
+	  alert( 'The square with ID "' + draggable.attr('id') + '" was dropped onto me!' );
+	},
 	
 	dataButtonClicked: function() {
 		//Todo: Verify string URL
