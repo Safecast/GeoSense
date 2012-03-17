@@ -4,6 +4,9 @@ Temporary & app-wide variables
 
 //Total number of data sources associated with each account
 //Update this number per session
+
+var DEBUG = true;
+
 var num_data_sources = 0;
 var pointCollection = new Array();
 

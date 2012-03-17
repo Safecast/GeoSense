@@ -90,10 +90,19 @@ window.MapGLView = Backbone.View.extend({
 
 		renderer.clear();
 		renderer.render( scene, camera );
+
+		this.stats.update();
 	},
 
     render: function() {
 		$(this.el).html(this.template());
+
+    	if (DEBUG) {
+			this.stats = new Stats();
+			this.stats.domElement.style.position = 'absolute';
+			this.stats.domElement.style.top = '0px';
+			this.el.appendChild(this.stats.domElement);
+    	}
 		
 		container = this.el;
 		scene = new THREE.Scene();
