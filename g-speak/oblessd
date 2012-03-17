@@ -1,0 +1,74 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'em-websocket'
+
+$: << '/opt/oblong/g-speak-64-2/lib64/ruby/'
+require 'Pool'
+include Plasma
+
+pool = "tcp://gspeak01.media.mit.edu/tags"
+host = "0.0.0.0"
+port = 8080
+debug = false
+tags = ["Object-05"]
+fps = 50.0
+time_samples = []
+num_time_samples = 50
+frames_sent = 0
+
+send_tags = {}
+open_sockets = []
+
+Thread.abort_on_exception = true
+t1 = Thread.new do
+  puts "Creating Hose to %s" % pool
+  h = Hose.new(pool)
+  prev_time = Time.now
+  loop {
+    send_tags = {}
+    h.tolast 
+    prot = h.next
+    if prot
+      for tag in tags
+        if prot.ingests["tags"][tag]
+          send_tags[tag] = prot.ingests["tags"][tag]
+        end
+      end
+    end
+    next_time = Time.now
+    if next_time - prev_time >= 1 / fps
+      for socket in open_sockets
+        socket.send(send_tags.to_json)
+      end
+      prev_time = next_time
+      time_samples.push(Time.now.to_i)
+      if time_samples.length > num_time_samples:
+        time_samples.shift
+      end
+      if time_samples.length >= 2 and frames_sent % 10 == 0:
+        #puts time_samples.length / (time_samples[time_samples.length - 1] - time_samples[0])
+      end
+      frames_sent += 1
+    end
+  }
+end
+
+puts "Starting oblessd on %s:%i" % [host, port]
+
+EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do |ws|
+  timer = nil
+  ws.onopen {
+    puts "WebSocket connected"
+    open_sockets.push(ws)
+  }
+  ws.onclose {
+    EM.cancel_timer(timer)
+    puts "WebSocket closed"
+    open_sockets.delete(ws)
+  }
+  ws.onerror { |e|
+    puts "Error: #{e.message}"
+  }
+end
+

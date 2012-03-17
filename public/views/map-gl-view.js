@@ -113,7 +113,7 @@ window.MapGLView = Backbone.View.extend({
 
 		container.appendChild( renderer.domElement );
 
-		this.world = new THREE.Object3D();
+		this.world = THREEx.world = new THREE.Object3D();
 		scene.add(this.world);
 
 		camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 50, 1e7 );
