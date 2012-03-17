@@ -5,6 +5,9 @@ window.SideBarDataView = Backbone.View.extend({
 	
     events: {
 		'click #removeData:' : 'removeDataClicked',
+		'click #editData:' : 'editDataClicked',
+		
+		
     },
 
     initialize: function(options) {
@@ -58,4 +61,17 @@ window.SideBarDataView = Backbone.View.extend({
 		});
 		self.collection.reset();
    	},
+
+	editDataClicked: function()
+	{
+		var self = this;
+		
+		if(this.editDataView)
+			this.editDataView.remove();
+			
+		this.editDataView = new EditDataView({vent: this.vent, collection:this.collection});
+        $('body').append(this.editDataView.render().el);
+		$('#editDataModal').modal('toggle');
+   	},
+
 });

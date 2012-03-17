@@ -56,6 +56,7 @@ window.MapView = Backbone.View.extend({
 		
 		//Render Fusion Maps
 		this.initSafecastFusionMap();
+
 	},
 	
 	addCollection: function(id, collection)
@@ -66,7 +67,7 @@ window.MapView = Backbone.View.extend({
 		this.collections[id].bind('add', this.addOne, this);
 		this.collections[id].fetch();
 		//this.drawMarkers(id);
-	}, 
+	},
 	
 	setMapZoom: function(zoom)
 	{
@@ -206,7 +207,6 @@ window.MapView = Backbone.View.extend({
 	
 	removeMarkersByCollection: function(model) {
 		
-		
 		if (this.markerArray.length > 0) {
 			for (i in this.markerArray) {
 				if(this.markerArray[i].collectionId == model.collectionId)
@@ -214,9 +214,7 @@ window.MapView = Backbone.View.extend({
 					this.markerArray[i].setMap(null)
 				}
 			}
-		}
-		//this.markerArray = [];
-		//this.markers = {};	
+		}	
 	},
 	
 	reset: function(model) {
@@ -227,7 +225,6 @@ window.MapView = Backbone.View.extend({
 		this.collections[model.collectionId].each(function (model) {
 			self.addOne(model);
 		});
-			
 	},
 
     addOne: function(model) {

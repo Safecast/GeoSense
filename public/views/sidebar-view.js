@@ -70,14 +70,12 @@ window.SideBarView = Backbone.View.extend({
 	
 	display2DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate("", {trigger: false});
-		window.location.href = '';
+		app.navigate("", {trigger: true});
 	},
 
 	display3DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate("globe", {trigger: false});
-		window.location.href = '/#globe';
+		app.navigate("#globe", {trigger: true});
 	},
 	
 	addDataClicked: function() {

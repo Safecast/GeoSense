@@ -4,23 +4,60 @@
     <h3 class="title">Add Your Awesome Data</h3>
   </div>
   <div class="modal-body">
-    <p class="body">
-		<label>Adding data is simple. Paste a URL below and go.</label>
-		
-    	<div class="well form-inline">
-		  <input type="text" id="titleInput" class="input-small" placeholder="Title of your data" value="Data"></input>
-		  <br><br>
-		  <input type="text" id="dataInput" class="input-large" placeholder="URL to XML, CSV, or JSON format data file..." value="data/reactors.json"></input>
-		  <a href="#"  id="dataButton" class="btn btn-primary">Add the data!</a>
-		</div>		
-    </p>
+
+	<!-- Selecting Data Source/File -->
+    <div class="add">
+		<div class="well form-inline">
+			
+		  <input type="text" id="titleInput" class="input-small" placeholder="Title of your data" value="Data"></input> <input type="text" class="color-picker black" size="6" placeholder="Choose color" />	
+		</div>
+		<ul id="tab" class="nav nav-tabs">
+			<li><span class="label">Select a data type</span></li>
+			<li class="active"><a href="#JSON" data-toggle="tab">JSON</a></li>
+		 	<li><a href="#XML" data-toggle="tab">XML</a></li>
+		 	<li><a href="#CSV" data-toggle="tab">CSV</a></li>
+			<li><a href="#GoogleFusion" data-toggle="tab">Google Fusion</a></li>
+		</ul>
+		<div id="myTabContent" class="tab-content">
+			<div class="tab-pane fade" id="XML">
+			</div>
+			<div class="tab-pane fade" id="CSV">
+			</div>
+			<div class="tab-pane fade active in" id="JSON">
+				<div class="form-inline">
+					<input type="text" id="dataInput" class="input-large" placeholder="Select a file..." value="data/reactors.json"></input>
+					<a href="#" class="btn large"><p>Browse</p></a>
+			    </div><br>
+			</div>
+			<div class="tab-pane fade" id="GoogleFusion">
+			</div>
+		</div>
+    </div>
+
+	<!-- Review data -->
+	<div class="review">
+		<label>Almost there! Drag the labels below onto their matching columns</label>
+    	<div class="well">
+			<div>
+			    <span class="label lat" id="dragLabel">Latitude</span>
+			    <span class="label lng" id="dragLabel">Longitude</span>
+			    <span class="label location" id="dragLabel">Latitude, Longitude</span>
+			    <span class="label name" id="dragLabel">Name</span>
+			    <span class="label intensity" id="dragLabel">Intensity</span>
+			</div>
+		</div>	
+		<div class="data-table" id="dataTable"></div>
+    </div>
+
+	<!-- Alerts -->
 	<div class="alert alert-error">
 	        <a class="close" data-dismiss="alert">×</a>
 	        <strong>Oops</strong> both a title and valid path are required to add a data set.
-	      </div>
-	<div class="data-table" id="dataTable"></div>
+	   </div>
   </div>
   <div class="modal-footer">
+	<a href="#"  id="dataConfirmButton" class="btn btn-success">Confirm and Add</a>
+	<a href="#"  id="dataButton" class="btn btn-primary">Next: Review Data</a>
     <a href="#" data-dismiss="modal" class="btn">Close</a>
   </div>
 </div>
