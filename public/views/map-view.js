@@ -193,36 +193,23 @@ window.MapView = window.MapViewBase.extend({
     addOne: function(model) {
 		var self = this;
 		
-		var markerObj = {};
-		markerObj.id = model.get('collectionid'); //May be the wrong ID
-		markerObj.name = model.get('name');
-		markerObj.location = model.get('location');
-		markerObj.lat = model.get('lat');
-		markerObj.lon = model.get('lon');
-		markerObj.val = model.get('val');
+		var collectionId = model.get('collectionid'); 
 	
-		//If location is a single string, parse it
-		var input = markerObj.location.substring(0, markerObj.location.length);
-		var latlngStr = input.split(",",2);
-		var lat = parseFloat(latlngStr[0]);
-		var lng = parseFloat(latlngStr[1]);
-		latlngArray = new google.maps.LatLng(lat, lng);
-		
 		var marker = new RichMarker({
 			map: this.map,
-	 		position: latlngArray,
+	 		position: new google.maps.LatLng(model.get('lat'), model.get('lon')),
 			draggable: true,
 			flat: true,
 			anchor: RichMarkerPosition.MIDDLE,
 			content: '<div class="data"></div>',
-			collectionId: markerObj.id,
+			collectionId: collectionId,
 		});
 
 		this.markerArray.push(marker);
-		this.markers[markerObj.id] = marker;
+		this.markers[collectionId] = marker;
 
 		google.maps.event.addListener(marker, 'click', function() {	
-			console.log(markerObj.location);
+			console.log(model.get('location'));
 		});
     },
   

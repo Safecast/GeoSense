@@ -323,24 +323,8 @@ window.MapGLView = window.MapViewBase.extend({
     addOne: function(model) 
     {
 		var self = this;
-
-		var markerObj = {};
-		markerObj.id = model.get('_id'); //May be the wrong ID
-		markerObj.name = model.get('name');
-		markerObj.location = model.get('location');
-		markerObj.lat = model.get('lat');
-		markerObj.lon = model.get('lon');
-		markerObj.val = model.get('val');
-	
-		var input = markerObj.location.substring(0, markerObj.location.length);
-		var latlngStr = input.split(",",2);
-		var lat = parseFloat(latlngStr[0]);
-		var lng = parseFloat(latlngStr[1]);
-		latlngArray = new google.maps.LatLng(lat, lng);
-
-
 		this.addPointWidget(model, this.createPointWidget(THREEx.PointWidget,
-			lat, lng, 1, {
+			model.get('lat'), model.get('lon'), 1, {
 				color: 0xff00000
 			}));
 

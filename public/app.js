@@ -31,9 +31,20 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections[id].fetch();
 	},
 
+	cleanPointModel: function(model) {
+		//If location is a single string, parse it
+		var input = model.get('location');
+		var latlngStr = input.split(",",2);
+		var lat = parseFloat(latlngStr[0]);
+		var lng = parseFloat(latlngStr[1]);
+		model.set('lat', lat);
+		model.set('lon', lng);
+	},
+
     addAll: function() {
       	var self = this;
-		this.collection.each(function(reading) { 
+		this.collection.each(function(model) { 
+			self.cleanPointModel(model);
 			self.addOne(reading);
 		});
     },
@@ -42,6 +53,7 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;	
 		self.removeCollectionFromMap(model);
 		this.collections[model.collectionId].each(function (model) {
+			self.cleanPointModel(model);
 			self.addOne(model);
 		});
 	},
