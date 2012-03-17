@@ -1,4 +1,4 @@
-window.MapView = Backbone.View.extend({
+window.MapView = window.MapViewBase.extend({
 
     tagName: 'div',
 	className: 'map-view',
@@ -7,19 +7,14 @@ window.MapView = Backbone.View.extend({
     },
 
     initialize: function(options) {
-	
+		MapView.__super__.initialize.call(this, options);
 	    this.template = _.template(tpl.get('map'));
 	
 		_.bindAll(this, "updateMapStyle");
-		_.bindAll(this, "setMapLocation");
-		
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
-	 	options.vent.bind("setMapLocation", this.setMapLocation);
 	
-		this.collections = {};
 		this.markers = {};
 		this.markerArray = [];
-		
     },
 
     render: function() {
@@ -58,36 +53,14 @@ window.MapView = Backbone.View.extend({
 		this.initSafecastFusionMap();
 
 	},
-	
-	addCollection: function(id, collection)
-	{
-		var self = this;
-		this.collections[id] = collection;
-		this.collections[id].bind('reset', this.reset, this);
-		this.collections[id].bind('add', this.addOne, this);
-		this.collections[id].fetch();
-		//this.drawMarkers(id);
-	},
-	
+		
 	setMapZoom: function(zoom)
 	{
 		map_zoom = zoom;
 	},
 	
-	setMapLocation: function(addr)
-	{				
-		var self = this;
-		
-		geocoder = new google.maps.Geocoder();
-		geocoder.geocode( {'address': addr, 'region': "jp"}, function (results, status)
-			{
-				if (status == google.maps.GeocoderStatus.OK)
-				{
-					self.map.fitBounds(results[0].geometry.viewport);
-				}
-				else { 	
-					alert ("Cannot find " + addr + "! Status: " + status);}
-		});
+	fitMapBounds: function(bounds) {
+		this.map.fitBounds(bounds);
 	},
 	
 	updateMapStyle: function(theme)
@@ -205,7 +178,7 @@ window.MapView = Backbone.View.extend({
 		this.markers = {};
 	},
 	
-	removeMarkersByCollection: function(model) {
+	removeCollectionFromMap: function(model) {
 		
 		if (this.markerArray.length > 0) {
 			for (i in this.markerArray) {
@@ -217,54 +190,40 @@ window.MapView = Backbone.View.extend({
 		}	
 	},
 	
-	reset: function(model) {
+    addOne: function(model) {
 		var self = this;
 		
-		self.removeMarkersByCollection(model);
+		var markerObj = {};
+		markerObj.id = model.get('collectionid'); //May be the wrong ID
+		markerObj.name = model.get('name');
+		markerObj.location = model.get('location');
+		markerObj.lat = model.get('lat');
+		markerObj.lon = model.get('lon');
+		markerObj.val = model.get('val');
+	
+		//If location is a single string, parse it
+		var input = markerObj.location.substring(0, markerObj.location.length);
+		var latlngStr = input.split(",",2);
+		var lat = parseFloat(latlngStr[0]);
+		var lng = parseFloat(latlngStr[1]);
+		latlngArray = new google.maps.LatLng(lat, lng);
 		
-		this.collections[model.collectionId].each(function (model) {
-			self.addOne(model);
+		var marker = new RichMarker({
+			map: this.map,
+	 		position: latlngArray,
+			draggable: true,
+			flat: true,
+			anchor: RichMarkerPosition.MIDDLE,
+			content: '<div class="data"></div>',
+			collectionId: markerObj.id,
 		});
-	},
 
-    addOne: function(model) {
-			var self = this;
-			
-			var markerObj = {};
-			markerObj.id = model.get('collectionid'); //May be the wrong ID
-			markerObj.name = model.get('name');
-			markerObj.location = model.get('location');
-			markerObj.lat = model.get('lat');
-			markerObj.lon = model.get('lon');
-			markerObj.val = model.get('val');
-		
-			//If location is a single string, parse it
-			var input = markerObj.location.substring(0, markerObj.location.length);
-			var latlngStr = input.split(",",2);
-			var lat = parseFloat(latlngStr[0]);
-			var lng = parseFloat(latlngStr[1]);
-			latlngArray = new google.maps.LatLng(lat, lng);
-			
-			var marker = new RichMarker({
-				map: this.map,
-		 		position: latlngArray,
-				draggable: true,
-				flat: true,
-				anchor: RichMarkerPosition.MIDDLE,
-				content: '<div class="data"></div>',
-				collectionId: markerObj.id,
-			});
+		this.markerArray.push(marker);
+		this.markers[markerObj.id] = marker;
 
-			this.markerArray.push(marker);
-			this.markers[markerObj.id] = marker;
-
-			google.maps.event.addListener(marker, 'click', function() {	
-				console.log(markerObj.location);
-			});
+		google.maps.event.addListener(marker, 'click', function() {	
+			console.log(markerObj.location);
+		});
     },
-
-    addAll: function() {
-		var self = this;		
-    }
   
 });

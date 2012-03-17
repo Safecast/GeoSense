@@ -1,4 +1,4 @@
-window.MapGLView = Backbone.View.extend({
+window.MapGLView = window.MapViewBase.extend({
 
     tagName: 'div',
 	className: 'map-gl-view',
@@ -6,7 +6,7 @@ window.MapGLView = Backbone.View.extend({
     events: {
     },
 
-    widgets: [],
+    widgets: {},
     world: null,
 
 
@@ -46,27 +46,12 @@ window.MapGLView = Backbone.View.extend({
 	},
 
     initialize: function(options) {
+		MapGLView.__super__.initialize.call(this, options)
 	    this.template = _.template(tpl.get('map-gl'));
 		this.animate();
 
 		this.latLngRotationMatrix.setRotationAxis(new THREE.Vector3(1, 0, 0), -Math.PI/2);
-		this.collections = {};
     },
-
-	addCollection: function(id, collection)
-	{	
-		this.collections[id] = collection;
-		this.collections[id].bind('reset', this.reset, this);
-		this.collections[id].bind('add', this.addOne, this);
-		this.collections[id].fetch();
-	},
-
-	reset: function(model) {
-		var self = this;
-		this.collections[model.collectionId].each(function (model) {
-			self.addOne(model);
-		});
-	},
 	
 	animate: function() {
 		var self = this;
@@ -92,6 +77,16 @@ window.MapGLView = Backbone.View.extend({
 		renderer.render( scene, camera );
 
 		this.stats.update();
+	},
+
+	removeCollectionFromMap: function(model) {
+		var id = model.collectionId;
+		if (!this.widgets[id]) return;
+		var w = this.widgets[id];
+		for (var i = 0; i < w.length; i++) {
+			this.world.remove(w[i].object3D);   
+		}
+		delete this.widgets[id];
 	},
 
     render: function() {
@@ -314,17 +309,21 @@ window.MapGLView = Backbone.View.extend({
 		return new cls(position, val, initObj);
 	},
 
-	addPointWidget: function(widget) 
+	addPointWidget: function(model, widget) 
 	{
 		widget.object3D.lookAt(meshPlanet.position);
 		this.world.add(widget.object3D);   
-		this.widgets.push(widget.object3D);
+		var id = model.get('collectionid');
+		if (!this.widgets[id]) {
+			this.widgets[id] = [];
+		}
+		this.widgets[id].push(widget);
 	},
 	
     addOne: function(model) 
     {
 		var self = this;
-		
+
 		var markerObj = {};
 		markerObj.id = model.get('_id'); //May be the wrong ID
 		markerObj.name = model.get('name');
@@ -340,18 +339,11 @@ window.MapGLView = Backbone.View.extend({
 		latlngArray = new google.maps.LatLng(lat, lng);
 
 
-		this.addPointWidget(this.createPointWidget(THREEx.PointWidget,
+		this.addPointWidget(model, this.createPointWidget(THREEx.PointWidget,
 			lat, lng, 1, {
 				color: 0xff00000
 			}));
 
     },
-
-    addAll: function() {
-      var self = this;
-		this.collection.each(function(reading){ 
-		self.addOne(reading);
-	 	});
-    }
   
 });

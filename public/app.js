@@ -1,3 +1,53 @@
+window.MapViewBase = Backbone.View.extend({
+
+    initialize: function(options) {
+		this.collections = {};
+		_.bindAll(this, "setMapLocation");
+		options.vent.bind("setMapLocation", this.setMapLocation);
+	},
+
+	setMapLocation: function(addr)
+	{				
+		var self = this;
+		
+		geocoder = new google.maps.Geocoder();
+		geocoder.geocode( {'address': addr, 'region': "jp"}, function (results, status)
+			{
+				if (status == google.maps.GeocoderStatus.OK)
+				{
+					self.fitMapBounds(results[0].geometry.viewport);
+				}
+				else { 	
+					alert ("Cannot find " + addr + "! Status: " + status);}
+		});
+	},
+
+	addCollection: function(id, collection)
+	{
+		var self = this;
+		this.collections[id] = collection;
+		this.collections[id].bind('reset', this.reset, this);
+		this.collections[id].bind('add', this.addOne, this);
+		this.collections[id].fetch();
+	},
+
+    addAll: function() {
+      	var self = this;
+		this.collection.each(function(reading) { 
+			self.addOne(reading);
+		});
+    },
+
+	reset: function(model) {
+		var self = this;	
+		self.removeCollectionFromMap(model);
+		this.collections[model.collectionId].each(function (model) {
+			self.addOne(model);
+		});
+	},
+
+});
+
 var AppRouter = Backbone.Router.extend({
 
     routes:{
@@ -5,7 +55,7 @@ var AppRouter = Backbone.Router.extend({
 		"globe":"mapGL",
     },
 
-    initialize:function () {
+    initialize:function() {
 		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
 	
