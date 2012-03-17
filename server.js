@@ -295,4 +295,4 @@ app.delete('/api/pointcollection/:id', function(req, res){
 	  });
 });
 
-app.listen(3000);
+app.listen(8124, "127.0.0.1");
