@@ -34,7 +34,7 @@ window.MapViewBase = Backbone.View.extend({
 	cleanPointModel: function(model) {
 		//If location is a single string, parse it
 		var input = model.get('location');
-		var latlngStr = input.split(",",2);
+		var latlngStr = input.split(/[, ]/, 2);
 		var lat = parseFloat(latlngStr[0]);
 		var lng = parseFloat(latlngStr[1]);
 		model.set('lat', lat);

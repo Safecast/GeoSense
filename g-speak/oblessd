@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 
+puts "---------------------------------------------------"
+puts "oblessd v0.1 -- a throttled Plasma WebSocket server"
+puts "created by Samuel Luescher <luescher@media.mit.edu>"
+puts "---------------------------------------------------"
+
 require 'rubygems'
 require 'em-websocket'
 
@@ -11,7 +16,7 @@ pool = "tcp://gspeak01.media.mit.edu/tags"
 host = "0.0.0.0"
 port = 8080
 debug = false
-tags = ["Object-05"]
+watch_tags = {}
 fps = 50.0
 time_samples = []
 num_time_samples = 50
@@ -26,19 +31,19 @@ t1 = Thread.new do
   h = Hose.new(pool)
   prev_time = Time.now
   loop {
-    send_tags = {}
     h.tolast 
     prot = h.next
-    if prot
-      for tag in tags
-        if prot.ingests["tags"][tag]
-          send_tags[tag] = prot.ingests["tags"][tag]
-        end
-      end
-    end
     next_time = Time.now
     if next_time - prev_time >= 1 / fps
       for socket in open_sockets
+        send_tags = {}
+        if prot
+          for tag in watch_tags[socket]
+            if prot.ingests["tags"][tag]
+              send_tags[tag] = prot.ingests["tags"][tag]
+            end
+          end
+        end
         socket.send(send_tags.to_json)
       end
       prev_time = next_time
@@ -54,13 +59,22 @@ t1 = Thread.new do
   }
 end
 
-puts "Starting oblessd on %s:%i" % [host, port]
+if ARGV.length > 0:
+  split = ARGV[0].split(':')
+  host = split[0]
+  if split.length > 1:
+    port = split[1]
+  end 
+end
+
+puts "Starting oblessd on %s:%i at %i fps" % [host, port, fps]
 
 EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do |ws|
   timer = nil
   ws.onopen {
     puts "WebSocket connected"
     open_sockets.push(ws)
+    watch_tags[ws] = []
   }
   ws.onclose {
     EM.cancel_timer(timer)
@@ -69,6 +83,18 @@ EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do 
   }
   ws.onerror { |e|
     puts "Error: #{e.message}"
+  }
+  ws.onmessage { |msg|
+    words = msg.split(' ')
+    case words[0]
+    when 'watch'
+      if words.length == 2:
+        puts msg
+        if not watch_tags.include?(words[1]):
+          watch_tags[ws].push(words[1])
+        end
+      end
+    end
   }
 end
 

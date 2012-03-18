@@ -3,8 +3,8 @@ var THREEx		= THREEx 		|| {};
 
 THREEx.PointWidget = function(position, val, initObj)
 {
-	var barHeight = 3000;
-	var barWidth = 200;
+	var barHeight = 4000;
+	var barWidth = 50;
 	var materials = [];
 
 	for (var c = 0; c < 6; c ++ ) {

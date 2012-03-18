@@ -215,83 +215,11 @@ window.MapGLView = window.MapViewBase.extend({
 
 		}
 
-		/*var stars,
-		starsMaterials = [
-			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 2, sizeAttenuation: false } ),
-			new THREE.ParticleBasicMaterial( { color: 0xcccccc, size: 1, sizeAttenuation: false } )
-		];
-
-		for ( i = 10; i < 30; i ++ ) {
-
-			stars = new THREE.ParticleSystem( starsGeometry, starsMaterials[ i % 6 ] );
-
-			stars.rotation.x = Math.random() * 6;
-			stars.rotation.y = Math.random() * 6;
-			stars.rotation.z = Math.random() * 6;
-
-			var s = i * 10;
-			stars.scale.set( s, s, s );
-
-			stars.matrixAutoUpdate = false;
-			stars.updateMatrix();
-
-			scene.add( stars );
-
-		}*/
-
-
-		// quick bar chart test
-
-		var dataPoints = [
-			[0, 0, 1],
-			//[45, 0, 1],
-			[0, 45, 1],
-			[-45, -45, 1],
-			[0, -90, 1],
-			[45, -90, 1],
-
-			[-34.578952,-58.40332, 1],
-			[-12.21118,49.746094, 1],
-			[38.272689,15.556641, 1],
-			[-41.508577,174.287109, 1],
-			[25,45, 1],
-
-			//[-25, 45, 2],
-			//[25, -90, 3],
-			//[-25, -90, 4],
-		];
-
-		var colors = [
-			0xff0000,
-			0x00ff00,
-			0x0000ff,
-			0xffff00,
-			0x00ffff,
-		];
-
-		/*
-		for (var i = 0; i < dataPoints.length; i++) {
-
-			this.addPointWidget(this.createPointWidget(
-				dataPoints[i][0], dataPoints[i][1], dataPoints[i][2], {
-					color: colors[i % colors.length]
-				}));
-
-		}
-		*/
-
-
-
 		/*var light = new THREE.DirectionalLight( 0xffffff );
 		light.position.set( 0, radius * 2, radius * 2 );
 		scene.add( light );*/
 
-		scene.add(new THREE.AmbientLight( 0xffffff ));
-				
+		scene.add(new THREE.AmbientLight( 0xffffff ));				
 
 		THREEx.WindowResize(renderer, camera);
 
@@ -329,7 +257,7 @@ window.MapGLView = window.MapViewBase.extend({
 			pointColor = parseInt(pointColor.replace('#', '0x'));
 		}
 		this.addPointWidget(model, this.createPointWidget(THREEx.PointWidget,
-			model.get('lat'), model.get('lon'), 1, {
+			model.get('lat'), model.get('lon'), Math.random(), {
 				color: pointColor || this.defaultPointColor
 			}));
 

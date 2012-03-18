@@ -26,14 +26,24 @@
 
           var obj = $.parseJSON(evt.data);
 
-          document.getElementById("last").innerHTML = obj["Object-05"].loc;
+          var html = '';
+          for (var key in obj) {
+              html += key + ': ' + obj[key].loc + '\n';
+          }
+          document.getElementById("monitor").innerHTML = html;
 
           //debug(evt.data);
           //console.log($.parseJSON(evt.data));
         };
+        ws.onerror = function() { debug("socket error"); };
         ws.onclose = function() { debug("socket closed"); };
         ws.onopen = function() {
-          debug("connected...");
+          debug("socket connected...");
+          ws.send('watch Object-01')
+          ws.send('watch Object-02')
+          ws.send('watch Object-03')
+          ws.send('watch Object-04')
+          ws.send('watch Object-05')
         };
 
         var displayFps = function() {
@@ -51,7 +61,7 @@
   <body onload="init();">
     <pre id="fps">&nbsp;</pre>
     <pre id="debug"></pre>
-    <pre id="last"></pre>
+    <pre id="monitor"></pre>
 
   </body>
 </html>
