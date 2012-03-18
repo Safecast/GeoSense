@@ -114,6 +114,11 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	name: String,
 }));
 
+app.get('/githook', function(req, res){
+  res.send('New commits from Git');
+});
+
+
 app.get('/points', function(req, res){
   res.render('data', {title: "All Points"});
 });
