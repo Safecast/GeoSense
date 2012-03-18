@@ -9,6 +9,10 @@ jQuery(document).ready(function($) {
       ws = new Socket("ws://18.85.58.21:8080/");
       var initialGlobeLoc; 
 
+      ws.onopen = function(evt) {
+        ws.send('watch '+globeTag);
+      }
+
       ws.onmessage = function(evt) { 
         var obj = $.parseJSON(evt.data);
         if (obj[globeTag]) {
