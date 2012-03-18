@@ -58,7 +58,7 @@ var twit = new twitter({
 mongoose.connect('mongodb://localhost/geo');
 
 app.configure(function(){
-	app.use(express.static(path.join(application_root, "public")));
+	app.use(express.static(path.join(application_root, "public")));	
 	app.use(express.logger('dev'));
  	app.use(express.bodyParser());
 	app.use(express.methodOverride());
@@ -87,6 +87,19 @@ app.get('/api/tweets', function(req, res){
 	});
 });
 */
+
+
+
+//app.get('/', function(req, res) {
+
+//});
+
+//app.get('/globe', function (req, res) {
+    // Trigger the toure 'domain.com/about'
+	//res.send('heh');
+	//app.use('/public', app.static(__dirname + '/public'));
+ 
+//});
 
 ///////////
 // DATA API

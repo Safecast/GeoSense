@@ -75,7 +75,7 @@ window.SideBarView = Backbone.View.extend({
 
 	display3DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate("#globe", {trigger: true});
+		app.navigate("globe", {trigger: true});
 	},
 	
 	addDataClicked: function() {
