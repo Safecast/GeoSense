@@ -157,6 +157,7 @@ var AppRouter = Backbone.Router.extend({
 		var uniqid = this.uniqid();
 		var title = options.title
 		var data = options.data;
+		var color = options.color;
 		
 		//First increment total number of data sources
 		num_data_sources +=1;
@@ -167,14 +168,14 @@ var AppRouter = Backbone.Router.extend({
 			title:title,
 			newData:true,
 		});
-		
+
 		for(var i = 0; i < data.length; ++i)
 		{
 			$.each(data[i], function(key, val) { 
 				
 				if(key == 'Location')
 				{
-					pointCollection[num_data_sources].create({name:'point',location:val});
+					pointCollection[num_data_sources].create({name:'point',location:val,color:color});
 				}
 			});	
 		}

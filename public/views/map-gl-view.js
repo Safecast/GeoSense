@@ -9,6 +9,7 @@ window.MapGLView = window.MapViewBase.extend({
     widgets: {},
     world: null,
 
+    defaultPointColor: 0x888888	,
 
 	degToRad: function(x) {
  		return x*Math.PI/180;
@@ -67,7 +68,7 @@ window.MapGLView = window.MapViewBase.extend({
 
 		//meshPlanet.rotation.y += rotationSpeed * delta;
 		this.world.rotation.y += rotationSpeed * delta;
-		meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
+		//meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
 
 		var angle = delta * rotationSpeed;
 
@@ -197,7 +198,7 @@ window.MapGLView = window.MapViewBase.extend({
 		meshClouds = new THREE.Mesh( geometry, materialClouds );
 		meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
 		//meshClouds.rotation.z = tilt;
-		this.world.add( meshClouds );
+		//this.world.add( meshClouds );
 
 		// stars
 
@@ -323,9 +324,13 @@ window.MapGLView = window.MapViewBase.extend({
     addOne: function(model) 
     {
 		var self = this;
+		var pointColor = model.get('color');
+		if (pointColor) {
+			pointColor = parseInt(pointColor.replace('#', '0x'));
+		}
 		this.addPointWidget(model, this.createPointWidget(THREEx.PointWidget,
 			model.get('lat'), model.get('lon'), 1, {
-				color: 0xff00000
+				color: pointColor || this.defaultPointColor
 			}));
 
     },

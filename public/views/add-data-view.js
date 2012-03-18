@@ -45,9 +45,10 @@ window.AddDataView = Backbone.View.extend({
 		//Todo: Verify string URL
 		var self = this;
 		this.dataTitle = this.$('#titleInput').val();
+		this.dataColor = this.$('#colorInput').val();
 		var urlPath = this.$('#dataInput').val();
 		
-		if(this.dataTitle != '' && urlPath != '')
+		if (this.dataTitle != '' && urlPath != '')
 		{
 			this.requestData({url:urlPath});
 			this.$('.modal-body .alert').hide();
@@ -62,7 +63,7 @@ window.AddDataView = Backbone.View.extend({
 	{
 		//Todo: Validate fields
 		$('#addDataModal').modal('hide');
-		app.addData({data:this.responseData, title:this.dataTitle});
+		app.addData({data:this.responseData, title:this.dataTitle, color: this.dataColor});
 	},
 	
 	requestData:function (options)

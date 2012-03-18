@@ -142,6 +142,7 @@ app.put('/api/point/:id', function(req, res){
 	point.lat 			= req.body.lat;
 	point.lon 			= req.body.lon;
 	point.val		 	= req.body.val;
+	point.color		 	= req.body.color;
 
     point.save(function(err) {
 		if (!err) {
@@ -164,6 +165,7 @@ app.post('/api/point', function(req, res){
 	lat: 		req.body.lat,
 	lon: 		req.body.lon,
 	val: 		req.body.val,
+	color:      req.body.color 
   });
   point.save(function(err) {
     if (!err) {
@@ -222,6 +224,7 @@ app.post('/api/collection/:id', function(req, res){
 		lat: 		req.body.lat,
 		lon: 		req.body.lon,
 		val: 		req.body.val,
+		color:      req.body.color 
 	  });
 	  point.save(function(err) {
 	    if (!err) {

@@ -10,6 +10,7 @@ Point = Backbone.Model.extend({
 			lat: 0,
 			lon: 0,
 			val: 0,
+			color: ''
 	      };
 	    },
 });
