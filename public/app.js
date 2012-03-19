@@ -68,7 +68,6 @@ var AppRouter = Backbone.Router.extend({
     },
 
     initialize:function() {
-		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
 	
         this.headerView = new HeaderView({vent: this.vent});
@@ -77,38 +76,9 @@ var AppRouter = Backbone.Router.extend({
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
 		
-		//Gather distinct collections
-		//This returns an array containing collectionid for lookup
-		$.ajax({
-			type: 'GET',
-			url: '/api/collection/distinct',
-			success: function(data) {
+		this.fetchAndDrawData();
 		
-				//Save the distinct collection Id(s) to app scope
-				num_data_sources = data.length;
-				
-				for(i=0;i<num_data_sources;i++)
-				{
-					// For each distinct data source, add an existing data source to the app.
-					// This binds a data model and sidebar data view
-					self.addExistingDataSources(data[i]);
-				}
-			},
-			error: function() {
-				console.error('failed to fetch distinct collections');
-			}
-		})
     },
-
-	maxValue: function( array ){
-	    return Math.max.apply( Math, array );
-	},
-	
-	uniqid: function ()
-	{
-	    var newDate = new Date;
-	    return newDate.getTime();
-	},
 
     map:function () {
 		var self = this;
@@ -126,8 +96,10 @@ var AppRouter = Backbone.Router.extend({
 			});
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
-			//this.readingsCollection.fetch();
         }
+
+		this.fetchAndDrawData();
+		this.vent.trigger("setToggleStates", {state:'map'});
     },
 
 	mapGL:function () {
@@ -149,7 +121,46 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
+		this.fetchAndDrawData();
+		this.vent.trigger("setToggleStates", {state:'mapgl'});
     },
+
+	fetchAndDrawData: function()
+	{
+		var self = this;
+				
+		//Gather distinct collections
+		//This returns an array containing collectionid for lookup
+		$.ajax({
+			type: 'GET',
+			url: '/api/collection/distinct',
+			success: function(data) {
+		
+				//Save the distinct collection Id(s) to app scope
+				num_data_sources = data.length;
+				
+				for(i=0;i<num_data_sources;i++)
+				{
+					// For each distinct data source, add an existing data source to the app.
+					// This binds a data model and sidebar data view
+					self.addExistingDataSources(data[i]);
+				}
+			},
+			error: function() {
+				console.error('failed to fetch distinct collections');
+			}
+		});
+	},
+
+	maxValue: function( array ){
+	    return Math.max.apply( Math, array );
+	},
+	
+	uniqid: function ()
+	{
+	    var newDate = new Date;
+	    return newDate.getTime();
+	},
 
 	addData:function (options)
 	{
@@ -194,7 +205,6 @@ var AppRouter = Backbone.Router.extend({
 	addExistingDataSources: function(index)
 	{
 		var self = this;
-		
 		//First we look up the pointcollection for name & collectionid
 		$.ajax({
 			type: 'GET',
