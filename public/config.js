@@ -11,7 +11,7 @@ var num_data_sources = 0;
 var pointCollection = new Array();
 
 var defaultMapStyle = 'light';
-var defaultMapLocation = 'california'
+var defaultMapLocation = 'japan'
 
 //VARIABLES FOR GOOGLE FUSION TABLES
 var map_zoom = 8;

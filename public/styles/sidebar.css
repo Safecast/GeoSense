@@ -30,6 +30,15 @@
 	border-bottom:1px solid rgba(255,255,255,.1);
 }
 
+.divider.large
+{
+	height:2px;
+	width:265px;
+	margin-top:15px;
+	background-color:rgba(0,0,0,.2);
+	border-bottom:1px solid rgba(255,255,255,.1);
+}
+
 .sidebar-view .black-overlay.visible
 {
 	-webkit-transition: opacity .3s linear;
@@ -132,4 +141,16 @@
 .input-prepend .span2
 {
 	width:158px;
+}
+
+.toggle-group .data-toggle btn.btn-inverse.data
+{
+	display:none;
+}
+
+#addData {
+	margin-top:-3px;
+	width:235px;
+	height:30px;
+	font-weight:bold;
 }

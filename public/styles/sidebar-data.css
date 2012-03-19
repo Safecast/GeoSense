@@ -1,5 +1,8 @@
-.sidebar-data .accordian-group .accordian-heading
+.sidebar-data .accordion-group 
 {
-	display:none;
-	color:blue;
+}
+
+#dataToggleEdit
+{
+	margin-left:110px;
 }

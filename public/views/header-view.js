@@ -7,6 +7,8 @@ window.HeaderView = Backbone.View.extend({
 		'click #settingsButton': 'settingsButtonClicked',
 		'click #aboutGeosense:' : 'aboutGeosenseClicked',
 		'click #aboutSafecast:' : 'aboutSafecastClicked',
+		'click #postFacebook:' : 'postFacebookClicked',
+		'click #postTwitter:' : 'postTwitterClicked',
 		'keypress input': 'keyEvent',
     },
 
@@ -71,5 +73,23 @@ window.HeaderView = Backbone.View.extend({
 		this.modalView.setBody('Body copy goes here!');
 		$('#myModal').modal('toggle');
 	},
+	
+	postTwitterClicked: function() {
+		var tweet = {};
+		tweet.url = 'url';
+		tweet.text = 'Check out the Safecast map: ' + window.location;
+		tweet.via = "safecastdotorg";
+
+		var url = 'https://twitter.com/share?' + $.param(tweet);
+
+		window.open(url, 'Tweet this post', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
+	},
+	
+	postFacebookClicked: function() {
+		var url = 'http://www.facebook.com/sharer.php?u='
+		url += encodeURIComponent(window.location);
+		url += '&t=Check out the Safecast map';
+		window.open('' + url, 'Share it on Facebook', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
+	}
   
 });

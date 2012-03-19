@@ -4,6 +4,8 @@ window.MapView = window.MapViewBase.extend({
 	className: 'map-view',
 	
     events: {
+		'click #zoomIn': 'zoomInClicked',
+		'click #zoomOut': 'zoomOutClicked',
     },
 
     initialize: function(options) {
@@ -26,6 +28,7 @@ window.MapView = window.MapViewBase.extend({
 		var self = this;
 		var mapOptions = {
 			zoom: 5,
+			minZoom:5,
 			center: new google.maps.LatLng(38.0, -97.0),
 			zoomControl: false,
 			panControl: false,
@@ -51,12 +54,15 @@ window.MapView = window.MapViewBase.extend({
 		
 		//Render Fusion Maps
 		this.initSafecastFusionMap();
+		
+		this.$('#dataPoint').popover();
 
 	},
 		
 	setMapZoom: function(zoom)
 	{
 		map_zoom = zoom;
+		this.initSafecastFusionMap();
 	},
 	
 	fitMapBounds: function(bounds) {
@@ -109,8 +115,22 @@ window.MapView = window.MapViewBase.extend({
 		}
 	},
 	
+	zoomInClicked: function()
+	{		
+		map_zoom = map_zoom+1;
+		this.map.setZoom(map_zoom);
+	},
+	
+	zoomOutClicked: function()
+	{
+		map_zoom = map_zoom-1;
+		this.map.setZoom(map_zoom);
+	},
+	
 	initSafecastFusionMap: function()
 	{
+		var self = this;
+		
 		//Clear all existing layers
 		for (var layer in layers)
 		{
@@ -120,40 +140,52 @@ window.MapView = window.MapViewBase.extend({
 				layers[layer] = null;
 			}
 		}
-						
+									
 		// Pull zoom key from tbl_data (based on map.getZoom())
 		// Zoom less than 14 use square KML blocks, 14+ use exact dots	
 					
 		if(map_zoom < 14)
 		{	
-			if (map_zoom <= 6)
-			{
-				zoom_key = tbl_data[8];
-			}		
-			else if (map_zoom <= 8)
+			if (map_zoom == 5)
 			{
 				zoom_key = tbl_data[10];
 			}
-			else if (map_zoom <= 10)
+			else if (map_zoom == 6)
 			{
-				zoom_key = tbl_data[15];
+				zoom_key = tbl_data[12];
+			}	
+			else if (map_zoom == 7)
+			{
+				zoom_key = tbl_data[13];
+			}
+			else if (map_zoom == 8)
+			{
+				zoom_key = tbl_data[14];
 			}
 			else if (map_zoom == 9)
 			{
-				zoom_key = tbl_data[10];
+				zoom_key = tbl_data[16];
 			}
-			else if (map_zoom <= 15)
+			else if (map_zoom == 10)
+			{
+				zoom_key = tbl_data[17];
+			}
+			else if (map_zoom == 11)
 			{
 				zoom_key = tbl_data[18];
 			}
-			else if (map_zoom > 15)
+			else if (map_zoom == 12)
 			{
-				zoom_key = tbl_data[7];
+				zoom_key = tbl_data[19];
 			}
-			
-			layers['squares'] = new google.maps.FusionTablesLayer({ query: {select: 'grid', from: tbl_data[18], where: ''} });
+			else if (map_zoom > 12)
+			{
+				zoom_key = tbl_data[20];
+			}
+						
+			layers['squares'] = new google.maps.FusionTablesLayer({ query: {select: 'grid', from: zoom_key, where: ''} });
 			layers['squares'].setOptions({ suppressInfoWindows : true});
-			listeners['squares'] = google.maps.event.addListener(layers['squares'], 'click', function(e) {app.updateDataPointInfo(e)});
+			listeners['squares'] = google.maps.event.addListener(layers['squares'], 'click', function(e) {self.updateDataPointInfo(e)});
 			if(mobileVisible)
 				layers['squares'].setMap(this.map)
 				
@@ -161,10 +193,49 @@ window.MapView = window.MapViewBase.extend({
 		{
 			layers['dots'] = new google.maps.FusionTablesLayer({ query: {select: 'lat_lon', from: zoom_key, where: ''}});
 			layers['dots'].setOptions({ suppressInfoWindows : true, markerOptions:{enabled:false}});
-			listeners['dots'] = google.maps.event.addListener(layers['dots'], 'click', function(e) {app.updateDataPointInfo(e)});
+			listeners['dots'] = google.maps.event.addListener(layers['dots'], 'click', function(e) {self.updateDataPointInfo(e)});
 			if(mobileVisible)
 				layers['dots'].setMap(this.map);	
 		}			
+	},
+	
+	updateDataPointInfo: function(e)
+	{
+		$('.info-pane').show();
+		
+		if (e)
+		{	
+			$('.info-pane').css('opacity',1);
+			$('.info-pane').css('height',320);
+			$('.info-pane .reading').fadeIn('fast');
+			$('.info-pane .samples').fadeIn('fast');
+			$('.info-pane .cpm').fadeIn('fast');;
+			$('.info-pane .date-range').fadeIn('fast');
+						
+			var DRE = parseFloat(e.row.DRE.value);
+						
+			var mapOptions = {
+				closeBoxURL: '',
+	            disableAutoPan: false,
+				infoBoxClearance: new google.maps.Size(15, 15),
+	           	zIndex: 999,
+	            isHidden: false,
+	            pane: 'floatPane',
+	            enableEventPropagation: false
+	        };
+			
+			var samples = e.row.points.value;
+			var dre = e.row.DRE.value;
+			var cpm = e.row.cpm_avg.value;
+			var time_from = e.row.timestamp_min.value;
+			var time_to = e.row.timestamp_max.value;
+			
+			$('.info-pane .samples').html(samples + ' samples');
+			$('.info-pane .reading').html('<p>&#956;Sv/h</p><h1>'+Number(dre).toFixed(3)+'</h1>')
+			$('.info-pane .cpm').html('<p>cpm</br>average</p><h1>'+Number(cpm).toFixed(3)+'</h1>');
+			$('.info-pane .date-range').html(time_from + 'to </br>'+ time_to);
+		}
+				
 	},
 	
 	removeMarkers: function() {
@@ -189,11 +260,19 @@ window.MapView = window.MapViewBase.extend({
 			}
 		}	
 	},
+
 	
     addOne: function(model) {
 		var self = this;
 		
 		var collectionId = model.get('collectionid'); 
+		var color = model.get('color');
+		var name = model.get('name');
+		
+		if(color == null)
+			color = '#F0F0F0'
+			
+		var content = "<div id='dataPoint' rel='tooltip' title='"+name+"' style='background-color:" +color + "; width:10px;height:10px;border-radius:10px;opacity:.5;box-shadow: 0 0 10px " +color + ";'></div>";
 	
 		var marker = new RichMarker({
 			map: this.map,
@@ -201,16 +280,17 @@ window.MapView = window.MapViewBase.extend({
 			draggable: true,
 			flat: true,
 			anchor: RichMarkerPosition.MIDDLE,
-			content: '<div class="data"></div>',
+			content: content,
 			collectionId: collectionId,
 		});
-
+		
 		this.markerArray.push(marker);
 		this.markers[collectionId] = marker;
 
-		google.maps.event.addListener(marker, 'click', function() {	
-			console.log(model.get('location'));
-		});
+		google.maps.event.addListener(marker, 'mouseover', function() {	
+			//console.log(model.get('location'));
+		});			
+		
     },
   
 });
