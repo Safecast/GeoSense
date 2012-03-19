@@ -4,6 +4,7 @@ var application_root = __dirname,
   	mongoose = require('mongoose'),
   	twitter = require('twitter');
 
+
 var app = express.createServer();
 
 //Now.js
@@ -113,6 +114,11 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: Number,
 	name: String,
 }));
+
+app.post('/sms', function(req, res){
+	res.send('New SMS');
+});
+
 
 app.get('/githook', function(req, res){
   res.send('New commits from Git');
