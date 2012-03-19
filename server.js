@@ -116,9 +116,25 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 }));
 
 app.post('/sms', function(req, res){
-	res.send('New SMS');
+	var point;
+	  point = new Point({
+		collectionid: 		req.body.collectionid,
+	    name: 		req.body.name,
+		location: 	req.body.location,
+		lat: 		req.body.lat,
+		lon: 		req.body.lon,
+		val: 		req.body.val,
+		color:      req.body.color 
+	  });
+	  point.save(function(err) {
+	    if (!err) {
+		 	res.send(point);
+	    } else
+		{
+			res.send('oops', 500);
+		}
+	  });
 });
-
 
 app.get('/githook', function(req, res){
   res.send('New commits from Git');
