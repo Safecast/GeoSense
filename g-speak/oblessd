@@ -18,43 +18,35 @@ port = 8080
 debug = false
 watch_tags = {}
 fps = 50.0
-time_samples = []
-num_time_samples = 50
-frames_sent = 0
 
-send_tags = {}
 open_sockets = []
+socket_options = {}
 
 Thread.abort_on_exception = true
 t1 = Thread.new do
   puts "Creating Hose to %s" % pool
   h = Hose.new(pool)
   prev_time = Time.now
+  targetTimeDelta = 1 / fps
   loop {
-    h.tolast 
-    prot = h.next
     next_time = Time.now
-    if next_time - prev_time >= 1 / fps
+    timeDelta = next_time - prev_time
+    if timeDelta >= targetTimeDelta
+      h.tolast 
+      prot = h.prev
+      ingests_tags = prot.ingests["tags"]
       for socket in open_sockets
         send_tags = {}
         if prot
           for tag in watch_tags[socket]
-            if prot.ingests["tags"][tag]
-              send_tags[tag] = prot.ingests["tags"][tag]
+            if ingests_tags[tag]
+              send_tags[tag] = ingests_tags[tag]
             end
           end
         end
         socket.send(send_tags.to_json)
       end
       prev_time = next_time
-      time_samples.push(Time.now.to_i)
-      if time_samples.length > num_time_samples:
-        time_samples.shift
-      end
-      if time_samples.length >= 2 and frames_sent % 10 == 0:
-        #puts time_samples.length / (time_samples[time_samples.length - 1] - time_samples[0])
-      end
-      frames_sent += 1
     end
   }
 end
@@ -90,7 +82,7 @@ EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do 
     when 'watch'
       if words.length == 2:
         puts msg
-        if not watch_tags.include?(words[1]):
+        if not watch_tags[ws].include?(words[1]):
           watch_tags[ws].push(words[1])
         end
       end
