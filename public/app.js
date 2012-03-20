@@ -188,6 +188,7 @@ var AppRouter = Backbone.Router.extend({
 			var lng = '';
 			var intesnity = '';
 			var name = '';
+			var val = '';
 			
 			$.each(data[i], function(key, val) { 
 								
