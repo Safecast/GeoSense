@@ -17,15 +17,12 @@ window.SideBarView = Backbone.View.extend({
 		this.vent = options.vent;
 		this.page = options.page;
 		
-		_.bindAll(this, "renderDataToggles");
-	 	options.vent.bind("renderDataToggles", this.renderDataToggles);		
-
+		_.bindAll(this, "setToggleStates");
+		options.vent.bind("setToggleStates", this.setToggleStates);	
     },
 
     render: function() {
-		$(this.el).html(this.template());	
-				
-		
+		$(this.el).html(this.template());		
 		
 		if(this.page == 'map')
 		{
@@ -41,19 +38,27 @@ window.SideBarView = Backbone.View.extend({
         return this;
     },
 
-	renderDataToggles: function(url){
-		
-
-	},
-
 	addDataToggle: function(options) {
 		
 		this.sideBarDataView = new SideBarDataView({vent: this.vent, url: options.url});
         this.$('#accordion').append(this.sideBarDataView.render({number: options.number}).el);
 	},
 	
-	removeDataToggle: function() {
-		
+	setToggleStates: function(options){
+		var state = options.state;
+		if(state == 'mapgl')
+		{
+			this.$('#display3D').addClass('active');
+			this.$('#display2D').removeClass('active');
+			this.$('#themeToggleGroup').fadeOut('fast');
+		}
+		else if (state == 'map')
+		{
+			this.$('#display3D').removeClass('active');
+			this.$('#display2D').addClass('active');
+			this.$('#themeToggleGroup').fadeIn('fast');
+			
+		}
 	},
 
 	lightFilterClicked: function() {
@@ -80,10 +85,6 @@ window.SideBarView = Backbone.View.extend({
 	
 	addDataClicked: function() {
 		
-		//$.get('/tweets', function(data) {
-			//console.log(data);
-		//});
-		
 		if(this.addDataView)
 			this.addDataView.remove();
 			
@@ -94,7 +95,6 @@ window.SideBarView = Backbone.View.extend({
 	
 	addOne: function(comment) {
 		var self = this;
-		//console.log('comment: ' + comment.get('text'))	
     },
 
     addAll: function() {
