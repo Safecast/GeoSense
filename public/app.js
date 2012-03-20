@@ -98,7 +98,7 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
-		this.fetchAndDrawData();
+		//this.fetchAndDrawData();
 		this.vent.trigger("setToggleStates", {state:'map'});
     },
 
@@ -121,7 +121,7 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
-		this.fetchAndDrawData();
+		//this.fetchAndDrawData();
 		this.vent.trigger("setToggleStates", {state:'mapgl'});
     },
 
@@ -170,6 +170,7 @@ var AppRouter = Backbone.Router.extend({
 		var data = options.data;
 		var color = options.color;
 		
+		
 		//First increment total number of data sources
 		num_data_sources +=1;
 		
@@ -182,13 +183,46 @@ var AppRouter = Backbone.Router.extend({
 
 		for(var i = 0; i < data.length; ++i)
 		{
+			var location = '';
+			var lat = '';
+			var lng = '';
+			var intesnity = '';
+			var name = '';
+			
 			$.each(data[i], function(key, val) { 
-				
+								
 				if(key == 'Location')
 				{
-					pointCollection[num_data_sources].create({name:'point',location:val,color:color});
+					location = val;
+				}
+				else if (key == 'lat')
+				{
+					lat = val;
+				}
+				else if (key == 'lng')
+				{
+					lng = val;
+				}
+				else if (key == 'intensity')
+				{
+					intensity = val;
+				}
+				else if (key == 'name')
+				{
+					name = val;
 				}
 			});	
+			
+			//Check for lat/lng location
+			if(location == '')
+				location = lat + ',' + lng;
+			
+			//Substitute intensity for val
+			if(val == '')
+				val = intensity;
+			
+			pointCollection[num_data_sources].create({name:name,location:location,lat:lat,lon:lng,val:val,color:color});
+			//console.log('location: ' + location + ' lat: ' + lat + ' lng: ' + lng + ' intensity: ' + intensity + ' name: ' + name);
 		}
 		
 		//Activate data toggles in adddata view
@@ -221,7 +255,6 @@ var AppRouter = Backbone.Router.extend({
 						
 						pointCollection[this.index] = new PointCollection({
 							collectionId:index,
-							title:'title',
 							newData:false,
 						});
 						pointCollection[this.index].fetch({success: function() {
