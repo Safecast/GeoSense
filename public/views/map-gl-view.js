@@ -256,8 +256,15 @@ window.MapGLView = window.MapViewBase.extend({
 		if (pointColor) {
 			pointColor = parseInt(pointColor.replace('#', '0x'));
 		}
+		var val = model.get('val');
+		if (val == 0) {
+			val = .1;
+		}
+		if (val > 1) {
+			val = 100/val;
+		}
 		this.addPointWidget(model, this.createPointWidget(THREEx.PointWidget,
-			model.get('lat'), model.get('lon'), Math.random(), {
+			model.get('lat'), model.get('lon'), val, {
 				color: pointColor || this.defaultPointColor
 			}));
 
