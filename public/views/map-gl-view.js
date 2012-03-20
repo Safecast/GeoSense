@@ -261,7 +261,7 @@ window.MapGLView = window.MapViewBase.extend({
 			val = .1;
 		}
 		if (val > 1) {
-			val = 100/val;
+			val = 50/val;
 		}
 		this.addPointWidget(model, this.createPointWidget(THREEx.PointWidget,
 			model.get('lat'), model.get('lon'), val, {
