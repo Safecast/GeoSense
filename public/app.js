@@ -76,7 +76,7 @@ var AppRouter = Backbone.Router.extend({
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
 		
-		this.fetchAndDrawData();
+		this.fetchAndDrawData('all');
 		
     },
 
@@ -100,6 +100,15 @@ var AppRouter = Backbone.Router.extend({
 
 		//this.fetchAndDrawData();
 		this.vent.trigger("setToggleStates", {state:'map'});
+		
+		if(!firstLoad)
+		{
+			this.fetchAndDrawData('map');
+		} else
+		{
+			firstLoad = false;
+		}
+				
     },
 
 	mapGL:function () {
@@ -123,9 +132,17 @@ var AppRouter = Backbone.Router.extend({
 
 		//this.fetchAndDrawData();
 		this.vent.trigger("setToggleStates", {state:'mapgl'});
+		
+		if(!firstLoad)
+		{
+			this.fetchAndDrawData('map');
+		} else
+		{
+			firstLoad = false;
+		}
     },
 
-	fetchAndDrawData: function()
+	fetchAndDrawData: function(loadType)
 	{
 		var self = this;
 				
@@ -143,7 +160,7 @@ var AppRouter = Backbone.Router.extend({
 				{
 					// For each distinct data source, add an existing data source to the app.
 					// This binds a data model and sidebar data view
-					self.addExistingDataSources(data[i]);
+					self.addExistingDataSources(data[i], loadType);
 				}
 			},
 			error: function() {
@@ -170,7 +187,6 @@ var AppRouter = Backbone.Router.extend({
 		var data = options.data;
 		var color = options.color;
 		
-		
 		//First increment total number of data sources
 		num_data_sources +=1;
 		
@@ -186,7 +202,7 @@ var AppRouter = Backbone.Router.extend({
 			var location = '';
 			var lat = '';
 			var lng = '';
-			var intesnity = '';
+			var intensity = '';
 			var name = '';
 			var val = '';
 			
@@ -237,9 +253,10 @@ var AppRouter = Backbone.Router.extend({
 			
 	},
 	
-	addExistingDataSources: function(index)
+	addExistingDataSources: function(index, loadType)
 	{
 		var self = this;
+		
 		//First we look up the pointcollection for name & collectionid
 		$.ajax({
 			type: 'GET',
@@ -260,9 +277,12 @@ var AppRouter = Backbone.Router.extend({
 						});
 						pointCollection[this.index].fetch({success: function() {
 							//Add a new sidebar data view once data is fetched
-							self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-							if(self.mapView)
-								self.addMapCollection(scope.index, pointCollection[scope.index]);	
+							
+							if(loadType == 'all')
+								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
+								
+							self.addMapCollection(scope.index, pointCollection[scope.index]);	
+							
 						}});
 						
 					},

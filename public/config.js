@@ -7,6 +7,8 @@ Temporary & app-wide variables
 
 var DEBUG = true;
 
+var firstLoad = true;
+
 var num_data_sources = 0;
 var pointCollection = new Array();
 
