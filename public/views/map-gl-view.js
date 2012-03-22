@@ -11,51 +11,15 @@ window.MapGLView = window.MapViewBase.extend({
 
     defaultPointColor: 0x888888	,
 
-	degToRad: function(x) {
- 		return x*Math.PI/180;
-	},
-
-	radToDeg: function(x) {
-		return x*180/Math.PI;
-	},
-
-	latLngRotationMatrix: new THREE.Matrix4(),
-
-	convertSphericalToCartesian: function(lat, lon, radiusOffset) {    
-		var r = radius;
-		if (radiusOffset) {
-			r += radiusOffset;
-		}
-		var rLat = this.degToRad(lat);
-		var rLon = this.degToRad(lon);
-		
-		var x = r * Math.cos(rLat)*Math.cos(rLon);    
-		var y = r * Math.cos(rLat)*Math.sin(rLon);
-		var z = r * Math.sin(rLat);
-		var vec = new THREE.Vector3(x, y, z);
-
-		//console.log(lat+','+lon+' ==> '+x+','+y+','+z);
-
-		return this.latLngRotationMatrix.multiplyVector3(vec);
-	},
-
-	convertCartesianToSpherical: function(v) {    
-		var r = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);     
-		var lat = this.radToDeg(Math.asin(v.z / r));    
-		var lon = this.radToDeg(Math.atan2(v.y, v.x));    
-		return [lat, lon];
-	},
-
     initialize: function(options) {
 		MapGLView.__super__.initialize.call(this, options)
 	    this.template = _.template(tpl.get('map-gl'));
 		this.animate();
-
-		this.latLngRotationMatrix.setRotationAxis(new THREE.Vector3(1, 0, 0), -Math.PI/2);
     },
 	
 	animate: function() {
 		var self = this;
+		
 		var loopTimer = 16;
 		animationLoop = setInterval(function() {
 			self.renderLoop();
@@ -63,9 +27,11 @@ window.MapGLView = window.MapViewBase.extend({
 	},
 
 	renderLoop: function() {
-		
+				
 		var delta = clock.getDelta();
+		this.globe.render();
 
+		/*
 		//meshPlanet.rotation.y += rotationSpeed * delta;
 		this.world.rotation.y += rotationSpeed * delta;
 		//meshClouds.rotation.y += 1.25 * rotationSpeed * delta;
@@ -73,9 +39,11 @@ window.MapGLView = window.MapViewBase.extend({
 		var angle = delta * rotationSpeed;
 
 		controls.update();
+		
 
 		renderer.clear();
 		renderer.render( scene, camera );
+		*/
 
 		this.stats.update();
 	},
@@ -101,125 +69,11 @@ window.MapGLView = window.MapViewBase.extend({
     	}
 		
 		container = this.el;
-		scene = new THREE.Scene();
+	    this.globe = new DAT.Globe(container);
 
-		renderer = new THREE.WebGLRenderer( { clearAlpha: 1, clearColor: 0x111111, antialias: true } );
-		renderer.setSize( width, height );
-		renderer.sortObjects = false;
-		renderer.autoClear = false;
-
-		//
-
-		renderer.gammaInput = true;
-		renderer.gammaOutput = true;
+	    return this;
 
 
-		//
-
-		container.appendChild( renderer.domElement );
-
-		this.world = THREEx.world = new THREE.Object3D();
-		scene.add(this.world);
-
-		camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 50, 1e7 );
-		camera.position.z = radius * 6;
-		scene.add( camera );
-
-		controls = new THREE.TrackballControls( camera, renderer.domElement );
-
-		controls.rotateSpeed = 1.0;
-		controls.zoomSpeed = 1.2;
-		controls.panSpeed = 0.2;
-
-		controls.noZoom = false;
-		controls.noPan = false;
-
-		controls.staticMoving = false;
-		controls.dynamicDampingFactor = 0.3;
-
-		controls.minDistance = radius * 1.1;
-		controls.maxDistance = radius * 100;
-
-		controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
-
-		dirLight = new THREE.DirectionalLight( 0xdddddd );
-		dirLight.position.set( -1, 0, 1 ).normalize();
-		scene.add( dirLight );
-
-		var planetTexture = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_white.jpg" ),
-		cloudsTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_clouds_1024.png" ),
-		normalTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_normal_2048.jpg" ),
-		specularTexture   = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_specular_2048.jpg" );
-
-		var shader = THREE.ShaderUtils.lib[ "normal" ],
-		uniforms = THREE.UniformsUtils.clone( shader.uniforms );
-
-		uniforms[ "tNormal" ].texture = normalTexture;
-		uniforms[ "uNormalScale" ].value = 0.85;
-
-		uniforms[ "tDiffuse" ].texture = planetTexture;
-		uniforms[ "tSpecular" ].texture = specularTexture;
-
-		uniforms[ "enableAO" ].value = false;
-		uniforms[ "enableDiffuse" ].value = true;
-		uniforms[ "enableSpecular" ].value = true;
-
-		uniforms[ "uDiffuseColor" ].value.setHex( 0xffffff );
-		uniforms[ "uSpecularColor" ].value.setHex( 0x666666 );
-		uniforms[ "uAmbientColor" ].value.setHex( 0x333333 );
-
-		uniforms[ "uShininess" ].value = 20;
-
-		uniforms[ "uDiffuseColor" ].value.convertGammaToLinear();
-		uniforms[ "uSpecularColor" ].value.convertGammaToLinear();
-		uniforms[ "uAmbientColor" ].value.convertGammaToLinear();
-
-		var materialNormalMap = new THREE.ShaderMaterial({
-			fragmentShader: shader.fragmentShader,
-			vertexShader: shader.vertexShader,
-			uniforms: uniforms,
-			lights: true
-		});
-
-		// planet
-
-		geometry = new THREE.SphereGeometry( radius, 100, 50 );
-		geometry.computeTangents();
-
-		meshPlanet = new THREE.Mesh( geometry, materialNormalMap );
-		//meshPlanet.rotation.y = 0;
-		this.world.rotation.z = tilt;
-		this.world.add( meshPlanet );
-
-		// clouds
-
-		var materialClouds = new THREE.MeshLambertMaterial( { color: 0xffffff, ambient: 0x030303, map: cloudsTexture, transparent:true } );
-
-		meshClouds = new THREE.Mesh( geometry, materialClouds );
-		meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
-		//meshClouds.rotation.z = tilt;
-		//this.world.add( meshClouds );
-
-		// stars
-
-		var i,
-		vector,
-		starsGeometry = new THREE.Geometry();
-
-		for ( i = 0; i < 1500; i ++ ) {
-
-			vector = new THREE.Vector3( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-			vector.multiplyScalar( radius );
-
-			starsGeometry.vertices.push( new THREE.Vertex( vector ) );
-
-		}
-
-		/*var light = new THREE.DirectionalLight( 0xffffff );
-		light.position.set( 0, radius * 2, radius * 2 );
-		scene.add( light );*/
-
-		scene.add(new THREE.AmbientLight( 0xffffff ));				
 
 		THREEx.WindowResize(renderer, camera);
 
@@ -234,12 +88,14 @@ window.MapGLView = window.MapViewBase.extend({
 
 	createPointWidget: function(cls, lat, lng, val, initObj)
 	{
-		var position = this.convertSphericalToCartesian(lat, lng);
-		return new cls(position, val, initObj);
+		//var position = this.convertSphericalToCartesian(lat, lng);
+		//return new cls(position, val, initObj);
+		return  new cls(new THREE.Vector3(), val, initObj);
 	},
 
 	addPointWidget: function(model, widget) 
 	{
+		return;
 		widget.object3D.lookAt(meshPlanet.position);
 		this.world.add(widget.object3D);   
 		var id = model.get('collectionid');
@@ -249,6 +105,35 @@ window.MapGLView = window.MapViewBase.extend({
 		this.widgets[id].push(widget);
 	},
 	
+	addCollectionToMap: function(collection)
+	{
+		var self = this;
+		var data = [];
+		var maxVal = 0;
+		collection.each(function(model) {
+			self.cleanPointModel(model);
+			data.push(model.get('lat'));
+			data.push(model.get('lon'));
+			var val = model.get('val');
+			if (val > maxVal) {
+				console.log('>>>> '+val);
+				maxVal = val;
+			}
+			data.push(val);
+		});
+		if (maxVal > 1) {
+			console.log('logarhitmically normalizing to '+maxVal);
+			var scaleFunc = Math.log;
+			var scale = scaleFunc(maxVal);
+			for (var i = 2; i < data.length; i += 3) {
+				data[i] = scaleFunc(data[i]) / scale;
+			}
+		}
+		this.globe.addData(data, {format: 'magnitude', name: collection.get('_id'), animated: false});
+		this.globe.createPoints();
+
+	},
+
     addOne: function(model) 
     {
 		var self = this;

@@ -42,21 +42,22 @@ window.MapViewBase = Backbone.View.extend({
 	},
 
     addAll: function() {
-      	var self = this;
-		this.collection.each(function(model) { 
-			self.cleanPointModel(model);
-			self.addOne(reading);
-		});
+		this.addCollectionToMap(this.collection);
     },
 
 	reset: function(model) {
-		var self = this;	
-		self.removeCollectionFromMap(model);
-		this.collections[model.collectionId].each(function (model) {
+		this.removeCollectionFromMap(model);
+		this.addCollectionToMap(this.collections[model.collectionId]);
+	},
+
+	addCollectionToMap: function(collection)
+	{
+		var self = this;
+		collection.each(function (model) {
 			self.cleanPointModel(model);
 			self.addOne(model);
 		});
-	},
+	}
 
 });
 
