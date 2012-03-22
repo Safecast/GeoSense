@@ -93,6 +93,8 @@ DAT.Globe = function(container, colorFn) {
   var barWidth = 50;
   var barHeight = radius / 2.5;
 
+  var delta = 0;
+
   function init() {
 
     var shader, uniforms, material;
@@ -400,6 +402,8 @@ DAT.Globe = function(container, colorFn) {
     vector.copy(camera.position);
     */
 
+    world.rotation.y += delta * 0.000005;
+    delta++;
 
     controls.update();
 
