@@ -53,7 +53,7 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
-		collection.each(function (model) {
+		collection.each(function(model) {
 			self.cleanPointModel(model);
 			self.addOne(model);
 		});

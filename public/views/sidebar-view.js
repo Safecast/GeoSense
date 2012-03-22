@@ -10,6 +10,8 @@ window.SideBarView = Backbone.View.extend({
 		'click #display2D': 'display2DClicked',
 		'click #display3D': 'display3DClicked',
 		'click #addData': 'addDataClicked',
+		'click #scale_linear': 'scaleLinearClicked',
+		'click #scale_log': 'scaleLogClicked',
     },
 
     initialize: function(options) {
@@ -23,7 +25,6 @@ window.SideBarView = Backbone.View.extend({
 
     render: function() {
 		$(this.el).html(this.template());		
-		
 		if(this.page == 'map')
 		{
 			this.$('#display2D').addClass('active');
@@ -34,6 +35,7 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#themeToggleGroup').hide();
 			this.$('#display3D').addClass('active');
 		}
+		this.$('#scale_linear').addClass('active');
 					
         return this;
     },
@@ -51,13 +53,14 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#display3D').addClass('active');
 			this.$('#display2D').removeClass('active');
 			this.$('#themeToggleGroup').fadeOut('fast');
+			this.$('#scaleToggleGroup').fadeIn('fast');
 		}
 		else if (state == 'map')
 		{
 			this.$('#display3D').removeClass('active');
 			this.$('#display2D').addClass('active');
 			this.$('#themeToggleGroup').fadeIn('fast');
-			
+			this.$('#scaleToggleGroup').fadeOut('fast');
 		}
 	},
 
@@ -91,6 +94,14 @@ window.SideBarView = Backbone.View.extend({
 		this.addDataView = new AddDataView({vent: this.vent});
         $('body').append(this.addDataView.render().el);
 		$('#addDataModal').modal('toggle');
+	},
+
+	scaleLinearClicked: function() {
+		this.vent.trigger("updateValueScale", 'linear'); 
+	},
+
+	scaleLogClicked: function() {
+		this.vent.trigger("updateValueScale", 'log'); 
 	},
 	
 	addOne: function(comment) {

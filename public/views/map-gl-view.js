@@ -9,11 +9,16 @@ window.MapGLView = window.MapViewBase.extend({
     widgets: {},
     world: null,
 
+    valueScale: 'linear',
+
     defaultPointColor: 0x888888	,
 
     initialize: function(options) {
 		MapGLView.__super__.initialize.call(this, options)
 	    this.template = _.template(tpl.get('map-gl'));
+		_.bindAll(this, "updateValueScale");
+	 	options.vent.bind("updateValueScale", this.updateValueScale);
+		
 		this.animate();
     },
 	
@@ -48,6 +53,14 @@ window.MapGLView = window.MapViewBase.extend({
 		this.stats.update();
 	},
 
+	updateValueScale: function(scale) {
+		this.valueScale = scale;
+		for (var i in this.collections) {
+			this.removeCollectionFromMap(this.collections[i]);
+			this.addCollectionToMap(this.collections[i]);
+		}
+	},
+
 	removeCollectionFromMap: function(model) {
 		var id = model.collectionId;
 		if (!this.widgets[id]) return;
@@ -70,6 +83,7 @@ window.MapGLView = window.MapViewBase.extend({
 		
 		container = this.el;
 	    this.globe = new DAT.Globe(container);
+
 
 	    return this;
 
@@ -116,17 +130,21 @@ window.MapGLView = window.MapViewBase.extend({
 			data.push(model.get('lon'));
 			var val = model.get('val');
 			if (val > maxVal) {
-				console.log('>>>> '+val);
 				maxVal = val;
 			}
 			data.push(val);
 		});
 		if (maxVal > 1) {
-			console.log('logarhitmically normalizing to '+maxVal);
-			var scaleFunc = Math.log;
-			var scale = scaleFunc(maxVal);
+			console.log('normalizing to '+maxVal+' ('+this.valueScale+')');
+			var scaleFuncs = {
+				linear: function(v) { return v },
+				log: Math.log
+			};
+			var scale = scaleFuncs[this.valueScale];
+			var max = scale(maxVal);
 			for (var i = 2; i < data.length; i += 3) {
-				data[i] = scaleFunc(data[i]) / scale;
+				//console.log(data[i]+' ==> '+  (scale(data[i]) / max));
+				data[i] = scale(data[i]) / max;
 			}
 		}
 		this.globe.addData(data, {format: 'magnitude', name: collection.get('_id'), animated: false});

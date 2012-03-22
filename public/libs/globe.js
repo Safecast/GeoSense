@@ -17,7 +17,11 @@ DAT.Globe = function(container, colorFn) {
 
   colorFn = colorFn || function(x) {
     var c = new THREE.Color();
-    c.setHSV( ( 0.6 - ( x * 0.5 ) ), .6, 1.0 );
+    if (x == 0) {
+      c.setHex(0x999999);
+    } else {
+      c.setHSV( ( 0.6 - ( x * 0.5 ) ), 1.0, .7 );
+    }
     return c;
   };
 
@@ -87,7 +91,7 @@ DAT.Globe = function(container, colorFn) {
   var PI_HALF = Math.PI / 2;
 
   var barWidth = 50;
-  var barHeight = radius / 5;
+  var barHeight = radius / 2.5;
 
   function init() {
 
@@ -126,12 +130,13 @@ DAT.Globe = function(container, colorFn) {
 
     world = THREEx.world = new THREE.Object3D();
     scene.add(world);
+    world.rotation.y = 90;
 
     dirLight = new THREE.DirectionalLight( 0xdddddd );
     dirLight.position.set( -1, 0, 1 ).normalize();
     scene.add( dirLight );
 
-    var planetTexture = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_white.jpg" ),
+    var planetTexture = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_grey.jpg" ),
     cloudsTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_clouds_1024.png" ),
     normalTexture     = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_normal_2048.jpg" ),
     specularTexture   = THREE.ImageUtils.loadTexture( "assets/textures/planets/earth_specular_2048.jpg" );
@@ -199,10 +204,8 @@ DAT.Globe = function(container, colorFn) {
     mesh.updateMatrix();
     sceneAtmosphere.addObject(mesh);
 
-
-
-
-    geometry = new THREE.CubeGeometry(barWidth, barWidth, 1, 1, null, false, { px: true,
+    
+    geometry = new THREE.CubeGeometry(barWidth, barWidth, 1, 1, 0, false, { px: true,
           nx: true, py: true, ny: true, pz: false, nz: true});
 
     for (var i = 0; i < geometry.vertices.length; i++) {
@@ -213,6 +216,7 @@ DAT.Globe = function(container, colorFn) {
     }
 
     point = new THREE.Mesh(geometry);
+
 
     renderer = new THREE.WebGLRenderer( { clearAlpha: 0, clearColor: 0x000000, antialias: true } );
     renderer.setSize( width, height );
@@ -293,7 +297,7 @@ DAT.Globe = function(container, colorFn) {
       lng = data[i + 1];
       color = colorFnWrapper(data,i);
       size = data[i + 2];
-      size = size * barHeight;
+      size = Math.max(size * barHeight, 100);
       addPoint(lat, lng, size, color, subgeo);
     }
     if (opts.animated) {
@@ -310,7 +314,8 @@ DAT.Globe = function(container, colorFn) {
         this.points = new THREE.Mesh(this._baseGeometry, new THREE.MeshBasicMaterial({
               color: 0xffffff,
               vertexColors: THREE.FaceColors,
-              morphTargets: false
+              morphTargets: false,
+              transparent: true, blending: THREE.AdditiveBlending
             }));
       } else {
         if (this._baseGeometry.morphTargets.length < 8) {
@@ -325,7 +330,8 @@ DAT.Globe = function(container, colorFn) {
         this.points = new THREE.Mesh(this._baseGeometry, new THREE.MeshBasicMaterial({
               color: 0xffffff,
               vertexColors: THREE.FaceColors,
-              morphTargets: true
+              morphTargets: true,
+              //transparent: true, blending: THREE.AdditiveBlending
             }));
       }
       console.log(world);
@@ -337,7 +343,7 @@ DAT.Globe = function(container, colorFn) {
     var phi = (90 - lat) * Math.PI / 180;
     var theta = (-lng) * Math.PI / 180;
 
-    var r = radius * 1.005;
+    var r = radius * 1.001;
 
     point.position.x = r * Math.sin(phi) * Math.cos(theta);
     point.position.y = r * Math.cos(phi);
