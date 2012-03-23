@@ -402,8 +402,8 @@ DAT.Globe = function(container, colorFn) {
     vector.copy(camera.position);
     */
 
-    world.rotation.y += delta * 0.000005;
-    delta++;
+    world.rotation.y += 0.0005;
+	delta++;
 
     controls.update();
 
