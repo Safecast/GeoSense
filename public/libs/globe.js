@@ -255,6 +255,23 @@ DAT.Globe = function(container, colorFn) {
     controls.maxDistance = radius * 100;
     controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
 
+
+	var renderModel = new THREE.RenderPass( scene, camera );
+	var effectBloom = new THREE.BloomPass( .8 );
+	var effectScreen = new THREE.ShaderPass( THREE.ShaderExtras[ "screen" ] );
+	var effectFXAA = new THREE.ShaderPass( THREE.ShaderExtras[ "fxaa" ] );
+
+	effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+
+	effectScreen.renderToScreen = true;
+
+	composer = new THREE.EffectComposer( renderer );
+
+	composer.addPass( renderModel );
+	composer.addPass( effectFXAA );
+	composer.addPass( effectBloom );
+	composer.addPass( effectScreen );
+
   }
 
   addData = function(data, opts) {
@@ -410,6 +427,8 @@ DAT.Globe = function(container, colorFn) {
     renderer.clear();
     renderer.render(scene, camera);
     renderer.render(sceneAtmosphere, camera);
+	composer.render();
+	
   }
 
   init();
