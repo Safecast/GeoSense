@@ -70,8 +70,8 @@ DAT.Globe = function(container, colorFn) {
     }
   };
 
-  var camera, scene, world, sceneAtmosphere, renderer, w, h;
-  var mesh, atmosphere, point;
+  var camera, scene, scenePoints, world, sceneAtmosphere, renderer, w, h;
+  var meshPlanet, atmosphere, point;
   var controls;
 
   var overRenderer;
@@ -86,14 +86,12 @@ DAT.Globe = function(container, colorFn) {
       target = { x: Math.PI*3/2, y: Math.PI / 6.0 },
       targetOnDown = { x: 0, y: 0 };
 
-  var distance = distanceTarget = radius * 6;
+  var distance = distanceTarget = radius * 7;
   var padding = 40;
   var PI_HALF = Math.PI / 2;
 
   var barWidth = 50;
   var barHeight = radius / 2.5;
-
-  var delta = 0;
 
   function init() {
 
@@ -103,6 +101,7 @@ DAT.Globe = function(container, colorFn) {
 
     scene = new THREE.Scene();
     sceneAtmosphere = new THREE.Scene();
+    scenePoints = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(25, w / h, 50, 1e7);
     camera.position.z = distance;
@@ -187,24 +186,23 @@ DAT.Globe = function(container, colorFn) {
     scene.add(new THREE.AmbientLight( 0xffffff ));        
 
 
-
+    /*
     shader = Shaders['atmosphere'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
     material = new THREE.MeshShaderMaterial({
-
-          uniforms: uniforms,
-          vertexShader: shader.vertexShader,
-          fragmentShader: shader.fragmentShader
-
-        });
+        uniforms: uniforms,
+        vertexShader: shader.vertexShader,
+        fragmentShader: shader.fragmentShader
+    });
 
     mesh = new THREE.Mesh(geometry, material);
-    mesh.scale.x = mesh.scale.y = mesh.scale.z = 1.1;
+    mesh.scale.x = mesh.scale.y = mesh.scale.z = 2.1;
     mesh.flipSided = true;
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
-    sceneAtmosphere.addObject(mesh);
+    scene.addObject(mesh);
+    */
 
     
     geometry = new THREE.CubeGeometry(barWidth, barWidth, 1, 1, 0, false, { px: true,
@@ -256,7 +254,10 @@ DAT.Globe = function(container, colorFn) {
     controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
 
 
-	var renderModel = new THREE.RenderPass( scene, camera );
+  var renderWorld = new THREE.RenderPass( scene, camera );
+	var renderPoints = new THREE.RenderPass( scenePoints, camera );
+  renderPoints.clear = false;
+  var renderPointsMask = new THREE.MaskPass( scenePoints, camera );
 	var effectBloom = new THREE.BloomPass( .8 );
 	var effectScreen = new THREE.ShaderPass( THREE.ShaderExtras[ "screen" ] );
 	var effectFXAA = new THREE.ShaderPass( THREE.ShaderExtras[ "fxaa" ] );
@@ -267,8 +268,9 @@ DAT.Globe = function(container, colorFn) {
 
 	composer = new THREE.EffectComposer( renderer );
 
-	composer.addPass( renderModel );
-	composer.addPass( effectFXAA );
+  composer.addPass( renderWorld );
+  composer.addPass( renderPoints );
+  composer.addPass( effectFXAA );
 	composer.addPass( effectBloom );
 	composer.addPass( effectScreen );
 
@@ -353,7 +355,6 @@ DAT.Globe = function(container, colorFn) {
               //transparent: true, blending: THREE.AdditiveBlending
             }));
       }
-      console.log(world);
       world.add(this.points);
     }
   }
@@ -368,7 +369,7 @@ DAT.Globe = function(container, colorFn) {
     point.position.y = r * Math.cos(phi);
     point.position.z = r * Math.sin(phi) * Math.sin(theta);
 
-    point.lookAt(mesh.position);
+    point.lookAt(meshPlanet.position);
 
     point.scale.z = -size;
     point.updateMatrix();
@@ -419,15 +420,17 @@ DAT.Globe = function(container, colorFn) {
     vector.copy(camera.position);
     */
 
-    world.rotation.y += 0.0005;
-	delta++;
+    world.rotation.y += 0.0025;
+	 scenePoints.rotation = world.rotation;
 
     controls.update();
 
     renderer.clear();
     renderer.render(scene, camera);
-    renderer.render(sceneAtmosphere, camera);
-	composer.render();
+    renderer.render(scenePoints, camera);
+
+
+  //composer.render();
 	
   }
 

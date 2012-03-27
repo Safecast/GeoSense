@@ -18,17 +18,23 @@ window.MapGLView = window.MapViewBase.extend({
 	    this.template = _.template(tpl.get('map-gl'));
 		_.bindAll(this, "updateValueScale");
 	 	options.vent.bind("updateValueScale", this.updateValueScale);
-		
-		this.animate();
     },
 	
 	animate: function() {
 		var self = this;
 		
+		var r = function() {
+			requestAnimationFrame(r);
+			self.renderLoop();
+		};
+		r();
+		
+		/*
 		var loopTimer = 16;
 		animationLoop = setInterval(function() {
 			self.renderLoop();
 		}, loopTimer);
+		*/
 	},
 
 	renderLoop: function() {
@@ -73,6 +79,11 @@ window.MapGLView = window.MapViewBase.extend({
 
     render: function() {
 		$(this.el).html(this.template());
+		var isiPad = navigator.userAgent.match(/iPad/i) != null;
+		if (isiPad) {
+			$('body').addClass('ipad');
+		}
+
 
     	if (DEBUG) {
 			this.stats = new Stats();
@@ -84,6 +95,22 @@ window.MapGLView = window.MapViewBase.extend({
 		container = this.el;
 	    this.globe = new DAT.Globe(container);
 
+	    this.animate();
+
+	    /*
+	    var data = [];
+	    var step = 5;
+	    for (var lat = -180; lat < 180; lat += step / 2) {
+		    for (var lng = -90; lng < 90; lng += step) {
+		    	data.push(lat);
+		    	data.push(lng);
+		    	data.push(Math.random());
+		    }
+	    }
+	    console.log(data.length/2);
+		this.globe.addData(data, {format: 'magnitude', name: 'test', animated: false});
+		this.globe.createPoints();
+		*/
 
 	    return this;
 
@@ -129,6 +156,9 @@ window.MapGLView = window.MapViewBase.extend({
 			data.push(model.get('lat'));
 			data.push(model.get('lon'));
 			var val = model.get('val');
+			if (val == 0) {
+				val = Math.random() * .5;
+			}
 			if (val > maxVal) {
 				maxVal = val;
 			}
