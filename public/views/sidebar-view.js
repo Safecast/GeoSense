@@ -12,6 +12,7 @@ window.SideBarView = Backbone.View.extend({
 		'click #addData': 'addDataClicked',
 		'click #scale_linear': 'scaleLinearClicked',
 		'click #scale_log': 'scaleLogClicked',
+		'click #tweetButton' : 'tweetButtonClicked',
     },
 
     initialize: function(options) {
@@ -102,6 +103,10 @@ window.SideBarView = Backbone.View.extend({
 
 	scaleLogClicked: function() {
 		this.vent.trigger("updateValueScale", 'log'); 
+	},
+	
+	tweetButtonClicked: function() {
+		var tweets = new TweetCollection({});
 	},
 	
 	addOne: function(comment) {
