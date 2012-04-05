@@ -3,6 +3,7 @@ PointCollection = Backbone.Collection.extend({
 	model: Point,
 	
 	initialize: function(options) {
+		
 		this.collectionId = options.collectionId;
 		this.mapId = options.mapId;
 		this.url = '/api/collection/' + options.collectionId;
@@ -14,7 +15,6 @@ PointCollection = Backbone.Collection.extend({
 	
 	createAssociativeIndex: function()
 	{	
-		console.log('boo');
 		var self = this;
 		$.ajax({
 			type: 'POST',
@@ -28,9 +28,24 @@ PointCollection = Backbone.Collection.extend({
 		})
 	},
 	
+	addData: function(data) {
+				
+		var self = this;
+		$.ajax({
+			type: 'POST',
+			url: '/api/addpoints/' + this.collectionId + '/' + JSON.stringify(data),
+			success: function(data) {
+				console.log('Adding points for: ' + self.collectionId);
+			},
+			error: function() {
+				console.error('failed to add point bundle');
+			}
+		})
+	},
+	
 	destroy: function(options) {
 		
-		var self = this;
+		var self = this;		
 	    $.ajax({
 			type: 'DELETE',
 			url: this.url,
@@ -38,7 +53,7 @@ PointCollection = Backbone.Collection.extend({
 				console.log('deleted collection: ' + self.collectionId);
 			},
 			error: function() {
-				console.error('failed to delete collection: ' + this.collectionId);
+				console.error('failed to delete collection: ' + self.collectionId);
 			}
 		});
 		
