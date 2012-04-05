@@ -272,7 +272,7 @@ window.MapView = window.MapViewBase.extend({
 		if(color == null)
 			color = '#F0F0F0'
 			
-		var content = "<div id='dataPoint' rel='tooltip' title='"+name+"' style='background-color:" +color + "; width:10px;height:10px;border-radius:10px;opacity:.5;box-shadow: 0 0 10px " +color + ";'></div>";
+		var content = "<div id='dataPoint' rel='tooltip' title='"+name+"' style='background-color:" +color + "; width:10px;height:10px;opacity:.5;" +color + ";'></div>";
 	
 		var marker = new RichMarker({
 			map: this.map,

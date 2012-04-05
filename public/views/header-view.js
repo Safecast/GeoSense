@@ -14,13 +14,14 @@ window.HeaderView = Backbone.View.extend({
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('header'));
-		this.vent = options.vent;
-		
-		this.sidebarstate = "hidden"
+		this.vent = options.vent;	
+		this.mapName = options.mapName;
+		this.sidebarstate = "hidden";
     },
 
     render: function() {
 		$(this.el).html(this.template());
+		this.setTitle();
         return this;
     },
 
@@ -32,6 +33,10 @@ window.HeaderView = Backbone.View.extend({
 				this.vent.trigger("setMapLocation", addr);
 			}
 		}
+	},
+	
+	setTitle: function() {
+		this.$('.brand').html(this.mapName);;
 	},
 
 	settingsButtonClicked: function() {

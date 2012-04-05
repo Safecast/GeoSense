@@ -148,7 +148,7 @@
 	display:none;
 }
 
-#addData {
+#addData, #deleteMap {
 	margin-top:-3px;
 	width:235px;
 	height:30px;
