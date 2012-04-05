@@ -24,23 +24,10 @@ everyone.now.distributeMessage = function(message){
 };
 */
 
-var twit = new twitter({
-	consumer_key: '7qvSnSrhvjsk303fhOtSDg',
-	consumer_secret: 'NKfINCJgnnuc7gCu5Tkx69OhkKFaWFmubChn1nK3uVw',
-	access_token_key: '10425532-2AuLCxYMHjt8ECvrdVSaIclERaYezVsdVJLFx7wyt',
-	access_token_secret: '6vX7aDY6WJjtYyokwkaLRS5FchC3f9I42gzTjRCpc'
-})
-
-// LON/LAT format
-//Japan Bounding Coordinates: 128.496094,30.524413,146.953125,45.213004
-//World Bounding Coordinates: -172.968750,-84.673513,172.968750,84.405941
-//San Fran Bounding Coordinates: -122.75,36.8,-121.75,37.8
-
-//App
 mongoose.connect('mongodb://localhost/geo');
 
 app.configure(function(){
-	app.use(express.static(path.join(application_root, "public")));	
+	app.use(express.static(__dirname + '/public'));
 	app.use(express.logger('dev'));
  	app.use(express.bodyParser());
 	app.use(express.methodOverride());
@@ -49,71 +36,15 @@ app.configure(function(){
   	app.set('views', path.join(application_root, "views"));
 });
 
-///////////////
-// Twitter API
-//////////////
-
-
-app.get('/tweetstream', function(req, res){
-	twit.stream('statuses/filter', {'locations':'128.496094,30.524413,146.953125,45.213004','track':['radiation','放射線','fukushima','福島県','safecast','geiger']}, function(stream) {
-	      console.log('Twitter stream open...');
-			stream.on('data', function (data) {
-
-				//console.log(data.text);
-				//console.log(data.geo);
-
-				if(data.geo != null || data.location != undefined)
-				{
-					tweet = data.text
-					if(tweet.search(/radiation|放射線|fukushima|福島県|safecast|geiger/i) != -1)
-					{
-						console.log(data.text);
-						console.log(data.geo);
-
-						latitude = data.geo.coordinates[0];
-						longitude = data.geo.coordinates[1];
-
-						var tweet;
-						tweet = new Tweet({text:data.text, lat:latitude, lng:longitude});
-
-						tweet.save(function(err) {
-						    if (!err) {
-								//
-						    } else
-							{
-								//
-							}
-						});
-
-					}				
-				}
-	      });
-	});
-});
-
-app.get('/tweets', function(req, res){
-	twit.search('',{geocode:'40.63971,-73.778925,100mi',rpp:'100'}, function(data) {		
-		for (var key in data.results) {
-			console.log(data.results[key].geo);
-		}
-	});	
-});
-
-app.get('/api/tweets', function(req, res){
-  Tweet.find(function(err, datasets) {
-     res.send(datasets);
-  });
-});
-
-///////////
-// NON API ROUTES
-///////////
+/////////////////
+// STATIC ROUTES
+////////////////
 
 app.get('/globe', function(req, res){
    res.sendfile('public/index.html');
 });
 
-app.get('/:mapid/:state', function(req, res){
+app.get('/:mapId/globe', function(req, res){
    res.sendfile('public/index.html');
 });
 
@@ -121,10 +52,11 @@ app.get('/:mapId', function(req, res){
    res.sendfile('public/index.html');
 });
 
-
 ///////////
 // DATA API
 ///////////
+
+//Models 
 
 var Map = mongoose.model('Map', new mongoose.Schema({
 	mapid: String,
@@ -152,6 +84,7 @@ var TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
 	name: String,
 }));
 
+// Routes
 
 app.get('/points', function(req, res){
   res.render('data', {title: "All Points"});
@@ -178,10 +111,10 @@ app.get('/api/point/:id', function(req, res){
 app.get('/api/uniquemaps' , function(req, res){
 	
 	Map.find(function(err, data) {
-	    if (!err) {
+	    if (!err) {		
 	       res.send(data);
 	    } else
-		{point
+		{
 			res.send("oops",500);
 		}
 	});
@@ -338,6 +271,7 @@ app.get('/api/collection/', function(req, res){
 });
 
 app.post('/api/collection/:id', function(req, res){
+	
 	var point;
 	  point = new Point({
 		collectionid:  req.params.id,
@@ -399,7 +333,7 @@ app.post('/api/pointcollection/:id/:name/:mapid', function(req, res){
 	  });
 	  collection.save(function(err) {
 	    if (!err) {
-		 	res.send(point);
+		 	res.send(collection);
 	    } else
 		{
 			res.send('oops', 500);
@@ -419,6 +353,64 @@ app.delete('/api/pointcollection/:id', function(req, res){
 		  }
 	  });
 });
+
+app.get('/tweetstream', function(req, res){
+	
+	// LON/LAT format
+	//Japan Bounding Coordinates: 128.496094,30.524413,146.953125,45.213004
+	//World Bounding Coordinates: -172.968750,-84.673513,172.968750,84.405941
+	//San Fran Bounding Coordinates: -122.75,36.8,-121.75,37.8
+	
+	twit.stream('statuses/filter', {'locations':'128.496094,30.524413,146.953125,45.213004','track':['radiation','放射線','fukushima','福島県','safecast','geiger']}, function(stream) {
+	      console.log('Twitter stream open...');
+			stream.on('data', function (data) {
+
+				//console.log(data.text);
+				//console.log(data.geo);
+
+				if(data.geo != null || data.location != undefined)
+				{
+					tweet = data.text
+					if(tweet.search(/radiation|放射線|fukushima|福島県|safecast|geiger/i) != -1)
+					{
+						console.log(data.text);
+						console.log(data.geo);
+
+						latitude = data.geo.coordinates[0];
+						longitude = data.geo.coordinates[1];
+
+						var tweet;
+						tweet = new Tweet({text:data.text, lat:latitude, lng:longitude});
+
+						tweet.save(function(err) {
+						    if (!err) {
+								//
+						    } else
+							{
+								//
+							}
+						});
+
+					}				
+				}
+	      });
+	});
+});
+
+app.get('/tweets', function(req, res){
+	twit.search('',{geocode:'40.63971,-73.778925,100mi',rpp:'100'}, function(data) {		
+		for (var key in data.results) {
+			console.log(data.results[key].geo);
+		}
+	});	
+});
+
+app.get('/api/tweets', function(req, res){
+  Tweet.find(function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
 
 app.listen(8124, "0.0.0.0");
 console.log('Server running at http://0.0.0.0:8124/');
