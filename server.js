@@ -86,9 +86,9 @@ var TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
 
 // Routes
 
-app.get('/points', function(req, res){
-  res.render('data', {title: "All Points"});
-});
+///////////////
+// POINTS 
+///////////////
 
 app.get('/api/points', function(req, res){
   Point.find(function(err, datasets) {
@@ -106,6 +106,228 @@ app.get('/api/point/:id', function(req, res){
 	}
   });
 });
+
+app.put('/api/point/:id', function(req, res){
+  Point.findById(req.params.id, function(err, point) {
+	
+	point.collectionid 	= req.body.collectionid;
+    point.name 			= req.body.name;
+    point.location 		= req.body.location;
+	point.lat 			= req.body.lat;
+	point.lon 			= req.body.lon;
+	point.val		 	= req.body.val;
+	point.color		 	= req.body.color;
+
+    point.save(function(err) {
+		if (!err) {
+      		res.send(point);
+		}
+		else
+		{
+			res.send('ooops', 500);
+		}
+    });
+  });
+});
+
+app.post('/api/point', function(req, res){
+  var point;
+  point = new Point({
+	collectionid: 		req.body.collectionid,
+    name: 		req.body.name,
+	location: 	req.body.location,
+	lat: 		req.body.lat,
+	lon: 		req.body.lon,
+	val: 		req.body.val,
+	color:      req.body.color 
+  });
+  point.save(function(err) {
+    if (!err) {
+	 	res.send(point);
+    } else
+	{
+		res.send('oops', 500);
+	}
+  });
+});
+
+app.delete('/api/point/:id', function(req, res){
+  return Point.findById(req.params.id, function(err, point) {
+    return point.remove(function(err) {
+		if (!err) {
+        	console.log("removed");
+        	res.send('')
+      	} else
+		{
+			res.send('oops', 500);
+		}
+    });
+  });
+});
+
+//////////////////////
+// POINT COLLECTIONS
+//////////////////////
+
+app.get('/api/collection/distinct' , function(req, res){
+		
+	Point.collection.distinct("collectionid", function(err, data){
+		if (!err) {
+			res.send(data);
+		} else
+		{
+			res.send("oops",500);
+		}
+	  });
+});
+
+app.get('/api/collection/:id', function(req, res){
+	Point.find({collectionid:req.params.id}, function(err, point) {
+		if (!err) {
+			res.send(point);
+		}
+		else
+		{
+			res.send('ooops', 500);
+		}
+  });
+});
+
+app.get('/api/collection/', function(req, res){
+	Point.find({collectionid:req.params.id}, function(err, point) {
+		if (!err) {
+			res.send(point);
+		}
+		else
+		{
+			res.send('ooops', 500);
+		}
+  });
+});
+
+app.post('/api/collection/:id', function(req, res){
+	
+	console.log(req.params)
+	
+	var point;
+	  point = new Point({
+		collectionid:  req.params.id,
+	    name: 		req.body.name,
+		location: 	req.body.location,
+		lat: 		req.body.lat,
+		lon: 		req.body.lon,
+		val: 		req.body.val,
+		color:      req.body.color 
+	  });
+	  point.save(function(err) {
+	    if (!err) {
+		 	res.send(point);
+	    } else
+		{
+			res.send('oops', 500);
+		}
+	  });
+});
+
+app.post('/api/addpoints/:id/:points', function(req, res){
+	
+	var jObject = JSON.parse(req.params.points);
+	
+	for(var i = 0; i < jObject.length; ++i)
+	{	
+		var point;	
+		point = new Point({
+			collectionid:  req.params.id,
+		    name: 		jObject[i].name,
+			location: 	jObject[i].location,
+			lat: 		jObject[i].lat,
+			lon: 		jObject[i].lon,
+			val: 		jObject[i].val,
+			color:      jObject[i].color 
+		  });		
+		
+		  point.save(function(err) {
+		    if (!err) {
+			 	//Point saved
+		    } else
+			{
+				res.send('oops', 500);
+			}
+		  });
+		
+		console.log('point: ' + jObject[i].location);
+	}	
+});
+
+app.delete('/api/collection/:id', function(req, res){
+   Point.remove({collectionid:req.params.id}, function(err) {
+      if (!err) {
+        console.log("removed");
+        res.send('')
+      }
+      else {
+		res.send('oops error', 500);
+	  }
+  });
+});
+
+
+//Associative Collection (keeps track of collection id & name)
+app.get('/api/pointcollection/:id', function(req, res){
+	PointCollection.find({collectionid:req.params.id}, function(err, point) {
+		if (!err) {
+			res.send(point);
+		}
+		else
+		{
+			res.send('ooops', 500);
+		}
+  });
+});
+
+//Return all Point Collections
+app.get('/api/pointcollections', function(req, res){
+  PointCollection.find(function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+//Post a Point Collection
+app.post('/api/pointcollection/:id/:name/:mapid', function(req, res){
+	
+	var collection;
+	  collection = new PointCollection({
+		collectionid: req.params.id,
+	    name: req.params.name,
+		mapid: req.params.mapid,
+	  });
+	  collection.save(function(err) {
+	    if (!err) {
+		 	res.send(collection);
+	    } else
+		{
+			res.send('oops', 500);
+		}
+	  });
+});
+
+//Delete a Post Collection
+app.delete('/api/pointcollection/:id', function(req, res){
+	
+	PointCollection.remove({collectionid:req.params.id}, function(err) {
+	      if (!err) {
+	        console.log("removed pointcollection");
+	        res.send('')
+	      }
+	      else {
+			res.send('oops', 500);
+		  }
+	  });
+});
+
+//////////
+// MAPS 
+/////////
 
 //Returns all unique maps
 app.get('/api/uniquemaps' , function(req, res){
@@ -175,184 +397,10 @@ app.delete('/api/map/:mapid', function(req, res){
 	  }
   });
 });
-	
-app.get('/api/collection/distinct' , function(req, res){
-		
-	Point.collection.distinct("collectionid", function(err, data){
-		if (!err) {
-			res.send(data);
-		} else
-		{
-			res.send("oops",500);
-		}
-	  });
-});
 
-app.put('/api/point/:id', function(req, res){
-  Point.findById(req.params.id, function(err, point) {
-	
-	point.collectionid 	= req.body.collectionid;
-    point.name 			= req.body.name;
-    point.location 		= req.body.location;
-	point.lat 			= req.body.lat;
-	point.lon 			= req.body.lon;
-	point.val		 	= req.body.val;
-	point.color		 	= req.body.color;
-
-    point.save(function(err) {
-		if (!err) {
-      		res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-    });
-  });
-});
-
-app.post('/api/point', function(req, res){
-  var point;
-  point = new Point({
-	collectionid: 		req.body.collectionid,
-    name: 		req.body.name,
-	location: 	req.body.location,
-	lat: 		req.body.lat,
-	lon: 		req.body.lon,
-	val: 		req.body.val,
-	color:      req.body.color 
-  });
-  point.save(function(err) {
-    if (!err) {
-	 	res.send(point);
-    } else
-	{
-		res.send('oops', 500);
-	}
-  });
-});
-
-app.delete('/api/point/:id', function(req, res){
-  return Point.findById(req.params.id, function(err, point) {
-    return point.remove(function(err) {
-		if (!err) {
-        	console.log("removed");
-        	res.send('')
-      	} else
-		{
-			res.send('oops', 500);
-		}
-    });
-  });
-});
-
-app.get('/api/collection/:id', function(req, res){
-	Point.find({collectionid:req.params.id}, function(err, point) {
-		if (!err) {
-			res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-  });
-});
-
-app.get('/api/collection/', function(req, res){
-	Point.find({collectionid:req.params.id}, function(err, point) {
-		if (!err) {
-			res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-  });
-});
-
-app.post('/api/collection/:id', function(req, res){
-	
-	var point;
-	  point = new Point({
-		collectionid:  req.params.id,
-	    name: 		req.body.name,
-		location: 	req.body.location,
-		lat: 		req.body.lat,
-		lon: 		req.body.lon,
-		val: 		req.body.val,
-		color:      req.body.color 
-	  });
-	  point.save(function(err) {
-	    if (!err) {
-		 	res.send(point);
-	    } else
-		{
-			res.send('oops', 500);
-		}
-	  });
-});
-
-app.delete('/api/collection/:id', function(req, res){
-   Point.remove({collectionid:req.params.id}, function(err) {
-      if (!err) {
-        console.log("removed");
-        res.send('')
-      }
-      else {
-		res.send('oops error', 500);
-	  }
-  });
-});
-
-//Associative Collection (keeps track of collection id & name)
-app.get('/api/pointcollection/:id', function(req, res){
-	PointCollection.find({collectionid:req.params.id}, function(err, point) {
-		if (!err) {
-			res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-  });
-});
-
-app.get('/api/pointcollections', function(req, res){
-  PointCollection.find(function(err, datasets) {
-     res.send(datasets);
-  });
-});
-
-app.post('/api/pointcollection/:id/:name/:mapid', function(req, res){
-	
-	var collection;
-	  collection = new PointCollection({
-		collectionid: req.params.id,
-	    name: req.params.name,
-		mapid: req.params.mapid,
-	  });
-	  collection.save(function(err) {
-	    if (!err) {
-		 	res.send(collection);
-	    } else
-		{
-			res.send('oops', 500);
-		}
-	  });
-});
-
-app.delete('/api/pointcollection/:id', function(req, res){
-	
-	PointCollection.remove({collectionid:req.params.id}, function(err) {
-	      if (!err) {
-	        console.log("removed pointcollection");
-	        res.send('')
-	      }
-	      else {
-			res.send('oops', 500);
-		  }
-	  });
-});
+////////////
+// TWEETS 
+///////////
 
 app.get('/tweetstream', function(req, res){
 	

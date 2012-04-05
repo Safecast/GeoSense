@@ -224,12 +224,11 @@ var AppRouter = Backbone.Router.extend({
 		var title = options.title
 		var data = options.data;
 		var color = options.color;
-		
+		var dataSet = [];
+				
 		//First increment total number of data sources
 		num_data_sources +=1;
-		
-		console.log('uniqueMapId: ' + uniqueMapId);
-		
+				
 		//Create collection
 		pointCollection[num_data_sources] = new PointCollection({
 			collectionId:uniqid,
@@ -246,6 +245,7 @@ var AppRouter = Backbone.Router.extend({
 			var intensity = '';
 			var name = '';
 			var val = '';
+
 			
 			$.each(data[i], function(key, val) { 
 								
@@ -269,6 +269,10 @@ var AppRouter = Backbone.Router.extend({
 				{
 					name = val;
 				}
+				else if (key == 'color')
+				{
+					console.log(val);
+				}
 			});	
 			
 			//Check for lat/lng location
@@ -279,10 +283,12 @@ var AppRouter = Backbone.Router.extend({
 			if(val == '')
 				val = intensity;
 			
-			pointCollection[num_data_sources].create({name:name,location:location,lat:lat,lon:lng,val:val,color:color});
-			//console.log('location: ' + location + ' lat: ' + lat + ' lng: ' + lng + ' intensity: ' + intensity + ' name: ' + name);
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val,'color':color});
 		}
 		
+		//pointCollection[num_data_sources].create({name:name,location:location,lat:lat,lon:lng,val:val,color:color});
+		pointCollection[num_data_sources].addData(dataSet);
+				
 		//Activate data toggles in adddata view
 		self.vent.trigger("toggleAddDataToolTips",pointCollection[num_data_sources]);
 		

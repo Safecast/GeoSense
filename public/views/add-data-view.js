@@ -13,7 +13,7 @@ window.AddDataView = Backbone.View.extend({
 		this.vent = options.vent;
 		this.responseData = null;
 		this.dataTitle = '';
-		this.dataColor = '';
+		this.dataColor = '#ffffff';
     },
 
     render: function() {
