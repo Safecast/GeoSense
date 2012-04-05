@@ -17,7 +17,107 @@ window.MapGLView = window.MapViewBase.extend({
 		MapGLView.__super__.initialize.call(this, options)
 	    this.template = _.template(tpl.get('map-gl'));
 		_.bindAll(this, "updateValueScale");
+		_.bindAll(this, "updatePhysicalTags");
 	 	options.vent.bind("updateValueScale", this.updateValueScale);
+	 	options.vent.bind("updatePhysicalTags", this.updatePhysicalTags);
+
+	 	var watch = [];
+    	for (var key in OBJECT_TAGS) {
+    		for (var i = 0; i < OBJECT_TAGS[key].length; i++) {
+    			watch.push(OBJECT_TAGS[key][i].tagName);
+    		}
+    	}
+		new OblessdClient({vent: options.vent, watch: watch});
+    },
+
+    updatePhysicalTags: function(protein)
+    {
+    	if (!this.globe) return;
+    	for (var key in OBJECT_TAGS) {
+    		var avgLoc = new THREE.Vector3();
+    		var avgNorm = new THREE.Vector3();
+    		var avgOver = new THREE.Vector3();
+    		var updated = 0;
+    		for (var i = 0; i < OBJECT_TAGS[key].length; i++) {
+    			var t = OBJECT_TAGS[key][i];
+    			if (t.update(protein)) {
+    				avgLoc.addSelf(t.virt.loc);
+    				avgNorm.addSelf(t.virt.norm);
+    				avgOver.addSelf(t.virt.over);
+    				updated++;
+    			}
+    		}
+			if (updated > OBJECT_TAGS[key].length / 2) {
+	    		avgLoc.divideScalar(updated);
+	    		avgNorm.divideScalar(updated);
+	    		avgOver.divideScalar(updated);
+
+	    		switch (key) {
+	    			case 'globe':
+	    				this.globe.world.position = avgLoc;
+	    				break;
+	    			case 'lens':
+	    				this.globe.camera.position = avgLoc;
+	    				var invNorm = avgNorm.copy().multiplyScalar(-1);
+	    				this.globe.camera.lookAt(new Vector3.add(avgLoc, invNorm));
+	    				break;
+	    		}
+			}
+    	}
+
+
+/*        if (obj[GLOBE_TAG]) {
+        	var newLoc = obj[GLOBE_TAG].loc;
+			var f = VIRTUAL_PHYSICAL_FACTOR;
+            this.globe.world.position = new THREE.Vector3(
+              newLoc[0] * f, 
+              newLoc[1] * f, 
+              newLoc[2] * f
+            );
+        }
+        if (obj[LENS_TAG]) {
+
+        	var newLoc = obj[LENS_TAG].loc;
+			var pos = new THREE.Vector3(
+              newLoc[0] * f, 
+              newLoc[1] * f, 
+              newLoc[2] * f
+            );
+        	var newLoc = obj[LENS_TAG].norm;
+			var dir = new THREE.Vector3(
+              newLoc[0], 
+              newLoc[1], 
+              newLoc[2]
+            );
+            dir.multiplyScalar(-1000);
+            var look = new THREE.Vector3();
+            look.add(pos, dir);
+            dir.multiplyScalar(f);
+
+			this.globe.camera.position = pos;
+			this.globe.camera.lookAt(look);
+
+			//console.log(dir);	
+//	        this.globe.camera.lookAt(look);
+
+			//this.globe.camera.position = pos;	
+            //this.globe.camera.lookAt(dir);
+
+          /*if (!initialGlobeLoc) {
+            initialGlobeLoc = obj[globeTag].loc;
+          }
+          if (THREEx && THREEx.world) {
+            var newLoc = obj[GLOBE_TAG].loc;
+            var f = realWorldToVirtualFactor;
+            THREEx.world.position = new THREE.Vector3(
+              (newLoc[0] - initialGlobeLoc[0]) * f, 
+              (newLoc[1] - initialGlobeLoc[1]) * f, 
+              (newLoc[2] - initialGlobeLoc[2]) * f
+            );
+          }
+        }
+          */
+
     },
 	
 	animate: function() {
@@ -79,8 +179,7 @@ window.MapGLView = window.MapViewBase.extend({
 
     render: function() {
 		$(this.el).html(this.template());
-		var isiPad = navigator.userAgent.match(/iPad/i) != null;
-		if (isiPad) {
+		if (IS_IPAD) {
 			$('body').addClass('ipad');
 		}
 

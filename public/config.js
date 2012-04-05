@@ -1,9 +1,5 @@
 /* Config 
-Temporary & app-wide variables
 */
-
-//Total number of data sources associated with each account
-//Update this number per session
 
 var DEBUG = true;
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
@@ -84,6 +80,8 @@ var OBJECT_TAGS = {
 };
 
 var firstLoad = true;
+var _mapId = String;
+var _mapName = String;
 
 var num_data_sources = 0;
 var pointCollection = new Array();

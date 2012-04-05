@@ -12,6 +12,8 @@ window.SideBarView = Backbone.View.extend({
 		'click #addData': 'addDataClicked',
 		'click #scale_linear': 'scaleLinearClicked',
 		'click #scale_log': 'scaleLogClicked',
+		'click #tweetButton' : 'tweetButtonClicked',
+		'click #deleteMap' : 'deleteMapClicked',
     },
 
     initialize: function(options) {
@@ -78,7 +80,7 @@ window.SideBarView = Backbone.View.extend({
 	
 	display2DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate("", {trigger: true});
+		app.navigate("map", {trigger: true});
 	},
 
 	display3DClicked: function() {
@@ -95,6 +97,20 @@ window.SideBarView = Backbone.View.extend({
         $('body').append(this.addDataView.render().el);
 		$('#addDataModal').modal('toggle');
 	},
+	
+	deleteMapClicked: function() {
+		$.ajax({
+			type: 'DELETE',
+			url: '/api/map/' + _mapId,
+			success: function() {
+				console.log('deleted map: ' + _mapId);
+				app.navigate("", {trigger: true});
+			},
+			error: function() {
+				console.error('failed to delete map: ' + _mapId);
+			}
+		});
+	},
 
 	scaleLinearClicked: function() {
 		this.vent.trigger("updateValueScale", 'linear'); 
@@ -102,6 +118,10 @@ window.SideBarView = Backbone.View.extend({
 
 	scaleLogClicked: function() {
 		this.vent.trigger("updateValueScale", 'log'); 
+	},
+	
+	tweetButtonClicked: function() {
+		var tweets = new TweetCollection({});
 	},
 	
 	addOne: function(comment) {

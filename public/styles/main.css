@@ -1,6 +1,7 @@
 @import url("reset.css");
 @import url("global.css");
 
+@import url("homepage.css");
 @import url("header.css");
 @import url("map.css");
 @import url("map-gl.css");

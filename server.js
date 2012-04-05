@@ -2,11 +2,12 @@ var application_root = __dirname,
   	express = require("express"),
   	path = require("path"),
   	mongoose = require('mongoose'),
-  	twitter = require('twitter');
+  	twitter = require('ntwitter');
 
 var app = express.createServer();
 
 //Now.js
+/*
 var nowjs = require("now");
 var everyone = nowjs.initialize(app);
 
@@ -16,36 +17,12 @@ nowjs.on("connect", function(){
 
 nowjs.on("disconnect", function(){
   console.log("Left: " + this.now.name);
-});
+}); 
 
 everyone.now.distributeMessage = function(message){
   everyone.now.receiveMessage(this.now.name, message);
 };
-
-//nTwitter
-var	count = 0,
-	lastc = 0;
-
-function tweet(data) {
-	count++;
-	if ( typeof data === 'string' )
-		sys.puts(data);
-	else if ( data.text && data.user && data.user.screen_name )
-		sys.puts('"' + data.text + '" -- ' + data.user.screen_name);
-	else if ( data.message )
-		sys.puts('ERROR: ' + sys.inspect(data));
-	else
-		sys.puts(sys.inspect(data));
-}
-
-function memrep() {
-	var rep = process.memoryUsage();
-	rep.tweets = count - lastc;
-	lastc = count;
-	console.log(JSON.stringify(rep));
-	// next report in 60 seconds
-	setTimeout(memrep, 60000);
-}
+*/
 
 var twit = new twitter({
 	consumer_key: '7qvSnSrhvjsk303fhOtSDg',
@@ -53,6 +30,11 @@ var twit = new twitter({
 	access_token_key: '10425532-2AuLCxYMHjt8ECvrdVSaIclERaYezVsdVJLFx7wyt',
 	access_token_secret: '6vX7aDY6WJjtYyokwkaLRS5FchC3f9I42gzTjRCpc'
 })
+
+// LON/LAT format
+//Japan Bounding Coordinates: 128.496094,30.524413,146.953125,45.213004
+//World Bounding Coordinates: -172.968750,-84.673513,172.968750,84.405941
+//San Fran Bounding Coordinates: -122.75,36.8,-121.75,37.8
 
 //App
 mongoose.connect('mongodb://localhost/geo');
@@ -67,41 +49,87 @@ app.configure(function(){
   	app.set('views', path.join(application_root, "views"));
 });
 
-///////////
+///////////////
 // Twitter API
-///////////
-/*
-app.get('/tweets', function(req, res){
-	twit.stream('statuses/filter', {'locations':'-122.75,36.8,-121.75,37.8,-74,40,-73,41'}, function(stream) {
-	      stream.on('data', function (data) {
-	        return res.send(data);
-	     });
+//////////////
+
+
+app.get('/tweetstream', function(req, res){
+	twit.stream('statuses/filter', {'locations':'128.496094,30.524413,146.953125,45.213004','track':['radiation','放射線','fukushima','福島県','safecast','geiger']}, function(stream) {
+	      console.log('Twitter stream open...');
+			stream.on('data', function (data) {
+
+				//console.log(data.text);
+				//console.log(data.geo);
+
+				if(data.geo != null || data.location != undefined)
+				{
+					tweet = data.text
+					if(tweet.search(/radiation|放射線|fukushima|福島県|safecast|geiger/i) != -1)
+					{
+						console.log(data.text);
+						console.log(data.geo);
+
+						latitude = data.geo.coordinates[0];
+						longitude = data.geo.coordinates[1];
+
+						var tweet;
+						tweet = new Tweet({text:data.text, lat:latitude, lng:longitude});
+
+						tweet.save(function(err) {
+						    if (!err) {
+								//
+						    } else
+							{
+								//
+							}
+						});
+
+					}				
+				}
+	      });
 	});
+});
+
+app.get('/tweets', function(req, res){
+	twit.search('',{geocode:'40.63971,-73.778925,100mi',rpp:'100'}, function(data) {		
+		for (var key in data.results) {
+			console.log(data.results[key].geo);
+		}
+	});	
 });
 
 app.get('/api/tweets', function(req, res){
-  	return twit.stream('statuses/filter', {'locations':'-122.75,36.8,-121.75,37.8,-74,40,-73,41'}, function(stream) {
-	      stream.on('data', function (data) {
-	        return res.send(data);
-	     });
-	});
+  Tweet.find(function(err, datasets) {
+     res.send(datasets);
+  });
 });
-*/
 
-//app.get('/', function(req, res) {
+///////////
+// NON API ROUTES
+///////////
 
-//});
+app.get('/globe', function(req, res){
+   res.sendfile('public/index.html');
+});
 
-//app.get('/globe', function (req, res) {
-    // Trigger the toure 'domain.com/about'
-	//res.send('heh');
-	//app.use('/public', app.static(__dirname + '/public'));
- 
-//});
+app.get('/:mapid/:state', function(req, res){
+   res.sendfile('public/index.html');
+});
+
+app.get('/:mapId', function(req, res){
+   res.sendfile('public/index.html');
+});
+
 
 ///////////
 // DATA API
 ///////////
+
+var Map = mongoose.model('Map', new mongoose.Schema({
+	mapid: String,
+	name: String,
+}));
 
 var Point = mongoose.model('Point', new mongoose.Schema({
 	collectionid: Number,
@@ -109,20 +137,21 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: Number,
+	mapid: String,
 	name: String,
 }));
 
-app.post('/sms', function(req, res){
+var Tweet = mongoose.model('Tweet', new mongoose.Schema({
+	collectionid: Number,
+	mapid: String,
+}));
 
-});
+var TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
+	collectionid: Number,
+	mapid: String,
+	name: String,
+}));
 
-app.get('/githook', function(req, res){
-  res.send('New commits from Git');
-});
-
-app.get('/globe', function(req, res){
-   res.sendfile('public/index.html');
-});
 
 app.get('/points', function(req, res){
   res.render('data', {title: "All Points"});
@@ -145,7 +174,77 @@ app.get('/api/point/:id', function(req, res){
   });
 });
 
-app.get('/api/collection/distinct', function(req, res){
+//Returns all unique maps
+app.get('/api/uniquemaps' , function(req, res){
+	
+	Map.find(function(err, data) {
+	    if (!err) {
+	       res.send(data);
+	    } else
+		{point
+			res.send("oops",500);
+		}
+	});
+});
+
+//Returns the collections associated with a unique map by mapId
+app.get('/api/maps/:mapid' , function(req, res){
+	
+	PointCollection.find({mapid : req.params.mapid}, function(err, data){
+		if (!err) {
+			res.send(data);
+		} else
+		{
+			res.send("oops",500);
+		}
+	});
+});
+
+//Returns a specific unique map by mapId
+app.get('/api/map/:mapid', function(req, res){
+	
+	Map.find({mapid: req.params.mapid}, function(err, data) {
+	    if (!err) {
+	       res.send(data);
+	    } else
+		{point
+			res.send("oops",500);
+		}
+	});
+});
+
+app.post('/api/map/:mapid/:name', function(req, res){
+	
+	var map;
+	  map = new Map({
+		mapid: req.params.mapid,
+	    name: req.params.name,
+	  });	
+	
+	  map.save(function(err) {
+	    if (!err) {
+		 	res.send(map);
+	    } else
+		{
+			res.send('oops', 500);
+		}
+	  });
+});
+
+app.delete('/api/map/:mapid', function(req, res){
+   Map.remove({mapid:req.params.mapid}, function(err) {
+      if (!err) {
+        console.log("map removed");
+        res.send('')
+      }
+      else {
+		res.send('oops error', 500);
+	  }
+  });
+});
+	
+app.get('/api/collection/distinct' , function(req, res){
+		
 	Point.collection.distinct("collectionid", function(err, data){
 		if (!err) {
 			res.send(data);
@@ -272,7 +371,6 @@ app.delete('/api/collection/:id', function(req, res){
 });
 
 //Associative Collection (keeps track of collection id & name)
-
 app.get('/api/pointcollection/:id', function(req, res){
 	PointCollection.find({collectionid:req.params.id}, function(err, point) {
 		if (!err) {
@@ -291,12 +389,13 @@ app.get('/api/pointcollections', function(req, res){
   });
 });
 
-app.post('/api/pointcollection/:id/:name', function(req, res){
+app.post('/api/pointcollection/:id/:name/:mapid', function(req, res){
 	
 	var collection;
 	  collection = new PointCollection({
 		collectionid: req.params.id,
 	    name: req.params.name,
+		mapid: req.params.mapid,
 	  });
 	  collection.save(function(err) {
 	    if (!err) {

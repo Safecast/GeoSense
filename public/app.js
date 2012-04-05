@@ -3,7 +3,7 @@ window.MapViewBase = Backbone.View.extend({
     initialize: function(options) {
 		this.collections = {};
 		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);
+		options.vent.bind("setMapLocation", this.setMapLocation);			
 	},
 
 	setMapLocation: function(addr)
@@ -64,25 +64,63 @@ window.MapViewBase = Backbone.View.extend({
 var AppRouter = Backbone.Router.extend({
 
     routes:{
-        "":"map",
 		"globe":"mapGL",
+		"map":"map",
+        ":mapId":"setFromUniqueMapId",
+		"":"home",
     },
 
     initialize:function() {
+		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
-	
-        this.headerView = new HeaderView({vent: this.vent});
+    },
+
+	render:function()
+	{
+ 		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
         $('body').append(this.headerView.render().el);
 
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
+
+		this.fetchAndDrawData('all');	
+	},
+
+	setUniqueMapName: function(name)
+	{
+		_mapName = name;		
+	},
+	
+	setFromUniqueMapId: function(uniqueMapId)
+	{
+		var self = this;
 		
-		this.fetchAndDrawData('all');
-		
-    },
+		//Fetch map information
+		$.ajax({
+			type: 'GET',
+			url: '/api/map/' + uniqueMapId,
+			success: function(data) {
+				_mapName = data[0].name;
+				_mapId = uniqueMapId;
+				self.map();
+			},
+			error: function() {
+				console.error('failed to fetch unique map');
+			}
+		});
+	},
+	
+	home:function () {
+		$('body').empty();
+		this.homepageView = new HomepageView();
+        $('body').append(this.homepageView.render().el);
+	},
 
     map:function () {
 		var self = this;
+		
+		if(!this.sideBarView)
+		self.render();
 		
 		if(this.mapView)
 		{
@@ -99,7 +137,6 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
-		//this.fetchAndDrawData();
 		this.vent.trigger("setToggleStates", {state:'map'});
 		
 		if(!firstLoad)
@@ -108,8 +145,7 @@ var AppRouter = Backbone.Router.extend({
 		} else
 		{
 			firstLoad = false;
-		}
-				
+		}	
     },
 
 	mapGL:function () {
@@ -131,7 +167,6 @@ var AppRouter = Backbone.Router.extend({
 			this.mapView.start();
         }
 
-		//this.fetchAndDrawData();
 		this.vent.trigger("setToggleStates", {state:'mapgl'});
 		
 		if(!firstLoad)
@@ -151,9 +186,10 @@ var AppRouter = Backbone.Router.extend({
 		//This returns an array containing collectionid for lookup
 		$.ajax({
 			type: 'GET',
-			url: '/api/collection/distinct',
+			url: '/api/maps/' + _mapId,
 			success: function(data) {
 		
+				console.log(data);
 				//Save the distinct collection Id(s) to app scope
 				num_data_sources = data.length;
 				
@@ -161,7 +197,7 @@ var AppRouter = Backbone.Router.extend({
 				{
 					// For each distinct data source, add an existing data source to the app.
 					// This binds a data model and sidebar data view
-					self.addExistingDataSources(data[i], loadType);
+					self.addExistingDataSources(data[i].collectionid, loadType);
 				}
 			},
 			error: function() {
@@ -174,7 +210,7 @@ var AppRouter = Backbone.Router.extend({
 	    return Math.max.apply( Math, array );
 	},
 	
-	uniqid: function ()
+	uniqId: function ()
 	{
 	    var newDate = new Date;
 	    return newDate.getTime();
@@ -183,7 +219,8 @@ var AppRouter = Backbone.Router.extend({
 	addData:function (options)
 	{
 		var self = this;
-		var uniqid = this.uniqid();
+		var uniqid = this.uniqId();
+		var uniqueMapId = _mapId;
 		var title = options.title
 		var data = options.data;
 		var color = options.color;
@@ -191,9 +228,12 @@ var AppRouter = Backbone.Router.extend({
 		//First increment total number of data sources
 		num_data_sources +=1;
 		
+		console.log('uniqueMapId: ' + uniqueMapId);
+		
 		//Create collection
 		pointCollection[num_data_sources] = new PointCollection({
 			collectionId:uniqid,
+			mapId:uniqueMapId,
 			title:title,
 			newData:true,
 		});
@@ -298,6 +338,11 @@ var AppRouter = Backbone.Router.extend({
 		})	
 	},
 	
+	addTwitterData:function (options)
+	{
+		console.log('adding tweets');
+	},
+	
 	addSideBarDataView:function (options) {
 		//Add SideBar
 		this.sideBarDataView = new SideBarDataView({collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title});
@@ -311,7 +356,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['map', 'map-gl', 'header','sidebar','sidebar-data', 'modal','add-data','edit-data'],
+tpl.loadTemplates(['homepage', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'modal','add-data','edit-data'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });

@@ -129,7 +129,7 @@ DAT.Globe = function(container, colorFn) {
     scene.addObject(mesh);
     */
 
-    world = THREEx.world = new THREE.Object3D();
+    world = new THREE.Object3D();
     scene.add(world);
     world.rotation.y = 90;
 
@@ -241,6 +241,7 @@ DAT.Globe = function(container, colorFn) {
       overRenderer = false;
     }, false);
 
+    /*
     controls = new THREE.TrackballControls( camera, renderer.domElement );
     controls.rotateSpeed = 1.0;
     controls.zoomSpeed = 1.2;
@@ -252,6 +253,7 @@ DAT.Globe = function(container, colorFn) {
     controls.minDistance = radius * 1.1;
     controls.maxDistance = radius * 100;
     controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+    */
 
 
   var renderWorld = new THREE.RenderPass( scene, camera );
@@ -421,9 +423,17 @@ DAT.Globe = function(container, colorFn) {
     */
 
     world.rotation.y += 0.0025;
-	 scenePoints.rotation = world.rotation;
+	  scenePoints.rotation = world.rotation;
+    
+    /*
+    var helper = new THREE.AxisHelper(); 
+    helper.scale.x = helper.scale.y = helper.scale.z = 1000;
+    world.add(helper);
+    */
 
-    controls.update();
+   // THREE.SceneUtils.showAxis(scene);
+
+    //controls.update();
 
     renderer.clear();
     renderer.render(scene, camera);
@@ -437,6 +447,8 @@ DAT.Globe = function(container, colorFn) {
   init();
   this.animate = animate;
   this.render = render;
+  this.world = world;
+  this.camera = camera;
 
   this.__defineGetter__('time', function() {
     return this._time || 0;
@@ -471,6 +483,7 @@ DAT.Globe = function(container, colorFn) {
   this.renderer = renderer;
   this.scene = scene;
 
+  console.log(this.world);
   return this;
 
 };

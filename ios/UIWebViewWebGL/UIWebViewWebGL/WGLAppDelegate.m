@@ -7,6 +7,7 @@
 //
 
 #import "WGLAppDelegate.h"
+#import "CameraViewController.h"
 
 @implementation WGLAppDelegate
 
@@ -14,27 +15,43 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-  
-//  Class ADWebView = NSClassFromString(@"ADWebView");
-//  UIWebView* webView = (UIWebView *)[[[ADWebView alloc] initWithFrame:self.window.bounds] autorelease];
-//  [webView setWebGLEnabled:YES];
-    
+      
   UIWebView* webView = [[[UIWebView alloc] initWithFrame:self.window.bounds] autorelease];
+  webView.backgroundColor = [UIColor clearColor];
+  webView.opaque = NO;
   
   id webDocumentView = [webView performSelector:@selector(_browserView)];
   id backingWebView = [webDocumentView performSelector:@selector(webView)];
   [backingWebView _setWebGLEnabled:YES];
+
   
-  //NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://sam-macbookair.media.mit.edu:8000/globe"]];
-  NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://sam-macbookair.media.mit.edu:8124/#globe"]];
+  //NSString *url = @"http://sam-macbookair.media.mit.edu:8124/globe";
+  //NSString *url = @"http://localhost:8124/globe";
+  NSString *url = @"http://18.189.34.8:8124/globe";
+  NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
   [webView loadRequest:request];
   
-  UIViewController* viewController = [[[UIViewController alloc] init] autorelease];
-  viewController.view = webView;
+  CameraViewController *viewController = [[CameraViewController alloc] init];
   
+  /*
+  UIViewController* viewController = [[[UIViewController alloc] init] autorelease];
+  UIView* view = [[UIView alloc] initWithFrame:webView.frame];
+
+  UIImageView* imageView = [[UIImageView alloc] initWithFrame:webView.frame];
+  imageView.image = [UIImage imageNamed:@"Palm_Beach.jpeg"];
+  
+  [view addSubview:imageView];
+  //[view addSubview:webView];
+  viewController.view = view;
+   */
+   
   self.window.rootViewController = viewController;
   [self.window makeKeyAndVisible];
   
+  [viewController initCamera];
+  viewController.imagePicker.cameraOverlayView = webView;
+  
+   
   return YES;
 }
 

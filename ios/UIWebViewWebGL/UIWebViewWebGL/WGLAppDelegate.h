@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface WGLAppDelegate : UIResponder <UIApplicationDelegate>
+@interface WGLAppDelegate : UIResponder <UIApplicationDelegate, UIImagePickerControllerDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
