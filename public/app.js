@@ -166,7 +166,7 @@ var AppRouter = Backbone.Router.extend({
 		
 	    if (!this.mapView)
 		{
-            this.mapView = new MapView({
+            this.mapView = new MapOLView({
 				vent: self.vent
 			});
 			$('body').append(this.mapView.render().el);
