@@ -25,9 +25,9 @@
   [backingWebView _setWebGLEnabled:YES];
 
   
-  //NSString *url = @"http://sam-macbookair.media.mit.edu:8124/globe";
+  NSString *url = @"http://sam-macbookair.media.mit.edu:8124/globe";
   //NSString *url = @"http://localhost:8124/globe";
-  NSString *url = @"http://18.189.34.8:8124/globe";
+  //NSString *url = @"http://18.189.34.8:8124/globe";
   NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
   [webView loadRequest:request];
   
