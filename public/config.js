@@ -2,7 +2,7 @@
 */
 
 var DEBUG = true;
-var firstLoad = true;
+var _firstLoad = true;
 var _mapId = String;
 var _mapName = String;
 

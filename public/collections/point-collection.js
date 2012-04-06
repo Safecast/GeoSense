@@ -13,6 +13,26 @@ PointCollection = Backbone.Collection.extend({
 			this.createAssociativeIndex();
 	},
 	
+	addData: function(data, callback) {
+				
+		var self = this;
+		var jsonData = JSON.stringify(data);
+		
+		$.ajax({
+			type: 'POST',
+			dataType: 'json',
+			data: { jsonpost: data },
+			url: '/api/addpoints/' + this.collectionId,
+			success: function() {
+				console.log('Adding points for: ' + self.collectionId);
+				callback();
+			},
+			error: function() {
+				console.error('failed to add point bundle');
+			}
+		});		
+	},
+	
 	createAssociativeIndex: function()
 	{	
 		var self = this;
@@ -24,21 +44,6 @@ PointCollection = Backbone.Collection.extend({
 			},
 			error: function() {
 				console.error('failed to create an associated collection');
-			}
-		})
-	},
-	
-	addData: function(data) {
-				
-		var self = this;
-		$.ajax({
-			type: 'POST',
-			url: '/api/addpoints/' + this.collectionId + '/' + JSON.stringify(data),
-			success: function(data) {
-				console.log('Adding points for: ' + self.collectionId);
-			},
-			error: function() {
-				console.error('failed to add point bundle');
 			}
 		})
 	},

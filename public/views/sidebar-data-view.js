@@ -6,14 +6,13 @@ window.SideBarDataView = Backbone.View.extend({
     events: {
 		'click #removeData:' : 'removeDataClicked',
 		'click #editData:' : 'editDataClicked',
-		
-		
     },
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('sidebar-data'));
 		this.collectionId = options.collectionId;
 		this.title = options.title;
+		this.dataLength = options.dataLength;
 				
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);

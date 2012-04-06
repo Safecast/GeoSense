@@ -95,6 +95,12 @@ window.HeaderView = Backbone.View.extend({
 		url += encodeURIComponent(window.location);
 		url += '&t=Check out the Safecast map';
 		window.open('' + url, 'Share it on Facebook', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
-	}
+	},
+	
+	remove: function() {
+		$(window).unbind();
+		$(this.el).remove();
+		return this;
+	},
   
 });

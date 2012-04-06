@@ -50,6 +50,7 @@ window.SideBarView = Backbone.View.extend({
 	
 	setToggleStates: function(options){
 		var state = options.state;
+				
 		if(state == 'mapgl')
 		{
 			this.$('#display3D').addClass('active');
@@ -80,12 +81,12 @@ window.SideBarView = Backbone.View.extend({
 	
 	display2DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate("map", {trigger: true});
+		app.navigate(_mapId + "/map", {trigger: true});
 	},
 
 	display3DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate("globe", {trigger: true});
+		app.navigate(_mapId + "/globe", {trigger: true});
 	},
 	
 	addDataClicked: function() {
@@ -133,6 +134,11 @@ window.SideBarView = Backbone.View.extend({
 		this.collection.each(function(comment){ 
 		self.addOne(comment);
 	 	});
-    }
+    },
 
+	remove: function() {
+		$(window).unbind();
+		$(this.el).remove();
+		return this;
+	},
 });

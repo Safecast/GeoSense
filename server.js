@@ -40,15 +40,7 @@ app.configure(function(){
 // STATIC ROUTES
 ////////////////
 
-app.get('/globe', function(req, res){
-   res.sendfile('public/index.html');
-});
-
-app.get('/:mapId/globe', function(req, res){
-   res.sendfile('public/index.html');
-});
-
-app.get('/:mapId', function(req, res){
+app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)$/, function(req, res){
    res.sendfile('public/index.html');
 });
 
@@ -229,34 +221,25 @@ app.post('/api/collection/:id', function(req, res){
 	  });
 });
 
-app.post('/api/addpoints/:id/:points', function(req, res){
+app.post('/api/addpoints/:id', function(req, res){
 	
-	var jObject = JSON.parse(req.params.points);
-	
-	for(var i = 0; i < jObject.length; ++i)
+	jsonObject = req.body.jsonpost;
+	for(var i = 0; i < jsonObject.length; ++i)
 	{	
 		var point;	
 		point = new Point({
 			collectionid:  req.params.id,
-		    name: 		jObject[i].name,
-			location: 	jObject[i].location,
-			lat: 		jObject[i].lat,
-			lon: 		jObject[i].lon,
-			val: 		jObject[i].val,
-			color:      jObject[i].color 
+		    name: 		jsonObject[i].name,
+			location: 	jsonObject[i].location,
+			lat: 		jsonObject[i].lat,
+			lon: 		jsonObject[i].lon,
+			val: 		jsonObject[i].val,
+			color:      jsonObject[i].color 
 		  });		
 		
-		  point.save(function(err) {
-		    if (!err) {
-			 	//Point saved
-		    } else
-			{
-				res.send('oops', 500);
-			}
-		  });
-		
-		console.log('point: ' + jObject[i].location);
+		  point.save();
 	}	
+	res.send('');
 });
 
 app.delete('/api/collection/:id', function(req, res){
@@ -270,7 +253,6 @@ app.delete('/api/collection/:id', function(req, res){
 	  }
   });
 });
-
 
 //Associative Collection (keeps track of collection id & name)
 app.get('/api/pointcollection/:id', function(req, res){

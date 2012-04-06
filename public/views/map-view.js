@@ -272,12 +272,12 @@ window.MapView = window.MapViewBase.extend({
 		if(color == null)
 			color = '#F0F0F0'
 			
-		var content = "<div id='dataPoint' rel='tooltip' title='"+name+"' style='background-color:" +color + "; width:10px;height:10px;opacity:.5;" +color + ";'></div>";
+		var content = "<div id='dataPoint' rel='tooltip' title='"+name+"' style='background-color:red; border-radius:10px; width:10px;height:10px;opacity:.5;" +color + ";'></div>";
 	
 		var marker = new RichMarker({
 			map: this.map,
 	 		position: new google.maps.LatLng(model.get('lat'), model.get('lon')),
-			draggable: true,
+			draggable: false,
 			flat: true,
 			anchor: RichMarkerPosition.MIDDLE,
 			content: content,

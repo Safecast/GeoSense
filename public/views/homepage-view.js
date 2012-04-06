@@ -22,7 +22,7 @@ window.HomepageView = Backbone.View.extend({
 		if (length == null) {
 			length = 10;
 		}
-		chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=";
+		chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		var name = [];
 		for (x = 0; x < length; x++) {
 			name.push(chars[Math.floor(Math.random() * chars.length)]);
@@ -67,9 +67,7 @@ window.HomepageView = Backbone.View.extend({
 			type: 'POST',
 			url: '/api/map/' + self.mapid + '/' + self.name,
 			success: function(data) {
-				console.log('created map' + self.mapid);
-				app.navigate(self.mapid, {trigger: true});
-				
+				app.navigate(self.mapid + "/setup", {trigger: true});
 			},
 			error: function() {
 				console.error('failed to create a new map');
