@@ -2,6 +2,7 @@
 */
 
 var DEBUG = true;
+<<<<<<< HEAD
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
 var VIRTUAL_PHYSICAL_FACTOR = 100; // 1 unit in GL view is 1km. 1mm movement in physical space maps to....
 
@@ -80,6 +81,9 @@ var OBJECT_TAGS = {
 };
 
 var firstLoad = true;
+=======
+var _firstLoad = true;
+>>>>>>> 786a9eb787a2ba26eaa23437b5f66b00c19e980b
 var _mapId = String;
 var _mapName = String;
 
