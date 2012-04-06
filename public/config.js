@@ -67,7 +67,7 @@ ObjectTag.prototype.update = function(protein) {
 		return true;
 	}
 	return false;
-}
+};
 
 var OBJECT_TAGS = {
 	globe: [
