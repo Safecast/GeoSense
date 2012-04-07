@@ -40,7 +40,7 @@ app.configure(function(){
 // STATIC ROUTES
 ////////////////
 
-app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)$/, function(req, res){
+app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)(|\/setup)$/, function(req, res){
    res.sendfile('public/index.html');
 });
 

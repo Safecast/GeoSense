@@ -14,9 +14,6 @@ window.MapOLView = window.MapViewBase.extend({
 	
 		_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
-	
-		this.markers = {};
-		this.markerArray = [];
     },
 
     render: function() {
@@ -26,37 +23,174 @@ window.MapOLView = window.MapViewBase.extend({
 
 	start: function() {
 		var self = this;
-		var mapOptions = {
-			zoom: 5,
-			minZoom:5,
-			center: new google.maps.LatLng(38.0, -97.0),
-			zoomControl: false,
-			panControl: false,
-			scaleControl: false,
-			scaleControlOptions: { position: google.maps.ControlPosition.TOP_CENTER },
-			mapTypeControl: false,
-			streetViewControl: false,
-			mapTypeId: google.maps.MapTypeId.ROADMAP	
-		};		
-	
-		this.map = new google.maps.Map(this.$('#map_canvas')[0],mapOptions);
 		
-		//Set Listeners
-		google.maps.event.addListener(this.map, 'zoom_changed', function() {
-			self.setMapZoom(self.map.getZoom());
-		})
+		var Feature = OpenLayers.Feature.Vector;
+		var Geometry = OpenLayers.Geometry;
+		var points = [];
+		
+		for (i=0;i<=50000;i++)
+		{
+			lat = this.getRandomInRange(180, -180, 3);
+			lng = this.getRandomInRange(90, -90, 3);
+			currPoint = new Geometry.Point(lat, lng);
+			currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+			points.push(new Feature(currPoint));
+		}
+		
+		console.log(points.length);
+		
+		var Rule = OpenLayers.Rule;
+		var Filter = OpenLayers.Filter;
+		
+		var style = new OpenLayers.Style({
+		    pointRadius: 10,
+		    strokeWidth: 3,
+		    strokeOpacity: 0.7,
+		    strokeColor: "navy",
+		    fillColor: "#ffcc66",
+		    fillOpacity: 1
+		}, {
+		    rules: [
+		        new Rule({
+		            filter: new Filter.Comparison({
+		                type: "==",
+		                property: "cls",
+		                value: "one"
+		            }),
+		            symbolizer: {
+		                externalGraphic: "../assets/marker-blue.png"
+		            }
+		        }),
+		        new Rule({
+		            filter: new Filter.Comparison({
+		                type: "==",
+		                property: "cls",
+		                value: "two"
+		            }),
+		            symbolizer: {
+		                externalGraphic: "../assets/marker-green.png"
+		            }
+		        }),
+		        new Rule({
+		            elseFilter: true,
+		            symbolizer: {
+		                graphicName: "circle"
+		            }
+		        })
+		    ]
+		});
+		
+		var layer = new OpenLayers.Layer.VectorPt(null, {
+			styleMap: new OpenLayers.StyleMap({
+		        "default": style,
+		        select: {
+		            fillColor: "red",
+		            pointRadius: 13,
+		            strokeColor: "yellow",
+		            strokeWidth: 3
+		        }
+		    }),
+			projection: new OpenLayers.Projection("EPSG:4326"),
+			sphericalMercator: true,
+		    renderers: ["Canvas2"]
+		});
+		layer.addFeatures(points);
+				
+		var g = new OpenLayers.Layer.Google("Google Streets", {
+			type: 'styled',
+		    sphericalMercator: true,
+		});
+		
+		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+		    restrictedExtent = maxExtent.clone(),
+		    maxResolution = 156543.0339;
+
+		var map = new OpenLayers.Map({
+		    div: "map_canvas",
+		    projection: new OpenLayers.Projection("EPSG:900913"),
+			displayProjection: new OpenLayers.Projection("EPSG:4326"),
+		    numZoomLevels: 18,
+		    maxResolution: maxResolution,
+		    maxExtent: maxExtent,
+		    restrictedExtent: restrictedExtent,
+		});
+		
+		map.addLayers([g]);
+		map.addLayers([layer]);
+		
+		var stylers = [ { featureType: "all", elementType: "all", stylers: [ { saturation: -100 }, { visibility: 'simplified' },{ lightness: 8 },{ gamma: 1.31 }] } ];	
+
+		var styledMapOptions = {
+			name: "Styled Map"
+		};
+
+		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
+		
+		g.mapObject.mapTypes.set('styled', styledMapType);
+		g.mapObject.setMapTypeId('styled');
+		
+		map.addControl(new OpenLayers.Control.MousePosition());
+		
+		centerPoint = new Geometry.Point(137, 36);
+		centerPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+		
+		map.setCenter(new OpenLayers.LonLat(15458624.598242,4314309.545983),6);
+		//map.setCenter(new OpenLayers.LonLat(centerPoint), 3); 
+		console.log(map.getCenter());
+
+		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+		                defaultHandlerOptions: {
+		                    'single': true,
+		                    'double': false,
+		                    'pixelTolerance': 0,
+		                    'stopSingle': false,
+		                    'stopDouble': false
+		                },
+
+		                initialize: function(options) {
+		                    this.handlerOptions = OpenLayers.Util.extend(
+		                        {}, this.defaultHandlerOptions
+		                    );
+		                    OpenLayers.Control.prototype.initialize.apply(
+		                        this, arguments
+		                    ); 
+		                    this.handler = new OpenLayers.Handler.Click(
+		                        this, {
+		                            'click': this.trigger
+		                        }, this.handlerOptions
+		                    );
+		                }, 
+
+		                trigger: function(e) {
+		                    var lonlat = map.getLonLatFromPixel(e.xy);
+		                    console.log(lonlat.lon + " , " + lonlat.lat);
+		                }
+
+		            });
+
+		var click = new OpenLayers.Control.Click();
+		map.addControl(click);
+		click.activate();
+
+		var select = new OpenLayers.Control.SelectFeature(layer);
+		map.addControl(select);
+		select.activate();
 		
 		//Default Theme
-		this.updateMapStyle(defaultMapStyle);
+		//this.updateMapStyle(defaultMapStyle);
 		
 		//Default Location
-		this.setMapLocation(defaultMapLocation);
+		//this.setMapLocation(defaultMapLocation);
 		
 		//Render Fusion Maps
-		this.initSafecastFusionMap();
+		//this.initSafecastFusionMap();
 		
-		this.$('#dataPoint').popover();
+		//this.$('#dataPoint').popover();
 
+	},
+	
+	getRandomInRange: function(from, to, fixed) {
+	    return (Math.random() * (to - from) + from).toFixed(fixed) * 1;
 	},
 		
 	setMapZoom: function(zoom)
@@ -151,14 +285,14 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	removeCollectionFromMap: function(model) {
 		
-		if (this.markerArray.length > 0) {
-			for (i in this.markerArray) {
-				if(this.markerArray[i].collectionId == model.collectionId)
-				{
-					this.markerArray[i].setMap(null)
-				}
-			}
-		}	
+		// if (this.markerArray.length > 0) {
+		// 	for (i in this.markerArray) {
+		// 		if(this.markerArray[i].collectionId == model.collectionId)
+		// 		{
+		// 			this.markerArray[i].setMap(null)
+		// 		}
+		// 	}
+		// }	
 	},
 
 	
@@ -184,8 +318,8 @@ window.MapOLView = window.MapViewBase.extend({
 			collectionId: collectionId,
 		});
 		
-		this.markerArray.push(marker);
-		this.markers[collectionId] = marker;
+		//this.markerArray.push(marker);
+		//this.markers[collectionId] = marker;
 
 		google.maps.event.addListener(marker, 'mouseover', function() {	
 			//console.log(model.get('location'));
