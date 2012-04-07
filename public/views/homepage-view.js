@@ -39,18 +39,13 @@ window.HomepageView = Backbone.View.extend({
 				
 				for(i=0;i<data.length;i++)
 				{
-					self.$('#mapTable').append('<tr><td>'+data[i].name+'</td><td><a target="_self" href="'+data[i].mapid+'">geo.media.mit.edu/'+ data[i].mapid +'</a></td><tr>');
+					self.$('#mapTable').append('<tr><td>'+data[i].name+'</td><td><a target="_self" href="/'+data[i].mapid+'">geo.media.mit.edu/'+ data[i].mapid +'</a></td><tr>');
 				}
 			},
 			error: function() {
 				console.error('failed to fetch unique map');
 			}
 		});	
-	},
-
-	removeButtonClicked: function(id)
-	{
-		console.log(id);
 	},
 
 	createMapButtonClicked: function() {
@@ -67,7 +62,7 @@ window.HomepageView = Backbone.View.extend({
 			type: 'POST',
 			url: '/api/map/' + self.mapid + '/' + self.name,
 			success: function(data) {
-				app.navigate(self.mapid + "/setup", {trigger: true});
+				window.location.href= self.mapid + '/setup';
 			},
 			error: function() {
 				console.error('failed to create a new map');

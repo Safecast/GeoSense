@@ -96,7 +96,7 @@ window.MapOLView = window.MapViewBase.extend({
 		});
 		layer.addFeatures(points);
 				
-		var g = new OpenLayers.Layer.Google("Google Streets", {
+		var gmap = new OpenLayers.Layer.Google("Google Streets", {
 			type: 'styled',
 		    sphericalMercator: true,
 		});
@@ -113,9 +113,10 @@ window.MapOLView = window.MapViewBase.extend({
 		    maxResolution: maxResolution,
 		    maxExtent: maxExtent,
 		    restrictedExtent: restrictedExtent,
+	
 		});
 		
-		map.addLayers([g]);
+		map.addLayers([gmap]);
 		map.addLayers([layer]);
 		
 		var stylers = [ { featureType: "all", elementType: "all", stylers: [ { saturation: -100 }, { visibility: 'simplified' },{ lightness: 8 },{ gamma: 1.31 }] } ];	
@@ -126,8 +127,8 @@ window.MapOLView = window.MapViewBase.extend({
 
 		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
 		
-		g.mapObject.mapTypes.set('styled', styledMapType);
-		g.mapObject.setMapTypeId('styled');
+		gmap.mapObject.mapTypes.set('styled', styledMapType);
+		gmap.mapObject.setMapTypeId('styled');
 		
 		map.addControl(new OpenLayers.Control.MousePosition());
 		
@@ -135,9 +136,6 @@ window.MapOLView = window.MapViewBase.extend({
 		centerPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
 		map.setCenter(new OpenLayers.LonLat(15458624.598242,4314309.545983),6);
-		//map.setCenter(new OpenLayers.LonLat(centerPoint), 3); 
-		console.log(map.getCenter());
-
 		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
 		                defaultHandlerOptions: {
 		                    'single': true,

@@ -105,7 +105,7 @@ window.SideBarView = Backbone.View.extend({
 			url: '/api/map/' + _mapId,
 			success: function() {
 				console.log('deleted map: ' + _mapId);
-				app.navigate("", {trigger: true});
+				window.location = '../';
 			},
 			error: function() {
 				console.error('failed to delete map: ' + _mapId);

@@ -68,6 +68,7 @@ var AppRouter = Backbone.Router.extend({
 		":mapId/map":"setUniqueMap",
 		":mapId/setup":"setNewMap",
 		":mapId":"setUniqueMap",
+		"removed":"home",
 		"":"home",
     },
 
@@ -78,14 +79,13 @@ var AppRouter = Backbone.Router.extend({
 
 	render:function(state)
 	{
-		console.log('render...');
  		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
         $('body').append(this.headerView.render().el);
 
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
 
-		this.fetchAndDrawData('all');	
+		this.fetchCollections('sidebar');
 		
 		this.vent.trigger("setToggleStates", {state:state});
 	},
@@ -131,7 +131,7 @@ var AppRouter = Backbone.Router.extend({
 				{
 					self.mapGL();
 				}
-				
+								
 				if(!self.sideBarView)
 					self.render(options.state);
 				
@@ -151,7 +151,7 @@ var AppRouter = Backbone.Router.extend({
 	        $('body').append(this.homepageView.render().el);
 		} else
 		{
-			window.location.reload(true);
+			window.location.reload(true);			
 		}
 	},
 
@@ -172,6 +172,8 @@ var AppRouter = Backbone.Router.extend({
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
         }	
+
+		this.fetchCollections('mapdata');
     },
 
 	mapGL:function () {
@@ -191,9 +193,11 @@ var AppRouter = Backbone.Router.extend({
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
         }
+
+		this.fetchCollections('mapdata');
     },
 
-	fetchAndDrawData: function(loadType)
+	fetchCollections: function(type)
 	{
 		var self = this;
 				
@@ -204,20 +208,31 @@ var AppRouter = Backbone.Router.extend({
 			url: '/api/maps/' + _mapId,
 			success: function(data) {
 		
-				//Save the distinct collection Id(s) to app scope
-				num_data_sources = data.length;
+				//Save collection information to app scope
+				_mapCollections = data;
 				
+				//Save the distinct collection Id(s) to app scope
+				num_data_sources = _mapCollections.length;
+				
+				//Bind existing data sources
 				for(i=0;i<num_data_sources;i++)
 				{
 					// For each distinct data source, add an existing data source to the app.
 					// This binds a data model and sidebar data view
-					self.addExistingDataSource(data[i].collectionid, loadType);
+					self.addExistingDataSource(data[i].collectionid, type);
 				}
+				
+				console.log(_mapCollections);
 			},
 			error: function() {
 				console.error('failed to fetch distinct collections');
 			}
 		});
+	},
+	
+	addSideBarDataViews: function()
+	{
+		console.log('I happen once: ' + num_data_sources);
 	},
 
 	maxValue: function( array ){
@@ -296,13 +311,12 @@ var AppRouter = Backbone.Router.extend({
 		}
 		
 		//Create Points
-		//pointCollection.create() may also be used
 		pointCollection[num_data_sources].addData(dataSet, function(){
 			app.addExistingDataSource(uniqid, 'all');
 		});
 	},
 	
-	addExistingDataSource: function(index, loadType)
+	addExistingDataSource: function(index, type)
 	{
 		var self = this;
 		
@@ -325,14 +339,22 @@ var AppRouter = Backbone.Router.extend({
 							newData:false,
 						});
 						pointCollection[this.index].fetch({success: function() {
+							
 							//Add a new sidebar data view once data is fetched
-							
-							if(loadType == 'all')
-							{
+							if(type == 'sidebar')
 								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-							}	
-							self.addMapCollection(scope.index, pointCollection[scope.index]);	
 							
+							//Add data source to map, mapol, or mapgl
+							if(type == 'mapdata')
+								self.addMapCollection(scope.index, pointCollection[scope.index]);
+							
+							//For adding new data, add both sidebar and map data
+							if(type == 'all')
+							{
+								self.addMapCollection(scope.index, pointCollection[scope.index]);
+								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
+									
+							}
 						}});
 						
 					},
@@ -353,14 +375,13 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
-		//Add SideBar
-		console.log('options.collectionId: ' + options.dataLength);
 		this.sideBarDataView = new SideBarDataView({collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},
 	
 	addMapCollection: function(id, collection)
 	{
+		console.log('adding map collection: id:' + id + ' collection: ' + collection);
 		this.mapView.addCollection(id, collection);
 	},
 
