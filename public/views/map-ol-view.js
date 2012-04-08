@@ -44,8 +44,8 @@ window.MapOLView = window.MapViewBase.extend({
 		    maxResolution = 156543.0339;
 		
 		map_controls = [ 
-		new OpenLayers.Control.PanZoomBar(),
-		new OpenLayers.Control.Navigation(),
+			new OpenLayers.Control.PanZoomBar(),
+			new OpenLayers.Control.Navigation(),
 		];
 
 		this.map = new OpenLayers.Map({
@@ -58,26 +58,87 @@ window.MapOLView = window.MapViewBase.extend({
 		    restrictedExtent: restrictedExtent,
 			controls: map_controls,
 			
-		});
-				
-		this.layer = new OpenLayers.Layer.VectorPt(null, {
-			projection: new OpenLayers.Projection("EPSG:4326"),
-			sphericalMercator: true,
-		    renderers: ["Canvas2"]
-		});
+		});	
 				
 		this.map.addLayers([this.gmap]);
-		this.map.addLayers([this.layer]);
+		
+		this.addCommentLayer();
 				
 		this.updateMapStyle(_defaultMapStyle);
 		
+		this.detectMapClick();
+		
 		if(DEBUG)
 			this.map.addControl(new OpenLayers.Control.MousePosition());
-					
-		centerPoint = new Geometry.Point(137, 36);
-		centerPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-		this.map.setCenter(new OpenLayers.LonLat(15458624.598242,4314309.545983),6);
+						
+		this.setMapLocation(_defaultMapLocation);
+	},
+	
+	addCommentLayer: function()
+	{
+		var features = [		    
+		    new Feature(
+		        new Geometry.Point(90, 45),
+		        {cls: "one"}
+		    ), 
+		];
 
+		// create rule based styles
+		var Rule = OpenLayers.Rule;
+		var Filter = OpenLayers.Filter;
+		var style = new OpenLayers.Style({
+		    pointRadius: 15,
+		    fillOpacity: .7
+		}, {
+		    rules: [
+		        new Rule({
+		            filter: new Filter.Comparison({
+		                type: "==",
+		                property: "cls",
+		                value: "one"
+		            }),
+		            symbolizer: {
+		                externalGraphic: "../assets/comment.png"
+		            }
+		        }),
+		       
+		    ]
+		});
+		
+		var selectedStyle = new OpenLayers.Style({
+		    pointRadius: 15,
+		    fillOpacity: .85
+		}, {
+		    rules: [
+		        new Rule({
+		            filter: new Filter.Comparison({
+		                type: "==",
+		                property: "cls",
+		                value: "one"
+		            }),
+		            symbolizer: {
+		                externalGraphic: "../assets/comment-o.png"
+		            }
+		        }),
+		    ]
+		});
+		
+		var commentLayer = new OpenLayers.Layer.Vector(null, {
+		    styleMap: new OpenLayers.StyleMap({
+		        "default": style,
+		        select: selectedStyle
+		    }),
+			projection: new OpenLayers.Projection("EPSG:4326"),
+			sphericalMercator: true,
+		    renderers: ["Canvas"]
+		});
+		commentLayer.addFeatures(features);
+	
+		this.map.addLayers([commentLayer]);
+		
+		var select = new OpenLayers.Control.SelectFeature(commentLayer);
+		this.map.addControl(select);
+		select.activate();
 	},
 	
 	addCollectionAsLayer: function(collection)
@@ -190,15 +251,40 @@ window.MapOLView = window.MapViewBase.extend({
 	  	return { x: tranlation.x, y: tranlation.y };
 	},
 	
-	removeMarkers: function() {
-	
-		if (this.markerArray.length > 0) {
-			for (i in this.markerArray) {				
-				this.markerArray[i].setMap(null);
-			}
-		}
-		this.markerArray = [];
-		this.markers = {};
+	detectMapClick: function ()
+	{
+		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+		                defaultHandlerOptions: {
+		                    'single': true,
+		                    'double': false,
+		                    'pixelTolerance': 0,
+		                    'stopSingle': false,
+		                    'stopDouble': false
+		                },
+
+		                initialize: function(options) {
+		                    this.handlerOptions = OpenLayers.Util.extend(
+		                        {}, this.defaultHandlerOptions
+		                    );
+		                    OpenLayers.Control.prototype.initialize.apply(
+		                        this, arguments
+		                    ); 
+		                    this.handler = new OpenLayers.Handler.Click(
+		                        this, {
+		                            'click': this.trigger
+		                        }, this.handlerOptions
+		                    );
+		                }, 
+
+		                trigger: function(e) {
+		                    var lonlat = this.map.getLonLatFromPixel(e.xy);
+		                    console.log(lonlat.lon + " , " + lonlat.lat);
+		                }
+
+					});
+		var click = new OpenLayers.Control.Click();
+		this.map.addControl(click);
+		click.activate();
 	},
 	
 	removeCollectionFromMap: function(model) {

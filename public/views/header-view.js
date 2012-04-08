@@ -16,12 +16,12 @@ window.HeaderView = Backbone.View.extend({
 	    this.template = _.template(tpl.get('header'));
 		this.vent = options.vent;	
 		this.mapName = options.mapName;
-		this.sidebarstate = "hidden";
     },
 
     render: function() {
 		$(this.el).html(this.template());
 		this.setTitle();
+		this.settingsButtonClicked();
         return this;
     },
 
@@ -41,14 +41,14 @@ window.HeaderView = Backbone.View.extend({
 
 	settingsButtonClicked: function() {
 				
-		if(this.sidebarstate == 'hidden')
+		if(_settingsVisible)
 		{
 			$('#settingsButton').html('<i class="icon-arrow-right icon-white"></i> Show Settings');
 			$('.sidebar-view').addClass('visible');
 			$('.map-view').addClass('full');
 			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
-			this.sidebarstate = '';
+			_settingsVisible = false;
 		}
 		else
 		{
@@ -57,7 +57,7 @@ window.HeaderView = Backbone.View.extend({
 			$('.map-view').removeClass('full');
 			$('.map-gl-view').removeClass('full');
 			$('.sidebar-view .black-overlay').removeClass('visible');
-			this.sidebarstate = 'hidden';
+			_settingsVisible = true;
 		}	
 	},
 	
