@@ -21,8 +21,6 @@ window.MapViewBase = Backbone.View.extend({
 					alert ("Cannot find " + addr + "! Status: " + status);
 				}
 		});
-		
-		
 	},
 
 	addCollection: function(id, collection)
@@ -58,15 +56,22 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		
 		//Create specific layer
-		//this.addCollectionAsLayer(collection);
+		this.addCollectionAsLayer(collection);
 		
+		var currCollection = collection.collectionId;
+		var currIndex;
+		$.each(this.layerArray, function(index, value) { 
+			if(value.collectionId == currCollection)
+				currIndex = index;
+		});
+				
 		collection.each(function(model) {
 			self.cleanPointModel(model);
-			self.addOne(model);
+			self.addOne(model, currIndex);
 		});
 		
+		this.layerArray[currIndex].redraw();
 	}
-
 });
 
 var AppRouter = Backbone.Router.extend({

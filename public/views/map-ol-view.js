@@ -22,8 +22,7 @@ window.MapOLView = window.MapViewBase.extend({
 		Rule = OpenLayers.Rule;
 		Filter = OpenLayers.Filter;
 		
-		OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";
-			
+		OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";	
     },
 
     render: function() {
@@ -85,15 +84,6 @@ window.MapOLView = window.MapViewBase.extend({
 	addCollectionAsLayer: function(collection)
 	{
 		var layer = new OpenLayers.Layer.VectorPt(null, {
-			styleMap: new OpenLayers.StyleMap({
-		        "default": style,
-		        select: {
-		            fillColor: "red",
-		            pointRadius: 13,
-		            strokeColor: "yellow",
-		            strokeWidth: 3
-		        }
-		    }),
 			projectionon: new OpenLayers.Projection("EPSG:4326"),
 			sphericalMercator: true,
 		    renderers: ["Canvas2"]
@@ -105,6 +95,7 @@ window.MapOLView = window.MapViewBase.extend({
 		currLayer = this.layerArray.length;
 		
 		this.map.addLayers([this.layerArray[currLayer-1]]);
+		
 	},
 	
 	updateMapStyle: function(theme)
@@ -188,20 +179,27 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 	
 	removeCollectionFromMap: function(model) {
+				
+		var currCollection = model.collectionId;
+		var currIndex;
+								
+		$.each(this.layerArray, function(index, value) { 
+			if(value.collectionId == currCollection)
+			{
+				currIndex = index;
+				console.log(currIndex);
+			}
+		});
 		
-		// if (this.markerArray.length > 0) {
-		// 	for (i in this.markerArray) {
-		// 		if(this.markerArray[i].collectionId == model.collectionId)
-		// 		{
-		// 			this.markerArray[i].setMap(null)
-		// 		}
-		// 	}
-		// }	
+		if(this.layerArray[currIndex])
+			this.layerArray[currIndex].destroy();
 	},
 
-    addOne: function(model) {
+    addOne: function(model, currIndex) {
 		var self = this;
 		
+		//Prep point for layer	
+		var index = currIndex;	
 		var collectionId = model.get('collectionid'); 
 		var name = model.get('name');
 		var location = model.get('location');
@@ -220,15 +218,8 @@ window.MapOLView = window.MapViewBase.extend({
 		vector = new OpenLayers.Feature.Vector(currPoint, {
 	        colour: hex,
 		});
-	
-		this.layer.features.push(vector)
-	
-		//this.layerArray[0].addFeatures(new Feature(point));
-		
-		//newPoints.push(new Feature(currPoint));
-
-		//this.pointArray.push(point);
-		//this.points[collectionId] = point;
-			
+				
+		//Add point to proper layer (by found index)
+		this.layerArray[index].features.push(vector);
     },
 });
