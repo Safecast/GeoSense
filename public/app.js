@@ -3,7 +3,7 @@ window.MapViewBase = Backbone.View.extend({
     initialize: function(options) {
 		this.collections = {};
 		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);			
+		options.vent.bind("setMapLocation", this.setMapLocation);		
 	},
 
 	setMapLocation: function(addr)
@@ -11,15 +11,18 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		
 		geocoder = new google.maps.Geocoder();
-		geocoder.geocode( {'address': addr, 'region': "jp"}, function (results, status)
+		geocoder.geocode( {'address': addr}, function (results, status)
 			{
 				if (status == google.maps.GeocoderStatus.OK)
 				{
-					self.fitMapBounds(results[0].geometry.viewport);
+					self.setViewPort(results);
 				}
 				else { 	
-					alert ("Cannot find " + addr + "! Status: " + status);}
+					alert ("Cannot find " + addr + "! Status: " + status);
+				}
 		});
+		
+		
 	},
 
 	addCollection: function(id, collection)
@@ -28,7 +31,7 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
-		this.collections[id].fetch();
+		this.collections[id].fetch();		
 	},
 
 	cleanPointModel: function(model) {
@@ -53,10 +56,15 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
+		
+		//Create specific layer
+		//this.addCollectionAsLayer(collection);
+		
 		collection.each(function(model) {
 			self.cleanPointModel(model);
 			self.addOne(model);
 		});
+		
 	}
 
 });
@@ -103,7 +111,6 @@ var AppRouter = Backbone.Router.extend({
 	setNewMap: function(uniqueMapId)
 	{
 		$('body').empty();
-		console.log(this.sideBarView);
 		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
 	},
 	
@@ -220,99 +227,11 @@ var AppRouter = Backbone.Router.extend({
 					// For each distinct data source, add an existing data source to the app.
 					// This binds a data model and sidebar data view
 					self.addExistingDataSource(data[i].collectionid, type);
-				}
-				
-				console.log(_mapCollections);
+				}				
 			},
 			error: function() {
 				console.error('failed to fetch distinct collections');
 			}
-		});
-	},
-	
-	addSideBarDataViews: function()
-	{
-		console.log('I happen once: ' + num_data_sources);
-	},
-
-	maxValue: function( array ){
-	    return Math.max.apply( Math, array );
-	},
-	
-	uniqId: function ()
-	{
-	    var newDate = new Date;
-	    return newDate.getTime();
-	},
-
-	addData:function (options)
-	{
-		var self = this;
-		var uniqid = this.uniqId();
-		var uniqueMapId = _mapId;
-		var title = options.title
-		var data = options.data;
-		var color = options.color;
-		var dataSet = [];
-						
-		//First increment total number of data sources
-		num_data_sources +=1;
-				
-		//Create collection
-		pointCollection[num_data_sources] = new PointCollection({
-			collectionId:uniqid,
-			mapId:uniqueMapId,
-			title:title,
-			newData:true,
-		});
-
-		for(var i = 0; i < data.length; ++i)
-		{
-			var location = '';
-			var lat = '';
-			var lng = '';
-			var intensity = '';
-			var name = '';
-			var val = '';
-
-			$.each(data[i], function(key, val) { 
-								
-				if(key == 'Location')
-				{
-					location = val;
-				}
-				else if (key == 'lat')
-				{
-					lat = val;
-				}
-				else if (key == 'lng')
-				{
-					lng = val;
-				}
-				else if (key == 'intensity')
-				{
-					intensity = val;
-				}
-				else if (key == 'name')
-				{
-					name = val;
-				}
-			});	
-			
-			//Check for lat/lng location
-			if(location == '')
-				location = lat + ',' + lng;
-			
-			//Substitute intensity for val
-			if(val == '')
-				val = intensity;
-			
-			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val});
-		}
-		
-		//Create Points
-		pointCollection[num_data_sources].addData(dataSet, function(){
-			app.addExistingDataSource(uniqid, 'all');
 		});
 	},
 	
@@ -342,18 +261,15 @@ var AppRouter = Backbone.Router.extend({
 							
 							//Add a new sidebar data view once data is fetched
 							if(type == 'sidebar')
+							{
 								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-							
-							//Add data source to map, mapol, or mapgl
-							if(type == 'mapdata')
-								self.addMapCollection(scope.index, pointCollection[scope.index]);
-							
-							//For adding new data, add both sidebar and map data
-							if(type == 'all')
+							} else if(type == 'mapdata')
 							{
 								self.addMapCollection(scope.index, pointCollection[scope.index]);
-								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-									
+							} else if(type == 'all')
+							{
+								self.addMapCollection(scope.index, pointCollection[scope.index]);
+								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});		
 							}
 						}});
 						
@@ -368,6 +284,87 @@ var AppRouter = Backbone.Router.extend({
 			}
 		})	
 	},
+
+	addData:function (options)
+	{
+		var self = this;
+		var uniqid = this.uniqId();
+		var uniqueMapId = _mapId;
+		var title = options.title
+		var data = options.data;
+		var color = options.color;
+		var dataSet = [];
+		var maxVal = 0;
+
+		for(var i = 0; i < data.length; ++i)
+		{
+			var location = '';
+			var lat = '';
+			var lng = '';
+			var intensity = '';
+			var name = '';
+			var val = '';
+			
+
+			$.each(data[i], function(key, val) { 
+								
+				if(key == 'Location')
+				{
+					location = val;
+				}
+				else if (key == 'lat')
+				{
+					lat = val;
+				}
+				else if (key == 'lng')
+				{
+					lng = val;
+				}
+				else if (key == 'lon')
+				{
+					lng = val;
+				}
+				else if (key == 'intensity')
+				{
+					intensity = val;
+				}
+				else if (key == 'name')
+				{
+					name = val;
+				}
+
+				if(intensity > maxVal)
+					maxVal = intensity;	
+					
+			});	
+				
+			//Check for lat/lng location
+			location = lat + ',' + lng;
+			
+			//Substitute intensity for val
+			if(val == '')
+				val = intensity;
+			
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val});
+		}
+				
+		//First increment total number of data sources
+		num_data_sources +=1;
+				
+		//Create collection
+		pointCollection[num_data_sources] = new PointCollection({
+			collectionId:uniqid,
+			mapId:uniqueMapId,
+			title:title,
+			maxVal: maxVal,
+			newData:true,
+		});
+		
+		//Create Points
+		pointCollection[num_data_sources].addData(dataSet, function(){
+			app.addExistingDataSource(uniqid, 'all');
+		});
+	},
 	
 	addTwitterData:function (options)
 	{
@@ -381,8 +378,13 @@ var AppRouter = Backbone.Router.extend({
 	
 	addMapCollection: function(id, collection)
 	{
-		console.log('adding map collection: id:' + id + ' collection: ' + collection);
 		this.mapView.addCollection(id, collection);
+	},
+	
+	uniqId: function ()
+	{
+	    var newDate = new Date;
+	    return newDate.getTime();
 	},
 
 });

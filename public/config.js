@@ -12,7 +12,7 @@ var _mapCollections = [];
 var num_data_sources = 0;
 var pointCollection = new Array();
 
-var defaultMapStyle = 'light';
+var _defaultMapStyle = 'dark';
 var defaultMapLocation = 'japan'
 							
 //VARIABLES FOR THREE.JS

@@ -2,7 +2,8 @@ var application_root = __dirname,
   	express = require("express"),
   	path = require("path"),
   	mongoose = require('mongoose'),
-  	twitter = require('ntwitter');
+  	twitter = require('ntwitter'),
+ 	Color = require("color");
 
 var app = express.createServer();
 
@@ -174,6 +175,9 @@ app.get('/api/collection/distinct' , function(req, res){
 });
 
 app.get('/api/collection/:id', function(req, res){
+	console.log('loading point collection');
+	
+	
 	Point.find({collectionid:req.params.id}, function(err, point) {
 		if (!err) {
 			res.send(point);
@@ -186,6 +190,7 @@ app.get('/api/collection/:id', function(req, res){
 });
 
 app.get('/api/collection/', function(req, res){
+	
 	Point.find({collectionid:req.params.id}, function(err, point) {
 		if (!err) {
 			res.send(point);
@@ -275,13 +280,14 @@ app.get('/api/pointcollections', function(req, res){
 });
 
 //Post a Point Collection
-app.post('/api/pointcollection/:id/:name/:mapid', function(req, res){
+app.post('/api/pointcollection/:id/:name/:mapid/:maxval', function(req, res){
 	
 	var collection;
 	  collection = new PointCollection({
 		collectionid: req.params.id,
 	    name: req.params.name,
 		mapid: req.params.mapid,
+		maxval: req.params.maxval,
 	  });
 	  collection.save(function(err) {
 	    if (!err) {

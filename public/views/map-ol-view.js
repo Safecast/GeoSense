@@ -4,8 +4,6 @@ window.MapOLView = window.MapViewBase.extend({
 	className: 'map-view',
 	
     events: {
-		'click #zoomIn': 'zoomInClicked',
-		'click #zoomOut': 'zoomOutClicked',
     },
 
     initialize: function(options) {
@@ -14,6 +12,18 @@ window.MapOLView = window.MapViewBase.extend({
 	
 		_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
+	
+		this.points = {};
+		this.pointArray = [];
+		this.layerArray = [];
+		
+		Feature = OpenLayers.Feature.Vector;
+		Geometry = OpenLayers.Geometry;
+		Rule = OpenLayers.Rule;
+		Filter = OpenLayers.Filter;
+		
+		OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";
+			
     },
 
     render: function() {
@@ -23,63 +33,57 @@ window.MapOLView = window.MapViewBase.extend({
 
 	start: function() {
 		var self = this;
+					
+		this.gmap = new OpenLayers.Layer.Google("Google Streets", {
+			type: 'styled',
+		    sphericalMercator: true,
+		});
+		        
+		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+		    restrictedExtent = maxExtent.clone(),
+		    maxResolution = 156543.0339;
 		
-		var Feature = OpenLayers.Feature.Vector;
-		var Geometry = OpenLayers.Geometry;
-		var points = [];
-		
-		for (i=0;i<=50000;i++)
-		{
-			lat = this.getRandomInRange(180, -180, 3);
-			lng = this.getRandomInRange(90, -90, 3);
-			currPoint = new Geometry.Point(lat, lng);
-			currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-			points.push(new Feature(currPoint));
-		}
-		
-		console.log(points.length);
-		
-		var Rule = OpenLayers.Rule;
-		var Filter = OpenLayers.Filter;
-		
-		var style = new OpenLayers.Style({
-		    pointRadius: 10,
-		    strokeWidth: 3,
-		    strokeOpacity: 0.7,
-		    strokeColor: "navy",
-		    fillColor: "#ffcc66",
-		    fillOpacity: 1
-		}, {
-		    rules: [
-		        new Rule({
-		            filter: new Filter.Comparison({
-		                type: "==",
-		                property: "cls",
-		                value: "one"
-		            }),
-		            symbolizer: {
-		                externalGraphic: "../assets/marker-blue.png"
-		            }
-		        }),
-		        new Rule({
-		            filter: new Filter.Comparison({
-		                type: "==",
-		                property: "cls",
-		                value: "two"
-		            }),
-		            symbolizer: {
-		                externalGraphic: "../assets/marker-green.png"
-		            }
-		        }),
-		        new Rule({
-		            elseFilter: true,
-		            symbolizer: {
-		                graphicName: "circle"
-		            }
-		        })
-		    ]
+		map_controls = [ 
+		new OpenLayers.Control.PanZoomBar(),
+		new OpenLayers.Control.Navigation(),
+		];
+
+		this.map = new OpenLayers.Map({
+		    div: "map_canvas",
+		    projection: new OpenLayers.Projection("EPSG:900913"),
+			displayProjection: new OpenLayers.Projection("EPSG:4326"),
+		    numZoomLevels: 18,
+		    maxResolution: maxResolution,
+		    maxExtent: maxExtent,
+		    restrictedExtent: restrictedExtent,
+			controls: map_controls,
+			
+		});
+				
+		this.layer = new OpenLayers.Layer.VectorPt(null, {
+			projection: new OpenLayers.Projection("EPSG:4326"),
+			sphericalMercator: true,
+		    renderers: ["Canvas2"]
 		});
 		
+		this.layer.visibility = true
+		
+		this.map.addLayers([this.gmap]);
+		this.map.addLayers([this.layer]);
+				
+		this.updateMapStyle(_defaultMapStyle);
+		
+		if(DEBUG)
+			this.map.addControl(new OpenLayers.Control.MousePosition());
+					
+		centerPoint = new Geometry.Point(137, 36);
+		centerPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+		this.map.setCenter(new OpenLayers.LonLat(15458624.598242,4314309.545983),6);
+
+	},
+	
+	addCollectionAsLayer: function(collection)
+	{
 		var layer = new OpenLayers.Layer.VectorPt(null, {
 			styleMap: new OpenLayers.StyleMap({
 		        "default": style,
@@ -90,115 +94,17 @@ window.MapOLView = window.MapViewBase.extend({
 		            strokeWidth: 3
 		        }
 		    }),
-			projection: new OpenLayers.Projection("EPSG:4326"),
+			projectionon: new OpenLayers.Projection("EPSG:4326"),
 			sphericalMercator: true,
 		    renderers: ["Canvas2"]
 		});
-		layer.addFeatures(points);
-				
-		var gmap = new OpenLayers.Layer.Google("Google Streets", {
-			type: 'styled',
-		    sphericalMercator: true,
-		});
 		
-		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
-		    restrictedExtent = maxExtent.clone(),
-		    maxResolution = 156543.0339;
-
-		var map = new OpenLayers.Map({
-		    div: "map_canvas",
-		    projection: new OpenLayers.Projection("EPSG:900913"),
-			displayProjection: new OpenLayers.Projection("EPSG:4326"),
-		    numZoomLevels: 18,
-		    maxResolution: maxResolution,
-		    maxExtent: maxExtent,
-		    restrictedExtent: restrictedExtent,
-	
-		});
+		layer.collectionId = collection.collectionId;
 		
-		map.addLayers([gmap]);
-		map.addLayers([layer]);
+		this.layerArray.push(layer);
+		currLayer = this.layerArray.length;
 		
-		var stylers = [ { featureType: "all", elementType: "all", stylers: [ { saturation: -100 }, { visibility: 'simplified' },{ lightness: 8 },{ gamma: 1.31 }] } ];	
-
-		var styledMapOptions = {
-			name: "Styled Map"
-		};
-
-		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
-		
-		gmap.mapObject.mapTypes.set('styled', styledMapType);
-		gmap.mapObject.setMapTypeId('styled');
-		
-		map.addControl(new OpenLayers.Control.MousePosition());
-		
-		centerPoint = new Geometry.Point(137, 36);
-		centerPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-		
-		map.setCenter(new OpenLayers.LonLat(15458624.598242,4314309.545983),6);
-		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
-		                defaultHandlerOptions: {
-		                    'single': true,
-		                    'double': false,
-		                    'pixelTolerance': 0,
-		                    'stopSingle': false,
-		                    'stopDouble': false
-		                },
-
-		                initialize: function(options) {
-		                    this.handlerOptions = OpenLayers.Util.extend(
-		                        {}, this.defaultHandlerOptions
-		                    );
-		                    OpenLayers.Control.prototype.initialize.apply(
-		                        this, arguments
-		                    ); 
-		                    this.handler = new OpenLayers.Handler.Click(
-		                        this, {
-		                            'click': this.trigger
-		                        }, this.handlerOptions
-		                    );
-		                }, 
-
-		                trigger: function(e) {
-		                    var lonlat = map.getLonLatFromPixel(e.xy);
-		                    console.log(lonlat.lon + " , " + lonlat.lat);
-		                }
-
-		            });
-
-		var click = new OpenLayers.Control.Click();
-		map.addControl(click);
-		click.activate();
-
-		var select = new OpenLayers.Control.SelectFeature(layer);
-		map.addControl(select);
-		select.activate();
-		
-		//Default Theme
-		//this.updateMapStyle(defaultMapStyle);
-		
-		//Default Location
-		//this.setMapLocation(defaultMapLocation);
-		
-		//Render Fusion Maps
-		//this.initSafecastFusionMap();
-		
-		//this.$('#dataPoint').popover();
-
-	},
-	
-	getRandomInRange: function(from, to, fixed) {
-	    return (Math.random() * (to - from) + from).toFixed(fixed) * 1;
-	},
-		
-	setMapZoom: function(zoom)
-	{
-		map_zoom = zoom;
-		this.initSafecastFusionMap();
-	},
-	
-	fitMapBounds: function(bounds) {
-		this.map.fitBounds(bounds);
+		this.map.addLayers([this.layerArray[currLayer-1]]);
 	},
 	
 	updateMapStyle: function(theme)
@@ -239,35 +145,35 @@ window.MapOLView = window.MapViewBase.extend({
 			];	
 		}
 		
-		if(theme != null)
-		{
-			var styledMapType = new google.maps.StyledMapType(style, { map: this.map, name: 'Styled Map' });
-			this.map.mapTypes.set('map-style', styledMapType);
-			this.map.setMapTypeId('map-style');
-		}
+		var stylers = style;	
+		var styledMapOptions = {
+			name: "Styled Map"
+		};
+		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
+
+		this.gmap.mapObject.mapTypes.set('styled', styledMapType);
+		this.gmap.mapObject.setMapTypeId('styled');
 	},
-	
-	zoomInClicked: function()
-	{		
-		map_zoom = map_zoom+1;
-		this.map.setZoom(map_zoom);
-	},
-	
-	zoomOutClicked: function()
-	{
-		map_zoom = map_zoom-1;
-		this.map.setZoom(map_zoom);
-	},
-	
-	initSafecastFusionMap: function()
-	{
 		
+	setViewPort: function(result)
+	{
+		var first = result[0],
+		
+		    center = this.toWebMercator(first.geometry.location),
+		    viewport = first.geometry.viewport,
+		    viewportSW = viewport.getSouthWest(),
+		    viewportNE = viewport.getNorthEast(),
+		    min = this.toWebMercator(viewportSW),
+		    max = this.toWebMercator(viewportNE),
+		    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
+
+		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
 	},
 	
-	updateDataPointInfo: function(e)
-	{
-		
-				
+	toWebMercator: function (googLatLng) {
+		tranlation = new Geometry.Point(googLatLng.Ya, googLatLng.Xa);
+		tranlation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
+	  	return { x: tranlation.x, y: tranlation.y };
 	},
 	
 	removeMarkers: function() {
@@ -293,36 +199,36 @@ window.MapOLView = window.MapViewBase.extend({
 		// }	
 	},
 
-	
     addOne: function(model) {
 		var self = this;
 		
 		var collectionId = model.get('collectionid'); 
-		var color = model.get('color');
 		var name = model.get('name');
+		var location = model.get('location');
+		var lat = model.get('lon');
+		var lon = model.get('lat');
+		var val = model.get('val');
 		
-		if(color == null)
-			color = '#F0F0F0'
-			
-		var content = "<div id='dataPoint' rel='tooltip' title='"+name+"' style='background-color:red; border-radius:10px; width:10px;height:10px;opacity:.5;" +color + ";'></div>";
-	
-		var marker = new RichMarker({
-			map: this.map,
-	 		position: new google.maps.LatLng(model.get('lat'), model.get('lon')),
-			draggable: false,
-			flat: true,
-			anchor: RichMarkerPosition.MIDDLE,
-			content: content,
-			collectionId: collectionId,
+		var rainbow = new Rainbow();
+		rainbow.setSpectrum('green', 'FFFFFF', '#ff0000');
+		rainbow.setNumberRange(0, 1000);
+		var hex = '#' + rainbow.colourAt(val);
+		
+		currPoint = new OpenLayers.Geometry.Point(lat, lon);
+		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+		
+		vector = new OpenLayers.Feature.Vector(currPoint, {
+	        colour: hex,
 		});
+	
+		this.layer.features.push(vector)
+	
+		//this.layerArray[0].addFeatures(new Feature(point));
 		
-		//this.markerArray.push(marker);
-		//this.markers[collectionId] = marker;
+		//newPoints.push(new Feature(currPoint));
 
-		google.maps.event.addListener(marker, 'mouseover', function() {	
-			//console.log(model.get('location'));
-		});			
-		
+		//this.pointArray.push(point);
+		//this.points[collectionId] = point;
+			
     },
-  
 });

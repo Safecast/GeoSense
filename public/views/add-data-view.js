@@ -74,7 +74,7 @@ window.AddDataView = Backbone.View.extend({
 			self.responseData = data;
 			self.showDataReview(data);
 		})
-		.error(function() { alert("Error loading your file"); })
+		.error(function(err) { alert(err); })
 		.complete(function() {});
 	},
 	
@@ -92,7 +92,7 @@ window.AddDataView = Backbone.View.extend({
 				$('.add-data-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
 
 				var table;
-				for(var i = 0; i < data.length; ++i)
+				for(var i = 0; i < 50; ++i) // 50 or data.length
 				{
 					table += "<tr>";
 
@@ -100,8 +100,7 @@ window.AddDataView = Backbone.View.extend({
 						table += '<td rel="tooltip" title="'+key+'" class="tooltip-test">' + val + '</td>';
 					});
 
-					table += "</tr>";	
-				    			
+					table += "</tr>";				
 				}
 
 				$('.add-data-view .modal-body .review .data-table .table').append(table);
