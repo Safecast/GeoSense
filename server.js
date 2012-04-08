@@ -84,10 +84,54 @@ var Chat = mongoose.model('Chat', new mongoose.Schema({
 	date: Date,
 }));
 
+var Comment = mongoose.model('Comment', new mongoose.Schema({
+	commentid: String,
+	mapid: String,
+	name: String,
+	text: String,
+	date: Date,
+}));
+
 // Routes
 
 ///////////////
 // COMMENTS 
+///////////////
+
+app.get('/api/comment/:commentid', function(req, res){
+  Comment.find(function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+app.get('/api/comment/map/:mapid', function(req, res){
+  Comment.find(function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+app.post('/api/comment/:commentid/:mapid/:name/:text/:date', function(req, res){
+  var chat;
+  chat = new Chat({
+	commentid: 		req.params.commentid,
+	mapid: 		req.params.mapid,
+    name: 		req.params.name,
+	text: 		req.params.text, 
+	date: 		req.params.date,
+  });
+
+  comment.save(function(err) {
+    if (!err) {
+	 	res.send(comment);
+    } else
+	{
+		res.send('oops', 500);
+	}
+  });
+});
+
+///////////////
+// LIVE CHAT 
 ///////////////
 
 app.get('/api/chat/:mapid', function(req, res){
@@ -104,8 +148,6 @@ app.post('/api/chat/:mapid/:name/:text/:date', function(req, res){
 	text: 		req.params.text, 
 	date: 		req.params.date,
   });
-
-console.log(req.params);
 
   chat.save(function(err) {
     if (!err) {
