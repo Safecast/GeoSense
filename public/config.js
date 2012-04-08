@@ -14,6 +14,9 @@ var pointCollection = new Array();
 
 var _defaultMapStyle = 'dark';
 var defaultMapLocation = 'japan'
+
+var _settingsVisible = true;
+var _chatVisible = true;
 							
 //VARIABLES FOR THREE.JS
 							

@@ -3,27 +3,9 @@ var application_root = __dirname,
   	path = require("path"),
   	mongoose = require('mongoose'),
   	twitter = require('ntwitter'),
- 	Color = require("color");
+	nowjs = require("now");
 
 var app = express.createServer();
-
-//Now.js
-/*
-var nowjs = require("now");
-var everyone = nowjs.initialize(app);
-
-nowjs.on("connect", function(){
-  console.log("Joined: " + this.now.name);
-});
-
-nowjs.on("disconnect", function(){
-  console.log("Left: " + this.now.name);
-}); 
-
-everyone.now.distributeMessage = function(message){
-  everyone.now.receiveMessage(this.now.name, message);
-};
-*/
 
 mongoose.connect('mongodb://localhost/geo');
 
@@ -36,6 +18,24 @@ app.configure(function(){
   	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   	app.set('views', path.join(application_root, "views"));
 });
+
+////////////////
+// CHAT SERVER
+////////////////
+var everyone = nowjs.initialize(app);
+
+// Send message to everyone on the users group
+everyone.now.distributeMessage = function(message){
+    var group = nowjs.getGroup(this.now.serverRoom);
+    group.now.receiveMessage(this.now.name, message);
+};
+
+everyone.now.joinRoom = function(newRoom){
+    var newGroup = nowjs.getGroup(newRoom);
+    newGroup.addUser(this.user.clientId);
+    newGroup.now.receiveMessage('New user joined the room', this.now.name);
+    this.now.serverRoom = newRoom;
+};
 
 /////////////////
 // STATIC ROUTES
@@ -447,6 +447,5 @@ app.get('/api/tweets', function(req, res){
   });
 });
 
-
-app.listen(8124, "0.0.0.0");
-console.log('Server running at http://0.0.0.0:8124/');
+app.listen(8080);
+console.log('Server running at localhost:8080/');

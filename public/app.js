@@ -106,6 +106,9 @@ var AppRouter = Backbone.Router.extend({
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
 
+		this.chatView = new ChatView({vent: this.vent});
+        $('body').append(this.chatView.render().el);
+
 		this.fetchCollections('sidebar');
 		
 		this.vent.trigger("setToggleStates", {state:state});
@@ -403,7 +406,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['homepage', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'modal','add-data','edit-data'],
+tpl.loadTemplates(['homepage', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });
