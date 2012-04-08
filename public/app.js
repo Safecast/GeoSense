@@ -3,7 +3,9 @@ window.MapViewBase = Backbone.View.extend({
     initialize: function(options) {
 		this.collections = {};
 		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);		
+		options.vent.bind("setMapLocation", this.setMapLocation);
+		
+		this.dataObjectArray = [];
 	},
 
 	setMapLocation: function(addr)
@@ -30,6 +32,11 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
 		this.collections[id].fetch();		
+		
+		//Save to local array for UI states not saved in DB
+		//I.e., visibility
+		collection.visible = true;
+		this.dataObjectArray.push(collection);
 	},
 
 	cleanPointModel: function(model) {
@@ -54,7 +61,7 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
-		
+				
 		//Create specific layer
 		this.addCollectionAsLayer(collection);
 		
@@ -71,6 +78,7 @@ window.MapViewBase = Backbone.View.extend({
 		});
 		
 		this.layerArray[currIndex].redraw();
+		
 	}
 });
 
@@ -377,7 +385,8 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
-		this.sideBarDataView = new SideBarDataView({collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
+		
+		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},
 	

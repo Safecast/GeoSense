@@ -6,9 +6,13 @@ window.SideBarDataView = Backbone.View.extend({
     events: {
 		'click #removeData:' : 'removeDataClicked',
 		'click #editData:' : 'editDataClicked',
+		'click #toggleVisible:' : 'toggleVisibleClicked',
+		'click #toggleHidden:' : 'toggleHiddenClicked',
     },
 
     initialize: function(options) {
+		this.vent = options.vent;
+	
 	    this.template = _.template(tpl.get('sidebar-data'));
 		this.collectionId = options.collectionId;
 		this.title = options.title;
@@ -72,5 +76,20 @@ window.SideBarDataView = Backbone.View.extend({
         $('body').append(this.editDataView.render().el);
 		$('#editDataModal').modal('toggle');
    	},
+
+	toggleVisibleClicked: function()
+	{
+		this.toggleVisibility(1);
+	},
+	
+	toggleHiddenClicked: function()
+	{
+		this.toggleVisibility(0)
+	},
+	
+	toggleVisibility: function(type)
+	{
+		this.vent.trigger("toggleLayerVisibility", this.collectionId, type);
+	}
 
 });

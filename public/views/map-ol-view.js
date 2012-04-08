@@ -13,8 +13,9 @@ window.MapOLView = window.MapViewBase.extend({
 		_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	
-		this.points = {};
-		this.pointArray = [];
+		_.bindAll(this, "toggleLayerVisibility");
+		options.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
+	
 		this.layerArray = [];
 		
 		Feature = OpenLayers.Feature.Vector;
@@ -64,9 +65,7 @@ window.MapOLView = window.MapViewBase.extend({
 			sphericalMercator: true,
 		    renderers: ["Canvas2"]
 		});
-		
-		this.layer.visibility = true
-		
+				
 		this.map.addLayers([this.gmap]);
 		this.map.addLayers([this.layer]);
 				
@@ -96,6 +95,30 @@ window.MapOLView = window.MapViewBase.extend({
 		
 		this.map.addLayers([this.layerArray[currLayer-1]]);
 		
+	},
+	
+	toggleLayerVisibility: function(index, type)
+	{		
+		var currCollection = index;
+		var currIndex;
+		$.each(this.layerArray, function(index, value) { 
+			if(value.collectionId == currCollection)
+				currIndex = index;
+		});
+		
+		currVisibility = this.layerArray[currIndex].getVisibility()
+		
+		if(type == 0)
+		{
+			this.layerArray[currIndex].setVisibility(false);
+		}else
+		{
+			this.layerArray[currIndex].setVisibility(true);
+		}
+		
+		//Update our local data object array
+		//this.dataObjectArray[currIndex].visible = type;
+		//console.log(this.dataObjectArray[currIndex].visible);
 	},
 	
 	updateMapStyle: function(theme)
