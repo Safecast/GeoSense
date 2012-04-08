@@ -9,6 +9,12 @@
 
 .chat-view .chat-container .messages
 {
+	position:absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:85px;
+	overflow-y:scroll;
 }
 
 .chat-view .chat-container .messages .message
@@ -19,10 +25,20 @@
 	border-radius:5px;
 }
 
+.chat-view .chat-container .messages .message.historic
+{
+	opacity:.3;
+}
+
 .chat-view .chat-container .messages .message-name
 {
 	margin-left:20px;
 	color:#666;
+}
+
+.chat-view .chat-container .messages .message-name.historic
+{
+	opacity:.5;
 }
 
 .chat-view .chat-container

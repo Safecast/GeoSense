@@ -6,6 +6,7 @@ window.ChatView = Backbone.View.extend({
     events: {
 		'click #joinRoom:' : 'joinRoomClicked',
 		'click #chatToggle' : 'chatToggleClicked',
+		'click #sendMessage' : 'sendMessageClicked',
     },
 
     initialize: function(options) {
@@ -16,14 +17,44 @@ window.ChatView = Backbone.View.extend({
 		var self = this;
 		$(this.el).html(this.template());	
 		
+		now.ready(function(){
+			now.joinRoom(_mapId);
+		});
+		
 		now.receiveMessage = function(name, message){
 			self.$("#messages").append("<div class='message'>" + message + '</div>' + "<div class='message-name'>" + name + "</div>");
+			//self.$("#messages").scrollTop(self.$("#messages").height());
+			
+			self.$("#messages").animate({ scrollTop: self.$("#messages").prop("scrollHeight") - self.$('#messages').height() }, 250);
+		   
 		}
+		this.fetchRoomHistory();
 		
-		this.toggleChatVisibility();
+		this.toggleChatVisibility();	
 			
         return this;
     },
+
+	fetchRoomHistory: function()
+	{
+		var self = this;
+		$.ajax({
+			type: 'GET',
+			url: '/api/chat/' + _mapId,
+			success: function(data) {
+		
+				for(i=0;i<data.length;i++)
+				{
+					self.$("#messages").append("<div class='message historic'>" + data[i].text + '</div>' + "<div class='message-name historic'>" + data[i].name + "</div>");
+				}	
+				
+			   	self.$("#messages").scrollTop(self.$("#messages").prop("scrollHeight") - self.$('#messages').height());
+			},
+			error: function() {
+				console.error('failed to fetch chat history');
+			}
+		});
+	},
 
 	joinRoomClicked: function()
 	{
@@ -32,14 +63,32 @@ window.ChatView = Backbone.View.extend({
 		
 		now.name = this.$('#userName').val();
 		
-		now.ready(function(){
-			now.joinRoom(_mapId);
-		});
-		
-		this.$("#sendMessage").click(function(){
-			now.distributeMessage(self.$("#message").val());
-			self.$("#message").val("");
-		});
+	},
+	
+	sendMessageClicked: function()
+	{
+		var message = this.$("#message").val();
+		if(message != '')
+		{
+			now.distributeMessage(message);
+			this.$("#message").val("");
+			
+			var mapid = _mapId;
+			var name = this.$('#userName').val();
+			var text = message;
+			var date = new Date();
+			
+			$.ajax({
+				type: 'POST',
+				url: '/api/chat/' + mapid + '/' + name + '/' + text + '/' + date,
+				success: function(data) {
+					console.log('stored chat message');
+				},
+				error: function() {
+					console.error('failed to store chat message');
+				}
+			})
+		}
 	},
 	
 	chatToggleClicked: function()
@@ -66,6 +115,8 @@ window.ChatView = Backbone.View.extend({
 			_chatVisible = false;
 		}
 	},
+	
+	
 
 	remove: function() {
 		$(window).unbind();
