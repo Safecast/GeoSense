@@ -77,7 +77,46 @@ var TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
 	name: String,
 }));
 
+var Comment = mongoose.model('Comment', new mongoose.Schema({
+	collectionid: Number,
+	mapid: String,
+}));
+
+var CommentCollection = mongoose.model('CommentCollection', new mongoose.Schema({
+	collectionid: Number,
+	mapid: String,
+	name: String,
+}));
+
 // Routes
+
+///////////////
+// COMMENTS 
+///////////////
+
+app.get('/api/comments', function(req, res){
+  Comment.find(function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+app.post('/api/comment', function(req, res){
+  var comment;
+  comment = new Comment({
+	mapid: 		req.body.mapid,
+    name: 		req.body.name,
+	text: 		req.body.text, 
+	date: 		req.body.date,
+  });
+  comment.save(function(err) {
+    if (!err) {
+	 	res.send(comment);
+    } else
+	{
+		res.send('oops', 500);
+	}
+  });
+});
 
 ///////////////
 // POINTS 
