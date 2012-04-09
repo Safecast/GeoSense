@@ -31,12 +31,21 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
-		this.collections[id].fetch();		
+		this.collections[id].fetch();
+	},
+	
+	addCommentCollection: function(collection)
+	{
+		var self = this;
+		this.commentCollection = collection;
+		this.commentCollection.bind('reset', this.reset, this);
+		this.commentCollection.bind('add', this.addOne, this);
+		this.commentCollection.fetch();
 		
-		//Save to local array for UI states not saved in DB
-		//I.e., visibility
-		collection.visible = true;
-		this.dataObjectArray.push(collection);
+		this.commentCollection.each(function(model) {
+			self.addOneComment(model);
+		});
+		
 	},
 
 	cleanPointModel: function(model) {
@@ -110,6 +119,8 @@ var AppRouter = Backbone.Router.extend({
         $('body').append(this.chatView.render().el);
 
 		this.fetchCollections('sidebar');
+		
+		this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
 	},
@@ -321,7 +332,6 @@ var AppRouter = Backbone.Router.extend({
 			var name = '';
 			var val = '';
 			
-
 			$.each(data[i], function(key, val) { 
 								
 				if(key == 'Location')
@@ -382,7 +392,13 @@ var AppRouter = Backbone.Router.extend({
 		});
 	},
 	
-	addTwitterData:function (options)
+	addCommentData: function(options)
+	{		
+		this.commentCollection = new CommentCollection({});
+		this.mapView.addCommentCollection(this.commentCollection);
+	},
+	
+	addTwitterData: function (options)
 	{
 		console.log('adding tweets');
 	},

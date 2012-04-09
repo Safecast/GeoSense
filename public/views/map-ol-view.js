@@ -254,34 +254,53 @@ window.MapOLView = window.MapViewBase.extend({
 	detectMapClick: function ()
 	{
 		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
-		                defaultHandlerOptions: {
-		                    'single': true,
-		                    'double': false,
-		                    'pixelTolerance': 0,
-		                    'stopSingle': false,
-		                    'stopDouble': false
-		                },
+		 	  defaultHandlerOptions: {
+                   'single': true,
+                   'double': false,
+                   'pixelTolerance': 0,
+                   'stopSingle': false,
+                   'stopDouble': false
+               },
 
-		                initialize: function(options) {
-		                    this.handlerOptions = OpenLayers.Util.extend(
-		                        {}, this.defaultHandlerOptions
-		                    );
-		                    OpenLayers.Control.prototype.initialize.apply(
-		                        this, arguments
-		                    ); 
-		                    this.handler = new OpenLayers.Handler.Click(
-		                        this, {
-		                            'click': this.trigger
-		                        }, this.handlerOptions
-		                    );
-		                }, 
+               initialize: function(options) {
+                   this.handlerOptions = OpenLayers.Util.extend(
+                       {}, this.defaultHandlerOptions
+                   );
+                   OpenLayers.Control.prototype.initialize.apply(
+                       this, arguments
+                   ); 
+                   this.handler = new OpenLayers.Handler.Click(
+                       this, {
+                           'click': this.trigger
+                       }, this.handlerOptions
+                   );
+               }, 
 
-		                trigger: function(e) {
-		                    var lonlat = this.map.getLonLatFromPixel(e.xy);
-		                    console.log(lonlat.lon + " , " + lonlat.lat);
-		                }
+               trigger: function(e) {
+                   var lonlat = this.map.getLonLatFromPixel(e.xy);
 
-					});
+				//Temporary!!!!
+				var commentid = 0123456;
+				var mapid = _mapId;
+				var lat = lonlat.lat;
+				var lon = lonlat.lon
+				var name = 'beef';
+				var text = 'burrito';
+				var date = new Date();
+
+				$.ajax({
+					type: 'POST',
+					url: '/api/comment/' + commentid + '/' + mapid + '/' + lat + '/' + lon + '/' + name + '/' + text + '/' + date,
+					success: function(data) {
+						console.log('stored comment');
+					},
+					error: function() {
+						console.error('failed to store comment');
+					}
+				})
+             }
+		});
+		
 		var click = new OpenLayers.Control.Click();
 		this.map.addControl(click);
 		click.activate();
@@ -306,7 +325,7 @@ window.MapOLView = window.MapViewBase.extend({
 
     addOne: function(model, currIndex) {
 		var self = this;
-		
+				
 		//Prep point for layer	
 		var index = currIndex;	
 		var collectionId = model.get('collectionid'); 
@@ -330,5 +349,12 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		//Add point to proper layer (by found index)
 		this.layerArray[index].features.push(vector);
+    },
+
+	addOneComment: function(model) {
+		var self = this;
+		
+		console.log('add comment');
+		console.log(model)
     },
 });

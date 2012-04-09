@@ -33,7 +33,7 @@ everyone.now.distributeMessage = function(message){
 everyone.now.joinRoom = function(newRoom){
     var newGroup = nowjs.getGroup(newRoom);
     newGroup.addUser(this.user.clientId);
-    newGroup.now.receiveMessage('New user joined the room', this.now.name);
+    //newGroup.now.receiveMessage('New user joined the room', this.now.name);
     this.now.serverRoom = newRoom;
 };
 
@@ -85,7 +85,7 @@ var Chat = mongoose.model('Chat', new mongoose.Schema({
 }));
 
 var Comment = mongoose.model('Comment', new mongoose.Schema({
-	commentid: String,
+	commentid: Number,
 	mapid: String,
 	name: String,
 	text: String,
@@ -98,23 +98,19 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 // COMMENTS 
 ///////////////
 
-app.get('/api/comment/:commentid', function(req, res){
+app.get('/api/comments/map/:mapid', function(req, res){
   Comment.find(function(err, datasets) {
      res.send(datasets);
   });
 });
 
-app.get('/api/comment/map/:mapid', function(req, res){
-  Comment.find(function(err, datasets) {
-     res.send(datasets);
-  });
-});
-
-app.post('/api/comment/:commentid/:mapid/:name/:text/:date', function(req, res){
-  var chat;
-  chat = new Chat({
-	commentid: 		req.params.commentid,
+app.post('/api/comment/:commentid/:mapid/:lat/:lon/:name/:text/:date', function(req, res){
+  var comment;
+  comment = new Comment({
+	commentid: 	req.params.commentid,
 	mapid: 		req.params.mapid,
+	lat: 		req.params.lat,
+	lon: 		req.params.lon,
     name: 		req.params.name,
 	text: 		req.params.text, 
 	date: 		req.params.date,
@@ -135,7 +131,8 @@ app.post('/api/comment/:commentid/:mapid/:name/:text/:date', function(req, res){
 ///////////////
 
 app.get('/api/chat/:mapid', function(req, res){
-  Chat.find(function(err, datasets) {
+
+  Chat.find({mapid:req.params.mapid},function(err, datasets) {
      res.send(datasets);
   });
 });
@@ -255,8 +252,6 @@ app.get('/api/collection/distinct' , function(req, res){
 });
 
 app.get('/api/collection/:id', function(req, res){
-	console.log('loading point collection');
-	
 	
 	Point.find({collectionid:req.params.id}, function(err, point) {
 		if (!err) {
