@@ -38,13 +38,15 @@ window.MapViewBase = Backbone.View.extend({
 	{
 		var self = this;
 		this.commentCollection = collection;
-		this.commentCollection.bind('reset', this.reset, this);
-		this.commentCollection.bind('add', this.addOne, this);
+		this.commentCollection.bind('reset', this.resetComments, this);
+		this.commentCollection.bind('add', this.addOneComment, this);
 		this.commentCollection.fetch();
 		
-		this.commentCollection.each(function(model) {
-			self.addOneComment(model);
-		});
+		console.log(this.commentCollection);
+		
+		//this.commentCollection.each(function(model) {
+		 		//self.addOneComment(model);
+		//});
 		
 	},
 
@@ -65,6 +67,11 @@ window.MapViewBase = Backbone.View.extend({
 	reset: function(model) {
 		this.removeCollectionFromMap(model);
 		this.addCollectionToMap(this.collections[model.collectionId]);
+	},
+
+	resetComments: function(model) {
+		//this.removeCollectionFromMap(model);
+		this.addCommentToMap(model);
 	},
 
 	addCollectionToMap: function(collection)
@@ -88,6 +95,14 @@ window.MapViewBase = Backbone.View.extend({
 		
 		this.layerArray[currIndex].redraw();
 		
+	},
+	
+	addCommentToMap: function(collection)
+	{
+		var self = this;
+		collection.each(function(model) {
+			self.addOneComment(model);
+		});
 	}
 });
 

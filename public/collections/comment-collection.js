@@ -17,12 +17,4 @@ CommentCollection = Backbone.Collection.extend({
 		});
 	},
 	
-	destroy: function(options) {
-		
-	},
-	
-	reset: function()
-	{
-		console.log('reset');
-	},
 });

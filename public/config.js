@@ -8,12 +8,13 @@ var _firstLoad = true;
 var _mapId = String;
 var _mapName = String;
 var _mapCollections = [];
+var _commentArray = [];
 
 var num_data_sources = 0;
 var pointCollection = new Array();
 
 var _defaultMapStyle = 'dark';
-var _defaultMapLocation = 'japan';
+var _defaultMapLocation = 'Africa';
 
 var _settingsVisible = false;
 var _chatVisible = true;

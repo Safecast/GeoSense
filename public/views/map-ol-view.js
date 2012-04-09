@@ -76,19 +76,9 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	addCommentLayer: function()
 	{
-		var features = [		    
-		    new Feature(
-		        new Geometry.Point(90, 45),
-		        {cls: "one"}
-		    ), 
-		];
-
-		// create rule based styles
-		var Rule = OpenLayers.Rule;
-		var Filter = OpenLayers.Filter;
 		var style = new OpenLayers.Style({
 		    pointRadius: 15,
-		    fillOpacity: .7
+		    fillOpacity: 1
 		}, {
 		    rules: [
 		        new Rule({
@@ -107,7 +97,7 @@ window.MapOLView = window.MapViewBase.extend({
 		
 		var selectedStyle = new OpenLayers.Style({
 		    pointRadius: 15,
-		    fillOpacity: .85
+		    fillOpacity: 1
 		}, {
 		    rules: [
 		        new Rule({
@@ -123,7 +113,7 @@ window.MapOLView = window.MapViewBase.extend({
 		    ]
 		});
 		
-		var commentLayer = new OpenLayers.Layer.Vector(null, {
+		this.commentLayer = new OpenLayers.Layer.Vector(null, {
 		    styleMap: new OpenLayers.StyleMap({
 		        "default": style,
 		        select: selectedStyle
@@ -132,11 +122,12 @@ window.MapOLView = window.MapViewBase.extend({
 			sphericalMercator: true,
 		    renderers: ["Canvas"]
 		});
-		commentLayer.addFeatures(features);
-	
-		this.map.addLayers([commentLayer]);
 		
-		var select = new OpenLayers.Control.SelectFeature(commentLayer);
+		//this.commentLayer.addFeatures(features);
+
+		this.map.addLayers([this.commentLayer]);
+		
+		var select = new OpenLayers.Control.SelectFeature(this.commentLayer);
 		this.map.addControl(select);
 		select.activate();
 	},
@@ -359,7 +350,14 @@ window.MapOLView = window.MapViewBase.extend({
 	addOneComment: function(model) {
 		var self = this;
 		
-		console.log('add comment');
-		console.log(model)
+		//console.log(model.attributes)
+		
+		var features = [		    
+		    new Feature(
+		        new Geometry.Point(model.attributes.lon, model.attributes.lat),
+		        {cls: "one"}
+		    ), 
+		];
+		this.commentLayer.addFeatures(features);
     },
 });
