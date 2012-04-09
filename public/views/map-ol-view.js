@@ -149,28 +149,44 @@ window.MapOLView = window.MapViewBase.extend({
 		
 	},
 	
-	toggleLayerVisibility: function(index, type)
-	{		
-		var currCollection = index;
-		var currIndex;
-		$.each(this.layerArray, function(index, value) { 
-			if(value.collectionId == currCollection)
-				currIndex = index;
-		});
-		
-		currVisibility = this.layerArray[currIndex].getVisibility()
-		
-		if(type == 0)
+	toggleLayerVisibility: function(index, type, layer)
+	{	
+		if(layer == 'comments')
 		{
-			this.layerArray[currIndex].setVisibility(false);
-		}else
-		{
-			this.layerArray[currIndex].setVisibility(true);
+			if(type == 0)
+			{
+				this.commentLayer.setVisibility(false);
+			}else
+			{
+				this.commentLayer.setVisibility(true);
+			}	
 		}
+		else if (layer == 'tweets')
+		{
+			
+		} else
+		{		
+			var currCollection = index;
+			var currIndex;
+			$.each(this.layerArray, function(index, value) { 
+				if(value.collectionId == currCollection)
+					currIndex = index;
+			});
 		
-		//Update our local data object array
-		//this.dataObjectArray[currIndex].visible = type;
-		//console.log(this.dataObjectArray[currIndex].visible);
+			currVisibility = this.layerArray[currIndex].getVisibility()
+		
+			if(type == 0)
+			{
+				this.layerArray[currIndex].setVisibility(false);
+			}else
+			{
+				this.layerArray[currIndex].setVisibility(true);
+			}
+		
+			//Update our local data object array
+			//this.dataObjectArray[currIndex].visible = type;
+			//console.log(this.dataObjectArray[currIndex].visible);
+		}
 	},
 	
 	updateMapStyle: function(theme)
@@ -244,6 +260,7 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	detectMapClick: function ()
 	{
+		var self = this;
 		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
 		 	  defaultHandlerOptions: {
                    'single': true,
@@ -284,11 +301,17 @@ window.MapOLView = window.MapViewBase.extend({
 					url: '/api/comment/' + commentid + '/' + mapid + '/' + lat + '/' + lon + '/' + name + '/' + text + '/' + date,
 					success: function(data) {
 						console.log('stored comment');
+						comment = new Feature(
+							new Geometry.Point(lon, lat),
+							{cls: "one"}
+						);
+						self.commentLayer.addFeatures(comment);
+						
 					},
 					error: function() {
 						console.error('failed to store comment');
 					}
-				})
+				});
              }
 		});
 		
@@ -349,15 +372,12 @@ window.MapOLView = window.MapViewBase.extend({
 
 	addOneComment: function(model) {
 		var self = this;
-		
+
 		//console.log(model.attributes)
-		
-		var features = [		    
-		    new Feature(
-		        new Geometry.Point(model.attributes.lon, model.attributes.lat),
-		        {cls: "one"}
-		    ), 
-		];
-		this.commentLayer.addFeatures(features);
+		comment = new Feature(
+			new Geometry.Point(model.attributes.lon, model.attributes.lat),
+			{cls: "one"}
+		);
+		this.commentLayer.addFeatures(comment);
     },
 });

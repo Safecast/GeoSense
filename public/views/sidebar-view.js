@@ -14,6 +14,8 @@ window.SideBarView = Backbone.View.extend({
 		'click #scale_log': 'scaleLogClicked',
 		'click #tweetButton' : 'tweetButtonClicked',
 		'click #deleteMap' : 'deleteMapClicked',
+		'click #toggleCommentsVisible' : 'toggleCommentsVisibleClicked',
+		'click #toggleCommentsHidden' : 'toggleCommentsHiddenClicked'
     },
 
     initialize: function(options) {
@@ -123,6 +125,21 @@ window.SideBarView = Backbone.View.extend({
 	
 	tweetButtonClicked: function() {
 		var tweets = new TweetCollection({});
+	},
+	
+	toggleCommentsVisibleClicked: function()
+	{
+		this.toggleCommentVisibility(1);
+	},
+	
+	toggleCommentsHiddenClicked: function()
+	{
+		this.toggleCommentVisibility(0)
+	},
+	
+	toggleCommentVisibility: function(type)
+	{
+		this.vent.trigger("toggleLayerVisibility", null, type, 'comments');
 	},
 	
 	addOne: function(comment) {
