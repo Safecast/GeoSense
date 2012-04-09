@@ -522,5 +522,5 @@ app.get('/api/tweets', function(req, res){
   });
 });
 
-app.listen(8080);
-console.log('Server running at localhost:8080/');
+app.listen(8124, "0.0.0.0");
+console.log('Server running at http://0.0.0.0:8124/');
