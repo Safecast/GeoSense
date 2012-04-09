@@ -338,6 +338,10 @@ var AppRouter = Backbone.Router.extend({
 				{
 					location = val;
 				}
+				if(key == 'location')
+				{
+					location = val;
+				}
 				else if (key == 'lat')
 				{
 					lat = val;
@@ -358,6 +362,10 @@ var AppRouter = Backbone.Router.extend({
 				{
 					name = val;
 				}
+				else if (key == 'color')
+				{
+					color = val;
+				}
 
 				if(intensity > maxVal)
 					maxVal = intensity;	
@@ -365,13 +373,18 @@ var AppRouter = Backbone.Router.extend({
 			});	
 				
 			//Check for lat/lng location
-			location = lat + ',' + lng;
+			if(location == '')
+				location = lat + ',' + lng;
 			
 			//Substitute intensity for val
 			if(val == '')
 				val = intensity;
 			
-			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val});
+			//Substitute intensity for val
+			if(val == '')
+				val = 10;
+
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'color':color});
 		}
 				
 		//First increment total number of data sources

@@ -334,17 +334,22 @@ window.MapOLView = window.MapViewBase.extend({
 		var lat = model.get('lon');
 		var lon = model.get('lat');
 		var val = model.get('val');
+		var color = model.get('color');
 		
-		var rainbow = new Rainbow();
-		rainbow.setSpectrum('green', 'FFFFFF', '#ff0000');
-		rainbow.setNumberRange(0, 1000);
-		var hex = '#' + rainbow.colourAt(val);
+		if(color == '')
+		{		
+			var rainbow = new Rainbow();
+			rainbow.setSpectrum('green', 'FFFFFF', '#ff0000');
+			rainbow.setNumberRange(0, 1000);
+			var hex = '#' + rainbow.colourAt(val);
+			color = hex;
+		}
 		
 		currPoint = new OpenLayers.Geometry.Point(lat, lon);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
 		vector = new OpenLayers.Feature.Vector(currPoint, {
-	        colour: hex,
+	        colour: color,
 		});
 				
 		//Add point to proper layer (by found index)

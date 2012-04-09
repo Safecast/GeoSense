@@ -18,7 +18,7 @@ PointCollection = Backbone.Collection.extend({
 				
 		var self = this;
 		var jsonData = JSON.stringify(data);
-		
+				
 		$.ajax({
 			type: 'POST',
 			dataType: 'json',

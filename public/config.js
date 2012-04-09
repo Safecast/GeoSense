@@ -13,7 +13,7 @@ var num_data_sources = 0;
 var pointCollection = new Array();
 
 var _defaultMapStyle = 'dark';
-var _defaultMapLocation = 'Africa'
+var _defaultMapLocation = 'japan';
 
 var _settingsVisible = false;
 var _chatVisible = true;
