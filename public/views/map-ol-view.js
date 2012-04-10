@@ -363,12 +363,17 @@ window.MapOLView = window.MapViewBase.extend({
 		var lon = model.get('lat');
 		var val = model.get('val');
 		var color = model.get('color');
-				
+		
+		var maxVal = this.collections[collectionId].maxVal;
+		var minVal = this.collections[collectionId].minVal;
+			
 		if(color == '')
-		{		
+		{					
 			var rainbow = new Rainbow();
 			rainbow.setSpectrum('green', 'FFFFFF', '#ff0000');
-			rainbow.setNumberRange(0, 1000);
+						
+			rainbow.setNumberRange(Number(minVal), Number(maxVal));
+			
 			var hex = '#' + rainbow.colourAt(val);
 			color = hex;
 		}

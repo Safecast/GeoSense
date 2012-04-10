@@ -355,7 +355,7 @@ app.get('/api/pointcollections', function(req, res){
 });
 
 //Post a Point Collection
-app.post('/api/pointcollection/:id/:name/:mapid/:maxval', function(req, res){
+app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, res){
 	
 	var collection;
 	  collection = new PointCollection({
@@ -363,6 +363,7 @@ app.post('/api/pointcollection/:id/:name/:mapid/:maxval', function(req, res){
 	    name: req.params.name,
 		mapid: req.params.mapid,
 		maxval: req.params.maxval,
+		minval: req.params.minval,
 	  });
 	  collection.save(function(err) {
 	    if (!err) {

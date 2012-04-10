@@ -272,9 +272,12 @@ var AppRouter = Backbone.Router.extend({
 			url: '/api/pointcollection/' + index,
 			success: function(data) {
 
+				var mapId = data[0].mapid;
+				var maxVal = data[0].maxval;
+				var minVal = data[0].minval;
 				var name = data[0].name;
-				
-				pointCollection[index] = new PointCollection({ collectionId:index, newData:false});
+								
+				pointCollection[index] = new PointCollection({collectionId:index, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
 				
 				pointCollection[index].fetch({success: function(data) {
 										
@@ -307,6 +310,7 @@ var AppRouter = Backbone.Router.extend({
 		var color = options.color;
 		var dataSet = [];
 		var maxVal = 0;
+		var minVal;
 
 		for(var i = 0; i < data.length; ++i)
 		{
@@ -339,7 +343,7 @@ var AppRouter = Backbone.Router.extend({
 				{
 					lng = val;
 				}
-				else if (key == 'intensity')
+				else if (key == 'intensity' || key == 'mag' || key == 'magnitude')
 				{
 					intensity = val;
 				}
@@ -351,10 +355,6 @@ var AppRouter = Backbone.Router.extend({
 				{
 					color = val;
 				}
-
-				if(intensity > maxVal)
-					maxVal = intensity;	
-					
 			});	
 				
 			//Check for lat/lng location
@@ -365,6 +365,15 @@ var AppRouter = Backbone.Router.extend({
 			if(val == '')
 				val = intensity;
 			
+			if(val >= maxVal)
+				maxVal = val;	
+				
+			if(minVal == undefined)
+				minVal = val;
+			
+			if(val <= minVal)
+				minVal = val;
+						
 			//Substitute intensity for val
 			if(val == '')
 				val = 10;
@@ -381,6 +390,7 @@ var AppRouter = Backbone.Router.extend({
 			mapId:uniqueMapId,
 			title:title,
 			maxVal: maxVal,
+			minVal: minVal,
 			newData:true,
 		});
 		
