@@ -4,10 +4,12 @@ PointCollection = Backbone.Collection.extend({
 	
 	initialize: function(options) {
 		
+		console.log(options);
+		
 		this.collectionId = options.collectionId;
 		this.mapId = options.mapId;
 		this.url = '/api/collection/' + options.collectionId;
-		this.name = options.name;
+		this.title = options.title;
 		this.maxVal = options.maxVal;
 		this.minVal = options.minVal;
 						

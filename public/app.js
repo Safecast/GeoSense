@@ -276,7 +276,7 @@ var AppRouter = Backbone.Router.extend({
 				var maxVal = data[0].maxval;
 				var minVal = data[0].minval;
 				var name = data[0].name;
-								
+												
 				pointCollection[index] = new PointCollection({collectionId:index, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
 				
 				pointCollection[index].fetch({success: function(data) {
@@ -307,7 +307,8 @@ var AppRouter = Backbone.Router.extend({
 		var uniqueMapId = _mapId;
 		var title = options.title
 		var data = options.data;
-		var color = options.color;
+		var colorLow = options.colorLow;
+		var colorHigh = options.colorHigh;
 		var dataSet = [];
 		var maxVal = 0;
 		var minVal;
@@ -343,11 +344,11 @@ var AppRouter = Backbone.Router.extend({
 				{
 					lng = val;
 				}
-				else if (key == 'intensity' || key == 'mag' || key == 'magnitude')
+				else if (key == 'intensity' || key == 'value')
 				{
 					intensity = val;
 				}
-				else if (key == 'name')
+				else if (key == 'name' || key == 'title')
 				{
 					name = val;
 				}
@@ -360,6 +361,13 @@ var AppRouter = Backbone.Router.extend({
 			//Check for lat/lng location
 			if(location == '')
 				location = lat + ',' + lng;
+				
+			if(lat == '' && lng == '')
+			{
+				var latlngStr = location.split(/[, ]/, 2);
+				lat = parseFloat(latlngStr[0]);
+				lng = parseFloat(latlngStr[1]);	
+			}
 			
 			//Substitute intensity for val
 			if(val == '')
@@ -378,12 +386,18 @@ var AppRouter = Backbone.Router.extend({
 			if(val == '')
 				val = 10;
 
-			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'color':color});
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'colorlow':colorLow, 'colorhigh':colorHigh});
 		}
 				
 		//First increment total number of data sources
 		_num_data_sources +=1;
-				
+		
+		if(maxVal == '')
+			maxVal = 1;
+		
+		if(minVal == '')
+			minVal = 0;
+		
 		//Create collection
 		pointCollection[_num_data_sources] = new PointCollection({
 			collectionId:uniqid,
@@ -393,7 +407,7 @@ var AppRouter = Backbone.Router.extend({
 			minVal: minVal,
 			newData:true,
 		});
-		
+				
 		//Create Points
 		pointCollection[_num_data_sources].addData(dataSet, function(){
 			app.addExistingDataSource(uniqid, 'newData');
@@ -412,7 +426,6 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
-		
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},

@@ -302,7 +302,7 @@ app.post('/api/collection/:id', function(req, res){
 });
 
 app.post('/api/addpoints/:id', function(req, res){
-	
+		
 	jsonObject = req.body.jsonpost;
 	for(var i = 0; i < jsonObject.length; ++i)
 	{	
@@ -314,9 +314,10 @@ app.post('/api/addpoints/:id', function(req, res){
 			lat: 		jsonObject[i].lat,
 			lon: 		jsonObject[i].lon,
 			val: 		jsonObject[i].val,
-			color:      jsonObject[i].color 
-		  });		
-		
+			colorhigh:  jsonObject[i].colorhigh,
+			colorlow:  jsonObject[i].colorlow,
+		  });	
+				
 		  point.save();
 	}	
 	res.send('');
@@ -477,8 +478,8 @@ app.get('/tweetstream', function(req, res){
 	      console.log('Twitter stream open...');
 			stream.on('data', function (data) {
 
-				//console.log(data.text);
-				//console.log(data.geo);
+				console.log(data.text);
+				console.log(data.geo);
 
 				if(data.geo != null || data.location != undefined)
 				{

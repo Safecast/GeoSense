@@ -362,27 +362,28 @@ window.MapOLView = window.MapViewBase.extend({
 		var lat = model.get('lon');
 		var lon = model.get('lat');
 		var val = model.get('val');
-		var color = model.get('color');
+		var colorlow = model.get('colorlow');
+		var colorhigh = model.get('colorhigh');
 		
+		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;
+		//Temporary super hack
+		if(maxVal - minVal > 1000)
+			maxVal = 500;
 			
-		if(color == '')
-		{					
-			var rainbow = new Rainbow();
-			rainbow.setSpectrum('green', 'FFFFFF', '#ff0000');
-						
-			rainbow.setNumberRange(Number(minVal), Number(maxVal));
-			
-			var hex = '#' + rainbow.colourAt(val);
-			color = hex;
-		}
+		var rainbow = new Rainbow();
+		rainbow.setSpectrum(colorlow, colorhigh);		
+		rainbow.setNumberRange(Number(minVal), Number(maxVal));
+		
+		var hex = '#' + rainbow.colourAt(val);
+		gocolor = hex;
 		
 		currPoint = new OpenLayers.Geometry.Point(lat, lon);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
 		vector = new OpenLayers.Feature.Vector(currPoint, {
-	        colour: color,
+	        colour: gocolor,
 		});
 				
 		//Add point to proper layer (by found index)
