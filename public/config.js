@@ -10,14 +10,15 @@ var _mapName = String;
 var _mapCollections = [];
 var _commentArray = [];
 
-var num_data_sources = 0;
+var _num_data_sources = 0;
+var _loaded_data_sources = 0;
 var pointCollection = new Array();
 
 var _defaultMapStyle = 'dark';
-var _defaultMapLocation = 'Africa';
+var _defaultMapLocation = 'Japan';
 
 var _settingsVisible = false;
-var _chatVisible = true;
+var _chatVisible = false;
 							
 //VARIABLES FOR THREE.JS
 							

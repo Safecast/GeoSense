@@ -123,9 +123,15 @@ window.MapOLView = window.MapViewBase.extend({
 		    renderers: ["Canvas"]
 		});
 		
-		//this.commentLayer.addFeatures(features);
-
+		
 		this.map.addLayers([this.commentLayer]);
+		
+		comment = new Feature(
+			new Geometry.Point(319253.28496258, -1568629.5776082),
+			{cls: "one"}
+		);
+		
+		this.commentLayer.addFeatures(comment);
 		
 		var select = new OpenLayers.Control.SelectFeature(this.commentLayer);
 		this.map.addControl(select);
@@ -236,10 +242,18 @@ window.MapOLView = window.MapViewBase.extend({
 		this.gmap.mapObject.mapTypes.set('styled', styledMapType);
 		this.gmap.mapObject.setMapTypeId('styled');
 	},
+	
+	toWebMercator: function (googLatLng) {
+		translation = new Geometry.Point(googLatLng.Za, googLatLng.Ya);
+		translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
+				
+	  	return { x: translation.x, y: translation.y };
+	},
 		
 	setViewPort: function(result)
 	{
 		var first = result[0],
+		
 		
 		    center = this.toWebMercator(first.geometry.location),
 		    viewport = first.geometry.viewport,
@@ -249,14 +263,14 @@ window.MapOLView = window.MapViewBase.extend({
 		    max = this.toWebMercator(viewportNE),
 		    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
 
+			//4030302.5713791
+			
+			//console.log(zoom);
+
+
 		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
 	},
 	
-	toWebMercator: function (googLatLng) {
-		tranlation = new Geometry.Point(googLatLng.Ya, googLatLng.Xa);
-		tranlation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
-	  	return { x: tranlation.x, y: tranlation.y };
-	},
 	
 	detectMapClick: function ()
 	{
@@ -349,7 +363,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var lon = model.get('lat');
 		var val = model.get('val');
 		var color = model.get('color');
-		
+				
 		if(color == '')
 		{		
 			var rainbow = new Rainbow();
@@ -368,12 +382,12 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		//Add point to proper layer (by found index)
 		this.layerArray[index].features.push(vector);
+		
     },
 
 	addOneComment: function(model) {
 		var self = this;
-
-		//console.log(model.attributes)
+		
 		comment = new Feature(
 			new Geometry.Point(model.attributes.lon, model.attributes.lat),
 			{cls: "one"}
