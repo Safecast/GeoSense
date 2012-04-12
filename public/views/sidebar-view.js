@@ -15,7 +15,8 @@ window.SideBarView = Backbone.View.extend({
 		'click #tweetButton' : 'tweetButtonClicked',
 		'click #deleteMap' : 'deleteMapClicked',
 		'click #toggleCommentsVisible' : 'toggleCommentsVisibleClicked',
-		'click #toggleCommentsHidden' : 'toggleCommentsHiddenClicked'
+		'click #toggleCommentsHidden' : 'toggleCommentsHiddenClicked',
+		'click #settingsTab' : 'settingsTabClicked',
     },
 
     initialize: function(options) {
@@ -48,6 +49,29 @@ window.SideBarView = Backbone.View.extend({
 		
 		this.sideBarDataView = new SideBarDataView({vent: this.vent, url: options.url});
         this.$('#accordion').append(this.sideBarDataView.render({number: options.number}).el);
+	},
+	
+	settingsTabClicked: function() {
+		if(_settingsVisible)
+		{
+			$('#settingsTabText').html('SHOW');
+			$('#settingsTab').addClass('hidden');
+			$('.sidebar-view').addClass('visible');
+			$('.map-view').addClass('full');
+			$('.map-gl-view').addClass('full');
+			$('.sidebar-view .black-overlay').addClass('visible');
+			_settingsVisible = false;
+		}
+		else
+		{
+			$('#settingsTabText').html('HIDE');
+			$('#settingsTab').removeClass('hidden');
+			$('.sidebar-view').removeClass('visible');
+			$('.map-view').removeClass('full');
+			$('.map-gl-view').removeClass('full');
+			$('.sidebar-view .black-overlay').removeClass('visible');
+			_settingsVisible = true;
+		}
 	},
 	
 	setToggleStates: function(options){

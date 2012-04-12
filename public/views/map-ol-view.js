@@ -23,7 +23,7 @@ window.MapOLView = window.MapViewBase.extend({
 		Rule = OpenLayers.Rule;
 		Filter = OpenLayers.Filter;
 		
-		OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";	
+		OpenLayers.ImgPath = "http://geo.media.mit.edu/assets/light/";	
     },
 
     render: function() {

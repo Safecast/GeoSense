@@ -1,11 +1,9 @@
-<div class="black-overlay" ></div>
+<div class="settings-tab" id="settingsTab"><h4 id="settingsTabText">HIDE</h4></div>
 <div class="data-container" id="dataContainer">
 	<div class="accordion" id="accordion">
-		<div class="accordion-group">
+		<div class="accordion-group">			
 		  <div class="accordion-heading">
-		    <a class="accordion-toggle btn btn-inverse" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-		      <i class="icon-map-marker icon-white"></i> Comments
-		    </a>
+		    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Comments</a>
 		  </div>
 		  <div id="collapseOne" class="accordion-body collapse">
 		    <div class="accordion-inner">
@@ -19,34 +17,10 @@
 		    </div>
 		  </div>
 		</div>
-		<!--
-		<div class="accordion-group">
-		  <div class="accordion-heading">
-		    <a class="accordion-toggle btn btn-inverse" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-		      <i class="icon-map-marker icon-white"></i> Twitter sentiment
-		    </a>
-		  </div>
-		  <div id="collapseThree" class="accordion-body collapse">
-		    <div class="accordion-inner">
-				<div class="data-toggle">
-					<p>Tweets</p>
-					<div class="btn-group" data-toggle="buttons-radio">
-					  <button class="btn active">Visible</button>
-					  <button class="btn">Hidden</button>
-					</div>
-				</div>
-				<div class="divider"></div>
-		        <div class="input-prepend">
-	                <span class="add-on">Keyword</span>
-	                <input class="span2" id="prependedInput" size="16" type="text">
-	    		</div>
-		    </div>
-		  </div>
-		</div>-->
 	</div>
 	<div class="toggle-group" id="">
 		<div class="data-toggle">
-			<button class="btn btn-inverse data" id="addData">Add data</button>		
+			<button class="btn data" id="addData">Add data</button>		
 		</div>
 	</div>
 	<div class="divider large"></div>
@@ -54,8 +28,8 @@
 		<div class="data-toggle">
 			<p>Display</p>
 			<div class="btn-group" data-toggle="buttons-radio">
-				<button id="display2D" class="btn btn-inverse">Flat map</button>
-				<button id="display3D" class="btn btn-inverse">3D Globe</button>
+				<button id="display2D" class="btn">Flat map</button>
+				<button id="display3D" class="btn">3D Globe</button>
 			</div>
 		</div>
 	</div>
@@ -63,9 +37,9 @@
 		<div class="data-toggle">
 			<p>Theme</p>
 			<div class="btn-group" data-toggle="buttons-radio">
-				<button id="dark_theme" class="btn btn-inverse active">Dark</button>
-				<button id="light_theme" class="btn btn-inverse">Light</button>
-				<button id="standard_theme" class="btn btn-inverse">Standard</button>
+				<button id="dark_theme" class="btn active">Dark</button>
+				<button id="light_theme" class="btn ">Light</button>
+				<button id="standard_theme" class="btn">Standard</button>
 			</div>
 		</div>
 	</div>
@@ -73,14 +47,14 @@
 		<div class="data-toggle">
 			<p>Scale</p>
 			<div class="btn-group" data-toggle="buttons-radio">
-				<button id="scale_linear" class="btn btn-inverse">Linear</button>
-				<button id="scale_log" class="btn btn-inverse">Logarhitmic</button>
+				<button id="scale_linear" class="btn">Linear</button>
+				<button id="scale_log" class="btn">Logarhitmic</button>
 			</div>
 		</div>
 	</div>
-	<div class="toggle-group" id="">
+	<div class="toggle-group" id="deleteGroup">
 		<div class="data-toggle">
-			<button class="btn btn-inverse data" id="deleteMap">Delete Map</button>		
+			<button class="btn data" id="deleteMap">Delete Map</button>		
 		</div>
 	</div>
 	<!--

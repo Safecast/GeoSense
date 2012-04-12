@@ -64,7 +64,6 @@ window.AddDataView = Backbone.View.extend({
 	dataConfirmButtonClicked: function()
 	{
 		//Todo: Validate fields
-		$('#addDataModal').modal('hide');
 		app.addData({data:this.responseData, title:this.dataTitle, colorLow: this.dataColorLow, colorHigh: this.dataColorHigh});
 	},
 	

@@ -101,6 +101,10 @@ h3 {
 	color: #353535;
 }
 
+h4 {
+	font-family: OswaldBold,sans-serif;
+}
+
 input, textarea {
 	color:#000;
 	font-size: 14px;

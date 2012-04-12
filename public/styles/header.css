@@ -4,7 +4,8 @@
 	top:0;
 	left:0;
 	right:0;
-	height:40px;	
+	height:40px;
+	border-bottom:1px solid rgba(255,255,255,.1);	
 }
 
 .header-view .navbar.navbar-fixed-top .navbar-inner
@@ -17,10 +18,27 @@
 
 .header-view .navbar.navbar-fixed-top .navbar-inner .container-fluid .brand
 {
-
 }
 
-.search-query
+.header-view .navbar.navbar-fixed-top .navbar-inner .container-fluid .brand h1
+{
+	float:left;
+	color:#555;
+	font-size:12pt;
+	line-height:20pt;
+}
+
+.header-view .navbar.navbar-fixed-top .navbar-inner .container-fluid .brand h3
+{
+	padding-left:10px;
+	float:left;
+	color:white;
+	font-size:20pt;
+	line-height:20pt;
+}
+
+
+#search
 {
 	position:absolute;
 	top:10px;
@@ -28,7 +46,8 @@
 	padding:4px 9px;
 	background-color:rgba(255, 255, 255, 0.3);
 	border:1px solid #111;
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 0px rgba(255, 255, 255, 0.15)
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 0px rgba(255, 255, 255, 0.15);
+	border-radius:3px;
 }
 
 .search-query:focus
@@ -39,4 +58,37 @@
 #settingsButton
 {
 	width:125px;
+}
+
+.header-view .state
+{
+	position:absolute;
+	top:60px;
+	left:360px;
+	display:none;
+}
+
+.header-view .state .message
+{
+	background-color:rgba(255,255,255,.9);
+	border-radius:3px;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	-webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.4);
+	-moz-box-shadow: 0px 1px 2px rgba(0,0,0,.4);
+	box-shadow: 0px 1px 2px rgba(0,0,0,.4);
+	
+	background-image:url('../assets/loader.gif');
+	background-position:10px 13px;
+	background-repeat:no-repeat;
+}
+
+.header-view .state .message h4
+{	
+	padding-top:13px;
+	color:black;
+	padding-left:35px;
+	padding-right:15px;
+	font-size:12pt;
+	color:#333;
 }

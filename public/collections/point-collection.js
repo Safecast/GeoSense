@@ -3,9 +3,7 @@ PointCollection = Backbone.Collection.extend({
 	model: Point,
 	
 	initialize: function(options) {
-		
-		console.log(options);
-		
+				
 		this.collectionId = options.collectionId;
 		this.mapId = options.mapId;
 		this.url = '/api/collection/' + options.collectionId;

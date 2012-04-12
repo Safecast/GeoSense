@@ -2,6 +2,7 @@ window.MapViewBase = Backbone.View.extend({
 
     initialize: function(options) {
 		this.collections = {};
+		this.vent = options.vent;
 		_.bindAll(this, "setMapLocation");
 		options.vent.bind("setMapLocation", this.setMapLocation);
 		
@@ -59,7 +60,8 @@ window.MapViewBase = Backbone.View.extend({
 
 	reset: function(model) {
 		this.removeCollectionFromMap(model);
-		this.addCollectionToMap(this.collections[model.collectionId]);
+		if(model.length > 0)
+			this.addCollectionToMap(this.collections[model.collectionId]);
 	},
 
 	resetComments: function(model) {
@@ -70,7 +72,8 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
-				
+		this.vent.trigger("setStateType", 'drawing');
+		
 		//Create specific layer
 		this.addCollectionAsLayer(collection);
 		
@@ -85,8 +88,12 @@ window.MapViewBase = Backbone.View.extend({
 			self.cleanPointModel(model);
 			self.addOne(model, currIndex);
 		});
-		
+				
 		this.layerArray[currIndex].redraw();
+		
+		if(_loaded_data_sources == (_num_data_sources-1))
+			this.vent.trigger("setStateType", 'complete');
+		
 	},
 	
 	addCommentToMap: function(collection)
@@ -271,6 +278,8 @@ var AppRouter = Backbone.Router.extend({
 			type: 'GET',
 			url: '/api/pointcollection/' + index,
 			success: function(data) {
+				
+				self.vent.trigger("setStateType", 'loading');
 
 				var mapId = data[0].mapid;
 				var maxVal = data[0].maxval;
@@ -280,7 +289,10 @@ var AppRouter = Backbone.Router.extend({
 				pointCollection[index] = new PointCollection({collectionId:index, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
 				
 				pointCollection[index].fetch({success: function(data) {
-										
+					
+					self.vent.trigger("setStateType", 'loadingcomplete');
+					
+								
 					if(_firstLoad == true || type == 'newData')
 					{
 			 			self.addSideBarDataView({collectionId:index,dataLength:data.length,title:name});
@@ -291,6 +303,7 @@ var AppRouter = Backbone.Router.extend({
 					_loaded_data_sources += 1;
 					if(_loaded_data_sources == _num_data_sources)
 						_firstLoad = false;
+											
 				}});
 					
 			},
@@ -412,6 +425,9 @@ var AppRouter = Backbone.Router.extend({
 		pointCollection[_num_data_sources].addData(dataSet, function(){
 			app.addExistingDataSource(uniqid, 'newData');
 		});
+		
+		$('#addDataModal').modal('hide');
+		this.vent.trigger("setStateType", 'post');
 	},
 	
 	addCommentData: function(options)
