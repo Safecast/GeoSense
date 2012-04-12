@@ -34,9 +34,10 @@ var ZoomLevel = {
 
 	//Creates the pairs of coordinates for each box to be created
 	defCoordinates: function(){
-		for (var i = 0; i < grid_length; i++){
-			for (var j = 0; i < grid_width; j++) {
-				this.coordinates.push([low_left[0] + (zoom_length / grid_length)*i], [[low_left[1] + (zoom_width / grid_width)*j]])
+		for (var n = 0; n < grid_width - 1; n++){
+			for (var m = 0; m < grid_length - 1; m++) {
+				this.coordinates.push([[ (low_left[0] + m*(zoom_length/grid_length)), (low_left[1] + n*(zoom_width/grid_width)) ],
+					[ (low_left[0] + (m+1)*(zoom_length/grid_length)), (low_left[1] + (n+1)*(zoom_width/grid_width)) ] ]);
 			};//end for
 		};//end for
 	},
