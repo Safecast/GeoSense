@@ -36,7 +36,7 @@ window.HeaderView = Backbone.View.extend({
 	},
 	
 	setTitle: function() {
-		this.$('.brand').html(this.mapName);;
+		this.$('.brand').html(this.mapName);
 	},
 
 	settingsButtonClicked: function() {
