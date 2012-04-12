@@ -243,4 +243,4 @@ OpenLayers.Control.PanZoom.X = 4;
  * Constant: Y
  * {Integer}
  */
-OpenLayers.Control.PanZoom.Y = 4;
+OpenLayers.Control.PanZoom.Y = 28;
