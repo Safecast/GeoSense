@@ -95,6 +95,17 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 // Routes
 
 ///////////////
+// TEST ROUTES 
+///////////////
+
+// app.get('/api/geo/map/:mapid', function(req, res){
+//   Comment.find({mapid:req.params.mapid},function(err, datasets) {
+//      res.send(datasets);
+//   });
+// });
+
+
+///////////////
 // COMMENTS 
 ///////////////
 
