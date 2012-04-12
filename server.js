@@ -92,18 +92,22 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 	date: Date,
 }));
 
+var Safecast = mongoose.model('Safecast', new mongoose.Schema({ location: Array}), 'safecast');
+
 // Routes
 
 ///////////////
 // TEST ROUTES 
 ///////////////
 
-// app.get('/api/geo/map/:mapid', function(req, res){
-//   Comment.find({mapid:req.params.mapid},function(err, datasets) {
-//      res.send(datasets);
-//   });
-// });
+app.get('/api/geo/:box', function(req, res){
+	
+	//var box = [[120,30],[143,45]]
+	Safecast.find(function(err, datasets) {
+	     res.send(datasets);
+	 });
 
+});
 
 ///////////////
 // COMMENTS 
