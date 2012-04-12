@@ -45,6 +45,11 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)(|\/setup)$/, function(req, res){
    res.sendfile('public/index.html');
 });
 
+app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
+   res.sendfile('public/query.html');
+});
+
+
 ///////////
 // DATA API
 ///////////
@@ -100,11 +105,14 @@ var Safecast = mongoose.model('Safecast', new mongoose.Schema({ location: Array}
 // TEST ROUTES 
 ///////////////
 
-app.get('/api/geo/:box', function(req, res){
+app.get('/api/geo/:low_left/:up_right', function(req, res){
 	
-	//var box = [[120,30],[143,45]]
-	Safecast.find(function(err, datasets) {
-	     res.send(datasets);
+	var box = [[low_left],[up_right]]
+	//var box = [[140.128,37.081],[140.132,37.087]];
+	//var box = [[0,0],[1,1]]
+	Safecast.find({"location":{"$within": {"$box": box}}}, function(err, datasets) {
+	     //console.log(datasets)
+		res.send(datasets);
 	 });
 
 });

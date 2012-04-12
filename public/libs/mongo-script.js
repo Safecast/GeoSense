@@ -1,4 +1,4 @@
-var ZoomLevel = {
+ZoomLevel = {
 
 	/*
 	PARAMETERS
@@ -11,14 +11,14 @@ var ZoomLevel = {
 	grid_length = number of boxes long
 	grid_width = number of boxes wide
 	*/
-	data_array = [], 
-	coordinates = [], 
-	zoom_width = null, 
-	zoom_length = null, 
-	zoom_sw = null, 
-	zoom_ne = null, 
-	grid_length = null, 
-	grid_width = null,
+	data_array: [], 
+	coordinates: [], 
+	zoom_width: null, 
+	zoom_length: null, 
+	zoom_sw: null, 
+	zoom_ne: null, 
+	grid_length: null, 
+	grid_width: null,
 
 	//Defines the dimensions of the view
 	defGrid: function(low_left, up_right){
@@ -53,7 +53,7 @@ var ZoomLevel = {
 
 	clearData: function(){
 		this.data_array = [];
-	}
+	},
 
 	create: function(low_left, up_right){
 		defGrid(low_left, up_right);
@@ -68,7 +68,7 @@ var ZoomLevel = {
 		defCoordinates();
 		clearData();
 		createArray();
-	}
+	},
 
 	/* HOW ARE WE DEFINING THE DIMENSIONS OF THE GRID?*/
 
