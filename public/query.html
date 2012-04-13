@@ -35,13 +35,14 @@
 				grid_width: null,
 
 				create: function(low_left, up_right){
-					console.log(up_right);
-					this.grid_length = 4.0;
-					this.grid_width = 5.0;
+					this.grid_length = 15.0;
+					this.grid_width = 15.0;
 					this.defBounds(low_left, up_right);
 					this.defGrid();
 					this.defCoordinates();
 					this.createArray();
+					
+					console.log(this.data_array);
 				},
 
 				//Defines the dimensions of the view
@@ -104,29 +105,24 @@
 			}//end defineCenter
 
 			function getPoints(low_left, up_right){
-					var s = low_left.lng;
-					var w = low_left.lat;
-					var n = up_right.lng;
-					var e = up_right.lat;					
-					var temp = [];
+				
+					var w = low_left.lng;
+					var s = low_left.lat;
+					var e = up_right.lng;
+					var n = up_right.lat;					
+					var boxArray = [];
 					$.ajax({
-					type: 'GET',
-					url: '/api/boxquery/' + s + "/" + w+ "/" + n + "/" + e,
-					success: function(data) {
-						console.log(data);
-						for(var i = 0; i < data.length; ++i)
-						{
-							//temp.push(data);
+						type: 'GET',
+						url: '/api/boxquery/' + s + "/" + w + "/" + n + "/" + e,
+						success: function(data) {
+							
+							boxArray.push(data);
+						},
+						error: function() {
+							console.error('failed to fetch existing data source');
 						}
-					},
-					error: function() {
-						console.error('failed to fetch existing data source');
-					}
-					
 				});
-				//console.log("temp =");
-				//console.log(temp);
-				return temp;	
+				return boxArray;	
 			}//end getPoints
 
 			function average(data){
@@ -182,8 +178,12 @@
 
   <body>
 	<div id='response'>Response</div>
-	<input id='inputBoxSE' value="140.128,37.081" placeholder='SE'></input>
-	<input id='inputBoxNW' value="140.132,37.087" placeholder='NW'></input>
+
+	<input id='inputBoxSE' value="120.20,30.72" placeholder='SW'></input>
+	<input id='inputBoxNW' value="147.61,45.41" placeholder='NE'></input>
+
+<!--	<input id='inputBoxSE' value="140.128,37.081" placeholder='SE'></input>
+	<input id='inputBoxNW' value="140.132,37.087" placeholder='NW'></input>-->
 	
 	<button id='submitButton'>go</button>
   </body>

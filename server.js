@@ -109,10 +109,9 @@ app.get('/api/boxquery/:s/:w/:n/:e', function(req, res){
 		
 	var box = [[Number(req.params.w), Number(req.params.s)],[Number(req.params.e), Number(req.params.n)]];
 	//box = [[140.128,37.081],[140.132,37.087]];
-		
 	Safecast.find({"location":{"$within": {"$box": box}}}, function(err, datasets) {
 		res.send(datasets);
-	 });
+	});
 });
 
 ///////////////
