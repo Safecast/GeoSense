@@ -8,7 +8,7 @@
 
 		$(document).ready(function() {
 		
-			function setup(low_left, up_left){			
+			function setup(low_left, up_right){		
 				ZoomLevel.create(low_left, up_right);
 			}
 
@@ -35,6 +35,7 @@
 				grid_width: null,
 
 				create: function(low_left, up_right){
+					console.log(up_right);
 					this.grid_length = 4.0;
 					this.grid_width = 5.0;
 					this.defBounds(low_left, up_right);
@@ -53,6 +54,7 @@
 				defBounds: function(low_left, up_right){
 					this.zoom_sw = low_left;
 					this.zoom_ne = up_right;
+					console.log(this.zoom_sw);
 				},
 
 				//Creates the pairs of coordinates for each box to be created
@@ -75,11 +77,10 @@
 
 				//Creates a box for each set of coordinates
 				createArray: function(){
-					//console.log("createArray");
+					var self = this;
 					this.coordinates.forEach(function(pair){
-						//console.log(pair);
 						var box = new Box(pair.low_left, pair.up_right);
-						this.data_array.push(box);
+						self.data_array.push(box);
 					});
 				},
 
@@ -94,63 +95,64 @@
 				this.minimum = minimum();
 				this.maximum = maximum();
 				this.mean = average(this.box_data);
+
+				return this;
 			}
 
 			function defineCenter(low_left, up_right){
-				return {lat: (up_right.lng - low_left.lng) / 2, lat: (up_right.lat - low_left.lat) / 2};
+				return {lng: (up_right.lng - low_left.lng) / 2, lat: (up_right.lat - low_left.lat) / 2};
 			}//end defineCenter
 
 			function getPoints(low_left, up_right){
-					//console.log('low_left: ' + low_left + ' up_right:' + up_right);
-							/*
-					db.geo.find({"loc":{"$within": {"$box": [low_left, up_right]}}}).sort({reading_id:1}).forEach(function(x){
-						this.box_data.push(x);
-						this.num_points += 1;
-					});
-					*/1
-					
 					var s = low_left.lng;
 					var w = low_left.lat;
 					var n = up_right.lng;
 					var e = up_right.lat;					
-					
+					var temp = [];
 					$.ajax({
 					type: 'GET',
 					url: '/api/boxquery/' + s + "/" + w+ "/" + n + "/" + e,
 					success: function(data) {
-						
 						console.log(data);
-						//console.log(data);
-						// for(var i = 0; i < data.length; ++i)
-						// 							{
-						// 								this.box_data.push(x);
-						// 								this.num_points += 1;	
-						// 							}
+						for(var i = 0; i < data.length; ++i)
+						{
+							//temp.push(data);
+						}
 					},
 					error: function() {
 						console.error('failed to fetch existing data source');
 					}
-				});
 					
+				});
+				//console.log("temp =");
+				//console.log(temp);
+				return temp;	
 			}//end getPoints
 
 			function average(data){
+				var sum = 0;
+				for(point in data){
+					sum += point.reading_value;
+				}//end for-each
+				return sum / data.length;
 			
 			}//end average
 
 			function minimum(){
+				return 0;
 
 			}//end minimum
 
 			function maximum(){
+				return 0;
 
 			}//end maximum
 
 		app = {
 				parse: function(input){
 					temp = input.split(/[, ]/, 2);
-	               	var lat = parseFloat(temp[0]);
-	               	var lng = parseFloat(temp[1]);
+	               	var lng = parseFloat(temp[0]);
+	               	var lat = parseFloat(temp[1]);
 	                return {lng: lng, lat: lat};
 				},
 
