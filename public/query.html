@@ -70,7 +70,7 @@
 									lng: this.zoom_sw.lng + (m+1)*(this.zoom_length / this.grid_length),
 									lat: this.zoom_sw.lat + (n+1)*(this.zoom_width / this.grid_width)
 								}};
-							console.log(pair);
+							//console.log(pair);
 							this.coordinates.push(pair);
 						};//end for
 					};//end for
@@ -88,21 +88,6 @@
 
 			}//end ZoomLevel
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 			function Box(low_left, up_right){
 				this.center = defineCenter(low_left, up_right);
 				this.box_data = getPoints(low_left, up_right);
@@ -110,17 +95,15 @@
 				this.minimum = minimum();
 				this.maximum = maximum();
 				this.mean = average(this.box_data);
-
-
 			}
 
 			function defineCenter(low_left, up_right){
-				console.log("defineCenter "+ low_left + up_right);
+				//console.log("defineCenter "+ low_left + up_right);
 				return {lat: (up_right.lng - low_left.lng) / 2, lat: (up_right.lat - low_left.lat) / 2};
 			}//end defineCenter
 
 			function getPoints(low_left, up_right){
-					console.log('low_left: ' + low_left + ' up_right:' + up_right);
+					//console.log('low_left: ' + low_left + ' up_right:' + up_right);
 							/*
 					db.geo.find({"loc":{"$within": {"$box": [low_left, up_right]}}}).sort({reading_id:1}).forEach(function(x){
 						this.box_data.push(x);
@@ -146,7 +129,8 @@
 						}
 					});
 					*/
-					console.log("We made it to getPoints without errors! We now just need to actually get the data.");
+					console.log(up_right)
+					//console.log("We made it to getPoints without errors! We now just need to actually get the data.");
 			}//end getPoints
 
 			function average(data){

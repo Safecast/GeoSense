@@ -509,3 +509,334 @@ OpenLayers.Layer.VectorPt = OpenLayers.Class(OpenLayers.Layer, {
     },
     CLASS_NAME: "OpenLayers.Layer.VectorPt"
 });
+
+Geom = OpenLayers.Geometry;
+
+
+Geom.Rectangle = function () {
+    this._height = this._width = this._bottom = this._right = this._top = this._left = 0;
+    this._isEmpty = !0
+};
+Geom.Rectangle.prototype.resize = function () {
+    this._width = this._right - this._left;
+    this._height = this._bottom - this._top
+};
+Geom.Rectangle.prototype.getX = function () {
+    return this._left
+};
+Geom.Rectangle.prototype.getY = function () {
+    return this._top
+};
+Geom.Rectangle.prototype.getWidth = function () {
+    return this._width
+};
+Geom.Rectangle.prototype.getHeight = function () {
+    return this._height
+};
+Geom.Rectangle.prototype.getLeft = function () {
+    return this._left
+};
+Geom.Rectangle.prototype.getTop = function () {
+    return this._top
+};
+Geom.Rectangle.prototype.getRight = function () {
+    return this._right
+};
+Geom.Rectangle.prototype.getBottom = function () {
+    return this._bottom
+};
+Geom.Rectangle.prototype.set = function (a, b, c, d) {
+    this._isEmpty = !1;
+    this._left = a;
+    this._top = b;
+    this._right = c;
+    this._bottom = d;
+    this.resize()
+};
+Geom.Rectangle.prototype.setX = function (a) {
+    this._left = a;
+    this.resize()
+};
+Geom.Rectangle.prototype.setY = function (a) {
+    this._top = a;
+    this.resize()
+};
+Geom.Rectangle.prototype.setLeft = function (a) {
+    this._left = a;
+    this.resize()
+};
+Geom.Rectangle.prototype.setRight = function (a) {
+    this._right = a;
+    this.resize()
+};
+Geom.Rectangle.prototype.setTop = function (a) {
+    this._top = a;
+    this.resize()
+};
+Geom.Rectangle.prototype.setBottom = function (a) {
+    this._bottom = a;
+    this.resize()
+};
+Geom.Rectangle.prototype.addPoint = function (a, b) {
+    this._isEmpty ? (this._isEmpty = !1, this._left = a, this._top = b, this._right = a, this._bottom = b) : (this._left = this._left < a ? this._left : a, this._top = this._top < b ? this._top : b, this._right = this._right > a ? this._right : a, this._bottom = this._bottom > b ? this._bottom : b);
+    this.resize()
+};
+Geom.Rectangle.prototype.add3Points = function (a, b, c, d, e, f) {
+    this._isEmpty ? (this._isEmpty = !1, this._left = a < c ? a < e ? a : e : c < e ? c : e, this._top = b < d ? b < f ? b : f : d < f ? d : f, this._right = a > c ? a > e ? a : e : c > e ? c : e, this._bottom = b > d ? b > f ? b : f : d > f ? d : f) : (this._left = a < c ? a < e ? a < this._left ? a : this._left : e < this._left ? e : this._left : c < e ? c < this._left ? c : this._left : e < this._left ? e : this._left, this._top = b < d ? b < f ? b < this._top ? b : this._top : f < this._top ? f : this._top : d < f ? d < this._top ? d : this._top : f < this._top ? f : this._top, this._right = a > c ? a > e ? a > this._right ? a : this._right : e > this._right ? e : this._right : c > e ? c > this._right ? c : this._right : e > this._right ? e : this._right, this._bottom = b > d ? b > f ? b > this._bottom ? b : this._bottom : f > this._bottom ? f : this._bottom : d > f ? d > this._bottom ? d : this._bottom : f > this._bottom ? f : this._bottom);
+    this.resize()
+};
+Geom.Rectangle.prototype.addRectangle = function (a) {
+    this._isEmpty ? (this._isEmpty = !1, this._left = a.getLeft(), this._top = a.getTop(), this._right = a.getRight(), this._bottom = a.getBottom()) : (this._left = this._left < a.getLeft() ? this._left : a.getLeft(), this._top = this._top < a.getTop() ? this._top : a.getTop(), this._right = this._right > a.getRight() ? this._right : a.getRight(), this._bottom = this._bottom > a.getBottom() ? this._bottom : a.getBottom());
+    this.resize()
+};
+Geom.Rectangle.prototype.inflate = function (a) {
+    this._left -= a;
+    this._top -= a;
+    this._right += a;
+    this._bottom += a;
+    this.resize()
+};
+Geom.Rectangle.prototype.minSelf = function (a) {
+    this._left = this._left > a.getLeft() ? this._left : a.getLeft();
+    this._top = this._top > a.getTop() ? this._top : a.getTop();
+    this._right = this._right < a.getRight() ? this._right : a.getRight();
+    this._bottom = this._bottom < a.getBottom() ? this._bottom : a.getBottom();
+    this.resize()
+};
+Geom.Rectangle.prototype.intersects = function (a) {
+    return Math.min(this._right, a.getRight()) - Math.max(this._left, a.getLeft()) >= 0 && Math.min(this._bottom, a.getBottom()) - Math.max(this._top, a.getTop()) >= 0
+};
+Geom.Rectangle.prototype.empty = function () {
+    this._isEmpty = !0;
+    this._bottom = this._right = this._top = this._left = 0;
+    this.resize()
+};
+Geom.Rectangle.prototype.isEmpty = function () {
+    return this._isEmpty
+};
+Geom.Vector2 = function (a, b) {
+    this.x = a || 0;
+    this.y = b || 0
+};
+Geom.Vector2.prototype = {
+    constructor: Geom.Vector2,
+    set: function (a, b) {
+        this.x = a;
+        this.y = b;
+        return this
+    },
+    copy: function (a) {
+        this.x = a.x;
+        this.y = a.y;
+        return this
+    },
+    clone: function () {
+        return new Geom.Vector2(this.x, this.y)
+    },
+    add: function (a, b) {
+        this.x = a.x + b.x;
+        this.y = a.y + b.y;
+        return this
+    },
+    addSelf: function (a) {
+        this.x += a.x;
+        this.y += a.y;
+        return this
+    },
+    sub: function (a, b) {
+        this.x = a.x - b.x;
+        this.y = a.y - b.y;
+        return this
+    },
+    subSelf: function (a) {
+        this.x -= a.x;
+        this.y -= a.y;
+        return this
+    },
+    multiplyScalar: function (a) {
+        this.x *= a;
+        this.y *= a;
+        return this
+    },
+    divideScalar: function (a) {
+        a ? (this.x /= a, this.y /= a) : this.set(0, 0);
+        return this
+    },
+    negate: function () {
+        return this.multiplyScalar(-1)
+    },
+    dot: function (a) {
+        return this.x * a.x + this.y * a.y
+    },
+    lengthSq: function () {
+        return this.x * this.x + this.y * this.y
+    },
+    length: function () {
+        return Math.sqrt(this.lengthSq())
+    },
+    normalize: function () {
+        return this.divideScalar(this.length())
+    },
+    distanceTo: function (a) {
+        return Math.sqrt(this.distanceToSquared(a))
+    },
+    distanceToSquared: function (a) {
+        var b = this.x - a.x,
+            a = this.y - a.y;
+        return b * b + a * a
+    },
+    setLength: function (a) {
+        return this.normalize().multiplyScalar(a)
+    },
+    equals: function (a) {
+        return a.x === this.x && a.y === this.y
+    }
+};
+Geom.Vector3 = function (a, b, c) {
+    this.x = a || 0;
+    this.y = b || 0;
+    this.z = c || 0
+};
+Geom.Vector3.prototype = {
+    constructor: Geom.Vector3,
+    set: function (a, b, c) {
+        this.x = a;
+        this.y = b;
+        this.z = c;
+        return this
+    },
+    setX: function (a) {
+        this.x = a;
+        return this
+    },
+    setY: function (a) {
+        this.y = a;
+        return this
+    },
+    setZ: function (a) {
+        this.z = a;
+        return this
+    },
+    copy: function (a) {
+        this.x = a.x;
+        this.y = a.y;
+        this.z = a.z;
+        return this
+    },
+    clone: function () {
+        return new Geom.Vector3(this.x, this.y, this.z)
+    },
+    add: function (a, b) {
+        this.x = a.x + b.x;
+        this.y = a.y + b.y;
+        this.z = a.z + b.z;
+        return this
+    },
+    addSelf: function (a) {
+        this.x += a.x;
+        this.y += a.y;
+        this.z += a.z;
+        return this
+    },
+    addScalar: function (a) {
+        this.x += a;
+        this.y += a;
+        this.z += a;
+        return this
+    },
+    sub: function (a, b) {
+        this.x = a.x - b.x;
+        this.y = a.y - b.y;
+        this.z = a.z - b.z;
+        return this
+    },
+    subSelf: function (a) {
+        this.x -= a.x;
+        this.y -= a.y;
+        this.z -= a.z;
+        return this
+    },
+    multiply: function (a, b) {
+        this.x = a.x * b.x;
+        this.y = a.y * b.y;
+        this.z = a.z * b.z;
+        return this
+    },
+    multiplySelf: function (a) {
+        this.x *= a.x;
+        this.y *= a.y;
+        this.z *= a.z;
+        return this
+    },
+    multiplyScalar: function (a) {
+        this.x *= a;
+        this.y *= a;
+        this.z *= a;
+        return this
+    },
+    divideSelf: function (a) {
+        this.x /= a.x;
+        this.y /= a.y;
+        this.z /= a.z;
+        return this
+    },
+    divideScalar: function (a) {
+        a ? (this.x /= a, this.y /= a, this.z /= a) : this.z = this.y = this.x = 0;
+        return this
+    },
+    negate: function () {
+        return this.multiplyScalar(-1)
+    },
+    dot: function (a) {
+        return this.x * a.x + this.y * a.y + this.z * a.z
+    },
+    lengthSq: function () {
+        return this.x * this.x + this.y * this.y + this.z * this.z
+    },
+    length: function () {
+        return Math.sqrt(this.lengthSq())
+    },
+    lengthManhattan: function () {
+        return this.x + this.y + this.z
+    },
+    normalize: function () {
+        return this.divideScalar(this.length())
+    },
+    setLength: function (a) {
+        return this.normalize().multiplyScalar(a)
+    },
+    cross: function (a, b) {
+        this.x = a.y * b.z - a.z * b.y;
+        this.y = a.z * b.x - a.x * b.z;
+        this.z = a.x * b.y - a.y * b.x;
+        return this
+    },
+    crossSelf: function (a) {
+        var b = this.x,
+            c = this.y,
+            d = this.z;
+        this.x = c * a.z - d * a.y;
+        this.y = d * a.x - b * a.z;
+        this.z = b * a.y - c * a.x;
+        return this
+    },
+    distanceTo: function (a) {
+        return Math.sqrt(this.distanceToSquared(a))
+    },
+    distanceToSquared: function (a) {
+        return (new Geom.Vector3).sub(this, a).lengthSq()
+    },
+    setPositionFromMatrix: function (a) {
+        this.x = a.n14;
+        this.y = a.n24;
+        this.z = a.n34
+    },
+    setRotationFromMatrix: function (a) {
+        var b = Math.cos(this.y);
+        this.y = Math.asin(a.n13);
+        Math.abs(b) > 1.0E-5 ? (this.x = Math.atan2(-a.n23 / b, a.n33 / b), this.z = Math.atan2(-a.n12 / b, a.n11 / b)) : (this.x = 0, this.z = Math.atan2(a.n21, a.n22))
+    },
+    isZero: function () {
+        return this.lengthSq() < 1.0E-4
+    }
+};

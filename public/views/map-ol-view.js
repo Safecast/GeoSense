@@ -66,12 +66,92 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		this.updateMapStyle(_defaultMapStyle);
 		
-		this.detectMapClick();
+		//this.detectMapClick();
 		
 		if(DEBUG)
 			this.map.addControl(new OpenLayers.Control.MousePosition());
 						
 		this.setMapLocation(_defaultMapLocation);
+				
+		//this.map.events.register("mousemove", this.map, function (b) {
+			// var a = this;
+			//         var c = this.getLonLatFromPixel(b.xy),
+			//             f = this.getExtent(),
+			//             g = this.getCurrentSize();
+			//         if (a.baseMapType == "google") {
+			//             var h = new OpenLayers.Projection("EPSG:900913"),
+			//                 j = new OpenLayers.Projection("EPSG:4326");
+			//             c.transform(h, j);
+			//             f.transform(h, j)
+			//         }
+			//         g = f.getWidth() / g.w;
+			//         g = self.getItems(c.lon, c.lat, g * (2 + this.zoom / this.numZoomLevels * 2));
+			//         f = "";
+			//         f = g.length;
+			//         $tooltip = $("#map-tooltip");
+			//         f > 0 ? (a.curItem = a.model.items[g[0]], c = 30, f > 1 ? ($("#map-tooltip .tooltip-info").html("[ " + g.length + " more ]"), $("#map-tooltip .tooltip-info").css("display", "inline"), c = 60) : ($("#map-tooltip .tooltip-info").html(""), $("#map-tooltip .tooltip-info").css("display", "none")), f = "<span>" + a.curItem.title + "</span> ", $("#map-tooltip .tooltip-title").html(f), g = this.getSize(), f = b.xy.x, h = b.xy.y + 20, j = $tooltip.outerWidth(), f + 200 + 10 > g.w && (f -= j), h + c > g.h && (h = b.xy.y - c), $tooltip.css({
+			//             left: f,
+			//             top: h,
+			//             display: "block"
+			//         })) : ($tooltip.css({
+			//             display: "none"
+			//         }), a.curItem = null)
+			// 
+			// 		console.log(a);
+	    //});
+		
+	},
+	
+	createQuadTree: function () {
+	    var a = {
+	        x: this.bounds.getX(),
+	        y: this.bounds.getY(),
+	        width: this.bounds.getWidth(),
+	        height: this.bounds.getHeight()
+	    };
+	    (new Date).getTime();
+	    this.quadTree = new QuadTree(a, !0, 7, 30);
+	    for (var a = this.items.length, b = 0; b < a; b++) {
+	        var c = this.items[b];
+	        this.quadTree.insert({
+	            x: c.lng,
+	            y: c.lat,
+	            id: c.id
+	        })
+	    }(new Date).getTime()
+	},
+	
+	insertQuadTree: function (a) {
+	    for (var b = a.length, c = 0; c < b; c++) {
+	        var d = a[c];
+	        this.quadTree.insert({
+	            x: d.lng,
+	            y: d.lat,
+	            id: d.id
+	        })
+	    }
+	},
+	
+	quadTreeRetrieve: function (a, b) {
+	    if (!this.quadTree) return null;
+	    return this.quadTree.retrieve({
+	        x: a,
+	        y: b
+	    })
+	},
+	
+	getItems: function (a, b, c) {
+		var self = this;
+	    a = new Geometry.Vector2(a, b);
+	    self.quadTreeRetrieve(a.x, a.y);
+	    if (b == null) return [];
+	    c *= c;
+	    for (var d = Number.MAX_VALUE, e = [], f = 0; f < b.length; f++) {
+	    	var g = b[f],
+	    	h = (a.x - g.x) * (a.x - g.x) + (a.y - g.y) * (a.y - g.y);
+	    	h < c && (e.push(g.id), h < d && (d = h))
+ 		}
+		return e
 	},
 	
 	addCommentLayer: function()
@@ -131,27 +211,116 @@ window.MapOLView = window.MapViewBase.extend({
 			{cls: "one"}
 		);
 		
-		this.commentLayer.addFeatures(comment);
+		///this.commentLayer.addFeatures(comment);
 		
-		var select = new OpenLayers.Control.SelectFeature(this.commentLayer);
+		var select = new OpenLayers.Control.SelectFeature(this.commentLayer,
+        {
+            clickout: false, toggle: false,
+            multiple: false, hover: false
+        });
+
+		this.commentLayer.events.on({
+			"featureselected": function(e) {
+				console.log('comment clicked');
+			}
+		});
+
 		this.map.addControl(select);
 		select.activate();
 	},
 	
-	addCollectionAsLayer: function(collection)
+	addCollectionAsLayer: function(collection, renderer)
 	{
-		var layer = new OpenLayers.Layer.VectorPt(null, {
-			projectionon: new OpenLayers.Projection("EPSG:4326"),
-			sphericalMercator: true,
-		    renderers: ["Canvas2"]
-		});
+		var renderer = 'Canvas2'
 		
-		layer.collectionId = collection.collectionId;
-		
-		this.layerArray.push(layer);
-		currLayer = this.layerArray.length;
-		
-		this.map.addLayers([this.layerArray[currLayer-1]]);
+		switch(renderer)
+		{
+			case 'Canvas2':
+			
+					var layer = new OpenLayers.Layer.VectorPt(null, {
+								projection: new OpenLayers.Projection("EPSG:4326"),
+								sphericalMercator: true,
+					    		renderers: ["Canvas2"]
+					});
+					
+					layer.collectionId = collection.collectionId;
+					this.layerArray.push(layer);
+					
+					currLayer = this.layerArray.length;
+					this.map.addLayers([this.layerArray[currLayer-1]]);
+				
+			break;
+			
+			case 'Canvas':
+			
+				var Rule = OpenLayers.Rule;
+				var Filter = OpenLayers.Filter;
+				var style = new OpenLayers.Style({
+				    pointRadius: 10,
+				    strokeWidth: 0,
+				    strokeOpacity: 0.0,
+				    strokeColor: "navy",
+				    fillColor: "#ffffff",
+				    fillOpacity: .2
+				});
+
+				var layerHit = new OpenLayers.Layer.Vector(null, {
+				    styleMap: new OpenLayers.StyleMap({
+				        "default": style,
+				        select: {
+				            fillColor: "red",
+				            pointRadius: 13,
+				            strokeColor: "yellow",
+				            strokeWidth: 3
+				        }
+				    }),
+				    renderers: ["Canvas"]
+				});
+
+				layerHit.collectionId = collection.collectionId;
+
+				this.layerArray.push(layerHit);
+				currLayer = this.layerArray.length;
+
+				this.map.addLayers([this.layerArray[currLayer-1]]);
+
+				var selectControl = new OpenLayers.Control.SelectFeature(
+				  this.layerArray[currLayer-1], {
+				     clickout: true, multiple: false, hover: false, box: false,
+				     onBeforeSelect: function(feat) {
+				        console.log('grr');
+				        return false;
+				     },
+				     onUnselect: function(feat) {
+				        // add code to remove feature from highlight layer
+				     }
+				  }
+				);
+					
+			break;
+			
+			case 'WMS':
+			
+				this.map.addControl(selectControl);
+				selectControl.activate();
+				
+					var longText = new Array(205).join("1234567890");
+					var base = new OpenLayers.Layer.WMS( "OpenLayers WMS",
+					    "http://vmap0.tiles.osgeo.org/wms/vmap0",
+					    {layers: 'basic', makeTheUrlLong: longText},
+					    {tileOptions: {maxGetUrlLength: 2048}, transitionEffect: 'resize'}
+					);
+					var overlay = new OpenLayers.Layer.WMS("Overlay",
+					    "http://suite.opengeo.org/geoserver/wms",
+					    {layers: "usa:states", transparent: true, makeTheUrlLong: longText},
+					    {ratio: 1, singleTile: true, tileOptions: {maxGetUrlLength: 2048}, transitionEffect: 'resize'}
+					);
+					this.map.addLayers([overlay]);
+			
+				break;
+			default:
+		  		//
+		}
 		
 	},
 	
@@ -271,7 +440,6 @@ window.MapOLView = window.MapViewBase.extend({
 		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
 	},
 	
-	
 	detectMapClick: function ()
 	{
 		var self = this;
@@ -300,32 +468,32 @@ window.MapOLView = window.MapViewBase.extend({
 
                trigger: function(e) {
                    var lonlat = this.map.getLonLatFromPixel(e.xy);
-
+					console.log(lonlat.lat);
 				//Temporary!!!!
-				var commentid = 0123456;
-				var mapid = _mapId;
-				var lat = lonlat.lat;
-				var lon = lonlat.lon
-				var name = 'beef';
-				var text = 'burrito';
-				var date = new Date();
-
-				$.ajax({
-					type: 'POST',
-					url: '/api/comment/' + commentid + '/' + mapid + '/' + lat + '/' + lon + '/' + name + '/' + text + '/' + date,
-					success: function(data) {
-						console.log('stored comment');
-						comment = new Feature(
-							new Geometry.Point(lon, lat),
-							{cls: "one"}
-						);
-						self.commentLayer.addFeatures(comment);
-						
-					},
-					error: function() {
-						console.error('failed to store comment');
-					}
-				});
+				// var commentid = 0123456;
+				// 				var mapid = _mapId;
+				// 				var lat = lonlat.lat;
+				// 				var lon = lonlat.lon
+				// 				var name = 'beef';
+				// 				var text = 'burrito';
+				// 				var date = new Date();
+				// 
+				// 				$.ajax({
+				// 					type: 'POST',
+				// 					url: '/api/comment/' + commentid + '/' + mapid + '/' + lat + '/' + lon + '/' + name + '/' + text + '/' + date,
+				// 					success: function(data) {
+				// 						console.log('stored comment');
+				// 						comment = new Feature(
+				// 							new Geometry.Point(lon, lat),
+				// 							{cls: "one"}
+				// 						);
+				// 						self.commentLayer.addFeatures(comment);
+				// 						
+				// 					},
+				// 					error: function() {
+				// 						console.error('failed to store comment');
+				// 					}
+				// 				});
              }
 		});
 		
@@ -382,13 +550,21 @@ window.MapOLView = window.MapViewBase.extend({
 		currPoint = new OpenLayers.Geometry.Point(lat, lon);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
+		var style = new OpenLayers.Style({
+		    pointRadius: 10,
+		    strokeWidth: 0,
+		    strokeOpacity: 0.0,
+		    strokeColor: "navy",
+		    fillColor: "#ffffff",
+		    fillOpacity: .2
+		});
+		
 		vector = new OpenLayers.Feature.Vector(currPoint, {
 	        colour: gocolor,
 		});
-				
+					
 		//Add point to proper layer (by found index)
-		this.layerArray[index].features.push(vector);
-		
+		this.layerArray[index].features.push(vector);	
     },
 
 	addOneComment: function(model) {
