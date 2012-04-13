@@ -8,8 +8,7 @@
 
 		$(document).ready(function() {
 		
-			function setup(low_left, up_left){	
-				console.log("SE " + low_left + " NW: " + up_left);			
+			function setup(low_left, up_left){			
 				ZoomLevel.create(low_left, up_right);
 			}	
 
@@ -59,8 +58,8 @@
 
 				//Creates the pairs of coordinates for each box to be created
 				defCoordinates: function(){
-					for (var n = 0; n < this.grid_width - 1; n++){
-						for (var m = 0; m < this.grid_length - 1; m++) {
+					for (var n = 0; n < this.grid_width; n++){
+						for (var m = 0; m < this.grid_length; m++) {
 							var pair = {low_left: 
 								{	lng: this.zoom_sw.lng + m*(this.zoom_length / this.grid_length),
 									lat: this.zoom_sw.lat + n*(this.zoom_width / this.grid_width)
@@ -70,7 +69,6 @@
 									lng: this.zoom_sw.lng + (m+1)*(this.zoom_length / this.grid_length),
 									lat: this.zoom_sw.lat + (n+1)*(this.zoom_width / this.grid_width)
 								}};
-							//console.log(pair);
 							this.coordinates.push(pair);
 						};//end for
 					};//end for
@@ -78,7 +76,9 @@
 
 				//Creates a box for each set of coordinates
 				createArray: function(){
+					console.log("createArray");
 					this.coordinates.forEach(function(pair){
+						console.log(pair);
 						var box = new Box(pair.low_left, pair.up_right);
 						this.data_array.push(box);
 					});
@@ -98,7 +98,6 @@
 			}
 
 			function defineCenter(low_left, up_right){
-				//console.log("defineCenter "+ low_left + up_right);
 				return {lat: (up_right.lng - low_left.lng) / 2, lat: (up_right.lat - low_left.lat) / 2};
 			}//end defineCenter
 
@@ -129,7 +128,6 @@
 						}
 					});
 					*/
-					console.log(up_right)
 					//console.log("We made it to getPoints without errors! We now just need to actually get the data.");
 			}//end getPoints
 
@@ -199,7 +197,7 @@
   <body>
 	<div id='response'>Response</div>
 	<input id='inputBoxSE' value="0,0" placeholder='SE'></input>
-	<input id='inputBoxNW' value="1,1" placeholder='NW'></input>
+	<input id='inputBoxNW' value="10,10" placeholder='NW'></input>
 	
 	<button id='submitButton'>go</button>
   </body>
