@@ -35,6 +35,8 @@ window.DataLibrary = Backbone.View.extend({
 	},
 
 	fetchDataCollections: function() {	
+		
+		
 		var self = this;	
 		$.ajax({
 			type: 'GET',
@@ -42,7 +44,11 @@ window.DataLibrary = Backbone.View.extend({
 			success: function(data) {
 				
 				$.each(data, function(key, val) { 
-					self.drawDataSource(val);
+					//Check to see if the map already has the collection
+					valStr = String(val.collectionid);
+					var search = jQuery.inArray(valStr,_mapCollections);
+					if(search == -1)
+						self.drawDataSource(val);
 				});
 				
 				self.$('#dragLabel').draggable({
@@ -55,7 +61,6 @@ window.DataLibrary = Backbone.View.extend({
 					},
 					stop: function(event, ui) {
 						$('#mapOLDataDrop').removeClass('visible');
-						$(this).css("opacity","1");
 					}
 				});
 
@@ -81,6 +86,7 @@ window.DataLibrary = Backbone.View.extend({
 	  	var draggable = ui.draggable;
 		collectionId = draggable.attr('data');
 		app.addFromDataLibrary(collectionId);
+		$(ui.draggable).css("display","none");
 	},
 	
 	closeButtonClicked: function() {

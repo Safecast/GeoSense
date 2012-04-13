@@ -57,10 +57,10 @@ PointCollection = Backbone.Collection.extend({
 			type: 'DELETE',
 			url: this.url,
 			success: function() {
-				console.log('deleted collection: ' + self.collectionId);
+				console.log('Removed collection: ' + self.collectionId);
 			},
 			error: function() {
-				console.error('failed to delete collection: ' + self.collectionId);
+				console.error('failed to remove collection: ' + self.collectionId);
 			}
 		});
 		

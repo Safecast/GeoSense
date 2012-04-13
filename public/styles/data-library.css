@@ -95,3 +95,8 @@
 {
 
 }
+
+.data-library .data-container .data-item .ui-draggable.hidden
+{
+	background-color:red;
+}

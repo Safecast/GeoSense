@@ -254,13 +254,13 @@ var AppRouter = Backbone.Router.extend({
 		
 				if(data[0].collections)
 				{
-					collections = data[0].collections;
+					_mapCollections = data[0].collections;
 				
-					for(var i = 0; i < collections.length; ++i)
+					for(var i = 0; i < _mapCollections.length; ++i)
 					{
 						$.ajax({
 							type: 'GET',
-							url: '/api/pointcollection/' + collections[i],
+							url: '/api/pointcollection/' + _mapCollections[i],
 							success: function(data) {
 								self.addExistingDataSource(data[0].collectionid, type)
 							},
@@ -270,7 +270,7 @@ var AppRouter = Backbone.Router.extend({
 						});
 					}
 					//Save the distinct collection Id(s) to app scope
-					_num_data_sources = collections.length;
+					_num_data_sources = _mapCollections.length;
 				}
 			},
 			error: function() {
