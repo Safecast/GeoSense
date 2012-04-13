@@ -10,8 +10,7 @@
 		
 			function setup(low_left, up_left){			
 				ZoomLevel.create(low_left, up_right);
-			}	
-
+			}
 
 			var ZoomLevel = {
 				
@@ -76,9 +75,9 @@
 
 				//Creates a box for each set of coordinates
 				createArray: function(){
-					console.log("createArray");
+					//console.log("createArray");
 					this.coordinates.forEach(function(pair){
-						console.log(pair);
+						//console.log(pair);
 						var box = new Box(pair.low_left, pair.up_right);
 						this.data_array.push(box);
 					});
@@ -108,27 +107,31 @@
 						this.box_data.push(x);
 						this.num_points += 1;
 					});
-					*/
+					*/1
 					
-					/*
+					var s = low_left.lng;
+					var w = low_left.lat;
+					var n = up_right.lng;
+					var e = up_right.lat;					
 					
 					$.ajax({
-						type: 'GET',
-						url: '/api/geo/' + low_left + "/" + up_right,
-						success: function(data) {
-							
-							for(var i = 0; i < data.length; ++i)
-							{
-								this.box_data.push(x);
-								this.num_points += 1;	
-							}
-						},
-						error: function() {
-							console.error('failed to fetch existing data source');
-						}
-					});
-					*/
-					//console.log("We made it to getPoints without errors! We now just need to actually get the data.");
+					type: 'GET',
+					url: '/api/boxquery/' + s + "/" + w+ "/" + n + "/" + e,
+					success: function(data) {
+						
+						console.log(data);
+						//console.log(data);
+						// for(var i = 0; i < data.length; ++i)
+						// 							{
+						// 								this.box_data.push(x);
+						// 								this.num_points += 1;	
+						// 							}
+					},
+					error: function() {
+						console.error('failed to fetch existing data source');
+					}
+				});
+					
 			}//end getPoints
 
 			function average(data){
@@ -142,22 +145,6 @@
 			function maximum(){
 
 			}//end maximum
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 		app = {
 				parse: function(input){
@@ -191,13 +178,10 @@
 	
   </head>
 
-
-
-
   <body>
 	<div id='response'>Response</div>
-	<input id='inputBoxSE' value="0,0" placeholder='SE'></input>
-	<input id='inputBoxNW' value="10,10" placeholder='NW'></input>
+	<input id='inputBoxSE' value="140.128,37.081" placeholder='SE'></input>
+	<input id='inputBoxNW' value="140.132,37.087" placeholder='NW'></input>
 	
 	<button id='submitButton'>go</button>
   </body>
