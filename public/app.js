@@ -246,23 +246,32 @@ var AppRouter = Backbone.Router.extend({
 	fetchCollections: function(type)
 	{
 		var self = this;
-				
+		var collectionObject = ["Hello","World"];
 		$.ajax({
 			type: 'GET',
-			url: '/api/maps/' + _mapId,
+			url: '/api/map/' + _mapId,
 			success: function(data) {
 		
-				//Save collection information to app scope
-				_mapCollections = data;
-				
-				//Save the distinct collection Id(s) to app scope
-				_num_data_sources = _mapCollections.length;				
-				
-				//Bind existing data sources
-				for(i=0;i<_num_data_sources;i++)
+				if(data[0].collections)
 				{
-					self.addExistingDataSource(data[i].collectionid, type);
-				}							
+					collections = data[0].collections;
+				
+					for(var i = 0; i < collections.length; ++i)
+					{
+						$.ajax({
+							type: 'GET',
+							url: '/api/pointcollection/' + collections[i],
+							success: function(data) {
+								self.addExistingDataSource(data[0].collectionid, type)
+							},
+							error: function() {
+								console.error('failed to fetch distinct collections');
+							}
+						});
+					}
+					//Save the distinct collection Id(s) to app scope
+					_num_data_sources = collections.length;
+				}
 			},
 			error: function() {
 				console.error('failed to fetch distinct collections');
@@ -290,10 +299,9 @@ var AppRouter = Backbone.Router.extend({
 				
 				pointCollection[index].fetch({success: function(data) {
 					
-					self.vent.trigger("setStateType", 'loadingcomplete');
+					self.vent.trigger("setStateType", 'complete');
 					
-								
-					if(_firstLoad == true || type == 'newData')
+					if(_firstLoad == true || type == 'newData' || type == 'dataLibrary')
 					{
 			 			self.addSideBarDataView({collectionId:index,dataLength:data.length,title:name});
 					}
@@ -311,6 +319,21 @@ var AppRouter = Backbone.Router.extend({
 				console.error('failed to fetch existing data source');
 			}
 		});
+	},
+	
+	addFromDataLibrary: function(collectionId)
+	{
+		$.ajax({
+			type: 'POST',
+			url: '/api/bindmapcollection/'+_mapId+'/' + collectionId,
+			success: function(data) {
+				_num_data_sources+=1;
+				app.addExistingDataSource(collectionId, 'dataLibrary')
+			},
+			error: function() {
+				console.error('failed to join map with collection');
+			}
+		});	
 	},
 
 	addData:function (options)

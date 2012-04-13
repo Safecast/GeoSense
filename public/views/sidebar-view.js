@@ -43,7 +43,7 @@ window.SideBarView = Backbone.View.extend({
 		}
 		this.$('#scale_linear').addClass('active');
 		
-		this.addDataLibraryClicked();
+		//this.addDataLibraryClicked();
 					
         return this;
     },

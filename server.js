@@ -474,6 +474,22 @@ app.post('/api/map/:mapid/:name', function(req, res){
 	  });
 });
 
+app.post('/api/bindmapcollection/:mapid/:collectionid', function(req, res){
+	var mapid =  req.params.mapid;
+    var collectionid = req.params.collectionid;
+
+	Map.update({ mapid:mapid }, { $push : { collections: collectionid} }, function(err) {
+	      if (!err) {
+	        console.log("map updated");
+	        res.send('');
+	      }
+	      else {
+			res.send('oops error', 500);
+		  }
+	  });
+	
+});
+
 app.delete('/api/map/:mapid', function(req, res){
    Map.remove({mapid:req.params.mapid}, function(err) {
       if (!err) {

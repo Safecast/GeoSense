@@ -80,7 +80,7 @@ window.DataLibrary = Backbone.View.extend({
 	dataDrop:function ( event, ui ) {
 	  	var draggable = ui.draggable;
 		collectionId = draggable.attr('data');
-		app.addExistingDataSource(collectionId,'newData');
+		app.addFromDataLibrary(collectionId);
 	},
 	
 	closeButtonClicked: function() {

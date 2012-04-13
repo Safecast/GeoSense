@@ -110,7 +110,7 @@ window.HeaderView = Backbone.View.extend({
 		{
 			case 'drawing':
 			  	stateIndicator.stop(true, true).fadeIn('fast');
-				message.html('LOADING DATA SET');
+				message.html('DRAWING DATA SET');
 			  	break;
 			case 'complete':
 				console.log(_num_data_sources +" : "+ _loaded_data_sources)
