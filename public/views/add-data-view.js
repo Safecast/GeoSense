@@ -25,12 +25,12 @@ window.AddDataView = Backbone.View.extend({
 			stack: '#dragLabel'
 		});
 				
-		this.$('#dataTable').droppable( {
+		this.$('#map_canvas').droppable( {
 	      accept: '#dragLabel',
 	      hoverClass: '',
 	      drop: self.handleCardDrop
 	    } );
-		
+			
 		this.$(".color-picker").miniColors();
 				
         return this;

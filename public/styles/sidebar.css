@@ -139,7 +139,24 @@
 {
 	height:25px;
 	padding:15px;
+}
 
+.toggle-group .data-toggle.double
+{
+	height:50px;
+}
+
+.toggle-group .data-toggle.double .first
+{
+	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 0px;	
+}
+
+.toggle-group .data-toggle.double .second
+{
+	border-top-right-radius: 0px;
+	border-top-left-radius: 0px;
+	margin-top:-1px;	
 }
 
 .toggle-group .data-toggle p
@@ -168,7 +185,7 @@
 	display:none;
 }
 
-#addData, #deleteMap {
+.btn.data	 {
 	margin-top:-3px;
 	width:235px;
 	height:30px;

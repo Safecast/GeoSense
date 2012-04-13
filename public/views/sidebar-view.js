@@ -10,6 +10,7 @@ window.SideBarView = Backbone.View.extend({
 		'click #display2D': 'display2DClicked',
 		'click #display3D': 'display3DClicked',
 		'click #addData': 'addDataClicked',
+		'click #addDataLibrary': 'addDataLibraryClicked',
 		'click #scale_linear': 'scaleLinearClicked',
 		'click #scale_log': 'scaleLogClicked',
 		'click #tweetButton' : 'tweetButtonClicked',
@@ -41,6 +42,8 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#display3D').addClass('active');
 		}
 		this.$('#scale_linear').addClass('active');
+		
+		this.addDataLibraryClicked();
 					
         return this;
     },
@@ -91,6 +94,24 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#themeToggleGroup').fadeIn('fast');
 			this.$('#scaleToggleGroup').fadeOut('fast');
 		}
+	},
+	
+	addDataLibraryClicked: function() {
+		this.toggleDataLibrary();
+	},
+	
+	toggleDataLibrary: function(){
+		
+		if(_dataLibraryVisible == false)
+		{
+			this.dataLibraryView = new DataLibrary();
+		    $(this.el).append(this.dataLibraryView.render().el);
+			_dataLibraryVisible = true;
+		}
+		else
+		{
+			_dataLibraryVisible = false;
+		}		
 	},
 
 	lightFilterClicked: function() {

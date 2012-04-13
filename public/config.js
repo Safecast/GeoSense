@@ -18,6 +18,7 @@ var _defaultMapStyle = 'dark';
 var _defaultMapLocation = 'Japan';
 
 var _settingsVisible = false;
+var _dataLibraryVisible = false;
 var _chatVisible = false;
 							
 //VARIABLES FOR THREE.JS
