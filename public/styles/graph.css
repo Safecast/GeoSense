@@ -1,0 +1,10 @@
+.graph-view
+{
+	position:absolute;
+	bottom:0px;
+	right:0px;
+	left:300px;
+	z-index:9999;
+	height:300px;
+	background-color:red;
+}

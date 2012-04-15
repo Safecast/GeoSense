@@ -135,6 +135,9 @@ var AppRouter = Backbone.Router.extend({
 		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
 		$('body').append(this.setupView.render().el);
 		
+		this.graphView = new GraphView({vent: this.vent});
+		$('body').append(this.graphView.render().el);
+		
 		this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
@@ -490,7 +493,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['homepage', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library'],
+tpl.loadTemplates(['homepage', 'graph', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });
