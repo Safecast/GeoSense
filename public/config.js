@@ -5,6 +5,7 @@
 
 var DEBUG = true;
 var _firstLoad = true;
+var _setupRoute = false;
 var _mapId = String;
 var _mapName = String;
 var _mapCollections = [];

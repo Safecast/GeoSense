@@ -9,6 +9,7 @@ window.HeaderView = Backbone.View.extend({
 		'click #aboutSafecast:' : 'aboutSafecastClicked',
 		'click #postFacebook:' : 'postFacebookClicked',
 		'click #postTwitter:' : 'postTwitterClicked',
+		'click #setupButton' : 'setupButtonClicked',
 		'keypress input': 'keyEvent',
     },
 
@@ -62,6 +63,10 @@ window.HeaderView = Backbone.View.extend({
 			$('.sidebar-view .black-overlay').removeClass('visible');
 			_settingsVisible = true;
 		}	
+	},
+	
+	setupButtonClicked: function() {
+		$('#setupModal').modal('show');	
 	},
 	
 	aboutGeosenseClicked: function() {

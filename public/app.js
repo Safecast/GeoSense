@@ -131,10 +131,17 @@ var AppRouter = Backbone.Router.extend({
 
 		this.chatView = new ChatView({vent: this.vent});
         $('body').append(this.chatView.render().el);
+
+		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
+		$('body').append(this.setupView.render().el);
 		
 		this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
+		
+		if(_setupRoute)
+			$('#setupModal').modal('show');	
+				
 	},
 
 	setUniqueMapName: function(name)
@@ -149,11 +156,9 @@ var AppRouter = Backbone.Router.extend({
 	
 	setNewMap: function(uniqueMapId)
 	{
+		_setupRoute = true;
 		$('body').empty();
 		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
-		
-		this.setupView = new SetupView({vent: this.vent, mapId:uniqueMapId});
-		$('body').append(this.setupView.render().el);
 	},
 	
 	setUniqueGlobe: function(uniqueMapId)
