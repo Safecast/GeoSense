@@ -11,6 +11,7 @@ window.ChatView = Backbone.View.extend({
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('chat'));
+
     },
 
     render: function() {
