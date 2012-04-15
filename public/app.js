@@ -151,6 +151,9 @@ var AppRouter = Backbone.Router.extend({
 	{
 		$('body').empty();
 		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
+		
+		this.setupView = new SetupView({vent: this.vent, mapId:uniqueMapId});
+		$('body').append(this.setupView.render().el);
 	},
 	
 	setUniqueGlobe: function(uniqueMapId)
@@ -482,7 +485,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['homepage', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library'],
+tpl.loadTemplates(['homepage', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });
