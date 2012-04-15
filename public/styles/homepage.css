@@ -540,6 +540,20 @@
 	color:#00c9ff;
 }
 
+.recent .pager .next a
+{
+	margin-top:10px;
+	background-color:rgba(255,255,255,.15);
+	border:none;
+	border-radius:7px;
+}
+
+.recent .pager .next a:hover
+{
+	color:#00C9FF;
+}
+
+
 /* BOTTOM MODULE */
 
 .footer 
