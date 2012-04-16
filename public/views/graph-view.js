@@ -4,115 +4,129 @@ window.GraphView = Backbone.View.extend({
 	className: 'graph-view',
 	
     events: {
+		'click #testButton': 'testButtonClicked',
     },
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('graph'));	
 		this.vent = options.vent;
 		$(window).bind("resize", _.bind(this.resize, this));
-		
-		this.dataSet = [];
-		for(var i = 0; i < 500; ++i)
-		{
-			num=Math.floor(Math.random()*100);
-			this.dataSet.push(num);
-		}
-		
-		this.width = $(window).width();
-		this.height = $(window).height();
     },
 
     render: function() {
 		$(this.el).html(this.template());
-		this.container = this.$('#graphContainer').get(0);
-		this.drawGraph();
         return this;
     },
 
-	resize: function()
+	testButtonClicked: function()
 	{
-		this.width = $(window).width();
-		this.height = $(window).height();	
-		this.drawGraph();
+		var data = this.generateData();
+		
+		d3.select($('#graphContainer svg').get(0))
+			    .attr('width', this.getWidth())
+			    .attr('height', this.getHeight())
+				.datum(data)
+			    .call(this.chart);
 	},
 
-	drawGraph: function()
+	getWidth: function()
 	{
-		this.$('#graphContainer').empty();
-		var data = this.dataSet,
-		w = this.width,
-		h = 275,
-		margin = 20,
-		y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin, h - margin]),
-		x = d3.scale.linear().domain([0, data.length]).range([0 + margin, w - margin])
-		
-		var vis = d3.select(this.container)
-		    .append("svg:svg")
-		    .attr("width", w)
-		    .attr("height", h)
+		return 5000;
+		//return parseInt(d3.select(this.$('#graphContainer').get(0)).style('width'));
+	},
+	
+	getHeight: function()
+	{
+		return parseInt(d3.select(this.$('#graphContainer').get(0)).style('height'))
+	},
 
-		var g = vis.append("svg:g")
-		    .attr("transform", "translate(0, 275)");
-		
-		var line = d3.svg.line()
-		    .x(function(d,i) { return x(i); })
-		    .y(function(d) { return -1 * y(d); })
-		
-		g.append("svg:path").attr("d", line(data));
-		
-		g.append("svg:line")
-		    .attr("x1", x(0))
-		    .attr("y1", -1 * y(0))
-		    .attr("x2", x(w))
-		    .attr("y2", -1 * y(0))
-
-		g.append("svg:line")
-		    .attr("x1", x(0))
-		    .attr("y1", -1 * y(0))
-		    .attr("x2", x(0))
-		    .attr("y2", -1 * y(d3.max(data)))
-		
-		g.selectAll(".xLabel")
-		    .data(x.ticks(5))
-		    .enter().append("svg:text")
-		    .attr("class", "xLabel")
-		    .text(String)
-		    .attr("x", function(d) { return x(d) })
-		    .attr("y", 0)
-		    .attr("text-anchor", "middle")
-
-		g.selectAll(".yLabel")
-		    .data(y.ticks(4))
-		    .enter().append("svg:text")
-		    .attr("class", "yLabel")
-		    .text(String)
-		    .attr("x", 0)
-		    .attr("y", function(d) { return -1 * y(d) })
-		    .attr("text-anchor", "right")
-		    .attr("dy", 4)
-			
-		g.selectAll(".xTicks")
-		    .data(x.ticks(5))
-		    .enter().append("svg:line")
-		    .attr("class", "xTicks")
-		    .attr("x1", function(d) { return x(d); })
-		    .attr("y1", -1 * y(0))
-		    .attr("x2", function(d) { return x(d); })
-		    .attr("y2", -1 * y(-0.3))
-
-		g.selectAll(".yTicks")
-		    .data(y.ticks(4))
-		    .enter().append("svg:line")
-		    .attr("class", "yTicks")
-		    .attr("y1", function(d) { return -1 * y(d); })
-		    .attr("x1", x(-0.3))
-		    .attr("y2", function(d) { return -1 * y(d); })
-		    .attr("x2", x(0))
+	resize: function()
+	{
+		this.updateGraph();
 	},
 	
 	updateGraph: function()
 	{
-		console.log('width:' + width);
+		d3.select($('#graphContainer svg').get(0))
+			    .attr('width', this.getWidth())
+			    .attr('height', this.getHeight())
+			    .call(this.chart);
+	},
+	
+	generateData: function()
+	{
+		var n = 3, // number of layers
+		    m = 120; // number of samples per layer
+		
+		var data = this.stream_layers(n,m).map(function(data, i) {
+		  return { 
+		    key: 'Stream' + i,
+		    values: data
+		  };
+		});
+		return data	
 	},
 
+	drawGraph: function()
+	{		
+
+		//format data to our liking, add keys
+		var data = this.generateData();
+		
+		this.chart = nv.models.stackedAreaWithLegend()
+		            .width(this.getWidth())
+		            .height(this.getHeight())
+		
+		var svg = d3.select($('#graphContainer svg').get(0))
+		  .attr('width', this.getWidth())
+		  .attr('height', this.getHeight())
+		  .datum(data)
+		
+		svg.transition().duration(500).call(this.chart);
+		
+		/*
+		this.chart.dispatch.on('tooltipShow', function(e) {
+		  var offset = $('#chart').offset(),
+		      left = e.pos[0] + offset.left,
+		      top = e.pos[1] + offset.top,
+		      formatterY = this.chart.stacked.offset() == 'expand' ? d3.format(',.2%') : d3.format(',.2f'), //TODO: stacked format should be set by caller
+		      formatterX = function(d) { return d };
+
+		  var content = '<h3>' + e.series.key + '</h3>' +
+		                '<p>' +
+		                formatterY(this.chart.y()(e.point)) + ' on ' + formatterX(this.chart.x()(e.point)) +
+		                '</p>';
+
+		  nvtooltip.show([left, top], content);
+		});
+
+		this.chart.dispatch.on('tooltipHide', function(e) {
+		  nvtooltip.cleanup();
+		});	
+		*/
+		/////
+		
+	},
+	
+	stream_layers: function(n, m, o) {
+	  if (arguments.length < 3) o = 0;
+	  function bump(a) {
+	    var x = 1 / (.1 + Math.random()),
+	        y = 2 * Math.random() - .5,
+	        z = 10 / (.1 + Math.random());
+	    for (var i = 0; i < m; i++) {
+	      var w = (i / m - y) * z;
+	      a[i] += x * Math.exp(-w * w);
+	    }
+	  }
+	  return d3.range(n).map(function() {
+	      var a = [], i;
+	      for (i = 0; i < m; i++) a[i] = o + o * Math.random();
+	      for (i = 0; i < 5; i++) bump(a);
+	      return a.map(stream_index);
+	    });
+		function stream_index(d, i) {
+		  return {x: i, y: Math.max(0, d)};
+		}
+	},
 });

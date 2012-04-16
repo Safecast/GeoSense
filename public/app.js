@@ -135,8 +135,7 @@ var AppRouter = Backbone.Router.extend({
 		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
 		$('body').append(this.setupView.render().el);
 		
-		this.graphView = new GraphView({vent: this.vent});
-		$('body').append(this.graphView.render().el);
+
 		
 		this.addCommentData();
 		

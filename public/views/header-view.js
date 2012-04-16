@@ -10,6 +10,8 @@ window.HeaderView = Backbone.View.extend({
 		'click #postFacebook:' : 'postFacebookClicked',
 		'click #postTwitter:' : 'postTwitterClicked',
 		'click #setupButton' : 'setupButtonClicked',
+		'click #graphButton' : 'graphButtonClicked',
+		
 		'keypress input': 'keyEvent',
     },
 
@@ -63,6 +65,12 @@ window.HeaderView = Backbone.View.extend({
 			$('.sidebar-view .black-overlay').removeClass('visible');
 			_settingsVisible = true;
 		}	
+	},
+	
+	graphButtonClicked: function() {
+		this.graphView = new GraphView({vent: this.vent});
+		$('body').append(this.graphView.render().el);
+		$('body').append(this.graphView.drawGraph());
 	},
 	
 	setupButtonClicked: function() {
