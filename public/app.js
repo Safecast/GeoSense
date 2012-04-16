@@ -135,7 +135,7 @@ var AppRouter = Backbone.Router.extend({
 		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
 		$('#app').append(this.setupView.render().el);
 		
-
+		$('body').css("overflow","hidden");
 		
 		this.addCommentData();
 		
@@ -143,6 +143,10 @@ var AppRouter = Backbone.Router.extend({
 		
 		if(_setupRoute)
 			$('#setupModal').modal('show');	
+			
+		// this.graphView = new GraphView({vent: this.vent});
+		// $('body').append(this.graphView.render().el);
+		// $('body').append(this.graphView.drawGraph());
 				
 	},
 
@@ -204,7 +208,7 @@ var AppRouter = Backbone.Router.extend({
 		{
 			_firstLoad = false;
 			this.homepageView = new HomepageView();
-	        $('#app').append(this.homepageView.render().el);
+	        $('#home').append(this.homepageView.render().el);
 		} else
 		{
 			window.location.reload(true);			

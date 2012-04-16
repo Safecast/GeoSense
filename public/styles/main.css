@@ -14,8 +14,21 @@
 @import url("data-library.css");
 @import url("graph.css");
 
+@import url("rickshaw/detail.css");
+@import url("rickshaw/graph.css");
+@import url("rickshaw/legend.css");
+
 @import url("bootstrap.css");
 @import url("jquery.miniColors.css");
+
+#home 
+{
+	overflow-y:scroll;
+}
+
+#app {
+	
+}
 
 .header-view
 {
@@ -123,3 +136,4 @@
     -o-transition: all .3s linear;
     -ms-transition: all .3s linear;
 }
+

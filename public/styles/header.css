@@ -144,3 +144,8 @@
 	background-image:url('../assets/graph-icon.png');
 	background-repeat:no-repeat;
 }
+
+.header-view .graph.active
+{
+	opacity:1;
+}
