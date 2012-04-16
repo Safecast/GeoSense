@@ -68,7 +68,7 @@ window.MapOLView = window.MapViewBase.extend({
 		this.addCommentLayer();
 				
 		this.updateMapStyle(_defaultMapStyle);
-		
+				
 		//this.detectMapClick();
 		
 		if(DEBUG)
@@ -572,7 +572,8 @@ window.MapOLView = window.MapViewBase.extend({
 		});
 					
 		//Add point to proper layer (by found index)
-		this.layerArray[index].features.push(vector);	
+		this.layerArray[index].features.push(vector);
+					
     },
 
 	addOneComment: function(model) {
