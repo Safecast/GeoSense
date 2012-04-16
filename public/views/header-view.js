@@ -76,17 +76,17 @@ window.HeaderView = Backbone.View.extend({
 			$('body').append(this.graphView.drawGraph());
 		}
 		
-		if(_settingsVisible)
-		{
-			$('.graph-view').addClass('visible');
-			$('.header-view .graph').addClass('active');
-			_settingsVisible = false;
-		}
-		else
+		if(_graphVisible == true)
 		{
 			$('.graph-view').removeClass('visible');
 			$('.header-view .graph').removeClass('active');
-			_settingsVisible = true;
+			_graphVisible = false;
+		}
+		else
+		{
+			$('.graph-view').addClass('visible');
+			$('.header-view .graph').addClass('active');
+			_graphVisible = true;
 		}
 		
 		

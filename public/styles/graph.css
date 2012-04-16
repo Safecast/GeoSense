@@ -5,9 +5,10 @@
 	right:0px;
 	left:0px;
 	height:250px;
-	z-index:9999;
+	z-index:998;
 	background-color:white;
 	opacity:.9;
+	border-top:1px solid #333;
 	
 	-webkit-transition: all .3s linear;
     -moz-transition: all .3s linear;

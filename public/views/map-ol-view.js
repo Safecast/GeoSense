@@ -15,6 +15,9 @@ window.MapOLView = window.MapViewBase.extend({
 	
 		_.bindAll(this, "toggleLayerVisibility");
 		options.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
+		
+		_.bindAll(this, "redrawMap");
+	 	options.vent.bind("redrawMap", this.redrawMap);
 	
 		this.layerArray = [];
 		
@@ -410,6 +413,11 @@ window.MapOLView = window.MapViewBase.extend({
 
 		this.gmap.mapObject.mapTypes.set('styled', styledMapType);
 		this.gmap.mapObject.setMapTypeId('styled');
+	},
+	
+	redrawMap: function()
+	{
+		
 	},
 	
 	toWebMercator: function (googLatLng) {

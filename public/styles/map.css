@@ -221,3 +221,12 @@
 	font-size:18px;
 	font-weight:bold;
 }
+
+.olControlPanZoomBar
+{
+	margin-left:300px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}

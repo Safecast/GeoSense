@@ -60,9 +60,9 @@ window.SideBarView = Backbone.View.extend({
 			$('#settingsTabText').html('SHOW');
 			$('#settingsTab').addClass('hidden');
 			$('.sidebar-view').addClass('visible');
-			$('.map-view').addClass('full');
 			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
+			$('.olControlPanZoomBar').css("margin-left",0);
 			_settingsVisible = false;
 		}
 		else
@@ -70,11 +70,17 @@ window.SideBarView = Backbone.View.extend({
 			$('#settingsTabText').html('HIDE');
 			$('#settingsTab').removeClass('hidden');
 			$('.sidebar-view').removeClass('visible');
+			
+			$('.olControlPanZoomBar').css("margin-left",300);
+			
 			$('.map-view').removeClass('full');
-			$('.map-gl-view').removeClass('full');
+			
 			$('.sidebar-view .black-overlay').removeClass('visible');
 			_settingsVisible = true;
 		}
+		
+		this.vent.trigger("redrawMap");
+		
 	},
 	
 	setToggleStates: function(options){
