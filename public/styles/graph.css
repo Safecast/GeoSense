@@ -1,11 +1,11 @@
 .graph-view
 {
+	display:none;
 	position:absolute;
 	bottom:-250px;
 	right:0px;
 	left:0px;
 	z-index:999;
-	background-color:white;
 	opacity:.9;
 	border-top:1px solid #333;
 	
@@ -17,6 +17,7 @@
 
 .graph-view.visible
 {
+	display:block;
 	bottom:0px;
 	-webkit-transition: all .3s linear;
     -moz-transition: all .3s linear;
@@ -24,16 +25,26 @@
     -ms-transition: all .3s linear;
 }
 
-.graph-view .graphContainer
+.graph-view .graph-container
 {
 	position:absolute;
-	top:0px;
 	bottom:0px;
 	left:0px;
 	right:0px;
+	height:300px;
+	background-color:rgba(0,0,0,.8);
 }
 
 /* RICKSHAW */
+
+#slider
+{
+	z-index:9999;
+	position:absolute;
+	top:0px;
+	left:100px;
+	width:200px;
+}
 
 #chart {
 	display: inline-block;
@@ -76,8 +87,8 @@
 #side_panel {
 	position:absolute;
 	z-index:999999;
-	top:0px;
-	right:0px;
+	bottom:300px;
+	right:15px;
 	padding: 0 20px 20px 0;
 	width: 240px;
 	background-color:white;
@@ -106,6 +117,7 @@
 	cursor: pointer;
 }
 #legend {
+	display:none;
 	background-color: white;
 	margin-left: 0;
 	padding: 0;
@@ -131,6 +143,7 @@ section {
 	padding: 15px 0;
 }
 #smoother {
+	display:none;
 	margin: 5px 0 0 10px;
 	width: 90%;
 }

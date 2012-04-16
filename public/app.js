@@ -136,9 +136,6 @@ var AppRouter = Backbone.Router.extend({
 		
 		this.graphView = new GraphView({vent: this.vent});
 		$('body').append(this.graphView.render().el);
-		//$('body').append(this.graphView.drawGraph());
-		$('.graph-view').addClass('visible');
-		$('.header-view .graph').addClass('active');
 		
 		$('body').css("overflow","hidden");
 		

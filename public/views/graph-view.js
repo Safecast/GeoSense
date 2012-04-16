@@ -10,15 +10,13 @@ window.GraphView = Backbone.View.extend({
 	    this.template = _.template(tpl.get('graph'));	
 		this.vent = options.vent;
 		$(window).bind("resize", _.bind(this.resize, this));
+		
+		_.bindAll(this, "drawGraph");
+		this.vent.bind("drawGraph", this.drawGraph);
+		
 		this.collections = {};
 		this.seriesData = [];
 		this.graphData = [];
-		// this.random = new Rickshaw.Fixtures.RandomData(78);
-		// 			
-		// 			for (var i = 0; i < 78; i++) {
-		// 				this.random.addData(this.seriesData);
-		// 			}
-		// 
     },
 
     render: function() {
@@ -32,7 +30,6 @@ window.GraphView = Backbone.View.extend({
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
-		
 		this.addCollectionToGraph(this.collections[id]);
 	},
 	
@@ -49,14 +46,11 @@ window.GraphView = Backbone.View.extend({
 		this.graphData.sort(function(a, b){
 		 return a.epoch-b.epoch
 		});
-		
-		this.drawGraph();
-		
 	},
 
 	resize: function()
 	{
-		this.drawGraph();
+		//this.drawGraph();
 	},
 	
 	updateGraph: function()
@@ -124,10 +118,10 @@ window.GraphView = Backbone.View.extend({
 				
 						xAxis.render();
 		
-		// var slider = new Rickshaw.Graph.RangeSlider( {
-		// 	graph: self.graph,
-		// 	element: $('#slider')
-		// });
+		var slider = new Rickshaw.Graph.RangeSlider( {
+			graph: this.graph,
+			element: $('#slider')
+		});
 		
 		var controls = new RenderControls( {
 			element: document.querySelector('form'),

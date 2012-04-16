@@ -21,6 +21,8 @@
 @import url("bootstrap.css");
 @import url("jquery.miniColors.css");
 
+@import url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css");
+
 #home 
 {
 	overflow-y:scroll;

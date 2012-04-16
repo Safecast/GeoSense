@@ -69,27 +69,23 @@ window.HeaderView = Backbone.View.extend({
 	
 	graphButtonClicked: function() {
 		
-		if(!this.graphView)
-		{
-			this.graphView = new GraphView({vent: this.vent});
-			$('body').append(this.graphView.render().el);
-			$('body').append(this.graphView.drawGraph());
-		}
+		console.log(_graphVisible);
 		
 		if(_graphVisible == true)
 		{
+			_graphVisible = false;
+			
 			$('.graph-view').removeClass('visible');
 			$('.header-view .graph').removeClass('active');
-			_graphVisible = false;
 		}
 		else
 		{
+			_graphVisible = true;
+			
 			$('.graph-view').addClass('visible');
 			$('.header-view .graph').addClass('active');
-			_graphVisible = true;
+			this.vent.trigger("drawGraph"); 
 		}
-		
-		
 	},
 	
 	setupButtonClicked: function() {
