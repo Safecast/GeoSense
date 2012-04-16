@@ -17,53 +17,62 @@ window.MapGLView = window.MapViewBase.extend({
 		MapGLView.__super__.initialize.call(this, options)
 	    this.template = _.template(tpl.get('map-gl'));
 		_.bindAll(this, "updateValueScale");
-		_.bindAll(this, "updatePhysicalTags");
+		_.bindAll(this, "updateTaggedObject");
 	 	options.vent.bind("updateValueScale", this.updateValueScale);
-	 	options.vent.bind("updatePhysicalTags", this.updatePhysicalTags);
-
-	 	var watch = [];
-    	for (var key in OBJECT_TAGS) {
-    		for (var i = 0; i < OBJECT_TAGS[key].length; i++) {
-    			watch.push(OBJECT_TAGS[key][i].tagName);
-    		}
-    	}
-		new OblessdClient({vent: options.vent, watch: watch});
+	 	options.vent.bind("updateTaggedObject", this.updateTaggedObject);
+		new OblessdClient({vent: options.vent, taggedObjects: taggedObjects});
+    	this.tweens = {};
     },
 
-    updatePhysicalTags: function(protein)
+    updateTaggedObject: function(obj)
     {
     	if (!this.globe) return;
-    	for (var key in OBJECT_TAGS) {
-    		var avgLoc = new THREE.Vector3();
-    		var avgNorm = new THREE.Vector3();
-    		var avgOver = new THREE.Vector3();
-    		var updated = 0;
-    		for (var i = 0; i < OBJECT_TAGS[key].length; i++) {
-    			var t = OBJECT_TAGS[key][i];
-    			if (t.update(protein)) {
-    				avgLoc.addSelf(t.virt.loc);
-    				avgNorm.addSelf(t.virt.norm);
-    				avgOver.addSelf(t.virt.over);
-    				updated++;
-    			}
-    		}
-			if (updated > OBJECT_TAGS[key].length / 2) {
-	    		avgLoc.divideScalar(updated);
-	    		avgNorm.divideScalar(updated);
-	    		avgOver.divideScalar(updated);
+		switch (obj.name) {
+			case 'globe':
+				this.globe.world.position = new THREE.Vector3().copy(obj.loc);
+				break;
+			case 'lens':
 
-	    		switch (key) {
-	    			case 'globe':
-	    				this.globe.world.position = avgLoc;
-	    				break;
-	    			case 'lens':
-	    				this.globe.camera.position = avgLoc;
-	    				var invNorm = avgNorm.copy().multiplyScalar(-1);
-	    				this.globe.camera.lookAt(new Vector3.add(avgLoc, invNorm));
-	    				break;
-	    		}
-			}
-    	}
+				this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
+
+				/*if (!this.tweens.cameraPosition) {
+				    this.tweens.cameraPosition = new TWEEN.Tween(this.globe.camera.position);
+				}
+				this.tweens.cameraPosition.stop();
+				this.tweens.cameraPosition.to(new THREE.Vector3().copy(obj.loc), SMOOTH_TWEEN_DURATION);
+				this.tweens.cameraPosition.start();*/
+
+
+				var invNorm = new THREE.Vector3().copy(obj.norm).multiplyScalar(-1);
+				var newLookAt = new THREE.Vector3().add(obj.loc, invNorm);
+				this.globe.camera.lookAt(newLookAt);
+
+				
+				break;
+
+				if (!this.lookAt) {
+					this.i = 0;
+					var self = this;
+					this.lookAt = newLookAt;
+					this.lookAtTween = new TWEEN.Tween(this.lookAt);
+					this.lookAtTween.onUpdate(function() {
+						console.log('update');
+						self.globe.camera.lookAt(self.lookAt);
+					});
+				} else {
+					this.i++;
+					if (this.i % 100 == 0) {
+						console.log('tween');
+						console.log(this.lookAt);
+						console.log(newLookAt);
+						this.lookAtTween.stop();
+						this.lookAtTween.to(newLookAt, 1000);
+						this.lookAtTween.start();
+					}
+				}
+
+				break;
+		}
 
 
 /*        if (obj[GLOBE_TAG]) {
@@ -157,6 +166,7 @@ window.MapGLView = window.MapViewBase.extend({
 		*/
 
 		this.stats.update();
+		TWEEN.update();
 	},
 
 	updateValueScale: function(scale) {
@@ -182,7 +192,6 @@ window.MapGLView = window.MapViewBase.extend({
 		if (IS_IPAD) {
 			$('body').addClass('ipad');
 		}
-
 
     	if (DEBUG) {
 			this.stats = new Stats();

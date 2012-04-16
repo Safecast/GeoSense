@@ -440,7 +440,7 @@ DAT.Globe = function(container, colorFn) {
     renderer.render(scenePoints, camera);
 
 
-  //composer.render();
+    //composer.render();
 	
   }
 

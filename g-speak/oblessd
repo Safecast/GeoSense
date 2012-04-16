@@ -12,51 +12,88 @@ $: << '/opt/oblong/g-speak-64-2/lib64/ruby/'
 require 'Pool'
 include Plasma
 
-pool = "tcp://gspeak01.media.mit.edu/tags"
+pools = ["tcp://gspeak01.media.mit.edu/tags"]
 host = "0.0.0.0"
 port = 8080
 debug = false
 watch_tags = {}
-fps = 50.0
+track = {}
+fps = 80.0
 
 open_sockets = []
 socket_options = {}
 
+
+if ARGV.length > 0:
+  pools = ARGV[0].split(',')
+
+  if ARGV.length > 1:
+    split = ARGV[1].split(':')
+    host = split[0]
+    if split.length > 1:
+      port = split[1]
+    end 
+  end
+end
+
+
+
 Thread.abort_on_exception = true
-t1 = Thread.new do
-  puts "Creating Hose to %s" % pool
-  h = Hose.new(pool)
+ingests_tags = {}
+ingests_tracks = {}
+
+for pool in pools:
+  Thread.new do
+    puts "Creating Hose to %s" % pool
+    h = Hose.new(pool)
+    prev_time = Time.now
+    targetTimeDelta = 1 / fps
+    loop {
+      h.tolast 
+      prot = h.prev
+      if prot.ingests["tags"]
+        ingests_tags = prot.ingests["tags"]
+      end
+      if prot.ingests["tracks"]
+        ingests_tracks = prot.ingests["tracks"]
+      end
+    }
+  end
+end
+
+Thread.new do
   prev_time = Time.now
   targetTimeDelta = 1 / fps
   loop {
     next_time = Time.now
     timeDelta = next_time - prev_time
     if timeDelta >= targetTimeDelta
-      h.tolast 
-      prot = h.prev
-      ingests_tags = prot.ingests["tags"]
       for socket in open_sockets
-        send_tags = {}
-        if prot
+        send_tags = nil
+        send_tracks = nil
+        if ingests_tags:
+          send_tags = {}
           for tag in watch_tags[socket]
             if ingests_tags[tag]
               send_tags[tag] = ingests_tags[tag]
             end
           end
         end
-        socket.send(send_tags.to_json)
+        if track[socket]:
+          send_tracks = ingests_tracks
+        end
+        send_data = {}
+        if send_tags:
+          send_data['tags'] = send_tags
+        end
+        if send_tracks:
+          send_data['tracks'] = send_tracks
+        end
+        socket.send(send_data.to_json)
       end
       prev_time = next_time
     end
   }
-end
-
-if ARGV.length > 0:
-  split = ARGV[0].split(':')
-  host = split[0]
-  if split.length > 1:
-    port = split[1]
-  end 
 end
 
 puts "Starting oblessd on %s:%i at %i fps" % [host, port, fps]
@@ -78,15 +115,16 @@ EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do 
   }
   ws.onmessage { |msg|
     words = msg.split(' ')
+    puts msg
     case words[0]
-    when 'watch'
-      if words.length == 2:
-        puts msg
-        if not watch_tags[ws].include?(words[1]):
-          watch_tags[ws].push(words[1])
+      when 'watch'
+        if words.length == 2:
+          if not watch_tags[ws].include?(words[1]):
+            watch_tags[ws].push(words[1])
+          end
         end
-      end
+      when 'track'
+        track[ws] = true
     end
   }
 end
-
