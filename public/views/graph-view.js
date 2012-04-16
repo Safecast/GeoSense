@@ -11,7 +11,7 @@ window.GraphView = Backbone.View.extend({
 		this.vent = options.vent;
 		$(window).bind("resize", _.bind(this.resize, this));
 		
-		this.seriesData = [ [], [], [] ];
+		this.seriesData = [ []];
 		this.random = new Rickshaw.Fixtures.RandomData(150);
 		
 		for (var i = 0; i < 150; i++) {
@@ -39,6 +39,8 @@ window.GraphView = Backbone.View.extend({
 	{
 		var self = this;
 		
+		console.log(this.seriesData[0]);
+		
 		this.$('#chart').empty();
 		this.$('#legendContainer').empty();
 		this.$('#legend').empty();
@@ -51,17 +53,9 @@ window.GraphView = Backbone.View.extend({
 			renderer: 'line',
 			series: [
 				{
-					color: "#fff",
+					color: "#ccc",
 					data: this.seriesData[0],
 					name: 'Earthquakes'
-				}, {
-					color: "#666",
-					data: this.seriesData[1],
-					name: 'Oil'
-				}, {
-					color: "#ccc",
-					data: this.seriesData[2],
-					name: 'Reactors'
 				}
 			]
 		} );
