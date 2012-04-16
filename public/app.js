@@ -371,6 +371,10 @@ var AppRouter = Backbone.Router.extend({
 			var intensity = '';
 			var name = '';
 			var val = '';
+			var date = '';
+			var day = '';
+			var month = '';
+			var year = '';
 			
 			$.each(data[i], function(key, val) { 
 								
@@ -406,8 +410,34 @@ var AppRouter = Backbone.Router.extend({
 				{
 					color = val;
 				}
+				else if (key == 'date')
+				{
+					date = val;
+				}
+				else if (key == 'day')
+				{
+					day = val;
+				}
+				else if (key == 'month')
+				{
+					month = val;
+				}
+				else if (key == 'year')
+				{
+					year = val;
+				}
 			});	
-				
+			
+			//Format date
+			if(date == '')
+			{
+				if(day != '' && month != '' & year != '')
+				{
+					newDate = new XDate(year, month, day);
+					date =  newDate.getTime();
+				}
+			}
+			
 			//Check for lat/lng location
 			if(location == '')
 				location = lat + ',' + lng;
@@ -436,7 +466,7 @@ var AppRouter = Backbone.Router.extend({
 			if(val == '')
 				val = 10;
 
-			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'colorlow':colorLow, 'colorhigh':colorHigh});
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'date':date, 'colorlow':colorLow, 'colorhigh':colorHigh});
 		}
 				
 		//First increment total number of data sources

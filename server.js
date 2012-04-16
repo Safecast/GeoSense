@@ -335,7 +335,8 @@ app.post('/api/addpoints/:id', function(req, res){
 			lon: 		jsonObject[i].lon,
 			val: 		jsonObject[i].val,
 			colorhigh:  jsonObject[i].colorhigh,
-			colorlow:  jsonObject[i].colorlow,
+			colorlow:  	jsonObject[i].colorlow,
+			date: 		jsonObject[i].date,
 		  });	
 				
 		  point.save();
