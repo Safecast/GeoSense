@@ -6,9 +6,13 @@ window.SideBarDataView = Backbone.View.extend({
     events: {
 		'click #removeData:' : 'removeDataClicked',
 		'click #editData:' : 'editDataClicked',
+		'click #toggleVisible:' : 'toggleVisibleClicked',
+		'click #toggleHidden:' : 'toggleHiddenClicked',
     },
 
     initialize: function(options) {
+		this.vent = options.vent;
+	
 	    this.template = _.template(tpl.get('sidebar-data'));
 		this.collectionId = options.collectionId;
 		this.title = options.title;
@@ -16,6 +20,7 @@ window.SideBarDataView = Backbone.View.extend({
 				
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);
+		
     },
 
     render: function() {
@@ -32,7 +37,7 @@ window.SideBarDataView = Backbone.View.extend({
 		
 		dataTitle += " ("+ this.collection.length + ")";
 		
-		this.$("a").html('<i class="icon-map-marker icon-white"></i> ' + dataTitle);
+		this.$("a").html(dataTitle);
 		this.$("a").attr("href", "#collapse" + this.collectionId);
 		this.$("#collapse").attr("id", "collapse" + this.collectionId);
 		
@@ -72,5 +77,25 @@ window.SideBarDataView = Backbone.View.extend({
         $('body').append(this.editDataView.render().el);
 		$('#editDataModal').modal('toggle');
    	},
+
+	displayDataState: function(state)
+	{
+		console.log('Currently: ' + state);
+	},
+
+	toggleVisibleClicked: function()
+	{
+		this.toggleVisibility(1);
+	},
+	
+	toggleHiddenClicked: function()
+	{
+		this.toggleVisibility(0)
+	},
+	
+	toggleVisibility: function(type)
+	{
+		this.vent.trigger("toggleLayerVisibility", this.collectionId, type);
+	}
 
 });

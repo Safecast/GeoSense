@@ -306,8 +306,8 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-weight: bold;
-  color: #333333;
+  font-weight: normal;
+  color: #353535;
   text-rendering: optimizelegibility;
 }
 h1 small,
@@ -317,7 +317,7 @@ h4 small,
 h5 small,
 h6 small {
   font-weight: normal;
-  color: #999999;
+  color: #353535;
 }
 h1 {
   font-size: 30px;
@@ -327,7 +327,7 @@ h1 small {
   font-size: 18px;
 }
 h2 {
-  font-size: 24px;
+  font-size: 30px;
   line-height: 36px;
 }
 h2 small {

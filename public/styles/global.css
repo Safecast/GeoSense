@@ -1,12 +1,60 @@
 @font-face {
-    font-family: 'Unit';
-    src: url('../assets/type/unit.eot');
-    src: url('../assets/type/unit.eot?#iefix') format('embedded-opentype'),
-         url('../assets/type/unit.woff') format('woff'),
-         url('../assets/type/unit.ttf') format('truetype'),
-         url('../assets/type/unit.svg#Unit') format('svg');
+    font-family: 'Vit';
+    src: url('../assets/type/vit.eot');
+    src: url('../assets/type/vit.eot?#iefix') format('embedded-opentype'),
+         url('../assets/type/vit.woff') format('woff'),
+         url('../assets/type/vit.ttf') format('truetype'),
+         url('../assets/type/vit.svg#Vit') format('svg');
     font-weight: bold;
     font-style: normal;
+}
+
+@font-face {
+    font-family: 'OswaldLight';
+    src: url('../assets/type/Oswald-Light-webfont.eot');
+    src: url('../assets/type/Oswald-Light-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../assets/type/Oswald-Light-webfont.woff') format('woff'),
+         url('../assets/type/Oswald-Light-webfont.ttf') format('truetype'),
+         url('../assets/type/Oswald-Light-webfont.svg#OswaldLight') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OswaldBook';
+    src: url('../assets/type/Oswald-Regular-webfont.eot');
+    src: url('../assets/type/Oswald-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../assets/type/Oswald-Regular-webfont.woff') format('woff'),
+         url('../assets/type/Oswald-Regular-webfont.ttf') format('truetype'),
+         url('../assets/type/Oswald-Regular-webfont.svg#OswaldBook') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OswaldBold';
+    src: url('../assets/type/Oswald-Bold-webfont.eot');
+    src: url('../assets/type/Oswald-Bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../assets/type/Oswald-Bold-webfont.woff') format('woff'),
+         url('../assets/type/Oswald-Bold-webfont.ttf') format('truetype'),
+         url('../assets/type/Oswald-Bold-webfont.svg#OswaldBold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OswaldStencilRegular';
+    src: url('../assets/type/Oswald-Stencil-webfont.eot');
+    src: url('../assets/type/Oswald-Stencil-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../assets/type/Oswald-Stencil-webfont.woff') format('woff'),
+         url('../assets/type/Oswald-Stencil-webfont.ttf') format('truetype'),
+         url('../assets/type/Oswald-Stencil-webfont.svg#OswaldStencilRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
 }
 
 html {
@@ -38,7 +86,7 @@ p {
 }
 
 h1 {
-	font-family: Unit ,sans-serif;
+	font-family: Vit ,sans-serif;
 	font-style: normal;
 	font-weight: 700;
 	line-height:38px;
@@ -46,9 +94,15 @@ h1 {
 
 h2,
 h3 {
+	font-family: OswaldLight,sans-serif;
+	
 	font-size:15pt;
 	font-weight: bold;
-	color: #404040;
+	color: #353535;
+}
+
+h4 {
+	font-family: OswaldBold,sans-serif;
 }
 
 input, textarea {

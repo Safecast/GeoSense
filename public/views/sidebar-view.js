@@ -10,10 +10,14 @@ window.SideBarView = Backbone.View.extend({
 		'click #display2D': 'display2DClicked',
 		'click #display3D': 'display3DClicked',
 		'click #addData': 'addDataClicked',
+		'click #addDataLibrary': 'addDataLibraryClicked',
 		'click #scale_linear': 'scaleLinearClicked',
 		'click #scale_log': 'scaleLogClicked',
 		'click #tweetButton' : 'tweetButtonClicked',
 		'click #deleteMap' : 'deleteMapClicked',
+		'click #toggleCommentsVisible' : 'toggleCommentsVisibleClicked',
+		'click #toggleCommentsHidden' : 'toggleCommentsHiddenClicked',
+		'click #settingsTab' : 'settingsTabClicked',
     },
 
     initialize: function(options) {
@@ -38,6 +42,8 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#display3D').addClass('active');
 		}
 		this.$('#scale_linear').addClass('active');
+		
+		//this.addDataLibraryClicked();
 					
         return this;
     },
@@ -46,6 +52,29 @@ window.SideBarView = Backbone.View.extend({
 		
 		this.sideBarDataView = new SideBarDataView({vent: this.vent, url: options.url});
         this.$('#accordion').append(this.sideBarDataView.render({number: options.number}).el);
+	},
+	
+	settingsTabClicked: function() {
+		if(_settingsVisible)
+		{
+			$('#settingsTabText').html('SHOW');
+			$('#settingsTab').addClass('hidden');
+			$('.sidebar-view').addClass('visible');
+			$('.map-view').addClass('full');
+			$('.map-gl-view').addClass('full');
+			$('.sidebar-view .black-overlay').addClass('visible');
+			_settingsVisible = false;
+		}
+		else
+		{
+			$('#settingsTabText').html('HIDE');
+			$('#settingsTab').removeClass('hidden');
+			$('.sidebar-view').removeClass('visible');
+			$('.map-view').removeClass('full');
+			$('.map-gl-view').removeClass('full');
+			$('.sidebar-view .black-overlay').removeClass('visible');
+			_settingsVisible = true;
+		}
 	},
 	
 	setToggleStates: function(options){
@@ -65,6 +94,24 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#themeToggleGroup').fadeIn('fast');
 			this.$('#scaleToggleGroup').fadeOut('fast');
 		}
+	},
+	
+	addDataLibraryClicked: function() {
+		this.toggleDataLibrary();
+	},
+	
+	toggleDataLibrary: function(){
+		
+		if(_dataLibraryVisible == false)
+		{
+			this.dataLibraryView = new DataLibrary();
+		    $(this.el).append(this.dataLibraryView.render().el);
+			_dataLibraryVisible = true;
+		}
+		else
+		{
+			_dataLibraryVisible = false;
+		}		
 	},
 
 	lightFilterClicked: function() {
@@ -105,7 +152,7 @@ window.SideBarView = Backbone.View.extend({
 			url: '/api/map/' + _mapId,
 			success: function() {
 				console.log('deleted map: ' + _mapId);
-				app.navigate("", {trigger: true});
+				window.location = '../';
 			},
 			error: function() {
 				console.error('failed to delete map: ' + _mapId);
@@ -123,6 +170,21 @@ window.SideBarView = Backbone.View.extend({
 	
 	tweetButtonClicked: function() {
 		var tweets = new TweetCollection({});
+	},
+	
+	toggleCommentsVisibleClicked: function()
+	{
+		this.toggleCommentVisibility(1);
+	},
+	
+	toggleCommentsHiddenClicked: function()
+	{
+		this.toggleCommentVisibility(0)
+	},
+	
+	toggleCommentVisibility: function(type)
+	{
+		this.vent.trigger("toggleLayerVisibility", null, type, 'comments');
 	},
 	
 	addOne: function(comment) {

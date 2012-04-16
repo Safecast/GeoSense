@@ -2,8 +2,11 @@ window.MapViewBase = Backbone.View.extend({
 
     initialize: function(options) {
 		this.collections = {};
+		this.vent = options.vent;
 		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);			
+		options.vent.bind("setMapLocation", this.setMapLocation);
+		
+		this.dataObjectArray = [];
 	},
 
 	setMapLocation: function(addr)
@@ -11,14 +14,15 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		
 		geocoder = new google.maps.Geocoder();
-		geocoder.geocode( {'address': addr, 'region': "jp"}, function (results, status)
+		geocoder.geocode( {'address': addr}, function (results, status)
 			{
 				if (status == google.maps.GeocoderStatus.OK)
 				{
-					self.fitMapBounds(results[0].geometry.viewport);
+					self.setViewPort(results);
 				}
 				else { 	
-					alert ("Cannot find " + addr + "! Status: " + status);}
+					alert ("Cannot find " + addr + "! Status: " + status);
+				}
 		});
 	},
 
@@ -28,11 +32,20 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
-		this.collections[id].fetch();
+		
+		this.addCollectionToMap(this.collections[id]);
+	},
+	
+	addCommentCollection: function(collection)
+	{
+		var self = this;
+		this.commentCollection = collection;
+		this.commentCollection.bind('reset', this.resetComments, this);
+		this.commentCollection.bind('add', this.addOneComment, this);
+		this.commentCollection.fetch();
 	},
 
 	cleanPointModel: function(model) {
-		//If location is a single string, parse it
 		var input = model.get('location');
 		var latlngStr = input.split(/[, ]/, 2);
 		var lat = parseFloat(latlngStr[0]);
@@ -47,18 +60,49 @@ window.MapViewBase = Backbone.View.extend({
 
 	reset: function(model) {
 		this.removeCollectionFromMap(model);
-		this.addCollectionToMap(this.collections[model.collectionId]);
+		if(model.length > 0)
+			this.addCollectionToMap(this.collections[model.collectionId]);
+	},
+
+	resetComments: function(model) {
+		//this.removeCollectionFromMap(model);
+		this.addCommentToMap(model);
 	},
 
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
+		this.vent.trigger("setStateType", 'drawing');
+		
+		//Create specific layer
+		this.addCollectionAsLayer(collection);
+		
+		var currCollection = collection.collectionId;
+		var currIndex;
+		$.each(this.layerArray, function(index, value) { 
+			if(value.collectionId == currCollection)
+				currIndex = index;
+		});
+				
 		collection.each(function(model) {
 			self.cleanPointModel(model);
-			self.addOne(model);
+			self.addOne(model, currIndex);
+		});
+				
+		this.layerArray[currIndex].redraw();
+		
+		if(_loaded_data_sources == (_num_data_sources-1))
+			this.vent.trigger("setStateType", 'complete');
+		
+	},
+	
+	addCommentToMap: function(collection)
+	{
+		var self = this;
+		collection.each(function(model) {
+			self.addOneComment(model);
 		});
 	}
-
 });
 
 var AppRouter = Backbone.Router.extend({
@@ -68,6 +112,7 @@ var AppRouter = Backbone.Router.extend({
 		":mapId/map":"setUniqueMap",
 		":mapId/setup":"setNewMap",
 		":mapId":"setUniqueMap",
+		"removed":"home",
 		"":"home",
     },
 
@@ -78,16 +123,25 @@ var AppRouter = Backbone.Router.extend({
 
 	render:function(state)
 	{
-		console.log('render...');
  		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
         $('body').append(this.headerView.render().el);
 
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('body').append(this.sideBarView.render().el);
 
-		this.fetchAndDrawData('all');	
+		this.chatView = new ChatView({vent: this.vent});
+        $('body').append(this.chatView.render().el);
+
+		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
+		$('body').append(this.setupView.render().el);
+		
+		this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
+		
+		if(_setupRoute)
+			$('#setupModal').modal('show');	
+				
 	},
 
 	setUniqueMapName: function(name)
@@ -102,8 +156,8 @@ var AppRouter = Backbone.Router.extend({
 	
 	setNewMap: function(uniqueMapId)
 	{
+		_setupRoute = true;
 		$('body').empty();
-		console.log(this.sideBarView);
 		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
 	},
 	
@@ -131,7 +185,7 @@ var AppRouter = Backbone.Router.extend({
 				{
 					self.mapGL();
 				}
-				
+								
 				if(!self.sideBarView)
 					self.render(options.state);
 				
@@ -151,7 +205,7 @@ var AppRouter = Backbone.Router.extend({
 	        $('body').append(this.homepageView.render().el);
 		} else
 		{
-			window.location.reload(true);
+			window.location.reload(true);			
 		}
 	},
 
@@ -166,12 +220,14 @@ var AppRouter = Backbone.Router.extend({
 		
 	    if (!this.mapView)
 		{
-            this.mapView = new MapView({
+            this.mapView = new MapOLView({
 				vent: self.vent
 			});
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
         }	
+
+		this.fetchCollections('mapdata');
     },
 
 	mapGL:function () {
@@ -191,27 +247,38 @@ var AppRouter = Backbone.Router.extend({
 			$('body').append(this.mapView.render().el);
 			this.mapView.start();
         }
-    },
 
-	fetchAndDrawData: function(loadType)
+		this.fetchCollections('mapdata');
+    },	
+
+	fetchCollections: function(type)
 	{
 		var self = this;
-				
-		//Gather distinct collections
-		//This returns an array containing collectionid for lookup
+		var collectionObject = ["Hello","World"];
 		$.ajax({
 			type: 'GET',
-			url: '/api/maps/' + _mapId,
+			url: '/api/map/' + _mapId,
 			success: function(data) {
 		
-				//Save the distinct collection Id(s) to app scope
-				num_data_sources = data.length;
-				
-				for(i=0;i<num_data_sources;i++)
+				if(data[0].collections)
 				{
-					// For each distinct data source, add an existing data source to the app.
-					// This binds a data model and sidebar data view
-					self.addExistingDataSource(data[i].collectionid, loadType);
+					_mapCollections = data[0].collections;
+				
+					for(var i = 0; i < _mapCollections.length; ++i)
+					{
+						$.ajax({
+							type: 'GET',
+							url: '/api/pointcollection/' + _mapCollections[i],
+							success: function(data) {
+								self.addExistingDataSource(data[0].collectionid, type)
+							},
+							error: function() {
+								console.error('failed to fetch distinct collections');
+							}
+						});
+					}
+					//Save the distinct collection Id(s) to app scope
+					_num_data_sources = _mapCollections.length;
 				}
 			},
 			error: function() {
@@ -219,15 +286,62 @@ var AppRouter = Backbone.Router.extend({
 			}
 		});
 	},
+	
+	addExistingDataSource: function(index,type)
+	{
+		var self = this;
+		
+		$.ajax({
+			type: 'GET',
+			url: '/api/pointcollection/' + index,
+			success: function(data) {
+				
+				self.vent.trigger("setStateType", 'loading');
 
-	maxValue: function( array ){
-	    return Math.max.apply( Math, array );
+				var mapId = data[0].mapid;
+				var maxVal = data[0].maxval;
+				var minVal = data[0].minval;
+				var name = data[0].name;
+												
+				pointCollection[index] = new PointCollection({collectionId:index, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
+				
+				pointCollection[index].fetch({success: function(data) {
+					
+					self.vent.trigger("setStateType", 'complete');
+					
+					if(_firstLoad == true || type == 'newData' || type == 'dataLibrary')
+					{
+			 			self.addSideBarDataView({collectionId:index,dataLength:data.length,title:name});
+					}
+								
+					self.addMapCollection(index, pointCollection[index]);
+					
+					_loaded_data_sources += 1;
+					if(_loaded_data_sources == _num_data_sources)
+						_firstLoad = false;
+											
+				}});
+					
+			},
+			error: function() {
+				console.error('failed to fetch existing data source');
+			}
+		});
 	},
 	
-	uniqId: function ()
+	addFromDataLibrary: function(collectionId)
 	{
-	    var newDate = new Date;
-	    return newDate.getTime();
+		$.ajax({
+			type: 'POST',
+			url: '/api/bindmapcollection/'+_mapId+'/' + collectionId,
+			success: function(data) {
+				_num_data_sources+=1;
+				app.addExistingDataSource(collectionId, 'dataLibrary')
+			},
+			error: function() {
+				console.error('failed to join map with collection');
+			}
+		});	
 	},
 
 	addData:function (options)
@@ -237,19 +351,11 @@ var AppRouter = Backbone.Router.extend({
 		var uniqueMapId = _mapId;
 		var title = options.title
 		var data = options.data;
-		var color = options.color;
+		var colorLow = options.colorLow;
+		var colorHigh = options.colorHigh;
 		var dataSet = [];
-						
-		//First increment total number of data sources
-		num_data_sources +=1;
-				
-		//Create collection
-		pointCollection[num_data_sources] = new PointCollection({
-			collectionId:uniqid,
-			mapId:uniqueMapId,
-			title:title,
-			newData:true,
-		});
+		var maxVal = 0;
+		var minVal;
 
 		for(var i = 0; i < data.length; ++i)
 		{
@@ -259,10 +365,14 @@ var AppRouter = Backbone.Router.extend({
 			var intensity = '';
 			var name = '';
 			var val = '';
-
+			
 			$.each(data[i], function(key, val) { 
 								
 				if(key == 'Location')
+				{
+					location = val;
+				}
+				if(key == 'location')
 				{
 					location = val;
 				}
@@ -274,88 +384,96 @@ var AppRouter = Backbone.Router.extend({
 				{
 					lng = val;
 				}
-				else if (key == 'intensity')
+				else if (key == 'lon')
+				{
+					lng = val;
+				}
+				else if (key == 'intensity' || key == 'value')
 				{
 					intensity = val;
 				}
-				else if (key == 'name')
+				else if (key == 'name' || key == 'title')
 				{
 					name = val;
 				}
+				else if (key == 'color')
+				{
+					color = val;
+				}
 			});	
-			
+				
 			//Check for lat/lng location
 			if(location == '')
 				location = lat + ',' + lng;
+				
+			if(lat == '' && lng == '')
+			{
+				var latlngStr = location.split(/[, ]/, 2);
+				lat = parseFloat(latlngStr[0]);
+				lng = parseFloat(latlngStr[1]);	
+			}
 			
 			//Substitute intensity for val
 			if(val == '')
 				val = intensity;
 			
-			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val});
+			if(val >= maxVal)
+				maxVal = val;	
+				
+			if(minVal == undefined)
+				minVal = val;
+			
+			if(val <= minVal)
+				minVal = val;
+						
+			//Substitute intensity for val
+			if(val == '')
+				val = 10;
+
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'colorlow':colorLow, 'colorhigh':colorHigh});
 		}
+				
+		//First increment total number of data sources
+		_num_data_sources +=1;
 		
-		//Create Points
-		//pointCollection.create() may also be used
-		pointCollection[num_data_sources].addData(dataSet, function(){
-			app.addExistingDataSource(uniqid, 'all');
+		if(maxVal == '')
+			maxVal = 1;
+		
+		if(minVal == '')
+			minVal = 0;
+		
+		//Create collection
+		pointCollection[_num_data_sources] = new PointCollection({
+			collectionId:uniqid,
+			mapId:uniqueMapId,
+			title:title,
+			maxVal: maxVal,
+			minVal: minVal,
+			newData:true,
 		});
-	},
-	
-	addExistingDataSource: function(index, loadType)
-	{
-		var self = this;
+				
+		//Create Points
+		pointCollection[_num_data_sources].addData(dataSet, function(){
+			app.addExistingDataSource(uniqid, 'newData');
+		});
 		
-		//First we look up the pointcollection for name & collectionid
-		$.ajax({
-			type: 'GET',
-			url: '/api/pointcollection/' + index,
-			success: function(data) {
-				var name = data[0].name;
-				//Now look up all points related to this collectionid
-				$.ajax({
-					type: 'GET',
-					url: '/api/collection/' + index,
-					success: function(data) {
-						var scope = this;
-						scope.index = index;
-						
-						pointCollection[this.index] = new PointCollection({
-							collectionId:index,
-							newData:false,
-						});
-						pointCollection[this.index].fetch({success: function() {
-							//Add a new sidebar data view once data is fetched
-							
-							if(loadType == 'all')
-							{
-								self.addSideBarDataView({collectionId:scope.index,dataLength:data.length,title:name});
-							}	
-							self.addMapCollection(scope.index, pointCollection[scope.index]);	
-							
-						}});
-						
-					},
-					error: function() {
-						console.error('failed to fetch existing data source');
-					}
-				});
-			},
-			error: function() {
-				console.error('failed to fetch existing data source');
-			}
-		})	
+		$('#addDataModal').modal('hide');
+		this.vent.trigger("setStateType", 'post');
 	},
 	
-	addTwitterData:function (options)
+	addCommentData: function(options)
+	{		
+		this.commentCollection = new CommentCollection({});
+		this.mapView.addCommentCollection(this.commentCollection);
+	},
+	
+	addTwitterData: function (options)
 	{
 		console.log('adding tweets');
 	},
 	
 	addSideBarDataView:function (options) {
-		//Add SideBar
-		console.log('options.collectionId: ' + options.dataLength);
-		this.sideBarDataView = new SideBarDataView({collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
+		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},
 	
@@ -363,10 +481,16 @@ var AppRouter = Backbone.Router.extend({
 	{
 		this.mapView.addCollection(id, collection);
 	},
+	
+	uniqId: function ()
+	{
+	    var newDate = new Date;
+	    return newDate.getTime();
+	},
 
 });
 
-tpl.loadTemplates(['homepage', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'modal','add-data','edit-data'],
+tpl.loadTemplates(['homepage', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });

@@ -25,12 +25,12 @@ window.AddDataView = Backbone.View.extend({
 			stack: '#dragLabel'
 		});
 				
-		this.$('#dataTable').droppable( {
+		this.$('#map_canvas').droppable( {
 	      accept: '#dragLabel',
 	      hoverClass: '',
 	      drop: self.handleCardDrop
 	    } );
-		
+			
 		this.$(".color-picker").miniColors();
 				
         return this;
@@ -45,7 +45,9 @@ window.AddDataView = Backbone.View.extend({
 		//Todo: Verify string URL
 		var self = this;
 		this.dataTitle = this.$('#titleInput').val();
-		this.dataColor = this.$('#colorInput').val();
+		this.dataColorLow = this.$('#colorInputLow').val();
+		this.dataColorHigh = this.$('#colorInputHigh').val();
+		
 		var urlPath = this.$('#dataInput').val();
 		
 		if (this.dataTitle != '' && urlPath != '')
@@ -62,8 +64,7 @@ window.AddDataView = Backbone.View.extend({
 	dataConfirmButtonClicked: function()
 	{
 		//Todo: Validate fields
-		$('#addDataModal').modal('hide');
-		app.addData({data:this.responseData, title:this.dataTitle, color: this.dataColor});
+		app.addData({data:this.responseData, title:this.dataTitle, colorLow: this.dataColorLow, colorHigh: this.dataColorHigh});
 	},
 	
 	requestData:function (options)
@@ -74,7 +75,7 @@ window.AddDataView = Backbone.View.extend({
 			self.responseData = data;
 			self.showDataReview(data);
 		})
-		.error(function() { alert("Error loading your file"); })
+		.error(function(err) { alert(err); })
 		.complete(function() {});
 	},
 	
@@ -92,7 +93,7 @@ window.AddDataView = Backbone.View.extend({
 				$('.add-data-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
 
 				var table;
-				for(var i = 0; i < data.length; ++i)
+				for(var i = 0; i < 50; ++i) // 50 or data.length
 				{
 					table += "<tr>";
 
@@ -100,8 +101,7 @@ window.AddDataView = Backbone.View.extend({
 						table += '<td rel="tooltip" title="'+key+'" class="tooltip-test">' + val + '</td>';
 					});
 
-					table += "</tr>";	
-				    			
+					table += "</tr>";				
 				}
 
 				$('.add-data-view .modal-body .review .data-table .table').append(table);

@@ -310,5 +310,9 @@ window.MapGLView = window.MapViewBase.extend({
 			}));
 
     },
+
+	addOneComment: function(model) {
+		//If we want to add comments to globe
+    },
   
 });

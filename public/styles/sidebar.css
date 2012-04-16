@@ -1,8 +1,40 @@
 .sidebar-view
 {
-	background-color:white;
-	box-shadow:inset -5px 0px 5px -2px rgba(0,0,0,0.6);
-	background-image: url('../assets/sidebar-thatch.jpg');
+	background-color:#f1f1f1;
+	box-shadow:inset -2px 0px 5px -2px rgba(0,0,0,0.6);
+	background-image:url('../assets/noise.gif');
+}
+
+.sidebar-view .settings-tab
+{
+	z-index:999;
+	position:absolute;
+	top:17px;
+	right:-52px;
+	width:63px;
+	height:43px;
+	background-image:url('../assets/settings-tab.png');
+	background-repeat:no-repeat;
+	cursor:pointer;
+	opacity:1;
+}
+
+.sidebar-view .settings-tab.hidden
+{
+	opacity:.8;
+}
+
+.sidebar-view .settings-tab h4
+{
+	padding-top:11px;
+	padding-left:17px;
+	font-size:10pt;
+	color:#666;
+}
+
+.sidebar-view .settings-tab h4:hover
+{
+	color:#00c9ff;
 }
 
 .sidebar-view .black-overlay
@@ -24,22 +56,22 @@
 
 .divider
 {
-	height:2px;
+	height:1px;
 	width:100%;
-	background-color:rgba(0,0,0,.2);
-	border-bottom:1px solid rgba(255,255,255,.1);
+	background-color:rgba(0,0,0,.1);
+	border-bottom:1px solid white;
 }
 
 .divider.large
 {
-	height:2px;
+	height:1px;
 	width:265px;
 	margin-top:15px;
-	background-color:rgba(0,0,0,.2);
-	border-bottom:1px solid rgba(255,255,255,.1);
+	background-color:rgba(0,0,0,.1);
+	border-bottom:1px solid rgba(255,255,255,1);
 }
 
-.sidebar-view .black-overlay.visible
+.sidebar-view .state-overlay.visible
 {
 	-webkit-transition: opacity .3s linear;
     -moz-transition: opacity .3s linear;
@@ -59,23 +91,11 @@
 .sidebar-view .data-container .accordion-group
 {
 	width:87%;
-	border:none;
 }
 
 .sidebar-view .data-container .accordion-inner
 {
-	border:none;
-	background-color:rgba(0,0,0,.15);
-	color:#ccc;
-	box-shadow: inset 0px 0px 10px rgba(0, 0, 0, .3);
-	height:45px;
-	height:100%;
-	-webkit-border-bottom-right-radius: 7px;
-	-webkit-border-bottom-left-radius: 7px;
-	-moz-border-bottom-right-radius: 7px;
-	-moz-border-bottom-left-radius: 7px;
-	border-bottom-right-radius: 7px;
-	border-bottom-left-radius: 7px;
+	background-color:rgba(0,0,0,.03);
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle
@@ -104,9 +124,9 @@
 .toggle-group
 {
 	width:87%;
-	background-color:rgba(0,0,0,.1);
-	box-shadow: inset 0px 0px 10px rgba(0, 0, 0, .3);
-	border:1px solid rgba(0,0,0,.4);
+	background-color:rgba(0,0,0,.023);
+	box-shadow: inset 0px 0px 5px rgba(0, 0, 0, .05);
+	border:1px solid rgba(0,0,0,.05);
 	border-radius:7px;
 	-moz-border-radius:7px;
 	-webkit-border-radius:7px;
@@ -119,7 +139,24 @@
 {
 	height:25px;
 	padding:15px;
+}
 
+.toggle-group .data-toggle.double
+{
+	height:50px;
+}
+
+.toggle-group .data-toggle.double .first
+{
+	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 0px;	
+}
+
+.toggle-group .data-toggle.double .second
+{
+	border-top-right-radius: 0px;
+	border-top-left-radius: 0px;
+	margin-top:-1px;	
 }
 
 .toggle-group .data-toggle p
@@ -148,9 +185,10 @@
 	display:none;
 }
 
-#addData, #deleteMap {
+.btn.data	 {
 	margin-top:-3px;
 	width:235px;
 	height:30px;
 	font-weight:bold;
 }
+

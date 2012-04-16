@@ -9,6 +9,7 @@ window.HeaderView = Backbone.View.extend({
 		'click #aboutSafecast:' : 'aboutSafecastClicked',
 		'click #postFacebook:' : 'postFacebookClicked',
 		'click #postTwitter:' : 'postTwitterClicked',
+		'click #setupButton' : 'setupButtonClicked',
 		'keypress input': 'keyEvent',
     },
 
@@ -16,12 +17,15 @@ window.HeaderView = Backbone.View.extend({
 	    this.template = _.template(tpl.get('header'));
 		this.vent = options.vent;	
 		this.mapName = options.mapName;
-		this.sidebarstate = "hidden";
+		
+		_.bindAll(this, "setStateType");
+		this.vent.bind("setStateType", this.setStateType);
     },
 
     render: function() {
 		$(this.el).html(this.template());
 		this.setTitle();
+		this.settingsButtonClicked();
         return this;
     },
 
@@ -36,19 +40,19 @@ window.HeaderView = Backbone.View.extend({
 	},
 	
 	setTitle: function() {
-		this.$('.brand').html(this.mapName);;
+		this.$('.brand').html('<h1>GEOKIT</h1><h3>'+this.mapName+'</h3>');
 	},
 
 	settingsButtonClicked: function() {
 				
-		if(this.sidebarstate == 'hidden')
+		if(_settingsVisible)
 		{
 			$('#settingsButton').html('<i class="icon-arrow-right icon-white"></i> Show Settings');
 			$('.sidebar-view').addClass('visible');
 			$('.map-view').addClass('full');
 			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
-			this.sidebarstate = '';
+			_settingsVisible = false;
 		}
 		else
 		{
@@ -57,8 +61,12 @@ window.HeaderView = Backbone.View.extend({
 			$('.map-view').removeClass('full');
 			$('.map-gl-view').removeClass('full');
 			$('.sidebar-view .black-overlay').removeClass('visible');
-			this.sidebarstate = 'hidden';
+			_settingsVisible = true;
 		}	
+	},
+	
+	setupButtonClicked: function() {
+		$('#setupModal').modal('show');	
 	},
 	
 	aboutGeosenseClicked: function() {
@@ -95,6 +103,39 @@ window.HeaderView = Backbone.View.extend({
 		url += encodeURIComponent(window.location);
 		url += '&t=Check out the Safecast map';
 		window.open('' + url, 'Share it on Facebook', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
+	},
+	
+	setStateType: function(type) {
+		//console.log(type);
+		
+		var stateIndicator = this.$('#stateIndicator');
+		var message = this.$('#stateIndicatorMessage');
+		
+		switch(type)
+		{
+			case 'drawing':
+			  	stateIndicator.stop(true, true).fadeIn('fast');
+				message.html('DRAWING DATA SET');
+			  	break;
+			case 'complete':
+				console.log(_num_data_sources +" : "+ _loaded_data_sources)
+			  	stateIndicator.delay(1000).fadeOut('fast');
+			  	break;
+			case 'loading':
+		  		stateIndicator.stop(true, true).fadeIn('fast');
+				stateIndicator.fadeIn('fast');
+				message.html('LOADING DATA SET');
+				break
+			case 'loadingcomplete':
+				break;
+			case 'post':
+				stateIndicator.stop(true, true).fadeIn('fast');
+				stateIndicator.fadeIn('fast');
+				message.html('UPLOADING NEW DATA');
+				break;
+			default:
+		  		//
+		}
 	},
 	
 	remove: function() {

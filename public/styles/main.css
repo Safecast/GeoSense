@@ -2,6 +2,7 @@
 @import url("global.css");
 
 @import url("homepage.css");
+@import url("setup.css");
 @import url("header.css");
 @import url("map.css");
 @import url("map-gl.css");
@@ -9,6 +10,8 @@
 @import url("add-data.css");
 @import url("sidebar.css");
 @import url("sidebar-data.css");
+@import url("chat.css");
+@import url("data-library.css");
 
 @import url("bootstrap.css");
 @import url("jquery.miniColors.css");
@@ -38,6 +41,28 @@
 .sidebar-view.visible
 {
 	left:-300px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.chat-view
+{
+	position:absolute;
+	top:50px;
+	right:-300px;
+	width:270px;
+	bottom:0px;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+
+.chat-view.visible
+{
+	right:0px;
 	-webkit-transition: all .3s linear;
     -moz-transition: all .3s linear;
     -o-transition: all .3s linear;

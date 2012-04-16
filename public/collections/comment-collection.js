@@ -1,6 +1,9 @@
 CommentCollection = Backbone.Collection.extend({
 
 	model: Comment,
-	url: '/api/comments',
-
+	
+	initialize: function(options) {
+		this.url = '/api/comments/map/' + _mapId;
+	},
+	
 });

@@ -2,27 +2,10 @@ var application_root = __dirname,
   	express = require("express"),
   	path = require("path"),
   	mongoose = require('mongoose'),
-  	twitter = require('ntwitter');
+  	twitter = require('ntwitter'),
+	nowjs = require("now");
 
 var app = express.createServer();
-
-//Now.js
-/*
-var nowjs = require("now");
-var everyone = nowjs.initialize(app);
-
-nowjs.on("connect", function(){
-  console.log("Joined: " + this.now.name);
-});
-
-nowjs.on("disconnect", function(){
-  console.log("Left: " + this.now.name);
-}); 
-
-everyone.now.distributeMessage = function(message){
-  everyone.now.receiveMessage(this.now.name, message);
-};
-*/
 
 mongoose.connect('mongodb://localhost/geo');
 
@@ -36,13 +19,36 @@ app.configure(function(){
   	app.set('views', path.join(application_root, "views"));
 });
 
+////////////////
+// CHAT SERVER
+////////////////
+var everyone = nowjs.initialize(app);
+
+// Send message to everyone on the users group
+everyone.now.distributeMessage = function(message){
+    var group = nowjs.getGroup(this.now.serverRoom);
+    group.now.receiveMessage(this.now.name, message);
+};
+
+everyone.now.joinRoom = function(newRoom){
+    var newGroup = nowjs.getGroup(newRoom);
+    newGroup.addUser(this.user.clientId);
+    //newGroup.now.receiveMessage('New user joined the room', this.now.name);
+    this.now.serverRoom = newRoom;
+};
+
 /////////////////
 // STATIC ROUTES
 ////////////////
 
-app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)$/, function(req, res){
+app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)(|\/setup)$/, function(req, res){
    res.sendfile('public/index.html');
 });
+
+app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
+   res.sendfile('public/query.html');
+});
+
 
 ///////////
 // DATA API
@@ -76,7 +82,99 @@ var TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
 	name: String,
 }));
 
+var Chat = mongoose.model('Chat', new mongoose.Schema({
+	mapid: String,
+	name: String,
+	text: String,
+	date: Date,
+}));
+
+var Comment = mongoose.model('Comment', new mongoose.Schema({
+	commentid: Number,
+	mapid: String,
+	name: String,
+	text: String,
+	date: Date,
+}));
+
+var Safecast = mongoose.model('Safecast', new mongoose.Schema({ location: Array}), 'safecast');
+
 // Routes
+
+///////////////
+// TEST ROUTES 
+///////////////
+
+app.get('/api/boxquery/:s/:w/:n/:e', function(req, res){
+		
+	var box = [[Number(req.params.w), Number(req.params.s)],[Number(req.params.e), Number(req.params.n)]];
+	//box = [[140.128,37.081],[140.132,37.087]];
+	Safecast.find({"location":{"$within": {"$box": box}}}, function(err, datasets) {
+		res.send(datasets);
+	});
+});
+
+///////////////
+// COMMENTS 
+///////////////
+
+app.get('/api/comments/map/:mapid', function(req, res){
+  Comment.find({mapid:req.params.mapid},function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+app.post('/api/comment/:commentid/:mapid/:lat/:lon/:name/:text/:date', function(req, res){
+  var comment;
+  comment = new Comment({
+	commentid: 	req.params.commentid,
+	mapid: 		req.params.mapid,
+	lat: 		req.params.lat,
+	lon: 		req.params.lon,
+    name: 		req.params.name,
+	text: 		req.params.text, 
+	date: 		req.params.date,
+  });
+
+  comment.save(function(err) {
+    if (!err) {
+	 	res.send(comment);
+    } else
+	{
+		res.send('oops', 500);
+	}
+  });
+});
+
+///////////////
+// LIVE CHAT 
+///////////////
+
+app.get('/api/chat/:mapid', function(req, res){
+
+  Chat.find({mapid:req.params.mapid},function(err, datasets) {
+     res.send(datasets);
+  });
+});
+
+app.post('/api/chat/:mapid/:name/:text/:date', function(req, res){
+  var chat;
+  chat = new Chat({
+	mapid: 		req.params.mapid,
+    name: 		req.params.name,
+	text: 		req.params.text, 
+	date: 		req.params.date,
+  });
+
+  chat.save(function(err) {
+    if (!err) {
+	 	res.send(chat);
+    } else
+	{
+		res.send('oops', 500);
+	}
+  });
+});
 
 ///////////////
 // POINTS 
@@ -174,6 +272,7 @@ app.get('/api/collection/distinct' , function(req, res){
 });
 
 app.get('/api/collection/:id', function(req, res){
+	
 	Point.find({collectionid:req.params.id}, function(err, point) {
 		if (!err) {
 			res.send(point);
@@ -186,6 +285,7 @@ app.get('/api/collection/:id', function(req, res){
 });
 
 app.get('/api/collection/', function(req, res){
+	
 	Point.find({collectionid:req.params.id}, function(err, point) {
 		if (!err) {
 			res.send(point);
@@ -222,7 +322,7 @@ app.post('/api/collection/:id', function(req, res){
 });
 
 app.post('/api/addpoints/:id', function(req, res){
-	
+		
 	jsonObject = req.body.jsonpost;
 	for(var i = 0; i < jsonObject.length; ++i)
 	{	
@@ -234,9 +334,10 @@ app.post('/api/addpoints/:id', function(req, res){
 			lat: 		jsonObject[i].lat,
 			lon: 		jsonObject[i].lon,
 			val: 		jsonObject[i].val,
-			color:      jsonObject[i].color 
-		  });		
-		
+			colorhigh:  jsonObject[i].colorhigh,
+			colorlow:  jsonObject[i].colorlow,
+		  });	
+				
 		  point.save();
 	}	
 	res.send('');
@@ -275,13 +376,15 @@ app.get('/api/pointcollections', function(req, res){
 });
 
 //Post a Point Collection
-app.post('/api/pointcollection/:id/:name/:mapid', function(req, res){
+app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, res){
 	
 	var collection;
 	  collection = new PointCollection({
 		collectionid: req.params.id,
 	    name: req.params.name,
 		mapid: req.params.mapid,
+		maxval: req.params.maxval,
+		minval: req.params.minval,
 	  });
 	  collection.save(function(err) {
 	    if (!err) {
@@ -368,6 +471,22 @@ app.post('/api/map/:mapid/:name', function(req, res){
 	  });
 });
 
+app.post('/api/bindmapcollection/:mapid/:collectionid', function(req, res){
+	var mapid =  req.params.mapid;
+    var collectionid = req.params.collectionid;
+
+	Map.update({ mapid:mapid }, { $push : { collections: collectionid} }, function(err) {
+	      if (!err) {
+	        console.log("map updated");
+	        res.send('');
+	      }
+	      else {
+			res.send('oops error', 500);
+		  }
+	  });
+	
+});
+
 app.delete('/api/map/:mapid', function(req, res){
    Map.remove({mapid:req.params.mapid}, function(err) {
       if (!err) {
@@ -395,8 +514,8 @@ app.get('/tweetstream', function(req, res){
 	      console.log('Twitter stream open...');
 			stream.on('data', function (data) {
 
-				//console.log(data.text);
-				//console.log(data.geo);
+				console.log(data.text);
+				console.log(data.geo);
 
 				if(data.geo != null || data.location != undefined)
 				{
@@ -440,7 +559,6 @@ app.get('/api/tweets', function(req, res){
      res.send(datasets);
   });
 });
-
 
 app.listen(8124, "0.0.0.0");
 console.log('Server running at http://0.0.0.0:8124/');
