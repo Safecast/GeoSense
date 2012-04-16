@@ -92,8 +92,7 @@ window.MapViewBase = Backbone.View.extend({
 		this.layerArray[currIndex].redraw();
 		
 		if(_loaded_data_sources == (_num_data_sources-1))
-			this.vent.trigger("setStateType", 'complete');
-		
+			this.vent.trigger("setStateType", 'complete');	
 	},
 	
 	addCommentToMap: function(collection)
@@ -135,6 +134,12 @@ var AppRouter = Backbone.Router.extend({
 		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
 		$('#app').append(this.setupView.render().el);
 		
+		this.graphView = new GraphView({vent: this.vent});
+		$('body').append(this.graphView.render().el);
+		//$('body').append(this.graphView.drawGraph());
+		$('.graph-view').addClass('visible');
+		$('.header-view .graph').addClass('active');
+		
 		$('body').css("overflow","hidden");
 		
 		this.addCommentData();
@@ -143,10 +148,6 @@ var AppRouter = Backbone.Router.extend({
 		
 		if(_setupRoute)
 			$('#setupModal').modal('show');	
-			
-		// this.graphView = new GraphView({vent: this.vent});
-		// $('body').append(this.graphView.render().el);
-		// $('body').append(this.graphView.drawGraph());
 				
 	},
 
@@ -322,6 +323,8 @@ var AppRouter = Backbone.Router.extend({
 								
 					self.addMapCollection(index, pointCollection[index]);
 					
+					self.addGraphCollection(index, pointCollection[index]);
+					
 					_loaded_data_sources += 1;
 					if(_loaded_data_sources == _num_data_sources)
 						_firstLoad = false;
@@ -426,15 +429,16 @@ var AppRouter = Backbone.Router.extend({
 				{
 					year = val;
 				}
+	
 			});	
 			
 			//Format date
 			if(date == '')
 			{
 				if(day != '' && month != '' & year != '')
-				{
-					newDate = new XDate(year, month, day);
-					date =  newDate.getTime();
+				{	
+					var d = Date.UTC(year,month,day);
+					date =  d;		
 				}
 			}
 			
@@ -516,6 +520,11 @@ var AppRouter = Backbone.Router.extend({
 	addMapCollection: function(id, collection)
 	{
 		this.mapView.addCollection(id, collection);
+	},
+	
+	addGraphCollection: function(id, collection)
+	{
+		this.graphView.addCollection(id, collection);
 	},
 	
 	uniqId: function ()

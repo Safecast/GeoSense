@@ -2,6 +2,10 @@ PointCollection = Backbone.Collection.extend({
 
 	model: Point,
 	
+	comparator: function(point) {
+		return point.get('date');
+	},
+	
 	initialize: function(options) {
 				
 		this.collectionId = options.collectionId;

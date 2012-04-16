@@ -281,7 +281,7 @@ app.get('/api/collection/:id', function(req, res){
 		{
 			res.send('ooops', 500);
 		}
-  });
+  }).sort('date', 1);
 });
 
 app.get('/api/collection/', function(req, res){

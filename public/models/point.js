@@ -5,6 +5,7 @@ Point = Backbone.Model.extend({
 	defaults: function() {
 	      return {
 			collectionid: null,
+			date: Date,
 	        name:  'data point',
 	        location: '0,0',
 			lat: 0,
