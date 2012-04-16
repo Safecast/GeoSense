@@ -82,7 +82,7 @@ window.GraphView = Backbone.View.extend({
 			element: $('#chart').get(0),
 			width: $('#graphContainer').width(),
 			height: 300,
-			renderer: 'bar',
+			renderer: 'area',
 			series: [
 				{
 					color: "steelblue",
@@ -91,7 +91,6 @@ window.GraphView = Backbone.View.extend({
 				}
 			]
 		} );
-
 
 		var hoverDetail = new Rickshaw.Graph.HoverDetail( {
 			graph: this.graph
@@ -129,6 +128,11 @@ window.GraphView = Backbone.View.extend({
 		// 	graph: self.graph,
 		// 	element: $('#slider')
 		// });
+		
+		var controls = new RenderControls( {
+			element: document.querySelector('form'),
+			graph: this.graph
+		} );
 		
 		this.graph.render();
 		
