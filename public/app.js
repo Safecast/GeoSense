@@ -124,16 +124,16 @@ var AppRouter = Backbone.Router.extend({
 	render:function(state)
 	{
  		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
-        $('body').append(this.headerView.render().el);
+        $('#app').append(this.headerView.render().el);
 
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
-        $('body').append(this.sideBarView.render().el);
+        $('#app').append(this.sideBarView.render().el);
 
 		this.chatView = new ChatView({vent: this.vent});
-        $('body').append(this.chatView.render().el);
+        $('#app').append(this.chatView.render().el);
 
 		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
-		$('body').append(this.setupView.render().el);
+		$('#app').append(this.setupView.render().el);
 		
 
 		
@@ -159,7 +159,7 @@ var AppRouter = Backbone.Router.extend({
 	setNewMap: function(uniqueMapId)
 	{
 		_setupRoute = true;
-		$('body').empty();
+		$('#app').empty();
 		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
 	},
 	
@@ -204,7 +204,7 @@ var AppRouter = Backbone.Router.extend({
 		{
 			_firstLoad = false;
 			this.homepageView = new HomepageView();
-	        $('body').append(this.homepageView.render().el);
+	        $('#app').append(this.homepageView.render().el);
 		} else
 		{
 			window.location.reload(true);			
@@ -225,7 +225,7 @@ var AppRouter = Backbone.Router.extend({
             this.mapView = new MapOLView({
 				vent: self.vent
 			});
-			$('body').append(this.mapView.render().el);
+			$('#app').append(this.mapView.render().el);
 			this.mapView.start();
         }	
 
@@ -246,7 +246,7 @@ var AppRouter = Backbone.Router.extend({
             this.mapView = new MapGLView({
 				vent: self.vent
 			});
-			$('body').append(this.mapView.render().el);
+			$('#app').append(this.mapView.render().el);
 			this.mapView.start();
         }
 
