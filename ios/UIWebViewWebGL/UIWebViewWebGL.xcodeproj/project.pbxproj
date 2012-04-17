@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		223E3A28151BE96500770228 /* Palm_Beach.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 223E3A27151BE96500770228 /* Palm_Beach.jpeg */; };
+		22C295E2153DB4010066AAF3 /* ARViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C295E1153DB4010066AAF3 /* ARViewController.xib */; };
+		22C295E9153DB7440066AAF3 /* ARViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C295E8153DB7440066AAF3 /* ARViewController.m */; };
 		22E2D5361520D58E00991B0E /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 22E2D5351520D58E00991B0E /* CameraViewController.m */; };
 		D89DC61D14592F50000FC7C6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D89DC61C14592F50000FC7C6 /* UIKit.framework */; };
 		D89DC61F14592F50000FC7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D89DC61E14592F50000FC7C6 /* Foundation.framework */; };
@@ -20,6 +22,9 @@
 
 /* Begin PBXFileReference section */
 		223E3A27151BE96500770228 /* Palm_Beach.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Palm_Beach.jpeg; sourceTree = "<group>"; };
+		22C295E1153DB4010066AAF3 /* ARViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ARViewController.xib; sourceTree = "<group>"; };
+		22C295E7153DB7440066AAF3 /* ARViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARViewController.h; sourceTree = "<group>"; };
+		22C295E8153DB7440066AAF3 /* ARViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARViewController.m; sourceTree = "<group>"; };
 		22E2D5341520D58E00991B0E /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
 		22E2D5351520D58E00991B0E /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
 		D89DC61814592F50000FC7C6 /* UIWebViewWebGL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UIWebViewWebGL.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,7 +88,10 @@
 			children = (
 				D89DC62B14592F50000FC7C6 /* WGLAppDelegate.h */,
 				D89DC62C14592F50000FC7C6 /* WGLAppDelegate.m */,
+				22C295E7153DB7440066AAF3 /* ARViewController.h */,
+				22C295E8153DB7440066AAF3 /* ARViewController.m */,
 				22E2D5341520D58E00991B0E /* CameraViewController.h */,
+				22C295E1153DB4010066AAF3 /* ARViewController.xib */,
 				22E2D5351520D58E00991B0E /* CameraViewController.m */,
 				D89DC633145931B3000FC7C6 /* WebGL.html */,
 				D89DC62314592F50000FC7C6 /* Supporting Files */,
@@ -157,6 +165,7 @@
 				D89DC62714592F50000FC7C6 /* InfoPlist.strings in Resources */,
 				D89DC634145931B3000FC7C6 /* WebGL.html in Resources */,
 				223E3A28151BE96500770228 /* Palm_Beach.jpeg in Resources */,
+				22C295E2153DB4010066AAF3 /* ARViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,6 +179,7 @@
 				D89DC62914592F50000FC7C6 /* main.m in Sources */,
 				D89DC62D14592F50000FC7C6 /* WGLAppDelegate.m in Sources */,
 				22E2D5361520D58E00991B0E /* CameraViewController.m in Sources */,
+				22C295E9153DB7440066AAF3 /* ARViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

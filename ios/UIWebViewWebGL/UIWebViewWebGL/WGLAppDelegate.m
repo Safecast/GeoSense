@@ -8,6 +8,7 @@
 
 #import "WGLAppDelegate.h"
 #import "CameraViewController.h"
+#import "ARViewController.h"
 
 @implementation WGLAppDelegate
 
@@ -15,23 +16,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-      
-  UIWebView* webView = [[[UIWebView alloc] initWithFrame:self.window.bounds] autorelease];
-  webView.backgroundColor = [UIColor clearColor];
-  webView.opaque = NO;
   
-  id webDocumentView = [webView performSelector:@selector(_browserView)];
-  id backingWebView = [webDocumentView performSelector:@selector(webView)];
-  [backingWebView _setWebGLEnabled:YES];
-
-  
-  NSString *url = @"http://sam-macbookair.media.mit.edu:8124";
-  //NSString *url = @"http://localhost:8124/globe";
-  //NSString *url = @"http://18.189.34.8:8124/globe";
-  NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-  [webView loadRequest:request];
-  
-  CameraViewController *viewController = [[CameraViewController alloc] init];
+  CameraViewController *cameraViewController = [[CameraViewController alloc] init];
+  ARViewController *overlayViewController = [[ARViewController alloc] initWithNibName:@"ARViewController" bundle:nil];
   
   /*
   UIViewController* viewController = [[[UIViewController alloc] init] autorelease];
@@ -44,12 +31,12 @@
   //[view addSubview:webView];
   viewController.view = view;
    */
-   
-  self.window.rootViewController = viewController;
+
+  self.window.rootViewController = cameraViewController;
   [self.window makeKeyAndVisible];
   
-  [viewController initCamera];
-  viewController.imagePicker.cameraOverlayView = webView;
+  [cameraViewController initCamera];
+  cameraViewController.imagePicker.cameraOverlayView = overlayViewController.view;
   
    
   return YES;

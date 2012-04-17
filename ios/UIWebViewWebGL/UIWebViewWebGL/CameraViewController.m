@@ -27,8 +27,6 @@
 
 - (void)initCamera
 {
-    [super viewDidLoad];
-
   if ([UIImagePickerController isSourceTypeAvailable:
          UIImagePickerControllerSourceTypeCamera])
     {
@@ -42,7 +40,6 @@
       [self presentModalViewController:imagePicker
                               animated:YES];
       [imagePicker release];
-      newMedia = YES;
     }
 }
 

@@ -8,7 +8,6 @@ UINavigationControllerDelegate, UIPopoverControllerDelegate>
   UIToolbar *toolbar;
   UIPopoverController *popoverController;
   UIImageView *imageView;
-  BOOL newMedia;
   UIImagePickerController *imagePicker;
 }
 
