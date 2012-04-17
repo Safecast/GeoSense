@@ -222,6 +222,16 @@
 	width:715px;
 }
 
+#errorMessage
+{
+	display:none;
+	position:relative;
+	margin-left:-13px;
+	margin-bottom:5px;
+	width:740px;
+}
+
+
 .hero-dark .create .fields
 {
 	position:relative;

@@ -84,21 +84,26 @@ window.HomepageView = Backbone.View.extend({
 		var self = this;
 		
 		this.mapid = this.generateUniqueUrl();
+		this.mapadminid = this.generateUniqueUrl();
+		
 		this.name = this.$('#appendedPrependedInput').val();
 		
-		if(this.name == '')
-			this.name = 'A Map With No Name';
-		
-		$.ajax({
-			type: 'POST',
-			url: '/api/map/' + self.mapid + '/' + self.name,
-			success: function(data) {
-				window.location.href= self.mapid + '/setup';
-			},
-			error: function() {
-				console.error('failed to create a new map');
-			}
-		});
+		if(this.name == '' || this.name == undefined)
+		{	
+			this.$('#errorMessage').show();
+		} else
+		{
+			$.ajax({
+				type: 'POST',
+				url: '/api/map/' + self.mapid + '/' + self.name,
+				success: function(data) {
+					window.location.href= self.mapid + '/setup';
+				},
+				error: function() {
+					console.error('failed to create a new map');
+				}
+			});
+		}
 	}
   
 });
