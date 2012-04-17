@@ -41,14 +41,20 @@ everyone.now.joinRoom = function(newRoom){
 // STATIC ROUTES
 ////////////////
 
-app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)(|\/setup)$/, function(req, res){
+//Admin Route
+app.get(/^\/[a-zA-Z0-9]{15}(|\/setup)$/, function(req, res){
    res.sendfile('public/index.html');
 });
 
+//View Route
+app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)$/, function(req, res){
+   res.sendfile('public/index.html');
+});
+
+//Test Query Route
 app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
    res.sendfile('public/query.html');
 });
-
 
 ///////////
 // DATA API
@@ -454,11 +460,25 @@ app.get('/api/map/:mapid', function(req, res){
 	});
 });
 
-app.post('/api/map/:mapid/:name', function(req, res){
+//Returns a specific unique map by mapId in admin state
+app.get('/api/map/admin/:mapadminid', function(req, res){
+	
+	Map.find({mapadminid: req.params.mapadminid}, function(err, data) {
+	    if (!err) {
+	       res.send(data);
+	    } else
+		{point
+			res.send("oops",500);
+		}
+	});
+});
+
+app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	
 	var map;
 	  map = new Map({
 		mapid: req.params.mapid,
+		mapadminid: req.params.mapadminid,
 	    name: req.params.name,
 	  });	
 	

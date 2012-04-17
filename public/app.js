@@ -131,7 +131,7 @@ var AppRouter = Backbone.Router.extend({
 		this.chatView = new ChatView({vent: this.vent});
         $('#app').append(this.chatView.render().el);
 
-		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapName:_mapName});
+		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapAdminId:_mapAdminId, mapName:_mapName});
 		$('#app').append(this.setupView.render().el);
 		
 		this.graphView = new GraphView({vent: this.vent});
@@ -145,7 +145,6 @@ var AppRouter = Backbone.Router.extend({
 		
 		if(_setupRoute)
 			$('#setupModal').modal('show');	
-				
 	},
 
 	setUniqueMapName: function(name)
@@ -173,31 +172,64 @@ var AppRouter = Backbone.Router.extend({
 	setFromUniqueMapId: function(options)
 	{
 		var self = this;
+		mapIdLength = options.mapId.length;
 
-		//Fetch map information
-		$.ajax({
-			type: 'GET',
-			url: '/api/map/' + options.mapId,
-			success: function(data) {
-				_mapName = data[0].name;
-				_mapId = options.mapId;
-				if(options.state == 'map')
-				{
-					self.map();
+		if(mapIdLength == 10) // Viewer Route
+		{
+			$.ajax({
+				type: 'GET',
+				url: '/api/map/' + options.mapId,
+				success: function(data) {
+					_admin = false;
+					_mapName = data[0].name;
+					_mapId = options.mapId;
+					if(options.state == 'map')
+					{
+						self.map();
+					}
+					else
+					{
+						self.mapGL();
+					}
+
+					if(!self.sideBarView)
+						self.render(options.state);
+
+				},
+				error: function() {
+					console.error('failed to fetch unique map');
 				}
-				else
-				{
-					self.mapGL();
+			});
+			
+		} else if(mapIdLength == 15) // Admin Route
+		{
+			$.ajax({
+				type: 'GET',
+				url: '/api/map/admin/' + options.mapId,
+				success: function(data) {
+					_admin = true;
+					_mapName = data[0].name;
+					_mapId = data[0].mapid;
+					_mapAdminId = data[0].mapadminid;
+					console.log(data);
+					if(options.state == 'map')
+					{
+						self.map();
+					}
+					else
+					{
+						self.mapGL();
+					}
+
+					if(!self.sideBarView)
+						self.render(options.state);
+
+				},
+				error: function() {
+					console.error('failed to fetch unique map');
 				}
-								
-				if(!self.sideBarView)
-					self.render(options.state);
-				
-			},
-			error: function() {
-				console.error('failed to fetch unique map');
-			}
-		});
+			});
+		}
 	},
 	
 	home:function () {

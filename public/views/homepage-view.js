@@ -84,7 +84,7 @@ window.HomepageView = Backbone.View.extend({
 		var self = this;
 		
 		this.mapid = this.generateUniqueUrl();
-		this.mapadminid = this.generateUniqueUrl();
+		this.mapadminid = this.generateUniqueUrl(15);
 		
 		this.name = this.$('#appendedPrependedInput').val();
 		
@@ -95,9 +95,9 @@ window.HomepageView = Backbone.View.extend({
 		{
 			$.ajax({
 				type: 'POST',
-				url: '/api/map/' + self.mapid + '/' + self.name,
+				url: '/api/map/' + self.mapid + '/' + self.mapadminid + '/' + self.name,
 				success: function(data) {
-					window.location.href= self.mapid + '/setup';
+					window.location.href= self.mapadminid + '/setup';
 				},
 				error: function() {
 					console.error('failed to create a new map');

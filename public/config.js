@@ -23,6 +23,7 @@ var _admin = true;
 var _firstLoad = true;
 var _setupRoute = false;
 var _mapId = String;
+var _mapAdminId = String;
 var _mapName = String;
 var _mapCollections = [];
 var _commentArray = [];
