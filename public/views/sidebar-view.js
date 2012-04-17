@@ -14,7 +14,6 @@ window.SideBarView = Backbone.View.extend({
 		'click #scale_linear': 'scaleLinearClicked',
 		'click #scale_log': 'scaleLogClicked',
 		'click #tweetButton' : 'tweetButtonClicked',
-		'click #deleteMap' : 'deleteMapClicked',
 		'click #toggleCommentsVisible' : 'toggleCommentsVisibleClicked',
 		'click #toggleCommentsHidden' : 'toggleCommentsHiddenClicked',
 		'click #settingsTab' : 'settingsTabClicked',
@@ -47,7 +46,6 @@ window.SideBarView = Backbone.View.extend({
 		if(!_admin)
 		{
 			this.$('#dataManager').remove();
-			this.$('#deleteGroup').remove();
 		}
 					
         return this;
@@ -155,20 +153,6 @@ window.SideBarView = Backbone.View.extend({
 		this.addDataView = new AddDataView({vent: this.vent});
         $('body').append(this.addDataView.render().el);
 		$('#addDataModal').modal('toggle');
-	},
-	
-	deleteMapClicked: function() {
-		$.ajax({
-			type: 'DELETE',
-			url: '/api/map/' + _mapId,
-			success: function() {
-				console.log('deleted map: ' + _mapId);
-				window.location = '../';
-			},
-			error: function() {
-				console.error('failed to delete map: ' + _mapId);
-			}
-		});
 	},
 
 	scaleLinearClicked: function() {

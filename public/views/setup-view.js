@@ -4,6 +4,9 @@ window.SetupView = Backbone.View.extend({
 	className: 'setup-view',
 	
     events: {
+		'click #deleteMapButton' : 'deleteMapClicked',
+		'click #saveCloseButton' : 'saveClicked',
+		
     },
 
     initialize: function(options) {
@@ -16,7 +19,7 @@ window.SetupView = Backbone.View.extend({
 
     render: function() {
 		$(this.el).html(this.template());	
-		this.$('.map-name').html('Your map: ' + this.mapName);
+		this.$('.map-name').html(this.mapName + ' admin');
 		
 		this.$('.map-url').val('http://geo.media.mit.edu/'+ this.mapId);
 		this.$('.map-admin-url').val('http://geo.media.mit.edu/'+ this.mapAdminId);
@@ -31,5 +34,25 @@ window.SetupView = Backbone.View.extend({
 		
         return this;
     },
+
+	saveClicked: function() {
+		console.log('save');
+		$('#setupModal').modal('hide')
+	},
+
+	deleteMapClicked: function() {
+		console.log('hi');
+		$.ajax({
+			type: 'DELETE',
+			url: '/api/map/' + _mapId,
+			success: function() {
+				console.log('deleted map: ' + _mapId);
+				window.location = '../';
+			},
+			error: function() {
+				console.error('failed to delete map: ' + _mapId);
+			}
+		});
+	},
 
 });

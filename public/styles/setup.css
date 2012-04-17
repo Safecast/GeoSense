@@ -1,3 +1,28 @@
 .setup-view 
 {
 }
+
+.setup-view .map-name
+{
+}
+
+.setup-view h3
+{
+	font-size:12pt;
+	color:#555;
+}
+
+.setup-view  input
+{
+	width:480px;
+	height:50px;
+	margin-bottom:10px;
+	font-size:16pt;
+	color:#999;
+}
+
+.setup-view .modal .modal-footer .btn.delete
+{
+	position:absolute;
+	left:10px;
+}
