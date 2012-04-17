@@ -28,7 +28,10 @@ window.MapGLView = window.MapViewBase.extend({
     	if (!this.globe) return;
 		switch (obj.name) {
 			case 'globe':
-				this.globe.world.position = new THREE.Vector3().copy(obj.loc);
+				var newGlobePos = new THREE.Vector3().copy(obj.loc);
+				var invNorm = new THREE.Vector3().copy(obj.norm).normalize().multiplyScalar(-1);
+				newGlobePos.addSelf(invNorm.multiplyScalar(radius));
+				this.globe.world.position = newGlobePos;
 				break;
 			case 'lens':
 
