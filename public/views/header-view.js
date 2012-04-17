@@ -28,6 +28,13 @@ window.HeaderView = Backbone.View.extend({
 		$(this.el).html(this.template());
 		this.setTitle();
 		this.settingsButtonClicked();
+		
+		if(!_admin)
+		{
+			this.$('#setupButton').remove();
+			this.$('#graphButton').css("right",270);
+		}
+		
         return this;
     },
 

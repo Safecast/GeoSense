@@ -41,6 +41,11 @@ window.SideBarDataView = Backbone.View.extend({
 		this.$("a").attr("href", "#collapse" + this.collectionId);
 		this.$("#collapse").attr("id", "collapse" + this.collectionId);
 		
+		if(!_admin)
+		{
+			this.$('#adminDataControls').remove();
+		}
+		
         return this;
     },
 

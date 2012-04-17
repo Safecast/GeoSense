@@ -19,6 +19,7 @@ var taggedObjects = [
 	])
 ];
 
+var _admin = true;
 var _firstLoad = true;
 var _setupRoute = false;
 var _mapId = String;
