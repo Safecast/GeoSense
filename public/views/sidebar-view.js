@@ -27,6 +27,7 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "setToggleStates");
 		options.vent.bind("setToggleStates", this.setToggleStates);	
+		new OblessdClient({vent: options.vent, taggedObjects: taggedObjects, track: true});
     },
 
     render: function() {

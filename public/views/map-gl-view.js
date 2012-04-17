@@ -20,7 +20,6 @@ window.MapGLView = window.MapViewBase.extend({
 		_.bindAll(this, "updateTaggedObject");
 	 	options.vent.bind("updateValueScale", this.updateValueScale);
 	 	options.vent.bind("updateTaggedObject", this.updateTaggedObject);
-		new OblessdClient({vent: options.vent, taggedObjects: taggedObjects});
     	this.tweens = {};
     },
 

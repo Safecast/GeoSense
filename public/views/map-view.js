@@ -21,8 +21,20 @@ window.MapView = window.MapViewBase.extend({
 
     render: function() {
 		$(this.el).html(this.template());				
+        console.log('render');
+        this.animate();
         return this;
     },
+
+	animate: function() {
+		var self = this;
+		var r = function() {
+			requestAnimationFrame(r);
+			TWEEN.update();
+			console.log('ani');
+		};
+		r();
+	},
 
 	start: function() {
 		var self = this;

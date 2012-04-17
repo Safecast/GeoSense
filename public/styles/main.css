@@ -139,3 +139,18 @@
     -ms-transition: all .3s linear;
 }
 
+.gest-cursor {
+	z-index: 9999999;
+	width: 100px;
+	height: 100px;
+	position: fixed;
+	border: 5px #999 dashed;
+	-webkit-transform: scale(0.5);
+	-webkit-transition: width .2s ease-out, height .2s ease-out;
+}
+
+.gest-cursor.active {
+	border-color: #aaa;
+	width: 120px;
+	height: 120px;
+}

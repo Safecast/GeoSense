@@ -13,7 +13,7 @@ var taggedObjects = [
 		new ObjectTag('Object-05', [0, 200, 0])
 	]),
 	new TaggedObject('lens', [
-		new ObjectTag('Left-Hand-1', [-150, 100, 0]),
+		new ObjectTag('Right-Hand-1', [-150, 100, 0]),
 		//new ObjectTag('Object-03', [-150, 100, 0]),
 		//new ObjectTag('Object-06', [150, -100, 0])
 	])

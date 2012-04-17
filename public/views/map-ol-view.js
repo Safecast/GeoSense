@@ -31,8 +31,18 @@ window.MapOLView = window.MapViewBase.extend({
 
     render: function() {
 		$(this.el).html(this.template());				
+        this.animate();
         return this;
     },
+
+	animate: function() {
+		var self = this;
+		var r = function() {
+			requestAnimationFrame(r);
+			TWEEN.update();
+		};
+		r();
+	},
 
 	start: function() {
 		var self = this;

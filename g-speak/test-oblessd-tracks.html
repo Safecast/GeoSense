@@ -1,243 +1,243 @@
 <html>
-  <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="../public/libs/three.js"></script>
-    <script src="../public/libs/tween.js"></script>
-    <script>
-      function debug(string) {
-        var element = document.getElementById("debug");
-        var p = document.createElement("p");
-        p.appendChild(document.createTextNode(string));
-        element.appendChild(p);
-      }
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script src="../public/libs/three.js"></script>
+		<script src="../public/libs/tween.js"></script>
+		<script>
+			function debug(string) {
+				var element = document.getElementById("debug");
+				var p = document.createElement("p");
+				p.appendChild(document.createTextNode(string));
+				element.appendChild(p);
+			}
 
-      var OblessdClient = function(options) {
-          var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
-          var ws;
-          var receivedMilli = [];
-          var FPS_SAMPLE_SIZE = 10;
+			var OblessdClient = function(options) {
+					var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+					var ws;
+					var receivedMilli = [];
+					var FPS_SAMPLE_SIZE = 10;
 
-          var GRIPE_OPEN_HAND = '\/\/-';
-          var GRIPE_FIST = '^^^^>';
-          var GRIPE_PUSHBACK = '||||-';
+					var GRIPE_OPEN_HAND = '\/\/-';
+					var GRIPE_FIST = '^^^^>';
+					var GRIPE_PUSHBACK = '||||-';
 
-          var CENTER_X = 200;
-          var CENTER_Y = 200;
+					var CENTER_X = 200;
+					var CENTER_Y = 200;
 
-          var TRACK_W = 640;
-          var TRACK_H = 480;
-          var SAMPLE_SIZE = 5;
-          var IGNORE_MOVEMENT = 5; 
-          var TWEEN_DURATION = 100;
+					var TRACK_W = 640;
+					var TRACK_H = 480;
+					var SAMPLE_SIZE = 5;
+					var IGNORE_MOVEMENT = 5; 
+					var TWEEN_DURATION = 100;
 
-          var tracks = {};
+					var tracks = {};
 
-          var tweens = {};
+					var tweens = {};
 
-          var connect = function()
-          {
-            ws = new Socket("ws://18.85.58.17:8080/");
-            var initialGlobeLoc; 
+					var connect = function()
+					{
+						ws = new Socket("ws://18.85.58.17:8080/");
+						var initialGlobeLoc; 
 
-            ws.onopen = function(evt) {
-                if (options.taggedObjects) {
-                    for (var o = 0; o < options.taggedObjects.length; o++) {
-                        ws.send('watch '+options.taggedObjects[o]);
-                    }
-                }
-                ws.send('track');
-            }
+						ws.onopen = function(evt) {
+								if (options.taggedObjects) {
+										for (var o = 0; o < options.taggedObjects.length; o++) {
+												ws.send('watch '+options.taggedObjects[o]);
+										}
+								}
+								ws.send('track');
+						}
 
-            ws.onmessage = function(evt) { 
-              d = new Date();
-              var ms = Date.UTC(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
-              receivedMilli.push(ms);
-              if (receivedMilli.length > FPS_SAMPLE_SIZE) {
-                receivedMilli.shift();
-              }
+						ws.onmessage = function(evt) { 
+							d = new Date();
+							var ms = Date.UTC(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
+							receivedMilli.push(ms);
+							if (receivedMilli.length > FPS_SAMPLE_SIZE) {
+								receivedMilli.shift();
+							}
 
-              var protein = $.parseJSON(evt.data);
-              var tracksInFrame = protein['tracks'];
+							var protein = $.parseJSON(evt.data);
+							var tracksInFrame = protein['tracks'];
 
-              var html = '';
+							var html = '';
 
-              var initPosTween = function(track) {
-                track['posTween'] = new TWEEN.Tween(track.pos);
-                track.posTween.easing(TWEEN.Easing.Quadratic.EaseOut);
-                track.posTween.onUpdate(function() {
-                  var windowW = $(window).width();
-                  var windowH = $(window).height();
-                  track.cursor.offset({
-                    left: windowW / 2 + track.pos[0] - track.cursor.width() / 2,
-                    top: windowH / 2 + track.pos[1] - track.cursor.height() / 2
-                  });
-                });
+							var initPosTween = function(track) {
+								track['posTween'] = new TWEEN.Tween(track.pos);
+								track.posTween.easing(TWEEN.Easing.Quadratic.EaseOut);
+								track.posTween.onUpdate(function() {
+									var windowW = $(window).width();
+									var windowH = $(window).height();
+									track.cursor.offset({
+										left: windowW / 2 + track.pos[0] - track.cursor.width() / 2,
+										top: windowH / 2 + track.pos[1] - track.cursor.height() / 2
+									});
+								});
 
-              };
+							};
 
-              for (var key in tracksInFrame) {
-                var fingers = tracksInFrame[key].gripe.split(':')[0];
-                if (fingers == '_____') break;
+							for (var key in tracksInFrame) {
+								var fingers = tracksInFrame[key].gripe.split(':')[0];
+								if (fingers == '_____') break;
 
-                if (!tracks[key]) {
-                  console.log('cursor appeared');
-                  tracks[key] = {
-                    frames: [],
-                    dragging: false,
-                    cursor: $('<div class="gest-cursor" />'),
-                    pos: [0, 0, 0]
-                  };
-                  initPosTween(tracks[key]);
-                  $('body').append(tracks[key].cursor);
-                } else if (tracks[key].frames.length == SAMPLE_SIZE) {
-                  tracks[key].frames.shift();
-                }
+								if (!tracks[key]) {
+									console.log('cursor appeared');
+									tracks[key] = {
+										frames: [],
+										dragging: false,
+										cursor: $('<div class="gest-cursor" />'),
+										pos: [0, 0, 0]
+									};
+									initPosTween(tracks[key]);
+									$('body').append(tracks[key].cursor);
+								} else if (tracks[key].frames.length == SAMPLE_SIZE) {
+									tracks[key].frames.shift();
+								}
 
-                var pos = tracksInFrame[key].pos;
-                pos[0] = pos[0] / TRACK_W; 
-                pos[1] = (-TRACK_H / 2 + pos[1]) / -TRACK_H; 
-                
-                var frame = {
-                  pos: pos,
-                  fingers: fingers,
-                };
+								var pos = tracksInFrame[key].pos;
+								pos[0] = pos[0] / TRACK_W; 
+								pos[1] = (-TRACK_H / 2 + pos[1]) / -TRACK_H; 
+								
+								var frame = {
+									pos: pos,
+									fingers: fingers,
+								};
 
-                var t = tracks[key];
-                t.frames.push(frame);
-                if (t.frames.length > 1) {
-                  var last = frame;
-                  var nextToLast = t.frames[t.frames.length - 2];
-                  if (last.fingers != nextToLast.fingers) {
-                    if (last.fingers == GRIPE_PUSHBACK) {
-                      console.log('enter zoom mode');
-                    }  
-                    if (nextToLast.fingers == GRIPE_PUSHBACK) {
-                      console.log('leave zoom mode');
-                    }  
-                    if (last.fingers == GRIPE_FIST) {
-                      console.log('start drag');
-                      t.dragging = true;
-                      t.cursor.addClass('grab');
-                    }  
-                    if (nextToLast.fingers == GRIPE_FIST) {
-                      console.log('stop drag');
-                      t.dragging = false;
-                      t.cursor.removeClass('grab');
-                    }  
-                  }
-                }
-              }
+								var t = tracks[key];
+								t.frames.push(frame);
+								if (t.frames.length > 1) {
+									var last = frame;
+									var nextToLast = t.frames[t.frames.length - 2];
+									if (last.fingers != nextToLast.fingers) {
+										if (last.fingers == GRIPE_PUSHBACK) {
+											console.log('enter zoom mode');
+										}  
+										if (nextToLast.fingers == GRIPE_PUSHBACK) {
+											console.log('leave zoom mode');
+										}  
+										if (last.fingers == GRIPE_FIST) {
+											console.log('start drag');
+											t.dragging = true;
+											t.cursor.addClass('grab');
+										}  
+										if (nextToLast.fingers == GRIPE_FIST) {
+											console.log('stop drag');
+											t.dragging = false;
+											t.cursor.removeClass('grab');
+										}  
+									}
+								}
+							}
 
-              var tracksInBuffer = {};
-              for (var key in tracks) {
-                tracksInBuffer[key] = true;  
-              }
-              for (var key in tracksInBuffer) {
-                if (!tracksInFrame[key]) {
-                  console.log('cursor disappeared');
-                  tracks[key].cursor.remove();
-                  if (tracks[key].dragging) {
-                    console.log('cancel drag');
-                  }
-                  delete tracks[key];
-                }
-              }
+							var tracksInBuffer = {};
+							for (var key in tracks) {
+								tracksInBuffer[key] = true;  
+							}
+							for (var key in tracksInBuffer) {
+								if (!tracksInFrame[key]) {
+									console.log('cursor disappeared');
+									tracks[key].cursor.remove();
+									if (tracks[key].dragging) {
+										console.log('cancel drag');
+									}
+									delete tracks[key];
+								}
+							}
 
-              for (var key in tracks) {
-                var f;
-                var t = tracks[key];
-                var pos = [0, 0, 0];
-                var l = t.frames.length;
-                // get running average of pos in frames
-                for (var i = 0; i < l; i++) {
-                  f = t.frames[i];
-                  pos[0] += f.pos[0];
-                  pos[1] += f.pos[1];
-                  pos[2] += f.pos[2];
-                }
-                // get average pos
-                pos[0] /= l;
-                pos[1] /= l;
-                pos[2] /= l;
+							for (var key in tracks) {
+								var f;
+								var t = tracks[key];
+								var pos = [0, 0, 0];
+								var l = t.frames.length;
+								// get running average of pos in frames
+								for (var i = 0; i < l; i++) {
+									f = t.frames[i];
+									pos[0] += f.pos[0];
+									pos[1] += f.pos[1];
+									pos[2] += f.pos[2];
+								}
+								// get average pos
+								pos[0] /= l;
+								pos[1] /= l;
+								pos[2] /= l;
 
-                var windowW = $(window).width();
-                var windowH = $(window).height();
-                pos[0] *= windowW;
-                pos[1] *= windowH;
-                var deltaX = t.pos[0] - pos[0];
-                var deltaY = t.pos[1] - pos[1];
-                if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) > IGNORE_MOVEMENT) {
-                  t.posTween.stop();
-                  t.posTween.to(pos, TWEEN_DURATION);
-                  t.posTween.start();
-                }
-                
-                html += key+': '+f.fingers+' '+pos[0]+','+pos[1];
+								var windowW = $(window).width();
+								var windowH = $(window).height();
+								pos[0] *= windowW;
+								pos[1] *= windowH;
+								var deltaX = t.pos[0] - pos[0];
+								var deltaY = t.pos[1] - pos[1];
+								if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) > IGNORE_MOVEMENT) {
+									t.posTween.stop();
+									t.posTween.to(pos, TWEEN_DURATION);
+									t.posTween.start();
+								}
+								
+								html += key+': '+f.fingers+' '+pos[0]+','+pos[1];
 
-              }
-              document.getElementById("monitor").innerHTML = html;
+							}
+							document.getElementById("monitor").innerHTML = html;
 
-              //debug(evt.data);
-              //console.log($.parseJSON(evt.data));
-            };
+							//debug(evt.data);
+							//console.log($.parseJSON(evt.data));
+						};
 
-            ws.onclose = function(evt) {
-                // try to reconnect after an interval
-                debug("socket closed, trying to reconnect...");
-                setTimeout(connect, 2000);
-            }
+						ws.onclose = function(evt) {
+								// try to reconnect after an interval
+								debug("socket closed, trying to reconnect...");
+								setTimeout(connect, 2000);
+						}
 
-            ws.onerror = function() { debug("socket error"); };
-          };            
+						ws.onerror = function() { debug("socket error"); };
+					};            
 
-          connect();
-          function animate() {
-            requestAnimationFrame(animate);
-            TWEEN.update();
-          }
-          animate();
+					connect();
+					function animate() {
+						requestAnimationFrame(animate);
+						TWEEN.update();
+					}
+					animate();
 
-          var displayFps = function() {
-            if (receivedMilli.length > 1 ) {
-              fps = receivedMilli.length / ((receivedMilli[receivedMilli.length - 1] - receivedMilli[0]) / 1000.0);
-              document.getElementById("fps").innerHTML = Math.round(fps) + ' fps';
-            }
-            setTimeout(displayFps, 500);
-          };
-          displayFps();
-      };
+					var displayFps = function() {
+						if (receivedMilli.length > 1 ) {
+							fps = receivedMilli.length / ((receivedMilli[receivedMilli.length - 1] - receivedMilli[0]) / 1000.0);
+							document.getElementById("fps").innerHTML = Math.round(fps) + ' fps';
+						}
+						setTimeout(displayFps, 500);
+					};
+					displayFps();
+			};
 
-      function init() {
-        new OblessdClient({taggedObjects: ['Object-05']});
-      }
+			function init() {
+				new OblessdClient({taggedObjects: ['Object-05']});
+			}
 
-    </script>
+		</script>
 
-    <style type="text/css">
-      .gest-cursor {
-        width: 100px;
-        height: 100px;
-        position: fixed;
-        border: 5px green dashed;
-        -webkit-transform: scale(0.5);
-        -webkit-transition: width .2s ease-out, height .2s ease-out;
-      }
+		<style type="text/css">
+			.gest-cursor {
+				width: 100px;
+				height: 100px;
+				position: fixed;
+				border: 5px green dashed;
+				-webkit-transform: scale(0.5);
+				-webkit-transition: width .2s ease-out, height .2s ease-out;
+			}
 
-      .gest-cursor.grab {
-        border-color: red;
-        width: 230px;
-        height: 230px;
-        -moz-transform: scale(1.0);
-      }
-    </style>
+			.gest-cursor.grab {
+				border-color: red;
+				width: 230px;
+				height: 230px;
+				-moz-transform: scale(1.0);
+			}
+		</style>
 
-  </head>
-  <body onload="init();">
-    <pre id="fps">&nbsp;</pre>
-    <pre id="debug"></pre>
-    <pre id="monitor"></pre>
+	</head>
+	<body onload="init();">
+		<pre id="fps">&nbsp;</pre>
+		<pre id="debug"></pre>
+		<pre id="monitor"></pre>
 
-    <div id="cursor"></div>
+		<div id="cursor"></div>
 
-  </body>
+	</body>
 </html>
