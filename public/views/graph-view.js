@@ -50,12 +50,13 @@ window.GraphView = Backbone.View.extend({
 
 	resize: function()
 	{
-		//this.drawGraph();
+		//Replace with a graph update when Rickshaw.js is updated
+		this.drawGraph();
 	},
 	
 	updateGraph: function()
 	{
-		this.graph.render();
+		this.graph.update();
 	},
 	
 	drawGraph: function()
@@ -117,6 +118,9 @@ window.GraphView = Backbone.View.extend({
 		} );
 		
 		this.graph.render();
+		
+		this.$('#slider').css('margin-left',7)
+		this.$('#slider').width($('#graphContainer').width() - 30);
 	},
 
     addOne: function(model, currIndex) {

@@ -32,7 +32,7 @@
 	left:0px;
 	right:0px;
 	height:300px;
-	background-color:rgba(0,0,0,.8);
+	background-color:white;
 }
 
 /* RICKSHAW */
@@ -41,9 +41,8 @@
 {
 	z-index:9999;
 	position:absolute;
-	top:0px;
-	left:100px;
-	width:200px;
+	background-color:black;
+	top:-20px;
 }
 
 #chart {
@@ -65,19 +64,29 @@
 	position: relative;
 }
 
+/*
+.ui-slider-handle.ui-state-default.ui-corner-all
+{
+	background:rgba(255,255,255,.5);
+	border: 4px solid rgba(255,255,255,.5);
+}
+*/
 .ui-slider-horizontal {
 	z-index:99999;
-	
-	height: 1px !important;
-	border-color: #e0e0e0;
+	height: 20px !important;
+	border-color: red;
 	margin-bottom: 10px;
+	border-radius:0px;
 }
+
 .ui-slider-handle {
 	border-color: #a0a0a0;
-	height: 9px !important;
-	width: 9px !important;
-	top: -5px !important;
-	border-radius: 6px;
+	height: 20px !important;
+	width: 20px !important;
+	top: -1px !important;
+	border-radius: 0px;
+	background-color:white;
+	background:white;
 	outline: none;
 	cursor: pointer;
 }
@@ -231,4 +240,15 @@ label[for=linear] {
 }
 label[for=step] {
 	background-image: url(../assets/rickshaw/interp_step.png);
+}
+
+.x_tick.plain .title
+{
+	color:white;
+}
+
+.y_ticks.plain
+{
+	color:white;
+	fill:white;
 }
