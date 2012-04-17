@@ -90,33 +90,21 @@ window.GraphView = Backbone.View.extend({
 			graph: this.graph
 		});
 
-		// 
-		// var legend = new Rickshaw.Graph.Legend( {
-		// 	graph: self.graph,
-		// 	element: document.getElementById('legend')
-		// });
-		// 
-		// var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-		// 	graph: self.graph,
-		// 	legend: legend
-		// });
-
 		var yAxis = new Rickshaw.Graph.Axis.Y({
 		    graph: this.graph,
 		    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
 		});
-
+		
 		yAxis.render();
 		
 		var time = new Rickshaw.Fixtures.Time();
 		var years = time.unit('year');
-		// 
-				var xAxis = new Rickshaw.Graph.Axis.Time({
-						    graph: this.graph,
-						    timeUnit: years
-						});
-				
-						xAxis.render();
+		var xAxis = new Rickshaw.Graph.Axis.Time({
+				    graph: this.graph,
+				    timeUnit: years
+				});
+		
+				xAxis.render();
 		
 		var slider = new Rickshaw.Graph.RangeSlider( {
 			graph: this.graph,
@@ -124,12 +112,11 @@ window.GraphView = Backbone.View.extend({
 		});
 		
 		var controls = new RenderControls( {
-			element: document.querySelector('form'),
+			element: $('#side_panel').get(0),
 			graph: this.graph
 		} );
 		
 		this.graph.render();
-		
 	},
 
     addOne: function(model, currIndex) {
