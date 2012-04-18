@@ -61,7 +61,6 @@ var runGridReduce = function(collection, grid_size, location_field, value_field,
 			location_field: location_field,
 			value_field: value_field
 		}
-		,
 		,verbose: true
 		,keeptemp: true
 	});
