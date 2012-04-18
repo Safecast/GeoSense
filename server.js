@@ -492,20 +492,25 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	  });
 });
 
-app.post('/api/bindmapcollection/:mapid/:collectionid', function(req, res){
-	var mapid =  req.params.mapid;
-    var collectionid = req.params.collectionid;
+app.post('/api/bindmapcollection/', function(req, res){
+	
+	data = req.body.jsonpost[0];
+	
+	var mapid =  data.mapid;
+    var collectionid = data.collectionid;
+
+	console.log(data);
 
 	Map.update({ mapid:mapid }, { $push : { collections: collectionid} }, function(err) {
 	      if (!err) {
-	        console.log("map updated");
+	        console.log("collection bound to map");
 	        res.send('');
 	      }
 	      else {
 			res.send('oops error', 500);
 		  }
 	  });
-	
+
 });
 
 app.post('/api/unbindmapcollection/:mapid/:collectionid', function(req, res){

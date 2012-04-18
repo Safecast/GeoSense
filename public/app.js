@@ -270,16 +270,22 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	bindCollectionToMap: function(collectionId)
-	{
+	{		
+		var bindObject =[{mapid:_mapId, collectionid:collectionId}];
+				
 		$.ajax({
-			type: 'POST',
-			url: '/api/bindmapcollection/'+_mapId+'/' + collectionId,
-			success: function(data) {
-			},
-			error: function() {
-				console.error('failed to join map with collection');
-			}
-		});	
+				type: 'POST',
+				url: '/api/bindmapcollection/',
+				dataType: 'json',
+				data: { jsonpost: bindObject },
+				success: function(data) {
+					
+				},
+				error: function() {
+					console.error('failed to join map with collection');
+				}
+			});	
+
 	},
 
 	addData:function (options)
