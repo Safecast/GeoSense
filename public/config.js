@@ -26,6 +26,7 @@ var _mapId = String;
 var _mapAdminId = String;
 var _mapName = String;
 var _mapCollections = [];
+var _boundCollections = {};
 var _commentArray = [];
 
 var _num_data_sources = 0;

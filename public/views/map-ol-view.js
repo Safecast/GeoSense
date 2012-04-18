@@ -555,7 +555,7 @@ window.MapOLView = window.MapViewBase.extend({
 
     addOne: function(model, currIndex) {
 		var self = this;
-				
+	
 		//Prep point for layer	
 		var index = currIndex;	
 		var collectionId = model.get('collectionid'); 
@@ -566,7 +566,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var val = model.get('val');
 		var colorlow = model.get('colorlow');
 		var colorhigh = model.get('colorhigh');
-		
+				
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;

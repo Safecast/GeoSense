@@ -104,6 +104,8 @@ window.SideBarDataView = Backbone.View.extend({
 						{
 							if(self.collectionId == val)
 								self.setParameters(collection);
+								_boundCollections[self.collectionId] = collection;
+								
 						}	
 					});
 				});
@@ -118,8 +120,7 @@ window.SideBarDataView = Backbone.View.extend({
 	setParameters: function(collection)
 	{
 		var self = this;
-		console.log(collection);
-		
+					
 		this.color = collection.color;
 		this.colorLow = collection.colorLow;
 		this.colorHigh = collection.colorHigh;
@@ -163,8 +164,6 @@ window.SideBarDataView = Backbone.View.extend({
 	
 	setLegendColor: function()
 	{
-		console.log('legend:');
-		console.log(this.colorType);
 		if(this.colorType == 1)
 		{
 			this.$('#dataColor').css('background-color',this.color)	

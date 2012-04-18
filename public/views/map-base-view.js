@@ -2,6 +2,7 @@ window.MapViewBase = Backbone.View.extend({
 
     initialize: function(options) {
 		this.collections = {};
+		
 		this.vent = options.vent;
 		_.bindAll(this, "setMapLocation");
 		options.vent.bind("setMapLocation", this.setMapLocation);
@@ -27,13 +28,13 @@ window.MapViewBase = Backbone.View.extend({
 	},
 
 	addCollection: function(id, collection)
-	{
+	{		
 		var self = this;
 		this.collections[id] = collection;
 		this.collections[id].bind('reset', this.reset, this);
 		this.collections[id].bind('add', this.addOne, this);
 		
-		this.addCollectionToMap(this.collections[id]);
+		this.addCollectionToMap(this.collections[id]);		
 	},
 	
 	addCommentCollection: function(collection)

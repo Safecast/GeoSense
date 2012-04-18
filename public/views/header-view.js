@@ -75,9 +75,7 @@ window.HeaderView = Backbone.View.extend({
 	},
 	
 	graphButtonClicked: function() {
-		
-		console.log(_graphVisible);
-		
+				
 		if(_graphVisible == true)
 		{
 			_graphVisible = false;
@@ -136,7 +134,6 @@ window.HeaderView = Backbone.View.extend({
 	},
 	
 	setStateType: function(type) {
-		//console.log(type);
 		
 		var stateIndicator = this.$('#stateIndicator');
 		var message = this.$('#stateIndicatorMessage');
@@ -148,7 +145,6 @@ window.HeaderView = Backbone.View.extend({
 				message.html('DRAWING DATA SET');
 			  	break;
 			case 'complete':
-				console.log(_num_data_sources +" : "+ _loaded_data_sources)
 			  	stateIndicator.delay(1000).fadeOut('fast');
 			  	break;
 			case 'loading':
