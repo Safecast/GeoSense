@@ -5,7 +5,6 @@
 	bottom:-250px;
 	right:0px;
 	left:0px;
-	z-index:999;
 	opacity:.9;
 	border-top:1px solid #333;
 	
@@ -32,7 +31,7 @@
 	left:0px;
 	right:0px;
 	height:300px;
-	background-color:white;
+	background-color:black;
 }
 
 /* RICKSHAW */

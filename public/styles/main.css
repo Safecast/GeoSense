@@ -42,8 +42,14 @@
 	height:50px;
 }
 
+.graph-view
+{
+	z-index:998;
+}
+
 .sidebar-view
 {
+	z-index:997;
 	position:absolute;
 	top:50px;
 	left:0px;
@@ -53,6 +59,10 @@
     -moz-transition: all .3s linear;
     -o-transition: all .3s linear;
     -ms-transition: all .3s linear;
+}
+.sidebar-view .settings-tab
+{
+	z-index:998;
 }
 
 .sidebar-view.visible
@@ -66,6 +76,7 @@
 
 .chat-view
 {
+	z-index:999;
 	position:absolute;
 	top:50px;
 	right:-300px;
@@ -88,6 +99,7 @@
 
 .map-view
 {
+	z-index:996;
 	position:absolute;
 	top:50px;
 	left:0px;
@@ -111,6 +123,8 @@
 
 .map-gl-view
 {
+	z-index:998;
+	
 	position:absolute;
 	top:50px;
 	left:0px;
@@ -124,11 +138,6 @@
     -moz-transition: all .3s linear;
     -o-transition: all .3s linear;
     -ms-transition: all .3s linear;
-}
-
-.map-gl-view canvas
-{	
-
 }
 
 .map-gl-view.full

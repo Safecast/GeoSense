@@ -302,9 +302,7 @@ window.MapGLView = window.MapViewBase.extend({
 		    viewportSW = viewport.getSouthWest(),
 		    viewportNE = viewport.getNorthEast(),
 		    min = this.toWebMercator(viewportSW),
-		    max = this.toWebMercator(viewportNE),
-		    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
-		
+		    max = this.toWebMercator(viewportNE);		
 			//Do something here
 	},
 

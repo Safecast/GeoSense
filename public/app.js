@@ -29,7 +29,7 @@ var AppRouter = Backbone.Router.extend({
 		$('#app').append(this.setupView.render().el);
 		
 		this.graphView = new GraphView({vent: this.vent});
-		$('body').append(this.graphView.render().el);
+		$('#app').append(this.graphView.render().el);
 		
 		$('body').css("overflow","hidden");
 		

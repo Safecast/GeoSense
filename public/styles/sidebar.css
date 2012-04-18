@@ -1,6 +1,5 @@
 .sidebar-view
 {
-	z-index:998;
 	background-color:#f1f1f1;
 	box-shadow:inset -2px 0px 5px -2px rgba(0,0,0,0.6);
 	background-image:url('../assets/noise.gif');
@@ -8,7 +7,6 @@
 
 .sidebar-view .settings-tab
 {
-	z-index:1000;
 	position:absolute;
 	top:17px;
 	right:-52px;
