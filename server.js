@@ -501,7 +501,7 @@ app.post('/api/bindmapcollection/', function(req, res){
 
 	console.log(data);
 
-	Map.update({ mapid:mapid }, { $push : { collections: collectionid} }, function(err) {
+	Map.update({ mapid:mapid }, { $push : { collections: data} }, function(err) {
 	      if (!err) {
 	        console.log("collection bound to map");
 	        res.send('');

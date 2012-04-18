@@ -184,7 +184,6 @@ var AppRouter = Backbone.Router.extend({
 	fetchCollections: function(type)
 	{
 		var self = this;
-		var collectionObject = ["Hello","World"];
 		$.ajax({
 			type: 'GET',
 			url: '/api/map/' + _mapId,
@@ -195,10 +194,10 @@ var AppRouter = Backbone.Router.extend({
 					_mapCollections = data[0].collections;
 				
 					for(var i = 0; i < _mapCollections.length; ++i)
-					{
+					{						
 						$.ajax({
 							type: 'GET',
-							url: '/api/pointcollection/' + _mapCollections[i],
+							url: '/api/pointcollection/' + _mapCollections[i].collectionid,
 							success: function(data) {
 								self.addExistingDataSource(data[0].collectionid, type)
 							},
