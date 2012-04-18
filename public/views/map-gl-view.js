@@ -293,6 +293,20 @@ window.MapGLView = window.MapViewBase.extend({
 		this.globe.createPoints();
 
 	},
+	
+	setViewPort: function(result)
+	{
+		var first = result[0],
+		    center = this.toWebMercator(first.geometry.location),
+		    viewport = first.geometry.viewport,
+		    viewportSW = viewport.getSouthWest(),
+		    viewportNE = viewport.getNorthEast(),
+		    min = this.toWebMercator(viewportSW),
+		    max = this.toWebMercator(viewportNE),
+		    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
+		
+			//Do something here
+	},
 
     addOne: function(model) 
     {
