@@ -6,6 +6,7 @@ window.SideBarDataView = Backbone.View.extend({
     events: {
 		'click #removeData:' : 'removeDataClicked',
 		'click #editData:' : 'editDataClicked',
+		'click #updateData' : 'updateDataClicked',
 		'click #toggleVisible:' : 'toggleVisibleClicked',
 		'click #toggleHidden:' : 'toggleHiddenClicked',
 		'click #singleColor:' : 'singleColorClicked',
@@ -21,18 +22,25 @@ window.SideBarDataView = Backbone.View.extend({
 
     initialize: function(options) {
 		this.vent = options.vent;
-	
 	    this.template = _.template(tpl.get('sidebar-data'));
 		this.collectionId = options.collectionId;
 		this.title = options.title;
 		this.dataLength = options.dataLength;
-				
+		
+		this.color = '';
+		this.colorLow = '';
+		this.colorHigh = '';
+		this.colorType = 1;
+		this.displayType = 2;
+		this.visible = true;
+		
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);
 		
     },
 
     render: function() {
+		var self = this;
 		$(this.el).html(this.template());
 				
 		if(this.title != '')
@@ -44,7 +52,7 @@ window.SideBarDataView = Backbone.View.extend({
 			dataTitle = "Untitled Data";
 		}
 		
-		dataTitle += " ("+ this.collection.length + ") <div class='data-color'></div>";
+		dataTitle += " ("+ this.collection.length + ") <div class='data-color' id='dataColor'></div>";
 		
 		this.$("a").html(dataTitle);
 		this.$("a").attr("href", "#collapse" + this.collectionId);
@@ -54,12 +62,118 @@ window.SideBarDataView = Backbone.View.extend({
 		{
 			this.$('#adminDataControls').remove();
 		}
-		this.$(".color-picker").miniColors();
-		this.$(".color-picker").miniColors('value','#0aa5ff');
+		
+		this.$("#colorInput").miniColors({
+		    change: function(hex, rgb) 
+			{ 
+				self.enableUpdateButton();
+			}});
+		this.$("#colorInput").miniColors('value','#0aa5ff');
+		
+		this.$("#colorInputLow").miniColors({
+		    change: function(hex, rgb) 
+			{ 
+				self.enableUpdateButton();
+			}});
+		this.$("#colorInputLow").miniColors('value','#333');
+		
+		this.$("#colorInputHigh").miniColors({
+		    change: function(hex, rgb) 
+			{ 
+				self.enableUpdateButton();
+			}});
+		this.$("#colorInputHigh").miniColors('value','#fff');
+	
+		this.fetchParameters();
 	
 		
         return this;
     },
+
+	fetchParameters: function()
+	{
+		var self = this;
+		$.ajax({
+			type: 'GET',
+			url: '/api/map/' + _mapId,
+			success: function(data) {
+				
+				$.each(data[0].collections, function(key, collection) { 
+					$.each(collection, function(key, val) { 
+						if(key == 'collectionid')
+						{
+							if(self.collectionId == val)
+								self.setParameters(collection);
+						}	
+					});
+				});
+				
+			},
+			error: function() {
+				console.error('failed to fetch map collection');
+			}
+		});
+	},
+	
+	setParameters: function(collection)
+	{
+		var self = this;
+		console.log(collection);
+		
+		this.color = collection.color;
+		this.colorLow = collection.colorLow;
+		this.colorHigh = collection.colorHigh;
+		this.colorType = collection.colorType;
+		this.displayType = collection.displayType;
+		
+		switch(this.colorType)
+		{
+		case "1": // Single Color
+		  	this.singleColorClicked();
+			this.$('#scaleColor').removeClass('active');
+			this.$('#singleColor').removeClass('active');
+			this.$('#singleColor').addClass('active');
+			this.setLegendColor();
+		  break;
+		case "2": // Color Range
+		  	this.scaleColorClicked();
+			this.$('#singleColor').removeClass('active');
+			this.$('#scaleColor').removeClass('active');
+			this.$('#scaleColor').addClass('active');
+			this.setLegendColor();
+		  break;
+		}
+
+		switch(this.displayType)
+		{
+		case "1": // Pixels
+		  	this.pixelsButtonClicked();
+		  break;
+		case "2": // Circles
+		  	this.circlesButtonClicked();
+		  break;
+		}
+		
+		this.$("#colorInput").miniColors('value',this.color);
+		this.$("#colorInputLow").miniColors('value',this.colorLow);
+		this.$("#colorInputHigh").miniColors('value',this.colorHigh);
+		
+		this.disableUpdateButton();
+	},
+	
+	setLegendColor: function()
+	{
+		console.log('legend:');
+		console.log(this.colorType);
+		if(this.colorType == 1)
+		{
+			this.$('#dataColor').css('background-color',this.color)	
+		}
+		else
+		{
+			this.$('#dataColor').css('background-color',this.colorLow)	
+		}
+	},
 
 	addOne: function(data) {
 		var self = this;
@@ -72,51 +186,63 @@ window.SideBarDataView = Backbone.View.extend({
 	 	});
     },
 
-	enableUpdatebutton: function()
+	enableUpdateButton: function()
 	{
 		this.$('#updateData').removeClass('disabled');
 		this.$('#updateData').addClass('btn-primary');
 	},
+	
+	disableUpdateButton: function()
+	{
+		this.$('#updateData').removeClass('btn-primary');
+		this.$('#updateData').addClass('disabled');
+	},
 
 	colorInputClicked: function()
 	{
-		this.enableUpdatebutton();
+		this.enableUpdateButton();
 	},
 	
 	colorInputLowClicked: function()
 	{
-		this.enableUpdatebutton();
+		this.enableUpdateButton();
 	},
 	
 	colorInputHighClicked: function()
 	{
-		this.enableUpdatebutton();
+		this.enableUpdateButton();
 	},
 
 	circlesButtonClicked: function()
 	{
-		this.enableUpdatebutton();
+		this.enableUpdateButton();
 		this.$('#circlesButton').addClass('active');
 		this.$('#pixelsButton').removeClass('active');
+		this.displayType = 2;
 	},
 	
 	pixelsButtonClicked: function()
 	{
-		this.enableUpdatebutton();
+		this.enableUpdateButton();
 		this.$('#circlesButton').removeClass('active');
 		this.$('#pixelsButton').addClass('active');
+		this.displayType = 1;
 	},
 
 	singleColorClicked: function()
 	{
+		this.enableUpdateButton();
 		$('.color-scale').hide();
 		$('.color-single').show();
+		this.colorType = 1;
 	},
 
 	scaleColorClicked: function()
 	{
+		this.enableUpdateButton();
 		$('.color-scale').show();
 		$('.color-single').hide();
+		this.colorType = 2;
 	},
 
 	removeDataClicked: function()
@@ -129,6 +255,41 @@ window.SideBarDataView = Backbone.View.extend({
 		});
 		self.collection.reset();
    	},
+
+	updateDataClicked: function()
+	{
+		//build json and update
+		var self = this;
+		this.collection.unbindCollection();
+		
+		this.color = this.$('#colorInput').val();
+		this.colorLow = this.$('#colorInputLow').val();
+		this.colorHigh = this.$('#colorInputHigh').val();
+		
+		var updateObject = [{
+				collectionid:this.collectionId,
+				colorType:this.colorType,
+				color: this.color,
+				colorLow: this.colorLow,
+				colorHigh: this.colorHigh,
+				displayType:this.displayType
+			}];
+		
+			$.ajax({
+					type: 'POST',
+					url: '/api/bindmapcollection/' + _mapId,
+					dataType: 'json',
+					data: { jsonpost: updateObject },
+					success: function(data) {
+						self.disableUpdateButton();
+						self.setLegendColor();
+					},
+					error: function() {
+						console.error('failed to join map with collection');
+					}
+				});	
+			
+	},
 
 	editDataClicked: function()
 	{

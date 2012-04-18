@@ -492,11 +492,11 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	  });
 });
 
-app.post('/api/bindmapcollection/', function(req, res){
+app.post('/api/bindmapcollection/:mapid', function(req, res){
 	
 	data = req.body.jsonpost[0];
 	
-	var mapid =  data.mapid;
+	var mapid =  req.params.mapid;
     var collectionid = data.collectionid;
 
 	console.log(data);
@@ -510,14 +510,34 @@ app.post('/api/bindmapcollection/', function(req, res){
 			res.send('oops error', 500);
 		  }
 	  });
+});
 
+app.post('/api/updatemapcollection/:mapid', function(req, res){
+	
+	data = req.body.jsonpost[0];
+	
+	var mapid =  req.params.mapid;
+    var collectionid = data.collectionid;
+
+	console.log(data);
+	// console.log(data);
+	// 
+	Map.update({ mapid:mapid }, { $set : { collections: data} }, function(err) {
+	      if (!err) {
+	        console.log("collection bound to map");
+	        res.send('');
+	      }
+	      else {
+			res.send('oops error', 500);
+		  }
+	  });
 });
 
 app.post('/api/unbindmapcollection/:mapid/:collectionid', function(req, res){
 	var mapid =  req.params.mapid;
     var collectionid = req.params.collectionid;
 
-	Map.update({ mapid:mapid }, { $pull : { collections: collectionid} }, function(err) {
+	Map.update({ mapid:mapid }, { $pull : { collections: {collectionid: collectionid}} }, function(err) {
 	      if (!err) {
 	        console.log("collection removed");
 	        res.send('');

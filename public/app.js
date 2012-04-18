@@ -105,7 +105,6 @@ var AppRouter = Backbone.Router.extend({
 					_mapName = data[0].name;
 					_mapId = data[0].mapid;
 					_mapAdminId = data[0].mapadminid;
-					console.log(data);
 					if(options.state == 'map')
 					{
 						self.map();
@@ -270,11 +269,19 @@ var AppRouter = Backbone.Router.extend({
 	
 	bindCollectionToMap: function(collectionId)
 	{		
-		var bindObject =[{mapid:_mapId, collectionid:collectionId}];
+		var bindObject = [{
+				collectionid:collectionId,
+				colorType:2,
+				color:'#4cbd2a',
+				colorLow:'#ce0aff',
+				colorHigh:"#ff0a33",
+				displayType:2,
+				visible:true,
+			}];
 				
 		$.ajax({
 				type: 'POST',
-				url: '/api/bindmapcollection/',
+				url: '/api/bindmapcollection/' + _mapId,
 				dataType: 'json',
 				data: { jsonpost: bindObject },
 				success: function(data) {
