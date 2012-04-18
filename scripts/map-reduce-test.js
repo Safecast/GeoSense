@@ -6,22 +6,26 @@
 var runGridReduce = function(collection, grid_size, location_field, value_field, query) {
 	var map = function() {
 		if (!this[location_field]) return;
-		var r = Math.floor;
-		grid_size = Math.max(1, grid_size);
+		if (grid_size < 1) {
+			r = function(v) {
+				var mag = 100;
+				return Math.round(v / grid_size * mag) / mag;
+			};
+		} else {
+			var r = Math.floor;
+		}
 		var grid_lat = r(this[location_field][0] / grid_size);
 		var grid_lng = r(this[location_field][1] / grid_size);
 		var key = grid_lat + ',' + grid_lng;
-		
 		var e = {
 			count: 1,
 		};
 		e[location_field] = [grid_lat * grid_size, grid_lng * grid_size];
 		e[value_field] = this[value_field];
-
 		emit(key, e);
 	};
-
 	var reduce = function(key, values) {
+		print(key+' -- '+values.length);
 		var sum = 0;
 		var count = 0;
 		values.forEach(function(doc) {
@@ -35,7 +39,6 @@ var runGridReduce = function(collection, grid_size, location_field, value_field,
 		r[value_field] = sum;
 		return r;
 	};
-
 	var reduced_collection = collection + '_grid_' + grid_size;
 	db[reduced_collection].drop();
 	if (!location_field) {
@@ -47,7 +50,6 @@ var runGridReduce = function(collection, grid_size, location_field, value_field,
 	var index = {};
 	index[location_field] = '2d';
 	db[reduced_collection].ensureIndex(index);
-
 	return db.runCommand({
 		mapreduce: collection
 		,query: query 
@@ -59,6 +61,7 @@ var runGridReduce = function(collection, grid_size, location_field, value_field,
 			location_field: location_field,
 			value_field: value_field
 		}
+		,
 		,verbose: true
 		,keeptemp: true
 	});
@@ -66,7 +69,10 @@ var runGridReduce = function(collection, grid_size, location_field, value_field,
 
 // Run on safecast for grid size 1 and without conditions
 use geo;
+var op = runGridReduce('safecast', .5, 'location', 'reading_value');
 var op = runGridReduce('safecast', 1, 'location', 'reading_value');
+var op = runGridReduce('safecast', 2, 'location', 'reading_value');
+var op = runGridReduce('safecast', 3, 'location', 'reading_value');
 
 // Test 
 var grp = db[op.result].group({
