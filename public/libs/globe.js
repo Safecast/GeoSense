@@ -169,8 +169,16 @@ DAT.Globe = function(container, colorFn) {
       fragmentShader: shader.fragmentShader,
       vertexShader: shader.vertexShader,
       uniforms: uniforms,
-      lights: true
+      lights: true,
+
     });
+
+    var materialNormalMap = new THREE.MeshBasicMaterial( { 
+      color: Math.random() * 0xffffff,
+      opacity: .000001 
+    } 
+
+    );
 
     // planet
 

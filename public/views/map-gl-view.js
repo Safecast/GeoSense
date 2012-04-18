@@ -26,6 +26,8 @@ window.MapGLView = window.MapViewBase.extend({
     updateTaggedObject: function(obj)
     {
     	if (!this.globe) return;
+    	return;
+    	console.log(obj.name);
 		switch (obj.name) {
 			case 'globe':
 				var newGlobePos = new THREE.Vector3().copy(obj.loc);
