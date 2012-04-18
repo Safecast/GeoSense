@@ -263,12 +263,18 @@ var AppRouter = Backbone.Router.extend({
 	
 	addFromDataLibrary: function(collectionId)
 	{
+		this.bindCollectionToMap(collectionId);
+		_num_data_sources+=1;
+		app.addExistingDataSource(collectionId, 'dataLibrary')
+			
+	},
+	
+	bindCollectionToMap: function(collectionId)
+	{
 		$.ajax({
 			type: 'POST',
 			url: '/api/bindmapcollection/'+_mapId+'/' + collectionId,
 			success: function(data) {
-				_num_data_sources+=1;
-				app.addExistingDataSource(collectionId, 'dataLibrary')
 			},
 			error: function() {
 				console.error('failed to join map with collection');
@@ -419,6 +425,8 @@ var AppRouter = Backbone.Router.extend({
 		pointCollection[_num_data_sources].addData(dataSet, function(){
 			app.addExistingDataSource(uniqid, 'newData');
 		});
+		
+		this.bindCollectionToMap(uniqid);
 		
 		$('#addDataModal').modal('hide');
 		this.vent.trigger("setStateType", 'post');
