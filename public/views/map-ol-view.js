@@ -49,6 +49,7 @@ window.MapOLView = window.MapViewBase.extend({
 					
 		this.gmap = new OpenLayers.Layer.Google("Google Streets", {
 			type: 'styled',
+			wrapDateLine: true,
 		    sphericalMercator: true,
 		});
 		        
@@ -65,12 +66,10 @@ window.MapOLView = window.MapViewBase.extend({
 		    div: "map_canvas",
 		    projection: new OpenLayers.Projection("EPSG:900913"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326"),
-		    numZoomLevels: 18,
+		    numZoomLevels: 16,
+			minZoomLevel: 3,
 		    maxResolution: maxResolution,
-		    maxExtent: maxExtent,
-		    restrictedExtent: restrictedExtent,
 			controls: map_controls,
-			
 		});	
 				
 		this.map.addLayers([this.gmap]);
@@ -417,7 +416,7 @@ window.MapOLView = window.MapViewBase.extend({
 		
 		var stylers = style;	
 		var styledMapOptions = {
-			name: "Styled Map"
+			name: "Styled Map",			
 		};
 		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
 
