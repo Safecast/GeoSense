@@ -26,6 +26,8 @@ window.DataLibrary = Backbone.View.extend({
 			  });
 		});	
 		
+		$('body').append('<div class="drop-zone" id="dropZone"><h3 class="instruction">DROP HERE</h3></div>');
+		
         return this;
     },
 
@@ -35,7 +37,6 @@ window.DataLibrary = Backbone.View.extend({
 	},
 
 	fetchDataCollections: function() {	
-		
 		
 		var self = this;	
 		$.ajax({
@@ -56,15 +57,15 @@ window.DataLibrary = Backbone.View.extend({
 					stack: '#dragLabel',
 					start: function(event, ui) { 
 						var test = 'blah';
-						$('#mapOLDataDrop').addClass('visible');
+						$('#dropZone').addClass('visible');
 						$(this).css("opacity",".9");
 					},
 					stop: function(event, ui) {
-						$('#mapOLDataDrop').removeClass('visible');
+						$('#dropZone').removeClass('visible');
 					}
 				});
 
-				$('#map_canvas').droppable( {
+				$('#dropZone').droppable( {
 			      accept: '#dragLabel',
 			      hoverClass: '',
 			      drop: self.dataDrop
@@ -98,6 +99,7 @@ window.DataLibrary = Backbone.View.extend({
 		$(self.el).animate({
 		    left: -350,
 		  }, 400, 'easeOutQuad', function() {
+				$('#dropZone').remove();
 				_dataLibraryVisible = false;
 				$(window).unbind();
 				$(self.el).remove();
