@@ -5,17 +5,38 @@
   <div id="collapse" class="accordion-body collapse">
     <div class="accordion-inner">
 		<div class="data-toggle">
-			<p>Data controls</p>
 			<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
-			  <button id='toggleVisible' class="btn active">Visible</button>
-			  <button id='toggleHidden' class="btn">Hidden</button>
+			  <button id="toggleVisible" class="btn active">Visible</button>
+			  <button id="toggleHidden" class="btn">Hidden</button>
 			</div>
 		</div>
+		<div class="divider"></div>
+		<p class="header-text">Display Settings</p>
+		<div class="data-toggle">
+			<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
+			  <button id="singleColor" class="btn active">Single Color</button>
+			  <button id="scaleColor" class="btn">Color Scale</button>
+			</div>
+		</div>
+		<div class="color-scale">
+			<input type="text" id="colorInputLow" class="color-picker black" size="6" placeholder="Low value" />
+			<input type="text" id="colorInputHigh" class="color-picker black" size="6" placeholder="High value" />	
+		</div>
+		<div class="color-single">
+			<input type="text" id="colorInput" class="color-picker black" size="6" placeholder="Color Value"/>
+		</div>
+		<div class="divider"></div>
+		
+		<div class="display">
+			<div class="type dots active" id="pixelsButton"><p>pixels</p></div>
+			<div class="type circles" id="circlesButton"><p>circles</p></div>
+		</div>
+		
 		<div id="adminDataControls">
 			<div class="divider"></div>
 	        <div id="dataToggleEdit" class="data-toggle edit">
-				<button class="btn" id="editData">Edit</button>
 				<button class="btn" id="removeData">Remove</button>
+				<button class="btn disabled" id="updateData">Update Display</button>
 			</div>
 		</div>
     </div>

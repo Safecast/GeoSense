@@ -8,6 +8,15 @@ window.SideBarDataView = Backbone.View.extend({
 		'click #editData:' : 'editDataClicked',
 		'click #toggleVisible:' : 'toggleVisibleClicked',
 		'click #toggleHidden:' : 'toggleHiddenClicked',
+		'click #singleColor:' : 'singleColorClicked',
+		'click #scaleColor:' : 'scaleColorClicked',
+		'click #circlesButton:' : 'circlesButtonClicked',
+		'click #pixelsButton:' : 'pixelsButtonClicked',
+		
+		'click #colorInput' : 'colorInputClicked',
+		'click #colorInputLow' : 'colorInputLowClicked',
+		'click #colorInputHigh' : 'colorInputHighClicked',
+		
     },
 
     initialize: function(options) {
@@ -35,7 +44,7 @@ window.SideBarDataView = Backbone.View.extend({
 			dataTitle = "Untitled Data";
 		}
 		
-		dataTitle += " ("+ this.collection.length + ")";
+		dataTitle += " ("+ this.collection.length + ") <div class='data-color'></div>";
 		
 		this.$("a").html(dataTitle);
 		this.$("a").attr("href", "#collapse" + this.collectionId);
@@ -45,6 +54,9 @@ window.SideBarDataView = Backbone.View.extend({
 		{
 			this.$('#adminDataControls').remove();
 		}
+		this.$(".color-picker").miniColors();
+		this.$(".color-picker").miniColors('value','#0aa5ff');
+	
 		
         return this;
     },
@@ -59,6 +71,53 @@ window.SideBarDataView = Backbone.View.extend({
 		self.addOne(data);
 	 	});
     },
+
+	enableUpdatebutton: function()
+	{
+		this.$('#updateData').removeClass('disabled');
+		this.$('#updateData').addClass('btn-primary');
+	},
+
+	colorInputClicked: function()
+	{
+		this.enableUpdatebutton();
+	},
+	
+	colorInputLowClicked: function()
+	{
+		this.enableUpdatebutton();
+	},
+	
+	colorInputHighClicked: function()
+	{
+		this.enableUpdatebutton();
+	},
+
+	circlesButtonClicked: function()
+	{
+		this.enableUpdatebutton();
+		this.$('#circlesButton').addClass('active');
+		this.$('#pixelsButton').removeClass('active');
+	},
+	
+	pixelsButtonClicked: function()
+	{
+		this.enableUpdatebutton();
+		this.$('#circlesButton').removeClass('active');
+		this.$('#pixelsButton').addClass('active');
+	},
+
+	singleColorClicked: function()
+	{
+		$('.color-scale').hide();
+		$('.color-single').show();
+	},
+
+	scaleColorClicked: function()
+	{
+		$('.color-scale').show();
+		$('.color-single').hide();
+	},
 
 	removeDataClicked: function()
 	{
