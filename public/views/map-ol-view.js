@@ -430,7 +430,29 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 	
 	toWebMercator: function (googLatLng) {
-		translation = new Geometry.Point(googLatLng.Za, googLatLng.Ya);
+		
+		// Extract property names from Google response
+		// It seems the API changes the response from Za/Yz/$a
+		
+		props = []
+		for (prop in googLatLng) {
+		    if (googLatLng.hasOwnProperty(prop)) {
+				props.push(prop);
+		    }
+		}
+
+		// Assign the property to lat/lng based on their object index
+		$.each(googLatLng, function(index, val) { 
+			if(index == props[0])
+			{
+		  		lat=val;
+			} else if (index == props[1])
+			{
+				lng=val;
+			}
+		});		
+		
+		translation = new Geometry.Point(lng, lat);
 		translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
 				
 	  	return { x: translation.x, y: translation.y };
@@ -448,11 +470,6 @@ window.MapOLView = window.MapViewBase.extend({
 		    min = this.toWebMercator(viewportSW),
 		    max = this.toWebMercator(viewportNE),
 		    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
-
-			//4030302.5713791
-			
-			//console.log(zoom);
-
 
 		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
 	},
