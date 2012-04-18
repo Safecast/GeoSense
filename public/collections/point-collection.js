@@ -54,6 +54,20 @@ PointCollection = Backbone.Collection.extend({
 		})
 	},
 	
+	unbindCollection: function(options) {
+		
+		var self = this;		
+	    $.ajax({
+			type: 'POST',
+			url: '/api/unbindmapcollection/'+_mapId+'/' + self.collectionId,
+			success: function(data) {
+			},
+			error: function() {
+				console.error('failed to join map with collection');
+			}
+		});
+	},
+	
 	destroy: function(options) {
 		
 		var self = this;		

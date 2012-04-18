@@ -125,7 +125,7 @@ window.SideBarDataView = Backbone.View.extend({
 		
 		$(this.el).fadeOut('fast',function()
 		{
-			self.collection.destroy();
+			self.collection.unbindCollection();
 		});
 		self.collection.reset();
    	},
