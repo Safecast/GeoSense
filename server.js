@@ -103,26 +103,25 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 	date: Date,
 }));
 
-var Safecast = mongoose.model('Safecast', new mongoose.Schema({ location: Array}), 'safecast');
 
 // Routes
 
-///////////////
-// TEST ROUTES 
-///////////////
+/////////////////////
+// MAP REDUCE ROUTES 
+////////////////////
 
-app.get('/api/boxquery/:s/:w/:n/:e', function(req, res){
-		
-	var box = [[Number(req.params.w), Number(req.params.s)],[Number(req.params.e), Number(req.params.n)]];
-	box = [[140.128,37.081],[140.132,37.087]];
-	Safecast.find({"location":{"$within": {"$box": box}}}, function(err, datasets) {
-		res.send(datasets);
+app.get('/api/safecast/:zoom', function(req, res){
+	
+	Safecast = mongoose.model('Safecast', new mongoose.Schema({ any: {} }), 'safecast_grid_' + req.params.zoom);
+	Safecast.find(function(err, datasets) {
+	   res.send(datasets);
 	});
+	
 });
 
-///////////////
+/////////////////
 // COMMENTS 
-///////////////
+////////////////
 
 app.get('/api/comments/map/:mapid', function(req, res){
   Comment.find({mapid:req.params.mapid},function(err, datasets) {
