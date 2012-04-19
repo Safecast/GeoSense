@@ -70,7 +70,7 @@ DAT.Globe = function(container, colorFn) {
     }
   };
 
-  var camera, scene, scenePoints, world, sceneAtmosphere, renderer, w, h;
+  var camera, scene, scenePoints, world, sceneAtmosphere, renderer, w, h, meshDebug;
   var meshPlanet, atmosphere, point;
   var controls;
 
@@ -103,7 +103,7 @@ DAT.Globe = function(container, colorFn) {
     sceneAtmosphere = new THREE.Scene();
     scenePoints = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(25, w / h, 50, 1e7);
+    camera = new THREE.PerspectiveCamera(CAMERA_FOV, w / h, 50, 1e7);
     camera.position.z = distance;
     scene.add( camera );
 
@@ -173,12 +173,12 @@ DAT.Globe = function(container, colorFn) {
 
     });
 
-    var materialNormalMap = new THREE.MeshBasicMaterial( { 
-      color: Math.random() * 0xffffff,
-      opacity: .000001 
-    } 
-
-    );
+    if (true || IS_IPAD) {
+      var materialNormalMap = new THREE.MeshBasicMaterial( { 
+        color: Math.random() * 0x00ffff,
+        opacity: .5000001 
+      });
+    }
 
     // planet
 
@@ -190,6 +190,20 @@ DAT.Globe = function(container, colorFn) {
     meshPlanet.rotation.y = 0;
     world.rotation.z = tilt;
     world.add( meshPlanet );
+
+
+    geometry = new THREE.SphereGeometry( radius / 10, 80, 60 );
+    geometry.computeTangents();
+    var material = new THREE.MeshBasicMaterial( { 
+        color: Math.random() * 0x00ffff,
+        opacity: .5000001 
+    });
+
+    meshDebug = new THREE.Mesh( geometry, material );
+    scene.add( meshDebug );
+
+
+
   
     scene.add(new THREE.AmbientLight( 0xffffff ));        
 
@@ -457,6 +471,7 @@ DAT.Globe = function(container, colorFn) {
   this.render = render;
   this.world = world;
   this.camera = camera;
+  this.debugMarker = meshDebug;
 
   this.__defineGetter__('time', function() {
     return this._time || 0;

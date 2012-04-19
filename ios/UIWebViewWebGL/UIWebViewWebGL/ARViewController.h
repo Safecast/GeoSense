@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ARViewController : UIViewController {
+@interface ARViewController : UIViewController <UIWebViewDelegate, UITableViewDelegate> {
   IBOutlet UIWebView *webView;
   IBOutlet UITextField *urlField;
   IBOutlet UIBarButtonItem *reloadButton;

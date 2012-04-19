@@ -26,13 +26,15 @@ window.MapGLView = window.MapViewBase.extend({
     updateTaggedObject: function(obj)
     {
     	if (!this.globe) return;
-    	return;
-    	console.log(obj.name);
+    	
 		switch (obj.name) {
 			case 'globe':
+				this.globe.debugMarker.position = new THREE.Vector3().copy(obj.loc);
+
+
 				var newGlobePos = new THREE.Vector3().copy(obj.loc);
 				var invNorm = new THREE.Vector3().copy(obj.norm).normalize().multiplyScalar(-1);
-				newGlobePos.addSelf(invNorm.multiplyScalar(radius));
+				newGlobePos.addSelf(invNorm.multiplyScalar(VIRTUAL_PHYSICAL_FACTOR * 200));
 				this.globe.world.position = newGlobePos;
 				break;
 			case 'lens':

@@ -5,15 +5,16 @@
 
 var DEBUG = true;
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
-var VIRTUAL_PHYSICAL_FACTOR = 100; // 1 unit in GL view is 1km. 1mm movement in physical space maps to....
+var VIRTUAL_PHYSICAL_FACTOR = 49.5; 
+var CAMERA_FOV = 44;
 var SMOOTH_TWEEN_DURATION = 50;
 
 var taggedObjects = [
 	new TaggedObject('globe', [
-		new ObjectTag('Object-05', [0, 200, 0])
+		new ObjectTag('Right-Hand-3', [0, 0, 0])
 	]),
 	new TaggedObject('lens', [
-		new ObjectTag('Right-Hand-1', [-150, 100, 0]),
+		new ObjectTag('Left-Hand-3', [40, 40, 0]),
 		//new ObjectTag('Object-03', [-150, 100, 0]),
 		//new ObjectTag('Object-06', [150, -100, 0])
 	])

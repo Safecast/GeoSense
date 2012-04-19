@@ -33,6 +33,9 @@
 
     id webDocumentView = [webView performSelector:@selector(_browserView)];
     id backingWebView = [webDocumentView performSelector:@selector(webView)];
+
+    urlField.text = @"http://google.com";
+  
     [backingWebView _setWebGLEnabled:YES];  
     [self reloadUrl];
 }
@@ -44,6 +47,12 @@
     NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
     [webView loadRequest:request];
 }
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+  urlField.text = [webView.request.URL absoluteString];
+}  
+
+
 
 - (void)viewDidUnload
 {

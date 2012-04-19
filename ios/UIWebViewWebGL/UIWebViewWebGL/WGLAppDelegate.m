@@ -35,8 +35,11 @@
   self.window.rootViewController = cameraViewController;
   [self.window makeKeyAndVisible];
   
-  [cameraViewController initCamera];
-  cameraViewController.imagePicker.cameraOverlayView = overlayViewController.view;
+  if ([cameraViewController initCamera]) {
+    cameraViewController.imagePicker.cameraOverlayView = overlayViewController.view;
+  } else {
+    [cameraViewController.view addSubview:overlayViewController.view];
+  }
   
    
   return YES;

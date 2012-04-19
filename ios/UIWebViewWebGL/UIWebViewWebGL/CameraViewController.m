@@ -25,7 +25,7 @@
     return self;
 }
 
-- (void)initCamera
+- (bool)initCamera
 {
   if ([UIImagePickerController isSourceTypeAvailable:
          UIImagePickerControllerSourceTypeCamera])
@@ -40,7 +40,9 @@
       [self presentModalViewController:imagePicker
                               animated:YES];
       [imagePicker release];
+      return YES;
     }
+  return NO;
 }
 
 - (void)viewDidUnload

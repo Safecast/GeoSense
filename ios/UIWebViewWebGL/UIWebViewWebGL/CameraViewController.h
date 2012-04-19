@@ -11,7 +11,7 @@ UINavigationControllerDelegate, UIPopoverControllerDelegate>
   UIImagePickerController *imagePicker;
 }
 
-- (void)initCamera;
+- (bool)initCamera;
 @property (nonatomic, retain) UIImagePickerController *imagePicker;
 
 @end
