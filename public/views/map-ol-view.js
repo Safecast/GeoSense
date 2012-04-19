@@ -19,6 +19,9 @@ window.MapOLView = window.MapViewBase.extend({
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
 	
+		_.bindAll(this, "redrawLayer");
+	 	options.vent.bind("redrawLayer", this.redrawLayer);
+	
 		this.layerArray = [];
 		
 		Feature = OpenLayers.Feature.Vector;
@@ -114,44 +117,6 @@ window.MapOLView = window.MapViewBase.extend({
 		
 	},
 	
-	createQuadTree: function () {
-	    var a = {
-	        x: this.bounds.getX(),
-	        y: this.bounds.getY(),
-	        width: this.bounds.getWidth(),
-	        height: this.bounds.getHeight()
-	    };
-	    (new Date).getTime();
-	    this.quadTree = new QuadTree(a, !0, 7, 30);
-	    for (var a = this.items.length, b = 0; b < a; b++) {
-	        var c = this.items[b];
-	        this.quadTree.insert({
-	            x: c.lng,
-	            y: c.lat,
-	            id: c.id
-	        })
-	    }(new Date).getTime()
-	},
-	
-	insertQuadTree: function (a) {
-	    for (var b = a.length, c = 0; c < b; c++) {
-	        var d = a[c];
-	        this.quadTree.insert({
-	            x: d.lng,
-	            y: d.lat,
-	            id: d.id
-	        })
-	    }
-	},
-	
-	quadTreeRetrieve: function (a, b) {
-	    if (!this.quadTree) return null;
-	    return this.quadTree.retrieve({
-	        x: a,
-	        y: b
-	    })
-	},
-	
 	getItems: function (a, b, c) {
 		var self = this;
 	    a = new Geometry.Vector2(a, b);
@@ -243,8 +208,6 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	addCollectionAsLayer: function(collection, renderer)
 	{ 
-		
-		console.log(collection.params);
 		
 		switch(collection.params.displayType)
 		{
@@ -428,6 +391,23 @@ window.MapOLView = window.MapViewBase.extend({
 
 		this.gmap.mapObject.mapTypes.set('styled', styledMapType);
 		this.gmap.mapObject.setMapTypeId('styled');
+	},
+	
+	redrawLayer: function(layer)
+	{
+		
+		var currCollection = layer;
+		var currIndex;
+		$.each(this.layerArray, function(index, value) { 
+			if(value.collectionId == currCollection)
+				currIndex = index;
+		});
+	
+		currVisibility = this.layerArray[currIndex].getVisibility()
+		//Needs to be finished
+		//this.layerArray[currIndex].destroy();
+		//this.addCollectionAsLayer(this.collections[layer]);
+		
 	},
 	
 	redrawMap: function()
