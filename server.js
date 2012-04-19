@@ -473,9 +473,9 @@ app.get('/api/maps/:mapid' , function(req, res){
 });
 
 //Returns a specific unique map by mapId
-app.get('/api/map/:mapid', function(req, res){
+app.get('/api/map/:publicslug', function(req, res){
 	
-	Map.find({mapid: req.params.mapid}, function(err, data) {
+	Map.find({publicslug: req.params.publicslug}, function(err, data) {
 	    if (!err) {
 	       res.send(data);
 	    } else
@@ -486,25 +486,37 @@ app.get('/api/map/:mapid', function(req, res){
 });
 
 //Returns a specific unique map by mapId in admin state
-app.get('/api/map/admin/:mapadminid', function(req, res){
+app.get('/api/map/admin/:adminslug', function(req, res){
 	
-	Map.find({mapadminid: req.params.mapadminid}, function(err, data) {
+	Map.find({adminslug: req.params.adminslug}, function(err, data) {
 	    if (!err) {
 	       res.send(data);
 	    } else
-		{point
+		{
 			res.send("oops",500);
 		}
 	});
 });
 
+//Create a new map
 app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
+	
+	var currDate = new Date();
+	var collections = [];
 	
 	var map;
 	  map = new Map({
-		mapid: req.params.mapid,
-		mapadminid: req.params.mapadminid,
-	    name: req.params.name,
+	
+		title: req.params.name,
+		description: '',
+		adminslug: req.params.mapadminid,
+		publicslug: req.params.mapid,
+		created: currDate,
+		modified: currDate,
+		created_by: '',
+		modified_by: '',
+		collections: collections,
+	
 	  });	
 	
 	  map.save(function(err) {
