@@ -1,7 +1,10 @@
+Fixed Collections
+=================
+
 point
 -----
 collectionid
-loc
+loc [lat, lng]
 val
 label
 datetime
@@ -10,6 +13,7 @@ modified
 
 pointcollection
 ---------------
+datafileid
 title
 maxval
 minval
@@ -30,4 +34,34 @@ collections {
 	collectionid
 	options {}	
 }
-	
+
+Dynamically Generated Collections
+=================================
+
+* original data files:
+
+o_<datafileid>
+--------------
+whatever columns a data file had
+
+
+* reductions of a pointcollection with loc-grid/time-grid:
+
+r_<collectionid>_<loc_grid>_<time_grid> 
+---------------------------------------
+key
+value {
+	loc []
+	datetime
+	val {
+		sum
+		count
+		avg
+	}
+	<somefield> {
+		sum
+		count
+		avg
+	}
+	...
+}
