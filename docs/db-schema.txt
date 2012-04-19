@@ -20,6 +20,8 @@ minval
 timebased
 created
 modified
+created_by
+modified_by
 defaults {}
 
 map
@@ -30,6 +32,8 @@ adminslug
 publicslug
 created
 modified
+created_by
+modified_by
 collections {
 	collectionid
 	options {}	
