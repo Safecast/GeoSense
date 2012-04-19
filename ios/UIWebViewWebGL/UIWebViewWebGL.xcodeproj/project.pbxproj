@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		22112567153FA130007C3833 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 22112566153FA130007C3833 /* MBProgressHUD.m */; };
 		223E3A28151BE96500770228 /* Palm_Beach.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 223E3A27151BE96500770228 /* Palm_Beach.jpeg */; };
 		22C295E2153DB4010066AAF3 /* ARViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C295E1153DB4010066AAF3 /* ARViewController.xib */; };
 		22C295E9153DB7440066AAF3 /* ARViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C295E8153DB7440066AAF3 /* ARViewController.m */; };
@@ -21,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		22112565153FA130007C3833 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		22112566153FA130007C3833 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		223E3A27151BE96500770228 /* Palm_Beach.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Palm_Beach.jpeg; sourceTree = "<group>"; };
 		22C295E1153DB4010066AAF3 /* ARViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ARViewController.xib; sourceTree = "<group>"; };
 		22C295E7153DB7440066AAF3 /* ARViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARViewController.h; sourceTree = "<group>"; };
@@ -54,6 +57,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		22112564153FA130007C3833 /* MBProgressHUD */ = {
+			isa = PBXGroup;
+			children = (
+				22112565153FA130007C3833 /* MBProgressHUD.h */,
+				22112566153FA130007C3833 /* MBProgressHUD.m */,
+			);
+			path = MBProgressHUD;
+			sourceTree = "<group>";
+		};
 		D89DC60D14592F4F000FC7C6 = {
 			isa = PBXGroup;
 			children = (
@@ -86,15 +98,16 @@
 		D89DC62214592F50000FC7C6 /* UIWebViewWebGL */ = {
 			isa = PBXGroup;
 			children = (
-				D89DC62B14592F50000FC7C6 /* WGLAppDelegate.h */,
-				D89DC62C14592F50000FC7C6 /* WGLAppDelegate.m */,
 				22C295E7153DB7440066AAF3 /* ARViewController.h */,
 				22C295E8153DB7440066AAF3 /* ARViewController.m */,
-				22E2D5341520D58E00991B0E /* CameraViewController.h */,
 				22C295E1153DB4010066AAF3 /* ARViewController.xib */,
+				22E2D5341520D58E00991B0E /* CameraViewController.h */,
 				22E2D5351520D58E00991B0E /* CameraViewController.m */,
-				D89DC633145931B3000FC7C6 /* WebGL.html */,
+				22112564153FA130007C3833 /* MBProgressHUD */,
 				D89DC62314592F50000FC7C6 /* Supporting Files */,
+				D89DC633145931B3000FC7C6 /* WebGL.html */,
+				D89DC62B14592F50000FC7C6 /* WGLAppDelegate.h */,
+				D89DC62C14592F50000FC7C6 /* WGLAppDelegate.m */,
 			);
 			path = UIWebViewWebGL;
 			sourceTree = "<group>";
@@ -180,6 +193,7 @@
 				D89DC62D14592F50000FC7C6 /* WGLAppDelegate.m in Sources */,
 				22E2D5361520D58E00991B0E /* CameraViewController.m in Sources */,
 				22C295E9153DB7440066AAF3 /* ARViewController.m in Sources */,
+				22112567153FA130007C3833 /* MBProgressHUD.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

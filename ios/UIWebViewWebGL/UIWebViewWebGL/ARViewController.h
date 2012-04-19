@@ -7,15 +7,23 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MBProgressHUD.h"
 
-@interface ARViewController : UIViewController <UIWebViewDelegate, UITableViewDelegate> {
+@interface ARViewController : UIViewController <UIWebViewDelegate, UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate> {
   IBOutlet UIWebView *webView;
   IBOutlet UITextField *urlField;
-  IBOutlet UIBarButtonItem *reloadButton;
-
+  IBOutlet UIBarButtonItem *reloadButton, *cancelButton;
+  IBOutlet UITableView *urlHistory;
+  IBOutlet UIToolbar *urlBar;
+  NSMutableArray *urls;
+  MBProgressHUD *hud;
 }
 
 @property (nonatomic, retain) UIWebView *webView;
 - (IBAction)reloadUrl;
+- (IBAction)urlEntered;
+- (IBAction)beginUrlEditing;
+- (IBAction)endUrlEditing;
+- (void)loadUrl:(NSString *)url addToHistory:(bool)addToHistory;
 
 @end
