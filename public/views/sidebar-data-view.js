@@ -105,7 +105,6 @@ window.SideBarDataView = Backbone.View.extend({
 							if(self.collectionId == val)
 								self.setParameters(collection);
 								_boundCollections[self.collectionId] = collection;
-								
 						}	
 					});
 				});
@@ -130,14 +129,16 @@ window.SideBarDataView = Backbone.View.extend({
 		switch(this.colorType)
 		{
 		case "1": // Single Color
-		  	this.singleColorClicked();
+			this.$('.color-scale').hide();
+			this.$('.color-single').show();
 			this.$('#scaleColor').removeClass('active');
 			this.$('#singleColor').removeClass('active');
 			this.$('#singleColor').addClass('active');
 			this.setLegendColor();
 		  break;
 		case "2": // Color Range
-		  	this.scaleColorClicked();
+		  	this.$('.color-scale').show();
+			this.$('.color-single').hide();
 			this.$('#singleColor').removeClass('active');
 			this.$('#scaleColor').removeClass('active');
 			this.$('#scaleColor').addClass('active');

@@ -185,9 +185,10 @@ var AppRouter = Backbone.Router.extend({
 		var self = this;
 		$.ajax({
 			type: 'GET',
+			ajaxType: type,
 			url: '/api/map/' + _mapId,
 			success: function(data) {
-		
+				var scope = this;
 				if(data[0].collections)
 				{
 					_mapCollections = data[0].collections;
@@ -196,9 +197,10 @@ var AppRouter = Backbone.Router.extend({
 					{						
 						$.ajax({
 							type: 'GET',
+							ajaxI: i,
 							url: '/api/pointcollection/' + _mapCollections[i].collectionid,
 							success: function(data) {
-								self.addExistingDataSource(data[0].collectionid, type)
+								self.addExistingDataSource(data[0].collectionid, scope.ajaxType)
 							},
 							error: function() {
 								console.error('failed to fetch distinct collections');
@@ -221,34 +223,35 @@ var AppRouter = Backbone.Router.extend({
 		
 		$.ajax({
 			type: 'GET',
+			ajaxIndex: index,
+			ajaxType: type,
 			url: '/api/pointcollection/' + index,
 			success: function(data) {
-				
+				var scope = this;
 				self.vent.trigger("setStateType", 'loading');
 
 				var mapId = data[0].mapid;
 				var maxVal = data[0].maxval;
 				var minVal = data[0].minval;
 				var name = data[0].name;
-												
-				pointCollection[index] = new PointCollection({collectionId:index, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
-				
-				pointCollection[index].fetch({success: function(data) {
+																
+				pointCollection[scope.ajaxIndex] = new PointCollection({collectionId:scope.ajaxIndex, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
+				pointCollection[scope.ajaxIndex].fetch({success: function(data) {
 					
-					self.vent.trigger("setStateType", 'complete');
-					
-					if(_firstLoad == true || type == 'newData' || type == 'dataLibrary')
+					if(_firstLoad == true || scope.ajaxType == 'newData' || scope.ajaxType == 'dataLibrary')
 					{
-			 			self.addSideBarDataView({collectionId:index,dataLength:data.length,title:name});
+			 			self.addSideBarDataView({collectionId:data.collectionId,dataLength:data.length,title:name});
 					}
 								
-					self.addMapCollection(index, pointCollection[index]);
+					self.addMapCollection(data.collectionId, pointCollection[data.collectionId]);
 					
-					self.addGraphCollection(index, pointCollection[index]);
+					self.addGraphCollection(data.collectionId, pointCollection[data.collectionId]);
 					
 					_loaded_data_sources += 1;
 					if(_loaded_data_sources == _num_data_sources)
 						_firstLoad = false;
+						
+					self.vent.trigger("setStateType", 'complete');
 											
 				}});
 					

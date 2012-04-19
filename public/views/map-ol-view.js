@@ -242,24 +242,35 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 	
 	addCollectionAsLayer: function(collection, renderer)
-	{
-		var renderer = 'Canvas2'
+	{ 
 		
+		console.log(collection.params);
+		
+		switch(collection.params.displayType)
+		{
+		case "1": // Pixels
+			var renderer = 'Canvas2'
+		  break;
+		case "2": // Circles
+			var renderer = 'Canvas'
+		  break;
+		}
+
 		switch(renderer)
 		{
 			case 'Canvas2':
 			
-					var layer = new OpenLayers.Layer.VectorPt(null, {
-								projection: new OpenLayers.Projection("EPSG:4326"),
-								sphericalMercator: true,
-					    		renderers: ["Canvas2"]
-					});
-					
-					layer.collectionId = collection.collectionId;
-					this.layerArray.push(layer);
-					
-					currLayer = this.layerArray.length;
-					this.map.addLayers([this.layerArray[currLayer-1]]);
+				var layer = new OpenLayers.Layer.VectorPt(null, {
+							projection: new OpenLayers.Projection("EPSG:4326"),
+							sphericalMercator: true,
+				    		renderers: ["Canvas2"]
+				});
+			
+				layer.collectionId = collection.collectionId;
+				this.layerArray.push(layer);
+			
+				currLayer = this.layerArray.length;
+				this.map.addLayers([this.layerArray[currLayer-1]]);
 				
 			break;
 			
@@ -272,7 +283,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    strokeWidth: 0,
 				    strokeOpacity: 0.0,
 				    strokeColor: "navy",
-				    fillColor: "#ffffff",
+				    fillColor: collection.params.color,
 				    fillOpacity: .2
 				});
 
@@ -300,7 +311,6 @@ window.MapOLView = window.MapViewBase.extend({
 				  this.layerArray[currLayer-1], {
 				     clickout: true, multiple: false, hover: false, box: false,
 				     onBeforeSelect: function(feat) {
-				        console.log('grr');
 				        return false;
 				     },
 				     onUnselect: function(feat) {
@@ -369,10 +379,6 @@ window.MapOLView = window.MapViewBase.extend({
 			{
 				this.layerArray[currIndex].setVisibility(true);
 			}
-		
-			//Update our local data object array
-			//this.dataObjectArray[currIndex].visible = type;
-			//console.log(this.dataObjectArray[currIndex].visible);
 		}
 	},
 	
@@ -502,7 +508,6 @@ window.MapOLView = window.MapViewBase.extend({
 
                trigger: function(e) {
                    var lonlat = this.map.getLonLatFromPixel(e.xy);
-					console.log(lonlat.lat);
 				//Temporary!!!!
 				// var commentid = 0123456;
 				// 				var mapid = _mapId;
@@ -545,7 +550,6 @@ window.MapOLView = window.MapViewBase.extend({
 			if(value.collectionId == currCollection)
 			{
 				currIndex = index;
-				console.log(currIndex);
 			}
 		});
 		
@@ -564,42 +568,44 @@ window.MapOLView = window.MapViewBase.extend({
 		var lat = model.get('lon');
 		var lon = model.get('lat');
 		var val = model.get('val');
-		var colorlow = model.get('colorlow');
-		var colorhigh = model.get('colorhigh');
-				
+		var color = this.collections[collectionId].params.color;
+		var colorlow = this.collections[collectionId].params.colorLow;
+		var colorhigh = this.collections[collectionId].params.colorHigh;
+		var colorType = this.collections[collectionId].params.colorType;
+		var drawType = this.collections[collectionId].params.drawType;
+		
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;
+		
 		//Temporary super hack
-		if(maxVal - minVal > 1000)
-			maxVal = 500;
+		// if(maxVal - minVal > 1000)
+		// 	maxVal = 500;
+		
+		if(colorType == 1) // Single color
+		{
+			gocolor = color;
+		}
+		else if(colorType == 2) // Color range
+		{
+			var rainbow = new Rainbow();
+			rainbow.setSpectrum(colorlow, colorhigh);		
+			rainbow.setNumberRange(Number(minVal), Number(maxVal));
+
+			var hex = '#' + rainbow.colourAt(val);
+			gocolor = hex;
+		}
 			
-		var rainbow = new Rainbow();
-		rainbow.setSpectrum(colorlow, colorhigh);		
-		rainbow.setNumberRange(Number(minVal), Number(maxVal));
-		
-		var hex = '#' + rainbow.colourAt(val);
-		gocolor = hex;
-		
 		currPoint = new OpenLayers.Geometry.Point(lat, lon);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-		
-		var style = new OpenLayers.Style({
-		    pointRadius: 10,
-		    strokeWidth: 0,
-		    strokeOpacity: 0.0,
-		    strokeColor: "navy",
-		    fillColor: "#ffffff",
-		    fillOpacity: .2
-		});
 		
 		vector = new OpenLayers.Feature.Vector(currPoint, {
 	        colour: gocolor,
 		});
 					
 		//Add point to proper layer (by found index)
-		this.layerArray[index].features.push(vector);
-					
+		this.layerArray[index].drawType;
+		this.layerArray[index].features.push(vector);		
     },
 
 	addOneComment: function(model) {

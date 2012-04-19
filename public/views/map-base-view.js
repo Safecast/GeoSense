@@ -30,11 +30,63 @@ window.MapViewBase = Backbone.View.extend({
 	addCollection: function(id, collection)
 	{		
 		var self = this;
-		this.collections[id] = collection;
-		this.collections[id].bind('reset', this.reset, this);
-		this.collections[id].bind('add', this.addOne, this);
+		$.ajax({
+			type: 'GET',
+			url: '/api/map/' + _mapId,
+			ajaxId: id,
+			ajaxCollection: collection,
+			success: function(data) {
+				var scope = this;
+				$.each(data[0].collections, function(key, parameterCollection) { 
+					$.each(parameterCollection, function(key, val) { 
+						if(key == 'collectionid')
+						{
+							if(scope.ajaxId == val)
+							{
+								scope.ajaxCollection.params = parameterCollection;
+								self.collections[scope.ajaxId] = scope.ajaxCollection;
+								self.collections[scope.ajaxId].bind('reset', self.reset, self);
+								self.collections[scope.ajaxId].bind('add', self.addOne, self);
+								self.addCollectionToMap(self.collections[scope.ajaxId]);
+								self.vent.trigger("setStateType", 'complete');
+								
+							}
+						}	
+					});
+				});
+				
+			},
+			error: function() {
+				console.error('failed to fetch map collection');
+			}
+		});
 		
-		this.addCollectionToMap(this.collections[id]);		
+	},
+	
+	fetchParameters: function()
+	{
+		var self = this;
+		$.ajax({
+			type: 'GET',
+			url: '/api/map/' + _mapId,
+			success: function(data) {
+				
+				$.each(data[0].collections, function(key, collection) { 
+					$.each(collection, function(key, val) { 
+						if(key == 'collectionid')
+						{
+							if(self.collectionId == val)
+								self.setParameters(collection);
+								_boundCollections[self.collectionId] = collection;
+						}	
+					});
+				});
+				
+			},
+			error: function() {
+				console.error('failed to fetch map collection');
+			}
+		});
 	},
 	
 	addCommentCollection: function(collection)

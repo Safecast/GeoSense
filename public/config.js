@@ -20,6 +20,8 @@ var taggedObjects = [
 	])
 ];
 
+var _panelLoaded = false;
+
 var _admin = true;
 var _firstLoad = true;
 var _setupRoute = false;
