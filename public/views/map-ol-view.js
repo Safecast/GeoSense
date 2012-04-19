@@ -539,14 +539,14 @@ window.MapOLView = window.MapViewBase.extend({
 
     addOne: function(model, currIndex) {
 		var self = this;
-	
+			
 		//Prep point for layer	
 		var index = currIndex;	
 		var collectionId = model.get('collectionid'); 
-		var name = model.get('name');
-		var location = model.get('location');
-		var lat = model.get('lon');
-		var lon = model.get('lat');
+		var label = model.get('label');
+		var loc = model.get('loc');
+		var lng = loc[0];
+		var lat = loc[1];
 		var val = model.get('val');
 		var color = this.collections[collectionId].params.color;
 		var colorlow = this.collections[collectionId].params.colorLow;
@@ -576,7 +576,7 @@ window.MapOLView = window.MapViewBase.extend({
 			gocolor = hex;
 		}
 			
-		currPoint = new OpenLayers.Geometry.Point(lat, lon);
+		currPoint = new OpenLayers.Geometry.Point(lng, lat);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
 		vector = new OpenLayers.Feature.Vector(currPoint, {
