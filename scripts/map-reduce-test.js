@@ -6,16 +6,10 @@
 var runGridReduce = function(collection, grid_size, location_field, value_field, query) {
 	var map = function() {
 		if (!this[location_field]) return;
-		if (grid_size < 1) {
-			r = function(v) {
-				var mag = 100;
-				return Math.round(v / grid_size * mag) / mag;
-			};
-		} else {
-			var r = Math.floor;
-		}
-		var grid_lat = r(this[location_field][0] / grid_size);
-		var grid_lng = r(this[location_field][1] / grid_size);
+		var lat = this[location_field][0];
+		var lng = this[location_field][1];
+		var grid_lat = (lat - lat % grid_size) / grid_size;
+		var grid_lng = (lng - lng % grid_size) / grid_size;
 		var key = grid_lat + ',' + grid_lng;
 		var e = {
 			count: 1,
