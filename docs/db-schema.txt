@@ -1,0 +1,33 @@
+point
+-----
+collectionid
+loc
+val
+label
+datetime
+created 
+modified
+
+pointcollection
+---------------
+title
+maxval
+minval
+timebased
+created
+modified
+defaults {}
+
+map
+---
+title
+description
+adminslug
+publicslug
+created
+modified
+collections {
+	collectionid
+	options {}	
+}
+	
