@@ -26,12 +26,17 @@ window.MapViewBase = Backbone.View.extend({
 		});
 	},
 	
-	mapZoomChanged: function(zoom, bounds)
+	mapPositionChanged: function(zoom, bounds)
 	{
 		//Bounds are [[SE.x, SE.y],[NW.x, NW.y]]
 		
-		console.log('mapZoomChanged to ' + zoom);
-		console.log(bounds);
+		// Here we look through the current collections, check against zoom levels, and refetch if necessary
+		
+		$.each(this.collections, function(key, val) { 
+			//val.url = '/api/collection/new_url'
+			//val.fetch();
+		});
+		
 	},
 
 	addCollection: function(id, collection)

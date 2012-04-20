@@ -185,8 +185,10 @@ app.get('/api/data/:file', function(req, res){
 		return new Point(doc);
 	}
 	
-	if(type == 'csv')
+	switch(type)
 	{
+		case 'csv':
+		
 		csv()
 		    .fromPath(__dirname+ path)
 		    .transform(function(data){
@@ -246,6 +248,17 @@ app.get('/api/data/:file', function(req, res){
 		    .on('error',function(error){
 		        console.log(error.message);
 		    });
+		break;
+	
+		case 'json':
+	
+			console.log('/public/data/reactors.json');
+			var parsedJSON = require('/public/data/reactors.json');
+			//console.log(parsedjson);
+	
+		break;
+		default:
+		  
 	}
 	
 });
