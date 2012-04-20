@@ -2,6 +2,7 @@ window.MapViewBase = Backbone.View.extend({
 
     initialize: function(options) {
 		this.collections = {};
+		
 		this.vent = options.vent;
 		_.bindAll(this, "setMapLocation");
 		options.vent.bind("setMapLocation", this.setMapLocation);
@@ -24,11 +25,6 @@ window.MapViewBase = Backbone.View.extend({
 					alert ("Cannot find " + addr + "! Status: " + status);
 				}
 		});
-	},
-	
-	mapZoomChanged: function(zoom)
-	{
-		console.log('mapZoomChanged to ' + zoom);
 	},
 
 	addCollection: function(id, collection)
