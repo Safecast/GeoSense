@@ -31,8 +31,6 @@
   [super viewDidLoad];
   webView.backgroundColor = [UIColor clearColor];
   webView.opaque = NO;
-  webView.scrollView.scrollEnabled = NO; 
-  webView.scrollView.bounces = NO;
 
   id webDocumentView = [webView performSelector:@selector(_browserView)];
   id backingWebView = [webDocumentView performSelector:@selector(webView)];
@@ -48,7 +46,7 @@
 
   [backingWebView _setWebGLEnabled:YES];  
 
-  [self loadUrl:@"http://18.189.34.8:8124/Y1xyXKwiHJ/globe" addToHistory:YES];
+  [self loadUrl:@"http://sam-macbookair.media.mit.edu:8124/Y1xyXKwiHJ/globe" addToHistory:YES];
 
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];

@@ -103,7 +103,7 @@ DAT.Globe = function(container, colorFn) {
     sceneAtmosphere = new THREE.Scene();
     scenePoints = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(CAMERA_FOV, 768 / 1024, 1, 1e7);
+    camera = new THREE.PerspectiveCamera(CAMERA_FOV, w / h, 50, 1e7);
     camera.position.z = distance;
     scene.add( camera );
 
@@ -192,16 +192,16 @@ DAT.Globe = function(container, colorFn) {
     world.add( meshPlanet );
 
 
-    var plane = new THREE.Mesh(new THREE.CubeGeometry(150, 10, 250, 2, 2), new THREE.MeshBasicMaterial({
-      color: 0x0000ff,
-      opacity: .5
-    }));
-    plane.overdraw = true;
-    scene.add(plane);
-
+    geometry = new THREE.SphereGeometry( radius / 10, 80, 60 );
+    geometry.computeTangents();
+    var material = new THREE.MeshBasicMaterial( { 
+        color: Math.random() * 0x00ffff,
+        opacity: .5000001 
+    });
 
     meshDebug = new THREE.Mesh( geometry, material );
     scene.add( meshDebug );
+
 
 
   
@@ -419,7 +419,6 @@ DAT.Globe = function(container, colorFn) {
 
   function onWindowResize( event ) {
     console.log('resize');
-    return;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -445,9 +444,8 @@ DAT.Globe = function(container, colorFn) {
     vector.copy(camera.position);
     */
 
-    //world.rotation.y += 0.0025;
+    world.rotation.y += 0.0025;
 	  scenePoints.rotation = world.rotation;
-
     
     /*
     var helper = new THREE.AxisHelper(); 
@@ -472,7 +470,7 @@ DAT.Globe = function(container, colorFn) {
   this.animate = animate;
   this.render = render;
   this.world = world;
-  CAMERA = this.camera = camera;
+  this.camera = camera;
   this.debugMarker = meshDebug;
 
   this.__defineGetter__('time', function() {
