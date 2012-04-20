@@ -266,33 +266,57 @@ window.MapGLView = window.MapViewBase.extend({
 		var self = this;
 		var data = [];
 		var maxVal = 0;
+		var minVal = 0;
+		var colorlow;
+		var colorhigh;
 		collection.each(function(model) {
 			self.cleanPointModel(model);
 			data.push(model.get('lat'));
 			data.push(model.get('lon'));
 			var val = model.get('val');
-			if (val == 0) {
+			/*if (val == 0) {
 				val = Math.random() * .5;
-			}
+			}*/
 			if (val > maxVal) {
 				maxVal = val;
 			}
 			data.push(val);
+			var collectionId = model.get('collectionId');
+			//colorlow = this.collections[collectionId].params.colorLow;
+			//colorhigh = this.collections[collectionId].params.colorHigh;
 		});
+
+
+
 		if (maxVal > 1) {
 			console.log('normalizing to '+maxVal+' ('+this.valueScale+')');
 			var scaleFuncs = {
 				linear: function(v) { return v },
 				log: Math.log
 			};
+
 			var scale = scaleFuncs[this.valueScale];
 			var max = scale(maxVal);
 			for (var i = 2; i < data.length; i += 3) {
 				//console.log(data[i]+' ==> '+  (scale(data[i]) / max));
 				data[i] = scale(data[i]) / max;
+				console.log(data[i]);
 			}
 		}
-		this.globe.addData(data, {format: 'magnitude', name: collection.get('_id'), animated: false});
+		this.globe.addData(data, {
+			format: 'magnitude', 
+			name: collection.get('_id'), 
+			animated: false,
+			colorFn: function(val) {
+				//var rainbow = new Rainbow();
+				//rainbow.setSpectrum(colorlow, colorhigh);		
+				//rainbow.setNumberRange(0, 1);
+				// ...
+				var c = new THREE.Color();
+				c.setHex(0xff0000);
+				return c;
+			}
+		});
 		this.globe.createPoints();
 
 	},

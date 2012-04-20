@@ -1,6 +1,15 @@
 /* Config 
 */
 
+function getURLParameter(name) {
+    return decodeURI(
+        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+    );
+}
+
+var IS_AR = getURLParameter('lens') == true;
+console.log('IS_AR '+IS_AR);
+
 //APP GLOBALS
 
 var DEBUG = true;
