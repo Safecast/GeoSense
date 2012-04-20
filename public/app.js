@@ -75,8 +75,8 @@ var AppRouter = Backbone.Router.extend({
 				url: '/api/map/' + options.mapId,
 				success: function(data) {
 					_admin = false;
-					_mapName = data[0].title;
-					_mapId = options.publicslug;
+					_mapName = data[0].name;
+					_mapId = options.mapId;
 					if(options.state == 'map')
 					{
 						self.map();
@@ -102,9 +102,9 @@ var AppRouter = Backbone.Router.extend({
 				url: '/api/map/admin/' + options.mapId,
 				success: function(data) {
 					_admin = true;
-					_mapName = data[0].title;
-					_mapId = data[0].publicslug;
-					_mapAdminId = data[0].adminslug;
+					_mapName = data[0].name;
+					_mapId = data[0].mapid;
+					_mapAdminId = data[0].mapadminid;
 					if(options.state == 'map')
 					{
 						self.map();
