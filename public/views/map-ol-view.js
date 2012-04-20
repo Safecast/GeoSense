@@ -64,7 +64,7 @@ window.MapOLView = window.MapViewBase.extend({
 			new OpenLayers.Control.PanZoomBar(),
 			new OpenLayers.Control.Navigation(),
 		];
-
+		
 		this.map = new OpenLayers.Map({
 		    div: "map_canvas",
 		    projection: new OpenLayers.Projection("EPSG:900913"),
@@ -73,6 +73,15 @@ window.MapOLView = window.MapViewBase.extend({
 			minZoomLevel: 3,
 		    maxResolution: maxResolution,
 			controls: map_controls,
+			scope: this,
+			eventListeners: {
+               "moveend": function(event){
+					var map = event.object;
+					var zoom = map.getZoom();
+					
+					self.mapZoomChanged(zoom);
+					},
+            }
 		});	
 				
 		this.map.addLayers([this.gmap]);
@@ -188,7 +197,7 @@ window.MapOLView = window.MapViewBase.extend({
 			{cls: "one"}
 		);
 		
-		///this.commentLayer.addFeatures(comment);
+		//this.commentLayer.addFeatures(comment);
 		
 		var select = new OpenLayers.Control.SelectFeature(this.commentLayer,
         {
