@@ -181,8 +181,8 @@ DAT.Globe = function(container, colorFn) {
 
 		if (IS_AR) {
 			var materialNormalMap = new THREE.MeshBasicMaterial( { 
-				color: Math.random() * 0x00ffff,
-				opacity: .5000001 
+				color: 0xffffff,
+				opacity: .100000 
 			});
 		}
 
@@ -206,7 +206,7 @@ DAT.Globe = function(container, colorFn) {
 			plane.overdraw = true;
 			scene.add(plane);
 
-			meshDebug = new THREE.Mesh(new THREE.CubeGeometry(40, 10, 40, 2, 2), new THREE.MeshBasicMaterial({
+			meshDebug = new THREE.Mesh(new THREE.SphereGeometry(10, 20, 20), new THREE.MeshBasicMaterial({
 				color: 0x0000ff,
 				opacity: .5
 			}));

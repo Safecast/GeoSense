@@ -12,7 +12,7 @@ function getURLParameter(name) {
 var DEBUG = true;
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
 var IS_AR = getURLParameter('lens') == true;
-var VIRTUAL_PHYSICAL_FACTOR = 1.1; 
+var VIRTUAL_PHYSICAL_FACTOR = 1.2; 
 var CAMERA_FOV = 54.25;
 var SMOOTH_TWEEN_DURATION = 50;
 var CAMERA;
@@ -22,7 +22,7 @@ var taggedObjects = [
 		new ObjectTag('Right-Hand-3', [0, 0, 0])
 	]),
 	new TaggedObject('lens', [
-		new ObjectTag('Left-Hand-1', [0, 0, 0]),
+		new ObjectTag('Left-Hand-1', [-6, -15, 35]),
 		//new ObjectTag('Object-03', [-150, 100, 0]),
 		//new ObjectTag('Object-06', [150, -100, 0])
 	])
