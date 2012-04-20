@@ -298,26 +298,135 @@ var AppRouter = Backbone.Router.extend({
 
 	addData:function (options)
 	{
-		console.log(options);
 		var self = this;
-		var uniqid = options.collectionId;
+		var uniqid = this.uniqId();
 		var uniqueMapId = _mapId;
-		var title = 'data set'
+		var title = options.title
 		var data = options.data;
-
-		var maxVal = options.maxVal;
-		var minVal = options.minVal;
-		
+		var colorLow = options.colorLow;
+		var colorHigh = options.colorHigh;
+		var dataSet = [];
+		var maxVal = 0;
+		var minVal;
 		var currEpoch = Math.round((new Date).getTime() / 1000);
 		var created = currEpoch;
 		var modified = currEpoch;
 		var createdBy = '';
 		var modifiedBy = '';
 
+		for(var i = 0; i < data.length; ++i)
+		{
+			var loc = '';
+			var lat = '';
+			var lng = '';
+			var intensity = '';
+			var name = '';
+			var val = '';
+			var date = '';
+			var day = '';
+			var month = '';
+			var year = '';
 			
+			$.each(data[i], function(key, val) { 
+								
+				if(key == 'Location')
+				{
+					location = val;
+				}
+				if(key == 'location')
+				{
+					location = val;
+				}
+				else if (key == 'lat')
+				{
+					lat = val;
+				}
+				else if (key == 'lng')
+				{
+					lng = val;
+				}
+				else if (key == 'lon')
+				{
+					lng = val;
+				}
+				else if (key == 'intensity' || key == 'value')
+				{
+					intensity = val;
+				}
+				else if (key == 'name' || key == 'title')
+				{
+					name = val;
+				}
+				else if (key == 'color')
+				{
+					color = val;
+				}
+				else if (key == 'date')
+				{
+					date = val;
+				}
+				else if (key == 'day')
+				{
+					day = val;
+				}
+				else if (key == 'month')
+				{
+					month = val;
+				}
+				else if (key == 'year')
+				{
+					year = val;
+				}
+	
+			});	
+			
+			//Format date
+			if(date == '')
+			{
+				if(day != '' && month != '' & year != '')
+				{	
+					var d = Date.UTC(year,month,day);
+					date =  d;		
+				}
+			}
+			
+			//Check for lat/lng location
+			if(location != '')
+			{
+				var location = location.split(/[, ]/, 2);
+				lat = parseFloat(location[0]);
+				lng = parseFloat(location[1]);	
+			}
+			
+			//Substitute intensity for val
+			if(val == '')
+				val = intensity;
+			
+			if(val >= maxVal)
+				maxVal = val;	
+				
+			if(minVal == undefined)
+				minVal = val;
+			
+			if(val <= minVal)
+				minVal = val;
+						
+			//Substitute intensity for val
+			if(val == '')
+				val = 1;
+
+			dataSet.push({'label':name,'loc':[lng,lat],'val':val, 'datetime':date, 'created': created, 'modified':modified});
+		}
+				
 		//First increment total number of data sources
 		_num_data_sources +=1;
-	
+		
+		if(maxVal == '')
+			maxVal = 1;
+		
+		if(minVal == '')
+			minVal = 1;
+		
 		//Check for time based
 		var timeBased = true;
 		
@@ -337,7 +446,9 @@ var AppRouter = Backbone.Router.extend({
 		});
 				
 		//Create Points
-		app.addExistingDataSource(uniqid, 'newData');
+		pointCollection[_num_data_sources].addData(dataSet, function(){
+			app.addExistingDataSource(uniqid, 'newData');
+		});
 		
 		this.bindCollectionToMap(uniqid);
 		
