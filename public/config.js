@@ -5,16 +5,17 @@
 
 var DEBUG = true;
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
-var VIRTUAL_PHYSICAL_FACTOR = 49.5; 
-var CAMERA_FOV = 44;
+var VIRTUAL_PHYSICAL_FACTOR = 1; 
+var CAMERA_FOV = 57;
 var SMOOTH_TWEEN_DURATION = 50;
+var CAMERA;
 
 var taggedObjects = [
 	new TaggedObject('globe', [
 		new ObjectTag('Right-Hand-3', [0, 0, 0])
 	]),
 	new TaggedObject('lens', [
-		new ObjectTag('Left-Hand-3', [40, 40, 0]),
+		new ObjectTag('Left-Hand-3', [-30, 0, -60]),
 		//new ObjectTag('Object-03', [-150, 100, 0]),
 		//new ObjectTag('Object-06', [150, -100, 0])
 	])
@@ -46,7 +47,7 @@ var _chatVisible = false;
 							
 //VARIABLES FOR THREE.JS
 							
-var radius = 6371,
+var radius = 190, //6371,
 tilt = 0.41,
 rotationSpeed = 0.1,
 cloudsScale = 1.005,
