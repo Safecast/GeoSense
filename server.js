@@ -63,44 +63,18 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
 //Models 
 
 var Map = mongoose.model('Map', new mongoose.Schema({
-	
-	title: String,
-	description: String,
-	adminslug: String,
-	publicslug: String,
-	created: Date,
-	modified: Date,
-	created_by: String,
-	modified_by: String,
-	collections: Array,
-	
+	mapid: String,
+	name: String,
 }));
 
 var Point = mongoose.model('Point', new mongoose.Schema({
-	
 	collectionid: Number,
-	loc: Array,
-	val: Number,
-	label: String,
-	datetime: Date,
-	created: Date,
-	modified: Date,
-	
 }));
 
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
-	
 	collectionid: Number,
-	title: String,
-	maxval: Number,
-	minval: Number,
-	timebased: Boolean,
-	created: Date, 
-	modified: Date,
-	created_by: String,
-	modified_by: String,
-	defaults: Array
-	
+	mapid: String,
+	name: String,
 }));
 
 var Tweet = mongoose.model('Tweet', new mongoose.Schema({
