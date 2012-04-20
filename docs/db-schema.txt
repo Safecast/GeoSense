@@ -13,7 +13,7 @@ modified
 
 pointcollection
 ---------------
-datafileid
+originalcollection
 title
 maxval
 minval

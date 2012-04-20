@@ -64,19 +64,37 @@ window.AddDataView = Backbone.View.extend({
 	dataConfirmButtonClicked: function()
 	{
 		//Todo: Validate fields
-		app.addData({data:this.responseData, title:this.dataTitle, colorLow: this.dataColorLow, colorHigh: this.dataColorHigh});
+		//app.addData({data:this.responseData, title:this.dataTitle, colorLow: this.dataColorLow, colorHigh: this.dataColorHigh});
 	},
 	
 	requestData:function (options)
 	{
-		var self = this;		
-		var jqxhr = $.getJSON(options.url, function(data) {})
-		.success(function(data) { 	
-			self.responseData = data;
-			self.showDataReview(data);
-		})
-		.error(function(err) { alert(err); })
-		.complete(function() {});
+		dataType = 'csv';
+		if(dataType == 'json')
+		{
+			var self = this;		
+			var jqxhr = $.getJSON(options.url, function(data) {})
+			.success(function(data) { 	
+				self.responseData = data;
+				self.showDataReview(data);
+			})
+			.error(function(err) { alert(err); })
+			.complete(function() {});
+		}
+		else if(dataType == 'csv')
+		{
+			$.ajax({
+				type: 'GET',
+				url: '/api/data/' + options.url,
+				success: function(data) {
+					//console.log(data);
+					app.addData(data);	
+				},
+				error: function() {
+					console.error('failed to fetch unique map');
+				}
+			});
+		}
 	},
 	
 	showDataReview: function(data)

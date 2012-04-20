@@ -3,7 +3,9 @@ var application_root = __dirname,
   	path = require("path"),
   	mongoose = require('mongoose'),
   	twitter = require('ntwitter'),
-	nowjs = require("now");
+	nowjs = require("now"),
+	csv = require('csv');
+    
 
 var app = express.createServer();
 
@@ -130,6 +132,118 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 
 
 // Routes
+
+/////////////////////
+// DATA POST ROUTES 
+////////////////////
+
+app.get('/api/data/:file', function(req, res){
+	
+	var file = '/public/data/' + req.params.file;
+	
+	var TEMPCOUNT = 0;
+	var fieldNames;
+	var FIRST_ROW_IS_HEADER = true;
+	var UNIQUE_ID = Math.round((new Date).getTime() / 1000);
+	var originalCollection = 'o_' + UNIQUE_ID;
+	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
+		
+	var originalToPointConverters = {
+		val: function() {
+			return parseFloat(this.get('mag'));
+		}
+		,datetime: function() {
+			return Date.UTC(this.get('year'), this.get('month'), this.get('day'));
+		}
+		,loc: function() {
+			var loc = this.get('location').split(', ');
+			return [parseFloat(loc[0]), parseFloat(loc[1])];
+		}
+	};
+
+	var safecastToPointConverters = {
+		val: function() {
+			return parseFloat(this.get('reading_value'));
+		}
+		,datetime: function() {
+			return this.get('reading_date');
+		}
+		,loc: function() {
+			var loc = this.get('location').split(', ');
+			return [parseFloat(loc[0]), parseFloat(loc[1])];
+		}
+	};
+	
+	var convertOriginalToPoint = function(data, converters) {
+		var doc = {};
+		for (var destField in converters) {
+			var f = converters[destField];
+			doc[destField] = f.apply(data);
+		}
+		return new Point(doc);
+	}
+	
+	csv()
+	    .fromPath(__dirname+ file)
+	    .transform(function(data){
+	        data.unshift(data.pop());
+	        return data;
+	    })
+	    .on('data',function(data,index){
+			if (FIRST_ROW_IS_HEADER && !fieldNames) {
+				fieldNames = data;
+			} else {
+				if (FIRST_ROW_IS_HEADER) {
+					var doc = {};
+					for (var i = 0; i < fieldNames.length; i++) {
+						doc[fieldNames[i]] = data[i];
+					}
+				} else {
+					doc['data'] = data;
+				}
+				new Model(doc).save(); 
+				//TEMPCOUNT++;
+				//console.log('saved ' + TEMPCOUNT);
+			}
+	
+	    })
+	    .on('end',function(count){
+			//console.log('end');
+			var countSaved = 0;
+			Model.find(function(err, datasets) {
+				
+				// SAVE POINTCOLLECTION WITH ALL POINTS WHATEVES
+				var maxVal, minVal;
+				for (var i = 0; i < datasets.length; i++) {
+					
+					var point = convertOriginalToPoint(datasets[i], originalToPointConverters);
+
+					if (maxVal == undefined || maxVal < point.get('val')) {
+						maxVal = point.get('val');
+					}
+					
+					if (minVal == undefined || minVal > point.get('val')) {
+						minVal = point.get('val');
+					}
+					
+					point.collectionid = UNIQUE_ID;
+					point.save();
+					//countSaved++;
+					//console.log('saving to point... ' + countSaved);
+				}
+				var response = {
+					'collectionId':UNIQUE_ID,
+					'maxVal': maxVal,
+					'minVal': minVal,
+					}
+				res.send(response);
+			});
+	    })
+	    .on('error',function(error){
+	        console.log(error.message);
+	    });
+	
+});
 
 /////////////////////
 // MAP REDUCE ROUTES 
@@ -565,7 +679,6 @@ app.post('/api/updatemapcollection/:publicslug', function(req, res){
 app.post('/api/unbindmapcollection/:publicslug/:collectionid', function(req, res){
 	var publicslug =  String(req.params.publicslug);
     var collectionid = String(req.params.collectionid);
-
 
 	Map.update({ publicslug:publicslug }, { $pull : { collections: {collectionid: collectionid}} }, function(err) {
 	      if (!err) {
