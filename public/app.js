@@ -298,46 +298,43 @@ var AppRouter = Backbone.Router.extend({
 
 	addData:function (options)
 	{
-		// console.log(options);
-		// var self = this;
-		// var uniqid = options.collectionId;
-		// var uniqueMapId = _mapId;
-		// var title = 'data set'
-		// var data = options.data;
-		// 
-		// var maxVal = options.maxVal;
-		// var minVal = options.minVal;
-		// 
-		// var currEpoch = Math.round((new Date).getTime() / 1000);
-		// var created = currEpoch;
-		// var modified = currEpoch;
-		// var createdBy = '';
-		// var modifiedBy = '';
-		// 
-		// 	
-		// //First increment total number of data sources
-		// _num_data_sources +=1;
-		// 	
-		// //Check for time based
-		// var timeBased = true;
-		// 
-		// //Create collection
-		// pointCollection[_num_data_sources] = new PointCollection({
-		// 	collectionId:uniqid,
-		// 	title:title,
-		// 	maxVal: maxVal,
-		// 	minVal: minVal,
-		// 	timebased: timeBased,
-		// 	created: created,
-		// 	modified: modified,
-		// 	created_by: createdBy,
-		// 	modified_by: modifiedBy,
-		// 	defaults: [],
-		// 	newData:true,
-		// });
+		var self = this;
+		var uniqid = options.collectionId;
+		var uniqueMapId = _mapId;
+		var title = 'data set'
+		var data = options.data;
+		
+		var maxVal = options.maxVal;
+		var minVal = options.minVal;
+		
+		var currEpoch = Math.round((new Date).getTime() / 1000);
+		var created = currEpoch;
+		var modified = currEpoch;
+		var createdBy = '';
+		var modifiedBy = '';
+		
+		//First increment total number of data sources
+		_num_data_sources +=1;
+			
+		//Check for time based
+		var timeBased = true;
+		
+		//Create collection
+		pointCollection[_num_data_sources] = new PointCollection({
+			collectionId:uniqid,
+			title:title,
+			maxVal: maxVal,
+			minVal: minVal,
+			timebased: timeBased,
+			created: created,
+			modified: modified,
+			created_by: createdBy,
+			modified_by: modifiedBy,
+			defaults: [],
+			newData:true,
+		});
 				
-		//Create Points
-		//app.addExistingDataSource(uniqid, 'newData');
+		app.addExistingDataSource(uniqid, 'newData');
 		
 		this.bindCollectionToMap(uniqid);
 		
