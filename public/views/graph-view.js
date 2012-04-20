@@ -152,7 +152,7 @@ window.GraphView = Backbone.View.extend({
 	reset: function(model) {
 		//this.removeCollectionFromMap(model);
 		if(model.length > 0)
-			console.log('add collection to graph: reset')
+			console.log('add collection to graph reset')
 			//this.addCollectionToMap(this.collections[model.collectionId]);
 	},
 });
