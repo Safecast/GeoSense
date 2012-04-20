@@ -270,6 +270,12 @@ window.MapGLView = window.MapViewBase.extend({
 		var colorlow;
 		var colorhigh;
 		collection.each(function(model) {
+			collectionId = model.attributes.collectionid;
+			params = self.collections[collectionId].params;
+			color = params.color;
+			colorLow = params.colorLow;
+			colorHigh = params.colorHigh;
+			
 			self.cleanPointModel(model);
 			data.push(model.get('lat'));
 			data.push(model.get('lon'));
@@ -281,13 +287,13 @@ window.MapGLView = window.MapViewBase.extend({
 				maxVal = val;
 			}
 			data.push(val);
-			var collectionId = model.get('collectionId');
-			//colorlow = this.collections[collectionId].params.colorLow;
-			//colorhigh = this.collections[collectionId].params.colorHigh;
 		});
-
-
-
+		
+		while(color.charAt(0) == '#')
+		    color = color.substr(1);
+			colorHigh = colorHigh.substr(1);
+			colorLow = colorLow.substr(1);
+		
 		if (maxVal > 1) {
 			console.log('normalizing to '+maxVal+' ('+this.valueScale+')');
 			var scaleFuncs = {
@@ -300,7 +306,7 @@ window.MapGLView = window.MapViewBase.extend({
 			for (var i = 2; i < data.length; i += 3) {
 				//console.log(data[i]+' ==> '+  (scale(data[i]) / max));
 				data[i] = scale(data[i]) / max;
-				console.log(data[i]);
+				//console.log(data[i]);
 			}
 		}
 		this.globe.addData(data, {
@@ -308,12 +314,13 @@ window.MapGLView = window.MapViewBase.extend({
 			name: collection.get('_id'), 
 			animated: false,
 			colorFn: function(val) {
+				
 				//var rainbow = new Rainbow();
 				//rainbow.setSpectrum(colorlow, colorhigh);		
 				//rainbow.setNumberRange(0, 1);
-				// ...
+				
 				var c = new THREE.Color();
-				c.setHex(0xff0000);
+				c.setHex("0x" + color);
 				return c;
 			}
 		});
