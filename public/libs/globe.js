@@ -351,7 +351,7 @@ DAT.Globe = function(container, colorFn) {
 			lat = data[i];
 			lng = data[i + 1];
 			color = colorFnWrapper(data,i);
-			console.log(data);
+			//console.log(data);
 			size = data[i + 2] * barHeight;
 			addPoint(lat, lng, size, color, subgeo);
 		}
