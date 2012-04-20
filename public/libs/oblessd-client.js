@@ -124,7 +124,7 @@ ObjectTag.prototype.update = function(protein) {
         this.phys.norm = p.norm;
         this.phys.over = p.over;
 
-        var vLoc = new THREE.Vector3().sub(new THREE.Vector3(p.loc[0], p.loc[1], p.loc[2]),
+        var vLoc = new THREE.Vector3().add(new THREE.Vector3(p.loc[0], p.loc[1], p.loc[2]),
             this.rel.loc);
         var vNorm = new THREE.Vector3(p.norm[0], p.norm[1], p.norm[2]);
         var vOver = new THREE.Vector3(p.over[0], p.over[1], p.over[2]);
