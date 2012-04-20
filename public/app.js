@@ -271,7 +271,7 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	bindCollectionToMap: function(collectionId)
-	{	
+	{		
 		var bindObject = [{
 				collectionid:collectionId,
 				colorType:2,
@@ -294,6 +294,7 @@ var AppRouter = Backbone.Router.extend({
 					console.error('failed to join map with collection');
 				}
 			});	
+
 	},
 
 	addData:function (options)
@@ -308,15 +309,10 @@ var AppRouter = Backbone.Router.extend({
 		var dataSet = [];
 		var maxVal = 0;
 		var minVal;
-		var currEpoch = Math.round((new Date).getTime() / 1000);
-		var created = currEpoch;
-		var modified = currEpoch;
-		var createdBy = '';
-		var modifiedBy = '';
 
 		for(var i = 0; i < data.length; ++i)
 		{
-			var loc = '';
+			var location = '';
 			var lat = '';
 			var lng = '';
 			var intensity = '';
@@ -391,11 +387,14 @@ var AppRouter = Backbone.Router.extend({
 			}
 			
 			//Check for lat/lng location
-			if(location != '')
+			if(location == '')
+				location = lat + ',' + lng;
+				
+			if(lat == '' && lng == '')
 			{
-				var location = location.split(/[, ]/, 2);
-				lat = parseFloat(location[0]);
-				lng = parseFloat(location[1]);	
+				var latlngStr = location.split(/[, ]/, 2);
+				lat = parseFloat(latlngStr[0]);
+				lng = parseFloat(latlngStr[1]);	
 			}
 			
 			//Substitute intensity for val
@@ -413,9 +412,9 @@ var AppRouter = Backbone.Router.extend({
 						
 			//Substitute intensity for val
 			if(val == '')
-				val = 1;
+				val = 10;
 
-			dataSet.push({'label':name,'loc':[lng,lat],'val':val, 'datetime':date, 'created': created, 'modified':modified});
+			dataSet.push({'name':name,'location':location,'lat':lat,'lon':lng,'val':val, 'date':date, 'colorlow':colorLow, 'colorhigh':colorHigh});
 		}
 				
 		//First increment total number of data sources
@@ -425,23 +424,15 @@ var AppRouter = Backbone.Router.extend({
 			maxVal = 1;
 		
 		if(minVal == '')
-			minVal = 1;
-		
-		//Check for time based
-		var timeBased = true;
+			minVal = 0;
 		
 		//Create collection
 		pointCollection[_num_data_sources] = new PointCollection({
 			collectionId:uniqid,
+			mapId:uniqueMapId,
 			title:title,
 			maxVal: maxVal,
 			minVal: minVal,
-			timebased: timeBased,
-			created: created,
-			modified: modified,
-			created_by: createdBy,
-			modified_by: modifiedBy,
-			defaults: [],
 			newData:true,
 		});
 				

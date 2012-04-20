@@ -7,19 +7,13 @@ PointCollection = Backbone.Collection.extend({
 	},
 	
 	initialize: function(options) {
-						
-		this.url = '/api/collection/' + options.collectionId;
-		
+				
 		this.collectionId = options.collectionId;
+		this.mapId = options.mapId;
+		this.url = '/api/collection/' + options.collectionId;
 		this.title = options.title;
 		this.maxVal = options.maxVal;
 		this.minVal = options.minVal;
-		this.created = options.created;
-		this.modified = options.modified;
-		this.createdBy = options.created_by;
-		this.modifiedBy = options.modifiedBy;
-		this.timeBased = options.timebased;
-		this.defaults = options.defaults;
 						
 		if(options.newData == true)		
 			this.createAssociativeIndex();
@@ -50,7 +44,7 @@ PointCollection = Backbone.Collection.extend({
 		var self = this;
 		$.ajax({
 			type: 'POST',
-			url: '/api/pointcollection/' + this.collectionId + '/' + this.title + '/' + _mapId + '/' + this.maxVal+ '/' + this.minVal,
+			url: '/api/pointcollection/' + this.collectionId + '/' + this.title + '/' + this.mapId + '/' + this.maxVal+ '/' + this.minVal,
 			success: function(data) {
 				console.log('created associated collection: ' + self.collectionId);
 			},
@@ -69,7 +63,7 @@ PointCollection = Backbone.Collection.extend({
 			success: function(data) {
 			},
 			error: function() {
-				console.error('failed to unbind collection');
+				console.error('failed to join map with collection');
 			}
 		});
 	},

@@ -72,6 +72,7 @@ var Map = mongoose.model('Map', new mongoose.Schema({
 	modified: Date,
 	created_by: String,
 	modified_by: String,
+	collections: Array,
 	
 }));
 
@@ -328,7 +329,9 @@ app.get('/api/collection/', function(req, res){
 });
 
 app.post('/api/collection/:id', function(req, res){
-		
+	
+	console.log(req.params)
+	
 	var point;
 	  point = new Point({
 		collectionid:  req.params.id,
@@ -357,12 +360,14 @@ app.post('/api/addpoints/:id', function(req, res){
 		var point;	
 		point = new Point({
 			collectionid:  req.params.id,
-		    label: 		jsonObject[i].label,
-			loc: 		jsonObject[i].loc,
+		    name: 		jsonObject[i].name,
+			location: 	jsonObject[i].location,
+			lat: 		jsonObject[i].lat,
+			lon: 		jsonObject[i].lon,
 			val: 		jsonObject[i].val,
-			datetime: 	jsonObject[i].datetime,
-			created: 	jsonObject[i].created,
-			modified: 	jsonObject[i].modified,
+			colorhigh:  jsonObject[i].colorhigh,
+			colorlow:  	jsonObject[i].colorlow,
+			date: 		jsonObject[i].date,
 		  });	
 				
 		  point.save();
@@ -496,8 +501,8 @@ app.get('/api/map/admin/:adminslug', function(req, res){
 //Create a new map
 app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	
-	var currDate = Math.round((new Date).getTime() / 1000);
-	var collections = {};
+	var currDate = new Date();
+	var collections = [];
 	
 	var map;
 	  map = new Map({
@@ -524,16 +529,16 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	  });
 });
 
-app.post('/api/bindmapcollection/:publicslug', function(req, res){
+app.post('/api/bindmapcollection/:mapid', function(req, res){
 	
 	data = req.body.jsonpost[0];
 	
+	var mapid =  req.params.mapid;
+    var collectionid = data.collectionid;
+
 	console.log(data);
-	
-	var publicslug =  req.params.publicslug;
-    var collectionid = data.collectionid;
 
-	Map.update({ publicslug:publicslug }, { $push : { collections: data} }, function(err) {
+	Map.update({ mapid:mapid }, { $push : { collections: data} }, function(err) {
 	      if (!err) {
 	        console.log("collection bound to map");
 	        res.send('');
@@ -544,14 +549,17 @@ app.post('/api/bindmapcollection/:publicslug', function(req, res){
 	  });
 });
 
-app.post('/api/updatemapcollection/:publicslug', function(req, res){
+app.post('/api/updatemapcollection/:mapid', function(req, res){
 	
 	data = req.body.jsonpost[0];
 	
-	var publicslug =  req.params.publicslug;
+	var mapid =  req.params.mapid;
     var collectionid = data.collectionid;
 
-	Map.update({ publicslug:publicslug }, { $set : { collections: data} }, function(err) {
+	console.log(data);
+	// console.log(data);
+	// 
+	Map.update({ mapid:mapid }, { $set : { collections: data} }, function(err) {
 	      if (!err) {
 	        console.log("collection bound to map");
 	        res.send('');
@@ -562,12 +570,11 @@ app.post('/api/updatemapcollection/:publicslug', function(req, res){
 	  });
 });
 
-app.post('/api/unbindmapcollection/:publicslug/:collectionid', function(req, res){
-	var publicslug =  String(req.params.publicslug);
-    var collectionid = String(req.params.collectionid);
+app.post('/api/unbindmapcollection/:mapid/:collectionid', function(req, res){
+	var mapid =  req.params.mapid;
+    var collectionid = req.params.collectionid;
 
-
-	Map.update({ publicslug:publicslug }, { $pull : { collections: {collectionid: collectionid}} }, function(err) {
+	Map.update({ mapid:mapid }, { $pull : { collections: {collectionid: collectionid}} }, function(err) {
 	      if (!err) {
 	        console.log("collection removed");
 	        res.send('');
