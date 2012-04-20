@@ -79,19 +79,8 @@ window.MapOLView = window.MapViewBase.extend({
 					var map = event.object;
 					var zoom = map.getZoom();
 					
-					var extent = map.getExtent();
-					
-					SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
-					SE.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-					
-					NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
-					NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-				
-					//console.log(SE.x + ", " + SE.y + " : " + NW.x + ", " + NW.y);
-					var bounds = [[SE.x,SE.y],[NW.x,NW.y]];
-			
-					self.mapPositionChanged(zoom, bounds);
-				},
+					self.mapZoomChanged(zoom);
+					},
             }
 		});	
 				
