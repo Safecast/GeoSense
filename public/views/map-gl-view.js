@@ -29,110 +29,45 @@ window.MapGLView = window.MapViewBase.extend({
     	
 		switch (obj.name) {
 			case 'globe':
-				this.globe.debugMarker.position = new THREE.Vector3().copy(obj.loc);
-
-
+				// get tag matrix
+				var norm = obj.norm.normalize();
+				var over = obj.over.normalize();
+				var up = new THREE.Vector3().cross(obj.norm, obj.over).normalize();
+				var matrix = new THREE.Matrix4(
+					over.x, up.x, norm.x, 0,
+					over.y, up.y, norm.y, 0,
+					over.z, up.z, norm.z, 0,
+					0, 0, 0, 1
+				);
+				// copy rotation from that matrix to globe
+				this.globe.world.rotation = new THREE.Vector3().getRotationFromMatrix(matrix);
+				// copy tag location to new vector
 				var newGlobePos = new THREE.Vector3().copy(obj.loc);
+				// translate location by radius along inverse of tag normal 
 				var invNorm = new THREE.Vector3().copy(obj.norm).normalize().multiplyScalar(-1);
 				newGlobePos.addSelf(invNorm.multiplyScalar(VIRTUAL_PHYSICAL_FACTOR * 200));
+				// update globe position
 				this.globe.world.position = newGlobePos;
+
+				if (DEBUG) {
+					this.globe.debugMarker.rotation.getRotationFromMatrix(matrix);
+					this.globe.debugMarker.position = new THREE.Vector3().copy(obj.loc);
+				}
+
 				break;
 			case 'lens':
-
+				// set camera position and up vectors to respective lens tag vectors
 				this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
 				this.globe.camera.up = new THREE.Vector3().cross(obj.norm, obj.over);
 				this.globe.camera.updateProjectionMatrix();
 
-				/*if (!this.tweens.cameraPosition) {
-				    this.tweens.cameraPosition = new TWEEN.Tween(this.globe.camera.position);
-				}
-				this.tweens.cameraPosition.stop();
-				this.tweens.cameraPosition.to(new THREE.Vector3().copy(obj.loc), SMOOTH_TWEEN_DURATION);
-				this.tweens.cameraPosition.start();*/
-
+				// look at camera position plus inverse norm vector of lens tag
 				var invNorm = new THREE.Vector3().copy(obj.norm).multiplyScalar(-1);
 				var newLookAt = new THREE.Vector3().add(obj.loc, invNorm);
 				this.globe.camera.lookAt(newLookAt);
-
 				
 				break;
-
-				if (!this.lookAt) {
-					this.i = 0;
-					var self = this;
-					this.lookAt = newLookAt;
-					this.lookAtTween = new TWEEN.Tween(this.lookAt);
-					this.lookAtTween.onUpdate(function() {
-						console.log('update');
-						self.globe.camera.lookAt(self.lookAt);
-					});
-				} else {
-					this.i++;
-					if (this.i % 100 == 0) {
-						console.log('tween');
-						console.log(this.lookAt);
-						console.log(newLookAt);
-						this.lookAtTween.stop();
-						this.lookAtTween.to(newLookAt, 1000);
-						this.lookAtTween.start();
-					}
-				}
-
-				break;
 		}
-
-
-/*        if (obj[GLOBE_TAG]) {
-        	var newLoc = obj[GLOBE_TAG].loc;
-			var f = VIRTUAL_PHYSICAL_FACTOR;
-            this.globe.world.position = new THREE.Vector3(
-              newLoc[0] * f, 
-              newLoc[1] * f, 
-              newLoc[2] * f
-            );
-        }
-        if (obj[LENS_TAG]) {
-
-        	var newLoc = obj[LENS_TAG].loc;
-			var pos = new THREE.Vector3(
-              newLoc[0] * f, 
-              newLoc[1] * f, 
-              newLoc[2] * f
-            );
-        	var newLoc = obj[LENS_TAG].norm;
-			var dir = new THREE.Vector3(
-              newLoc[0], 
-              newLoc[1], 
-              newLoc[2]
-            );
-            dir.multiplyScalar(-1000);
-            var look = new THREE.Vector3();
-            look.add(pos, dir);
-            dir.multiplyScalar(f);
-
-			this.globe.camera.position = pos;
-			this.globe.camera.lookAt(look);
-
-			//console.log(dir);	
-//	        this.globe.camera.lookAt(look);
-
-			//this.globe.camera.position = pos;	
-            //this.globe.camera.lookAt(dir);
-
-          /*if (!initialGlobeLoc) {
-            initialGlobeLoc = obj[globeTag].loc;
-          }
-          if (THREEx && THREEx.world) {
-            var newLoc = obj[GLOBE_TAG].loc;
-            var f = realWorldToVirtualFactor;
-            THREEx.world.position = new THREE.Vector3(
-              (newLoc[0] - initialGlobeLoc[0]) * f, 
-              (newLoc[1] - initialGlobeLoc[1]) * f, 
-              (newLoc[2] - initialGlobeLoc[2]) * f
-            );
-          }
-        }
-          */
 
     },
 	
