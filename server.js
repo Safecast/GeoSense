@@ -139,7 +139,9 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 
 app.get('/api/data/:file', function(req, res){
 	
-	var file = '/public/data/' + req.params.file;
+	var file = req.params.file;
+	var path = '/public/data/' + req.params.file;
+	var type =  file.split('.').pop();
 	
 	var TEMPCOUNT = 0;
 	var fieldNames;
@@ -183,65 +185,68 @@ app.get('/api/data/:file', function(req, res){
 		return new Point(doc);
 	}
 	
-	csv()
-	    .fromPath(__dirname+ file)
-	    .transform(function(data){
-	        data.unshift(data.pop());
-	        return data;
-	    })
-	    .on('data',function(data,index){
-			if (FIRST_ROW_IS_HEADER && !fieldNames) {
-				fieldNames = data;
-			} else {
-				if (FIRST_ROW_IS_HEADER) {
-					var doc = {};
-					for (var i = 0; i < fieldNames.length; i++) {
-						doc[fieldNames[i]] = data[i];
-					}
+	if(type == 'csv')
+	{
+		csv()
+		    .fromPath(__dirname+ path)
+		    .transform(function(data){
+		        data.unshift(data.pop());
+		        return data;
+		    })
+		    .on('data',function(data,index){
+				if (FIRST_ROW_IS_HEADER && !fieldNames) {
+					fieldNames = data;
 				} else {
-					doc['data'] = data;
+					if (FIRST_ROW_IS_HEADER) {
+						var doc = {};
+						for (var i = 0; i < fieldNames.length; i++) {
+							doc[fieldNames[i]] = data[i];
+						}
+					} else {
+						doc['data'] = data;
+					}
+					new Model(doc).save(); 
+					//TEMPCOUNT++;
+					//console.log('saved ' + TEMPCOUNT);
 				}
-				new Model(doc).save(); 
-				//TEMPCOUNT++;
-				//console.log('saved ' + TEMPCOUNT);
-			}
 	
-	    })
-	    .on('end',function(count){
-			//console.log('end');
-			var countSaved = 0;
-			Model.find(function(err, datasets) {
+		    })
+		    .on('end',function(count){
+				//console.log('end');
+				var countSaved = 0;
+				Model.find(function(err, datasets) {
 				
-				// SAVE POINTCOLLECTION WITH ALL POINTS WHATEVES
-				var maxVal, minVal;
-				for (var i = 0; i < datasets.length; i++) {
+					// SAVE POINTCOLLECTION WITH ALL POINTS WHATEVES
+					var maxVal, minVal;
+					for (var i = 0; i < datasets.length; i++) {
 					
-					var point = convertOriginalToPoint(datasets[i], originalToPointConverters);
+						var point = convertOriginalToPoint(datasets[i], originalToPointConverters);
 
-					if (maxVal == undefined || maxVal < point.get('val')) {
-						maxVal = point.get('val');
-					}
+						if (maxVal == undefined || maxVal < point.get('val')) {
+							maxVal = point.get('val');
+						}
 					
-					if (minVal == undefined || minVal > point.get('val')) {
-						minVal = point.get('val');
-					}
+						if (minVal == undefined || minVal > point.get('val')) {
+							minVal = point.get('val');
+						}
 					
-					point.collectionid = UNIQUE_ID;
-					point.save();
-					//countSaved++;
-					//console.log('saving to point... ' + countSaved);
-				}
-				var response = {
-					'collectionId':UNIQUE_ID,
-					'maxVal': maxVal,
-					'minVal': minVal,
+						point.collectionid = UNIQUE_ID;
+						point.save();
+						//countSaved++;
+						//console.log('saving to point... ' + countSaved);
 					}
-				res.send(response);
-			});
-	    })
-	    .on('error',function(error){
-	        console.log(error.message);
-	    });
+					var response = {
+						'collectionId':UNIQUE_ID,
+						'maxVal': maxVal,
+						'minVal': minVal,
+						}
+					res.send(response);
+				});
+		    })
+		    .on('error',function(error){
+		        console.log(error.message);
+		    });
+	}
 	
 });
 
