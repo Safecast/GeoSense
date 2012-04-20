@@ -44,7 +44,7 @@ everyone.now.joinRoom = function(newRoom){
 ////////////////
 
 //Admin Route
-app.get(/^\/[a-zA-Z0-9]{15}(|\/setup)(|\/globe)(|\/map)$/, function(req, res){
+app.get(/^\/[a-zA-Z0-9]{15}(|\/setup)(|\/globe)(|\/map)(|\/?)$/, function(req, res){
    res.sendfile('public/index.html');
 });
 
