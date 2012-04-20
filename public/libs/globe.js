@@ -206,8 +206,12 @@ DAT.Globe = function(container, colorFn) {
 			plane.overdraw = true;
 			scene.add(plane);
 
-			meshDebug = new THREE.Mesh( geometry, material );
-			scene.add( meshDebug );
+			meshDebug = new THREE.Mesh(new THREE.CubeGeometry(40, 10, 40, 2, 2), new THREE.MeshBasicMaterial({
+				color: 0x0000ff,
+				opacity: .5
+			}));
+			meshDebug.overdraw = true;
+			scene.add(meshDebug);
 		}
 
 

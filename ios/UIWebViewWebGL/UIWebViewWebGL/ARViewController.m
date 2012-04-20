@@ -48,7 +48,7 @@
 
   [backingWebView _setWebGLEnabled:YES];  
 
-  [self loadUrl:@"http://18.189.34.8:8124/Y1xyXKwiHJ/globe" addToHistory:YES];
+  [self loadUrl:@"http://18.189.90.22:8124/aaPV23lNRJaXt3W/globe" addToHistory:YES];
 
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];

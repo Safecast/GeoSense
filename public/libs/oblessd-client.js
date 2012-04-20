@@ -28,13 +28,17 @@ var OblessdClient = function(options) {
 
         ws.onmessage = function(evt) { 
             var protein = $.parseJSON(evt.data);
+            var foundObjects = [];
             if (options.taggedObjects) {
                 for (var o = 0; o < options.taggedObjects.length; o++) {
                     if (options.taggedObjects[o].update(protein)) {
+                        foundObjects.push(options.taggedObjects[o].name);
                         options.vent.trigger('updateTaggedObject', options.taggedObjects[o]);
                     }
                 }
             }
+
+            $('#tracking-info').text(foundObjects.join(', '));
             if (options.track) {
                 handTracker.update(protein);
             } 
