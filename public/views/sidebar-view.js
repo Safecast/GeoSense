@@ -30,6 +30,8 @@ window.SideBarView = Backbone.View.extend({
     },
 
     render: function() {
+		var self = this;
+
 		$(this.el).html(this.template());		
 		if(this.page == 'map')
 		{
@@ -42,7 +44,72 @@ window.SideBarView = Backbone.View.extend({
 			this.$('#display3D').addClass('active');
 		}
 		this.$('#scale_linear').addClass('active');
-				
+
+		this.$("#camera-fov-val").text(CAMERA_FOV);
+		this.$('#camera-fov').slider({
+			value: CAMERA_FOV,
+			min: 1,
+			max: 100,
+			step: .25,
+			range: 'max',
+			slide: function( event, ui ) {
+				self.$("#camera-fov-val").text(ui.value);
+				CAMERA.fov = CAMERA_FOV = ui.value;
+				CAMERA.updateProjectionMatrix();
+			},
+		});
+		this.$("#virtual-physical-factor-val").text(VIRTUAL_PHYSICAL_FACTOR);
+		this.$('#virtual-physical-factor').slider({
+			value: VIRTUAL_PHYSICAL_FACTOR,
+			min: 1,
+			max: 100,
+			step: .25,
+			range: 'max',
+			slide: function( event, ui ) {
+				self.$("#virtual-physical-factor-val" ).text(ui.value);
+				VIRTUAL_PHYSICAL_FACTOR = ui.value;
+			},
+		});
+
+		this.$("#lens-ofs-x-val").text(taggedObjects[1].tags[0].rel.loc.x);
+		this.$('#lens-ofs-x').slider({
+			value: taggedObjects[1].tags[0].rel.loc.x,
+			min: -200,
+			max: 200,
+			step: 1,
+			range: 'max',
+			slide: function( event, ui ) {
+				self.$("#lens-ofs-x-val" ).text(ui.value);
+				taggedObjects[1].tags[0].rel.loc.x = ui.value;
+			},
+		});
+
+		this.$("#lens-ofs-y-val").text(taggedObjects[1].tags[0].rel.loc.y);
+		this.$('#lens-ofs-y').slider({
+			value: taggedObjects[1].tags[0].rel.loc.y,
+			min: -200,
+			max: 200,
+			step: 1,
+			range: 'max',
+			slide: function( event, ui ) {
+				self.$("#lens-ofs-y-val" ).text(ui.value);
+				taggedObjects[1].tags[0].rel.loc.y = ui.value;
+			},
+		});
+
+		this.$("#lens-ofs-z-val").text(taggedObjects[1].tags[0].rel.loc.z);
+		this.$('#lens-ofs-z').slider({
+			value: taggedObjects[1].tags[0].rel.loc.z,
+			min: -200,
+			max: 200,
+			step: 1,
+			range: 'max',
+			slide: function( event, ui ) {
+				self.$("#lens-ofs-z-val" ).text(ui.value);
+				taggedObjects[1].tags[0].rel.loc.z = ui.value;
+			},
+		});
+
 		if(!_admin)
 		{
 			this.$('#dataManager').remove();

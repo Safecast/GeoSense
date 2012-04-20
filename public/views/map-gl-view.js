@@ -40,6 +40,8 @@ window.MapGLView = window.MapViewBase.extend({
 			case 'lens':
 
 				this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
+				this.globe.camera.up = new THREE.Vector3().cross(obj.norm, obj.over);
+				this.globe.camera.updateProjectionMatrix();
 
 				/*if (!this.tweens.cameraPosition) {
 				    this.tweens.cameraPosition = new TWEEN.Tween(this.globe.camera.position);
@@ -47,7 +49,6 @@ window.MapGLView = window.MapViewBase.extend({
 				this.tweens.cameraPosition.stop();
 				this.tweens.cameraPosition.to(new THREE.Vector3().copy(obj.loc), SMOOTH_TWEEN_DURATION);
 				this.tweens.cameraPosition.start();*/
-
 
 				var invNorm = new THREE.Vector3().copy(obj.norm).multiplyScalar(-1);
 				var newLookAt = new THREE.Vector3().add(obj.loc, invNorm);
