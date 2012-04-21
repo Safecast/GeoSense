@@ -548,6 +548,15 @@ app.get('/api/pointcollections', function(req, res){
 //Post a Point Collection
 app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, res){
 	
+	var defaults = [{
+		visible 	: 	req.body.jsonpost[0],
+		displayType : 	req.body.jsonpost[1],
+		colorHigh 	: 	req.body.jsonpost[2],
+		colorLow 	: 	req.body.jsonpost[3],
+		color 		: 	req.body.jsonpost[4],
+		colorType 	: 	req.body.jsonpost[5],
+	}];
+	
 	var collection;
 	  collection = new PointCollection({
 		collectionid: req.params.id,
@@ -555,6 +564,7 @@ app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, 
 		mapid: req.params.mapid,
 		maxval: req.params.maxval,
 		minval: req.params.minval,
+		defaults: defaults,
 	  });
 	  collection.save(function(err) {
 	    if (!err) {

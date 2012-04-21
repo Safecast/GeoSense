@@ -271,16 +271,17 @@ var AppRouter = Backbone.Router.extend({
 			
 	},
 	
-	bindCollectionToMap: function(collectionId)
+	bindCollectionToMap: function(defaults)
 	{	
+
 		var bindObject = [{
-				collectionid:collectionId,
-				colorType:2,
-				color:'#4cbd2a',
-				colorLow:'#ce0aff',
-				colorHigh:"#ff0a33",
-				displayType:2,
-				visible:true,
+				collectionid:defaults[0].collectionid,
+				colorType:defaults[0].colorType,
+				color:defaults[0].color,
+				colorLow:defaults[0].colorLow,
+				colorHigh:defaults[0].colorHigh,
+				displayType:defaults[0].displayType,
+				visible:defaults[0].visible,
 			}];
 				
 		$.ajax({
@@ -319,6 +320,13 @@ var AppRouter = Backbone.Router.extend({
 			
 		//Check for time based
 		var timeBased = true;
+		
+		var visible = true;
+		var displayType = 1;
+		var colorHigh = "#ff0000";
+		var colorLow = "#00ff00";
+		var color = "#00ff00";
+		var colorType = 1;
 
 		//Create collection
 		pointCollection[_num_data_sources] = new PointCollection({
@@ -331,13 +339,30 @@ var AppRouter = Backbone.Router.extend({
 			modified: modified,
 			created_by: createdBy,
 			modified_by: modifiedBy,
-			defaults: [],
+			defaults: [
+				visible = visible,
+				displayType = displayType,
+				colorHigh = colorHigh,
+				colorLow = colorLow,
+				color = color,
+				colorType = colorType,
+			],
 			newData:true,
 		});
 				
 		app.addExistingDataSource(uniqid, 'newData');
 		
-		this.bindCollectionToMap(uniqid);
+		var defaults = [{
+				collectionid:uniqid,
+				colorType:colorType,
+				color:color,
+				colorLow:colorLow,
+				colorHigh:colorHigh,
+				displayType:displayType,
+				visible:visible,
+			}];
+		
+		this.bindCollectionToMap(defaults);
 		
 		$('#addDataModal').modal('hide');
 		this.vent.trigger("setStateType", 'post');

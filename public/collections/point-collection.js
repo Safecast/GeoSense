@@ -20,9 +20,7 @@ PointCollection = Backbone.Collection.extend({
 		this.modifiedBy = options.modifiedBy;
 		this.timeBased = options.timebased;
 		this.defaults = options.defaults;
-		
-		console.log(options);
-						
+								
 		if(options.newData == true)		
 			this.createAssociativeIndex();
 	},
@@ -50,8 +48,11 @@ PointCollection = Backbone.Collection.extend({
 	createAssociativeIndex: function()
 	{	
 		var self = this;
+		
 		$.ajax({
 			type: 'POST',
+			dataType: 'json',
+			data: { jsonpost: this.defaults },
 			url: '/api/pointcollection/' + this.collectionId + '/' + this.title + '/' + _mapId + '/' + this.maxVal+ '/' + this.minVal,
 			success: function(data) {
 				console.log('created associated collection: ' + self.collectionId);
