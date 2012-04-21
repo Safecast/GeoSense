@@ -27,16 +27,15 @@ window.MapViewBase = Backbone.View.extend({
 	
 	mapPositionChanged: function(zoom, bounds)
 	{
+		console.log(zoom);
 		//Bounds are [[SE.x, SE.y],[NW.x, NW.y]]
 		$.each(this.collections, function(key, val) { 
 			switch(zoom) {
 				case 0:
-					//val.url = '/api/collection/1335031181';
-					//val.fetch();
 				break
 				case 1:
-					//val.url = '/api/collection/1335031831';
-					//val.fetch();
+					val.url = '/api/collection/1335042230';
+					val.fetch();
 				break
 				case 2:
 				break

@@ -39,6 +39,8 @@ window.GraphView = Backbone.View.extend({
 		
 		var currCollection = collection.collectionId;
 	
+		//console.log(collection);
+		
 		collection.each(function(model) {
 			self.addOne(model, currCollection);
 		});
@@ -130,9 +132,9 @@ window.GraphView = Backbone.View.extend({
 		var index = currIndex;	
 		var collectionId = model.get('collectionid'); 
 		var name = model.get('name');
-		var location = model.get('location');
-		var lat = model.get('lon');
-		var lon = model.get('lat');
+		var location = model.get('loc');
+		var lon = location[0];
+		var lat = location[1];
 		var val = model.get('val');
 		var colorlow = model.get('colorlow');
 		var colorhigh = model.get('colorhigh');
@@ -143,11 +145,14 @@ window.GraphView = Backbone.View.extend({
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;
 		
-		var dateString = new XDate(Number(date)).toString('M/d/yy');
-		//console.log(dateString);
-		console.log(dateString);
+		normVal = val/maxVal;
 		
-		var data = { x: Number(date)/1000, y: Number(val), date: dateString, epoch:Number(date) };
+		epoch = new Date(date).getTime()/1000;
+				
+		var data = { x: Number(epoch), y: Number(normVal), date: date, epoch:epoch, color:this};
+		//Need to pull color from params
+		//console.log(this.collections[collectionId]);
+		
 		this.graphData.push(data);	
     },
 
