@@ -299,6 +299,7 @@ var AppRouter = Backbone.Router.extend({
 
 	addData:function (options)
 	{
+		return;
 		var self = this;
 		var uniqid = options.collectionId;
 		var uniqueMapId = _mapId;

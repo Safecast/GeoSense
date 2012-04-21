@@ -143,7 +143,7 @@ app.get('/api/data/:file', function(req, res){
 	var path = '/public/data/' + req.params.file;
 	var type =  file.split('.').pop();
 	
-	var TEMPCOUNT = 0;
+	var importCount = 0;
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = true;
 	var UNIQUE_ID = Math.round((new Date).getTime() / 1000);
@@ -184,11 +184,13 @@ app.get('/api/data/:file', function(req, res){
 		}
 		return new Point(doc);
 	}
+
+	console.log('importing '+type+' to '+originalCollection);
 	
-	switch(type)
-	{
+	switch(type) {
 		case 'csv':
-		
+		var UNIQUE_ID = Math.round((new Date).getTime() / 1000);
+
 		csv()
 		    .fromPath(__dirname+ path)
 		    .transform(function(data){
@@ -207,43 +209,29 @@ app.get('/api/data/:file', function(req, res){
 					} else {
 						doc['data'] = data;
 					}
-					new Model(doc).save(); 
-					//TEMPCOUNT++;
-					//console.log('saved ' + TEMPCOUNT);
+					var model = new Model(doc);
+					model.save(); 
+
+					var point = convertOriginalToPoint(model, originalToPointConverters);
+					point.collectionid = UNIQUE_ID;
+					point.save();
+
+					delete model;
+					delete doc;
+					delete point;
+
+					importCount++;
+					if (importCount == 1 || importCount % 1000 == 0) {
+						console.log(UNIQUE_ID+' saved ' + importCount);
+					}
 				}
 	
 		    })
 		    .on('end',function(count){
-				//console.log('end');
-				var countSaved = 0;
-				Model.find(function(err, datasets) {
-				
-					// SAVE POINTCOLLECTION WITH ALL POINTS WHATEVES
-					var maxVal, minVal;
-					for (var i = 0; i < datasets.length; i++) {
-					
-						var point = convertOriginalToPoint(datasets[i], originalToPointConverters);
-
-						if (maxVal == undefined || maxVal < point.get('val')) {
-							maxVal = point.get('val');
-						}
-					
-						if (minVal == undefined || minVal > point.get('val')) {
-							minVal = point.get('val');
-						}
-					
-						point.collectionid = UNIQUE_ID;
-						point.save();
-						//countSaved++;
-						//console.log('saving to point... ' + countSaved);
-					}
-					var response = {
-						'collectionId':UNIQUE_ID,
-						'maxVal': maxVal,
-						'minVal': minVal,
-						}
-					res.send(response);
-				});
+				var response = {
+					'collectionId':UNIQUE_ID,
+				};
+				res.send(response);
 		    })
 		    .on('error',function(error){
 		        console.log(error.message);
