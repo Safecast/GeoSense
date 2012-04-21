@@ -136,7 +136,8 @@ window.GraphView = Backbone.View.extend({
 		var val = model.get('val');
 		var colorlow = model.get('colorlow');
 		var colorhigh = model.get('colorhigh');
-		var date = model.get('date');
+		var date = model.get('datetime');
+		
 		
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
@@ -144,6 +145,7 @@ window.GraphView = Backbone.View.extend({
 		
 		var dateString = new XDate(Number(date)).toString('M/d/yy');
 		//console.log(dateString);
+		console.log(dateString);
 		
 		var data = { x: Number(date)/1000, y: Number(val), date: dateString, epoch:Number(date) };
 		this.graphData.push(data);	

@@ -156,7 +156,7 @@ app.get('/api/data/:file', function(req, res){
 		}
 		,datetime: function() {
 			var d = Date.parse(String(this.get('year')));
-			return d.getTime()/1000;
+			return new Date(d);
 		}
 		,loc: function() {
 			var loc = this.get('location').split(', ');
@@ -170,7 +170,7 @@ app.get('/api/data/:file', function(req, res){
 		}
 		,datetime: function() {
 			var d = Date.parse(String(this.get('year')), String(this.get('month')), String(this.get('day')));
-			return d.getTime()/1000;
+			return new Date(d);
 		}
 		,loc: function() {
 			var loc = this.get('location').split(', ');
@@ -184,7 +184,7 @@ app.get('/api/data/:file', function(req, res){
 		}
 		,datetime: function() {
 			var d = Date.parse(this.get('reading_date'));
-			return d.getTime()/1000;
+			return new Date(d);
 		}
 		,loc: function() {
 			return [parseFloat(this.get('longitude')), parseFloat(this.get('latitude'))];
@@ -227,7 +227,7 @@ app.get('/api/data/:file', function(req, res){
 					var model = new Model(doc);
 					model.save(); 
 					
-					var point = convertOriginalToPoint(model, reactorToPointConverters);
+					var point = convertOriginalToPoint(model, earthquakeToPointConverters);
 					point.collectionid = UNIQUE_ID;
 					point.save();
 					
