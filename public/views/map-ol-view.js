@@ -97,6 +97,8 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		this.map.addLayers([this.gmap]);
 		
+		//this.addGeoJsonLayer('/data/japan.geojson');
+		
 		this.addCommentLayer();
 				
 		this.updateMapStyle(_defaultMapStyle);
@@ -224,6 +226,32 @@ window.MapOLView = window.MapViewBase.extend({
 
 		this.map.addControl(select);
 		select.activate();
+	},
+	
+	addGeoJsonLayer: function(url)
+	{
+		var self = this;
+		
+		var vector_layer = new OpenLayers.Layer.Vector(null, {
+			projection: new OpenLayers.Projection("EPSG:4326"),
+			sphericalMercator: true,
+		    renderers: ["Canvas"]
+		});
+				
+		var p = new OpenLayers.Format.GeoJSON();
+
+		OpenLayers.loadURL(url, {}, null, function (response) {
+		    var gformat = new OpenLayers.Format.GeoJSON();
+		    gg = '{"type":"FeatureCollection", "features":' + response.responseText + '}';
+		    var feats = gformat.read(gg);
+
+		    vector_layer.addFeatures(feats);
+			//console.log(feats);
+			
+		});
+		
+		this.map.addLayer(vector_layer);
+	
 	},
 	
 	addCollectionAsLayer: function(collection, renderer)
