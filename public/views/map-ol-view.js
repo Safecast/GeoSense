@@ -4,11 +4,14 @@ window.MapOLView = window.MapViewBase.extend({
 	className: 'map-view',
 	
     events: {
+		"keypress #map_canvas input" : "keyDown"
     },
 
     initialize: function(options) {
 		MapOLView.__super__.initialize.call(this, options);
 	    this.template = _.template(tpl.get('map'));
+	
+		$(document).on('keydown', this.keyDown);
 	
 		_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
@@ -27,8 +30,19 @@ window.MapOLView = window.MapViewBase.extend({
 		Rule = OpenLayers.Rule;
 		Filter = OpenLayers.Filter;
 		
+		previousKey = 0;
+		scope = this;
 		OpenLayers.ImgPath = "http://geo.media.mit.edu/assets/light/";	
     },
+
+	keyDown: function(e)
+	{	
+		var key = e.keyCode;
+		if(key == 49 && previousKey == 49)
+			scope.addKMLLayer('data/coast.kml');
+			
+		previousKey = 49;
+	},
 
     render: function() {
 		$(this.el).html(this.template());				
@@ -94,9 +108,7 @@ window.MapOLView = window.MapViewBase.extend({
 		});	
 				
 		this.map.addLayers([this.gmap]);
-		
-		//this.addGeoJsonLayer('/data/japan.geojson');
-		
+				
 		this.addCommentLayer();
 				
 		this.updateMapStyle(_defaultMapStyle);
@@ -226,30 +238,24 @@ window.MapOLView = window.MapViewBase.extend({
 		select.activate();
 	},
 	
-	addGeoJsonLayer: function(url)
+	addKMLLayer: function(url)
 	{
-		var self = this;
-		
-		var vector_layer = new OpenLayers.Layer.Vector(null, {
+		kml = new OpenLayers.Layer.Vector("KML", {
 			projection: new OpenLayers.Projection("EPSG:4326"),
-			sphericalMercator: true,
-		    renderers: ["Canvas"]
-		});
-				
-		var p = new OpenLayers.Format.GeoJSON();
-
-		OpenLayers.loadURL(url, {}, null, function (response) {
-		    var gformat = new OpenLayers.Format.GeoJSON();
-		    gg = '{"type":"FeatureCollection", "features":' + response.responseText + '}';
-		    var feats = gformat.read(gg);
-
-		    vector_layer.addFeatures(feats);
-			//console.log(feats);
-			
-		});
-		
-		this.map.addLayer(vector_layer);
+            strategies: [new OpenLayers.Strategy.Fixed()],
+			renderers: ["Canvas"],
+			opacity: 0.3,
+            protocol: new OpenLayers.Protocol.HTTP({
+                url: url,
+                format: new OpenLayers.Format.KML({
+                    extractStyles: true, 
+                    extractAttributes: true,
+                    maxDepth: 2
+                })
+            })
+        })
 	
+		this.map.addLayers([kml]);
 	},
 	
 	addCollectionAsLayer: function(collection, renderer)
