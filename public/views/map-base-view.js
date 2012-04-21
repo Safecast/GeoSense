@@ -31,12 +31,12 @@ window.MapViewBase = Backbone.View.extend({
 		$.each(this.collections, function(key, val) { 
 			switch(zoom) {
 				case 0:
-					val.url = '/api/collection/1335031181';
-					val.fetch();
+					//val.url = '/api/collection/1335031181';
+					//val.fetch();
 				break
 				case 1:
-					val.url = '/api/collection/1335031831';
-					val.fetch();
+					//val.url = '/api/collection/1335031831';
+					//val.fetch();
 				break
 				case 2:
 				break
