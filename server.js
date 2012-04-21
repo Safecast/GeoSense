@@ -4,8 +4,8 @@ var application_root = __dirname,
   	mongoose = require('mongoose'),
   	twitter = require('ntwitter'),
 	nowjs = require("now"),
-	csv = require('csv');
-    
+	csv = require('csv'),    
+	date = require('datejs');
 
 var app = express.createServer();
 
@@ -130,7 +130,6 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 	date: Date,
 }));
 
-
 // Routes
 
 /////////////////////
@@ -147,15 +146,31 @@ app.get('/api/data/:file', function(req, res){
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = true;
 	var UNIQUE_ID = Math.round((new Date).getTime() / 1000);
+	var maxVal, minVal;
 	var originalCollection = 'o_' + UNIQUE_ID;
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
+	
+	var reactorToPointConverters = {
+		val: function() {
+			return parseFloat(this.get('val'));
+		}
+		,datetime: function() {
+			var d = Date.parse(String(this.get('year')));
+			return d.getTime()/1000;
+		}
+		,loc: function() {
+			var loc = this.get('location').split(', ');
+			return [parseFloat(loc[0]), parseFloat(loc[1])];
+		}
+	};
 		
-	var originalToPointConverters = {
+	var earthquakeToPointConverters = {
 		val: function() {
 			return parseFloat(this.get('mag'));
 		}
 		,datetime: function() {
-			return Date.UTC(this.get('year'), this.get('month'), this.get('day'));
+			var d = Date.parse(String(this.get('year')), String(this.get('month')), String(this.get('day')));
+			return d.getTime()/1000;
 		}
 		,loc: function() {
 			var loc = this.get('location').split(', ');
@@ -168,11 +183,11 @@ app.get('/api/data/:file', function(req, res){
 			return parseFloat(this.get('reading_value'));
 		}
 		,datetime: function() {
-			return this.get('reading_date');
+			var d = Date.parse(this.get('reading_date'));
+			return d.getTime()/1000;
 		}
 		,loc: function() {
-			var loc = this.get('location').split(', ');
-			return [parseFloat(loc[0]), parseFloat(loc[1])];
+			return [parseFloat(this.get('longitude')), parseFloat(this.get('latitude'))];
 		}
 	};
 	
@@ -211,10 +226,18 @@ app.get('/api/data/:file', function(req, res){
 					}
 					var model = new Model(doc);
 					model.save(); 
-
-					var point = convertOriginalToPoint(model, originalToPointConverters);
+					
+					var point = convertOriginalToPoint(model, earthquakeToPointConverters);
 					point.collectionid = UNIQUE_ID;
 					point.save();
+					
+					if (maxVal == undefined || maxVal < point.get('val')) {
+						maxVal = point.get('val');
+					}
+
+					if (minVal == undefined || minVal > point.get('val')) {
+						minVal = point.get('val');
+					}
 
 					delete model;
 					delete doc;
@@ -230,6 +253,8 @@ app.get('/api/data/:file', function(req, res){
 		    .on('end',function(count){
 				var response = {
 					'collectionId':UNIQUE_ID,
+					'maxVal':maxVal,
+					'minVal':minVal,
 				};
 				res.send(response);
 		    })
@@ -245,10 +270,8 @@ app.get('/api/data/:file', function(req, res){
 			//console.log(parsedjson);
 	
 		break;
-		default:
-		  
+		default: 
 	}
-	
 });
 
 /////////////////////
