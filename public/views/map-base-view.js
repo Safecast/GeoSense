@@ -2,11 +2,10 @@ window.MapViewBase = Backbone.View.extend({
 
     initialize: function(options) {
 		this.collections = {};
+		this.layerArray = {};
 		this.vent = options.vent;
 		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);
-		
-		this.dataObjectArray = [];
+		options.vent.bind("setMapLocation", this.setMapLocation);  
 	},
 
 	setMapLocation: function(addr)
@@ -29,14 +28,22 @@ window.MapViewBase = Backbone.View.extend({
 	mapPositionChanged: function(zoom, bounds)
 	{
 		//Bounds are [[SE.x, SE.y],[NW.x, NW.y]]
-		
-		// Here we look through the current collections, check against zoom levels, and refetch if necessary
-		
 		$.each(this.collections, function(key, val) { 
-			//val.url = '/api/collection/new_url'
-			//val.fetch();
+			switch(zoom) {
+				case 0:
+					val.url = '/api/collection/1335031181';
+					val.fetch();
+				break
+				case 1:
+					val.url = '/api/collection/1335031831';
+					val.fetch();
+				break
+				case 2:
+				break
+				default:
+				break
+			}
 		});
-		
 	},
 
 	addCollection: function(id, collection)
@@ -119,11 +126,12 @@ window.MapViewBase = Backbone.View.extend({
 		model.set('lon', lng);
 	},
 
-    addAll: function() {
+    addAll: function() {	
 		this.addCollectionToMap(this.collection);
     },
 
 	reset: function(model) {
+
 		this.removeCollectionFromMap(model);
 		if(model.length > 0)
 			this.addCollectionToMap(this.collections[model.collectionId]);
@@ -139,25 +147,26 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		this.vent.trigger("setStateType", 'drawing');
 		
-		//Create specific layer
+		if(!this.layerArray[collection.collectionId])
+		{
+			delete this.addCollectionAsLayer(collection);
+		}
+		
 		this.addCollectionAsLayer(collection);
 		
-		var currCollection = collection.collectionId;
-		var currIndex;
-		$.each(this.layerArray, function(index, value) { 
-			if(value.collectionId == currCollection)
-				currIndex = index;
-		});
-				
 		collection.each(function(model) {
 			self.cleanPointModel(model);
-			self.addOne(model, currIndex);
+			self.addOne(model, collection.collectionId);
 		});
-				
-		this.layerArray[currIndex].redraw();
+			
+		this.layerArray[collection.collectionId].redraw();
+	 
+		this.vent.trigger("setStateType", 'complete');	
+	},
+	
+	updateFromNewCollection: function(collection)
+	{
 		
-		if(_loaded_data_sources == (_num_data_sources-1))
-			this.vent.trigger("setStateType", 'complete');	
 	},
 	
 	addCommentToMap: function(collection)

@@ -21,9 +21,7 @@ window.MapOLView = window.MapViewBase.extend({
 	
 		_.bindAll(this, "redrawLayer");
 	 	options.vent.bind("redrawLayer", this.redrawLayer);
-	
-		this.layerArray = [];
-		
+			
 		Feature = OpenLayers.Feature.Vector;
 		Geometry = OpenLayers.Geometry;
 		Rule = OpenLayers.Rule;
@@ -278,10 +276,10 @@ window.MapOLView = window.MapViewBase.extend({
 				});
 			
 				layer.collectionId = collection.collectionId;
-				this.layerArray.push(layer);
+				
+				this.layerArray[layer.collectionId] = layer;
 			
-				currLayer = this.layerArray.length;
-				this.map.addLayers([this.layerArray[currLayer-1]]);
+				this.map.addLayers([this.layerArray[layer.collectionId]]);
 				
 			break;
 			
@@ -298,7 +296,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    fillOpacity: .2
 				});
 
-				var layerHit = new OpenLayers.Layer.Vector(null, {
+				var layer = new OpenLayers.Layer.Vector(null, {
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
 				        select: {
@@ -311,15 +309,14 @@ window.MapOLView = window.MapViewBase.extend({
 				    renderers: ["Canvas"]
 				});
 
-				layerHit.collectionId = collection.collectionId;
+				layer.collectionId = collection.collectionId;
 
-				this.layerArray.push(layerHit);
-				currLayer = this.layerArray.length;
-
-				this.map.addLayers([this.layerArray[currLayer-1]]);
+				this.layerArray[layer.collectionId] = layer;
+			
+				this.map.addLayers([this.layerArray[layer.collectionId]]);
 
 				var selectControl = new OpenLayers.Control.SelectFeature(
-				  this.layerArray[currLayer-1], {
+				  this.layerArray[layer.collectionId], {
 				     clickout: true, multiple: false, hover: false, box: false,
 				     onBeforeSelect: function(feat) {
 				        return false;
@@ -585,13 +582,11 @@ window.MapOLView = window.MapViewBase.extend({
 			this.layerArray[currIndex].destroy();
 	},
 
-    addOne: function(model, currIndex) {
+    addOne: function(model, collectionId) {
 		var self = this;
-			
 		//Prep point for layer	
-		var index = currIndex;	
-		var collectionId = model.get('collectionid'); 
-		var label = model.get('label');
+		var collectionId = collectionId; 
+		var label = model.get('name');
 		var loc = model.get('loc');
 		var lng = loc[0];
 		var lat = loc[1];
@@ -630,10 +625,10 @@ window.MapOLView = window.MapViewBase.extend({
 		vector = new OpenLayers.Feature.Vector(currPoint, {
 	        colour: gocolor,
 		});
-					
+		
 		//Add point to proper layer (by found index)
-		this.layerArray[index].drawType;
-		this.layerArray[index].features.push(vector);		
+		this.layerArray[collectionId].drawType;
+		this.layerArray[collectionId].features.push(vector);		
     },
 
 	addOneComment: function(model) {

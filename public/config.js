@@ -45,7 +45,7 @@ var _loaded_data_sources = 0;
 var pointCollection = new Array();
 
 var _defaultMapStyle = 'dark';
-var _defaultMapLocation = 'Japan';
+var _defaultMapLocation = 'Africa';
 
 var _settingsVisible = false;
 var _graphVisible = false;

@@ -227,7 +227,7 @@ app.get('/api/data/:file', function(req, res){
 					var model = new Model(doc);
 					model.save(); 
 					
-					var point = convertOriginalToPoint(model, earthquakeToPointConverters);
+					var point = convertOriginalToPoint(model, reactorToPointConverters);
 					point.collectionid = UNIQUE_ID;
 					point.save();
 					

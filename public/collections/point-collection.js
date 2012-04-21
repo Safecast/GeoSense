@@ -20,13 +20,15 @@ PointCollection = Backbone.Collection.extend({
 		this.modifiedBy = options.modifiedBy;
 		this.timeBased = options.timebased;
 		this.defaults = options.defaults;
+		
+		console.log(options);
 						
 		if(options.newData == true)		
 			this.createAssociativeIndex();
 	},
 	
 	addData: function(data, callback) {
-				
+		
 		var self = this;
 		var jsonData = JSON.stringify(data);
 				

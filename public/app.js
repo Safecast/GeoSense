@@ -319,7 +319,7 @@ var AppRouter = Backbone.Router.extend({
 			
 		//Check for time based
 		var timeBased = true;
-		
+
 		//Create collection
 		pointCollection[_num_data_sources] = new PointCollection({
 			collectionId:uniqid,
