@@ -1,30 +1,66 @@
-var ReductionKeys = {
+var GRID_MIN = .05;
+var GRID_STEP = .05;
+var GRID_MAX = 2;
+var OUT_INDEX = {'value.loc': '2d'};
+
+var ReductionKey = {
 	copy: function(value) {
 		return value;
 	},
-	daily: function(t) {
-		return t.getFullYear()+''+t.getMonth()+''+t.getDay()	
+	Daily: function(t) {
+		this.get = function(t) {
+			return t.getFullYear()+''+t.getMonth()+''+t.getDay()	
+		};
+		this.info = 'Daily';
+		return this;
 	},
-	weekly: function(t) {
-		var onejan = new Date(t.getFullYear(),0,1);
-		var week = Math.ceil((((t - onejan) / 86400000) + onejan.getDay()+1)/7);
-		return t.getFullYear() + '' + week;
+	Weekly: function(t) {
+		this.get = function(t) {
+			var onejan = new Date(t.getFullYear(), 0, 1);
+			var week = Math.ceil((((t - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+			return t.getFullYear() + '' + week;
+		};
+		this.info = 'Weekly';
+		return this;
 	},
-	yearly: function(t) {
-		return t.getFullYear()	
+	Yearly: function(t) {
+		this.get = function(t) {
+			return t.getFullYear()	
+		};
+		this.info = 'Yearly';
+		return this;
 	},
 	LocGrid: function(grid_size) {
-		return function(loc) {
-			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))) return;
-			var lat = loc[0];
-			var lng = loc[1];
-			var grid_lat = Math.round((lat - lat % grid_size) / grid_size);
+		this.grid_size = grid_size;
+		this.get = function(loc) {
+			var grid_size = this.grid_size;
+			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))
+				|| loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) return;
+			var lng = loc[0];
+			var lat = loc[1];
+			// Mongo manual: The index space bounds are inclusive of the lower bound and exclusive of the upper bound.
+			if (lng = 180) {
+				lng = -180;
+			}
+			if (lat = 180) {
+				lat = -180;
+			}
 			var grid_lng = Math.round((lng - lng % grid_size) / grid_size);
+			var grid_lat = Math.round((lat - lat % grid_size) / grid_size);
+			var loc = [grid_lng * grid_size, grid_lat * grid_size];
 			return [
-				grid_lat + ',' + grid_lng + ',' + grid_size, 
-				[grid_lat * grid_size, grid_lng * grid_size]
+				grid_lng + ',' + grid_lat + ',' + grid_size, 
+				[grid_lng * grid_size, grid_lat * grid_size]
 			];
 		};
+		this.info = 'LocGrid('+this.grid_size+')';
+		this.index = function(collection, field_name) {
+			var index = {};
+			index[field_name] = '2d';
+			collection.ensureIndex(index);
+			return (collectionHasIndex(collection, index));
+		}
+		return this;
 	}
 };
 var runGridReduce = function(collection, reduced_collection, value_fields, reduction_keys, options) {
@@ -32,7 +68,8 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		var keyValues = [];
 		var e = {};
 		for (var k in reduction_keys) {
-			var keyValue = reduction_keys[k].call(reduction_keys[k], this[k]);
+			var f = reduction_keys[k].get || reduction_keys[k];
+			var keyValue = f.call(reduction_keys[k], this[k]);
 			if (!keyValue) return;
 			if (keyValue instanceof Array) {
 				keyValues.push(keyValue[0]);
@@ -43,7 +80,6 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 			}
 		}
 		var key = keyValues.join('|');
-		print('KEY = '+key);
 		for (var k in value_fields) {
 			var value_field = value_fields[k];
 			e[value_field] = {
@@ -85,10 +121,6 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 	if (!value_fields) {
 		value_fields = ['val'];
 	}
-	reduction_keys.loc = ReductionKeys.LocGrid(10);
-	//var index = {};
-	//index[loc_field] = '2d';
-	//db[reduced_collection].ensureIndex(index);
 	var params = {
 		mapreduce: collection
 		,map: map
@@ -102,17 +134,72 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		,verbose: true
 		,keeptemp: true
 	};
-	print(params.reduce);
 	if (options) {
 		for (k in options) {
 			params[k] = options[k];
 		}
 	} 
-	return db.runCommand(params);
+	var info = [];
+	for (var k in reduction_keys) {
+		info.push(reduction_keys[k].info || k);
+	}
+	print('* reducing '+collection+' to '+reduced_collection+' with key: '+info.join(' | ')+' ...');
+	var op = db.runCommand(params);
+	if (op.ok) {
+		for (var k in reduction_keys) {
+			if (reduction_keys[k].index) {
+				var field_name = 'value.' + k;
+				print('* building index for '+field_name+' ...');
+				if (!reduction_keys[k].index.call(reduction_keys[k], 
+						db[reduced_collection], field_name)) {
+					print('ERROR: could not build index');
+					return false;
+				}
+			}
+		}
+		print('SUCCESS: reduced '+op.counts.input+' records to '+op.counts.output);
+		return true;
+	} else {
+		print('ERROR: '+op.assertion);
+		return false;		
+	}
 };
 
-// Run on safecast for grid size 1 and without conditions
-use geo;
-var op = runGridReduce('points', 'r_points_10', ['val'], {collectionid: ReductionKeys.copy, loc: ReductionKeys.LocGrid(10), datetime: ReductionKeys.weekly}, { limit: 10000 });
-db[op.result].count();
+var collectionHasIndex = function(collection, key) {
+	var indexes = collection.getIndexes();
+	for (var i = 0; i < indexes.length; i++) {
+		for (var j in key) {
+			if (indexes[i].key[j] && indexes[i].key[j] == key[j]) {
+				return true;
+			}
+		}
+	}
+	return false;
+};
 
+var reducePoints = function(reduction_keys) {
+	var outCollection = 'r_points_'+reduction_keys.loc.grid_size;
+	var inCollection = 'points';
+	db[outCollection].drop();
+	return runGridReduce(inCollection, outCollection, ['val'], reduction_keys, { });
+};
+
+use geo;
+
+for (var grid_size = GRID_MIN; grid_size <= GRID_MAX; grid_size += GRID_STEP) {
+	reducePoints({
+		collectionid: ReductionKey.copy, 
+		loc: new ReductionKey.LocGrid(grid_size), 
+		datetime: new ReductionKey.Yearly()
+	});
+	reducePoints({
+		collectionid: ReductionKey.copy, 
+		loc: new ReductionKey.LocGrid(grid_size), 
+		datetime: new ReductionKey.Weekly()
+	});
+	reducePoints({
+		collectionid: ReductionKey.copy, 
+		loc: new ReductionKey.LocGrid(grid_size), 
+		datetime: new ReductionKey.Daily()
+	});
+}
