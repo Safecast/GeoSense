@@ -5,7 +5,7 @@ var AppRouter = Backbone.Router.extend({
 		":mapId/map":"setUniqueMap",
 		":mapId/globe/:query":"setUniqueGlobe",
 		":mapId/setup":"setNewMap",
-		":mapId":"setUniqueMap",
+		":mapId/":"setUniqueMap",
 		"removed":"home",
 		"":"home",
     },
@@ -13,7 +13,7 @@ var AppRouter = Backbone.Router.extend({
     initialize:function() {
 		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
-    },
+    }, 
 
 	render:function(state)
 	{
@@ -232,7 +232,6 @@ var AppRouter = Backbone.Router.extend({
 		    success: function(data) {
 				app.bindCollectionToMap(pointCollectionId);
 				app.addExistingDataSource(data._id, 'newData');
-				$('#addDataModal').modal('hide');
 				app.vent.trigger("setStateType", 'post');
 		    }
 		});
