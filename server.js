@@ -171,7 +171,7 @@ app.post('/api/data/:file', function(req, res){
 				}
 				,loc: function() {
 					var loc = this.get('location').split(', ');
-					return [parseFloat(loc[0]), parseFloat(loc[1])];
+					return [parseFloat(loc[1]), parseFloat(loc[0])];
 				}
 			};
 		
