@@ -40,6 +40,9 @@ var AppRouter = Backbone.Router.extend({
 		this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
+
+		this.vent.bind("mapReady", this.fetchCollections());
+
 		
 		if(_setupRoute)
 			$('#setupModal').modal('show');	
@@ -158,8 +161,6 @@ var AppRouter = Backbone.Router.extend({
 			$('#app').append(this.mapView.render().el);
 			this.mapView.start();
         }	
-
-		this.fetchCollections('mapdata');
     },
 
 	mapGL:function () {
@@ -179,9 +180,7 @@ var AppRouter = Backbone.Router.extend({
 			$('#app').append(this.mapView.render().el);
 			this.mapView.start();
         }
-
-		this.fetchCollections('mapdata');
-    },	
+    },
 
 	fetchCollections: function(type)
 	{
