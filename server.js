@@ -159,7 +159,7 @@ app.post('/api/data/:file', function(req, res){
 					return new Date(d);
 				}
 				,loc: function() {
-					var loc = this.get('loc').split(', ');
+					var loc = this.get('loc').split(' ');
 					return [parseFloat(loc[1]), parseFloat(loc[0])];
 				}
 			};
@@ -299,6 +299,8 @@ app.post('/api/data/:file', function(req, res){
 							
 							var point = convertOriginalToPoint(model, converter);
 							point.collectionid = newCollectionId;
+							point.created = new Date();
+							point.modified = new Date();
 							point.save();
 							
 							if (maxVal == undefined || maxVal < point.get('val')) {
