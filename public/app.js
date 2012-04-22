@@ -250,23 +250,23 @@ var AppRouter = Backbone.Router.extend({
 			ajaxType: type,
 			url: '/api/pointcollection/' + index,
 			success: function(data) {
-				console.log(data);
 				var scope = this;
 				self.vent.trigger("setStateType", 'loading');
 
 				var mapId = _mapId;
 				var maxVal = data.maxval;
 				var minVal = data.minval;
-				var name = data.name;
-				data.collectionId = data.collectionid; // TODO: argh
-				console.log(data);
+				var title = data.title;
+
+				
+				data.collectionId = data.collectionid; // TODO: deprecated
 																
-				pointCollection[scope.ajaxIndex] = new PointCollection({collectionId:scope.ajaxIndex, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
+				pointCollection[scope.ajaxIndex] = new PointCollection({collectionId:data.collectionId, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
 				pointCollection[scope.ajaxIndex].fetch({success: function(data) {
 
 					if(_firstLoad == true || scope.ajaxType == 'newData' || scope.ajaxType == 'dataLibrary')
 					{
-			 			self.addSideBarDataView({collectionId:data.collectionId,dataLength:data.length,title:name});
+			 			self.addSideBarDataView({collectionId:data.collectionId,dataLength:data.length,title:title});
 					}
 								
 					//self.addMapCollection(data.collectionId, pointCollection[data.collectionId]);
@@ -335,6 +335,7 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
+		console.log(options);
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},

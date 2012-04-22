@@ -43,9 +43,8 @@ window.HomepageView = Backbone.View.extend({
 				
 				for(i=0;i<data.length;i++)
 				{
-					currMap = '<tr><td>'+data[i].name+'</td><td><a target="_self" href="/'+data[i].mapid+'">geo.media.mit.edu/'+ data[i].mapid +'</a></td><tr>';
+					currMap = '<tr><td>'+data[i].title+'</td><td><a target="_self" href="/'+data[i].mapid+'">geo.media.mit.edu/'+ data[i].mapid +'</a></td><tr>';
 					self.recentMaps.push(currMap);
-					//self.$('#mapTable').append('<tr><td>'+data[i].name+'</td><td><a target="_self" href="/'+data[i].mapid+'">geo.media.mit.edu/'+ data[i].mapid +'</a></td><tr>');
 				}
 				self.showRecentMaps();
 			},

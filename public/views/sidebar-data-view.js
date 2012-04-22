@@ -98,6 +98,9 @@ window.SideBarDataView = Backbone.View.extend({
 			url: '/api/map/' + _mapId,
 			success: function(data) {
 				
+				console.log('fetch');
+				console.log(data);
+				
 				$.each(data[0].collections, function(key, collection) { 
 					$.each(collection, function(key, val) { 
 						if(key == 'collectionid')
@@ -119,16 +122,19 @@ window.SideBarDataView = Backbone.View.extend({
 	setParameters: function(collection)
 	{
 		var self = this;
+		
+		console.log('setParams')
+		console.log(collection.defaults);
 					
-		this.color = collection.color;
-		this.colorLow = collection.colorLow;
-		this.colorHigh = collection.colorHigh;
-		this.colorType = collection.colorType;
-		this.displayType = collection.displayType;
+		this.color = collection.defaults.color;
+		this.colorLow = collection.defaults.colorLow;
+		this.colorHigh = collection.defaults.colorHigh;
+		this.colorType = collection.defaults.colorType;
+		this.displayType = collection.defaults.displayType;
 		
 		switch(this.colorType)
 		{
-		case "1": // Single Color
+		case 1: // Single Color
 			this.$('.color-scale').hide();
 			this.$('.color-single').show();
 			this.$('#scaleColor').removeClass('active');
@@ -136,7 +142,7 @@ window.SideBarDataView = Backbone.View.extend({
 			this.$('#singleColor').addClass('active');
 			this.setLegendColor();
 		  break;
-		case "2": // Color Range
+		case 2: // Color Range
 		  	this.$('.color-scale').show();
 			this.$('.color-single').hide();
 			this.$('#singleColor').removeClass('active');
@@ -148,10 +154,10 @@ window.SideBarDataView = Backbone.View.extend({
 
 		switch(this.displayType)
 		{
-		case "1": // Pixels
+		case 1: // Pixels
 		  	this.pixelsButtonClicked();
 		  break;
-		case "2": // Circles
+		case 2: // Circles
 		  	this.circlesButtonClicked();
 		  break;
 		}
@@ -260,36 +266,36 @@ window.SideBarDataView = Backbone.View.extend({
 	{
 		//build json and update
 		var self = this;
-		this.collection.unbindCollection();
-		
+		//this.collection.unbindCollection();
+				
 		this.color = this.$('#colorInput').val();
 		this.colorLow = this.$('#colorInputLow').val();
 		this.colorHigh = this.$('#colorInputHigh').val();
 		
-		var updateObject = [{
-				collectionid:this.collectionId,
-				colorType:this.colorType,
-				color: this.color,
-				colorLow: this.colorLow,
-				colorHigh: this.colorHigh,
-				displayType:this.displayType
-			}];
+		var updateObject = {
+				visible: Boolean(true),
+				colorType:Number(this.colorType),
+				color: String(this.color),
+				colorLow: String(this.colorLow),
+				colorHigh: String(this.colorHigh),
+				displayType:Number(this.displayType)
+			};
 		
-			$.ajax({
-					type: 'POST',
-					url: '/api/bindmapcollection/' + _mapId,
-					dataType: 'json',
-					data: { jsonpost: updateObject },
-					success: function(data) {
-						self.disableUpdateButton();
-						self.setLegendColor();
-						self.vent.trigger("redrawLayer", self.collectionId);
-						
-					},
-					error: function() {
-						console.error('failed to join map with collection');
-					}
-				});	
+		$.ajax({
+				type: 'POST',
+				url: '/api/updatemapcollection/' + _mapId + '/' + this.collection.collectionId,
+				dataType: 'json',
+				data: { jsonpost: updateObject },
+				success: function(data) {
+					self.disableUpdateButton();
+					self.setLegendColor();
+					self.vent.trigger("redrawLayer", self.collectionId);
+					
+				},
+				error: function() {
+					console.error('failed to join map with collection');
+				}
+			});	
 			
 	},
 

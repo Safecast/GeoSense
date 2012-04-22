@@ -47,16 +47,12 @@ window.MapViewBase = Backbone.View.extend({
 	addCollection: function(collection)
 	{		
 		var self = this;
-		console.log('mapView.addCollection '+collection);
 		$.ajax({
 			type: 'GET',
 			url: '/api/map/' + _mapId,
 			success: function(data) {
-				console.log('loaded map');
-				console.log(data);
 				var scope = this;
 				$.each(data[0].collections, function(key, link) { 
-					console.log('--'+link.collectionid+' == '+collection.collectionId);
 					if (link.collectionid == collection.collectionId) {
 						//scope.ajaxCollection.params = parameterCollection;
 						

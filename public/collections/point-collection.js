@@ -63,7 +63,8 @@ PointCollection = Backbone.Collection.extend({
 		})
 	},
 	
-	unbindCollection: function(options) {
+	unbindCollection: function() {
+		console.log('unbinding...');
 		
 		var self = this;		
 	    $.ajax({

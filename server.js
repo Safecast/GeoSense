@@ -708,13 +708,13 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 	var publicslug = req.params.publicslug;
     var pointcollectionid = req.params.pointcollectionid;
 
+	console.log(req.body)
+
     var find = PointCollection.findOne({_id: pointcollectionid, active: true}, function(err, collection) {
 	    if (err || !collection) {
 			res.send('oops', 404);
 			return;
 	    }
-
-	    console.log(collection);
 
 	    var link = {
 	    	collectionid: collection._id,
@@ -732,37 +732,69 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
     });
 });
 
-app.post('/api/updatemapcollection/:publicslug', function(req, res){
+app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req, res){
 	
-	data = req.body.jsonpost[0];
+	jsonObject = req.body.jsonpost;
 	
-	var publicslug =  req.params.publicslug;
-    var collectionid = data.collectionid;
+	var publicslug = req.params.publicslug;
+    var collectionid = req.params.pointcollectionid;
 
-	Map.update({ publicslug:publicslug }, { $set : { collections: data} }, function(err) {
-	      if (!err) {
-	        console.log("collection bound to map");
-	        res.send('');
-	      }
-	      else {
-			res.send('oops error', 500);
-		  }
-	  });
+	var options = {
+		visible : Boolean(jsonObject.visible),
+		displayType : Number(jsonObject.displayType),
+		colorHigh : String(jsonObject.colorHigh),
+		colorLow : String(jsonObject.colorLow),
+		color : String(jsonObject.color),
+		colorType : Number(jsonObject.colorType)
+	}
+	
+	var link = {
+		collectionid: collectionid,
+		defaults: options
+	};
+
+	Map.findOne({publicslug: publicslug}, function(err, map) {
+		if (!err && map) {
+			var keepCollections = [];
+			for (var i = 0; i < map.collections.length; i++) {
+				if (map.collections[i].collectionid != collectionid) {
+					keepCollections.push(map.collections[i]);
+					break;
+				}
+				else
+				{
+					keepCollections.push(link);
+				}
+			}
+			map.collections = keepCollections;			
+			map.save();	
+			res.send('');
+			
+		} else {
+			res.send('ooops', 404);
+		}
+	  	});
 });
 
 app.post('/api/unbindmapcollection/:publicslug/:collectionid', function(req, res){
 	var publicslug =  String(req.params.publicslug);
     var collectionid = String(req.params.collectionid);
-
-	Map.update({ publicslug:publicslug }, { $pull : { collections: {collectionid: collectionid}} }, function(err) {
-	      if (!err) {
-	        console.log("collection removed");
-	        res.send('');
-	      }
-	      else {
-			res.send('oops error', 500);
-		  }
-	  });
+	
+	Map.findOne({publicslug: publicslug}, function(err, map) {
+		if (!err && map) {
+			var keepCollections = [];
+			for (var i = 0; i < map.collections.length; i++) {
+				if (map.collections[i].collectionid != collectionid) {
+					keepCollections.push(map.collections[i]);
+					break;
+				}
+			}
+			map.collections = keepCollections;			
+			map.save();
+		} else {
+			res.send('ooops', 404);
+		}
+  	});
 	
 });
 
