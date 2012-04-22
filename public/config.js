@@ -1,6 +1,9 @@
 /* Config 
 */
 
+var DEBUG = true;
+if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
+
 function getURLParameter(name) {
     return decodeURI(
         (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
@@ -27,7 +30,6 @@ function genQueryString(params, name) {
 
 //APP GLOBALS
 
-var DEBUG = true;
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
 var IS_AR = getURLParameter('lens') == true;
 var VIRTUAL_PHYSICAL_FACTOR = 1.2; 
