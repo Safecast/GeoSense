@@ -98,9 +98,6 @@ window.SideBarDataView = Backbone.View.extend({
 			url: '/api/map/' + _mapId,
 			success: function(data) {
 				
-				console.log('fetch');
-				console.log(data);
-				
 				$.each(data[0].collections, function(key, collection) { 
 					$.each(collection, function(key, val) { 
 						if(key == 'collectionid')

@@ -2,10 +2,13 @@ var AppRouter = Backbone.Router.extend({
 
     routes:{
 		":mapId/globe":"setUniqueGlobe",
+		":mapId/globe/":"setUniqueGlobe",
 		":mapId/map":"setUniqueMap",
+		":mapId/map/":"setUniqueMap",
 		":mapId/globe/:query":"setUniqueGlobe",
 		":mapId/setup":"setNewMap",
 		":mapId/":"setUniqueMap",
+		":mapId":"setUniqueMap",
 		"removed":"home",
 		"":"home",
     },

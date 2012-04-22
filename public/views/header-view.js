@@ -144,6 +144,10 @@ window.HeaderView = Backbone.View.extend({
 			  	stateIndicator.stop(true, true).fadeIn('fast');
 				message.html('DRAWING DATA SET');
 			  	break;
+			case 'parse':
+			  	stateIndicator.stop(true, true).fadeIn('fast');
+				message.html('CRUNCHING DATA');
+			  	break;
 			case 'complete':
 			  	stateIndicator.delay(1000).fadeOut('fast');
 			  	break;

@@ -69,6 +69,7 @@ window.AddDataView = Backbone.View.extend({
 	
 	requestData:function (options)
 	{
+		var self = this;
 		dataType = 'csv';
 		if(dataType == 'json')
 		{
@@ -96,7 +97,7 @@ window.AddDataView = Backbone.View.extend({
 					if (responseData.pointCollectionId) {
 						app.pollForNewPointCollection(responseData.pointCollectionId);
 						$('#addDataModal').modal('hide');
-						
+						self.vent.trigger("setStateType", 'parsing');
 					} else {
 						// TODO: error
 					}
