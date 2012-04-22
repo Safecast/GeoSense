@@ -3,7 +3,7 @@ PointCollection = Backbone.Collection.extend({
 	model: Point,
 	
 	comparator: function(point) {
-		return point.get('date');
+		return point.get('datetime');
 	},
 	
 	initialize: function(options) {
