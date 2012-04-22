@@ -40,6 +40,7 @@ PointCollection = Backbone.Collection.extend({
 	},
 
 	fetch: function(options) {
+		console.log('PointCollection.fetch');	
 		return PointCollection.__super__.fetch.call(this, options);
 	},
 

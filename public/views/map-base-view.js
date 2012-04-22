@@ -40,7 +40,6 @@ window.MapViewBase = Backbone.View.extend({
 	{
 		$.each(this.collections, function(collectionid, collection) { 
 			collection.setVisibleMapArea(visibleMapArea);
-			console.log('refetch '+collection.url());
 			collection.fetch();
 		});
 	},

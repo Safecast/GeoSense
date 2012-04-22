@@ -112,6 +112,7 @@ window.MapOLView = window.MapViewBase.extend({
 						// Since the loadend event does not seem to be fired on the gmap layer,
 						// we just register a google event on the google map object directly.
 						google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
+							console.log('mapReady');
 							self.vent.trigger('mapReady');
 						});
 					}

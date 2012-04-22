@@ -527,10 +527,6 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 	var collectionName = 'r_points_loc-'+grid_size;
 	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 
-	res.send([]);
-	return;
-
-
 	ReducedPoint.find(pointQuery, function(err, datasets) {
 		console.log('Found '+datasets.length+' reduction points');
 		if (!err) {

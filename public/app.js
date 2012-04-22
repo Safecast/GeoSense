@@ -20,6 +20,7 @@ var AppRouter = Backbone.Router.extend({
 
 	render:function(state)
 	{
+		var self = this;
  		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
         $('#app').append(this.headerView.render().el);
 
@@ -41,8 +42,9 @@ var AppRouter = Backbone.Router.extend({
 		
 		this.vent.trigger("setToggleStates", {state:state});
 
-		this.vent.bind("mapReady", this.fetchCollections());
-
+		this.vent.bind("mapReady", function() {
+			self.fetchCollections();
+		});
 		
 		if(_setupRoute)
 			$('#setupModal').modal('show');	
@@ -202,7 +204,6 @@ var AppRouter = Backbone.Router.extend({
 							ajaxI: i,
 							url: '/api/pointcollection/' + _mapCollections[i].collectionid,
 							success: function(data) {
-
 								self.addExistingDataSource(data.collectionid, scope.ajaxType)
 							},
 							error: function() {
