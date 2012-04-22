@@ -260,13 +260,12 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	addCollectionAsLayer: function(collection, renderer)
 	{ 
-		
 		switch(collection.params.displayType)
 		{
-		case "1": // Pixels
+		case 1: // Pixels
 			var renderer = 'Canvas2'
 		  break;
-		case "2": // Circles
+		case 2: // Circles
 			var renderer = 'Canvas'
 		  break;
 		}
@@ -601,7 +600,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var colorlow = this.collections[collectionId].params.colorLow;
 		var colorhigh = this.collections[collectionId].params.colorHigh;
 		var colorType = this.collections[collectionId].params.colorType;
-		var drawType = this.collections[collectionId].params.drawType;
+		//var drawType = this.collections[collectionId].params.drawType;
 		
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
@@ -633,7 +632,8 @@ window.MapOLView = window.MapViewBase.extend({
 		});
 		
 		//Add point to proper layer (by found index)
-		this.layerArray[collectionId].drawType;
+		//this.layerArray[collectionId].drawType;
+		//console.log(vector);
 		this.layerArray[collectionId].features.push(vector);		
     },
 

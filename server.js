@@ -64,34 +64,18 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
 
 //Models 
 
-var Map = mongoose.model('Map', new mongoose.Schema({
-	
-	title: String,
-	description: String,
-	adminslug: String,
-	publicslug: String,
-	created: Date,
-	modified: Date,
-	created_by: String,
-	modified_by: String,
-	
-}));
-
 var Point = mongoose.model('Point', new mongoose.Schema({
-	
-	collectionid: Number,
+	collectionid: String, 
 	loc: Array,
 	val: Number,
 	label: String,
 	datetime: Date,
 	created: Date,
-	modified: Date,
-	
+	modified: Date,	
 }));
 
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
-	
-	collectionid: Number,
+	collectionid: String, // TODO: deprecated
 	title: String,
 	maxval: Number,
 	minval: Number,
@@ -100,17 +84,29 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	modified: Date,
 	created_by: String,
 	modified_by: String,
-	defaults: Array
-	
+	defaults: mongoose.Schema.Types.Mixed,
+	active: Boolean	
+}));
+
+var Map = mongoose.model('Map', new mongoose.Schema({
+	title: String,
+	description: String,
+	adminslug: String,
+	publicslug: String,
+	created: Date,
+	modified: Date,
+	created_by: String,
+	modified_by: String,
+	collections: Array
 }));
 
 var Tweet = mongoose.model('Tweet', new mongoose.Schema({
-	collectionid: Number,
+	collectionid: String,
 	mapid: String,
 }));
 
 var TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
-	collectionid: Number,
+	collectionid: String,
 	mapid: String,
 	name: String,
 }));
@@ -145,9 +141,7 @@ app.get('/api/data/:file', function(req, res){
 	var importCount = 0;
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = true;
-	var UNIQUE_ID = Math.round((new Date).getTime() / 1000);
-	var maxVal, minVal;
-	var originalCollection = 'o_' + UNIQUE_ID;
+	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
 	
 	var reactorToPointConverters = {
@@ -200,78 +194,105 @@ app.get('/api/data/:file', function(req, res){
 		return new Point(doc);
 	}
 
-	console.log('importing '+type+' to '+originalCollection);
+	console.log('importing '+type);
 	
-	switch(type) {
-		case 'csv':
-		var UNIQUE_ID = Math.round((new Date).getTime() / 1000);
+	var defaults = {
+		visible: true,
+		displayType: 1,
+		colorHigh: '#FF8888',
+		colorLow: '#88FF88',
+		color: '#88FF88',
+		colorType: 1,
+	};
+	
+	var collection = new PointCollection({
+	    name: req.params.name,
+		defaults: defaults,
+		active: false
+	});
 
-		csv()
-		    .fromPath(__dirname+ path)
-		    .transform(function(data){
-		        data.unshift(data.pop());
-		        return data;
-		    })
-		    .on('data',function(data,index){
-				if (FIRST_ROW_IS_HEADER && !fieldNames) {
-					fieldNames = data;
-				} else {
-					if (FIRST_ROW_IS_HEADER) {
-						var doc = {};
-						for (var i = 0; i < fieldNames.length; i++) {
-							doc[fieldNames[i]] = data[i];
+	var maxVal, minVal;
+
+	collection.save(function(err, collection) {
+	    if (!err) {
+	    	var newCollectionId = collection.get('_id');
+	    	console.log('created PointCollection '+newCollectionId);
+			var response = {
+				'pointCollectionId': collection.get('_id'),
+			};
+			res.send(response);
+
+			switch(type) {
+				case 'csv':
+
+				csv()
+				    .fromPath(__dirname+ path)
+				    .transform(function(data){
+				        data.unshift(data.pop());
+				        return data;
+				    })
+				    .on('data',function(data,index){
+						if (FIRST_ROW_IS_HEADER && !fieldNames) {
+							fieldNames = data;
+						} else {
+							if (FIRST_ROW_IS_HEADER) {
+								var doc = {};
+								for (var i = 0; i < fieldNames.length; i++) {
+									doc[fieldNames[i]] = data[i];
+								}
+							} else {
+								doc['data'] = data;
+							}
+							var model = new Model(doc);
+							model.save(); 
+							
+							var point = convertOriginalToPoint(model, earthquakeToPointConverters);
+							point.collectionid = newCollectionId;
+							point.save();
+							
+							if (maxVal == undefined || maxVal < point.get('val')) {
+								maxVal = point.get('val');
+							}
+
+							if (minVal == undefined || minVal > point.get('val')) {
+								minVal = point.get('val');
+							}
+
+							delete model;
+							delete doc;
+							delete point;
+
+							importCount++;
+							if (importCount == 1 || importCount % 1000 == 0) {
+								console.log('saved ' + importCount + ' points to '+newCollectionId);
+							}
 						}
-					} else {
-						doc['data'] = data;
-					}
-					var model = new Model(doc);
-					model.save(); 
-					
-					var point = convertOriginalToPoint(model, reactorToPointConverters);
-					point.collectionid = UNIQUE_ID;
-					point.save();
-					
-					if (maxVal == undefined || maxVal < point.get('val')) {
-						maxVal = point.get('val');
-					}
-
-					if (minVal == undefined || minVal > point.get('val')) {
-						minVal = point.get('val');
-					}
-
-					delete model;
-					delete doc;
-					delete point;
-
-					importCount++;
-					if (importCount == 1 || importCount % 1000 == 0) {
-						console.log(UNIQUE_ID+' saved ' + importCount);
-					}
-				}
-	
-		    })
-		    .on('end',function(count){
-				var response = {
-					'collectionId':UNIQUE_ID,
-					'maxVal':maxVal,
-					'minVal':minVal,
-				};
-				res.send(response);
-		    })
-		    .on('error',function(error){
-		        console.log(error.message);
-		    });
-		break;
-	
-		case 'json':
-	
-			console.log('/public/data/reactors.json');
-			var parsedJSON = require('/public/data/reactors.json');
-			//console.log(parsedjson);
-	
-		break;
-		default: 
-	}
+			
+				    })
+				    .on('end',function(count){
+				    	collection.maxval = maxVal;
+						collection.minval = minVal;
+						collection.active = true;
+						collection.collectionid = collection.get('_id'); // TODO: deprecated
+						collection.save();
+				    	console.log('finalized and activated collection');
+				    })
+				    .on('error',function(error){
+				        console.log(error.message);
+				    });
+				break;
+			
+				case 'json':
+			
+					console.log('/public/data/reactors.json');
+					var parsedJSON = require('/public/data/reactors.json');
+					//console.log(parsedjson);
+			
+				break;
+				default: 
+			}
+		}
+	});
 });
 
 /////////////////////
@@ -527,20 +548,18 @@ app.delete('/api/collection/:id', function(req, res){
 
 //Associative Collection (keeps track of collection id & name)
 app.get('/api/pointcollection/:id', function(req, res){
-	PointCollection.find({collectionid:req.params.id}, function(err, point) {
-		if (!err) {
-			res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
+	PointCollection.findOne({_id: req.params.id, active: true}, function(err, pointCollection) {
+		if (!err && pointCollection) {
+			res.send(pointCollection);
+		} else {
+			res.send('ooops', 404);
 		}
   });
 });
 
 //Return all Point Collections
 app.get('/api/pointcollections', function(req, res){
-  PointCollection.find(function(err, datasets) {
+  PointCollection.find({active: true}, function(err, datasets) {
      res.send(datasets);
   });
 });
@@ -677,24 +696,33 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	  });
 });
 
-app.post('/api/bindmapcollection/:publicslug', function(req, res){
+app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, res){
 	
-	data = req.body.jsonpost[0];
-	
-	console.log(data);
-	
-	var publicslug =  req.params.publicslug;
-    var collectionid = data.collectionid;
+	var publicslug = req.params.publicslug;
+    var pointcollectionid = req.params.pointcollectionid;
 
-	Map.update({ publicslug:publicslug }, { $push : { collections: data} }, function(err) {
+    var find = PointCollection.findOne({_id: pointcollectionid, active: true}, function(err, collection) {
+	    if (err || !collection) {
+			res.send('oops', 404);
+			return;
+	    }
+
+	    console.log(collection);
+
+	    var link = {
+	    	collectionid: collection._id,
+	    	defaults: collection.defaults
+	    };
+
+		Map.update({ publicslug:publicslug }, { $push : { collections: link} }, function(err) {
 	      if (!err) {
 	        console.log("collection bound to map");
 	        res.send('');
-	      }
-	      else {
+	      } else {
 			res.send('oops error', 500);
 		  }
-	  });
+	  	});
+    });
 });
 
 app.post('/api/updatemapcollection/:publicslug', function(req, res){

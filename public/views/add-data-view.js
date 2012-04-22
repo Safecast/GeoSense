@@ -86,9 +86,13 @@ window.AddDataView = Backbone.View.extend({
 			$.ajax({
 				type: 'GET',
 				url: '/api/data/' + options.url,
-				success: function(data) {
-					//console.log(data);
-					app.addData(data);	
+				success: function(responseData) {
+					if (responseData.pointCollectionId) {
+						app.pollForNewPointCollection(responseData.pointCollectionId);
+					} else {
+						// TODO: error
+					}
+					//app.addData(data);	
 				},
 				error: function() {
 					console.error('failed to fetch unique map');

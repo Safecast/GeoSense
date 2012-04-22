@@ -201,7 +201,8 @@ var AppRouter = Backbone.Router.extend({
 							ajaxI: i,
 							url: '/api/pointcollection/' + _mapCollections[i].collectionid,
 							success: function(data) {
-								self.addExistingDataSource(data[0].collectionid, scope.ajaxType)
+
+								self.addExistingDataSource(data.collectionid, scope.ajaxType)
 							},
 							error: function() {
 								console.error('failed to fetch distinct collections');
@@ -218,7 +219,28 @@ var AppRouter = Backbone.Router.extend({
 		});
 	},
 	
-	addExistingDataSource: function(index,type)
+	pollForNewPointCollection: function(pointCollectionId) {
+		console.log('pollForNewPointCollection: '+pointCollectionId);
+		$.ajax({
+			type: 'GET',
+			url: '/api/pointcollection/' + pointCollectionId,
+		    error: function() {
+				console.error('Failed to fetch new collection, trying again after timeout...');
+				setTimeout(function() {
+					app.pollForNewPointCollection(pointCollectionId);
+				}, POLL_INTERVAL);
+		    },
+		    success: function(data) {
+				app.bindCollectionToMap(pointCollectionId);
+				app.addExistingDataSource(data._id, 'newData');
+				$('#addDataModal').modal('hide');
+				app.vent.trigger("setStateType", 'post');
+		    }
+		});
+
+	},
+
+	addExistingDataSource: function(index, type)
 	{
 		var self = this;
 		
@@ -228,23 +250,27 @@ var AppRouter = Backbone.Router.extend({
 			ajaxType: type,
 			url: '/api/pointcollection/' + index,
 			success: function(data) {
+				console.log(data);
 				var scope = this;
 				self.vent.trigger("setStateType", 'loading');
 
-				var mapId = data[0].mapid;
-				var maxVal = data[0].maxval;
-				var minVal = data[0].minval;
-				var name = data[0].name;
+				var mapId = _mapId;
+				var maxVal = data.maxval;
+				var minVal = data.minval;
+				var name = data.name;
+				data.collectionId = data.collectionid; // TODO: argh
+				console.log(data);
 																
 				pointCollection[scope.ajaxIndex] = new PointCollection({collectionId:scope.ajaxIndex, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
 				pointCollection[scope.ajaxIndex].fetch({success: function(data) {
-					
+
 					if(_firstLoad == true || scope.ajaxType == 'newData' || scope.ajaxType == 'dataLibrary')
 					{
 			 			self.addSideBarDataView({collectionId:data.collectionId,dataLength:data.length,title:name});
 					}
 								
-					self.addMapCollection(data.collectionId, pointCollection[data.collectionId]);
+					//self.addMapCollection(data.collectionId, pointCollection[data.collectionId]);
+					self.mapView.addCollection(data);
 					
 					self.addGraphCollection(data.collectionId, pointCollection[data.collectionId]);
 					
@@ -271,102 +297,31 @@ var AppRouter = Backbone.Router.extend({
 			
 	},
 	
-	bindCollectionToMap: function(defaults)
+	bindCollectionToMap: function(pointCollectionId)
 	{	
-
-		var bindObject = [{
-				collectionid:defaults[0].collectionid,
-				colorType:defaults[0].colorType,
-				color:defaults[0].color,
-				colorLow:defaults[0].colorLow,
-				colorHigh:defaults[0].colorHigh,
-				displayType:defaults[0].displayType,
-				visible:defaults[0].visible,
-			}];
-				
 		$.ajax({
-				type: 'POST',
-				url: '/api/bindmapcollection/' + _mapId,
-				dataType: 'json',
-				data: { jsonpost: bindObject },
-				success: function(data) {
-					
-				},
-				error: function() {
-					console.error('failed to join map with collection');
-				}
-			});	
+			type: 'POST',
+			url: '/api/bindmapcollection/' + _mapId + '/' + pointCollectionId,
+			success: function(data) {
+				
+			},
+			error: function() {
+				console.error('failed to join map with collection');
+			}
+		});	
 	},
 
-	addData:function (options)
+	/*addData: function (options)
 	{
 		var self = this;
-		var uniqid = options.collectionId;
-		var uniqueMapId = _mapId;
-		var title = 'data set'
-		var data = options.data;
-		
-		var maxVal = options.maxVal;
-		var minVal = options.minVal;
-		
-		var currEpoch = Math.round((new Date).getTime() / 1000);
-		var created = currEpoch;
-		var modified = currEpoch;
-		var createdBy = '';
-		var modifiedBy = '';
-		
-		//First increment total number of data sources
-		_num_data_sources +=1;
-			
-		//Check for time based
-		var timeBased = true;
-		
-		var visible = true;
-		var displayType = 1;
-		var colorHigh = "#ff0000";
-		var colorLow = "#00ff00";
-		var color = "#00ff00";
-		var colorType = 1;
-
-		//Create collection
-		pointCollection[_num_data_sources] = new PointCollection({
-			collectionId:uniqid,
-			title:title,
-			maxVal: maxVal,
-			minVal: minVal,
-			timebased: timeBased,
-			created: created,
-			modified: modified,
-			created_by: createdBy,
-			modified_by: modifiedBy,
-			defaults: [
-				visible = visible,
-				displayType = displayType,
-				colorHigh = colorHigh,
-				colorLow = colorLow,
-				color = color,
-				colorType = colorType,
-			],
-			newData:true,
-		});
+		var pointCollectionId = options.collectionId;
 				
 		app.addExistingDataSource(uniqid, 'newData');
-		
-		var defaults = [{
-				collectionid:uniqid,
-				colorType:colorType,
-				color:color,
-				colorLow:colorLow,
-				colorHigh:colorHigh,
-				displayType:displayType,
-				visible:visible,
-			}];
-		
 		this.bindCollectionToMap(defaults);
 		
 		$('#addDataModal').modal('hide');
 		this.vent.trigger("setStateType", 'post');
-	},
+	},*/
 	
 	addCommentData: function(options)
 	{		
@@ -382,11 +337,6 @@ var AppRouter = Backbone.Router.extend({
 	addSideBarDataView:function (options) {
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
-	},
-	
-	addMapCollection: function(id, collection)
-	{
-		this.mapView.addCollection(id, collection);
 	},
 	
 	addGraphCollection: function(id, collection)

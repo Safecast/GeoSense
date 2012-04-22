@@ -27,7 +27,6 @@ window.MapViewBase = Backbone.View.extend({
 	
 	mapPositionChanged: function(zoom, bounds)
 	{
-		console.log(zoom);
 		//Bounds are [[SE.x, SE.y],[NW.x, NW.y]]
 		$.each(this.collections, function(key, val) { 
 			switch(zoom) {
@@ -45,32 +44,32 @@ window.MapViewBase = Backbone.View.extend({
 		});
 	},
 
-	addCollection: function(id, collection)
+	addCollection: function(collection)
 	{		
 		var self = this;
+		console.log('mapView.addCollection '+collection);
 		$.ajax({
 			type: 'GET',
 			url: '/api/map/' + _mapId,
-			ajaxId: id,
-			ajaxCollection: collection,
 			success: function(data) {
+				console.log('loaded map');
+				console.log(data);
 				var scope = this;
-				$.each(data[0].collections, function(key, parameterCollection) { 
-					$.each(parameterCollection, function(key, val) { 
-						if(key == 'collectionid')
-						{
-							if(scope.ajaxId == val)
-							{
-								scope.ajaxCollection.params = parameterCollection;
-								self.collections[scope.ajaxId] = scope.ajaxCollection;
-								self.collections[scope.ajaxId].bind('reset', self.reset, self);
-								self.collections[scope.ajaxId].bind('add', self.addOne, self);
-								self.addCollectionToMap(self.collections[scope.ajaxId]);
-								self.vent.trigger("setStateType", 'complete');
-								
-							}
-						}	
-					});
+				$.each(data[0].collections, function(key, link) { 
+					console.log('--'+link.collectionid+' == '+collection.collectionId);
+					if (link.collectionid == collection.collectionId) {
+						//scope.ajaxCollection.params = parameterCollection;
+						
+						collection.params = link.defaults;
+						self.collections[link.collectionid] = collection;
+
+						self.collections[link.collectionid].bind('reset', self.reset, self);
+						self.collections[link.collectionid].bind('add', self.addOne, self);
+						self.addCollectionToMap(self.collections[link.collectionid]);
+						self.vent.trigger("setStateType", 'complete');
+						
+
+					}	
 				});
 				
 			},
