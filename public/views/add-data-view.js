@@ -95,10 +95,11 @@ window.AddDataView = Backbone.View.extend({
 				success: function(responseData) {
 					if (responseData.pointCollectionId) {
 						app.pollForNewPointCollection(responseData.pointCollectionId);
+						$('#addDataModal').modal('hide');
+						
 					} else {
 						// TODO: error
 					}
-					//app.addData(data);	
 				},
 				error: function() {
 					console.error('failed to fetch unique map');
