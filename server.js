@@ -85,7 +85,8 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	created_by: String,
 	modified_by: String,
 	defaults: mongoose.Schema.Types.Mixed,
-	active: Boolean	
+	active: Boolean,
+	progress: Number	
 }));
 
 var Map = mongoose.model('Map', new mongoose.Schema({
@@ -219,7 +220,6 @@ app.post('/api/data/:file', function(req, res){
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-
 	
 	var convertOriginalToPoint = function(data, converters) {
 		var doc = {};
@@ -251,7 +251,8 @@ app.post('/api/data/:file', function(req, res){
 	    name: req.params.name,
 		defaults: defaults,
 		active: false,
-		title: req.body.title
+		title: req.body.title,
+		progress: 0
 	});
 
 	var maxVal, minVal;
@@ -496,6 +497,55 @@ app.delete('/api/point/:id', function(req, res){
 // POINT COLLECTIONS
 //////////////////////
 
+var ZOOM_TO_GRID = {
+	1: .5
+};
+
+app.get('/api/mappoints/:pointcollectionid', function(req, res){
+	
+
+
+	zoom = req.params.zoom || 1;
+	console.log(zoom);
+
+	var collectionName = 'r_points_loc-'+ZOOM_TO_GRID[zoom];
+	console.log(collectionName);
+
+	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+
+	var box = [[60, 0], [100, 50]];
+	var query = {"value.loc" : {$within: {$box : box}}};
+
+	console.log(ReducedPoint.find(query, function(err, datasets) {
+		console.log(err);
+		if (!err) {
+			var points = [];
+			for (var i = 0; i < datasets.length; i++) {
+				var reduced = datasets[i].get('value');
+				points.push({
+					val: reduced.val.avg,
+					loc: [reduced.loc[1], reduced.loc[0]]
+				});
+			}
+			res.send(points);
+		}
+	}));
+
+	return;
+
+	Point.find({collectionid:req.params.pointcollectionid}, function(err, point) {
+		if (!err) {
+			res.send(point);
+		}
+		else
+		{
+			res.send('ooops', 500);
+		}
+  	}).sort('date', 1);
+
+});
+
+/*
 app.get('/api/collection/distinct' , function(req, res){
 		
 	Point.collection.distinct("collectionid", function(err, data){
@@ -533,6 +583,7 @@ app.get('/api/collection/', function(req, res){
 		}
   });
 });
+*/
 
 app.post('/api/collection/:id', function(req, res){
 		
