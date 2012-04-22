@@ -125,27 +125,22 @@ window.GraphView = Backbone.View.extend({
 		this.$('#slider').width($('#graphContainer').width() - 30);
 	},
 
-    addOne: function(model, currIndex) {
-
-    	console.log('model');
-    	console.log(model);
-    	console.log('currIndex');
-    	console.log(currIndex);
-
-    	
+    addOne: function(model, pointCollectionId) {
 		var self = this;
 				
 		//Prep point for graph	
-		var index = currIndex;	
-		var collectionId = model.collection.collectionId; 
+		var collectionId = pointCollectionId; 
 		var name = model.get('name');
-		var location = model.get('loc');
+
+		var location = model.attributes.loc;
 		var lon = location[0];
 		var lat = location[1];
-		var val = model.get('val');
-		var colorlow = model.get('colorlow');
-		var colorhigh = model.get('colorhigh');
-		var date = model.get('datetime');
+
+		var val = model.attributes.val;
+
+		var colorlow = model.attributes.colorlow;
+		var colorhigh = model.attributes.colorhigh;
+		var date = model.attributes.date;
 		
 		
 		//Set min/max values		
@@ -156,7 +151,7 @@ window.GraphView = Backbone.View.extend({
 		
 		epoch = new Date(date).getTime()/1000;
 				
-		var data = { x: Number(epoch), y: Number(normVal), date: date, epoch:epoch, color:this};
+		var data = { x: Number(epoch), y: Number(normVal), date: date, color:this};
 		//Need to pull color from params
 		//console.log(this.collections[collectionId]);
 		
