@@ -132,12 +132,12 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 // DATA POST ROUTES 
 ////////////////////
 
-app.get('/api/data/:file', function(req, res){
+app.post('/api/data/:file', function(req, res){
 	
 	var file = req.params.file;
 	var path = '/public/data/' + req.params.file;
 	var type =  file.split('.').pop();
-	
+
 	var importCount = 0;
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = true;
@@ -204,11 +204,18 @@ app.get('/api/data/:file', function(req, res){
 		color: '#88FF88',
 		colorType: 1,
 	};
+
+	for (var key in defaults) {
+		if (req.body[key]) {
+			defaults[key] = req.body[key];
+		}
+	}
 	
 	var collection = new PointCollection({
 	    name: req.params.name,
 		defaults: defaults,
-		active: false
+		active: false,
+		title: req.body.title
 	});
 
 	var maxVal, minVal;
@@ -216,7 +223,7 @@ app.get('/api/data/:file', function(req, res){
 	collection.save(function(err, collection) {
 	    if (!err) {
 	    	var newCollectionId = collection.get('_id');
-	    	console.log('created PointCollection '+newCollectionId);
+	    	console.log('created PointCollection "'+collection.get('title')+'" = '+newCollectionId);
 			var response = {
 				'pointCollectionId': collection.get('_id'),
 			};

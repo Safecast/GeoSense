@@ -84,8 +84,13 @@ window.AddDataView = Backbone.View.extend({
 		else if(dataType == 'csv')
 		{
 			$.ajax({
-				type: 'GET',
+				type: 'POST',
 				url: '/api/data/' + options.url,
+				data: {
+					title: this.$('#titleInput').val(),
+					colorLow: this.$('#colorInputLow').val(),
+					colorHigh: this.$('#colorInputHigh').val()
+				},
 				success: function(responseData) {
 					if (responseData.pointCollectionId) {
 						app.pollForNewPointCollection(responseData.pointCollectionId);
