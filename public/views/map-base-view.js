@@ -111,15 +111,6 @@ window.MapViewBase = Backbone.View.extend({
 		this.commentCollection.fetch();
 	},
 
-	cleanPointModel: function(model) {
-		var input = model.get('location');
-		var latlngStr = input.split(/[, ]/, 2);
-		var lat = parseFloat(latlngStr[0]);
-		var lng = parseFloat(latlngStr[1]);
-		model.set('lat', lat);
-		model.set('lon', lng);
-	},
-
     addAll: function() {	
 		this.addCollectionToMap(this.collection);
     },
@@ -138,6 +129,8 @@ window.MapViewBase = Backbone.View.extend({
 
 	addCollectionToMap: function(collection)
 	{
+		console.log('collection');
+		console.log(collection);
 		var self = this;
 		this.vent.trigger("setStateType", 'drawing');
 		
@@ -149,7 +142,6 @@ window.MapViewBase = Backbone.View.extend({
 		this.addCollectionAsLayer(collection);
 		
 		collection.each(function(model) {
-			self.cleanPointModel(model);
 			self.addOne(model, collection.collectionId);
 		});
 			
