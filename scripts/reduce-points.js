@@ -260,7 +260,6 @@ for (var i in GRID_SIZES) {
 		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Weekly()
 	});
-
 	/*reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
