@@ -67,7 +67,7 @@ window.MapOLView = window.MapViewBase.extend({
 		SE.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
 		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-		var bounds = [[SE.x,SE.y],[NW.x,NW.y]];
+		var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
 		return {
 			zoom: zoom,
 			bounds: bounds

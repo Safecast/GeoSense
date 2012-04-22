@@ -33,10 +33,9 @@ PointCollection = Backbone.Collection.extend({
 
 	setVisibleMapArea: function(visibleMapArea) {
 		console.log('PointCollection.setVisibleMapArea');	
-		this.urlParams = {
-			b: [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]],
-			zoom: visibleMapArea.zoom
-		};
+		this.urlParams.b = [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]];
+		this.urlParams.z = visibleMapArea.zoom;
+		this.urlParams.t = 'w';
 	},
 
 	fetch: function(options) {

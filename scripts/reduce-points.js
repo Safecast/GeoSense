@@ -255,15 +255,16 @@ for (var i in GRID_SIZES) {
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size)
 	});
-	/*reducePoints({
-		collectionid: ReductionKey.copy, 
-		loc: new ReductionKey.LocGrid(grid_size), 
-		datetime: new ReductionKey.Yearly()
-	});
 	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Weekly()
+	});
+
+	/*reducePoints({
+		collectionid: ReductionKey.copy, 
+		loc: new ReductionKey.LocGrid(grid_size), 
+		datetime: new ReductionKey.Yearly()
 	});
 	reducePoints({
 		collectionid: ReductionKey.copy, 

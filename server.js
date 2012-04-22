@@ -511,20 +511,47 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 	var pointQuery = {'value.collectionid': req.params.pointcollectionid};
 	var urlObj = url.parse(req.url, true);
 
-	zoom = urlObj.query.zoom || 0;
+	zoom = urlObj.query.z || 0;
 	grid_size = GRID_SIZES[zoom];
 	console.log('zoom ' + zoom + ', grid size ' + grid_size);
 
 	if (urlObj.query.b && urlObj.query.b.length == 4) {
 		var b = urlObj.query.b;
-		var box = [[parseFloat(b[0]), parseFloat(b[1])], 
-			[parseFloat(b[2]), parseFloat(b[3])]];
+		for (var i = 0; i < 4; i++) {
+			b[i] = parseFloat(b[i]) || 0;
+			if (b[i] > 180) {
+				b[i] = -180 + b[i] % 180;
+			} else if (b[i] < -180) {
+				b[i] = 180 + b[i] % 180;
+			}
+		}
+
+		var box = [[b[0], b[1]], [b[2], b[3]]];
+
+		//var box = [[Math.min(b[0], b[2]), Math.min(b[1], b[3])], 
+		//	[Math.max(b[0], b[2]), Math.max(b[1], b[3])]];
+
 		console.log('query with bounds:');
 		console.log(box);
+
 		pointQuery['value.loc'] = {$within: {$box : box}};
 	}
 
-	var collectionName = 'r_points_loc-'+grid_size;
+	var time_grid = false;
+	switch (urlObj.query.t) {
+		case 'y':
+			time_grid = 'yearly';
+			break;
+		case 'w':
+			time_grid = 'weekly';
+			break;
+		case 't':
+			time_grid = 'daily';
+			break;
+	}
+
+	var collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
+	console.log('querying '+collectionName);
 	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 
 	ReducedPoint.find(pointQuery, function(err, datasets) {
@@ -533,11 +560,14 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 			var points = [];
 			for (var i = 0; i < datasets.length; i++) {
 				var reduced = datasets[i].get('value');
-				points.push({
+				var p = {
 					val: reduced.val.avg,
 					loc: [reduced.loc[0], reduced.loc[1]],
-					datetime: reduced.datetime
-				});
+				};
+				if (time_grid) {
+					p.datetime = reduced.datetime;
+				}
+				points.push(p);
 			}
 			res.send(points);
 		}
