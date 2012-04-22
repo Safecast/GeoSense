@@ -126,11 +126,18 @@ window.GraphView = Backbone.View.extend({
 	},
 
     addOne: function(model, currIndex) {
+
+    	console.log('model');
+    	console.log(model);
+    	console.log('currIndex');
+    	console.log(currIndex);
+
+    	
 		var self = this;
 				
 		//Prep point for graph	
 		var index = currIndex;	
-		var collectionId = model.get('collectionid'); 
+		var collectionId = model.collection.collectionId; 
 		var name = model.get('name');
 		var location = model.get('loc');
 		var lon = location[0];
@@ -153,6 +160,8 @@ window.GraphView = Backbone.View.extend({
 		//Need to pull color from params
 		//console.log(this.collections[collectionId]);
 		
+		console.log('--- data');
+		console.log(data);
 		this.graphData.push(data);	
     },
 
