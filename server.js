@@ -1,3 +1,9 @@
+var GRID_SIZES = {};
+GRID_SIZES[0] = .6;
+for (var zoom = 1; zoom <= 15; zoom++) {
+	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
+}
+
 var application_root = __dirname,
   	express = require("express"),
   	path = require("path"),
@@ -5,7 +11,8 @@ var application_root = __dirname,
   	twitter = require('ntwitter'),
 	nowjs = require("now"),
 	csv = require('csv'),    
-	date = require('datejs');
+	date = require('datejs'),
+	url = require('url');
 
 var app = express.createServer();
 
@@ -504,20 +511,31 @@ var ZOOM_TO_GRID = {
 app.get('/api/mappoints/:pointcollectionid', function(req, res){
 	
 
+	var pointQuery = {'value.collectionid': req.params.pointcollectionid};
+	var urlObj = url.parse(req.url, true);
 
-	zoom = req.params.zoom || 1;
-	console.log(zoom);
 
-	var collectionName = 'r_points_loc-'+ZOOM_TO_GRID[zoom];
-	console.log(collectionName);
+	zoom = urlObj.query.zoom || 1;
+	grid_size = GRID_SIZES[zoom];
+	if (urlObj.query.bounds) {
+		var bounds = urlObj.query.bounds.split(',');
+		if (bounds.length == 4) {
+			console.log('has bounds');
+			var box = [[parseFloat(bounds[0]), parseFloat(bounds[1])], 
+				[parseFloat(bounds[2]), parseFloat(bounds[3])]];
+			console.log(box);
+			pointQuery['value.loc'] = {$within: {$box : box}};
+		}
+	}
 
+	var collectionName = 'r_points_loc-'+grid_size;
 	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 
-	var box = [[60, 0], [100, 50]];
-	var query = {"value.loc" : {$within: {$box : box}}};
+	//var box = [[60, 0], [100, 50]];
+	//var query = {"value.loc" : {$within: {$box : box}}};
 
-	console.log(ReducedPoint.find(query, function(err, datasets) {
-		console.log(err);
+	ReducedPoint.find(pointQuery, function(err, datasets) {
+		console.log('Found '+datasets.length+' reduction points');
 		if (!err) {
 			var points = [];
 			for (var i = 0; i < datasets.length; i++) {
@@ -529,7 +547,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 			}
 			res.send(points);
 		}
-	}));
+	});
 
 	return;
 

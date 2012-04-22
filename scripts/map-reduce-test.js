@@ -1,25 +1,8 @@
-var GRID_SIZES = {
-	1: 2,
-	2: 1.9,
-	3: 1.8,
-	4: 1.7,
-	5: 1.6,
-	6: 1.5,
-	7: 1.4,
-	8: 1.3,
-	9: 1.2,
-	10: 1.1,
-	11: 1,
-	12: .9,
-	13: .8,
-	14: .7,
-	15: .6,
-	16: .5,
-	17: .4,
-	18: .3,
-	19: .2,
-	20: .1
-};
+var GRID_SIZES = {};
+GRID_SIZES[0] = .6;
+for (var zoom = 1; zoom <= 15; zoom++) {
+	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
+}
 
 var lpad = function(str, padString, length) {
 	var str = new String(str);
@@ -257,9 +240,10 @@ var reducePoints = function(reduction_keys) {
 	db[reduced_collection].drop();
 	return runGridReduce(collection, reduced_collection, ['val'], reduction_keys, {
 		count: 1,
-		avg: 1
+		avg: 1,
+		collectionid: 1
 	}, {
-		limit: 5000
+		limit: null
 	});
 };
 
