@@ -8,7 +8,7 @@ PointCollection = Backbone.Collection.extend({
 	
 	initialize: function(options) {
 						
-		this.url = '/api/collection/' + options.collectionId;
+		this.url = '/api/mappoints/' + options.collectionId;
 		
 		this.collectionId = options.collectionId;
 		this.title = options.title;
@@ -24,6 +24,12 @@ PointCollection = Backbone.Collection.extend({
 		if(options.newData == true)		
 			this.createAssociativeIndex();
 	},
+
+	fetch: function(options) {
+		console.log('fetchhh');
+		return PointCollection.__super__.fetch.call(this, options);
+	},
+
 	
 	addData: function(data, callback) {
 		

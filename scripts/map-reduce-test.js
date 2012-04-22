@@ -1,7 +1,25 @@
-var GRID_MIN = .5;
-var GRID_MAX = 1;
-var GRID_STEP = .5;
-var OUT_INDEX = {'value.loc': '2d'};
+var GRID_SIZES = {
+	1: 2,
+	2: 1.9,
+	3: 1.8,
+	4: 1.7,
+	5: 1.6,
+	6: 1.5,
+	7: 1.4,
+	8: 1.3,
+	9: 1.2,
+	10: 1.1,
+	11: 1,
+	12: .9,
+	13: .8,
+	14: .7,
+	15: .6,
+	16: .5,
+	17: .4,
+	18: .3,
+	19: .2,
+	20: .1
+};
 
 var lpad = function(str, padString, length) {
 	var str = new String(str);
@@ -241,13 +259,23 @@ var reducePoints = function(reduction_keys) {
 		count: 1,
 		avg: 1
 	}, {
-		limit: null
+		limit: 5000
 	});
 };
 
 use geo;
 
-for (var grid_size = GRID_MIN; grid_size <= GRID_MAX; grid_size += GRID_STEP) {
+for (var i in GRID_SIZES) {
+	var grid_size = GRID_SIZES[i];
+	reducePoints({
+		collectionid: ReductionKey.copy, 
+		loc: new ReductionKey.LocGrid(grid_size)
+	});
+	/*reducePoints({
+		collectionid: ReductionKey.copy, 
+		loc: new ReductionKey.LocGrid(grid_size), 
+		datetime: new ReductionKey.Yearly()
+	});
 	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
@@ -256,11 +284,6 @@ for (var grid_size = GRID_MIN; grid_size <= GRID_MAX; grid_size += GRID_STEP) {
 	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
-		datetime: new ReductionKey.Yearly()
-	});
-	reducePoints({
-		collectionid: ReductionKey.copy, 
-		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Daily()
-	});
+	});*/
 }

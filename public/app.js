@@ -68,7 +68,6 @@ var AppRouter = Backbone.Router.extend({
 	{
 		var self = this;
 		mapIdLength = options.mapId.length;
-
 		if(mapIdLength == 10) // Viewer Route
 		{
 			$.ajax({
@@ -257,8 +256,6 @@ var AppRouter = Backbone.Router.extend({
 				var maxVal = data.maxval;
 				var minVal = data.minval;
 				var title = data.title;
-
-				
 				data.collectionId = data.collectionid; // TODO: deprecated
 																
 				pointCollection[scope.ajaxIndex] = new PointCollection({collectionId:data.collectionId, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});

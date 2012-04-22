@@ -16,7 +16,7 @@ var VIRTUAL_PHYSICAL_FACTOR = 1.2;
 var CAMERA_FOV = 54.25;
 var SMOOTH_TWEEN_DURATION = 50;
 var CAMERA;
-var POLL_INTERVAL = 1000;
+var POLL_INTERVAL = 5000;
 
 var taggedObjects = [
 	new TaggedObject('globe', [
