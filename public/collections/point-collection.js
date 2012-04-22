@@ -20,7 +20,7 @@ PointCollection = Backbone.Collection.extend({
 		this.modifiedBy = options.modifiedBy;
 		this.timeBased = options.timebased;
 		this.defaults = options.defaults;
-		this.urlParams = options.urlParams || {};
+		this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 								
 		if(options.newData == true)	{
 			this.createAssociativeIndex();
