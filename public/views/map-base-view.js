@@ -24,12 +24,23 @@ window.MapViewBase = Backbone.View.extend({
 				}
 		});
 	},
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+	getVisibleMapArea: function()
+	{
+		return {
+			bounds: null,
+			zoom: null
+		};
+	},
 	
-	mapPositionChanged: function(zoom, bounds)
+	mapAreaChanged: function(visibleMapArea)
 	{
 		$.each(this.collections, function(collectionid, collection) { 
-			collection.url = collection.baseUrl + '?zoom=' + zoom + '&bounds='+bounds[0][0]+','+bounds[0][1]+','+bounds[1][0]+','+bounds[1][1]+'';
-			console.log('refetch '+collection.url);
+			collection.setVisibleMapArea(visibleMapArea);
+			console.log('refetch '+collection.url());
 			collection.fetch();
 		});
 	},

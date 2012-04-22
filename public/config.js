@@ -7,6 +7,24 @@ function getURLParameter(name) {
     );
 }
 
+function genQueryString(params, name) {
+	var url = '';
+	if (params instanceof Array) {
+		for (var i = 0; i < params.length; i++) {
+			url += (url != '' ? '&' : '') + name + '=' + params[i];
+		}
+	} else {
+		for (var name in params) {
+			if (params[name] instanceof Array) {
+				url += (url != '' ? '&' : '') + genQueryString(params[name], name);
+			} else {
+				url += (url != '' ? '&' : '') + name + '=' + params[name];
+			}
+		}
+	}
+	return url;
+}
+
 //APP GLOBALS
 
 var DEBUG = true;

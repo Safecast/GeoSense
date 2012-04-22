@@ -506,35 +506,30 @@ app.delete('/api/point/:id', function(req, res){
 // POINT COLLECTIONS
 //////////////////////
 
-var ZOOM_TO_GRID = {
-	1: .5
-};
-
 app.get('/api/mappoints/:pointcollectionid', function(req, res){
-	
 
 	var pointQuery = {'value.collectionid': req.params.pointcollectionid};
 	var urlObj = url.parse(req.url, true);
 
-
-	zoom = urlObj.query.zoom || 1;
+	zoom = urlObj.query.zoom || 0;
 	grid_size = GRID_SIZES[zoom];
-	if (urlObj.query.bounds) {
-		var bounds = urlObj.query.bounds.split(',');
-		if (bounds.length == 4) {
-			console.log('has bounds');
-			var box = [[parseFloat(bounds[0]), parseFloat(bounds[1])], 
-				[parseFloat(bounds[2]), parseFloat(bounds[3])]];
-			console.log(box);
-			pointQuery['value.loc'] = {$within: {$box : box}};
-		}
+	console.log('zoom ' + zoom + ', grid size ' + grid_size);
+
+	if (urlObj.query.b && urlObj.query.b.length == 4) {
+		var b = urlObj.query.b;
+		var box = [[parseFloat(b[0]), parseFloat(b[1])], 
+			[parseFloat(b[2]), parseFloat(b[3])]];
+		console.log('query with bounds:');
+		console.log(box);
+		pointQuery['value.loc'] = {$within: {$box : box}};
 	}
 
 	var collectionName = 'r_points_loc-'+grid_size;
 	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 
-	//var box = [[60, 0], [100, 50]];
-	//var query = {"value.loc" : {$within: {$box : box}}};
+	res.send([]);
+	return;
+
 
 	ReducedPoint.find(pointQuery, function(err, datasets) {
 		console.log('Found '+datasets.length+' reduction points');

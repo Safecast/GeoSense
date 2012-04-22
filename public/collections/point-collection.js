@@ -8,7 +8,7 @@ PointCollection = Backbone.Collection.extend({
 	
 	initialize: function(options) {
 						
-		this.baseUrl = this.url = '/api/mappoints/' + options.collectionId;
+		this.baseUrl = '/api/mappoints/' + options.collectionId;
 		
 		this.collectionId = options.collectionId;
 		this.title = options.title;
@@ -20,16 +20,29 @@ PointCollection = Backbone.Collection.extend({
 		this.modifiedBy = options.modifiedBy;
 		this.timeBased = options.timebased;
 		this.defaults = options.defaults;
+		this.urlParams = options.urlParams || {};
 								
-		if(options.newData == true)		
+		if(options.newData == true)	{
 			this.createAssociativeIndex();
+		}
+	},
+
+	url: function() {
+		return this.baseUrl + '?' + genQueryString(this.urlParams);
+	},
+
+	setVisibleMapArea: function(visibleMapArea) {
+		console.log('PointCollection.setVisibleMapArea');	
+		this.urlParams = {
+			b: [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]],
+			zoom: visibleMapArea.zoom
+		};
 	},
 
 	fetch: function(options) {
 		return PointCollection.__super__.fetch.call(this, options);
 	},
 
-	
 	addData: function(data, callback) {
 		
 		var self = this;

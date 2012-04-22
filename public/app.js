@@ -258,8 +258,17 @@ var AppRouter = Backbone.Router.extend({
 				var minVal = data.minval;
 				var title = data.title;
 				data.collectionId = data.collectionid; // TODO: deprecated
-																
-				pointCollection[scope.ajaxIndex] = new PointCollection({collectionId:data.collectionId, mapId:mapId, maxVal:maxVal, minVal:minVal, name:name, newData:false});
+							
+				var mapArea = self.mapView.getVisibleMapArea();									
+				pointCollection[scope.ajaxIndex] = new PointCollection({
+					collectionId: data.collectionId, 
+					mapId: mapId, 
+					maxVal: maxVal, 
+					minVal: minVal, 
+					name: name, 
+					newData: false,
+				});
+				pointCollection[scope.ajaxIndex].setVisibleMapArea(self.mapView.getVisibleMapArea());
 				pointCollection[scope.ajaxIndex].fetch({success: function(data) {
 
 					if(_firstLoad == true || scope.ajaxType == 'newData' || scope.ajaxType == 'dataLibrary')

@@ -59,6 +59,21 @@ window.MapOLView = window.MapViewBase.extend({
 		r();
 	},
 
+	getVisibleMapArea: function() {
+		var map = this.map;
+		var zoom = map.getZoom();
+		var extent = map.getExtent();
+		SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
+		SE.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+		NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
+		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+		var bounds = [[SE.x,SE.y],[NW.x,NW.y]];
+		return {
+			zoom: zoom,
+			bounds: bounds
+		};
+	},
+
 	start: function() {
 		var self = this;
 					
@@ -66,7 +81,8 @@ window.MapOLView = window.MapViewBase.extend({
 			type: 'styled',
 			wrapDateLine: true,
 		    sphericalMercator: true,
-		});
+			baselayer: true
+		});		
 		        
 		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
 		    restrictedExtent = maxExtent.clone(),
@@ -87,23 +103,19 @@ window.MapOLView = window.MapViewBase.extend({
 			controls: map_controls,
 			scope: this,
 			eventListeners: {
-               "moveend": function(event){
-					var map = event.object;
-					var zoom = map.getZoom();
-					
-					var extent = map.getExtent();
-					
-					SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
-					SE.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-					
-					NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
-					NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-				
-					//console.log(SE.x + ", " + SE.y + " : " + NW.x + ", " + NW.y);
-					var bounds = [[SE.x,SE.y],[NW.x,NW.y]];
-			
-					self.mapPositionChanged(zoom, bounds);
+               moveend: function(event) {
+					self.mapAreaChanged(self.getVisibleMapArea());
 				},
+				addlayer: function(event) {
+					if (event.layer.baselayer) {
+						// We need to wait for the map to be ready so we can get its bounds.
+						// Since the loadend event does not seem to be fired on the gmap layer,
+						// we just register a google event on the google map object directly.
+						google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
+							self.vent.trigger('mapReady');
+						});
+					}
+				}
             }
 		});	
 				
