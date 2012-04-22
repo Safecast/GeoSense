@@ -192,7 +192,6 @@ var AppRouter = Backbone.Router.extend({
 			url: '/api/map/' + _mapId,
 			success: function(data) {
 				var scope = this;
-				console.log(data);
 				if(data[0].collections)
 				{
 					_mapCollections = data[0].collections;
@@ -335,7 +334,6 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
-		console.log(options);
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},

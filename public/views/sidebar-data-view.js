@@ -119,10 +119,7 @@ window.SideBarDataView = Backbone.View.extend({
 	setParameters: function(collection)
 	{
 		var self = this;
-		
-		console.log('setParams')
-		console.log(collection.defaults);
-					
+							
 		this.color = collection.defaults.color;
 		this.colorLow = collection.defaults.colorLow;
 		this.colorHigh = collection.defaults.colorHigh;
