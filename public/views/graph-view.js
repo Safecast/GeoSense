@@ -141,7 +141,12 @@ window.GraphView = Backbone.View.extend({
 		var colorlow = model.attributes.colorlow;
 		var colorhigh = model.attributes.colorhigh;
 		var date = model.attributes.date;
-		
+
+
+		//console.log(date);
+		var d = Date.parse(model.attributes.date);
+
+		//console.log(model);
 		
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
@@ -153,11 +158,8 @@ window.GraphView = Backbone.View.extend({
 				
 		var data = { x: Number(epoch), y: Number(normVal), date: date, color:this};
 		//Need to pull color from params
-		//console.log(this.collections[collectionId]);
-		
-		console.log('--- data');
-		console.log(data);
-		this.graphData.push(data);	
+				
+		//this.graphData.push(data);	
     },
 
 	reset: function(model) {
