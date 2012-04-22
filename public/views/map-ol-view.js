@@ -276,40 +276,35 @@ window.MapOLView = window.MapViewBase.extend({
 		switch(collection.params.displayType)
 		{
 		case 1: // Pixels
-			var renderer = 'Canvas2'
-		  break;
+			var renderer = 'Pixels'
+			break;
 		case 2: // Circles
-			var renderer = 'Canvas'
-		  break;
+			var renderer = 'Circles'
+			break
+		case 3: //Rectangles
+			var renderer = 'Rectangles'
+			break;
 		}
 
 		switch(renderer)
 		{
-			case 'Canvas2':
+			case 'Pixels':
 			
 				var layer = new OpenLayers.Layer.VectorPt(null, {
 							projection: new OpenLayers.Projection("EPSG:4326"),
 							sphericalMercator: true,
 				    		renderers: ["Canvas2"]
 				});
+
+				break;
 			
-				layer.collectionId = collection.collectionId;
-				
-				this.layerArray[layer.collectionId] = layer;
-			
-				this.map.addLayers([this.layerArray[layer.collectionId]]);
-				
-			break;
-			
-			case 'Canvas':
+			case 'Circles':
 			
 				var Rule = OpenLayers.Rule;
 				var Filter = OpenLayers.Filter;
 				var style = new OpenLayers.Style({
 				    pointRadius: 10,
-				    strokeWidth: 0,
-				    strokeOpacity: 0.0,
-				    strokeColor: "navy",
+				    strokeOpacity: 0,
 				    fillColor: collection.params.color,
 				    fillOpacity: .2
 				});
@@ -317,58 +312,26 @@ window.MapOLView = window.MapViewBase.extend({
 				var layer = new OpenLayers.Layer.Vector(null, {
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
-				        select: {
-				            fillColor: "red",
-				            pointRadius: 13,
-				            strokeColor: "yellow",
-				            strokeWidth: 3
-				        }
 				    }),
 				    renderers: ["Canvas"]
 				});
-
-				layer.collectionId = collection.collectionId;
-
-				this.layerArray[layer.collectionId] = layer;
-			
-				this.map.addLayers([this.layerArray[layer.collectionId]]);
-
-				var selectControl = new OpenLayers.Control.SelectFeature(
-				  this.layerArray[layer.collectionId], {
-				     clickout: true, multiple: false, hover: false, box: false,
-				     onBeforeSelect: function(feat) {
-				        return false;
-				     },
-				     onUnselect: function(feat) {
-				        // add code to remove feature from highlight layer
-				     }
-				  }
-				);
-					
-			break;
-			
-			case 'WMS':
-			
-				this.map.addControl(selectControl);
-				selectControl.activate();
 				
-					var longText = new Array(205).join("1234567890");
-					var base = new OpenLayers.Layer.WMS( "OpenLayers WMS",
-					    "http://vmap0.tiles.osgeo.org/wms/vmap0",
-					    {layers: 'basic', makeTheUrlLong: longText},
-					    {tileOptions: {maxGetUrlLength: 2048}, transitionEffect: 'resize'}
-					);
-					var overlay = new OpenLayers.Layer.WMS("Overlay",
-					    "http://suite.opengeo.org/geoserver/wms",
-					    {layers: "usa:states", transparent: true, makeTheUrlLong: longText},
-					    {ratio: 1, singleTile: true, tileOptions: {maxGetUrlLength: 2048}, transitionEffect: 'resize'}
-					);
-					this.map.addLayers([overlay]);
-			
 				break;
+
+			case 'Rectangles':
+
+				//TODO: Add rectangle support
+				break;
+
 			default:
 		  		//
 		}
+
+		layer.collectionId = collection.collectionId;
+
+		this.layerArray[layer.collectionId] = layer;
+			
+		this.map.addLayers([this.layerArray[layer.collectionId]]);
 		
 	},
 	
@@ -643,7 +606,7 @@ window.MapOLView = window.MapViewBase.extend({
 		vector = new OpenLayers.Feature.Vector(currPoint, {
 	        colour: gocolor,
 		});
-		
+
 		//Add point to proper layer (by found index)
 		//this.layerArray[collectionId].drawType;
 		//console.log(vector);
