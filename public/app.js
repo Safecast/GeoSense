@@ -79,7 +79,7 @@ var AppRouter = Backbone.Router.extend({
 				success: function(data) {
 					_admin = false;
 					_mapName = data[0].title;
-					_mapId = options.publicslug;
+					_mapId = data[0].publicslug;
 					if(options.state == 'map')
 					{
 						self.map();
@@ -192,6 +192,7 @@ var AppRouter = Backbone.Router.extend({
 			url: '/api/map/' + _mapId,
 			success: function(data) {
 				var scope = this;
+				console.log(data);
 				if(data[0].collections)
 				{
 					_mapCollections = data[0].collections;
