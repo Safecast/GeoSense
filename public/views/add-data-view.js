@@ -89,7 +89,8 @@ window.AddDataView = Backbone.View.extend({
 				data: {
 					title: this.$('#titleInput').val(),
 					colorLow: this.$('#colorInputLow').val(),
-					colorHigh: this.$('#colorInputHigh').val()
+					colorHigh: this.$('#colorInputHigh').val(),
+					converter: this.$('#converterType').val()
 				},
 				success: function(responseData) {
 					if (responseData.pointCollectionId) {

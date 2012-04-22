@@ -137,53 +137,89 @@ app.post('/api/data/:file', function(req, res){
 	var file = req.params.file;
 	var path = '/public/data/' + req.params.file;
 	var type =  file.split('.').pop();
+	
+	switch(req.body.converter) {
+		
+		case 'Standard (loc, val, date)':
+			
+			var converter = {
+				val: function() {
+					return parseFloat(this.get('val'));
+				}
+				,datetime: function() {
+					var d = Date.parse(String(this.get('date')));
+					return new Date(d);
+				}
+				,loc: function() {
+					var loc = this.get('loc').split(', ');
+					return [parseFloat(loc[1]), parseFloat(loc[0])];
+				}
+			};
+			
+		break;
+		
+		case 'Earthquake Dataset':
+		
+			var converter = {
+				val: function() {
+					return parseFloat(this.get('mag'));
+				}
+				,datetime: function() {
+					var d = Date.parse(String(this.get('year')), String(this.get('month')), String(this.get('day')));
+					return new Date(d);
+				}
+				,loc: function() {
+					var loc = this.get('location').split(', ');
+					return [parseFloat(loc[0]), parseFloat(loc[1])];
+				}
+			};
+		
+		break;
+		
+		case 'Nuclear Reactors':
+		
+			var converter = {
+				val: function() {
+					return parseFloat(this.get('val'));
+				}
+				,datetime: function() {
+					var d = Date.parse(String(this.get('year')));
+					return new Date(d);
+				}
+				,loc: function() {
+					var loc = this.get('location').split(', ');
+					return [parseFloat(loc[1]), parseFloat(loc[0])];
+				}
+			};
+			
+		break;
+		
+		case 'Safecast Dataset':
+		
+			var converter = {
+				val: function() {
+					return parseFloat(this.get('reading_value'));
+				}
+				,datetime: function() {
+					var d = Date.parse(this.get('reading_date'));
+					return new Date(d);
+				}
+				,loc: function() {
+					return [parseFloat(this.get('longitude')), parseFloat(this.get('latitude'))];
+				}
+			};
+		
+		break;
+		
+		default:
+	}
 
 	var importCount = 0;
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-	
-	var reactorToPointConverters = {
-		val: function() {
-			return parseFloat(this.get('val'));
-		}
-		,datetime: function() {
-			var d = Date.parse(String(this.get('year')));
-			return new Date(d);
-		}
-		,loc: function() {
-			var loc = this.get('location').split(', ');
-			return [parseFloat(loc[1]), parseFloat(loc[0])];
-		}
-	};
-		
-	var earthquakeToPointConverters = {
-		val: function() {
-			return parseFloat(this.get('mag'));
-		}
-		,datetime: function() {
-			var d = Date.parse(String(this.get('year')), String(this.get('month')), String(this.get('day')));
-			return new Date(d);
-		}
-		,loc: function() {
-			var loc = this.get('location').split(', ');
-			return [parseFloat(loc[0]), parseFloat(loc[1])];
-		}
-	};
 
-	var safecastToPointConverters = {
-		val: function() {
-			return parseFloat(this.get('reading_value'));
-		}
-		,datetime: function() {
-			var d = Date.parse(this.get('reading_date'));
-			return new Date(d);
-		}
-		,loc: function() {
-			return [parseFloat(this.get('longitude')), parseFloat(this.get('latitude'))];
-		}
-	};
 	
 	var convertOriginalToPoint = function(data, converters) {
 		var doc = {};
@@ -253,7 +289,7 @@ app.post('/api/data/:file', function(req, res){
 							var model = new Model(doc);
 							model.save(); 
 							
-							var point = convertOriginalToPoint(model, earthquakeToPointConverters);
+							var point = convertOriginalToPoint(model, converter);
 							point.collectionid = newCollectionId;
 							point.save();
 							

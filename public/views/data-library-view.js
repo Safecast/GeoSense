@@ -79,7 +79,7 @@ window.DataLibrary = Backbone.View.extend({
 	
 	drawDataSource: function(data)
 	{
-		dataDiv = '<div class="data-item" id="dragLabel" data="'+data.collectionid+'"><div class="data-icon"></div><div class="data-title">'+data.name+'</div></div>'
+		dataDiv = '<div class="data-item" id="dragLabel" data="'+data.collectionid+'"><div class="data-icon"></div><div class="data-title">'+data.title+'</div></div>'
 		this.$('.data-container').append(dataDiv);
 	},
 	

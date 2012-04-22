@@ -99,6 +99,12 @@
 
 }
 
+.add-data-view select
+{
+	width:523px;
+	opacity:.3;
+}
+
 .add-data-view .modal-body .add .nav.nav-tabs .label
 {
 	position:relative;
