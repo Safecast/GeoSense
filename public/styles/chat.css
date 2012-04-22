@@ -78,11 +78,14 @@
 	border-bottom-left-radius: 0px;
 	border-top-left-radius: 0px;
 	border-left:0px;
+	height: 46px
 }
 
-.chat-vew input
+#userName, #message
 {
-
+	border-bottom-right-radius: 0px;
+	border-top-right-radius: 0px;
+	height:40px;
 }
 
 .chat-view .lower-module
