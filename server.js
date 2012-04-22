@@ -524,7 +524,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 				var reduced = datasets[i].get('value');
 				points.push({
 					val: reduced.val.avg,
-					loc: [reduced.loc[1], reduced.loc[0]]
+					loc: [reduced.loc[0], reduced.loc[1]]
 				});
 			}
 			res.send(points);
