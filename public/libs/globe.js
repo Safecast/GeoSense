@@ -143,7 +143,7 @@ DAT.Globe = function(container, colorFn) {
 		dirLight.position.set( -1, 0, 1 ).normalize();
 		scene.add( dirLight );
 
-		var planetTexture = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_grey.jpg" ),
+		var planetTexture = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_night_1024.png" ),
 		cloudsTexture     = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_clouds_1024.png" ),
 		normalTexture     = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_normal_2048.jpg" ),
 		specularTexture   = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_specular_2048.jpg" );

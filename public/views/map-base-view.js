@@ -169,6 +169,7 @@ window.MapViewBase = Backbone.View.extend({
 		var params = c.params;
 		var min = Number(c.minVal);
 		var max = Number(c.maxVal);
+		var val = model.get('val');
 		
 		var color;
 		switch (params.colorType) {
@@ -179,7 +180,7 @@ window.MapViewBase = Backbone.View.extend({
 				var rainbow = new Rainbow();
 				rainbow.setSpectrum(params.colorLow, params.colorHigh);		
 				rainbow.setNumberRange(min, max);
-				color = '#' + rainbow.colourAt(model.get('val'));
+				color = '#' + rainbow.colourAt(val);
 				break;
 		}
 
@@ -187,6 +188,9 @@ window.MapViewBase = Backbone.View.extend({
 			color: color,
 			min: min,
 			max: max,
+			val: val,
+			count: model.get('count'),
+			maxcount: 10
 		}, collectionId);
     },
 	

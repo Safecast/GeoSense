@@ -302,12 +302,22 @@ window.MapOLView = window.MapViewBase.extend({
 			
 				var Rule = OpenLayers.Rule;
 				var Filter = OpenLayers.Filter;
+				var maxRadius = 20;
+				var context = {
+	                getColor: function(feature) {
+	                    return feature.attributes.color;
+	                },
+	                getSize: function(feature) {
+	                    return Math.min(maxRadius, 
+	                    	feature.attributes.count / feature.attributes.maxcount * maxRadius);
+	                }
+	            };
 				var style = new OpenLayers.Style({
-				    pointRadius: 10,
+				    pointRadius: '${getSize}',
 				    strokeOpacity: 0,
-				    fillColor: collection.params.color,
-				    fillOpacity: .2
-				});
+				    fillColor: '${getColor}',
+				    fillOpacity: .3
+				}, {context: context});
 
 				var layer = new OpenLayers.Layer.Vector(null, {
 				    styleMap: new OpenLayers.StyleMap({
@@ -356,9 +366,8 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 		currPoint = new OpenLayers.Geometry.Point(lng, lat);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-		var vector = new OpenLayers.Feature.Vector(currPoint, {
-	        colour: opts.color,
-		});
+		
+		var vector = new OpenLayers.Feature.Vector(currPoint, opts);
 		this.layerArray[collectionId].features.push(vector);		
     },
 
