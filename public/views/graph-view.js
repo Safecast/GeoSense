@@ -64,13 +64,31 @@ window.GraphView = Backbone.View.extend({
 
 	updateGraphCollections: function(visibleMapArea)
 	{
+		var self = this;
+		console.log('updating graph collection!');
+
 		$.each(this.collections, function(collectionid, collection) { 
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
 		});
+		
+		this.graphSeries = [];
 
+		$.each(this.graphPointCollection, function(key, link) { 
+
+			series = {
+				color: self.graphPointCollection[key].color,
+				data: self.graphPointCollection[key].points,
+				name: 'Test'
+			}
+
+			self.graphSeries.push(series);
+		});
+
+		//console.log('-- graph series');
+		//console.log(self.graphSeries);
 		//TODO: Update graph
-		//this.drawGraph();
+		this.drawGraph();
 	},
 	
 	addCollectionToGraph: function(collection)
@@ -126,17 +144,6 @@ window.GraphView = Backbone.View.extend({
 		var self = this;
 
 		console.log('Drawing le graph');
-
-		$.each(this.graphPointCollection, function(key, link) { 
-
-			series = {
-				color: self.graphPointCollection[key].color,
-				data: self.graphPointCollection[key].points,
-				name: 'Test'
-			}
-
-			self.graphSeries.push(series);
-		});
 		
 		this.$('#chart').empty();
 		this.$('#legendContainer').empty();
@@ -210,10 +217,10 @@ window.GraphView = Backbone.View.extend({
 		this.graphPoints.push(data);	
     },
 
-	reset: function(model) {
+	reset: function(collection) {
 		//this.removeCollectionFromMap(model);
-		if(model.length > 0)
-			console.log('GraphView reset called')
-			//this.addCollectionToMap(this.collections[model.collectionId]);
+
+		this.graphPointCollection = []
+		this.addCollectionToGraph(collection);
 	},
 });
