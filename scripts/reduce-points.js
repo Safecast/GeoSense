@@ -7,7 +7,7 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 }
 
 var opts = {
-	limit: 20000
+	limit: null
 };
 
 
@@ -316,6 +316,7 @@ cur.forEach(function(collection) {
 			loc: new ReductionKey.LocGrid(grid_size), 
 			datetime: new ReductionKey.Weekly()
 		}, opts);
+		/*
 		reducePoints({
 			collectionid: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(grid_size), 
