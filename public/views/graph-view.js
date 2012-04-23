@@ -158,7 +158,7 @@ window.GraphView = Backbone.View.extend({
 			element: $('#chart').get(0),
 			width: $('#graphContainer').width(),
 			height: 300,
-			renderer: 'scatterplot',
+			renderer: 'line',
 			series: self.graphSeries,
 		} );
 
