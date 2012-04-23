@@ -428,10 +428,17 @@ window.MapOLView = window.MapViewBase.extend({
 				      { visibility: _visibility },
 				      { lightness: 45 },
 				      { invert_lightness: true },
-				      { gamma: 0.88 }
-					]
-			  }
-			];	
+				      { gamma: 0.88 },
+
+					]	
+			  },
+			  {
+    featureType: "administrative",
+    stylers: [
+      { visibility: "off" }
+    ]
+  }
+			];
 		} else if (theme == 'none')
 		{
 			var style = [
