@@ -49,8 +49,6 @@ window.MapViewBase = Backbone.View.extend({
 		});
 
 		this.vent.trigger("updateGraphCollections", visibleMapArea);
-
-		//TODO: Update graph collections
 	},
 
 	redrawCollection: function(options)

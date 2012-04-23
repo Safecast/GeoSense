@@ -2,26 +2,16 @@
 {
 	display:none;
 	position:absolute;
-	bottom:-250px;
+	bottom:0px;
 	right:0px;
 	left:0px;
 	opacity:.9;
 	border-top:1px solid #333;
-	
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
 }
 
 .graph-view.visible
 {
 	display:block;
-	bottom:0px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
 }
 
 .graph-view .graph-container
@@ -30,7 +20,7 @@
 	bottom:0px;
 	left:0px;
 	right:0px;
-	height:300px;
+	height:200px;
 	background-color: #222;
 }
 

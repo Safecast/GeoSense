@@ -18,9 +18,6 @@ window.GraphView = Backbone.View.extend({
 
 		_.bindAll(this, "updateGraphCollections");
 		this.vent.bind("updateGraphCollections", this.updateGraphCollections);
-
-		//_.bindAll(this, "setToggleStates");
-		//options.vent.bind("setToggleStates", this.setToggleStates);	
 		
 		this.collections = {}; //Bound collections
 		this.graphPoints = []; //Used to keep count through addOne
@@ -64,7 +61,6 @@ window.GraphView = Backbone.View.extend({
 
 	updateGraphCollections: function(visibleMapArea)
 	{
-		
 
 		var self = this;
 		console.log('updating graph collection!');
@@ -87,12 +83,17 @@ window.GraphView = Backbone.View.extend({
 			self.graphSeries.push(series);
 		});
 
-		//TODO: Update graph
 
 		if(this.graph == undefined)
 		 	return;
 
+		//TODO: Update graph, not redraw!
 		this.drawGraph();
+	},
+
+	buildGraphPointCollection: function()
+	{
+		
 	},
 	
 	addCollectionToGraph: function(collection)
@@ -104,10 +105,6 @@ window.GraphView = Backbone.View.extend({
 
 		collection.each(function(model) {
 			self.addOne(model, currCollection);
-		});
-
-		this.graphPoints.sort(function(a, b){
-			return a.epoch-b.epoch
 		});
 
 		var defaults = self.mapParams[currCollection].defaults
@@ -123,10 +120,10 @@ window.GraphView = Backbone.View.extend({
 		}
 
 		this.graphPointCollection.push(
-			{
-				points: this.graphPoints,
-				color: color
-			});
+		{
+			points: this.graphPoints,
+			color: color
+		});
 	},
 
 	resize: function()
@@ -146,9 +143,6 @@ window.GraphView = Backbone.View.extend({
 	drawGraph: function()
 	{
 		var self = this;
-
-		console.log('Drawing le graph');
-		console.log(self.graphSeries);
 		
 		this.$('#chart').empty();
 		this.$('#legendContainer').empty();
@@ -156,51 +150,46 @@ window.GraphView = Backbone.View.extend({
 		this.$('#smoother').empty();
 				
 		this.graph = new Rickshaw.Graph( {
-			element: $('#chart').get(0),
-			width: $('#graphContainer').width(),
-			height: 300,
-			renderer: 'line',
+			element: document.getElementById("chart"),
+			width: this.$('#graphContainer').width(),
+			height: 200,
+			renderer: 'area',
 			series: self.graphSeries,
-
 		} );
+
 
 		var yAxis = new Rickshaw.Graph.Axis.Y({
 		    graph: this.graph,
 		    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
 		});
+
+		var axes = new Rickshaw.Graph.Axis.Time( {
+			graph: this.graph
+		} );
 		
-		var time = new Rickshaw.Fixtures.Time();
-		var years = time.unit('year');
-		var xAxis = new Rickshaw.Graph.Axis.Time({
-				    graph: this.graph,
-				    timeUnit: years
-				});
-		
-		// var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-		// 	graph: this.graph
-		// });
+		var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+			graph: this.graph
+		});
 		
 		var slider = new Rickshaw.Graph.RangeSlider( {
 			graph: this.graph,
 			element: $('#slider')
 		});
 		
-		// var controls = new RenderControls( {
-		// 	element: $('#side_panel').get(0),
-		// 	graph: this.graph
-		// } );
-		
 		this.$('#slider').css('margin-left',7)
 		this.$('#slider').width($('#graphContainer').width() - 30);
 
-		var legend = new Rickshaw.Graph.Legend({
-		    graph: this.graph,
-		    element: $('#graph').get(0),
-		});
+		// var legend = new Rickshaw.Graph.Legend({
+		//     graph: this.graph,
+		//     element: $('#graph').get(0),
+		// });
 
-		yAxis.render();
-		xAxis.render();
 		this.graph.render();
+
+
+		axes.render();
+		yAxis.render();
+		
 	},
 
     addOne: function(model, pointCollectionId) {
@@ -223,7 +212,7 @@ window.GraphView = Backbone.View.extend({
 		
 		//console.log(epoch + " | " + normVal);
 
-		var data = { x: Number(epoch), y: Number(normVal), date: date, color:this};
+		var data = { x: epoch, y: val, date: date, color:this};
 		
 		this.graphPoints.push(data);	
     },
