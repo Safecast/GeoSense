@@ -43,7 +43,7 @@ var COLOR_RANGE = 2;
 
 var taggedObjects = [
 	new TaggedObject('globe', [
-		new ObjectTag('Right-Hand-3', [0, 0, 0])
+		new ObjectTag((getURLParameter('globe') || 'Right-Hand-3'), [0, 0, 0])
 	]),
 	new TaggedObject('lens', [
 		new ObjectTag('Left-Hand-1', [-6, -15, 35]),

@@ -305,6 +305,7 @@ window.MapOLView = window.MapViewBase.extend({
 				var maxRadius = 20;
 				var context = {
 	                getColor: function(feature) {
+	                    console.log(feature.attributes.color);
 	                    return feature.attributes.color;
 	                },
 	                getSize: function(feature) {
@@ -367,6 +368,9 @@ window.MapOLView = window.MapViewBase.extend({
 		currPoint = new OpenLayers.Geometry.Point(lng, lat);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
+		// TODO: Replace VectorPt
+		opts.colour = opts.color;
+
 		var vector = new OpenLayers.Feature.Vector(currPoint, opts);
 		this.layerArray[collectionId].features.push(vector);		
     },

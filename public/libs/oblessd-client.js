@@ -4,7 +4,7 @@ var OblessdClient = function(options) {
 
     var connect = function()
     {
-        ws = new Socket("ws://18.85.58.17:8080/");
+        ws = new Socket("ws://18.85.58.62:8080/");
         var initialGlobeLoc; 
         var handTracker;
 

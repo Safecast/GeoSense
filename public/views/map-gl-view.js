@@ -34,6 +34,10 @@ window.MapGLView = window.MapViewBase.extend({
     updateTaggedObject: function(obj)
     {
     	if (!this.globe) return;
+
+		this.globe.camera.lookAt(this.globe.world.position);
+		this.globe.camera.position = new THREE.Vector3().copy(this.globe.world.position);
+		this.globe.camera.position.z += radius * 3; 
     	
 		switch (obj.name) {
 			case 'globe':
@@ -64,6 +68,7 @@ window.MapGLView = window.MapViewBase.extend({
 
 				break;
 			case 'lens':
+				break;
 				// set camera position and up vectors to respective lens tag vectors
 				this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
 				this.globe.camera.up = new THREE.Vector3().cross(obj.norm, obj.over);
