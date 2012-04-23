@@ -11,6 +11,37 @@ var lpad = function(str, padString, length) {
     return str;
 }
 
+// Returns the week number for this date.  dowOffset is the day of week the week.
+// "starts" on for your locale - it can be from 0 to 6. If dowOffset is 1 (Monday),
+// the week returned is the ISO 8601 week number.
+// @param int dowOffset
+// @return int
+var getWeek = function(date, dowOffset) {
+	dowOffset = typeof(dowOffset) == 'int' ? dowOffset : 0; //default dowOffset to zero
+	var newYear = new Date(date.getFullYear(),0,1);
+	var day = newYear.getDay() - dowOffset; //the day of week the year begins on
+	day = (day >= 0 ? day : day + 7);
+	var daynum = Math.floor((date.getTime() - newYear.getTime() - 
+	(date.getTimezoneOffset()-newYear.getTimezoneOffset())*60000)/86400000) + 1;
+	var weeknum;
+	//if the year starts before the middle of a week
+	if(day < 4) {
+		weeknum = Math.floor((daynum+day-1)/7) + 1;
+		if(weeknum > 52) {
+			nYear = new Date(date.getFullYear() + 1,0,1);
+			nday = nYear.getDay() - dowOffset;
+			nday = nday >= 0 ? nday : nday + 7;
+			/*if the next year starts before the middle of
+ 			  the week, it is week #1 of that year*/
+			weeknum = nday < 4 ? 1 : 53;
+		}
+	}
+	else {
+		weeknum = Math.floor((daynum+day-1)/7);
+	}
+	return weeknum;
+};
+
 var ReductionKey = {
 	copy: function(value) {
 		return value;
@@ -33,10 +64,13 @@ var ReductionKey = {
 	},
 	Weekly: function(t) {
 		this.get = function(t) {
-			var onejan = new Date(t.getFullYear(), 0, 1);
-			var week = Math.ceil((((t - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+			var week = getWeek(t, 1);
 			var day = t.getDay(),
 		      diff = t.getDate() - day + (day == 0 ? -6 : 1);
+			
+			print(t.getFullYear() + '-' + week);
+			print(t);
+
 			return [
 				t.getFullYear() + '' + lpad(week, '0', 2),
 				new Date(t.setDate(diff))
@@ -167,7 +201,8 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		,scope: {
 			value_fields: value_fields,
 			reduction_keys: reduction_keys,
-			lpad: lpad
+			lpad: lpad,
+			getWeek: getWeek
 		}
 		,verbose: true
 		,keeptemp: true
@@ -251,22 +286,25 @@ use geo;
 
 for (var i in GRID_SIZES) {
 	var grid_size = GRID_SIZES[i];
-	reducePoints({
+	print('*** grid size = '+grid_size+' ***');
+	/*reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size)
 	});
-	/*
+	*/
+	
 	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Weekly()
 	});
-	*/
+	/*
 	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Yearly()
 	});
+*/
 	/*reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 

@@ -173,8 +173,7 @@ app.post('/api/data/:file', function(req, res){
 					return parseFloat(this.get('mag'));
 				}
 				,datetime: function() {
-					var d = Date.parse(String(this.get('year')), String(this.get('month')), String(this.get('day')));
-					return new Date(d);
+					return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
 				}
 				,loc: function() {
 					var loc = this.get('location').split(', ');
@@ -598,14 +597,14 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 			var command = {
 				mapreduce: collectionName,
 				query: pointQuery,
-				//sort: {'value.datetime': 1},
 				map: function() {
-					var epoch = new Date(this.value.datetime).getTime() / 1000;
-					emit(epoch, {
+					//var epoch = new Date(this.value.datetime).getTime() / 1000;
+					emit(this.value.datetime, {
 						val: this.value.val.sum,
 						count: this.value.val.count,
 						datetime: this.value.datetime
 					});
+					print(this.value.datetime);
 				}.toString(),
 				reduce: function(key, values) {
 					var result = {
