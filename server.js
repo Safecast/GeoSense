@@ -945,25 +945,15 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 		colorType : Number(jsonObject.colorType)
 	}
 	
-	var link = {
-		collectionid: collectionid,
-		defaults: options
-	};
-
 	Map.findOne({publicslug: publicslug}, function(err, map) {
 		if (!err && map) {
-			var keepCollections = [];
 			for (var i = 0; i < map.collections.length; i++) {
-				if (map.collections[i].collectionid != collectionid) {
-					keepCollections.push(map.collections[i]);
-					break;
-				}
-				else
-				{
-					keepCollections.push(link);
+				if (map.collections[i].collectionid == collectionid) {
+					map.collections[i].defaults = options;
+					console.log('set new opts');
 				}
 			}
-			map.collections = keepCollections;			
+
 			map.save();	
 			res.send('');
 			
