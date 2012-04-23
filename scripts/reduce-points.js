@@ -274,7 +274,7 @@ var reducePoints = function(reduction_keys) {
 		avg: 1,
 		collectionid: 1
 	}, {
-		limit: null
+		limit: 20000
 	});
 };
 
@@ -283,11 +283,10 @@ use geo;
 for (var i in GRID_SIZES) {
 	var grid_size = GRID_SIZES[i];
 	print('*** grid size = '+grid_size+' ***');
-	/*reducePoints({
+	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size)
 	});
-	*/
 	
 	reducePoints({
 		collectionid: ReductionKey.copy, 
