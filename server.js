@@ -557,7 +557,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 		case 'w':
 			time_grid = 'weekly';
 			break;
-		case 't':
+		case 'd':
 			time_grid = 'daily';
 			break;
 	}
