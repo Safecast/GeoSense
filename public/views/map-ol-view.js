@@ -441,16 +441,16 @@ window.MapOLView = window.MapViewBase.extend({
 				      { visibility: _visibility },
 				      { lightness: 45 },
 				      { invert_lightness: true },
-				      { gamma: 0.88 },
+				      { gamma: 1.3 },
 
 					]	
 			  },
 			  {
-    featureType: "administrative",
-    stylers: [
-      { visibility: "off" }
-    ]
-  }
+			    featureType: "administrative",
+			    stylers: [
+			      { visibility: "off" }
+			    ]
+			  }
 			];
 		} else if (theme == 'none')
 		{
