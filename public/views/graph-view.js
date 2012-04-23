@@ -64,6 +64,8 @@ window.GraphView = Backbone.View.extend({
 
 	updateGraphCollections: function(visibleMapArea)
 	{
+		
+
 		var self = this;
 		console.log('updating graph collection!');
 
@@ -85,9 +87,11 @@ window.GraphView = Backbone.View.extend({
 			self.graphSeries.push(series);
 		});
 
-		//console.log('-- graph series');
-		//console.log(self.graphSeries);
 		//TODO: Update graph
+
+		if(this.graph == undefined)
+		 	return;
+
 		this.drawGraph();
 	},
 	
