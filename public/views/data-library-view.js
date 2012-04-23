@@ -43,7 +43,7 @@ window.DataLibrary = Backbone.View.extend({
 			type: 'GET',
 			url: '/api/pointcollections',
 			success: function(data) {
-				
+
 				$.each(data, function(key, val) { 
 					//Check to see if the map already has the collection
 					valStr = String(val.collectionid);
@@ -79,7 +79,7 @@ window.DataLibrary = Backbone.View.extend({
 	
 	drawDataSource: function(data)
 	{
-		dataDiv = '<div class="data-item" id="dragLabel" data="'+data.collectionid+'"><div class="data-icon"></div><div class="data-title">'+data.title+'</div></div>'
+		dataDiv = '<div class="data-item" id="dragLabel" data="'+data._id+'"><div class="data-icon"></div><div class="data-title">'+data.title+'</div></div>'
 		this.$('.data-container').append(dataDiv);
 	},
 	

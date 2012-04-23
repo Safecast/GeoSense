@@ -67,10 +67,6 @@ var ReductionKey = {
 			var week = getWeek(t, 1);
 			var day = t.getDay(),
 		      diff = t.getDate() - day + (day == 0 ? -6 : 1);
-			
-			print(t.getFullYear() + '-' + week);
-			print(t);
-
 			return [
 				t.getFullYear() + '' + lpad(week, '0', 2),
 				new Date(t.setDate(diff))
