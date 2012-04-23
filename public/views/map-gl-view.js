@@ -27,7 +27,7 @@ window.MapGLView = window.MapViewBase.extend({
 	{
 		return {
 			bounds: [[-180, -90], [180, 90]],
-			zoom: 0
+			zoom: -1
 		};
 	},
 
@@ -154,7 +154,6 @@ window.MapGLView = window.MapViewBase.extend({
 	    this.globe = new DAT.Globe(container);
 
 	    this.animate();
-	    console.log('mapReady?');
 		this.vent.trigger('mapReady');
 
 	    /*
@@ -187,6 +186,7 @@ window.MapGLView = window.MapViewBase.extend({
 	
 	},
 
+	/*
 	createPointWidget: function(cls, lat, lng, val, initObj)
 	{
 		//var position = this.convertSphericalToCartesian(lat, lng);
@@ -205,20 +205,86 @@ window.MapGLView = window.MapViewBase.extend({
 		}
 		this.widgets[id].push(widget);
 	},
+	*/
 
-	addCollectionToMap: function(collection)
+	/**
+	* Required to be implemented by descendants.
+	*/
+	initLayerForCollection: function(collection)
+	{
+		this.layerArray[collection.collectionId] = {
+			data: [],
+			colors: []
+		}; 
+	},
+
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+    addPointToLayer: function(model, opts, collectionId) 
+    {
+    	var loc = model.get('loc');
+    	this.layerArray[collectionId].data.push(loc[1]);
+    	this.layerArray[collectionId].data.push(loc[0]);
+    	var val = model.get('val') / opts.max;
+    	this.layerArray[collectionId].data.push(val);
+    	this.layerArray[collectionId].colors.push(
+    		opts.color.replace('#', '0x'));
+    },
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+	drawLayerForCollection: function(collection) 
+	{
+		var colorIndex = 0;
+		var self = this;
+		this.globe.addData(this.layerArray[collection.collectionId].data, {
+			format: 'magnitude', 
+			name: collection.get('_id'), 
+			animated: false,
+			colorFn: function(val) {
+				var c = new THREE.Color();
+				c.setHex(self.layerArray[collection.collectionId].colors[colorIndex]);
+				colorIndex++;
+				return c;
+			}
+		});
+		this.globe.createPoints();
+	},
+
+
+
+	_addCollectionToMap: function(collection)
 	{
 		var self = this;
 		this.vent.trigger("setStateType", 'drawing');
 
-				
+		this.__addData = []; 				
 		MapOLView.__super__.addCollectionToMap.call(this, collection);
 
+		this.globe.addData(this.__addData, {
+			format: 'magnitude', 
+			name: collection.get('_id'), 
+			animated: false,
+			/*colorFn: function(val) {
+				
+				//var rainbow = new Rainbow();
+				//rainbow.setSpectrum(colorlow, colorhigh);		
+				//rainbow.setNumberRange(0, 1);
+				
+				var c = new THREE.Color();
+				c.setHex("0x" + color);
+				return c;
+			}*/
+		});
+		this.globe.createPoints();
 
 		this.vent.trigger("setStateType", 'complete');	
 	},
 
-    __addOne: function(model, collectionId) {
+    _addOne: function(model, collectionId) {
 		var self = this;
 		//Prep point for layer	
 		var collectionId = collectionId; 
@@ -236,24 +302,6 @@ window.MapGLView = window.MapViewBase.extend({
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;
-
-		// TODO: Crappy fix for points around the dateline -- look into layer.wrapDateLine		
-		var bounds = this.getVisibleMapArea().bounds;
-		if (bounds[0][0] < -180) {
-			//console.log('dateline left ');
-			if (lng > 0) {
-				lng = -180 - (180 - lng);
-			}
-		} else if (bounds[1][0] > 180) {
-			//console.log('dateline right ');
-			if (lng < 0) {
-				lng = 180 - (-180 - lng);
-			}
-		}
-
-		//Temporary super hack
-		// if(maxVal - minVal > 1000)
-		// 	maxVal = 500;
 		
 		if(colorType == 1) // Single color
 		{
@@ -268,19 +316,11 @@ window.MapGLView = window.MapViewBase.extend({
 			var hex = '#' + rainbow.colourAt(val);
 			gocolor = hex;
 		}
-			
-		currPoint = new OpenLayers.Geometry.Point(lng, lat);
-		//console.log('add point '+lng+','+lat);
-		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-		
-		var vector = new OpenLayers.Feature.Vector(currPoint, {
-	        colour: gocolor,
-		});
-
-		//Add point to proper layer (by found index)
-		//this.layerArray[collectionId].drawType;
-		//console.log(vector);
-		this.layerArray[collectionId].features.push(vector);		
+					
+		console.log('gl addone');
+		this.__addData.push(lat);		
+		this.__addData.push(lng);		
+		this.__addData.push(val);		
     },
 
 	
@@ -365,7 +405,7 @@ window.MapGLView = window.MapViewBase.extend({
 			//Do something here
 	},
 
-    addOne: function(model) 
+    /*addOne: function(model) 
     {
 		var self = this;
 		var pointColor = model.get('color');
@@ -385,6 +425,7 @@ window.MapGLView = window.MapViewBase.extend({
 			}));
 
     },
+    */
 
 	addOneComment: function(model) {
 		//If we want to add comments to globe

@@ -135,10 +135,62 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
+		this.vent.trigger("setStateType", 'drawing');
+		this.initLayerForCollection(collection);
 		collection.each(function(model) {
 			self.addOne(model, collection.collectionId);
 		});
+		this.drawLayerForCollection(collection);
+		this.vent.trigger("setStateType", 'complete');	
 	},
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+	initLayerForCollection: function(collection)
+	{ 
+	},
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+    addPointToLayer: function(model, opts, collectionId) 
+    {
+    },
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+	drawLayerForCollection: function(collection) 
+	{
+	},
+
+    addOne: function(model, collectionId) 
+    {
+		var c = this.collections[collectionId];
+		var params = c.params;
+		var min = Number(c.minVal);
+		var max = Number(c.maxVal);
+		
+		var color;
+		switch (params.colorType) {
+			case COLOR_SOLID: 
+				color = params.color;
+				break;
+			case COLOR_RANGE:
+				var rainbow = new Rainbow();
+				rainbow.setSpectrum(params.colorLow, params.colorHigh);		
+				rainbow.setNumberRange(min, max);
+				color = '#' + rainbow.colourAt(model.get('val'));
+				break;
+		}
+
+		this.addPointToLayer(model, {
+			color: color,
+			min: min,
+			max: max,
+		}, collectionId);
+    },
 	
 	updateFromNewCollection: function(collection)
 	{

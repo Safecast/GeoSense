@@ -37,6 +37,9 @@ var CAMERA_FOV = 54.25;
 var SMOOTH_TWEEN_DURATION = 50;
 var CAMERA;
 var POLL_INTERVAL = 5000;
+var COLOR_SOLID = 1;
+var COLOR_RANGE = 2;
+
 
 var taggedObjects = [
 	new TaggedObject('globe', [

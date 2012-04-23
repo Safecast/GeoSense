@@ -3,6 +3,7 @@ GRID_SIZES[0] = .6;
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
+GRID_SIZES['-1'] = 2;
 
 var lpad = function(str, padString, length) {
 	var str = new String(str);
