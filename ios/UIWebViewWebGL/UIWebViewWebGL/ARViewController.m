@@ -48,7 +48,7 @@
 
   [backingWebView _setWebGLEnabled:YES];  
 
-  [self loadUrl:@"http://18.189.90.22:8124/aaPV23lNRJaXt3W/globe/?lens=1" addToHistory:YES];
+  [self loadUrl:@"http://sam-macbookair.media.mit.edu:8124/toLpaWT1900dmxm/globe/?lens=1" addToHistory:YES];
 
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];
