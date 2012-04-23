@@ -64,9 +64,11 @@ var _commentArray = [];
 var _num_data_sources = 0;
 var _loaded_data_sources = 0;
 var pointCollection = new Array();
+var timeBasedPointCollection = new Array();
+
 
 var _defaultMapStyle = 'dark';
-var _defaultMapLocation = 'Africa';
+var _defaultMapLocation = 'Japan';
 
 var _settingsVisible = false;
 var _graphVisible = false;

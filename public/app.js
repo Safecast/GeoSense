@@ -270,23 +270,10 @@ var AppRouter = Backbone.Router.extend({
 					newData: false,
 				};
 
+				//Fetch point collections for map(s)
+
 				pointCollection[scope.ajaxIndex] = new PointCollection(collectionOptions);
 				pointCollection[scope.ajaxIndex].setVisibleMapArea(self.mapView.getVisibleMapArea());
-
-				console.log(data.timebased);
-				if (1||data.timebased) {
-					// pseudo code
-					collectionOptions.urlParams = {
-						t: 'w'
-					};
-					var timeBasedPointCollection = new PointCollection(collectionOptions);
-					timeBasedPointCollection.setVisibleMapArea(self.mapView.getVisibleMapArea());
-					timeBasedPointCollection.fetch({success: function(data) {
-						console.log('fetched timebased');
-						console.log(data);
-					}});
-					// add to graph!
-				}
 
 				pointCollection[scope.ajaxIndex].fetch({success: function(data) {
 
@@ -298,7 +285,6 @@ var AppRouter = Backbone.Router.extend({
 					//self.addMapCollection(data.collectionId, pointCollection[data.collectionId]);
 					self.mapView.addCollection(data);
 					
-					self.addGraphCollection(data.collectionId, pointCollection[data.collectionId]);
 					
 					_loaded_data_sources += 1;
 					if(_loaded_data_sources == _num_data_sources)
@@ -307,6 +293,18 @@ var AppRouter = Backbone.Router.extend({
 					self.vent.trigger("setStateType", 'complete');
 											
 				}});
+
+				//Fetch time based point collections for graph
+				if (1||data.timebased) {
+					collectionOptions.urlParams = {
+						t: 'w'
+					};
+					timeBasedPointCollection[scope.ajaxIndex] = new PointCollection(collectionOptions);
+					timeBasedPointCollection[scope.ajaxIndex].setVisibleMapArea(self.mapView.getVisibleMapArea());
+					timeBasedPointCollection[scope.ajaxIndex].fetch({success: function(data) {
+						self.graphView.addCollection(data.collectionId, timeBasedPointCollection[data.collectionId]);
+					}});
+				}
 					
 			},
 			error: function() {
@@ -336,18 +334,6 @@ var AppRouter = Backbone.Router.extend({
 			}
 		});	
 	},
-
-	/*addData: function (options)
-	{
-		var self = this;
-		var pointCollectionId = options.collectionId;
-				
-		app.addExistingDataSource(uniqid, 'newData');
-		this.bindCollectionToMap(defaults);
-		
-		$('#addDataModal').modal('hide');
-		this.vent.trigger("setStateType", 'post');
-	},*/
 	
 	addCommentData: function(options)
 	{		
@@ -363,17 +349,6 @@ var AppRouter = Backbone.Router.extend({
 	addSideBarDataView:function (options) {
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
-	},
-	
-	addGraphCollection: function(id, collection)
-	{
-		this.graphView.addCollection(id, collection);
-	},
-	
-	uniqId: function ()
-	{
-	    var newDate = new Date;
-	    return newDate.getTime();
 	},
 
 });

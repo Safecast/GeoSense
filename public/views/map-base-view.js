@@ -42,6 +42,10 @@ window.MapViewBase = Backbone.View.extend({
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
 		});
+
+		this.vent.trigger("updateGraphCollections", visibleMapArea);
+
+		//TODO: Update graph collections
 	},
 
 	addCollection: function(collection)
@@ -63,7 +67,6 @@ window.MapViewBase = Backbone.View.extend({
 						self.collections[link.collectionid].bind('add', self.addOne, self);
 						self.addCollectionToMap(self.collections[link.collectionid]);
 						self.vent.trigger("setStateType", 'complete');
-						
 
 					}	
 				});
@@ -74,32 +77,6 @@ window.MapViewBase = Backbone.View.extend({
 			}
 		});
 		
-	},
-	
-	fetchParameters: function()
-	{
-		var self = this;
-		$.ajax({
-			type: 'GET',
-			url: '/api/map/' + _mapId,
-			success: function(data) {
-				
-				$.each(data[0].collections, function(key, collection) { 
-					$.each(collection, function(key, val) { 
-						if(key == 'collectionid')
-						{
-							if(self.collectionId == val)
-								self.setParameters(collection);
-								_boundCollections[self.collectionId] = collection;
-						}	
-					});
-				});
-				
-			},
-			error: function() {
-				console.error('failed to fetch map collection');
-			}
-		});
 	},
 	
 	addCommentCollection: function(collection)
@@ -129,8 +106,6 @@ window.MapViewBase = Backbone.View.extend({
 
 	addCollectionToMap: function(collection)
 	{
-		console.log('collection');
-		console.log(collection);
 		var self = this;
 		this.vent.trigger("setStateType", 'drawing');
 		

@@ -4,15 +4,9 @@ Point = Backbone.Model.extend({
 	
 	defaults: function() {
 	      return {
-			collectionid: null,
-			date: Date,
-	        name:  'data point',
-	        location: '0,0',
-			lat: 0,
-			lon: 0,
+			datetime: Date,
+	        loc: [0,0],
 			val: 0,
-			colorlow: '#000000',
-			colorhigh: '#FFFFFF',
 	      };
 	    },
 });

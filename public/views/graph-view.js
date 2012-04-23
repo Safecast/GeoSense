@@ -9,20 +9,49 @@ window.GraphView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('graph'));	
 		this.vent = options.vent;
+		this.mapParams = {};
+
 		$(window).bind("resize", _.bind(this.resize, this));
 		
 		_.bindAll(this, "drawGraph");
 		this.vent.bind("drawGraph", this.drawGraph);
+
+		_.bindAll(this, "updateGraphCollections");
+		this.vent.bind("updateGraphCollections", this.updateGraphCollections);
+
+		//_.bindAll(this, "setToggleStates");
+		//options.vent.bind("setToggleStates", this.setToggleStates);	
 		
-		this.collections = {};
-		this.seriesData = [];
-		this.graphData = [];
+		this.collections = {}; //Bound collections
+		this.graphPoints = []; //Used to keep count through addOne
+		this.graphPointCollection = []; //Array of point collection objects (post addOne)
+		this.graphSeries = [] //Passed to graph during draw
+
+		this.fetchMapCollectionOptions();
     },
 
     render: function() {
 		$(this.el).html(this.template());
         return this;
     },
+
+    fetchMapCollectionOptions: function()
+	{
+		var self = this;
+		$.ajax({
+			type: 'GET',
+			url: '/api/map/' + _mapId,
+			success: function(data) {
+				
+				$.each(data[0].collections, function(key, collection) { 
+					self.mapParams[collection.collectionid] = collection;
+				});
+			},
+			error: function() {
+				console.error('failed to fetch map collection');
+			}
+		});
+	},
 
 	addCollection: function(id, collection)
 	{
@@ -32,44 +61,83 @@ window.GraphView = Backbone.View.extend({
 		this.collections[id].bind('add', this.addOne, this);
 		this.addCollectionToGraph(this.collections[id]);
 	},
+
+	updateGraphCollections: function(visibleMapArea)
+	{
+		$.each(this.collections, function(collectionid, collection) { 
+			collection.setVisibleMapArea(visibleMapArea);
+			collection.fetch();
+		});
+
+		//TODO: Update graph
+		//this.drawGraph();
+	},
 	
 	addCollectionToGraph: function(collection)
 	{
 		var self = this;
-		
 		var currCollection = collection.collectionId;
-	
-		//console.log(collection);
-		
+
+		this.graphPoints = [];	
+
 		collection.each(function(model) {
 			self.addOne(model, currCollection);
 		});
 
-		this.graphData.sort(function(a, b){
-		 return a.epoch-b.epoch
+		this.graphPoints.sort(function(a, b){
+			return a.epoch-b.epoch
 		});
+
+		var defaults = self.mapParams[currCollection].defaults
+		var colorType = defaults.colorType;
+
+		if(colorType == 1)
+		{
+			var color = defaults.color;
+
+		} else
+		{
+			var color = defaults.colorLow;
+		}
+
+		this.graphPointCollection.push(
+			{
+				points: this.graphPoints,
+				color: color
+			});
 	},
 
 	resize: function()
 	{
-		//Replace with a graph update when Rickshaw.js is updated
-		this.drawGraph();
+		if(this.graph)
+			this.graph.update({
+	   			width: $('#graphContainer').width(),
+	    		height: $('#graphContainer').height()
+			});
 	},
 	
 	updateGraph: function()
 	{
-		this.graph.update();
+		//this.graph.update();
 	},
 	
 	drawGraph: function()
 	{
-		// $.each(this.graphData, function(key, val) { 
-		// 	console.log(val.date);
-		// });
-		
-		this.seriesData.push(this.graphData);		
-		
 		var self = this;
+
+		console.log('Drawing le graph');
+
+		$.each(this.graphPointCollection, function(key, link) { 
+
+			series = {
+				color: self.graphPointCollection[key].color,
+				data: self.graphPointCollection[key].points,
+				name: 'Test'
+			}
+
+			self.graphSeries.push(series);
+		});
+		
 		this.$('#chart').empty();
 		this.$('#legendContainer').empty();
 		this.$('#legend').empty();
@@ -79,26 +147,14 @@ window.GraphView = Backbone.View.extend({
 			element: $('#chart').get(0),
 			width: $('#graphContainer').width(),
 			height: 300,
-			renderer: 'area',
-			series: [
-				{
-					color: "steelblue",
-					data: this.seriesData[0],
-					name: 'Earthquakes'
-				}
-			]
+			renderer: 'scatterplot',
+			series: self.graphSeries,
 		} );
-
-		var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-			graph: this.graph
-		});
 
 		var yAxis = new Rickshaw.Graph.Axis.Y({
 		    graph: this.graph,
 		    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
 		});
-		
-		yAxis.render();
 		
 		var time = new Rickshaw.Fixtures.Time();
 		var years = time.unit('year');
@@ -107,22 +163,26 @@ window.GraphView = Backbone.View.extend({
 				    timeUnit: years
 				});
 		
-				xAxis.render();
+		// var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+		// 	graph: this.graph
+		// });
 		
-		var slider = new Rickshaw.Graph.RangeSlider( {
-			graph: this.graph,
-			element: $('#slider')
-		});
+		// var slider = new Rickshaw.Graph.RangeSlider( {
+		// 	graph: this.graph,
+		// 	element: $('#slider')
+		// });
 		
-		var controls = new RenderControls( {
-			element: $('#side_panel').get(0),
-			graph: this.graph
-		} );
+		// var controls = new RenderControls( {
+		// 	element: $('#side_panel').get(0),
+		// 	graph: this.graph
+		// } );
 		
+		// this.$('#slider').css('margin-left',7)
+		// this.$('#slider').width($('#graphContainer').width() - 30);
+
+		yAxis.render();
+		xAxis.render();
 		this.graph.render();
-		
-		this.$('#slider').css('margin-left',7)
-		this.$('#slider').width($('#graphContainer').width() - 30);
 	},
 
     addOne: function(model, pointCollectionId) {
@@ -131,41 +191,29 @@ window.GraphView = Backbone.View.extend({
 		//Prep point for graph	
 		var collectionId = pointCollectionId; 
 		var name = model.get('name');
-
-		var location = model.attributes.loc;
-		var lon = location[0];
-		var lat = location[1];
-
 		var val = model.attributes.val;
 
 		var colorlow = model.attributes.colorlow;
 		var colorhigh = model.attributes.colorhigh;
-		var date = model.attributes.date;
+		var date = model.attributes.datetime;
+		var epoch = new Date(date).getTime()/1000;
 
-
-		//console.log(date);
-		var d = Date.parse(model.attributes.date);
-
-		//console.log(model);
-		
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;
+		var normVal = val/maxVal;
 		
-		normVal = val/maxVal;
-		
-		epoch = new Date(date).getTime()/1000;
-				
+		//console.log(epoch + " | " + normVal);
+
 		var data = { x: Number(epoch), y: Number(normVal), date: date, color:this};
-		//Need to pull color from params
-				
-		//this.graphData.push(data);	
+		
+		this.graphPoints.push(data);	
     },
 
 	reset: function(model) {
 		//this.removeCollectionFromMap(model);
 		if(model.length > 0)
-			console.log('add collection to graph: reset')
+			console.log('GraphView reset called')
 			//this.addCollectionToMap(this.collections[model.collectionId]);
 	},
 });
