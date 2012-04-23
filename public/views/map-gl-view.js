@@ -115,7 +115,7 @@ window.MapGLView = window.MapViewBase.extend({
 		renderer.render( scene, camera );
 		*/
 
-		this.stats.update();
+		if (this.stats) this.stats.update();
 		TWEEN.update();
 	},
 

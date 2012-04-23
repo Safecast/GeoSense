@@ -918,7 +918,7 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 	    	defaults: collection.defaults
 	    };
 
-		Map.update({ publicslug:publicslug }, { $push : { collections: link} }, function(err) {
+		Map.update({ publicslug: publicslug }, { $push : { collections: link} }, function(err) {
 	      if (!err) {
 	        console.log("collection bound to map");
 	        res.send('');
@@ -943,18 +943,23 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 		colorLow : String(jsonObject.colorLow),
 		color : String(jsonObject.color),
 		colorType : Number(jsonObject.colorType)
-	}
+	};
 	
 	Map.findOne({publicslug: publicslug}, function(err, map) {
 		if (!err && map) {
+			console.log(map._id);
 			for (var i = 0; i < map.collections.length; i++) {
 				if (map.collections[i].collectionid == collectionid) {
 					map.collections[i].defaults = options;
-					console.log('set new opts');
+					break;
 				}
 			}
 
-			map.save();	
+			Map.update({ publicslug: publicslug }, { $set : { collections: map.collections} }, function(err) {
+				if (!err) {
+					console.log('map updated');
+				}
+			});
 			res.send('');
 			
 		} else {
