@@ -618,7 +618,7 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 			
 		currPoint = new OpenLayers.Geometry.Point(lng, lat);
-		console.log('add point '+lng+','+lat);
+		//console.log('add point '+lng+','+lat);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
 		var vector = new OpenLayers.Feature.Vector(currPoint, {
