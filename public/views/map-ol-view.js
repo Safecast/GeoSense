@@ -588,13 +588,11 @@ window.MapOLView = window.MapViewBase.extend({
 		if (bounds[0][0] < -180) {
 			//console.log('dateline left ');
 			if (lng > 0) {
-				console.log(lng);
 				lng = -180 - (180 - lng);
 			}
 		} else if (bounds[1][0] > 180) {
 			//console.log('dateline right ');
 			if (lng < 0) {
-				console.log(lng);
 				lng = 180 - (-180 - lng);
 			}
 		}

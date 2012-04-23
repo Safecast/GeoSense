@@ -145,7 +145,20 @@ app.post('/api/data/:file', function(req, res){
 	var file = req.params.file;
 	var path = '/public/data/' + req.params.file;
 	var type =  file.split('.').pop();
-	
+
+	var ConversionError = function() {};
+
+	/**
+	* Converts a string like ' y.yyy ,  -xx.x' to [x, y]
+	*/	
+	var latLngWithCommaFromString = function(field) {
+		return function() {
+			var match = new String(this.get(field)).match(/^\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*$/);
+			if (match) return [parseFloat(match[2]), parseFloat(match[1])];
+			return new ConversionError();
+		}
+	};
+
 	switch(req.body.converter) {
 		
 		case 'Standard (loc, val, date)':
@@ -175,10 +188,7 @@ app.post('/api/data/:file', function(req, res){
 				,datetime: function() {
 					return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
 				}
-				,loc: function() {
-					var loc = this.get('location').split(', ');
-					return [parseFloat(loc[1]), parseFloat(loc[0])];
-				}
+				,loc: latLngWithCommaFromString('location')
 			};
 		
 		break;
@@ -193,10 +203,7 @@ app.post('/api/data/:file', function(req, res){
 					var d = Date.parse(String(this.get('year')));
 					return new Date(d);
 				}
-				,loc: function() {
-					var loc = this.get('location').split(', ');
-					return [parseFloat(loc[1]), parseFloat(loc[0])];
-				}
+				,loc: latLngWithCommaFromString('location')
 			};
 			
 		break;
@@ -232,6 +239,12 @@ app.post('/api/data/:file', function(req, res){
 		for (var destField in converters) {
 			var f = converters[destField];
 			doc[destField] = f.apply(data);
+			if (doc[destField] instanceof ConversionError) {
+				console.log('ConversionError on field '+destField);
+				return false;
+			} else {
+				//console.log(doc[destField]);
+			}
 		}
 		return new Point(doc);
 	}
@@ -297,24 +310,26 @@ app.post('/api/data/:file', function(req, res){
 							model.save(); 
 							
 							var point = convertOriginalToPoint(model, converter);
-							point.collectionid = newCollectionId;
-							point.created = new Date();
-							point.modified = new Date();
-							point.save();
-							
-							if (maxVal == undefined || maxVal < point.get('val')) {
-								maxVal = point.get('val');
-							}
+							if (point) {
+								point.collectionid = newCollectionId;
+								point.created = new Date();
+								point.modified = new Date();
+								point.save();
+								if (maxVal == undefined || maxVal < point.get('val')) {
+									maxVal = point.get('val');
+								}
 
-							if (minVal == undefined || minVal > point.get('val')) {
-								minVal = point.get('val');
+								if (minVal == undefined || minVal > point.get('val')) {
+									minVal = point.get('val');
+								}
+	
+								importCount++;
 							}
-
+	
 							delete model;
 							delete doc;
 							delete point;
 
-							importCount++;
 							if (importCount == 1 || importCount % 1000 == 0) {
 								console.log('saved ' + importCount + ' points to '+newCollectionId);
 							}
@@ -604,7 +619,6 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 						count: this.value.val.count,
 						datetime: this.value.datetime
 					});
-					print(this.value.datetime);
 				}.toString(),
 				reduce: function(key, values) {
 					var result = {

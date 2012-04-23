@@ -101,8 +101,14 @@ var ReductionKey = {
 		this.grid_size = grid_size;
 		this.get = function(loc) {
 			var grid_size = this.grid_size;
-			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))
-				|| loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) return;
+			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))) return;
+
+			if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
+				print('warning: ');
+				print(loc);
+				return;
+			}
+			
 			var lng = loc[0];
 			var lat = loc[1];
 			// Mongo manual: The index space bounds are inclusive of the lower bound and exclusive of the upper bound.
@@ -293,13 +299,12 @@ for (var i in GRID_SIZES) {
 		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Weekly()
 	});
-	/*
 	reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 
 		datetime: new ReductionKey.Yearly()
 	});
-*/
+
 	/*reducePoints({
 		collectionid: ReductionKey.copy, 
 		loc: new ReductionKey.LocGrid(grid_size), 

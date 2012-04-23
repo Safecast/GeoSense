@@ -93,10 +93,10 @@ window.MapViewBase = Backbone.View.extend({
     },
 
 	reset: function(model) {
-
 		this.removeCollectionFromMap(model);
-		if(model.length > 0)
+		if (model.length > 0) {
 			this.addCollectionToMap(this.collections[model.collectionId]);
+		}
 	},
 
 	resetComments: function(model) {
@@ -109,9 +109,8 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		this.vent.trigger("setStateType", 'drawing');
 		
-		if(!this.layerArray[collection.collectionId])
-		{
-			delete this.addCollectionAsLayer(collection);
+		if (!this.layerArray[collection.collectionId]) {
+			//delete this.addCollectionAsLayer(collection);
 		}
 		
 		this.addCollectionAsLayer(collection);
