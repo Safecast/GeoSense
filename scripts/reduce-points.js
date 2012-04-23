@@ -1,9 +1,15 @@
-var GRID_SIZES = {};
-GRID_SIZES[0] = .6;
+var GRID_SIZES = {
+	'-1': 2,
+	'0': .6
+};
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
-GRID_SIZES['-1'] = 2;
+
+var opts = {
+	limit: 20000
+};
+
 
 var lpad = function(str, padString, length) {
 	var str = new String(str);
@@ -191,7 +197,6 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		}
 		return value;
 	};
-	db[reduced_collection].drop();
 	if (!value_fields) {
 		value_fields = ['val'];
 	}
@@ -214,7 +219,8 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		for (k in options) {
 			params[k] = options[k];
 		}
-	} 
+	}
+
 	var info = [];
 	for (var k in reduction_keys) {
 		info.push(reduction_keys[k].name || k);
@@ -266,7 +272,7 @@ var collectionHasIndex = function(collection, key) {
 	return false;
 };
 
-var reducePoints = function(reduction_keys) {
+var reducePoints = function(reduction_keys, opts) {
 	var collection = 'points';
 	var info = ['r', collection];
 	for (var k in reduction_keys) {
@@ -275,40 +281,51 @@ var reducePoints = function(reduction_keys) {
 		}
 	}
 	var reduced_collection = info.join('_');
-	db[reduced_collection].drop();
+	if (opts.query && opts.query.collectionid) {
+		print('* removing existing points for '+opts.query.collectionid);
+		db[reduced_collection].remove({
+			'value.collectionid': opts.query.collectionid
+		});
+	} else {
+		print('* dropping '+reduced_collection);
+		db[reduced_collection].drop();
+	}
 	return runGridReduce(collection, reduced_collection, ['val'], reduction_keys, {
 		count: 1,
 		avg: 1,
 		collectionid: 1
-	}, {
-		limit: 20000
-	});
+	}, opts);
 };
 
 use geo;
+var cur = db.pointcollections.find({});
+cur.forEach(function(collection) {
+	print('*** collection = '+collection.title+' ('+collection._id+') ***');
+	opts.query = {collectionid: collection._id.toString()};
+	print(opts.query.collectionid);
+	for (var g in GRID_SIZES) {
+		var grid_size = GRID_SIZES[g];
+		print('*** grid = '+g+' ***');
+		reducePoints({
+			collectionid: ReductionKey.copy, 
+			loc: new ReductionKey.LocGrid(grid_size)
+		}, opts);
+		
+		reducePoints({
+			collectionid: ReductionKey.copy, 
+			loc: new ReductionKey.LocGrid(grid_size), 
+			datetime: new ReductionKey.Weekly()
+		}, opts);
+		reducePoints({
+			collectionid: ReductionKey.copy, 
+			loc: new ReductionKey.LocGrid(grid_size), 
+			datetime: new ReductionKey.Yearly()
+		}, opts);
 
-for (var i in GRID_SIZES) {
-	var grid_size = GRID_SIZES[i];
-	print('*** grid size = '+grid_size+' ***');
-	reducePoints({
-		collectionid: ReductionKey.copy, 
-		loc: new ReductionKey.LocGrid(grid_size)
-	});
-	
-	reducePoints({
-		collectionid: ReductionKey.copy, 
-		loc: new ReductionKey.LocGrid(grid_size), 
-		datetime: new ReductionKey.Weekly()
-	});
-	reducePoints({
-		collectionid: ReductionKey.copy, 
-		loc: new ReductionKey.LocGrid(grid_size), 
-		datetime: new ReductionKey.Yearly()
-	});
-
-	/*reducePoints({
-		collectionid: ReductionKey.copy, 
-		loc: new ReductionKey.LocGrid(grid_size), 
-		datetime: new ReductionKey.Daily()
-	});*/
-}
+		/*reducePoints({
+			collectionid: ReductionKey.copy, 
+			loc: new ReductionKey.LocGrid(grid_size), 
+			datetime: new ReductionKey.Daily()
+		});*/
+	}
+});

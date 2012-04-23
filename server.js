@@ -1,9 +1,10 @@
-var GRID_SIZES = {};
-GRID_SIZES[0] = .6;
+var GRID_SIZES = {
+	'-1': 2,
+	'0': .6
+};
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
-GRID_SIZES['-1'] = 2;
 
 var application_root = __dirname,
   	express = require("express"),
