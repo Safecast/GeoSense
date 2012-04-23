@@ -205,8 +205,86 @@ window.MapGLView = window.MapViewBase.extend({
 		}
 		this.widgets[id].push(widget);
 	},
-	
+
 	addCollectionToMap: function(collection)
+	{
+		var self = this;
+		this.vent.trigger("setStateType", 'drawing');
+
+				
+		MapOLView.__super__.addCollectionToMap.call(this, collection);
+
+
+		this.vent.trigger("setStateType", 'complete');	
+	},
+
+    __addOne: function(model, collectionId) {
+		var self = this;
+		//Prep point for layer	
+		var collectionId = collectionId; 
+		var label = model.get('name');
+		var loc = model.get('loc');
+		var lng = loc[0];
+		var lat = loc[1];
+		var val = model.get('val');
+		var color = this.collections[collectionId].params.color;
+		var colorlow = this.collections[collectionId].params.colorLow;
+		var colorhigh = this.collections[collectionId].params.colorHigh;
+		var colorType = this.collections[collectionId].params.colorType;
+		//var drawType = this.collections[collectionId].params.drawType;
+		
+		//Set min/max values		
+		var maxVal = this.collections[collectionId].maxVal;
+		var minVal = this.collections[collectionId].minVal;
+
+		// TODO: Crappy fix for points around the dateline -- look into layer.wrapDateLine		
+		var bounds = this.getVisibleMapArea().bounds;
+		if (bounds[0][0] < -180) {
+			//console.log('dateline left ');
+			if (lng > 0) {
+				lng = -180 - (180 - lng);
+			}
+		} else if (bounds[1][0] > 180) {
+			//console.log('dateline right ');
+			if (lng < 0) {
+				lng = 180 - (-180 - lng);
+			}
+		}
+
+		//Temporary super hack
+		// if(maxVal - minVal > 1000)
+		// 	maxVal = 500;
+		
+		if(colorType == 1) // Single color
+		{
+			gocolor = color;
+		}
+		else if(colorType == 2) // Color range
+		{
+			var rainbow = new Rainbow();
+			rainbow.setSpectrum(colorlow, colorhigh);		
+			rainbow.setNumberRange(Number(minVal), Number(maxVal));
+
+			var hex = '#' + rainbow.colourAt(val);
+			gocolor = hex;
+		}
+			
+		currPoint = new OpenLayers.Geometry.Point(lng, lat);
+		//console.log('add point '+lng+','+lat);
+		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+		
+		var vector = new OpenLayers.Feature.Vector(currPoint, {
+	        colour: gocolor,
+		});
+
+		//Add point to proper layer (by found index)
+		//this.layerArray[collectionId].drawType;
+		//console.log(vector);
+		this.layerArray[collectionId].features.push(vector);		
+    },
+
+	
+	__addCollectionToMap: function(collection)
 	{
 		console.log('addCollectionToMap');
 		console.log('collection');
