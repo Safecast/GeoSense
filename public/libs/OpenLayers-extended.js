@@ -281,6 +281,7 @@ OpenLayers.Layer.VectorPt = OpenLayers.Class(OpenLayers.Layer, {
         this.features = [];
         this.selectedFeatures = [];
         this.unrenderedFeatures = {};
+        console.log('---dateline '+this.wrapDateLine);
         if (this.strategies) for (var a = 0, b = this.strategies.length; a < b; a++) this.strategies[a].setLayer(this)
     },
     destroy: function () {

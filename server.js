@@ -517,24 +517,36 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 
 	if (urlObj.query.b && urlObj.query.b.length == 4) {
 		var b = urlObj.query.b;
+		console.log('bounds:');	
+		console.log(b);
+
 		for (var i = 0; i < 4; i++) {
 			b[i] = parseFloat(b[i]) || 0;
-			if (b[i] > 180) {
-				b[i] = -180 + b[i] % 180;
-			} else if (b[i] < -180) {
-				b[i] = 180 + b[i] % 180;
-			}
 		}
 
-		var box = [[b[0], b[1]], [b[2], b[3]]];
+		var boxes;
 
-		//var box = [[Math.min(b[0], b[2]), Math.min(b[1], b[3])], 
-		//	[Math.max(b[0], b[2]), Math.max(b[1], b[3])]];
+		// Mongo currently doesn't handle the transition around the dateline (x = +-180)
+		// This, if the bounds contain the dateline, we need to query for the box to 
+		// the left and the box to the right of it. 
+		if (b[0] < -180) {
+			boxes = [
+				[[180 + b[0] % 180, b[1]], [180, b[3]]],
+				[[-180, b[1]], [b[2], b[3]]]
+			];
+		} else if (b[2] > 180) {
+			boxes = [
+				[[b[0], b[1]], [180, b[3]]],
+				[[-180, b[1]], [-180 + b[2] % 180, b[3]]]
+			];
+		} else {
+			boxes = [
+				[[b[0], b[1]], [b[2], b[3]]]
+			];
+		}
 
-		console.log('query with bounds:');
-		console.log(box);
-
-		pointQuery['value.loc'] = {$within: {$box : box}};
+		console.log('query within boxes: '+boxes.length);
+		console.log(boxes);
 	}
 
 	var time_grid = false;
@@ -551,40 +563,81 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 	}
 
 	var collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
-	console.log('querying '+collectionName);
+
 	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+	var points = [];
+	var originalCount = 0;
+	console.log('querying '+collectionName);
 
-	ReducedPoint.find(pointQuery, function(err, datasets) {
-		console.log('Found '+datasets.length+' reduction points');
-		if (!err) {
-			var points = [];
-			for (var i = 0; i < datasets.length; i++) {
-				var reduced = datasets[i].get('value');
-				var p = {
-					val: reduced.val.avg,
-					loc: [reduced.loc[0], reduced.loc[1]],
-				};
-				if (time_grid) {
-					p.datetime = reduced.datetime;
-				}
-				points.push(p);
-			}
+	var dequeueBoxQuery = function() {
+		if (!boxes.length) {
+			console.log('Found '+points.length+' reduction points for '+originalCount+' original points.');
 			res.send(points);
+			return;
 		}
-	});
 
-	return;
+		var box = boxes.shift();
+		pointQuery['value.loc'] = {$within: {$box : box}};
 
-	Point.find({collectionid:req.params.pointcollectionid}, function(err, point) {
-		if (!err) {
-			res.send(point);
+		if (!time_grid) {
+			ReducedPoint.find(pointQuery, function(err, datasets) {
+				if (err) return;
+				for (var i = 0; i < datasets.length; i++) {
+					var reduced = datasets[i].get('value');
+					var p = {
+						val: reduced.val.avg,
+						count: reduced.val.count,
+						loc: [reduced.loc[0], reduced.loc[1]],
+					};
+					points.push(p);
+					originalCount += p.count;
+				}
+				dequeueBoxQuery();
+			});
+		} else {
+			var command = {
+				mapreduce: collectionName,
+				query: pointQuery,
+				//sort: {'value.datetime': 1},
+				map: function() {
+					var epoch = new Date(this.value.datetime).getTime() / 1000;
+					emit(epoch, {
+						val: this.value.val.sum,
+						count: this.value.val.count,
+						datetime: this.value.datetime
+					});
+				}.toString(),
+				reduce: function(key, values) {
+					var result = {
+						val: 0,
+						count: 0,
+						datetime: values[0].datetime
+					};
+					values.forEach(function(value) {
+						result.val += value.val;
+						result.count += value.count;
+					});
+					return result;
+				}.toString(),
+				finalize: function(key, value) {
+					value.val /= value.count;
+					return value;
+				}.toString(),
+				out: {inline: 1}
+			};
+			mongoose.connection.db.executeDbCommand(command, function(err, res) {
+				var datasets = res.documents[0].results;
+				for (var i = 0; i < datasets.length; i++) {
+					var p = datasets[i].value;
+					points.push(p);
+					originalCount += p.count;
+				}
+				dequeueBoxQuery();
+			});
 		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-  	}).sort('date', 1);
+	}
 
+	dequeueBoxQuery();
 });
 
 /*

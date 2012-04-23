@@ -128,7 +128,7 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		//this.detectMapClick();
 		
-		if(DEBUG)
+		if(DEBUG) 
 			this.map.addControl(new OpenLayers.Control.MousePosition());
 						
 		this.setMapLocation(_defaultMapLocation);
@@ -293,7 +293,8 @@ window.MapOLView = window.MapViewBase.extend({
 				var layer = new OpenLayers.Layer.VectorPt(null, {
 							projection: new OpenLayers.Projection("EPSG:4326"),
 							sphericalMercator: true,
-				    		renderers: ["Canvas2"]
+				    		renderers: ["Canvas2"],
+				    		wrapDateLine: true
 				});
 
 				break;
@@ -581,7 +582,23 @@ window.MapOLView = window.MapViewBase.extend({
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;
 		var minVal = this.collections[collectionId].minVal;
-		
+
+		// TODO: Crappy fix for points around the dateline -- look into layer.wrapDateLine		
+		var bounds = this.getVisibleMapArea().bounds;
+		if (bounds[0][0] < -180) {
+			//console.log('dateline left ');
+			if (lng > 0) {
+				console.log(lng);
+				lng = -180 - (180 - lng);
+			}
+		} else if (bounds[1][0] > 180) {
+			//console.log('dateline right ');
+			if (lng < 0) {
+				console.log(lng);
+				lng = 180 - (-180 - lng);
+			}
+		}
+
 		//Temporary super hack
 		// if(maxVal - minVal > 1000)
 		// 	maxVal = 500;
@@ -601,9 +618,10 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 			
 		currPoint = new OpenLayers.Geometry.Point(lng, lat);
+		console.log('add point '+lng+','+lat);
 		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
-		vector = new OpenLayers.Feature.Vector(currPoint, {
+		var vector = new OpenLayers.Feature.Vector(currPoint, {
 	        colour: gocolor,
 		});
 
