@@ -49,7 +49,7 @@ window.HeaderView = Backbone.View.extend({
 	},
 	
 	setTitle: function() {
-		this.$('.brand').html('<h1>GEOKIT</h1><h3>'+this.mapName+'</h3>');
+		this.$('.brand').html('<h1>GEOSENSE</h1><h3>'+this.mapName+'</h3>');
 	},
 
 	settingsButtonClicked: function() {

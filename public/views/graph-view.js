@@ -152,7 +152,7 @@ window.GraphView = Backbone.View.extend({
 		this.graph = new Rickshaw.Graph( {
 			element: document.getElementById("chart"),
 			width: this.$('#graphContainer').width(),
-			height: 200,
+			height: 300,
 			renderer: 'area',
 			series: self.graphSeries,
 		} );
