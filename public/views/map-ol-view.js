@@ -112,7 +112,6 @@ window.MapOLView = window.MapViewBase.extend({
 						// Since the loadend event does not seem to be fired on the gmap layer,
 						// we just register a google event on the google map object directly.
 						google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
-							console.log('mapReady');
 							self.vent.trigger('mapReady');
 						});
 					}
@@ -269,6 +268,21 @@ window.MapOLView = window.MapViewBase.extend({
         })
 	
 		this.map.addLayers([kml]);
+	},
+
+	addCollectionToMap: function(collection)
+	{
+		var self = this;
+		this.vent.trigger("setStateType", 'drawing');
+		
+		/*if (!this.layerArray[collection.collectionId]) {
+			delete this.addCollectionAsLayer(collection);
+		}*/
+		
+		this.addCollectionAsLayer(collection);
+		MapOLView.__super__.addCollectionToMap.call(this, collection);
+		this.layerArray[collection.collectionId].redraw();
+		this.vent.trigger("setStateType", 'complete');	
 	},
 	
 	addCollectionAsLayer: function(collection, renderer)

@@ -23,6 +23,14 @@ window.MapGLView = window.MapViewBase.extend({
     	this.tweens = {};
     },
 
+	getVisibleMapArea: function()
+	{
+		return {
+			bounds: [[-180, -90], [180, 90]],
+			zoom: 0
+		};
+	},
+
     updateTaggedObject: function(obj)
     {
     	if (!this.globe) return;
@@ -146,6 +154,8 @@ window.MapGLView = window.MapViewBase.extend({
 	    this.globe = new DAT.Globe(container);
 
 	    this.animate();
+	    console.log('mapReady?');
+		this.vent.trigger('mapReady');
 
 	    /*
 	    var data = [];
@@ -198,6 +208,8 @@ window.MapGLView = window.MapViewBase.extend({
 	
 	addCollectionToMap: function(collection)
 	{
+		console.log('addCollectionToMap');
+		console.log('collection');
 		var self = this;
 		var data = [];
 		var maxVal = 0;

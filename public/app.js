@@ -16,6 +16,10 @@ var AppRouter = Backbone.Router.extend({
     initialize:function() {
 		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
+		this.vent.bind('mapReady', function() {
+			console.log('mapReady -- fetch collections');
+			self.fetchCollections();
+		});
     }, 
 
 	render:function(state)
@@ -41,13 +45,10 @@ var AppRouter = Backbone.Router.extend({
 		this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
-
-		this.vent.bind("mapReady", function() {
-			self.fetchCollections();
-		});
 		
-		if(_setupRoute)
+		if(_setupRoute) {
 			$('#setupModal').modal('show');	
+		}
 	},
 
 	setUniqueMapName: function(name)
@@ -245,6 +246,8 @@ var AppRouter = Backbone.Router.extend({
 	{
 		var self = this;
 		
+		console.log('addExistingDataSource');
+
 		$.ajax({
 			type: 'GET',
 			ajaxIndex: index,

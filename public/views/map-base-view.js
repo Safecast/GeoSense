@@ -49,7 +49,9 @@ window.MapViewBase = Backbone.View.extend({
 	},
 
 	addCollection: function(collection)
-	{		
+	{	
+		console.log('addCollection');
+
 		var self = this;
 		$.ajax({
 			type: 'GET',
@@ -107,21 +109,9 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
-		this.vent.trigger("setStateType", 'drawing');
-		
-		if (!this.layerArray[collection.collectionId]) {
-			//delete this.addCollectionAsLayer(collection);
-		}
-		
-		this.addCollectionAsLayer(collection);
-		
 		collection.each(function(model) {
 			self.addOne(model, collection.collectionId);
 		});
-			
-		this.layerArray[collection.collectionId].redraw();
-	 
-		this.vent.trigger("setStateType", 'complete');	
 	},
 	
 	updateFromNewCollection: function(collection)
