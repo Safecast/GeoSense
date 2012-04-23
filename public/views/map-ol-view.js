@@ -592,6 +592,9 @@ window.MapOLView = window.MapViewBase.extend({
 		var colorhigh = this.collections[collectionId].params.colorHigh;
 		var colorType = this.collections[collectionId].params.colorType;
 		//var drawType = this.collections[collectionId].params.drawType;
+
+		console.log(color);
+
 		
 		//Set min/max values		
 		var maxVal = this.collections[collectionId].maxVal;

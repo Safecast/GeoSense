@@ -283,8 +283,8 @@ window.SideBarDataView = Backbone.View.extend({
 				success: function(data) {
 					self.disableUpdateButton();
 					self.setLegendColor();
-					self.vent.trigger("redrawLayer", self.collectionId);
-					
+					self.vent.trigger("redrawCollection", {collectionId: self.collectionId, updateObject:updateObject});
+
 				},
 				error: function() {
 					console.error('failed to join map with collection');

@@ -5,7 +5,10 @@ window.MapViewBase = Backbone.View.extend({
 		this.layerArray = {};
 		this.vent = options.vent;
 		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);  
+		options.vent.bind("setMapLocation", this.setMapLocation);
+		
+		_.bindAll(this, "redrawCollection");
+		options.vent.bind("redrawCollection", this.redrawCollection);  
 	},
 
 	setMapLocation: function(addr)
@@ -38,6 +41,8 @@ window.MapViewBase = Backbone.View.extend({
 	
 	mapAreaChanged: function(visibleMapArea)
 	{
+		this.vent.trigger("setStateType", 'loading');
+
 		$.each(this.collections, function(collectionid, collection) { 
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
@@ -46,6 +51,27 @@ window.MapViewBase = Backbone.View.extend({
 		this.vent.trigger("updateGraphCollections", visibleMapArea);
 
 		//TODO: Update graph collections
+	},
+
+	redrawCollection: function(options)
+	{
+		var self = this;
+
+		var collectionId = options.collectionId;
+		var updateObject = options.updateObject;
+
+		this.collections[collectionId].params.color = updateObject.color;
+		this.collections[collectionId].params.colorHigh = updateObject.colorHigh;
+		this.collections[collectionId].params.colorLow = updateObject.colorLow;
+		this.collections[collectionId].params.colorType = updateObject.colorType;
+		this.collections[collectionId].params.displayType = updateObject.displayType;
+		this.collections[collectionId].params.visible = updateObject.visible;
+
+		$.each(this.collections, function(collectionid, collection) { 
+			if(collectionid == collectionId)
+				collection.fetch();
+		})
+
 	},
 
 	addCollection: function(collection)

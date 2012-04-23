@@ -148,6 +148,7 @@ window.GraphView = Backbone.View.extend({
 		var self = this;
 
 		console.log('Drawing le graph');
+		console.log(self.graphSeries);
 		
 		this.$('#chart').empty();
 		this.$('#legendContainer').empty();
@@ -160,6 +161,7 @@ window.GraphView = Backbone.View.extend({
 			height: 300,
 			renderer: 'line',
 			series: self.graphSeries,
+
 		} );
 
 		var yAxis = new Rickshaw.Graph.Axis.Y({
@@ -178,18 +180,23 @@ window.GraphView = Backbone.View.extend({
 		// 	graph: this.graph
 		// });
 		
-		// var slider = new Rickshaw.Graph.RangeSlider( {
-		// 	graph: this.graph,
-		// 	element: $('#slider')
-		// });
+		var slider = new Rickshaw.Graph.RangeSlider( {
+			graph: this.graph,
+			element: $('#slider')
+		});
 		
 		// var controls = new RenderControls( {
 		// 	element: $('#side_panel').get(0),
 		// 	graph: this.graph
 		// } );
 		
-		// this.$('#slider').css('margin-left',7)
-		// this.$('#slider').width($('#graphContainer').width() - 30);
+		this.$('#slider').css('margin-left',7)
+		this.$('#slider').width($('#graphContainer').width() - 30);
+
+		var legend = new Rickshaw.Graph.Legend({
+		    graph: this.graph,
+		    element: $('#graph').get(0),
+		});
 
 		yAxis.render();
 		xAxis.render();
