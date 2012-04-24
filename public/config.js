@@ -1,7 +1,7 @@
 /* Config 
 */
 
-var DEBUG = true;
+var DEBUG = false;
 if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
 
 function getURLParameter(paramName) {
