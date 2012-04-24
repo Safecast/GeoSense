@@ -49,7 +49,7 @@
 
   [backingWebView _setWebGLEnabled:YES];  
 
-  [self loadUrl:@"http://18.189.34.8:8124/toLpaWT1900dmxm/globe/?lens_tag=1" addToHistory:YES];
+  [self loadUrl:@"http://18.85.59.8:8124/toLpaWT1900dmxm/globe/?lens_tag=1" addToHistory:YES];
 
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];

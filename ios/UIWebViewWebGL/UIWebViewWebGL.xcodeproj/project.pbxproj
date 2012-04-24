@@ -32,7 +32,7 @@
 		22C295E8153DB7440066AAF3 /* ARViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARViewController.m; sourceTree = "<group>"; };
 		22E2D5341520D58E00991B0E /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
 		22E2D5351520D58E00991B0E /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
-		D89DC61814592F50000FC7C6 /* UIWebViewWebGL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UIWebViewWebGL.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D89DC61814592F50000FC7C6 /* GeoSense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GeoSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D89DC61C14592F50000FC7C6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D89DC61E14592F50000FC7C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D89DC62014592F50000FC7C6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -83,7 +83,7 @@
 		D89DC61914592F50000FC7C6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D89DC61814592F50000FC7C6 /* UIWebViewWebGL.app */,
+				D89DC61814592F50000FC7C6 /* GeoSense.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -144,7 +144,7 @@
 			);
 			name = GeoSense;
 			productName = UIWebViewWebGL;
-			productReference = D89DC61814592F50000FC7C6 /* UIWebViewWebGL.app */;
+			productReference = D89DC61814592F50000FC7C6 /* GeoSense.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
