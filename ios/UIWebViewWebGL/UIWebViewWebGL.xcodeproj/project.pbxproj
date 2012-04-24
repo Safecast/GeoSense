@@ -130,9 +130,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D89DC61714592F50000FC7C6 /* UIWebViewWebGL */ = {
+		D89DC61714592F50000FC7C6 /* GeoSense */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D89DC63014592F50000FC7C6 /* Build configuration list for PBXNativeTarget "UIWebViewWebGL" */;
+			buildConfigurationList = D89DC63014592F50000FC7C6 /* Build configuration list for PBXNativeTarget "GeoSense" */;
 			buildPhases = (
 				D89DC61414592F50000FC7C6 /* Sources */,
 				D89DC61514592F50000FC7C6 /* Frameworks */,
@@ -142,7 +142,7 @@
 			);
 			dependencies = (
 			);
-			name = UIWebViewWebGL;
+			name = GeoSense;
 			productName = UIWebViewWebGL;
 			productReference = D89DC61814592F50000FC7C6 /* UIWebViewWebGL.app */;
 			productType = "com.apple.product-type.application";
@@ -168,7 +168,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D89DC61714592F50000FC7C6 /* UIWebViewWebGL */,
+				D89DC61714592F50000FC7C6 /* GeoSense */,
 			);
 		};
 /* End PBXProject section */
@@ -235,6 +235,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = GeoSense;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 			};
@@ -254,6 +255,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PRODUCT_NAME = GeoSense;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -295,7 +297,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D89DC63014592F50000FC7C6 /* Build configuration list for PBXNativeTarget "UIWebViewWebGL" */ = {
+		D89DC63014592F50000FC7C6 /* Build configuration list for PBXNativeTarget "GeoSense" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D89DC63114592F50000FC7C6 /* Debug */,

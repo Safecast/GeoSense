@@ -97,6 +97,7 @@
   urlField.text = [webView.request.URL absoluteString];
   [hud hide:YES];
   webView.hidden = NO;
+  NSLog(@"webViewDidFinishLoad");
 }
 
 - (IBAction)beginUrlEditing {
@@ -132,6 +133,13 @@
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
   [hud hide:YES];
+  NSString *message = [error.userInfo objectForKey:@"NSLocalizedDescription"];
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" 
+                                                  message:message delegate:nil 
+                                        cancelButtonTitle:@"OK" otherButtonTitles:nil];
+  [self showUrlBar:nil];
+  [alert show];
+  NSLog(@"didFailLoadWithError %@", error);
 }
 
 - (void)viewDidUnload

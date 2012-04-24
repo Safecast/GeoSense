@@ -53,7 +53,7 @@ window.MapViewBase = Backbone.View.extend({
 
 	mapAreaChanged: function(visibleMapArea)
 	{
-		this.vent.trigger("setStateType", 'loading');
+		//this.vent.trigger("setStateType", 'loading');
 
 		$.each(this.collections, function(collectionid, collection) { 
 			collection.setVisibleMapArea(visibleMapArea);

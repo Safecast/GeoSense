@@ -182,7 +182,7 @@ DAT.Globe = function(container, colorFn) {
 		if (IS_AR) {
 			var materialNormalMap = new THREE.MeshBasicMaterial( { 
 				color: 0xffffff,
-				opacity: .100000 
+				opacity: .0100000 
 			});
 		}
 

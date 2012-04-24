@@ -40,8 +40,8 @@ var tilt = 0.41;
 
 var IS_REMOTE_CONTROLLED = getURLParameter('rc');
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
-var VIRTUAL_PHYSICAL_FACTOR = .9; 
-var CAMERA_FOV = 54.25;
+var VIRTUAL_PHYSICAL_FACTOR = 1; 
+var CAMERA_FOV = 50;
 var SMOOTH_TWEEN_DURATION = 50;
 var CAMERA;
 var POLL_INTERVAL = 5000;
@@ -51,12 +51,17 @@ var COLOR_RANGE = 2;
 var lensTag = getURLParameter('lens_tag') || false;
 var globeTag = getURLParameter('globe_tag') || false;
 
-var IS_AR = lensTag != false;
+var IS_AR = IS_IPAD || lensTag != false;
 var IS_TAGGED_GLOBE = globeTag != false;
 
 var WORLD_ROT_X = Math.PI / 2;
 var WORLD_ROT_Y = -Math.PI / 2;
 var WORLD_ROT_Z = tilt;
+	
+if (IS_AR) {
+	var WORLD_ROT_Z = 0;
+}
+
 
 var taggedObjects = [
 	new TaggedObject('globe', [
@@ -97,7 +102,7 @@ var _chatVisible = false;
 							
 //VARIABLES FOR THREE.JS
 							
-var radius = 190, //6371,
+var radius = 145, //6371,
 rotationSpeed = 0.1,
 cloudsScale = 1.005,
 moonScale = 0.23,

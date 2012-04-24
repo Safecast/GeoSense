@@ -47,8 +47,7 @@ window.MapGLView = window.MapViewBase.extend({
 					over.z, up.z, norm.z, 0,
 					0, 0, 0, 1
 				);
-				//	rotMatrix.setRotationZ(-Math.PI);
-				//rotMatrix.setRotationZ(-Math.PI);
+
 				var rotMatrix = new THREE.Matrix4();
 				rotMatrix.setRotationX(WORLD_ROT_X);
 				matrix.multiplySelf(rotMatrix);
@@ -63,7 +62,7 @@ window.MapGLView = window.MapViewBase.extend({
 				var newGlobePos = new THREE.Vector3().copy(obj.loc);
 				// translate location by radius along inverse of tag normal 
 				var invNorm = new THREE.Vector3().copy(obj.norm).normalize().multiplyScalar(-1);
-				newGlobePos.addSelf(invNorm.multiplyScalar(VIRTUAL_PHYSICAL_FACTOR * 200));
+				newGlobePos.addSelf(invNorm.multiplyScalar(VIRTUAL_PHYSICAL_FACTOR * radius));
 				// update globe position
 				this.globe.world.position = newGlobePos;
 
