@@ -37,6 +37,7 @@ window.MapGLView = window.MapViewBase.extend({
 
 		switch (obj.name) {
 			case 'globe':
+				if (!IS_AR && !IS_TAGGED_GLOBE) break;
 				// get tag matrix
 				var norm = obj.norm.normalize();
 				var over = obj.over.normalize();

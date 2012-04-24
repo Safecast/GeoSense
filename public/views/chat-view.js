@@ -25,18 +25,7 @@ window.ChatView = Backbone.View.extend({
 		
 		now.receiveMessage = function(name, message) {
 			if (message[0] == '@') {
-				var match = new String(message).match(/^@([a-zA-Z0-9_]+)( (.*))?$/);
-				if (match) {
-					switch (match[1]) {
-						case 'setViewport':
-							if (!IS_REMOTE_CONTROLLED) return;
-							var obj = $.parseJSON(match[3]);
-							if (obj) {
-								self.vent.trigger('setViewport', obj);
-							}
-							return;
-					}
-				}
+				return;
 			}
 
 			self.$("#messages").append("<div class='message'>" + message + '</div>' + "<div class='message-name'>" + name + "</div>");

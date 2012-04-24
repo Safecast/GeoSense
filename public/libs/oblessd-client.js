@@ -24,9 +24,19 @@ var OblessdClient = function(options) {
                 handTracker = new HandTracker();
             };
 
+            options.vent.bind('broadcastMessage', function(message) {
+                console.log('broadcasting: '+message);
+                ws.send(message);
+            });
+
         }
 
         ws.onmessage = function(evt) { 
+            if (evt.data[0] == '@') {
+                console.log('broadcast message received '+evt.data);
+                options.vent.trigger('broadcastMessageReceived', evt.data);
+                return;
+            }
             var protein = $.parseJSON(evt.data);
             var foundObjects = [];
             if (options.taggedObjects) {

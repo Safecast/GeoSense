@@ -592,7 +592,7 @@ window.MapOLView = window.MapViewBase.extend({
 		    	translation = new Geometry.Point(lonlat.x, lonlat.y);
 				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));	
 
-				now.distributeMessage('@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
+				self.vent.trigger('broadcastMessage', '@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
 
 				//Temporary!!!!
 				// var commentid = 0123456;

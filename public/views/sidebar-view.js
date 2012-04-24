@@ -26,7 +26,7 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "setToggleStates");
 		options.vent.bind("setToggleStates", this.setToggleStates);	
-		if (IS_AR || IS_TAGGED_GLOBE) {
+		if (IS_AR || IS_TAGGED_GLOBE || IS_REMOTE_CONTROLLED) {
 			new OblessdClient({vent: options.vent, taggedObjects: taggedObjects, track: true});
 		}
     },

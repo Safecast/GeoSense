@@ -14,6 +14,20 @@ window.MapViewBase = Backbone.View.extend({
 		options.vent.bind("setViewport", function(params) {
 			self.setViewport(params);  
 		});
+		options.vent.bind("broadcastMessageReceived", function(message) {
+			var match = new String(message).match(/^@([a-zA-Z0-9_]+)( (.*))?$/);
+			if (match) {
+				switch (match[1]) {
+					case 'setViewport':
+						if (!IS_REMOTE_CONTROLLED) return;
+						var obj = $.parseJSON(match[3]);
+						if (obj) {
+							self.vent.trigger('setViewport', obj);
+						}
+						return;
+				}
+			}
+		});
 	},
 
 	setMapLocation: function(addr)

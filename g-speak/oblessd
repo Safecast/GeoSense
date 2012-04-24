@@ -115,16 +115,25 @@ EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do 
   }
   ws.onmessage { |msg|
     words = msg.split(' ')
-    puts msg
-    case words[0]
-      when 'watch'
-        if words.length == 2:
-          if not watch_tags[ws].include?(words[1]):
-            watch_tags[ws].push(words[1])
+    if words[0].chars.first == '@':
+      puts 'broadcast '+msg
+      for ws in open_sockets:
+        puts
+        ws.send(msg)
+      end
+    else
+      puts msg
+      case words[0]
+        when 'watch'
+          if words.length == 2:
+            if not watch_tags[ws].include?(words[1]):
+              watch_tags[ws].push(words[1])
+            end
           end
-        end
-      when 'track'
-        track[ws] = true
+        when 'track'
+          track[ws] = true
+      end
     end
   }
 end
+

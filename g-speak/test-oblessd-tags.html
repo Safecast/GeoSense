@@ -26,10 +26,13 @@
                         ws.send('watch '+options.taggedObjects[o]);
                     }
                 }
-
             }
 
             ws.onmessage = function(evt) { 
+              if (evt.data[0] == '@') {
+                console.log('broadcast message received '+evt.data);
+                return;
+              }
               d = new Date();
               var ms = Date.UTC(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
               receivedMilli.push(ms);
