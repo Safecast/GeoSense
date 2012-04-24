@@ -65,10 +65,10 @@ if (IS_AR) {
 
 var taggedObjects = [
 	new TaggedObject('globe', [
-		new ObjectTag((globeTag && globeTag != 1 ? globeTag : 'Right-Hand-3'), [0, 0, 0])
+		new ObjectTag((globeTag && globeTag != 1 ? globeTag : 'Right-Hand-2'), [0, 0, 0])
 	]),
 	new TaggedObject('lens', [
-		new ObjectTag((lensTag && lensTag != 1 ? lensTag : 'Left-Hand-1'), [0, 0, 0]),
+		new ObjectTag((lensTag && lensTag != 1 ? lensTag : 'Left-Hand-2'), [0, 0, 0]),
 		//new ObjectTag('Object-03', [-150, 100, 0]),
 		//new ObjectTag('Object-06', [150, -100, 0])
 	])
