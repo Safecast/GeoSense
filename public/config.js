@@ -38,6 +38,7 @@ function genQueryString(params, name) {
 //APP GLOBALS
 var tilt = 0.41;
 
+var IS_REMOTE_CONTROLLED = getURLParameter('rc');
 var IS_IPAD = navigator.userAgent.match(/iPad/i) != null;
 var VIRTUAL_PHYSICAL_FACTOR = .9; 
 var CAMERA_FOV = 54.25;

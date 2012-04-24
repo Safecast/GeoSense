@@ -47,7 +47,7 @@ window.SideBarView = Backbone.View.extend({
 		}
 		this.$('#scale_linear').addClass('active');
 
-		if (!IS_AR && !IS_TAGGED_GLOBE) {
+		if (!DEBUG || !IS_AR && !IS_TAGGED_GLOBE) {
 			this.$('#arToggleGroup').remove();
 		} else {
 			this.$("#world-rot-x-val").text(WORLD_ROT_X);

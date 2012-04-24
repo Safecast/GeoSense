@@ -7,6 +7,7 @@
 //
 
 #import "ARViewController.h"
+#import "WGLAppDelegate.h"
 
 
 @interface ARViewController ()
@@ -42,7 +43,7 @@
   hud = [[MBProgressHUD alloc] initWithView:webView];
   hud.animationType = MBProgressHUDAnimationFade;
   hud.opacity = .5;
-  [webView addSubview:hud];
+  [self.view addSubview:hud];
   
   urls = [[NSMutableArray alloc] init];
 
@@ -53,8 +54,9 @@
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];
 	[tapRecognizer setDelegate:self];
-	[self.view.superview.superview addGestureRecognizer:tapRecognizer];  
+  WGLAppDelegate *appDelegate = (WGLAppDelegate *)[[UIApplication sharedApplication] delegate];
 
+	[appDelegate.window addGestureRecognizer:tapRecognizer];  
 }
 
 - (IBAction)reloadUrl 
@@ -99,6 +101,7 @@
 
 - (IBAction)beginUrlEditing {
   urlHistory.hidden = NO;
+  [hud hide:YES];
 }
 
 - (IBAction)endUrlEditing {

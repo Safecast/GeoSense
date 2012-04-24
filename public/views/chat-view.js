@@ -29,11 +29,12 @@ window.ChatView = Backbone.View.extend({
 				if (match) {
 					switch (match[1]) {
 						case 'setViewport':
+							if (!IS_REMOTE_CONTROLLED) return;
 							var obj = $.parseJSON(match[3]);
 							if (obj) {
 								self.vent.trigger('setViewport', obj);
 							}
-							break;
+							return;
 					}
 				}
 			}
