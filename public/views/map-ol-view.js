@@ -442,7 +442,7 @@ window.MapOLView = window.MapViewBase.extend({
 				      { visibility: _visibility },
 				      { lightness: 45 },
 				      { invert_lightness: true },
-				      { gamma: 1.3 },
+				      { gamma: 1.1 },
 
 					]	
 			  },
