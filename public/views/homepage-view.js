@@ -43,7 +43,7 @@ window.HomepageView = Backbone.View.extend({
 				
 				for(i=0;i<data.length;i++)
 				{
-					currMap = '<tr><td>'+data[i].title+'</td><td><a target="_self" href="/'+data[i].publicslug+'">geo.media.mit.edu/'+ data[i].publicslug +'</a></td><tr>';
+					currMap = '<tr><td>'+data[i].title+'</td><td><a target="_self" href="/'+data[i].adminslug+'">geo.media.mit.edu/'+ data[i].adminslug +'</a></td><tr>';
 					self.recentMaps.push(currMap);
 				}
 				self.showRecentMaps();

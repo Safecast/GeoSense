@@ -125,11 +125,12 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		this.updateMapStyle(_defaultMapStyle);
 				
-		//this.detectMapClick();
+		this.detectMapClick();
 		
-		if(DEBUG) 
+		if(DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
-						
+		}
+
 		this.setMapLocation(_defaultMapLocation);
 				
 		//this.map.events.register("mousemove", this.map, function (b) {
@@ -522,7 +523,7 @@ window.MapOLView = window.MapViewBase.extend({
 	  	return { x: translation.x, y: translation.y };
 	},
 		
-	setViewPort: function(result)
+	setViewport: function(result)
 	{
 		switch(result.type)
 		{
@@ -543,50 +544,56 @@ window.MapOLView = window.MapViewBase.extend({
 		    break;
 
 		    default:
-
-		    	translation = new Geometry.Point(result.x, result.y);
-				translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
 		    
-		    	var center = {x: translation.x, y: translation.y};
-		    	
-		    	if(result.zoom)
-		    		var zoom = result.zoom;
+		    	var center = {x: result.x, y: result.y};
+		    	console.log(center);
 
+		    	if(result.zoom) {
+		    		var zoom = result.zoom;
+		    	}
 
 		    break;
 		}
-		
+
+		if (center) {
 		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
+		}		
 	},
 	
 	detectMapClick: function ()
 	{
 		var self = this;
-		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
-		 	  defaultHandlerOptions: {
-                   'single': true,
-                   'double': false,
-                   'pixelTolerance': 0,
-                   'stopSingle': false,
-                   'stopDouble': false
-               },
+        OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+            defaultHandlerOptions: {
+                'single': true,
+                'double': false,
+                'pixelTolerance': 0,
+                'stopSingle': false,
+                'stopDouble': false
+            },
 
-               initialize: function(options) {
-                   this.handlerOptions = OpenLayers.Util.extend(
-                       {}, this.defaultHandlerOptions
-                   );
-                   OpenLayers.Control.prototype.initialize.apply(
-                       this, arguments
-                   ); 
-                   this.handler = new OpenLayers.Handler.Click(
-                       this, {
-                           'click': this.trigger
-                       }, this.handlerOptions
-                   );
-               }, 
+            initialize: function(options) {
+                this.handlerOptions = OpenLayers.Util.extend(
+                    {}, this.defaultHandlerOptions
+                );
+                OpenLayers.Control.prototype.initialize.apply(
+                    this, arguments
+                ); 
+                this.handler = new OpenLayers.Handler.Click(
+                    this, {
+                        'click': this.onClick,
+                        'dblclick': this.onDblclick 
+                    }, this.handlerOptions
+                );
+            }, 
 
-               trigger: function(e) {
-                   var lonlat = this.map.getLonLatFromPixel(e.xy);
+            onClick: function(evt) {
+	            var lonlat = self.map.getLonLatFromPixel(evt.xy);
+		    	translation = new Geometry.Point(lonlat.x, lonlat.y);
+				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));	
+
+				now.distributeMessage('@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
+
 				//Temporary!!!!
 				// var commentid = 0123456;
 				// 				var mapid = _mapId;
@@ -612,12 +619,20 @@ window.MapOLView = window.MapViewBase.extend({
 				// 						console.error('failed to store comment');
 				// 					}
 				// 				});
-             }
-		});
-		
-		var click = new OpenLayers.Control.Click();
-		this.map.addControl(click);
-		click.activate();
+            },
+
+            onDblclick: function(evt) {  
+            }   
+
+        });
+
+		var dblClick = new OpenLayers.Control.Click({
+	        handlerOptions: {
+	            "double": true
+	        }
+	    });
+		this.map.addControl(dblClick);
+		dblClick.activate();
 	},
 	
 	removeCollectionFromMap: function(model) {

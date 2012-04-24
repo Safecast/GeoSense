@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		22112567153FA130007C3833 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 22112566153FA130007C3833 /* MBProgressHUD.m */; };
 		223E3A28151BE96500770228 /* Palm_Beach.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 223E3A27151BE96500770228 /* Palm_Beach.jpeg */; };
+		2255D78915464FE800808F40 /* GeoSense.png in Resources */ = {isa = PBXBuildFile; fileRef = 2255D78815464FE800808F40 /* GeoSense.png */; };
 		22C295E2153DB4010066AAF3 /* ARViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C295E1153DB4010066AAF3 /* ARViewController.xib */; };
 		22C295E9153DB7440066AAF3 /* ARViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C295E8153DB7440066AAF3 /* ARViewController.m */; };
 		22E2D5361520D58E00991B0E /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 22E2D5351520D58E00991B0E /* CameraViewController.m */; };
@@ -25,6 +26,7 @@
 		22112565153FA130007C3833 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		22112566153FA130007C3833 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		223E3A27151BE96500770228 /* Palm_Beach.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Palm_Beach.jpeg; sourceTree = "<group>"; };
+		2255D78815464FE800808F40 /* GeoSense.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GeoSense.png; sourceTree = "<group>"; };
 		22C295E1153DB4010066AAF3 /* ARViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ARViewController.xib; sourceTree = "<group>"; };
 		22C295E7153DB7440066AAF3 /* ARViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARViewController.h; sourceTree = "<group>"; };
 		22C295E8153DB7440066AAF3 /* ARViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARViewController.m; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 		D89DC60D14592F4F000FC7C6 = {
 			isa = PBXGroup;
 			children = (
+				2255D78815464FE800808F40 /* GeoSense.png */,
 				D89DC62214592F50000FC7C6 /* UIWebViewWebGL */,
 				D89DC61B14592F50000FC7C6 /* Frameworks */,
 				D89DC61914592F50000FC7C6 /* Products */,
@@ -179,6 +182,7 @@
 				D89DC634145931B3000FC7C6 /* WebGL.html in Resources */,
 				223E3A28151BE96500770228 /* Palm_Beach.jpeg in Resources */,
 				22C295E2153DB4010066AAF3 /* ARViewController.xib in Resources */,
+				2255D78915464FE800808F40 /* GeoSense.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

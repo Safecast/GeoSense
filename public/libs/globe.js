@@ -96,12 +96,12 @@ DAT.Globe = function(container, colorFn) {
 	function init() {
 
 		var shader, uniforms, material;
-		if (!IS_AR) {
-			w = container.offsetWidth || window.innerWidth;
-			h = container.offsetHeight || window.innerHeight;
-		} else {
+		if (IS_AR && IS_IPAD) {
 			w = 768;
 			h = 1024;
+		} else {
+			w = container.offsetWidth || window.innerWidth;
+			h = container.offsetHeight || window.innerHeight;
 		}
 		var aspectRatio = w / h;
 

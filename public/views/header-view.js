@@ -5,7 +5,7 @@ window.HeaderView = Backbone.View.extend({
 	
     events: {
 		'click #settingsButton': 'settingsButtonClicked',
-		'click #aboutGeosense:' : 'aboutGeosenseClicked',
+		'click #aboutGeoSense:' : 'aboutGeoSenseClicked',
 		'click #aboutSafecast:' : 'aboutSafecastClicked',
 		'click #postFacebook:' : 'postFacebookClicked',
 		'click #postTwitter:' : 'postTwitterClicked',
@@ -97,7 +97,7 @@ window.HeaderView = Backbone.View.extend({
 		$('#setupModal').modal('show');	
 	},
 	
-	aboutGeosenseClicked: function() {
+	aboutGeoSenseClicked: function() {
 		
 		this.modalView = new ModalView();
         $('body').append(this.modalView.render().el);

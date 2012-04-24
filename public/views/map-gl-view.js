@@ -411,7 +411,7 @@ window.MapGLView = window.MapViewBase.extend({
 
 	},
 	
-	setViewPort: function(result)
+	setViewport: function(result)
 	{
 		var first = result[0],
 		    center = this.toWebMercator(first.geometry.location),

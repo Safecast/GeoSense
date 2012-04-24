@@ -68,8 +68,6 @@ var taggedObjects = [
 	])
 ];
 
-console.log(taggedObjects);
-
 var _panelLoaded = false;
 
 var _admin = true;

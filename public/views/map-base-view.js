@@ -1,6 +1,7 @@
 window.MapViewBase = Backbone.View.extend({
 
     initialize: function(options) {
+		var self = this;
 		this.collections = {};
 		this.layerArray = {};
 		this.vent = options.vent;
@@ -9,6 +10,10 @@ window.MapViewBase = Backbone.View.extend({
 		
 		_.bindAll(this, "redrawCollection");
 		options.vent.bind("redrawCollection", this.redrawCollection);  
+
+		options.vent.bind("setViewport", function(params) {
+			self.setViewport(params);  
+		});
 	},
 
 	setMapLocation: function(addr)
@@ -21,7 +26,7 @@ window.MapViewBase = Backbone.View.extend({
 				if (status == google.maps.GeocoderStatus.OK)
 				{
 					results.type = 'google';
-					self.setViewPort(results);
+					self.setViewport(results);
 				}
 				else { 	
 					alert ("Cannot find " + addr + "! Status: " + status);
@@ -39,12 +44,13 @@ window.MapViewBase = Backbone.View.extend({
 			zoom: null
 		};
 	},
-
-	setMapToPostition: function(position)
-	{
-		setViewPort();
-	},
 	
+	/**
+	* Required to be implemented by descendants.
+	*/
+	setViewport: function(to) {
+	},
+
 	mapAreaChanged: function(visibleMapArea)
 	{
 		this.vent.trigger("setStateType", 'loading');

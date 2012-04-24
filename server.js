@@ -38,11 +38,15 @@ var everyone = nowjs.initialize(app);
 // Send message to everyone on the users group
 everyone.now.distributeMessage = function(message){
     var group = nowjs.getGroup(this.now.serverRoom);
+    console.log(group);
+    console.log('******************** distribute '+message);
     group.now.receiveMessage(this.now.name, message);
 };
 
 everyone.now.joinRoom = function(newRoom){
     var newGroup = nowjs.getGroup(newRoom);
+    console.log(this.user);
+    console.log('-----------------'+this.user.clientId+' joined '+newRoom);
     newGroup.addUser(this.user.clientId);
     //newGroup.now.receiveMessage('New user joined the room', this.now.name);
     this.now.serverRoom = newRoom;

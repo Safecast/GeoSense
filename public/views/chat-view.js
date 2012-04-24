@@ -11,23 +11,37 @@ window.ChatView = Backbone.View.extend({
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('chat'));
-
+		this.vent = options.vent;
     },
 
     render: function() {
 		var self = this;
 		$(this.el).html(this.template());	
 		
-		now.ready(function(){
+		now.ready(function() {
 			now.joinRoom(_mapId);
+			console.log('joining room '+_mapId);
 		});
 		
-		now.receiveMessage = function(name, message){
+		now.receiveMessage = function(name, message) {
+			if (message[0] == '@') {
+				var match = new String(message).match(/^@([a-zA-Z0-9_]+)( (.*))?$/);
+				if (match) {
+					switch (match[1]) {
+						case 'setViewport':
+							var obj = $.parseJSON(match[3]);
+							if (obj) {
+								self.vent.trigger('setViewport', obj);
+							}
+							break;
+					}
+				}
+			}
+
 			self.$("#messages").append("<div class='message'>" + message + '</div>' + "<div class='message-name'>" + name + "</div>");
 			//self.$("#messages").scrollTop(self.$("#messages").height());
 			
 			self.$("#messages").animate({ scrollTop: self.$("#messages").prop("scrollHeight") - self.$('#messages').height() }, 250);
-		   
 		}
 		this.fetchRoomHistory();
 		
