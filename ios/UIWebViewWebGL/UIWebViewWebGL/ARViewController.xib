@@ -45,7 +45,7 @@
 						<string key="NSFrameSize">{768, 1024}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="624606583"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -61,6 +61,7 @@
 						<string key="NSFrame">{{0, 44}, {768, 965}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -83,7 +84,7 @@
 							<object class="IBUITextField" id="430552515">
 								<reference key="NSNextResponder" ref="624606583"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{12, 7}, {436, 31}}</string>
+								<string key="NSFrame">{{51, 7}, {436, 31}}</string>
 								<reference key="NSSuperview" ref="624606583"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="16508367"/>
@@ -127,16 +128,16 @@
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 						<array class="NSMutableArray" key="IBUIItems">
-							<object class="IBUIBarButtonItem" id="231302238">
-								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
-								<reference key="IBUICustomView" ref="430552515"/>
-								<reference key="IBUIToolbar" ref="624606583"/>
-							</object>
 							<object class="IBUIBarButtonItem" id="972091429">
 								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 								<int key="IBUIStyle">1</int>
 								<reference key="IBUIToolbar" ref="624606583"/>
 								<int key="IBUISystemItemIdentifier">13</int>
+							</object>
+							<object class="IBUIBarButtonItem" id="231302238">
+								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
+								<reference key="IBUICustomView" ref="430552515"/>
+								<reference key="IBUIToolbar" ref="624606583"/>
 							</object>
 							<object class="IBUIBarButtonItem" id="436874378">
 								<string key="targetRuntimeIdentifier">IBIPadFramework</string>
@@ -187,19 +188,19 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">urlBar</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="624606583"/>
-					</object>
-					<int key="connectionID">53</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">urlField</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="430552515"/>
 					</object>
 					<int key="connectionID">55</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">urlBar</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="624606583"/>
+					</object>
+					<int key="connectionID">53</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -282,8 +283,8 @@
 						<reference key="object" ref="191373211"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="624606583"/>
-							<reference ref="16508367"/>
 							<reference ref="999617891"/>
+							<reference ref="16508367"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -312,8 +313,8 @@
 						<int key="objectID">37</int>
 						<reference key="object" ref="624606583"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="972091429"/>
 							<reference ref="231302238"/>
+							<reference ref="972091429"/>
 							<reference ref="436874378"/>
 						</array>
 						<reference key="parent" ref="191373211"/>
@@ -361,7 +362,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">55</int>
+			<int key="maxID">65</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -393,21 +394,21 @@
 						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="cancelButton">UIBarButtonItem</string>
-						<string key="reloadButton">UIBarButtonItem</string>
+						<string key="progressView">UIView</string>
+						<string key="tapView">UIView</string>
 						<string key="urlBar">UIToolbar</string>
 						<string key="urlField">UITextField</string>
 						<string key="urlHistory">UITableView</string>
 						<string key="webView">UIWebView</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="cancelButton">
-							<string key="name">cancelButton</string>
-							<string key="candidateClassName">UIBarButtonItem</string>
+						<object class="IBToOneOutletInfo" key="progressView">
+							<string key="name">progressView</string>
+							<string key="candidateClassName">UIView</string>
 						</object>
-						<object class="IBToOneOutletInfo" key="reloadButton">
-							<string key="name">reloadButton</string>
-							<string key="candidateClassName">UIBarButtonItem</string>
+						<object class="IBToOneOutletInfo" key="tapView">
+							<string key="name">tapView</string>
+							<string key="candidateClassName">UIView</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="urlBar">
 							<string key="name">urlBar</string>

@@ -42,18 +42,18 @@
   hud = [[MBProgressHUD alloc] initWithView:webView];
   hud.animationType = MBProgressHUDAnimationFade;
   hud.opacity = .5;
-  [self.view addSubview:hud];
+  [webView addSubview:hud];
   
   urls = [[NSMutableArray alloc] init];
 
   [backingWebView _setWebGLEnabled:YES];  
 
-  [self loadUrl:@"http:// 18.189.90.22:8124/toLpaWT1900dmxm/globe/?lens=1" addToHistory:YES];
+  [self loadUrl:@"http://18.189.34.8:8124/toLpaWT1900dmxm/globe/?lens_tag=1" addToHistory:YES];
 
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];
 	[tapRecognizer setDelegate:self];
-	[webView addGestureRecognizer:tapRecognizer];  
+	[self.view.superview.superview addGestureRecognizer:tapRecognizer];  
 
 }
 
@@ -139,7 +139,7 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-	return YES;
+	return NO;
 }
 
 -(void)showUrlBar:(id)sender {

@@ -26,7 +26,7 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "setToggleStates");
 		options.vent.bind("setToggleStates", this.setToggleStates);	
-		if (IS_AR) {
+		if (IS_AR || IS_TAGGED_GLOBE) {
 			new OblessdClient({vent: options.vent, taggedObjects: taggedObjects, track: true});
 		}
     },
@@ -47,9 +47,46 @@ window.SideBarView = Backbone.View.extend({
 		}
 		this.$('#scale_linear').addClass('active');
 
-		if (!IS_AR) {
+		if (!IS_AR && !IS_TAGGED_GLOBE) {
 			this.$('#arToggleGroup').remove();
 		} else {
+			this.$("#world-rot-x-val").text(WORLD_ROT_X);
+			this.$('#world-rot-x').slider({
+				value: WORLD_ROT_X,
+				min: -Math.PI,
+				max: Math.PI,
+				step: Math.PI / 100,
+				range: 'max',
+				slide: function( event, ui ) {
+					self.$("#world-rot-x-val").text(ui.value);
+					WORLD_ROT_X = ui.value;
+				},
+			});
+			this.$("#world-rot-y-val").text(WORLD_ROT_Y);
+			this.$('#world-rot-y').slider({
+				value: WORLD_ROT_Y,
+				min: -Math.PI,
+				max: Math.PI,
+				step: Math.PI / 100,
+				range: 'max',
+				slide: function( event, ui ) {
+					self.$("#world-rot-y-val").text(ui.value);
+					WORLD_ROT_Y = ui.value;
+				},
+			});
+			this.$("#world-rot-z-val").text(WORLD_ROT_Z);
+			this.$('#world-rot-z').slider({
+				value: WORLD_ROT_Z,
+				min: -Math.PI,
+				max: Math.PI,
+				step: Math.PI / 100,
+				range: 'max',
+				slide: function( event, ui ) {
+					self.$("#world-rot-z-val").text(ui.value);
+					WORLD_ROT_Z = ui.value;
+				},
+			});
+
 			this.$("#camera-fov-val").text(CAMERA_FOV);
 			this.$('#camera-fov').slider({
 				value: CAMERA_FOV,
@@ -66,8 +103,8 @@ window.SideBarView = Backbone.View.extend({
 			this.$("#virtual-physical-factor-val").text(VIRTUAL_PHYSICAL_FACTOR);
 			this.$('#virtual-physical-factor').slider({
 				value: VIRTUAL_PHYSICAL_FACTOR,
-				min: 1,
-				max: 100,
+				min: .5,
+				max: 1.5,
 				step: .25,
 				range: 'max',
 				slide: function( event, ui ) {

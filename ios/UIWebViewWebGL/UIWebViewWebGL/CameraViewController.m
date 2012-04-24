@@ -12,6 +12,16 @@
 
 @end
 
+@implementation UIImagePickerController (NoRotate)
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+@end
+
+
 @implementation CameraViewController
 
 @synthesize imagePicker;
@@ -53,7 +63,7 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-	return YES;
+	return NO;
 }
 
 @end

@@ -137,16 +137,16 @@ DAT.Globe = function(container, colorFn) {
 
 		world = new THREE.Object3D();
 		scene.add(world);
-		world.rotation.y = 90;
+		//world.rotation.y = 90;
 
 		dirLight = new THREE.DirectionalLight( 0xdddddd );
 		dirLight.position.set( -1, 0, 1 ).normalize();
 		scene.add( dirLight );
 
-		var planetTexture = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_night_1024.png" ),
+		var planetTexture = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_watermask_2048.png" ),
 		cloudsTexture     = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_clouds_1024.png" ),
 		normalTexture     = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_normal_2048.jpg" ),
-		specularTexture   = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_specular_2048.jpg" );
+		specularTexture   = THREE.ImageUtils.loadTexture( "/assets/textures/planets/earth_specular_2048.png" );
 
 		var shader = THREE.ShaderUtils.lib[ "normal" ],
 		uniforms = THREE.UniformsUtils.clone( shader.uniforms );
@@ -193,12 +193,12 @@ DAT.Globe = function(container, colorFn) {
 		geometry.computeTangents();
 
 		meshPlanet = new THREE.Mesh(geometry, materialNormalMap);
-		meshPlanet.rotation.y = 0;
-		world.rotation.z = tilt;
+		//meshPlanet.rotation.y = 0;
+		//world.rotation.z = tilt;
 		world.add( meshPlanet );
 
 
-		if (IS_AR) {
+		if (DEBUG && (IS_AR || IS_TAGGED_GLOBE)) {
 			var plane = new THREE.Mesh(new THREE.CubeGeometry(150, 10, 250, 2, 2), new THREE.MeshBasicMaterial({
 				color: 0x0000ff,
 				opacity: .5
@@ -275,7 +275,7 @@ DAT.Globe = function(container, colorFn) {
 		}, false);
 
 
-		if (!IS_AR) {
+		if (!IS_AR && !IS_TAGGED_GLOBE) {
 			controls = new THREE.TrackballControls( camera, renderer.domElement );
 			controls.rotateSpeed = 1.0;
 			controls.zoomSpeed = 1.2;
@@ -474,11 +474,15 @@ DAT.Globe = function(container, colorFn) {
 		}
 
 		renderer.clear();
-		renderer.render(scene, camera);
-		renderer.render(scenePoints, camera);
+		
+		if (IS_IPAD) {
+			renderer.render(scene, camera);
+			renderer.render(scenePoints, camera);
+		} else {
+			composer.render();
+		}
 
 
-		//composer.render();
 	
 	}
 

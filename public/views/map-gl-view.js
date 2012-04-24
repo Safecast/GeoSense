@@ -35,10 +35,6 @@ window.MapGLView = window.MapViewBase.extend({
     {
     	if (!this.globe) return;
 
-		this.globe.camera.lookAt(this.globe.world.position);
-		this.globe.camera.position = new THREE.Vector3().copy(this.globe.world.position);
-		this.globe.camera.position.z += radius * 3; 
-    	
 		switch (obj.name) {
 			case 'globe':
 				// get tag matrix
@@ -51,6 +47,16 @@ window.MapGLView = window.MapViewBase.extend({
 					over.z, up.z, norm.z, 0,
 					0, 0, 0, 1
 				);
+				//	rotMatrix.setRotationZ(-Math.PI);
+				//rotMatrix.setRotationZ(-Math.PI);
+				var rotMatrix = new THREE.Matrix4();
+				rotMatrix.setRotationX(WORLD_ROT_X);
+				matrix.multiplySelf(rotMatrix);
+				rotMatrix.setRotationY(WORLD_ROT_Y);
+				matrix.multiplySelf(rotMatrix);
+				rotMatrix.setRotationZ(WORLD_ROT_Z);
+				matrix.multiplySelf(rotMatrix);
+
 				// copy rotation from that matrix to globe
 				this.globe.world.rotation = new THREE.Vector3().getRotationFromMatrix(matrix);
 				// copy tag location to new vector
@@ -61,14 +67,21 @@ window.MapGLView = window.MapViewBase.extend({
 				// update globe position
 				this.globe.world.position = newGlobePos;
 
-				if (DEBUG) {
+				if (DEBUG && this.globe.debugMarker) {
 					this.globe.debugMarker.rotation.getRotationFromMatrix(matrix);
 					this.globe.debugMarker.position = new THREE.Vector3().copy(obj.loc);
 				}
 
+		    	if (!IS_AR) {
+					this.globe.camera.position = new THREE.Vector3().copy(this.globe.world.position);
+					this.globe.camera.position.z += radius * 2; 
+		    		this.globe.world.position.y -= radius * 2.5;
+					this.globe.camera.lookAt(this.globe.world.position);
+		    	}
+
 				break;
 			case 'lens':
-				break;
+		    	if (!IS_AR) break;
 				// set camera position and up vectors to respective lens tag vectors
 				this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
 				this.globe.camera.up = new THREE.Vector3().cross(obj.norm, obj.over);

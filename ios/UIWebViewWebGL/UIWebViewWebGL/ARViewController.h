@@ -12,9 +12,9 @@
 @interface ARViewController : UIViewController <UIWebViewDelegate, UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate> {
   IBOutlet UIWebView *webView;
   IBOutlet UITextField *urlField;
-  IBOutlet UIBarButtonItem *reloadButton, *cancelButton;
   IBOutlet UITableView *urlHistory;
   IBOutlet UIToolbar *urlBar;
+  IBOutlet UIView *tapView, *progressView;
   NSMutableArray *urls;
   MBProgressHUD *hud;
 }
