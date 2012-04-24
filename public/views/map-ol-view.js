@@ -524,17 +524,38 @@ window.MapOLView = window.MapViewBase.extend({
 		
 	setViewPort: function(result)
 	{
-		var first = result[0],
-		
-		
-		    center = this.toWebMercator(first.geometry.location),
-		    viewport = first.geometry.viewport,
-		    viewportSW = viewport.getSouthWest(),
-		    viewportNE = viewport.getNorthEast(),
-		    min = this.toWebMercator(viewportSW),
-		    max = this.toWebMercator(viewportNE),
-		    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
+		switch(result.type)
+		{
+			case 'google':
 
+				var first = result[0],
+			
+			    center = this.toWebMercator(first.geometry.location),
+			    viewport = first.geometry.viewport,
+			    viewportSW = viewport.getSouthWest(),
+			    viewportNE = viewport.getNorthEast(),
+			    min = this.toWebMercator(viewportSW),
+			    max = this.toWebMercator(viewportNE),
+			    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
+
+			    console.log(center);
+
+		    break;
+
+		    default:
+
+		    	translation = new Geometry.Point(result.x, result.y);
+				translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
+		    
+		    	var center = {x: translation.x, y: translation.y};
+		    	
+		    	if(result.zoom)
+		    		var zoom = result.zoom;
+
+
+		    break;
+		}
+		
 		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
 	},
 	

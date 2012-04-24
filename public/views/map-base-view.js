@@ -20,6 +20,7 @@ window.MapViewBase = Backbone.View.extend({
 			{
 				if (status == google.maps.GeocoderStatus.OK)
 				{
+					results.type = 'google';
 					self.setViewPort(results);
 				}
 				else { 	
@@ -37,6 +38,11 @@ window.MapViewBase = Backbone.View.extend({
 			bounds: null,
 			zoom: null
 		};
+	},
+
+	setMapToPostition: function(position)
+	{
+		setViewPort();
 	},
 	
 	mapAreaChanged: function(visibleMapArea)
