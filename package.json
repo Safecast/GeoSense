@@ -2,11 +2,11 @@
   "name": "Geo",
   "version": "0.0.1",
   "engines": {
-    "node": "0.6.6",
-    "npm":  "1.1.0-2"
+	"node": "0.6.x",
+    "npm":  "1.0.x"
   },
   "dependencies": {
-    "csv":"0.0.13",
+    	"csv":"0.0.13",
 		"datejs":"0.0.2",
 		"express": "2.5.8",
 		"mongodb": "0.9.9-5",
