@@ -36,3 +36,5 @@ Thumbs.db
 # GEO Specific #
 ################
 main.scpt
+
+node_modules
