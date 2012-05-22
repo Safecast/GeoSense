@@ -2,6 +2,10 @@
 	"name": "Geo",
 	"description": "Geo Visualization",
 	"version": "0.1.0",
+	"engines": {
+    	"node": "0.6.6",
+    	"npm":  "1.1.0-2"
+  	},
 	"contributors": [
 		"Anthony DeVincenzi <tonyd@media.mit.edu>",
 		"Samuel Luescher <luescher@media.mit.edu>",
