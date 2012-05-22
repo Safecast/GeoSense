@@ -43,8 +43,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!--
 	<div class="toggle-group" id="scaleToggleGroup">
 		<div class="data-toggle">
 			<p>Scale</p>
@@ -54,7 +52,58 @@
 			</div>
 		</div>
 	</div>
-	-->
+	<div class="toggle-group" id="couplingToggleGroup">
+		<div class="data-toggle">
+			<p>Coupling</p>
+			<div class="btn-group" data-toggle="buttons-radio">
+				<button id="couple_lens" class="btn">AR Lens</button>
+				<button id="couple_mag" class="btn">Loupe</button>
+				<button id="couple_rc" class="btn">RC</button>
+			</div>
+		</div>
+	</div>
+	<div class="toggle-group clearfix" id="arToggleGroup">
+		<div class="data-toggle">
+			<div class="slider" id="world-fixed-dist"></div>
+			<p>WORLD_FIXED_DIST: <span id="world-fixed-dist-val"></span></p>
+		</div>
+		<div class="data-toggle">
+			<div class="slider" id="world-rot-x"></div>
+			<p>WORLD_ROT_X: <span id="world-rot-x-val"></span></p>
+		</div>
+		<div class="data-toggle">
+			<div class="slider" id="world-rot-y"></div>
+			<p>WORLD_ROT_Y: <span id="world-rot-y-val"></span></p>
+		</div>
+		<div class="data-toggle">
+			<div class="slider" id="world-rot-z"></div>
+			<p>WORLD_ROT_Z: <span id="world-rot-z-val"></span></p>
+		</div>
+		<div class="data-toggle">
+			<div class="slider" id="camera-fov"></div>
+			<p>CAMERA_FOV: <span id="camera-fov-val"></span></p>
+		</div>
+		<div class="data-toggle" style="margin-top: 1em">
+			<div class="slider" id="virtual-physical-factor"></div>
+			<p>VIRTUAL_PHYSICAL_FACTOR: <span id="virtual-physical-factor-val"></span></p>
+		</div>
+		<div class="data-toggle" style="margin-top: 1em">
+			<div class="slider" id="lens-ofs-x"></div>
+			<p>LENS OFFSET X: <span id="lens-ofs-x-val"></span></p>
+		</div>
+		<div class="data-toggle" style="margin-top: 1em">
+			<div class="slider" id="lens-ofs-y"></div>
+			<p>LENS OFFSET Y: <span id="lens-ofs-y-val"></span></p>
+		</div>
+		<div class="data-toggle" style="margin-top: 1em">
+			<div class="slider" id="lens-ofs-z"></div>
+			<p>LENS OFFSET Z: <span id="lens-ofs-z-val"></span></p>
+		</div>
+		<div class="" id="tracking-info" style="margin-top: 2em; background: white !important; font-family: courier; border: 1px #888 solid; height: 50px">
+			no tracking info received
+		</div>
+	</div>
+
 
 	<!--
 	<button id="tweetButton">Get Tweets</button>

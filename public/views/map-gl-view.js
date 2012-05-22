@@ -31,24 +31,29 @@ window.MapGLView = window.MapViewBase.extend({
 		};
 	},
 
+	getMatrixFromTag: function(obj, switchON) {
+		var norm = !switchON ? obj.norm.normalize() : obj.over.normalize();
+		var over = !switchON ? obj.over.normalize() : obj.norm.normalize();
+		var up = new THREE.Vector3().cross(obj.norm, obj.over).normalize();
+		var matrix = new THREE.Matrix4(
+			over.x, up.x, norm.x, 0,
+			over.y, up.y, norm.y, 0,
+			over.z, up.z, norm.z, 0,
+			0, 0, 0, 1
+		);
+		return matrix;
+	},
+
     updateTaggedObject: function(obj)
     {
     	if (!this.globe) return;
 
+    	//console.log(obj.name);
 		switch (obj.name) {
 			case 'globe':
-				if (!IS_AR && !IS_TAGGED_GLOBE) break;
+				if (!IS_AR && !IS_TAGGED_GLOBE && !IS_LOUPE) break;
 				// get tag matrix
-				var norm = obj.norm.normalize();
-				var over = obj.over.normalize();
-				var up = new THREE.Vector3().cross(obj.norm, obj.over).normalize();
-				var matrix = new THREE.Matrix4(
-					over.x, up.x, norm.x, 0,
-					over.y, up.y, norm.y, 0,
-					over.z, up.z, norm.z, 0,
-					0, 0, 0, 1
-				);
-
+				var matrix = this.getMatrixFromTag(obj);
 				var rotMatrix = new THREE.Matrix4();
 				rotMatrix.setRotationX(WORLD_ROT_X);
 				matrix.multiplySelf(rotMatrix);
@@ -72,25 +77,77 @@ window.MapGLView = window.MapViewBase.extend({
 					this.globe.debugMarker.position = new THREE.Vector3().copy(obj.loc);
 				}
 
-		    	if (!IS_AR) {
+		    	if (IS_TAGGED_GLOBE && !IS_AR && (!IS_LOUPE || IS_TOP_DOWN)) {
 					this.globe.camera.position = new THREE.Vector3().copy(this.globe.world.position);
-					this.globe.camera.position.z += radius * 2; 
-		    		this.globe.world.position.y -= radius * 2.5;
+		    		this.globe.camera.position.y += WORLD_FIXED_DIST;
+					if (!IS_TOP_DOWN) {
+						this.globe.camera.position.z += WORLD_FIXED_DIST * .4; 
+					} else {
+						var rotMatrix = new THREE.Matrix4();
+						this.globe.camera.up.getRotationFromMatrix(rotMatrix);
+					}
 					this.globe.camera.lookAt(this.globe.world.position);
 		    	}
 
 				break;
 			case 'lens':
-		    	if (!IS_AR) break;
-				// set camera position and up vectors to respective lens tag vectors
-				this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
-				this.globe.camera.up = new THREE.Vector3().cross(obj.norm, obj.over);
-				this.globe.camera.updateProjectionMatrix();
+		    	if (!IS_AR && !IS_LOUPE) break;
 
 				// look at camera position plus inverse norm vector of lens tag
-				var invNorm = new THREE.Vector3().copy(obj.norm).multiplyScalar(-1);
-				var newLookAt = new THREE.Vector3().add(obj.loc, invNorm);
-				this.globe.camera.lookAt(newLookAt);
+				var invNorm;
+				if (!IS_GESTURAL) {
+					invNorm = new THREE.Vector3().copy(obj.norm).multiplyScalar(-1);
+				} else {
+					invNorm = new THREE.Vector3().copy(obj.over);
+				}
+
+		    	if (!IS_TOP_DOWN) {
+					// set camera position and up vectors to respective lens tag vectors
+					this.globe.camera.position = new THREE.Vector3().copy(obj.loc);
+					this.globe.camera.up = new THREE.Vector3().cross(obj.norm, obj.over);
+					var newLookAt = new THREE.Vector3().add(obj.loc, invNorm);
+					this.globe.camera.lookAt(newLookAt);
+		    	}
+
+				if (IS_LOUPE) {					
+
+					var ray = new THREE.Ray(obj.loc, invNorm);
+					var intersect = ray.intersectObject(this.globe.planetExtents);
+
+					if (intersect && intersect.length) {
+						console.log('intersect');
+						var i = intersect[0];
+						var loupeDist = Math.min(Math.abs(i.distance - LOUPE_FOCAL_DISTANCE), LOUPE_FOCAL_DISTANCE);
+						var zoom = (LOUPE_FOCAL_DISTANCE - loupeDist) / LOUPE_FOCAL_DISTANCE;
+
+						var newFov = CAMERA_FOV - LOUPE_STRENGTH * zoom;
+
+						if (!IS_TOP_DOWN && this.globe.camera.fov != newFov) {
+							this.globe.camera.fov = newFov;
+							this.globe.camera.updateProjectionMatrix(); 						
+						}
+
+						if (IS_TOP_DOWN) {
+							this.globe.roiMarker.position = new THREE.Vector3().copy(this.globe.world.position);
+							this.globe.roiMarker.rotation = new THREE.Vector3().getRotationFromMatrix(this.getMatrixFromTag(obj, IS_GESTURAL));
+							this.globe.roiMarker.position.addSelf(invNorm.multiplyScalar(-radius));
+							var roiScale = 1 - zoom;
+							var roiSize = 300;
+							this.globe.roiMarker.scale.x = roiScale * roiSize;
+							this.globe.roiMarker.scale.y = roiScale * roiSize;
+							this.globe.roiMarker.visible = true;
+						}
+					} else {
+						this.globe.roiMarker.visible = false;
+					}
+
+					/*
+					var loupePos = invNorm.multiplyScalar(300);
+					console.log(loupePos.length());
+					console.log('loupe');
+					this.globe.camera.position.x += 100;
+					*/
+				}
 				
 				break;
 		}
@@ -159,6 +216,9 @@ window.MapGLView = window.MapViewBase.extend({
 		$(this.el).html(this.template());
 		if (IS_IPAD) {
 			$('body').addClass('ipad');
+		}
+		if (IS_AR) {
+			$('body').addClass('ar-lens');
 		}
 
     	if (DEBUG) {

@@ -130,7 +130,7 @@ var ReductionKey = {
 			var loc = [grid_lng * grid_size, grid_lat * grid_size];
 			return [
 				grid_lng + ',' + grid_lat + ',' + grid_size, 
-				[grid_lng * grid_size, grid_lat * grid_size]
+				[grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2]
 			];
 		};
 		this.name = 'loc-'+this.grid_size;
@@ -297,7 +297,7 @@ var reducePoints = function(reduction_keys, opts) {
 	}, opts);
 };
 
-use geo;
+
 var cur = db.pointcollections.find({});
 cur.forEach(function(collection) {
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
@@ -311,11 +311,12 @@ cur.forEach(function(collection) {
 			loc: new ReductionKey.LocGrid(grid_size)
 		}, opts);
 		
-		reducePoints({
+		/*reducePoints({
 			collectionid: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(grid_size), 
 			datetime: new ReductionKey.Weekly()
 		}, opts);
+*/
 		/*
 		reducePoints({
 			collectionid: ReductionKey.copy, 

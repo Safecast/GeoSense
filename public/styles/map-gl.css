@@ -24,6 +24,6 @@
 /*
 AR version
 */
-body.ipad, .ipad .map-gl-view {
+body.ar-lens, .ar-lens .map-gl-view {
 	background: transparent !important;
 }

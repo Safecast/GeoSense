@@ -15,6 +15,11 @@
           var receivedMilli = [];
           var sampleSize = 50;
 
+          var getMilli = function() {
+            d = new Date();
+            return Date.UTC(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
+          };
+
           var connect = function()
           {
             ws = new Socket("ws://18.85.58.62:8080/");
@@ -33,9 +38,7 @@
                 console.log('broadcast message received '+evt.data);
                 return;
               }
-              d = new Date();
-              var ms = Date.UTC(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
-              receivedMilli.push(ms);
+              receivedMilli.push(getMilli());
               if (receivedMilli.length > sampleSize) {
                 receivedMilli.shift();
               }
@@ -64,7 +67,7 @@
           connect();
           var displayFps = function() {
             if (receivedMilli.length > 1 ) {
-              fps = receivedMilli.length / ((receivedMilli[receivedMilli.length - 1] - receivedMilli[0]) / 1000.0);
+              fps = receivedMilli.length / ((getMilli() - receivedMilli[0]) / 1000.0);
               document.getElementById("fps").innerHTML = Math.round(fps) + ' fps';
             }
             setTimeout(displayFps, 500);

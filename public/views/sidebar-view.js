@@ -26,7 +26,7 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "setToggleStates");
 		options.vent.bind("setToggleStates", this.setToggleStates);	
-		if (IS_AR || IS_TAGGED_GLOBE || IS_REMOTE_CONTROLLED) {
+		if (IS_AR || IS_LOUPE || IS_TAGGED_GLOBE) {
 			new OblessdClient({vent: options.vent, taggedObjects: taggedObjects, track: true});
 		}
     },
@@ -47,9 +47,21 @@ window.SideBarView = Backbone.View.extend({
 		}
 		this.$('#scale_linear').addClass('active');
 
-		if (!DEBUG || !IS_AR && !IS_TAGGED_GLOBE) {
+		if (!DEBUG || (!IS_AR && !IS_LOUPE && !IS_TAGGED_GLOBE)) {
 			this.$('#arToggleGroup').remove();
 		} else {
+			this.$("#world-fixed-dist-val").text(WORLD_FIXED_DIST);
+			this.$('#world-fixed-dist').slider({
+				value: WORLD_FIXED_DIST,
+				min: 0,
+				max: radius * 10,
+				step: 1,
+				range: 'max',
+				slide: function( event, ui ) {
+					self.$("#world-fixed-dist-val").text(ui.value);
+					WORLD_FIXED_DIST = ui.value;
+				},
+			});
 			this.$("#world-rot-x-val").text(WORLD_ROT_X);
 			this.$('#world-rot-x').slider({
 				value: WORLD_ROT_X,

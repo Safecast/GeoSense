@@ -22,6 +22,7 @@ fps = 80.0
 
 open_sockets = []
 socket_options = {}
+min_dist = 0.025
 
 
 if ARGV.length > 0:
@@ -36,11 +37,26 @@ if ARGV.length > 0:
   end
 end
 
+def vector_dist(v1, v2)
+  xd = v1[0] - v2[0]
+  yd = v1[1] - v2[1]
+  zd = v1[2] - v2[2]
+  return Math.sqrt(xd*xd + yd*yd + zd*zd)  
+end
 
+def tag_different(tag1, tag2, min_dist)
+  for cmp in ['loc', 'norm', 'over']:
+    if vector_dist(tag1[cmp], tag2[cmp]) > min_dist:
+      return true
+    end
+  end
+  return false;
+end
 
 Thread.abort_on_exception = true
 ingests_tags = {}
 ingests_tracks = {}
+sent_tags = {}
 
 for pool in pools:
   Thread.new do
@@ -67,15 +83,21 @@ Thread.new do
   loop {
     next_time = Time.now
     timeDelta = next_time - prev_time
-    if timeDelta >= targetTimeDelta
+    if min_dist != 0 or timeDelta >= targetTimeDelta
       for socket in open_sockets
         send_tags = nil
         send_tracks = nil
         if ingests_tags:
           send_tags = {}
           for tag in watch_tags[socket]
-            if ingests_tags[tag]
-              send_tags[tag] = ingests_tags[tag]
+            if ingests_tags[tag]:
+              if (not sent_tags[socket].include?(tag)) or tag_different(sent_tags[socket][tag], ingests_tags[tag], min_dist):
+                if sent_tags[socket].include?(tag):
+                  #puts 'is different: '+(tag_different(sent_tags[socket][tag], ingests_tags[tag])
+                end
+                send_tags[tag] = ingests_tags[tag]
+                sent_tags[socket][tag] = ingests_tags[tag]
+              end
             end
           end
         end
@@ -83,13 +105,15 @@ Thread.new do
           send_tracks = ingests_tracks
         end
         send_data = {}
-        if send_tags:
+        if send_tags and send_tags.length > 0:
           send_data['tags'] = send_tags
         end
-        if send_tracks:
+        if send_tracks and send_tracks.length > 0:
           send_data['tracks'] = send_tracks
         end
-        socket.send(send_data.to_json)
+        if send_data.length > 0:
+          socket.send(send_data.to_json)
+        end
       end
       prev_time = next_time
     end
@@ -104,6 +128,7 @@ EventMachine::WebSocket.start(:host => host, :port => port, :debug => debug) do 
     puts "WebSocket connected"
     open_sockets.push(ws)
     watch_tags[ws] = []
+    sent_tags[ws] = {} 
   }
   ws.onclose {
     EM.cancel_timer(timer)

@@ -9,7 +9,6 @@
 #import "ARViewController.h"
 #import "WGLAppDelegate.h"
 
-
 @interface ARViewController ()
 
 @end
@@ -32,7 +31,7 @@
   [super viewDidLoad];
   webView.backgroundColor = [UIColor clearColor];
   webView.opaque = NO;
-  webView.scrollView.scrollEnabled = NO; 
+  //webView.scrollView.scrollEnabled = NO; 
   webView.scrollView.bounces = NO;
 
   id webDocumentView = [webView performSelector:@selector(_browserView)];
@@ -49,7 +48,9 @@
 
   [backingWebView _setWebGLEnabled:YES];  
 
-  [self loadUrl:@"http://18.85.59.187:8124/hY0VgozaeoY4NQp/globe/?lens_tag=1" addToHistory:YES];
+  [self loadUrl:@"http://18.189.26.244:8124/Oeq6NkK0FTmkPRG/globe/?lens_tag=1" addToHistory:YES];
+  [self loadUrl:@"http://18.189.26.244:8124/Oeq6NkK0FTmkPRG/globe/?lens_tag=1&loupe=1" addToHistory:YES];
+  [self loadUrl:@"http://18.189.26.244:8124/" addToHistory:YES];
 
   UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showUrlBar:)];
 	[tapRecognizer setNumberOfTapsRequired:3];
@@ -71,7 +72,6 @@
   urlField.text = url;
  
   NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLCacheStorageNotAllowed timeoutInterval:10];
-  webView.hidden = YES;
   [webView loadRequest:request];
   
   NSLog(@"load url %@", url);
@@ -90,7 +90,8 @@
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-  [hud show:YES];
+  //[hud show:YES];
+  //webView.hidden = YES;
 }  
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -132,6 +133,9 @@
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+  if ([error code] == NSURLErrorCancelled) {
+    return;
+  }
   [hud hide:YES];
   NSString *message = [error.userInfo objectForKey:@"NSLocalizedDescription"];
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" 

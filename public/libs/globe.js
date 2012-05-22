@@ -70,8 +70,8 @@ DAT.Globe = function(container, colorFn) {
 		}
 	};
 
-	var camera, scene, scenePoints, world, sceneAtmosphere, renderer, w, h, meshDebug;
-	var meshPlanet, atmosphere, point;
+	var camera, scene, scenePoints, world, sceneAtmosphere, renderer, w, h, meshDebug, roiMarker;
+	var meshPlanet, planetExtents, atmosphere, point;
 	var controls;
 
 	var overRenderer;
@@ -96,7 +96,7 @@ DAT.Globe = function(container, colorFn) {
 	function init() {
 
 		var shader, uniforms, material;
-		if (IS_AR && IS_IPAD) {
+		if ((IS_AR || IS_LOUPE) && IS_IPAD) {
 			w = 768;
 			h = 1024;
 		} else {
@@ -197,8 +197,13 @@ DAT.Globe = function(container, colorFn) {
 		//world.rotation.z = tilt;
 		world.add( meshPlanet );
 
+		geometry = new THREE.SphereGeometry( radius, 1, 1 );
+		planetExtents = new THREE.Mesh(geometry);
+		planetExtents.visible = false;
+		world.add(planetExtents);
 
-		if (DEBUG && (IS_AR || IS_TAGGED_GLOBE)) {
+
+		if (DEBUG && (IS_AR || IS_LOUPE || IS_TAGGED_GLOBE)) {
 			var plane = new THREE.Mesh(new THREE.CubeGeometry(150, 10, 250, 2, 2), new THREE.MeshBasicMaterial({
 				color: 0x0000ff,
 				opacity: .5
@@ -214,6 +219,23 @@ DAT.Globe = function(container, colorFn) {
 			scene.add(meshDebug);
 		}
 
+
+		geometry = new THREE.CubeGeometry(aspectRatio, 1, 1, 2, 2);
+		geometry = new THREE.CylinderGeometry(1, 1, 1, 30, 1, false);
+
+		var roiWidget = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+			color: 0xffff88,
+			opacity: (IS_TOP_DOWN ? .8 : .4),
+			transparent: true,
+		}));
+
+		roiWidget.overdraw = true;
+		roiMarker = new THREE.Object3D();
+		roiMarker.add(roiWidget);
+		roiWidget.rotation.x = Math.PI / 2;
+		//roiMarker.visible = false;
+
+		scene.add(roiMarker);
 
 	
 		scene.add(new THREE.AmbientLight( 0xffffff ));        
@@ -275,7 +297,7 @@ DAT.Globe = function(container, colorFn) {
 		}, false);
 
 
-		if (!IS_AR && !IS_TAGGED_GLOBE) {
+		if (!IS_AR && !IS_TAGGED_GLOBE && !IS_LOUPE) {
 			controls = new THREE.TrackballControls( camera, renderer.domElement );
 			controls.rotateSpeed = 1.0;
 			controls.zoomSpeed = 1.2;
@@ -356,7 +378,11 @@ DAT.Globe = function(container, colorFn) {
 			lng = data[i + 1];
 			color = colorFnWrapper(data,i);
 			//console.log(data);
-			size = data[i + 2] * barHeight;
+			if (!IS_TOP_DOWN) {
+				size = data[i + 2] * barHeight;
+			} else {
+				size = barHeight * .05;
+			}
 			addPoint(lat, lng, size, color, subgeo);
 		}
 		if (opts.animated) {
@@ -374,7 +400,8 @@ DAT.Globe = function(container, colorFn) {
 							color: 0xffffff,
 							vertexColors: THREE.FaceColors,
 							morphTargets: false,
-							transparent: true, blending: THREE.AdditiveBlending
+							transparent: true, blending: THREE.AdditiveBlending,
+							opacity: .75
 						}));
 			} else {
 				if (this._baseGeometry.morphTargets.length < 8) {
@@ -390,7 +417,9 @@ DAT.Globe = function(container, colorFn) {
 							color: 0xffffff,
 							vertexColors: THREE.FaceColors,
 							morphTargets: true,
-							//transparent: true, blending: THREE.AdditiveBlending
+							transparent: true, blending: THREE.AdditiveBlending,
+							opacity: .75
+							
 						}));
 			}
 			world.add(this.points);
@@ -490,8 +519,11 @@ DAT.Globe = function(container, colorFn) {
 	this.animate = animate;
 	this.render = render;
 	this.world = world;
+	this.planet = meshPlanet;
+	this.planetExtents = planetExtents;
 	CAMERA = this.camera = camera;
 	this.debugMarker = meshDebug;
+	this.roiMarker = roiMarker;
 
 	this.__defineGetter__('time', function() {
 		return this._time || 0;
