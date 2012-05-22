@@ -5,9 +5,10 @@
 	"contributors": [
 		"Anthony DeVincenzi <tonyd@media.mit.edu>",
 		"Samuel Luescher <luescher@media.mit.edu>",
-		"Walter Menendez <walterm@mit.edu>"
 	],
 	"dependencies": {
+		"csv":"0.0.13",
+		"datejs":"0.0.2",
 		"express": "2.5.8",
 		"mongodb": "0.9.9-5",
 		"mongoose": "2.5.10",
@@ -16,5 +17,5 @@
 		"oauth": "0.9.6",
 		"twitter": "v0.1.18"
 	},
-	"engine": "node >= 0.6.11"
+	"engine": "node >= 0.6.6"
 }
