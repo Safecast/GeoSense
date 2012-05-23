@@ -14,11 +14,6 @@
 		"now": "0.8.1",
 		"ntwitter": "0.2.10",
 		"oauth": "0.9.6",
-<<<<<<< HEAD
 		"twitter": "v0.1.18",
-		"v8-profiler": "3.6.2beta2"
-=======
-		"twitter": "v0.1.18"
->>>>>>> 4375cf060cf66e8a5396664d029cb70ed8f98fb8
   }
 }
