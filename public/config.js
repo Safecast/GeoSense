@@ -1,7 +1,23 @@
 /* Config 
 */
 
+var FeatureType = {
+	POINTS: 100,
+	CELLS: 200,
+	BUBBLES: 300 
+};
+
 var DEBUG = 1;
+var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
+var GRID_SIZES = {
+//	'-1': 2,
+	'0': DEG_PER_PX_AT_ZOOM_0 * 4
+};
+for (var zoom = 1; zoom <= 15; zoom++) {
+	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
+}
+
+
 if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
 
 function getURLParameter(paramName) {

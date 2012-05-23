@@ -5,4 +5,4 @@ do
 	latest=$i
 done
 
-mongod run --config $latest/mongod.conf
+mongod run -v --config $latest/mongod.conf

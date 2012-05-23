@@ -1,6 +1,13 @@
+
+/*var Proj4js = require('proj4js');
+var METERS_PER_DEG_LON = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj("EPSG:900913"), new Proj4js.Point(1, 0)).x;
+var METERS_PER_PX_AT_ZOOM_0 = 156543.03390625;
+var DEG_PER_PX_AT_ZOOM_0 = METERS_PER_DEG_LON / METERS_PER_PX_AT_ZOOM_0;*/
+
+var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
 var GRID_SIZES = {
-	'-1': 2,
-	'0': .6
+//	'-1': 2,
+	'0': DEG_PER_PX_AT_ZOOM_0 * 4
 };
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
@@ -528,12 +535,16 @@ app.delete('/api/point/:id', function(req, res){
 
 app.get('/api/mappoints/:pointcollectionid', function(req, res){
 
+	console.log('??????');
+
 	var pointQuery = {'value.collectionid': req.params.pointcollectionid};
 	var urlObj = url.parse(req.url, true);
 
 	zoom = urlObj.query.z || 0;
 	grid_size = GRID_SIZES[zoom];
 	console.log('zoom ' + zoom + ', grid size ' + grid_size);
+
+	var boxes;
 
 	if (urlObj.query.b && urlObj.query.b.length == 4) {
 		var b = urlObj.query.b;
@@ -543,8 +554,6 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 		for (var i = 0; i < 4; i++) {
 			b[i] = parseFloat(b[i]) || 0;
 		}
-
-		var boxes;
 
 		// Mongo currently doesn't handle the transition around the dateline (x = +-180)
 		// This, if the bounds contain the dateline, we need to query for the box to 
@@ -586,21 +595,26 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 
 	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 	var points = [];
+	var queryExecuted = false; 
 	var originalCount = 0;
 	console.log('querying '+collectionName);
 
 	var dequeueBoxQuery = function() {
-		if (!boxes.length) {
+		if (queryExecuted && (!boxes || boxes.length == 0)) {
 			console.log('Found '+points.length+' reduction points for '+originalCount+' original points.');
 			res.send(points);
 			return;
 		}
 
-		var box = boxes.shift();
-		pointQuery['value.loc'] = {$within: {$box : box}};
+		if (boxes) {
+			var box = boxes.shift();
+			pointQuery['value.loc'] = {$within: {$box : box}};
+		}
 
 		if (!time_grid) {
+			console.log(pointQuery);
 			ReducedPoint.find(pointQuery, function(err, datasets) {
+				console.log(datasets);
 				if (err) return;
 				for (var i = 0; i < datasets.length; i++) {
 					var reduced = datasets[i].get('value');
@@ -612,6 +626,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 					points.push(p);
 					originalCount += p.count;
 				}
+				queryExecuted = true;
 				dequeueBoxQuery();
 			});
 		} else {
@@ -646,11 +661,13 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 			};
 			mongoose.connection.db.executeDbCommand(command, function(err, res) {
 				var datasets = res.documents[0].results;
+				if (!datasets.length) return;
 				for (var i = 0; i < datasets.length; i++) {
 					var p = datasets[i].value;
 					points.push(p);
 					originalCount += p.count;
 				}
+				queryExecuted = true;
 				dequeueBoxQuery();
 			});
 		}

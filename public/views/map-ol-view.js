@@ -2,6 +2,9 @@ window.MapOLView = window.MapViewBase.extend({
 
     tagName: 'div',
 	className: 'map-view',
+
+	addFeatures: {
+	},
 	
     events: {
 		"keypress #map_canvas input" : "keyDown"
@@ -68,6 +71,7 @@ window.MapOLView = window.MapViewBase.extend({
 		NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
 		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
+		//console.log('zoom: '+zoom+', resolution '+this.map.getResolution()+' '+this.map.getUnits());
 		return {
 			zoom: zoom,
 			bounds: bounds
@@ -121,13 +125,13 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		this.map.addLayers([this.gmap]);
 				
-		this.addCommentLayer();
+		//this.addCommentLayer();
 				
 		this.updateMapStyle(_defaultMapStyle);
 				
-		this.detectMapClick();
+		//this.detectMapClick();
 		
-		if(DEBUG) {
+		if (DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
 		}
 
@@ -235,6 +239,7 @@ window.MapOLView = window.MapViewBase.extend({
 		
 		//this.commentLayer.addFeatures(comment);
 		
+		/*
 		var select = new OpenLayers.Control.SelectFeature(this.commentLayer,
         {
             clickout: false, toggle: false,
@@ -249,6 +254,7 @@ window.MapOLView = window.MapViewBase.extend({
 
 		this.map.addControl(select);
 		select.activate();
+		*/
 	},
 	
 	addKMLLayer: function(url)
@@ -273,70 +279,100 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	initLayerForCollection: function(collection)
 	{ 
+		var maxRadius = 20;
+		var context = {
+            getColor: function(feature) {
+                return feature.attributes.color;
+            },
+            getBubbleSize: function(feature) {
+                return Math.min(maxRadius, 
+                	feature.attributes.count / feature.attributes.maxcount * maxRadius);
+            }
+        };
+
+        var layer;
+
 		switch(collection.params.displayType)
 		{
-		case 1: // Pixels
-			var renderer = 'Pixels'
-			break;
-		case 2: // Circles
-			var renderer = 'Circles'
-			break
-		case 3: //Rectangles
-			var renderer = 'Rectangles'
-			break;
-		}
-
-		switch(renderer)
-		{
-			case 'Pixels':
+			default:
+			case FeatureType.POINTS:
 			
-				var layer = new OpenLayers.Layer.VectorPt(null, {
-							projection: new OpenLayers.Projection("EPSG:4326"),
-							sphericalMercator: true,
-				    		renderers: ["Canvas2"],
-				    		wrapDateLine: true
+				var style = new OpenLayers.Style({
+				    fillColor: '${getColor}',
+				    strokeColor: '#333',
+				    strokeWidth: 2,
+				    pointRadius: 7,
+				    fillOpacity: .5,
+				    strokeOpacity: 1
+				}, {context: context});
+
+				layer = new OpenLayers.Layer.Vector(null, {
+					projection: new OpenLayers.Projection("EPSG:4326"),
+					sphericalMercator: true,
+				    styleMap: new OpenLayers.StyleMap({
+				        "default": style,
+				        "temporary": {
+				        	fillOpacity: .6
+				        },
+				        "select": {
+				        	fillOpacity: .8,
+						    strokeColor: '#eee'
+				        }
+				    }),
+				    renderers: ["Canvas"],
+				    wrapDateLine: true
+				});
+
+				break;
+
+			case FeatureType.CELLS:
+			
+				var style = new OpenLayers.Style({
+				    fillColor: '${getColor}',
+				    strokeColor: '#333',
+				    strokeWidth: 2,
+				    pointRadius: 7,
+				    fillOpacity: .5,
+				    strokeOpacity: 0
+				}, {context: context});
+
+				layer = new OpenLayers.Layer.Vector(null, {
+					projection: new OpenLayers.Projection("EPSG:4326"),
+					sphericalMercator: true,
+				    styleMap: new OpenLayers.StyleMap({
+				        "default": style,
+				        "temporary": {
+				        	fillOpacity: .6
+				        },
+				        "select": {
+				        	fillOpacity: .8,
+						    strokeColor: '#eee'
+				        }
+				    }),
+				    renderers: ["Canvas"],
+				    wrapDateLine: true
 				});
 
 				break;
 			
-			case 'Circles':
+			case FeatureType.BUBBLES:
 			
-				var Rule = OpenLayers.Rule;
-				var Filter = OpenLayers.Filter;
-				var maxRadius = 20;
-				var context = {
-	                getColor: function(feature) {
-	                    console.log(feature.attributes.color);
-	                    return feature.attributes.color;
-	                },
-	                getSize: function(feature) {
-	                    return Math.min(maxRadius, 
-	                    	feature.attributes.count / feature.attributes.maxcount * maxRadius);
-	                }
-	            };
 				var style = new OpenLayers.Style({
-				    pointRadius: '${getSize}',
+				    pointRadius: '${getBubbleSize}',
 				    strokeOpacity: 0,
 				    fillColor: '${getColor}',
 				    fillOpacity: .3
 				}, {context: context});
 
-				var layer = new OpenLayers.Layer.Vector(null, {
+				layer = new OpenLayers.Layer.Vector(null, {
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
 				    }),
-				    renderers: ["Canvas"]
+				    renderers: ["Canvas"],
+				    wrapDateLine: true
 				});
 				
 				break;
-
-			case 'Rectangles':
-
-				//TODO: Add rectangle support
-				break;
-
-			default:
-		  		//
 		}
 
 		layer.collectionId = collection.collectionId;
@@ -344,11 +380,67 @@ window.MapOLView = window.MapViewBase.extend({
 		this.layerArray[layer.collectionId] = layer;
 			
 		this.map.addLayers([this.layerArray[layer.collectionId]]);
+
+        
+
+        /*var highlightCtrl = new OpenLayers.Control.SelectFeature(layer, {
+            hover: true,
+            highlightOnly: true,
+            renderIntent: "temporary",
+            eventListeners: {
+                beforefeaturehighlighted: report,
+                featurehighlighted: report,
+                featureunhighlighted: report
+            }
+        });
+
+        var selectCtrl = new OpenLayers.Control.SelectFeature(layer,
+            {clickout: true}
+        );
+
+        this.map.addControl(highlightCtrl);
+        this.map.addControl(selectCtrl);
+
+        highlightCtrl.activate();
+        selectCtrl.activate();		*/
+
+		layer.events.on({
+            'featureselected': this.featureSelected,
+            'featureunselected': this.featureUnselected
+        });
+
+        /*var hover = new OpenLayers.Control.SelectFeature(layer, {
+            hover: true,
+            highlightOnly: true,
+            renderIntent: "temporary",
+        });
+		this.map.addControl(hover);
+		hover.activate();*/
+
+		var select = new OpenLayers.Control.SelectFeature(layer, {
+            clickout: true, toggle: false,
+            multiple: false, hover: false,
+            toggleKey: "ctrlKey", // ctrl key removes from selection
+            multipleKey: "shiftKey", // shift key adds to selection
+            box: false
+        });
+		this.map.addControl(select);
+		select.activate();
 		
+	},
+
+	featureSelected: function(feature) {
+		console.log('featureSelected '+feature);
+	},
+
+	featureUnselected: function(feature) {
+		console.log('featureUnselected');
 	},
 
     addPointToLayer: function(model, opts, collectionId) 
     {
+    	var collection = this.collections[collectionId];
+
     	var loc = model.get('loc');
 		var lng = loc[0];
 		var lat = loc[1];
@@ -366,18 +458,50 @@ window.MapOLView = window.MapViewBase.extend({
 				lng = 180 - (-180 - lng);
 			}
 		}
-		currPoint = new OpenLayers.Geometry.Point(lng, lat);
-		currPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		
-		// TODO: Replace VectorPt
-		opts.colour = opts.color;
+		var pt = new OpenLayers.Geometry.Point(lng, lat);
+		var geometry;
 
-		var vector = new OpenLayers.Feature.Vector(currPoint, opts);
-		this.layerArray[collectionId].features.push(vector);		
+		switch(collection.params.displayType)
+		{
+			default:
+				geometry = pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+				break;
+
+			case FeatureType.CELLS:
+				var gw = GRID_SIZES[this.getVisibleMapArea().zoom] / 2;
+				var pts = [
+					new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
+					new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),
+					new OpenLayers.Geometry.Point(pt.x + gw, pt.y + gw),
+					new OpenLayers.Geometry.Point(pt.x + gw, pt.y - gw)
+				];
+				var corners = [];
+				for (var i = 0; i < pts.length; i++) {
+					var pt = pts[i];
+					pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+					corners.push(pt.x+' '+pt.y);
+				}
+				var wkt = 'POLYGON(' + corners.join(', ') + ')';
+				var geometry = OpenLayers.Geometry.fromWKT(wkt);
+				break;
+		}
+		
+		var feature = new OpenLayers.Feature.Vector(geometry, opts);
+		
+		if (!this.addFeatures[collectionId]) {
+			this.addFeatures[collectionId] = [];
+		}
+		this.addFeatures[collectionId].push(feature);
     },
 
 	drawLayerForCollection: function(collection) 
 	{
+		if (this.addFeatures[collection.collectionId]) {
+			console.log('addFeatures '+this.addFeatures[collection.collectionId].length);		
+			this.layerArray[collection.collectionId].addFeatures(this.addFeatures[collection.collectionId]);
+			delete this.addFeatures[collection.collectionId];
+		}
 		this.layerArray[collection.collectionId].redraw();
 	},
 	
@@ -590,9 +714,11 @@ window.MapOLView = window.MapViewBase.extend({
             onClick: function(evt) {
 	            var lonlat = self.map.getLonLatFromPixel(evt.xy);
 		    	translation = new Geometry.Point(lonlat.x, lonlat.y);
-				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));	
+				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+				console.log(evt);
 
-				self.vent.trigger('broadcastMessage', '@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
+
+				//self.vent.trigger('broadcastMessage', '@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
 
 				//Temporary!!!!
 				// var commentid = 0123456;

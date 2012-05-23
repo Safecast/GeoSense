@@ -11,8 +11,9 @@ window.SideBarDataView = Backbone.View.extend({
 		'click #toggleHidden:' : 'toggleHiddenClicked',
 		'click #singleColor:' : 'singleColorClicked',
 		'click #scaleColor:' : 'scaleColorClicked',
-		'click #circlesButton:' : 'circlesButtonClicked',
-		'click #pixelsButton:' : 'pixelsButtonClicked',
+		'click #pointsButton:' : 'pointsButtonClicked',
+		'click #cellsButton:' : 'cellsButtonClicked',
+		'click #bubblesButton:' : 'bubblesButtonClicked',
 		
 		'click #colorInput' : 'colorInputClicked',
 		'click #colorInputLow' : 'colorInputLowClicked',
@@ -148,12 +149,15 @@ window.SideBarDataView = Backbone.View.extend({
 
 		switch(this.displayType)
 		{
-		case 1: // Pixels
-		  	this.pixelsButtonClicked();
-		  break;
-		case 2: // Circles
-		  	this.circlesButtonClicked();
-		  break;
+			case FeatureType.POINTS: 
+			  	this.pointsButtonClicked();
+				break;
+			case FeatureType.CELLS: 
+			  	this.cellsButtonClicked();
+				break;
+			case FeatureType.BUBBLES: 
+			  	this.bubblesButtonClicked();
+				break;
 		}
 		
 		this.$("#colorInput").miniColors('value',this.color);
@@ -213,20 +217,31 @@ window.SideBarDataView = Backbone.View.extend({
 		this.enableUpdateButton();
 	},
 
-	circlesButtonClicked: function()
+	pointsButtonClicked: function()
 	{
 		this.enableUpdateButton();
-		this.$('#circlesButton').addClass('active');
-		this.$('#pixelsButton').removeClass('active');
-		this.displayType = 2;
+		this.$('#pointsButton').addClass('active');
+		this.$('#cellsButton').removeClass('active');
+		this.$('#bubblesButton').removeClass('active');
+		this.displayType = FeatureType.POINTS;
 	},
 	
-	pixelsButtonClicked: function()
+	cellsButtonClicked: function()
 	{
 		this.enableUpdateButton();
-		this.$('#circlesButton').removeClass('active');
-		this.$('#pixelsButton').addClass('active');
-		this.displayType = 1;
+		this.$('#pointsButton').removeClass('active');
+		this.$('#cellsButton').addClass('active');
+		this.$('#bubblesButton').removeClass('active');
+		this.displayType = FeatureType.CELLS;
+	},
+
+	bubblesButtonClicked: function()
+	{
+		this.enableUpdateButton();
+		this.$('#pointsButton').removeClass('active');
+		this.$('#cellsButton').removeClass('active');
+		this.$('#bubblesButton').addClass('active');
+		this.displayType = FeatureType.BUBBLES;
 	},
 
 	singleColorClicked: function()

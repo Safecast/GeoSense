@@ -206,7 +206,7 @@ var AppRouter = Backbone.Router.extend({
 							ajaxI: i,
 							url: '/api/pointcollection/' + _mapCollections[i].collectionid,
 							success: function(data) {
-								self.addExistingDataSource(data.collectionid, scope.ajaxType)
+								self.addExistingDataSource(data._id, scope.ajaxType)
 							},
 							error: function() {
 								console.error('failed to fetch distinct collections');
@@ -257,12 +257,13 @@ var AppRouter = Backbone.Router.extend({
 			success: function(data) {
 				var scope = this;
 				self.vent.trigger("setStateType", 'loading');
+					console.log(data);
 
 				var mapId = _mapId;
 				var maxVal = data.maxval;
 				var minVal = data.minval;
 				var title = data.title;
-				data.collectionId = data.collectionid; // TODO: deprecated
+				data.collectionId = data.collectionid = data._id; // TODO: deprecated
 							
 				var mapArea = self.mapView.getVisibleMapArea();							
 				var collectionOptions = {
@@ -351,6 +352,8 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
+		console.log('---');
+		console.log(options);
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},
