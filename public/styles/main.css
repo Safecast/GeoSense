@@ -22,6 +22,8 @@
 @import url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css");
 @import url("jquery-ui-1.8.16.custom.css");
 
+@import url("embed.css");
+
 #home 
 {
 	overflow-y:scroll;

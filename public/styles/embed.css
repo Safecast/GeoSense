@@ -1,0 +1,15 @@
+.nav-collapse .graph {
+	display:none;
+}
+.nav-collapse .setup {
+	display:none;
+}
+.chat-view {
+	display:none;
+}
+#dataManager {
+	display:none;
+}
+#comments {
+	display:hidden;
+}
