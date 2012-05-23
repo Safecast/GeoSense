@@ -1072,5 +1072,6 @@ app.get('/api/tweets', function(req, res){
   });
 });
 
-app.listen(8124, "0.0.0.0");
-console.log('Server running at http://0.0.0.0:27366/');
+var port = process.env.PORT || 3000;
+app.listen(port, "0.0.0.0");
+console.log('Server running at http://0.0.0.0:' + port + "/");
