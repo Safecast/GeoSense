@@ -28,7 +28,15 @@ var application_root = __dirname,
 var app = express.createServer();
 
 //local
+<<<<<<< HEAD
 mongoose.connect('mongodb://localhost/geo');
+=======
+//mongoose.connect('mongodb://localhost/geo');
+
+//production
+mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
+
+>>>>>>> 4375cf060cf66e8a5396664d029cb70ed8f98fb8
 
 //production
 //mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
@@ -1125,4 +1133,8 @@ app.get('/api/tweets', function(req, res){
 
 var port = process.env.PORT || 3000;
 app.listen(port, "0.0.0.0");
+<<<<<<< HEAD
 console.log('Server running at http://0.0.0.0:' + port + "/");
+=======
+console.log('Server running at http://0.0.0.0:' + port + "/");
+>>>>>>> 4375cf060cf66e8a5396664d029cb70ed8f98fb8
