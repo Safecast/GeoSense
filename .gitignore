@@ -34,4 +34,4 @@ Icon?
 Thumbs.db
 *.scpt
 
-node_modules
+node_modules/*
