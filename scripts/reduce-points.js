@@ -1,7 +1,10 @@
+var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
+
 var GRID_SIZES = {
-	'-1': 2,
-	'0': .6
+//	'-1': 2,
+	'0': DEG_PER_PX_AT_ZOOM_0 * 4
 };
+
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
@@ -111,7 +114,7 @@ var ReductionKey = {
 			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))) return;
 
 			if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
-				print('warning: ');
+				print('warning: dropping point because loc not within +- 180');
 				print(loc);
 				return;
 			}
@@ -127,10 +130,15 @@ var ReductionKey = {
 			}
 			var grid_lng = Math.round((lng - lng % grid_size) / grid_size);
 			var grid_lat = Math.round((lat - lat % grid_size) / grid_size);
-			var loc = [grid_lng * grid_size, grid_lat * grid_size];
+			var loc = [grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2];
+			if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
+				print('warning: dropping point because grid loc not within +- 180');
+				print(loc);
+				return;
+			}
 			return [
 				grid_lng + ',' + grid_lat + ',' + grid_size, 
-				[grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2]
+				loc
 			];
 		};
 		this.name = 'loc-'+this.grid_size;
