@@ -13,6 +13,8 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
 
+var profiler = require('v8-profiler');
+
 var application_root = __dirname,
   	express = require("express"),
   	path = require("path"),
@@ -25,7 +27,12 @@ var application_root = __dirname,
 
 var app = express.createServer();
 
-mongoose.connect('mongodb://localhost/geo');
+//local
+//mongoose.connect('mongodb://localhost/geo');
+
+//production
+mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
+
 
 app.configure(function(){
 	app.use(express.static(__dirname + '/public'));
@@ -106,7 +113,8 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	modified_by: String,
 	defaults: mongoose.Schema.Types.Mixed,
 	active: Boolean,
-	progress: Number	
+	progress: Number,
+	busy: Boolean
 }));
 
 var Map = mongoose.model('Map', new mongoose.Schema({
@@ -283,6 +291,7 @@ app.post('/api/data/:file', function(req, res){
 	    name: req.params.name,
 		defaults: defaults,
 		active: false,
+		busy: true,
 		title: req.body.title,
 		progress: 0
 	});
@@ -298,6 +307,14 @@ app.post('/api/data/:file', function(req, res){
 			};
 			res.send(response);
 
+			var numRead = 0;
+			var numSaving = 0;
+			var numDone = 0;
+
+			var debugStats = function(pos) {
+				console.log('* '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone);
+			};
+
 			switch(type) {
 				case 'csv':
 
@@ -307,7 +324,11 @@ app.post('/api/data/:file', function(req, res){
 				        data.unshift(data.pop());
 				        return data;
 				    })
-				    .on('data',function(data,index){
+				    .on('data',function(data, index) {
+				    	debugStats('on data');
+				    	var self = this;
+				    	self.readStream.pause();
+						numRead++;
 						if (FIRST_ROW_IS_HEADER && !fieldNames) {
 							fieldNames = data;
 						} else {
@@ -320,14 +341,35 @@ app.post('/api/data/:file', function(req, res){
 								doc['data'] = data;
 							}
 							var model = new Model(doc);
-							model.save(); 
+							
+							/*numSaving++;
+							model.save(function(err) {
+						    	debugStats('on save original');
+								doc = null; 
+								model = null;
+								numSaving--;
+								if (numSaving == 0) {
+							    	self.readStream.resume();
+							    	debugStats('resume');
+								}
+							});*/
 							
 							var point = convertOriginalToPoint(model, converter);
 							if (point) {
 								point.collectionid = newCollectionId;
 								point.created = new Date();
 								point.modified = new Date();
-								point.save();
+								numSaving++;
+								point.save(function(err) {
+							    	debugStats('on save point');
+									point = null;
+									numSaving--;
+									numDone++;
+									if (numSaving == 0) {
+								    	self.readStream.resume();
+								    	debugStats('resume');
+									}
+								});
 								if (maxVal == undefined || maxVal < point.get('val')) {
 									maxVal = point.get('val');
 								}
@@ -339,12 +381,10 @@ app.post('/api/data/:file', function(req, res){
 								importCount++;
 							}
 	
-							delete model;
-							delete doc;
-							delete point;
-
 							if (importCount == 1 || importCount % 1000 == 0) {
-								console.log('saved ' + importCount + ' points to '+newCollectionId);
+						    	debugStats('update progress');
+						    	collection.progress = numDone;
+						    	collection.save();
 							}
 						}
 			
@@ -353,6 +393,7 @@ app.post('/api/data/:file', function(req, res){
 				    	collection.maxval = maxVal;
 						collection.minval = minVal;
 						collection.active = true;
+						collection.busy = false;
 						collection.collectionid = collection.get('_id'); // TODO: deprecated
 						collection.save();
 				    	console.log('finalized and activated collection');
@@ -535,8 +576,6 @@ app.delete('/api/point/:id', function(req, res){
 
 app.get('/api/mappoints/:pointcollectionid', function(req, res){
 
-	console.log('??????');
-
 	var pointQuery = {'value.collectionid': req.params.pointcollectionid};
 	var urlObj = url.parse(req.url, true);
 
@@ -661,7 +700,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 			};
 			mongoose.connection.db.executeDbCommand(command, function(err, res) {
 				var datasets = res.documents[0].results;
-				if (!datasets.length) return;
+				if (!datasets || !datasets.length) return;
 				for (var i = 0; i < datasets.length; i++) {
 					var p = datasets[i].value;
 					points.push(p);
@@ -773,7 +812,7 @@ app.delete('/api/collection/:id', function(req, res){
 
 //Associative Collection (keeps track of collection id & name)
 app.get('/api/pointcollection/:id', function(req, res){
-	PointCollection.findOne({_id: req.params.id, active: true}, function(err, pointCollection) {
+	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {busy: true}]}, function(err, pointCollection) {
 		if (!err && pointCollection) {
 			res.send(pointCollection);
 		} else {
@@ -1084,5 +1123,6 @@ app.get('/api/tweets', function(req, res){
   });
 });
 
-app.listen(8124, "0.0.0.0");
-console.log('Server running at http://0.0.0.0:8124/');
+var port = process.env.PORT || 3000;
+app.listen(port, "0.0.0.0");
+console.log('Server running at http://0.0.0.0:' + port + "/");

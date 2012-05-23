@@ -35,7 +35,7 @@ window.MapOLView = window.MapViewBase.extend({
 		
 		previousKey = 0;
 		scope = this;
-		OpenLayers.ImgPath = "http://geo.media.mit.edu/assets/light/";	
+		OpenLayers.ImgPath = "/assets/openlayers-light/";	
     },
 
 	keyDown: function(e)

@@ -42,6 +42,10 @@ var AppRouter = Backbone.Router.extend({
 		$('#app').append(this.graphView.render().el);
 		
 		$('body').css("overflow","hidden");
+
+		if (window.location.href.indexOf('embed.html') != -1) {
+			$('body').addClass("embed");
+		}
 		
 		this.addCommentData();
 		
@@ -223,21 +227,32 @@ var AppRouter = Backbone.Router.extend({
 		});
 	},
 	
-	pollForNewPointCollection: function(pointCollectionId) {
+	pollForNewPointCollection: function(pointCollectionId, interval) {
+		if (interval) {
+			setTimeout(function() {
+				app.pollForNewPointCollection(pointCollectionId);
+			}, interval);
+			return;
+		}
+
 		console.log('pollForNewPointCollection: '+pointCollectionId);
+
 		$.ajax({
 			type: 'GET',
 			url: '/api/pointcollection/' + pointCollectionId,
 		    error: function() {
 				console.error('Failed to fetch new collection, trying again after timeout...');
-				setTimeout(function() {
-					app.pollForNewPointCollection(pointCollectionId);
-				}, POLL_INTERVAL);
 		    },
 		    success: function(data) {
-				app.bindCollectionToMap(pointCollectionId);
-				app.addExistingDataSource(data._id, 'newData');
-				app.vent.trigger("setStateType", 'post');
+		    	if (data.busy) {
+					app.vent.trigger("setStateType", 'parsing', data);
+					console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
+					app.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
+		    	} else {
+					app.bindCollectionToMap(pointCollectionId);
+					app.addExistingDataSource(data._id, 'newData');
+					app.vent.trigger("setStateType", 'post');
+		    	}
 		    }
 		});
 

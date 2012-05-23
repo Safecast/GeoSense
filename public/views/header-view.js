@@ -133,7 +133,7 @@ window.HeaderView = Backbone.View.extend({
 		window.open('' + url, 'Share it on Facebook', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 	},
 	
-	setStateType: function(type) {
+	setStateType: function(type, obj) {
 		
 		var stateIndicator = this.$('#stateIndicator');
 		var message = this.$('#stateIndicatorMessage');
@@ -146,7 +146,11 @@ window.HeaderView = Backbone.View.extend({
 			  	break;
 			case 'parsing':
 			  	stateIndicator.stop(true, true).fadeIn('fast');
-				message.html('CRUNCHING DATA');
+				if (obj && obj.busy && obj.progress) {
+					message.html('CRUNCHING DATA (' + obj.progress + ')');
+				} else {
+					message.html('CRUNCHING DATA');
+				}
 			  	break;
 			case 'complete':
 			  	stateIndicator.delay(1000).fadeOut('fast');
