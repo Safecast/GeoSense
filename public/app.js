@@ -44,7 +44,7 @@ var AppRouter = Backbone.Router.extend({
 		$('body').css("overflow","hidden");
 
 		// TODO: Detect embed 
-		if (true /*window.location.href.indexOf('embed.html') != -1*/) {
+		if (window.location.href.indexOf('4D4R0IjQJYzGP0m') != -1) {
 			$('body').addClass("embed");
 		}
 		
