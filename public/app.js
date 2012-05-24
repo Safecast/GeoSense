@@ -32,6 +32,9 @@ var AppRouter = Backbone.Router.extend({
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('#app').append(this.sideBarView.render().el);
 
+        this.dataInfoView = new DataInfoView({vent: this.vent});
+		$('#app').append(this.dataInfoView.render().el);
+
 		this.chatView = new ChatView({vent: this.vent});
         $('#app').append(this.chatView.render().el);
 
@@ -41,8 +44,6 @@ var AppRouter = Backbone.Router.extend({
 		this.graphView = new GraphView({vent: this.vent});
 		$('#app').append(this.graphView.render().el);
 
-		this.dataInfoView = new DataInfoView({vent: this.vent});
-		$('#app').append(this.dataInfoView.render().el);
 		
 		$('body').css("overflow","hidden");
 

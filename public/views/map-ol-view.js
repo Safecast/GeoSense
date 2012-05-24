@@ -309,7 +309,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    strokeWidth: 2,
 				    pointRadius: 7,
 				    fillOpacity: .75,
-				    strokeOpacity: 1
+				    strokeOpacity: 0
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
@@ -430,6 +430,7 @@ window.MapOLView = window.MapViewBase.extend({
 	featureSelected: function(evt) {
 		console.log('featureSelected');
 		// TODO: detail info panel
+		this.vent.trigger("updateDataInfo");
 		console.log(evt.feature.attributes.val);
 	},
 
