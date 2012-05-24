@@ -146,8 +146,12 @@ window.HeaderView = Backbone.View.extend({
 			  	break;
 			case 'parsing':
 			  	stateIndicator.stop(true, true).fadeIn('fast');
+				var progress;
 				if (obj && obj.busy && obj.progress) {
-					message.html('CRUNCHING DATA (' + obj.progress + ')');
+					progress = obj.progress - obj.progress % 1000;
+				}
+				if (progress) {
+					message.html('CRUNCHING DATA (' + progress + ')');
 				} else {
 					message.html('CRUNCHING DATA');
 				}

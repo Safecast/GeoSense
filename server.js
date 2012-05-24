@@ -13,7 +13,7 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
 
-var profiler = require('v8-profiler');
+//var profiler = require('v8-profiler');
 
 var application_root = __dirname,
   	express = require("express"),
@@ -28,10 +28,10 @@ var application_root = __dirname,
 var app = express.createServer();
 
 //local
-//mongoose.connect('mongodb://localhost/geo');
+mongoose.connect('mongodb://localhost/geo_prod');
 
 //production
-mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
+//mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
 
 app.configure(function(){
 	app.use(express.static(__dirname + '/public'));
@@ -92,7 +92,7 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
 
 var Point = mongoose.model('Point', new mongoose.Schema({
 	collectionid: String, 
-	loc: Array,
+	loc: {type: [Number], index: '2d'},
 	val: Number,
 	label: String,
 	datetime: Date,
@@ -113,7 +113,8 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	defaults: mongoose.Schema.Types.Mixed,
 	active: Boolean,
 	progress: Number,
-	busy: Boolean
+	busy: Boolean,
+	reduce: Boolean
 }));
 
 var Map = mongoose.model('Map', new mongoose.Schema({
@@ -248,11 +249,28 @@ app.post('/api/data/:file', function(req, res){
 		default:
 	}
 
+	var clamp180 = function(deg) {
+		if (deg < -360 || deg > 360) {
+			deg = deg % 360;	
+		} 
+		if (deg < -180) {
+			deg = 180 + deg % 180;
+		}
+		if (deg > 180) {
+			deg = 180 - deg % 180;
+		}
+
+		return deg;
+	};
+
 	var importCount = 0;
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
+	var limitMax = 200000;
+	var limitSkip = 0;
+	var appendCollectionId = null;
 	
 	var convertOriginalToPoint = function(data, converters) {
 		var doc = {};
@@ -263,6 +281,10 @@ app.post('/api/data/:file', function(req, res){
 				console.log('ConversionError on field '+destField);
 				return false;
 			} else {
+				if (destField == 'loc' && doc[destField].length) {
+					doc[destField][0] = clamp180(doc[destField][0]);
+					doc[destField][1] = clamp180(doc[destField][1]);
+				}
 				//console.log(doc[destField]);
 			}
 		}
@@ -286,133 +308,183 @@ app.post('/api/data/:file', function(req, res){
 		}
 	}
 	
-	var collection = new PointCollection({
-	    name: req.params.name,
-		defaults: defaults,
-		active: false,
-		busy: true,
-		title: req.body.title,
-		progress: 0
-	});
+	var runImport = function(collection) {
+		collection.active = false;
+		collection.busy = true;
 
-	var maxVal, minVal;
+		collection.save(function(err, collection) {
+		    if (!err) {
+		    	var newCollectionId = collection.get('_id');
+		    	console.log('saved PointCollection "'+collection.get('title')+'" = '+newCollectionId);
+				var response = {
+					'pointCollectionId': collection.get('_id'),
+				};
+				res.send(response);
 
-	collection.save(function(err, collection) {
-	    if (!err) {
-	    	var newCollectionId = collection.get('_id');
-	    	console.log('created PointCollection "'+collection.get('title')+'" = '+newCollectionId);
-			var response = {
-				'pointCollectionId': collection.get('_id'),
-			};
-			res.send(response);
+				var maxVal, minVal;
+				var numRead = 0;
+				var numImport = 0;
+				var numSaving = 0;
+				var numDone = 0;
+				var ended = false;
+				var finalized = false;
 
-			var numRead = 0;
-			var numSaving = 0;
-			var numDone = 0;
+				var finalize = function() {
+					finalized = true;
+			    	collection.maxval = maxVal;
+					collection.minval = minVal;
+					collection.active = true;
+					collection.busy = false;
+					collection.reduce = numDone > 1000;
+					collection.collectionid = collection.get('_id'); // TODO: deprecated
+					collection.save(function(err) {
+				    	debugStats('*** finalized and activated collection ***');
+					});
+				};
 
-			var debugStats = function(pos) {
-				console.log('* '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone);
-			};
+				var debugStats = function(pos) {
+					console.log('* '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone);
+				};
 
-			switch(type) {
-				case 'csv':
+				switch(type) {
+					case 'csv':
 
-				csv()
-				    .fromPath(__dirname+ path)
-				    .transform(function(data){
-				        data.unshift(data.pop());
-				        return data;
-				    })
-				    .on('data',function(data, index) {
-				    	debugStats('on data');
-				    	var self = this;
-				    	self.readStream.pause();
-						numRead++;
-						if (FIRST_ROW_IS_HEADER && !fieldNames) {
-							fieldNames = data;
-						} else {
-							if (FIRST_ROW_IS_HEADER) {
-								var doc = {};
-								for (var i = 0; i < fieldNames.length; i++) {
-									doc[fieldNames[i]] = data[i];
-								}
+					csv()
+					    .fromPath(__dirname+ path)
+					    .transform(function(data){
+					        data.unshift(data.pop());
+					        return data;
+					    })
+					    .on('data',function(data, index) {
+							if (ended) return;
+							numRead++;
+					    	debugStats('on data');
+					    	var self = this;
+					    	self.readStream.pause();
+							if (FIRST_ROW_IS_HEADER && !fieldNames) {
+								fieldNames = data;
+						    	debugStats('using row as header');
 							} else {
-								doc['data'] = data;
-							}
-							var model = new Model(doc);
-							
-							/*numSaving++;
-							model.save(function(err) {
-						    	debugStats('on save original');
-								doc = null; 
-								model = null;
-								numSaving--;
-								if (numSaving == 0) {
-							    	self.readStream.resume();
-							    	debugStats('resume');
+								numImport++;
+								if (numImport <= limitSkip) {
+							    	debugStats('skipping row');
+							    	return;
 								}
-							});*/
-							
-							var point = convertOriginalToPoint(model, converter);
-							if (point) {
-								point.collectionid = newCollectionId;
-								point.created = new Date();
-								point.modified = new Date();
-								numSaving++;
-								point.save(function(err) {
-							    	debugStats('on save point');
-									point = null;
+								if (limitMax && numImport - limitSkip > limitMax) {
+							    	debugStats('reached limit, ending');
+									ended = true;
+									self.end();
+									return;
+								}
+
+
+								if (FIRST_ROW_IS_HEADER) {
+									var doc = {};
+									for (var i = 0; i < fieldNames.length; i++) {
+										doc[fieldNames[i]] = data[i];
+									}
+								} else {
+									doc['data'] = data;
+								}
+								var model = new Model(doc);
+								
+								/*numSaving++;
+								model.save(function(err) {
+							    	debugStats('on save original');
+									doc = null; 
+									model = null;
 									numSaving--;
-									numDone++;
 									if (numSaving == 0) {
 								    	self.readStream.resume();
 								    	debugStats('resume');
 									}
-								});
-								if (maxVal == undefined || maxVal < point.get('val')) {
-									maxVal = point.get('val');
-								}
+								});*/
+								
+								var point = convertOriginalToPoint(model, converter);
+								if (point) {
+									point.collectionid = newCollectionId;
+									point.created = new Date();
+									point.modified = new Date();
+									numSaving++;
+									point.save(function(err) {
+										point = null;
+										numSaving--;
+										numDone++;
+								    	debugStats('on save point');
+										if (numSaving == 0) {
+											if (ended) {
+												if (!finalized) {
+													finalize();
+												}
+												return;
+											}
+									    	self.readStream.resume();
+									    	debugStats('resume');
+										}
+									});
+									if (maxVal == undefined || maxVal < point.get('val')) {
+										maxVal = point.get('val');
+									}
 
-								if (minVal == undefined || minVal > point.get('val')) {
-									minVal = point.get('val');
+									if (minVal == undefined || minVal > point.get('val')) {
+										minVal = point.get('val');
+									}
+		
+									importCount++;
 								}
-	
-								importCount++;
+		
+								if (importCount == 1 || importCount % 1000 == 0) {
+							    	debugStats('update progress');
+							    	collection.progress = numDone;
+							    	collection.save();
+								}
 							}
-	
-							if (importCount == 1 || importCount % 1000 == 0) {
-						    	debugStats('update progress');
-						    	collection.progress = numDone;
-						    	collection.save();
+				
+					    })
+					    .on('end',function(count) {
+					    	ended = true;
+					    	debugStats('on end');
+							if (!finalized) {
+								finalize();
 							}
-						}
-			
-				    })
-				    .on('end',function(count){
-				    	collection.maxval = maxVal;
-						collection.minval = minVal;
-						collection.active = true;
-						collection.busy = false;
-						collection.collectionid = collection.get('_id'); // TODO: deprecated
-						collection.save();
-				    	console.log('finalized and activated collection');
-				    })
-				    .on('error',function(error){
-				        console.log(error.message);
-				    });
-				break;
-			
-				case 'json':
-			
-					console.log('/public/data/reactors.json');
-					var parsedJSON = require('/public/data/reactors.json');
-					//console.log(parsedjson);
-			
-				break;
-				default: 
+					    })
+					    .on('error',function(error){
+					        console.log(error.message);
+					    });
+					break;
+				
+					case 'json':
+				
+						console.log('/public/data/reactors.json');
+						var parsedJSON = require('/public/data/reactors.json');
+						//console.log(parsedjson);
+				
+					break;
+					default: 
+				}
 			}
-		}
-	});
+		});
+	};
+
+	if (!appendCollectionId) {
+		console.log('Creating new collection');
+		runImport(new PointCollection({
+		    name: req.params.name,
+			defaults: defaults,
+			title: req.body.title,
+			progress: 0,
+		}));
+	} else {
+		console.log('Appending to collection '+appendCollectionId);
+		PointCollection.findOne({_id: appendCollectionId}, function(err, collection) {
+			if (err) {
+				console.log('Could not find collection');
+				return;
+			}
+			runImport(collection);
+		});
+	}
+
 });
 
 /////////////////////
@@ -575,143 +647,169 @@ app.delete('/api/point/:id', function(req, res){
 
 app.get('/api/mappoints/:pointcollectionid', function(req, res){
 
-	var pointQuery = {'value.collectionid': req.params.pointcollectionid};
-	var urlObj = url.parse(req.url, true);
+	PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
+		if (!err && pointCollection) {
+			var urlObj = url.parse(req.url, true);
 
-	zoom = urlObj.query.z || 0;
-	grid_size = GRID_SIZES[zoom];
-	console.log('zoom ' + zoom + ', grid size ' + grid_size);
+			zoom = urlObj.query.z || 0;
+			grid_size = GRID_SIZES[zoom];
+			console.log('zoom ' + zoom + ', grid size ' + grid_size);
 
-	var boxes;
+			var time_grid = false;
+			switch (urlObj.query.t) {
+				case 'y':
+					time_grid = 'yearly';
+					break;
+				case 'w':
+					time_grid = 'weekly';
+					break;
+				case 'd':
+					time_grid = 'daily';
+					break;
+			}
 
-	if (urlObj.query.b && urlObj.query.b.length == 4) {
-		var b = urlObj.query.b;
-		console.log('bounds:');	
-		console.log(b);
+			var reduce = pointCollection.get('reduce');
 
-		for (var i = 0; i < 4; i++) {
-			b[i] = parseFloat(b[i]) || 0;
-		}
+			if (reduce) {
+				var collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
+				var pointQuery = {'value.collectionid': req.params.pointcollectionid};
+			} else {
+				var collectionName = 'points';
+				var pointQuery = {'collectionid': req.params.pointcollectionid};
+			}
 
-		// Mongo currently doesn't handle the transition around the dateline (x = +-180)
-		// This, if the bounds contain the dateline, we need to query for the box to 
-		// the left and the box to the right of it. 
-		if (b[0] < -180) {
-			boxes = [
-				[[180 + b[0] % 180, b[1]], [180, b[3]]],
-				[[-180, b[1]], [b[2], b[3]]]
-			];
-		} else if (b[2] > 180) {
-			boxes = [
-				[[b[0], b[1]], [180, b[3]]],
-				[[-180, b[1]], [-180 + b[2] % 180, b[3]]]
-			];
-		} else {
-			boxes = [
-				[[b[0], b[1]], [b[2], b[3]]]
-			];
-		}
+			var boxes;
 
-		console.log('query within boxes: '+boxes.length);
-		console.log(boxes);
-	}
+			if (urlObj.query.b && urlObj.query.b.length == 4) {
+				var b = urlObj.query.b;
+				console.log('bounds:');	
+				console.log(b);
 
-	var time_grid = false;
-	switch (urlObj.query.t) {
-		case 'y':
-			time_grid = 'yearly';
-			break;
-		case 'w':
-			time_grid = 'weekly';
-			break;
-		case 'd':
-			time_grid = 'daily';
-			break;
-	}
-
-	var collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
-
-	var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
-	var points = [];
-	var queryExecuted = false; 
-	var originalCount = 0;
-	console.log('querying '+collectionName);
-
-	var dequeueBoxQuery = function() {
-		if (queryExecuted && (!boxes || boxes.length == 0)) {
-			console.log('Found '+points.length+' reduction points for '+originalCount+' original points.');
-			res.send(points);
-			return;
-		}
-
-		if (boxes) {
-			var box = boxes.shift();
-			pointQuery['value.loc'] = {$within: {$box : box}};
-		}
-
-		if (!time_grid) {
-			console.log(pointQuery);
-			ReducedPoint.find(pointQuery, function(err, datasets) {
-				console.log(datasets);
-				if (err) return;
-				for (var i = 0; i < datasets.length; i++) {
-					var reduced = datasets[i].get('value');
-					var p = {
-						val: reduced.val.avg,
-						count: reduced.val.count,
-						loc: [reduced.loc[0], reduced.loc[1]],
-					};
-					points.push(p);
-					originalCount += p.count;
+				for (var i = 0; i < 4; i++) {
+					b[i] = parseFloat(b[i]) || 0;
 				}
-				queryExecuted = true;
-				dequeueBoxQuery();
-			});
-		} else {
-			var command = {
-				mapreduce: collectionName,
-				query: pointQuery,
-				map: function() {
-					//var epoch = new Date(this.value.datetime).getTime() / 1000;
-					emit(this.value.datetime, {
-						val: this.value.val.sum,
-						count: this.value.val.count,
-						datetime: this.value.datetime
-					});
-				}.toString(),
-				reduce: function(key, values) {
-					var result = {
-						val: 0,
-						count: 0,
-						datetime: values[0].datetime
-					};
-					values.forEach(function(value) {
-						result.val += value.val;
-						result.count += value.count;
-					});
-					return result;
-				}.toString(),
-				finalize: function(key, value) {
-					value.val /= value.count;
-					return value;
-				}.toString(),
-				out: {inline: 1}
-			};
-			mongoose.connection.db.executeDbCommand(command, function(err, res) {
-				var datasets = res.documents[0].results;
-				if (!datasets || !datasets.length) return;
-				for (var i = 0; i < datasets.length; i++) {
-					var p = datasets[i].value;
-					points.push(p);
-					originalCount += p.count;
-				}
-				queryExecuted = true;
-				dequeueBoxQuery();
-			});
-		}
-	}
 
-	dequeueBoxQuery();
+				// Mongo currently doesn't handle the transition around the dateline (x = +-180)
+				// This, if the bounds contain the dateline, we need to query for the box to 
+				// the left and the box to the right of it. 
+				if (b[0] < -180) {
+					boxes = [
+						[[180 + b[0] % 180, b[1]], [180, b[3]]],
+						[[-180, b[1]], [b[2], b[3]]]
+					];
+				} else if (b[2] > 180) {
+					boxes = [
+						[[b[0], b[1]], [180, b[3]]],
+						[[-180, b[1]], [-180 + b[2] % 180, b[3]]]
+					];
+				} else {
+					boxes = [
+						[[b[0], b[1]], [b[2], b[3]]]
+					];
+				}
+
+				console.log('query within boxes: '+boxes.length);
+				console.log(boxes);
+			}
+
+			var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+			var points = [];
+			var queryExecuted = false; 
+			var originalCount = 0;
+			console.log('querying "' + collectionName + '"');
+
+			var dequeueBoxQuery = function() {
+				if (queryExecuted && (!boxes || boxes.length == 0)) {
+					if (reduce) {
+						console.log('Found '+points.length+' reduction points for '+originalCount+' original points.');
+					} else {
+						console.log('Found '+points.length+' points.');
+					}
+					res.send(points);
+					return;
+				}
+
+				if (boxes) {
+					var box = boxes.shift();
+					pointQuery[reduce ? 'value.loc' : 'loc'] = {$within: {$box : box}};
+				}
+
+				if (!time_grid) {
+					console.log(pointQuery);
+					ReducedPoint.find(pointQuery, function(err, datasets) {
+						if (err) return;
+						for (var i = 0; i < datasets.length; i++) {
+							if (reduce) {
+								var reduced = datasets[i].get('value');
+								var p = {
+									val: reduced.val.avg,
+									count: reduced.val.count,
+									loc: [reduced.loc[0], reduced.loc[1]],
+								};
+							} else {
+								var p = {
+									val: datasets[i].get('val'),
+									count: 1,
+									loc: datasets[i].get('loc'),
+								};
+							}
+							points.push(p);
+							originalCount += p.count;
+						}
+						queryExecuted = true;
+						dequeueBoxQuery();
+					});
+				} else {
+					var command = {
+						mapreduce: collectionName,
+						query: pointQuery,
+						map: function() {
+							//var epoch = new Date(this.value.datetime).getTime() / 1000;
+							emit(this.value.datetime, {
+								val: this.value.val.sum,
+								count: this.value.val.count,
+								datetime: this.value.datetime
+							});
+						}.toString(),
+						reduce: function(key, values) {
+							var result = {
+								val: 0,
+								count: 0,
+								datetime: values[0].datetime
+							};
+							values.forEach(function(value) {
+								result.val += value.val;
+								result.count += value.count;
+							});
+							return result;
+						}.toString(),
+						finalize: function(key, value) {
+							value.val /= value.count;
+							return value;
+						}.toString(),
+						out: {inline: 1}
+					};
+					mongoose.connection.db.executeDbCommand(command, function(err, res) {
+						var datasets = res.documents[0].results;
+						if (!datasets || !datasets.length) return;
+						for (var i = 0; i < datasets.length; i++) {
+							var p = datasets[i].value;
+							points.push(p);
+							originalCount += p.count;
+						}
+						queryExecuted = true;
+						dequeueBoxQuery();
+					});
+				}
+			}
+
+			dequeueBoxQuery();
+
+		} else {
+			res.send('ooops', 404);
+		}
+	});
+
 });
 
 /*
@@ -817,7 +915,7 @@ app.get('/api/pointcollection/:id', function(req, res){
 		} else {
 			res.send('ooops', 404);
 		}
-  });
+	});
 });
 
 //Return all Point Collections
@@ -1122,6 +1220,6 @@ app.get('/api/tweets', function(req, res){
   });
 });
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3030;
 app.listen(port, "0.0.0.0");
 console.log('Server running at http://0.0.0.0:' + port + "/");

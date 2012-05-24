@@ -95,7 +95,7 @@ window.AddDataView = Backbone.View.extend({
 				},
 				success: function(responseData) {
 					if (responseData.pointCollectionId) {
-						app.pollForNewPointCollection(responseData.pointCollectionId);
+						app.pollForNewPointCollection(responseData.pointCollectionId, INITIAL_POLL_INTERVAL);
 						$('#addDataModal').modal('hide');
 						self.vent.trigger("setStateType", 'parsing');
 					} else {

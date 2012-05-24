@@ -279,18 +279,24 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	initLayerForCollection: function(collection)
 	{ 
-		var maxRadius = 20;
+		var maxBubbleSize = 20;
 		var context = {
             getColor: function(feature) {
                 return feature.attributes.color;
             },
             getBubbleSize: function(feature) {
-                return Math.min(maxRadius, 
-                	feature.attributes.count / feature.attributes.maxcount * maxRadius);
+                return Math.min(maxBubbleSize, 
+                	feature.attributes.count / feature.attributes.maxcount * maxBubbleSize);
             }
         };
 
         var layer;
+
+        var selectStyle = {
+        	fillOpacity: .9,
+		    strokeColor: '#eee'
+        };
+        var temporaryStyle = {};
 
 		switch(collection.params.displayType)
 		{
@@ -302,7 +308,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    strokeColor: '#333',
 				    strokeWidth: 2,
 				    pointRadius: 7,
-				    fillOpacity: .5,
+				    fillOpacity: .75,
 				    strokeOpacity: 1
 				}, {context: context});
 
@@ -311,13 +317,8 @@ window.MapOLView = window.MapViewBase.extend({
 					sphericalMercator: true,
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
-				        "temporary": {
-				        	fillOpacity: .6
-				        },
-				        "select": {
-				        	fillOpacity: .8,
-						    strokeColor: '#eee'
-				        }
+				        "temporary": temporaryStyle,
+				        "select": selectStyle
 				    }),
 				    renderers: ["Canvas"],
 				    wrapDateLine: true
@@ -332,7 +333,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    strokeColor: '#333',
 				    strokeWidth: 2,
 				    pointRadius: 7,
-				    fillOpacity: .5,
+				    fillOpacity: .6,
 				    strokeOpacity: 0
 				}, {context: context});
 
@@ -341,13 +342,8 @@ window.MapOLView = window.MapViewBase.extend({
 					sphericalMercator: true,
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
-				        "temporary": {
-				        	fillOpacity: .6
-				        },
-				        "select": {
-				        	fillOpacity: .8,
-						    strokeColor: '#eee'
-				        }
+				        "temporary": temporaryStyle,
+				        "select": selectStyle
 				    }),
 				    renderers: ["Canvas"],
 				    wrapDateLine: true
@@ -361,12 +357,14 @@ window.MapOLView = window.MapViewBase.extend({
 				    pointRadius: '${getBubbleSize}',
 				    strokeOpacity: 0,
 				    fillColor: '${getColor}',
-				    fillOpacity: .3
+				    fillOpacity: .5
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
+				        "temporary": temporaryStyle,
+				        "select": selectStyle
 				    }),
 				    renderers: ["Canvas"],
 				    wrapDateLine: true
@@ -429,11 +427,13 @@ window.MapOLView = window.MapViewBase.extend({
 		
 	},
 
-	featureSelected: function(feature) {
-		console.log('featureSelected '+feature);
+	featureSelected: function(evt) {
+		console.log('featureSelected');
+		// TODO: detail info panel
+		console.log(evt.feature.attributes.val);
 	},
 
-	featureUnselected: function(feature) {
+	featureUnselected: function(evt) {
 		console.log('featureUnselected');
 	},
 
@@ -446,7 +446,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var lat = loc[1];
 
 		// TODO: Crappy fix for points around the dateline -- look into layer.wrapDateLine		
-		var bounds = this.getVisibleMapArea().bounds;
+		/*var bounds = this.getVisibleMapArea().bounds;
 		if (bounds[0][0] < -180) {
 			//console.log('dateline left ');
 			if (lng > 0) {
@@ -457,7 +457,7 @@ window.MapOLView = window.MapViewBase.extend({
 			if (lng < 0) {
 				lng = 180 - (-180 - lng);
 			}
-		}
+		}*/
 		
 		var pt = new OpenLayers.Geometry.Point(lng, lat);
 		var geometry;
@@ -465,7 +465,8 @@ window.MapOLView = window.MapViewBase.extend({
 		switch(collection.params.displayType)
 		{
 			default:
-				geometry = pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+				pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+				geometry = pt;
 				break;
 
 			case FeatureType.CELLS:
@@ -488,6 +489,8 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 		
 		var feature = new OpenLayers.Feature.Vector(geometry, opts);
+		//console.log(geometry);
+		//console.log(feature.lonlat.x);
 		
 		if (!this.addFeatures[collectionId]) {
 			this.addFeatures[collectionId] = [];
@@ -498,7 +501,7 @@ window.MapOLView = window.MapViewBase.extend({
 	drawLayerForCollection: function(collection) 
 	{
 		if (this.addFeatures[collection.collectionId]) {
-			console.log('addFeatures '+this.addFeatures[collection.collectionId].length);		
+			console.log('addFeatures '+this.addFeatures[collection.collectionId].length + ' to '+this.layerArray[collection.collectionId]);		
 			this.layerArray[collection.collectionId].addFeatures(this.addFeatures[collection.collectionId]);
 			delete this.addFeatures[collection.collectionId];
 		}
@@ -762,19 +765,18 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 	
 	removeCollectionFromMap: function(model) {
-				
-		var currCollection = model.collectionId;
-		var currIndex;
-								
-		$.each(this.layerArray, function(index, value) { 
-			if(value.collectionId == currCollection)
-			{
-				currIndex = index;
-			}
-		});
-		
-		if(this.layerArray[currIndex])
-			this.layerArray[currIndex].destroy();
+
+		console.log('removeCollectionFromMap? '+model.collectionId);
+		console.log(this.layerArray);
+		if (this.layerArray[model.collectionId]) {
+			this.layerArray[model.collectionId].destroyFeatures();
+			
+			// TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
+			/*this.map.removeLayer(this.layerArray[model.collectionId]);
+			this.layerArray[model.collectionId].destroy();
+			this.layerArray[model.collectionId] = null;
+			console.log('removeCollectionFromMap: '+model.collectionId);*/
+		}
 	},
 
 	addOneComment: function(model) {

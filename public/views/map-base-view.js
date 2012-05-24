@@ -216,7 +216,7 @@ window.MapViewBase = Backbone.View.extend({
 			max: max,
 			val: val,
 			count: model.get('count'),
-			maxcount: 10
+			maxcount: 250
 		}, collectionId);
     },
 	

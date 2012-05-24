@@ -52,6 +52,20 @@ var getWeek = function(date, dowOffset) {
 	return weeknum;
 };
 
+var clamp180 = function(deg) {
+	if (deg < -360 || deg > 360) {
+		deg = deg % 360;	
+	} 
+	if (deg < -180) {
+		deg = 180 + deg % 180;
+	}
+	if (deg > 180) {
+		deg = 180 - deg % 180;
+	}
+
+	return deg;
+};
+
 var ReductionKey = {
 	copy: function(value) {
 		return value;
@@ -113,11 +127,13 @@ var ReductionKey = {
 			var grid_size = this.grid_size;
 			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))) return;
 
-			if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
+			/*if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
 				print('warning: dropping point because loc not within +- 180');
 				print(loc);
 				return;
-			}
+			}*/
+			loc[0] = clamp180(loc[0]);
+			loc[1] = clamp180(loc[1]);
 			
 			var lng = loc[0];
 			var lat = loc[1];
@@ -131,11 +147,15 @@ var ReductionKey = {
 			var grid_lng = Math.round((lng - lng % grid_size) / grid_size);
 			var grid_lat = Math.round((lat - lat % grid_size) / grid_size);
 			var loc = [grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2];
-			if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
+
+			/*if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
 				print('warning: dropping point because grid loc not within +- 180');
 				print(loc);
 				return;
-			}
+			}*/
+			loc[0] = clamp180(loc[0]);
+			loc[1] = clamp180(loc[1]);
+
 			return [
 				grid_lng + ',' + grid_lat + ',' + grid_size, 
 				loc
@@ -218,7 +238,8 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 			value_fields: value_fields,
 			reduction_keys: reduction_keys,
 			lpad: lpad,
-			getWeek: getWeek
+			getWeek: getWeek,
+			clamp180: clamp180
 		}
 		,verbose: true
 		,keeptemp: true
@@ -308,34 +329,36 @@ var reducePoints = function(reduction_keys, opts) {
 
 var cur = db.pointcollections.find({});
 cur.forEach(function(collection) {
-	print('*** collection = '+collection.title+' ('+collection._id+') ***');
-	opts.query = {collectionid: collection._id.toString()};
-	print(opts.query.collectionid);
-	for (var g in GRID_SIZES) {
-		var grid_size = GRID_SIZES[g];
-		print('*** grid = '+g+' ***');
-		reducePoints({
-			collectionid: ReductionKey.copy, 
-			loc: new ReductionKey.LocGrid(grid_size)
-		}, opts);
-		
-		/*reducePoints({
-			collectionid: ReductionKey.copy, 
-			loc: new ReductionKey.LocGrid(grid_size), 
-			datetime: new ReductionKey.Weekly()
-		}, opts);
-*/
-		/*
-		reducePoints({
-			collectionid: ReductionKey.copy, 
-			loc: new ReductionKey.LocGrid(grid_size), 
-			datetime: new ReductionKey.Yearly()
-		}, opts);
+	if (collection.reduce) {
+		print('*** collection = '+collection.title+' ('+collection._id+') ***');
+		opts.query = {collectionid: collection._id.toString()};
+		print(opts.query.collectionid);
+		for (var g in GRID_SIZES) {
+			var grid_size = GRID_SIZES[g];
+			print('*** grid = '+g+' ***');
+			reducePoints({
+				collectionid: ReductionKey.copy, 
+				loc: new ReductionKey.LocGrid(grid_size)
+			}, opts);
+			
+			/*reducePoints({
+				collectionid: ReductionKey.copy, 
+				loc: new ReductionKey.LocGrid(grid_size), 
+				datetime: new ReductionKey.Weekly()
+			}, opts);
+	*/
+			/*
+			reducePoints({
+				collectionid: ReductionKey.copy, 
+				loc: new ReductionKey.LocGrid(grid_size), 
+				datetime: new ReductionKey.Yearly()
+			}, opts);
 
-		/*reducePoints({
-			collectionid: ReductionKey.copy, 
-			loc: new ReductionKey.LocGrid(grid_size), 
-			datetime: new ReductionKey.Daily()
-		});*/
+			/*reducePoints({
+				collectionid: ReductionKey.copy, 
+				loc: new ReductionKey.LocGrid(grid_size), 
+				datetime: new ReductionKey.Daily()
+			});*/
+		}
 	}
 });

@@ -11,5 +11,8 @@
 	display:none;
 }
 .embed #comments {
-	display:hidden;
+	display:none;
+}
+.embed .sidebar-data #removeData {
+	display:none;
 }
