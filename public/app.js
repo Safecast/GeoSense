@@ -40,6 +40,9 @@ var AppRouter = Backbone.Router.extend({
 		
 		this.graphView = new GraphView({vent: this.vent});
 		$('#app').append(this.graphView.render().el);
+
+		this.dataInfoView = new DataInfoView({vent: this.vent});
+		$('#app').append(this.dataInfoView.render().el);
 		
 		$('body').css("overflow","hidden");
 
@@ -376,7 +379,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['homepage', 'graph', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library'],
+tpl.loadTemplates(['homepage', 'graph', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library', 'data-info'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });

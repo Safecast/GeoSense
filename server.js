@@ -28,10 +28,10 @@ var application_root = __dirname,
 var app = express.createServer();
 
 //local
-mongoose.connect('mongodb://localhost/geo_prod');
+//mongoose.connect('mongodb://localhost/geo');
 
 //production
-//mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
+mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
 
 app.configure(function(){
 	app.use(express.static(__dirname + '/public'));
