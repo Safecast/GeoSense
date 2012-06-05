@@ -7,7 +7,7 @@ var FeatureType = {
 	BUBBLES: 300 
 };
 
-var DEBUG = 0;
+var DEBUG = 1;
 var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
 var GRID_SIZES = {
 //	'-1': 2,
@@ -19,6 +19,15 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 
 
 if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
+
+function formatLargeNumber(c) {
+	if (c > 1000000) {
+		c = Math.round(c / 1000000 * 10) / 10 + 'M';
+	} else if (c > 1000) {
+		c = Math.round(c / 1000) + 'K';
+	}
+	return c;
+}
 
 function getURLParameter(paramName) {
   var searchString = window.location.search.substring(1),
@@ -51,6 +60,27 @@ function genQueryString(params, name) {
 	return url;
 }
 
+$.fn.updateFeedback = function() {
+	this.each(function() {
+		$(this).tempGlow({
+			textColor: '#00C9FF',
+			haloColor: '#008cbf',
+			duration: 1000
+		});
+	});
+};
+
+$.fn.blink = function() {
+	var cycle;
+	(cycle = function() {
+	   progressElement.delay(1000)
+	        .animate({opacity: 1}, 'slow')
+	        .delay(1000)
+	        .animate({opacity: .2}, 'slow', cycle);
+	})();
+};
+
+
 //APP GLOBALS
 var tilt = 0.41;
 
@@ -60,7 +90,7 @@ var CAMERA_FOV = 50;
 var SMOOTH_TWEEN_DURATION = 50;
 var CAMERA;
 var INITIAL_POLL_INTERVAL = 3000;
-var POLL_INTERVAL = 10000;
+var POLL_INTERVAL = 6000;
 var COLOR_SOLID = 1;
 var COLOR_RANGE = 2;
 

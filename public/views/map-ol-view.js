@@ -279,14 +279,15 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	initLayerForCollection: function(collection)
 	{ 
-		var maxBubbleSize = 20;
+		var minBubbleSize = 2;
+		var maxBubbleSize = 30;
+
 		var context = {
             getColor: function(feature) {
                 return feature.attributes.color;
             },
             getBubbleSize: function(feature) {
-                return Math.min(maxBubbleSize, 
-                	feature.attributes.count / feature.attributes.maxcount * maxBubbleSize);
+                return minBubbleSize + feature.attributes.size * (maxBubbleSize - minBubbleSize);
             }
         };
 
@@ -431,7 +432,7 @@ window.MapOLView = window.MapViewBase.extend({
 		console.log('featureSelected');
 		// TODO: detail info panel
 		this.vent.trigger("updateDataInfo");
-		console.log(evt.feature.attributes.val);
+		console.log(evt.feature.attributes.val, evt.feature.attributes.count);
 	},
 
 	featureUnselected: function(evt) {

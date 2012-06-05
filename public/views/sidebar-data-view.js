@@ -52,9 +52,8 @@ window.SideBarDataView = Backbone.View.extend({
 		{
 			dataTitle = "Untitled Data";
 		}
-		
-		// TODO: Add full length
-		dataTitle += /*" ("+ this.collection.length + ") " + */ "<div class='data-color' id='dataColor'></div>";
+
+		dataTitle += " ("+ formatLargeNumber(this.collection.fullCount) + ") " + "<div class='data-color' id='dataColor'></div>";
 		
 		this.$("a").html(dataTitle);
 		this.$("a").attr("href", "#collapse" + this.collectionId);

@@ -23,15 +23,16 @@ var application_root = __dirname,
 	nowjs = require("now"),
 	csv = require('csv'),    
 	date = require('datejs'),
-	url = require('url');
+	url = require('url'),
+	util = require('util');
 
 var app = express.createServer();
 
 //local
-//mongoose.connect('mongodb://localhost/geo');
+mongoose.connect('mongodb://localhost/geo');
 
 //production
-mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
+//mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
 
 app.configure(function(){
 	app.use(express.static(__dirname + '/public'));
@@ -174,7 +175,7 @@ app.post('/api/data/:file', function(req, res){
 	*/	
 	var latLngWithCommaFromString = function(field) {
 		return function() {
-			var match = new String(this.get(field)).match(/^\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*$/);
+			var match = String(this.get(field)).match(/^\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*$/);
 			if (match) return [parseFloat(match[2]), parseFloat(match[1])];
 			return new ConversionError();
 		}
@@ -236,8 +237,7 @@ app.post('/api/data/:file', function(req, res){
 					return parseFloat(this.get('reading_value'));
 				}
 				,datetime: function() {
-					var d = Date.parse(this.get('reading_date'));
-					return new Date(d);
+					return new Date(this.get('reading_date'));
 				}
 				,loc: function() {
 					return [parseFloat(this.get('longitude')), parseFloat(this.get('latitude'))];
@@ -268,7 +268,7 @@ app.post('/api/data/:file', function(req, res){
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-	var limitMax = 200000;
+	var limitMax = 0;
 	var limitSkip = 0;
 	var appendCollectionId = null;
 	
@@ -281,7 +281,7 @@ app.post('/api/data/:file', function(req, res){
 				console.log('ConversionError on field '+destField);
 				return false;
 			} else {
-				if (destField == 'loc' && doc[destField].length) {
+				if (doc[destField] && destField == 'loc' && doc[destField].length) {
 					doc[destField][0] = clamp180(doc[destField][0]);
 					doc[destField][1] = clamp180(doc[destField][1]);
 				}
@@ -317,7 +317,7 @@ app.post('/api/data/:file', function(req, res){
 		    	var newCollectionId = collection.get('_id');
 		    	console.log('saved PointCollection "'+collection.get('title')+'" = '+newCollectionId);
 				var response = {
-					'pointCollectionId': collection.get('_id'),
+					'pointCollectionId': newCollectionId,
 				};
 				res.send(response);
 
@@ -346,112 +346,139 @@ app.post('/api/data/:file', function(req, res){
 					console.log('* '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone);
 				};
 
-				switch(type) {
-					case 'csv':
-
-					csv()
-					    .fromPath(__dirname+ path)
-					    .transform(function(data){
-					        data.unshift(data.pop());
-					        return data;
-					    })
-					    .on('data',function(data, index) {
-							if (ended) return;
-							numRead++;
-					    	debugStats('on data');
-					    	var self = this;
-					    	self.readStream.pause();
-							if (FIRST_ROW_IS_HEADER && !fieldNames) {
-								fieldNames = data;
-						    	debugStats('using row as header');
-							} else {
-								numImport++;
-								if (numImport <= limitSkip) {
-							    	debugStats('skipping row');
-							    	return;
-								}
-								if (limitMax && numImport - limitSkip > limitMax) {
-							    	debugStats('reached limit, ending');
-									ended = true;
-									self.end();
-									return;
-								}
-
-
-								if (FIRST_ROW_IS_HEADER) {
-									var doc = {};
-									for (var i = 0; i < fieldNames.length; i++) {
-										doc[fieldNames[i]] = data[i];
-									}
-								} else {
-									doc['data'] = data;
-								}
-								var model = new Model(doc);
-								
-								/*numSaving++;
-								model.save(function(err) {
-							    	debugStats('on save original');
-									doc = null; 
-									model = null;
-									numSaving--;
-									if (numSaving == 0) {
-								    	self.readStream.resume();
-								    	debugStats('resume');
-									}
-								});*/
-								
-								var point = convertOriginalToPoint(model, converter);
-								if (point) {
-									point.collectionid = newCollectionId;
-									point.created = new Date();
-									point.modified = new Date();
-									numSaving++;
-									point.save(function(err) {
-										point = null;
-										numSaving--;
-										numDone++;
-								    	debugStats('on save point');
-										if (numSaving == 0) {
-											if (ended) {
-												if (!finalized) {
-													finalize();
-												}
-												return;
-											}
-									    	self.readStream.resume();
-									    	debugStats('resume');
-										}
-									});
-									if (maxVal == undefined || maxVal < point.get('val')) {
-										maxVal = point.get('val');
-									}
-
-									if (minVal == undefined || minVal > point.get('val')) {
-										minVal = point.get('val');
-									}
-		
-									importCount++;
-								}
-		
-								if (importCount == 1 || importCount % 1000 == 0) {
-							    	debugStats('update progress');
-							    	collection.progress = numDone;
-							    	collection.save();
-								}
-							}
-				
-					    })
-					    .on('end',function(count) {
-					    	ended = true;
-					    	debugStats('on end');
+				function postSave(self) {
+					if (numSaving == 0) {
+						if (ended) {
 							if (!finalized) {
 								finalize();
 							}
-					    })
-					    .on('error',function(error){
-					        console.log(error.message);
-					    });
-					break;
+							return;
+						}
+				    	debugStats('resume');
+				    	self.readStream.resume();
+					}
+				}
+
+				function makeSaveHandler(point, self) {
+					return function(err) {
+						point = null;
+						numSaving--;
+						numDone++;
+				    	debugStats('on save point');
+				    	postSave(self);
+					}
+				}
+
+				switch(type) {
+					case 'csv':
+
+						csv()
+						    .fromPath(__dirname+ path)
+						    .transform(function(data){
+						        data.unshift(data.pop());
+						        return data;
+						    })
+						    .on('data',function(data, index) {
+								if (ended) return;
+								numRead++;
+						    	debugStats('on data');
+						    	var self = this;
+						    	self.readStream.pause();
+								if (FIRST_ROW_IS_HEADER && !fieldNames) {
+									fieldNames = data;
+							    	debugStats('using row as header');
+								} else {
+									numImport++;
+									if (numImport <= limitSkip) {
+								    	debugStats('skipping row');
+								    	return;
+									}
+									if (limitMax && numImport - limitSkip > limitMax) {
+								    	debugStats('reached limit, ending');
+										ended = true;
+										self.end();
+										return;
+									}
+
+
+									if (FIRST_ROW_IS_HEADER) {
+										var doc = {};
+										for (var i = 0; i < fieldNames.length; i++) {
+											doc[fieldNames[i]] = data[i];
+										}
+									} else {
+										doc['data'] = data;
+									}
+									var model = new Model(doc);
+									
+									/*numSaving++;
+									model.save(function(err) {
+								    	debugStats('on save original');
+										doc = null; 
+										model = null;
+										numSaving--;
+										if (numSaving == 0) {
+									    	self.readStream.resume();
+									    	debugStats('resume');
+										}
+									});*/
+									
+									var point = convertOriginalToPoint(model, converter);
+									model = null;
+
+									if (point) {
+										point.collectionid = newCollectionId;
+										point.created = new Date();
+										point.modified = new Date();
+										if (maxVal == undefined || maxVal < point.get('val')) {
+											maxVal = point.get('val');
+										}
+
+										if (minVal == undefined || minVal > point.get('val')) {
+											minVal = point.get('val');
+										}
+										numSaving++;
+										importCount++;
+
+										var saveHandler = makeSaveHandler(point, self);
+										point.save(saveHandler);
+									} else {
+								    	postSave(self);
+									}
+			
+									if (numRead == 1 || numRead % 1000 == 0) {
+								    	if (global.gc) {
+									    	// https://github.com/joyent/node/issues/2175
+									    	process.nextTick(function () {
+									    		var mem1 = process.memoryUsage();
+										    	debugStats('force garbage collection');
+												global.gc(true);
+												var mem2 = process.memoryUsage();
+										    	debugStats('memory usage: before ' + 
+										    		Math.round(mem1.rss / 1048576) + 'MiB, after: ' +
+										    		Math.round(mem2.rss / 1048576) + 'MiB, freed: ' +
+										    		Math.round((1 - mem2.rss / mem1.rss) * 100) + '%');
+											});
+								    	}
+
+								    	debugStats('update progress');
+								    	collection.progress = numDone;
+								    	collection.save();
+									}
+								}
+					
+						    })
+						    .on('end',function(count) {
+						    	ended = true;
+						    	debugStats('on end');
+								if (numSaving == 0 && !finalized) {
+									finalize();
+								}
+						    })
+						    .on('error',function(error){
+						        console.log(error.message);
+						    });
+							break;
 				
 					case 'json':
 				
@@ -459,8 +486,7 @@ app.post('/api/data/:file', function(req, res){
 						var parsedJSON = require('/public/data/reactors.json');
 						//console.log(parsedjson);
 				
-					break;
-					default: 
+						break;
 				}
 			}
 		});
@@ -716,6 +742,9 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 			var points = [];
 			var queryExecuted = false; 
 			var originalCount = 0;
+			var maxCount = 0;
+			var fullCount;
+
 			console.log('querying "' + collectionName + '"');
 
 			var dequeueBoxQuery = function() {
@@ -725,7 +754,13 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 					} else {
 						console.log('Found '+points.length+' points.');
 					}
-					res.send(points);
+					var data = {
+						fullCount: fullCount,
+						originalCount: originalCount,
+						maxCount: maxCount,
+						items: points
+					};
+					res.send(data);
 					return;
 				}
 
@@ -755,6 +790,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 							}
 							points.push(p);
 							originalCount += p.count;
+							maxCount = Math.max(maxCount, p.count);
 						}
 						queryExecuted = true;
 						dequeueBoxQuery();
@@ -796,6 +832,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 							var p = datasets[i].value;
 							points.push(p);
 							originalCount += p.count;
+							maxCount = Math.max(maxCount, p.count);
 						}
 						queryExecuted = true;
 						dequeueBoxQuery();
@@ -803,7 +840,11 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 				}
 			}
 
-			dequeueBoxQuery();
+			Point.count({'collectionid': req.params.pointcollectionid}, function(err, c) {
+				fullCount = c;
+				dequeueBoxQuery();
+			});
+
 
 		} else {
 			res.send('ooops', 404);
@@ -1220,6 +1261,6 @@ app.get('/api/tweets', function(req, res){
   });
 });
 
-var port = process.env.PORT || 3030;
+var port = process.env.PORT || 3000;
 app.listen(port, "0.0.0.0");
 console.log('Server running at http://0.0.0.0:' + port + "/");

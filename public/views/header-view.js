@@ -148,10 +148,18 @@ window.HeaderView = Backbone.View.extend({
 			  	stateIndicator.stop(true, true).fadeIn('fast');
 				var progress;
 				if (obj && obj.busy && obj.progress) {
-					progress = obj.progress - obj.progress % 1000;
+					//progress = obj.progress - obj.progress % 1000;
+					progress = formatLargeNumber(obj.progress);
 				}
 				if (progress) {
-					message.html('CRUNCHING DATA (' + progress + ')');
+					var progressElement = $('.importProgress', message);
+					if (!progressElement.length) {
+						message.html('CRUNCHING DATA <span class="importProgress">' + progress + '</span>');
+						progressElement = $('.importProgress', message);
+					} else {
+						progressElement.html(progress);
+					}
+					progressElement.updateFeedback();
 				} else {
 					message.html('CRUNCHING DATA');
 				}

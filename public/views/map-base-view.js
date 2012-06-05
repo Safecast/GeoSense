@@ -196,6 +196,7 @@ window.MapViewBase = Backbone.View.extend({
 		var min = Number(c.minVal);
 		var max = Number(c.maxVal);
 		var val = model.get('val');
+		var count = model.get('count');
 		
 		var color;
 		switch (params.colorType) {
@@ -215,8 +216,8 @@ window.MapViewBase = Backbone.View.extend({
 			min: min,
 			max: max,
 			val: val,
-			count: model.get('count'),
-			maxcount: 250
+			count: count,
+			size: count / this.collections[collectionId].maxCount
 		}, collectionId);
     },
 	

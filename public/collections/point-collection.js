@@ -42,6 +42,17 @@ PointCollection = Backbone.Collection.extend({
 		return PointCollection.__super__.fetch.call(this, options);
 	},
 
+    parse: function(resp, xhr) {
+    	if (resp['items']) {
+    		this.fullCount = resp.fullCount;
+    		console.log(resp.fullCount);
+    		this.maxCount = resp.maxCount;
+    		this.originalCount = resp.originalCount;
+    		resp = resp['items'];
+    	}
+		return PointCollection.__super__.parse.call(this, resp, xhr);
+    },
+
 	addData: function(data, callback) {
 		
 		var self = this;
