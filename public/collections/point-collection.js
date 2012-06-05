@@ -56,12 +56,11 @@ PointCollection = Backbone.Collection.extend({
 	addData: function(data, callback) {
 		
 		var self = this;
-		var jsonData = JSON.stringify(data);
 				
 		$.ajax({
 			type: 'POST',
 			dataType: 'json',
-			data: { jsonpost: data },
+			data: data,
 			url: '/api/addpoints/' + this.collectionId,
 			success: function() {
 				console.log('Adding points for: ' + self.collectionId);

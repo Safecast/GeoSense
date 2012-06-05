@@ -110,7 +110,7 @@ window.GraphView = Backbone.View.extend({
 		var defaults = self.mapParams[currCollection].defaults
 		var colorType = defaults.colorType;
 
-		if(colorType == 1)
+		if (colorType == ColorType.SOLID)
 		{
 			var color = defaults.color;
 

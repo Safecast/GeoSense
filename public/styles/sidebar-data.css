@@ -1,0 +1,14 @@
+/* Points */
+.legend-button.P {
+	background-image: url(../assets/vis-bubbles-tmp.png);
+}
+
+/* Cells */
+.legend-button.C {
+	background-image: url(../assets/vis-bubbles-tmp.png);
+}
+
+/* Bubbles */
+.legend-button.B {
+	background-image: url(../assets/vis-bubbles-tmp.png);
+}

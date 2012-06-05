@@ -1,37 +1,57 @@
 <div class="accordion-group">
   <div class="accordion-heading">
-    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse"></a>
+    <a class="title accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse"></a>
+    <a class="legend-button toggle"></a>
   </div>
   <div id="collapse" class="accordion-body collapse">
     <div class="accordion-inner">
 		<div class="data-toggle">
 			<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
-			  <button id="toggleVisible" class="btn active">Visible</button>
-			  <button id="toggleHidden" class="btn">Hidden</button>
+			  <button class="btn visibility" value="1">Visible</button>
+			  <button class="btn visibility" value="0">Hidden</button>
 			</div>
 		</div>
 		<div class="data-controls">
+			<div class="features">
+				<div class="data-toggle">
+					<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
+					  <button class="btn feature-type" value="P">Points</button>
+					  <button class="btn feature-type" value="C">Cells</button>
+					  <button class="btn feature-type" value="B">Bubbles</button>
+					</div>
+				</div>
+			</div>
+			<div class="feature-settings B">
+				<div>
+					<label for="feature-size">Bubble size</label>
+					<input name="feature-size" class="feature-size" type="text" value="min/max slider" />
+				</div>
+				<label for="map-size">Map size to</label>
+				<select name="map-size" class="map-size">
+					<option value="count">sample size</option>
+				</select>
+			</div>
 			<div class="divider"></div>
 			<div class="data-toggle">
 				<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
-				  <button id="singleColor" class="btn color active">Single Color</button>
-				  <button id="scaleColor" class="btn color active">Color Scale</button>
+				  <button class="btn color-type" value="S">Solid Color</button>
+				  <button class="btn color-type" value="L">Gradient</button>
 				</div>
 			</div>
-			<div class="color-scale">
+			<div class="color-gradient">
 				<input type="text" id="colorInputLow" class="color-picker black" size="6" placeholder="Low value" />
 				<input type="text" id="colorInputHigh" class="color-picker black" size="6" placeholder="High value" />	
 			</div>
-			<div class="color-single">
+			<div class="color-solid">
 				<input type="text" id="colorInput" class="color-picker black" size="6" placeholder="Color Value"/>
 			</div>
-			<div class="divider"></div>
-			
-			<div class="display">
-				<div class="type points active" id="pointsButton"><p>points</p></div>
-				<div class="type cells active" id="cellsButton"><p>cells</p></div>
-				<div class="type bubbles" id="bubblesButton"><p>bubbles</p></div>
+			<div class="map-color">
+				<label for="map-color">Map color to</label>
+				<select name="map-color" class="map-color">
+					<option value="val">value</option>
+				</select>
 			</div>
+			
 			
 			<div id="adminDataControls">
 				<div class="divider"></div>

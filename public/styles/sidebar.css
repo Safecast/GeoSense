@@ -142,45 +142,53 @@
 	float:left;
 }
 
-.sidebar-view .accordion-heading .accordion-toggle .data-color
-{
-	margin-right:-5px;
-	width:20px;
-	height:20px;
-	border-radius:3px;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
-	background-color:#CCC;
+.sidebar-view .accordion-heading {
+	position: relative;
 }
 
-.sidebar-view .accordion-heading .data-color
-{
-	float:right;
-	width:20px;
-	height:20px;
-	border-radius:3px;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
-	background-color:red;
+.sidebar-view .accordion-heading .title {
+	font-weight: bold;
+	overflow: hidden;
 }
+
+.sidebar-view .accordion-heading .legend-button
+{
+	display: block;
+	width: 20px;
+	height: 20px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	background-color: #CCC;
+	position: absolute;
+	top: 8px;
+	right: 8px;
+}
+
+.sidebar-view .sidebar-data.hidden .legend-button {
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	filter:alpha(opacity=5);
+}
+
 
 .sidebar-view .header-text
 {
 	padding-top:10px;
 }
 
-.sidebar-view .color-single .color-picker
+.sidebar-view .color-solid .color-picker
 {
 	width:194px;
 	height:25px;
 }
 
-.sidebar-view .color-scale
+.sidebar-view .color-gradient
 {
 	display:none;
 }
 
-.sidebar-view .color-scale .color-picker
+.sidebar-view .color-gradient .color-picker
 {
 	width:77px;
 	height:25px;

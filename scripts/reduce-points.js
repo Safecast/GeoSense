@@ -192,7 +192,9 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 			var value_field = value_fields[k];
 			e[value_field] = {
 				sum: this[value_field],
-				count: 1
+				count: 1,
+				min: this[value_field],
+				max: this[value_field]
 			};
 		}
 		emit(key, e);
@@ -206,14 +208,19 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 			var value_field = value_fields[k];
 			reduced[value_field] = {
 				sum: 0,
-				count: 0
+				count: 0,
+				min: null,
+				max: null
 			};
 		}
 		values.forEach(function(doc) {
 			for (var k in value_fields) {
 				var value_field = value_fields[k];
-				reduced[value_field].sum += doc[value_field].sum;
-				reduced[value_field].count += doc[value_field].count;
+				var r = reduced[value_field];
+				r.sum += doc[value_field].sum;
+				r.count += doc[value_field].count;
+				if (r.min == null || r.min > doc[value_field].min) r.min = doc[value_field].min;
+				if (r.max == null || r.max < doc[value_field].max) r.max = doc[value_field].max;
 			}
 		});
 		return reduced;
@@ -322,6 +329,8 @@ var reducePoints = function(reduction_keys, opts) {
 	return runGridReduce(collection, reduced_collection, ['val'], reduction_keys, {
 		count: 1,
 		avg: 1,
+		min: 1,
+		max: 1,
 		collectionid: 1
 	}, opts);
 };
@@ -332,7 +341,6 @@ cur.forEach(function(collection) {
 	if (collection.reduce) {
 		print('*** collection = '+collection.title+' ('+collection._id+') ***');
 		opts.query = {collectionid: collection._id.toString()};
-		print(opts.query.collectionid);
 		for (var g in GRID_SIZES) {
 			var grid_size = GRID_SIZES[g];
 			print('*** grid = '+g+' ***');

@@ -12,7 +12,7 @@ window.MapOLView = window.MapViewBase.extend({
 
     initialize: function(options) {
 		MapOLView.__super__.initialize.call(this, options);
-	    this.template = _.template(tpl.get('map'));
+	    this.template = _.template(tpl.get('map-ol'));
 	
 		$(document).on('keydown', this.keyDown);
 	
@@ -299,9 +299,8 @@ window.MapOLView = window.MapViewBase.extend({
         };
         var temporaryStyle = {};
 
-		switch(collection.params.displayType)
+		switch(collection.params.featureType)
 		{
-			default:
 			case FeatureType.POINTS:
 			
 				var style = new OpenLayers.Style({
@@ -327,6 +326,7 @@ window.MapOLView = window.MapViewBase.extend({
 
 				break;
 
+			default:
 			case FeatureType.CELLS:
 			
 				var style = new OpenLayers.Style({
@@ -375,12 +375,8 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 
 		layer.collectionId = collection.collectionId;
-
 		this.layerArray[layer.collectionId] = layer;
-			
 		this.map.addLayers([this.layerArray[layer.collectionId]]);
-
-        
 
         /*var highlightCtrl = new OpenLayers.Control.SelectFeature(layer, {
             hover: true,
@@ -464,7 +460,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var pt = new OpenLayers.Geometry.Point(lng, lat);
 		var geometry;
 
-		switch(collection.params.displayType)
+		switch(collection.params.featureType)
 		{
 			default:
 				pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
@@ -534,7 +530,7 @@ window.MapOLView = window.MapViewBase.extend({
 					currIndex = index;
 			});
 		
-			currVisibility = this.layerArray[currIndex].getVisibility()
+			currVisibility = this.layerArray[currIndex].getVisibility();
 		
 			if(type == 0)
 			{

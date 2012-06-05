@@ -7,13 +7,11 @@ window.SideBarDataView = Backbone.View.extend({
 		'click #removeData:' : 'removeDataClicked',
 		'click #editData:' : 'editDataClicked',
 		'click #updateData' : 'updateDataClicked',
-		'click #toggleVisible:' : 'toggleVisibleClicked',
-		'click #toggleHidden:' : 'toggleHiddenClicked',
-		'click #singleColor:' : 'singleColorClicked',
-		'click #scaleColor:' : 'scaleColorClicked',
-		'click #pointsButton:' : 'pointsButtonClicked',
-		'click #cellsButton:' : 'cellsButtonClicked',
-		'click #bubblesButton:' : 'bubblesButtonClicked',
+
+		'click .color-type:' : 'colorTypeChanged',
+		'click .feature-type:' : 'featureTypeChanged',
+		'click .legend-button:' : 'visibilityChanged',
+		'click .visibility:' : 'visibilityChanged',
 		
 		'click #colorInput' : 'colorInputClicked',
 		'click #colorInputLow' : 'colorInputLowClicked',
@@ -31,8 +29,8 @@ window.SideBarDataView = Backbone.View.extend({
 		this.color = '';
 		this.colorLow = '';
 		this.colorHigh = '';
-		this.colorType = 1;
-		this.displayType = 2;
+		this.colorType = null;
+		this.featureType = null;
 		this.visible = true;
 		
 		this.collection.bind('add',   this.addOne, this);
@@ -53,14 +51,13 @@ window.SideBarDataView = Backbone.View.extend({
 			dataTitle = "Untitled Data";
 		}
 
-		dataTitle += " ("+ formatLargeNumber(this.collection.fullCount) + ") " + "<div class='data-color' id='dataColor'></div>";
-		
-		this.$("a").html(dataTitle);
-		this.$("a").attr("href", "#collapse" + this.collectionId);
+		dataTitle += " ("+ formatLargeNumber(this.collection.fullCount) + ") " + "";
+
+		this.$(".title").html(dataTitle);
+		this.$(".title").attr("href", "#collapse" + this.collectionId);
 		this.$("#collapse").attr("id", "collapse" + this.collectionId);
 		
-		if(!_admin)
-		{
+		if(!_admin) {
 			this.$('#adminDataControls').remove();
 		}
 		
@@ -85,6 +82,7 @@ window.SideBarDataView = Backbone.View.extend({
 			}});
 		this.$("#colorInputHigh").miniColors('value','#fff');
 	
+		console.log('render');
 		this.fetchParameters();
 	
 		
@@ -92,7 +90,9 @@ window.SideBarDataView = Backbone.View.extend({
     },
 
 	fetchParameters: function()
-	{
+	{	
+		console.log('fetchParameters');
+
 		var self = this;
 		$.ajax({
 			type: 'GET',
@@ -120,62 +120,113 @@ window.SideBarDataView = Backbone.View.extend({
 	setParameters: function(collection)
 	{
 		var self = this;
-							
+
 		this.color = collection.defaults.color;
 		this.colorLow = collection.defaults.colorLow;
 		this.colorHigh = collection.defaults.colorHigh;
 		this.colorType = collection.defaults.colorType;
-		this.displayType = collection.defaults.displayType;
-		
-		switch(this.colorType)
-		{
-		case 1: // Single Color
-			this.$('.color-scale').hide();
-			this.$('.color-single').show();
-			this.$('#scaleColor').removeClass('active');
-			this.$('#singleColor').removeClass('active');
-			this.$('#singleColor').addClass('active');
-			this.setLegendColor();
-		  break;
-		case 2: // Color Range
-		  	this.$('.color-scale').show();
-			this.$('.color-single').hide();
-			this.$('#singleColor').removeClass('active');
-			this.$('#scaleColor').removeClass('active');
-			this.$('#scaleColor').addClass('active');
-			this.setLegendColor();
-		  break;
-		}
+		this.featureType = collection.defaults.featureType;
+		this.visible = collection.defaults.visible;
 
-		switch(this.displayType)
-		{
-			case FeatureType.POINTS: 
-			  	this.pointsButtonClicked();
-				break;
-			case FeatureType.CELLS: 
-			  	this.cellsButtonClicked();
-				break;
-			case FeatureType.BUBBLES: 
-			  	this.bubblesButtonClicked();
-				break;
-		}
-		
+		console.log(this.featureType);
+
+		this.featureTypeChanged();
+		this.colorTypeChanged();
+		this.visibilityChanged();
+
 		this.$("#colorInput").miniColors('value',this.color);
 		this.$("#colorInputLow").miniColors('value',this.colorLow);
 		this.$("#colorInputHigh").miniColors('value',this.colorHigh);
 		
+		console.log('setParameters', this.featureType);
 		this.disableUpdateButton();
 	},
-	
-	setLegendColor: function()
+
+	removeDataClicked: function()
 	{
-		if(this.colorType == 1)
-		{
-			this.$('#dataColor').css('background-color',this.color)	
+		var self = this;
+		$(this.el).fadeOut('fast');
+		self.collection.reset();
+		self.collection.unbindCollection();
+   	},
+
+	updateDataClicked: function()
+	{
+		//build json and update
+		var self = this;
+		//this.collection.unbindCollection();
+				
+		this.color = this.$('#colorInput').val();
+		this.colorLow = this.$('#colorInputLow').val();
+		this.colorHigh = this.$('#colorInputHigh').val();
+		
+		var postData = {
+			visible: this.visible,
+			colorType: this.colorType,
+			color: this.color,
+			colorLow: this.colorLow,
+			colorHigh: this.colorHigh,
+			featureType: this.featureType
+		};
+		
+		$.ajax({
+			type: 'POST',
+			url: '/api/updatemapcollection/' + _mapId + '/' + this.collection.collectionId,
+			dataType: 'json',
+			data: postData,
+			success: function(data) {
+				self.disableUpdateButton();
+				self.updateLegend();
+				self.vent.trigger("redrawCollection", {collectionId: self.collectionId, updateObject: postData});
+			},
+			error: function() {
+				console.error('failed to join map with collection');
+			}
+		});	
+			
+	},
+
+	editDataClicked: function()
+	{
+		var self = this;
+		
+		if(this.editDataView)
+			this.editDataView.remove();
+			
+		this.editDataView = new EditDataView({vent: this.vent, collection:this.collection});
+        $('body').append(this.editDataView.render().el);
+		$('#editDataModal').modal('toggle');
+   	},
+
+	displayDataState: function(state)
+	{
+		console.log('Currently: ' + state);
+	},
+
+	updateLegend: function() {
+		if (this.visible) {
+			$(this.el).addClass('visible');
+			$(this.el).removeClass('hidden');
+		} else {
+			$(this.el).removeClass('visible');
+			$(this.el).addClass('hidden');
 		}
-		else
-		{
-			this.$('#dataColor').css('background-color',this.colorLow)	
+
+		switch(this.colorType) {
+			case ColorType.SOLID: 
+				this.$('.legend-button').css('background-color', this.color);
+				break;
+			case ColorType.LINEAR_GRADIENT: 
+				this.$('.legend-button').css('background-color', this.colorLow)	
+				break;
+		}
+
+		for (t in FeatureType) {
+			if (FeatureType[t] == this.featureType) {
+				this.$('.legend-button').addClass(FeatureType[t]);
+			} else {
+				this.$('.legend-button').removeClass(FeatureType[t]);
+			}
 		}
 	},
 
@@ -217,127 +268,92 @@ window.SideBarDataView = Backbone.View.extend({
 		this.enableUpdateButton();
 	},
 
-	pointsButtonClicked: function()
-	{
-		this.enableUpdateButton();
-		this.$('#pointsButton').addClass('active');
-		this.$('#cellsButton').removeClass('active');
-		this.$('#bubblesButton').removeClass('active');
-		this.displayType = FeatureType.POINTS;
-	},
-	
-	cellsButtonClicked: function()
-	{
-		this.enableUpdateButton();
-		this.$('#pointsButton').removeClass('active');
-		this.$('#cellsButton').addClass('active');
-		this.$('#bubblesButton').removeClass('active');
-		this.displayType = FeatureType.CELLS;
-	},
-
-	bubblesButtonClicked: function()
-	{
-		this.enableUpdateButton();
-		this.$('#pointsButton').removeClass('active');
-		this.$('#cellsButton').removeClass('active');
-		this.$('#bubblesButton').addClass('active');
-		this.displayType = FeatureType.BUBBLES;
-	},
-
-	singleColorClicked: function()
-	{
-		this.enableUpdateButton();
-		$('.color-scale').hide();
-		$('.color-single').show();
-		this.colorType = 1;
-	},
-
-	scaleColorClicked: function()
-	{
-		this.enableUpdateButton();
-		$('.color-scale').show();
-		$('.color-single').hide();
-		this.colorType = 2;
-	},
-
-	removeDataClicked: function()
+	featureTypeChanged: function(evt)
 	{
 		var self = this;
-		
-		$(this.el).fadeOut('fast',function()
-		{
-			self.collection.unbindCollection();
+		if (evt) {
+			var val = $(evt.currentTarget).val();
+			if (val == this.colorType) return;
+			this.featureType = val;
+			this.enableUpdateButton();
+		}
+
+		this.$('.feature-type').each(function() {
+			if ($(this).val() == self.featureType) {
+				$(this).addClass('active');
+			} else {
+				$(this).removeClass('active');
+			}
 		});
-		self.collection.reset();
-   	},
 
-	updateDataClicked: function()
-	{
-		//build json and update
-		var self = this;
-		//this.collection.unbindCollection();
-				
-		this.color = this.$('#colorInput').val();
-		this.colorLow = this.$('#colorInputLow').val();
-		this.colorHigh = this.$('#colorInputHigh').val();
-		
-		var updateObject = {
-				visible: Boolean(true),
-				colorType:Number(this.colorType),
-				color: String(this.color),
-				colorLow: String(this.colorLow),
-				colorHigh: String(this.colorHigh),
-				displayType:Number(this.displayType)
-			};
-		
-		$.ajax({
-				type: 'POST',
-				url: '/api/updatemapcollection/' + _mapId + '/' + this.collection.collectionId,
-				dataType: 'json',
-				data: { jsonpost: updateObject },
-				success: function(data) {
-					self.disableUpdateButton();
-					self.setLegendColor();
-					self.vent.trigger("redrawCollection", {collectionId: self.collectionId, updateObject:updateObject});
-
-				},
-				error: function() {
-					console.error('failed to join map with collection');
-				}
-			});	
-			
+		this.$('.feature-settings').each(function() {
+			if ($(this).hasClass(self.featureType)) {
+				$(this).show();
+			} else {
+				$(this).hide();
+			}
+		});
 	},
 
-	editDataClicked: function()
+	colorTypeChanged: function(evt)
 	{
 		var self = this;
-		
-		if(this.editDataView)
-			this.editDataView.remove();
-			
-		this.editDataView = new EditDataView({vent: this.vent, collection:this.collection});
-        $('body').append(this.editDataView.render().el);
-		$('#editDataModal').modal('toggle');
-   	},
+		if (evt) {
+			var val = $(evt.currentTarget).val();
+			if (val == this.colorType) return;
+			this.colorType = val;
+			this.enableUpdateButton();
+		}
 
-	displayDataState: function(state)
-	{
-		console.log('Currently: ' + state);
+		this.$('.color-type').each(function() {
+			if ($(this).val() == self.colorType) {
+				$(this).addClass('active');
+			} else {
+				$(this).removeClass('active');
+			}
+		});
+
+		switch (this.colorType) {
+			case ColorType.SOLID: 
+				this.$('.color-gradient').hide();
+				this.$('.color-solid').show();
+				this.updateLegend();
+				break;
+			case ColorType.LINEAR_GRADIENT: 
+			  	this.$('.color-gradient').show();
+				this.$('.color-solid').hide();
+				this.updateLegend();
+			  	break;
+		}
 	},
 
-	toggleVisibleClicked: function()
+	visibilityChanged: function(evt)
 	{
-		this.toggleVisibility(1);
-	},
-	
-	toggleHiddenClicked: function()
-	{
-		this.toggleVisibility(0)
-	},
-	
-	toggleVisibility: function(type)
-	{
-		this.vent.trigger("toggleLayerVisibility", this.collectionId, type);
+		var self = this;
+		if (evt) {
+			if (!$(evt.currentTarget).hasClass('toggle')) {
+				var val = $(evt.currentTarget).val();
+				val = Number(val) != 0;
+				if (val == this.visible) return;
+				this.visible = val;
+			} else {
+				this.visible = !this.visible;
+			}
+			this.enableUpdateButton();
+			this.vent.trigger("toggleLayerVisibility", this.collectionId, this.visible);
+		}
+
+		this.$('.visibility').each(function() {
+			var val = $(this).val();
+			val = Number(val) != 0;
+			if (val == self.visible) {
+				$(this).addClass('active');
+			} else {
+				$(this).removeClass('active');
+			}
+		});
+
+		this.updateLegend();
 	}
 
 });

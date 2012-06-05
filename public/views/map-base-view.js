@@ -88,7 +88,7 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections[collectionId].params.colorHigh = updateObject.colorHigh;
 		this.collections[collectionId].params.colorLow = updateObject.colorLow;
 		this.collections[collectionId].params.colorType = updateObject.colorType;
-		this.collections[collectionId].params.displayType = updateObject.displayType;
+		this.collections[collectionId].params.featureType = updateObject.featureType;
 		this.collections[collectionId].params.visible = updateObject.visible;
 
 		$.each(this.collections, function(collectionid, collection) { 
@@ -200,10 +200,10 @@ window.MapViewBase = Backbone.View.extend({
 		
 		var color;
 		switch (params.colorType) {
-			case COLOR_SOLID: 
+			case ColorType.SOLID: 
 				color = params.color;
 				break;
-			case COLOR_RANGE:
+			case ColorType.LINEAR_GRADIENT:
 				var rainbow = new Rainbow();
 				rainbow.setSpectrum(params.colorLow, params.colorHigh);		
 				rainbow.setNumberRange(min, max);

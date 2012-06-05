@@ -26,6 +26,9 @@ var AppRouter = Backbone.Router.extend({
 	render:function(state)
 	{
 		var self = this;
+
+		window.document.title = _mapName + ' – GeoSense';
+
  		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
         $('#app').append(this.headerView.render().el);
 
@@ -380,7 +383,7 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['homepage', 'graph', 'setup', 'map', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library', 'data-info'],
+tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library', 'data-info'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });

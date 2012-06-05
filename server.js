@@ -94,7 +94,7 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
 var Point = mongoose.model('Point', new mongoose.Schema({
 	collectionid: String, 
 	loc: {type: [Number], index: '2d'},
-	val: Number,
+	val: [Number],
 	label: String,
 	datetime: Date,
 	created: Date,
@@ -104,8 +104,8 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: String, // TODO: deprecated
 	title: String,
-	maxval: Number,
-	minval: Number,
+	maxVal: Number,
+	minVal: Number,
 	timebased: Boolean,
 	created: Date, 
 	modified: Date,
@@ -234,7 +234,7 @@ app.post('/api/data/:file', function(req, res){
 		
 			var converter = {
 				val: function() {
-					return parseFloat(this.get('reading_value'));
+					return [parseFloat(this.get('reading_value')), parseFloat(this.get('alt_reading_value'))];
 				}
 				,datetime: function() {
 					return new Date(this.get('reading_date'));
@@ -295,7 +295,7 @@ app.post('/api/data/:file', function(req, res){
 	
 	var defaults = {
 		visible: true,
-		displayType: 1,
+		featureType: 1,
 		colorHigh: '#FF8888',
 		colorLow: '#88FF88',
 		color: '#88FF88',
@@ -331,8 +331,8 @@ app.post('/api/data/:file', function(req, res){
 
 				var finalize = function() {
 					finalized = true;
-			    	collection.maxval = maxVal;
-					collection.minval = minVal;
+			    	collection.maxVal = maxVal;
+					collection.minVal = minVal;
 					collection.active = true;
 					collection.busy = false;
 					collection.reduce = numDone > 1000;
@@ -361,6 +361,9 @@ app.post('/api/data/:file', function(req, res){
 
 				function makeSaveHandler(point, self) {
 					return function(err) {
+
+						if (err) console.log('*** error', err);
+
 						point = null;
 						numSaving--;
 						numDone++;
@@ -915,6 +918,7 @@ app.post('/api/collection/:id', function(req, res){
 	  });
 });
 
+/*
 app.post('/api/addpoints/:id', function(req, res){
 		
 	jsonObject = req.body.jsonpost;
@@ -935,6 +939,7 @@ app.post('/api/addpoints/:id', function(req, res){
 	}	
 	res.send('');
 });
+*/
 
 app.delete('/api/collection/:id', function(req, res){
    Point.remove({collectionid:req.params.id}, function(err) {
@@ -966,12 +971,13 @@ app.get('/api/pointcollections', function(req, res){
   });
 });
 
+/*
 //Post a Point Collection
 app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, res){
 	
 	var defaults = [{
 		visible 	: 	req.body.jsonpost[0],
-		displayType : 	req.body.jsonpost[1],
+		featureType : 	req.body.jsonpost[1],
 		colorHigh 	: 	req.body.jsonpost[2],
 		colorLow 	: 	req.body.jsonpost[3],
 		color 		: 	req.body.jsonpost[4],
@@ -996,6 +1002,8 @@ app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, 
 		}
 	  });
 });
+*/
+
 
 //Delete a Post Collection
 app.delete('/api/pointcollection/:id', function(req, res){
@@ -1129,18 +1137,16 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 
 app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req, res){
 	
-	jsonObject = req.body.jsonpost;
-	
 	var publicslug = req.params.publicslug;
     var collectionid = req.params.pointcollectionid;
 
 	var options = {
-		visible : Boolean(jsonObject.visible),
-		displayType : Number(jsonObject.displayType),
-		colorHigh : String(jsonObject.colorHigh),
-		colorLow : String(jsonObject.colorLow),
-		color : String(jsonObject.color),
-		colorType : Number(jsonObject.colorType)
+		visible : Boolean(req.body.visible),
+		featureType : String(req.body.featureType),
+		colorHigh : String(req.body.colorHigh),
+		colorLow : String(req.body.colorLow),
+		color : String(req.body.color),
+		colorType : String(req.body.colorType)
 	};
 	
 	Map.findOne({publicslug: publicslug}, function(err, map) {
