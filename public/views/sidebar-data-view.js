@@ -121,14 +121,12 @@ window.SideBarDataView = Backbone.View.extend({
 	{
 		var self = this;
 
-		this.color = collection.defaults.color;
-		this.colorLow = collection.defaults.colorLow;
-		this.colorHigh = collection.defaults.colorHigh;
-		this.colorType = collection.defaults.colorType;
-		this.featureType = collection.defaults.featureType;
-		this.visible = collection.defaults.visible;
-
-		console.log(this.featureType);
+		this.color = collection.options.color;
+		this.colorLow = collection.options.colorLow;
+		this.colorHigh = collection.options.colorHigh;
+		this.colorType = collection.options.colorType;
+		this.featureType = collection.options.featureType;
+		this.visible = collection.options.visible;
 
 		this.featureTypeChanged();
 		this.colorTypeChanged();

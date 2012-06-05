@@ -112,7 +112,7 @@ window.MapViewBase = Backbone.View.extend({
 					if (link.collectionid == collection.collectionId) {
 						//scope.ajaxCollection.params = parameterCollection;
 						
-						collection.params = link.defaults;
+						collection.params = link.options;
 						self.collections[link.collectionid] = collection;
 
 						self.collections[link.collectionid].bind('reset', self.reset, self);

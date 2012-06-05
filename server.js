@@ -1121,7 +1121,7 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 
 	    var link = {
 	    	collectionid: collection._id,
-	    	defaults: collection.defaults
+	    	options: collection.defaults
 	    };
 
 		Map.update({ publicslug: publicslug }, { $push : { collections: link} }, function(err) {
@@ -1154,7 +1154,7 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 			console.log(map._id);
 			for (var i = 0; i < map.collections.length; i++) {
 				if (map.collections[i].collectionid == collectionid) {
-					map.collections[i].defaults = options;
+					map.collections[i].options = options;
 					break;
 				}
 			}

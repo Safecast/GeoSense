@@ -107,16 +107,16 @@ window.GraphView = Backbone.View.extend({
 			self.addOne(model, currCollection);
 		});
 
-		var defaults = self.mapParams[currCollection].defaults
+		var options = self.mapParams[currCollection].options;
 		var colorType = defaults.colorType;
 
 		if (colorType == ColorType.SOLID)
 		{
-			var color = defaults.color;
+			var color = options.color;
 
 		} else
 		{
-			var color = defaults.colorLow;
+			var color = options.colorLow;
 		}
 
 		this.graphPointCollection.push(
