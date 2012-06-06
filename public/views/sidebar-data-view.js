@@ -26,16 +26,13 @@ window.SideBarDataView = Backbone.View.extend({
 		this.title = options.title;
 		this.dataLength = options.dataLength;
 		
-		this.color = '';
-		this.colorLow = '';
-		this.colorHigh = '';
+		this.colors = [];
 		this.colorType = null;
 		this.featureType = null;
 		this.visible = true;
 		
 		this.collection.bind('add',   this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);
-		
     },
 
     render: function() {
@@ -121,9 +118,8 @@ window.SideBarDataView = Backbone.View.extend({
 	{
 		var self = this;
 
-		this.color = collection.options.color;
-		this.colorLow = collection.options.colorLow;
-		this.colorHigh = collection.options.colorHigh;
+		this.colors = collection.options.colors;
+		console.log(this.colors, 'CCCCC');
 		this.colorType = collection.options.colorType;
 		this.featureType = collection.options.featureType;
 		this.visible = collection.options.visible;
@@ -132,9 +128,9 @@ window.SideBarDataView = Backbone.View.extend({
 		this.colorTypeChanged();
 		this.visibilityChanged();
 
-		this.$("#colorInput").miniColors('value',this.color);
-		this.$("#colorInputLow").miniColors('value',this.colorLow);
-		this.$("#colorInputHigh").miniColors('value',this.colorHigh);
+		this.$("#colorInput").miniColors('value', this.colors[0].color);
+		this.$("#colorInputLow").miniColors('value', this.colors[0].color);
+		this.$("#colorInputHigh").miniColors('value', this.colors[this.colors.length - 1].color);
 		
 		console.log('setParameters', this.featureType);
 		this.disableUpdateButton();
@@ -154,16 +150,17 @@ window.SideBarDataView = Backbone.View.extend({
 		var self = this;
 		//this.collection.unbindCollection();
 				
-		this.color = this.$('#colorInput').val();
-		this.colorLow = this.$('#colorInputLow').val();
-		this.colorHigh = this.$('#colorInputHigh').val();
+		if (this.colorType == ColorType.SOLID) {
+			this.colors[0] = {color: this.$('#colorInput').val()};
+		} else {
+			this.colors[0] = {color: this.$('#colorInputLow').val(), position: 0.0};
+		}
+		this.colors[1] = {color: this.$('#colorInputHigh').val(), position: 1.0};
 		
 		var postData = {
 			visible: this.visible,
 			colorType: this.colorType,
-			color: this.color,
-			colorLow: this.colorLow,
-			colorHigh: this.colorHigh,
+			colors: this.colors,
 			featureType: this.featureType
 		};
 		

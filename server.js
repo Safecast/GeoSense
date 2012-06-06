@@ -13,6 +13,13 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
 
+var COLLECTION_DEFAULTS = {
+	visible: true,
+	featureType: 'C',
+	colorType: 'S',
+	colors: [{color: '#00C9FF'}]
+};
+
 //var profiler = require('v8-profiler');
 
 var application_root = __dirname,
@@ -24,7 +31,8 @@ var application_root = __dirname,
 	csv = require('csv'),    
 	date = require('datejs'),
 	url = require('url'),
-	util = require('util');
+	util = require('util'),
+	_ = require('cloneextend');
 
 var app = express.createServer();
 
@@ -104,6 +112,7 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: String, // TODO: deprecated
 	title: String,
+	description: String,
 	maxVal: Number,
 	minVal: Number,
 	timebased: Boolean,
@@ -291,23 +300,6 @@ app.post('/api/data/:file', function(req, res){
 		return new Point(doc);
 	}
 
-	console.log('importing '+type);
-	
-	var defaults = {
-		visible: true,
-		featureType: 1,
-		colorHigh: '#FF8888',
-		colorLow: '#88FF88',
-		color: '#88FF88',
-		colorType: 1,
-	};
-
-	for (var key in defaults) {
-		if (req.body[key]) {
-			defaults[key] = req.body[key];
-		}
-	}
-	
 	var runImport = function(collection) {
 		collection.active = false;
 		collection.busy = true;
@@ -497,10 +489,19 @@ app.post('/api/data/:file', function(req, res){
 
 	if (!appendCollectionId) {
 		console.log('Creating new collection');
+
+		var defaults = _.extend({}, COLLECTION_DEFAULTS);
+		for (var key in defaults) {
+			if (req.body[key]) {
+				defaults[key] = req.body[key];
+			}
+		}
+
 		runImport(new PointCollection({
 		    name: req.params.name,
-			defaults: defaults,
+			defaults: COLLECTION_DEFAULTS,
 			title: req.body.title,
+			description: req.body.description,
 			progress: 0,
 		}));
 	} else {
@@ -1143,11 +1144,16 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 	var options = {
 		visible : Boolean(req.body.visible),
 		featureType : String(req.body.featureType),
-		colorHigh : String(req.body.colorHigh),
-		colorLow : String(req.body.colorLow),
-		color : String(req.body.color),
+		colors : req.body.colors,
 		colorType : String(req.body.colorType)
 	};
+
+	for (var i = 0; i < options.colors.length; i++) {
+		var c = options.colors[i];
+		if (c.position) {
+			c.position = Number(c.position);
+		}
+	}
 	
 	Map.findOne({publicslug: publicslug}, function(err, map) {
 		if (!err && map) {

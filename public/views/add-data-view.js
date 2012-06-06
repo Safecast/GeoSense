@@ -13,7 +13,7 @@ window.AddDataView = Backbone.View.extend({
 		this.vent = options.vent;
 		this.responseData = null;
 		this.dataTitle = '';
-		this.dataColor = '#ffffff';
+		this.dataDescription = '';
     },
 
     render: function() {
@@ -31,8 +31,6 @@ window.AddDataView = Backbone.View.extend({
 	      drop: self.handleCardDrop
 	    } );
 			
-		this.$(".color-picker").miniColors();
-				
         return this;
     },
 
@@ -45,8 +43,7 @@ window.AddDataView = Backbone.View.extend({
 		//Todo: Verify string URL
 		var self = this;
 		this.dataTitle = this.$('#titleInput').val();
-		this.dataColorLow = this.$('#colorInputLow').val();
-		this.dataColorHigh = this.$('#colorInputHigh').val();
+		this.dataDescription = this.$('#descriptionInput').val();
 		
 		var urlPath = this.$('#dataInput').val();
 		
@@ -64,7 +61,7 @@ window.AddDataView = Backbone.View.extend({
 	dataConfirmButtonClicked: function()
 	{
 		//Todo: Validate fields
-		//app.addData({data:this.responseData, title:this.dataTitle, colorLow: this.dataColorLow, colorHigh: this.dataColorHigh});
+		//app.addData({data:this.responseData, title:this.dataTitle, description:this.dataDescription});
 	},
 	
 	requestData:function (options)
@@ -89,8 +86,7 @@ window.AddDataView = Backbone.View.extend({
 				url: '/api/data/' + options.url,
 				data: {
 					title: this.$('#titleInput').val(),
-					colorLow: this.$('#colorInputLow').val(),
-					colorHigh: this.$('#colorInputHigh').val(),
+					description: this.$('#descriptionInput').val(),
 					converter: this.$('#converterType').val()
 				},
 				success: function(responseData) {

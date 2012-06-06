@@ -283,8 +283,8 @@ var AppRouter = Backbone.Router.extend({
 					console.log(data);
 
 				var mapId = _mapId;
-				var maxVal = data.maxval;
-				var minVal = data.minval;
+				var maxVal = data.maxVal;
+				var minVal = data.minVal;
 				var title = data.title;
 				data.collectionId = data.collectionid = data._id; // TODO: deprecated
 							

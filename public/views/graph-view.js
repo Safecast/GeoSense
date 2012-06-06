@@ -200,8 +200,8 @@ window.GraphView = Backbone.View.extend({
 		var name = model.get('name');
 		var val = model.attributes.val;
 
-		var colorlow = model.attributes.colorlow;
-		var colorhigh = model.attributes.colorhigh;
+		var colorlow = model.attributes.colors[0].color;
+		var colorhigh = model.attributes.colors[1].color;
 		var date = model.attributes.datetime;
 		var epoch = new Date(date).getTime()/1000;
 
