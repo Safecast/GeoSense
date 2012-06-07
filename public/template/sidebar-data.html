@@ -14,10 +14,10 @@
 		<div class="data-controls">
 			<div class="features">
 				<div class="data-toggle">
-					<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
-					  <button class="btn feature-type" value="P">Points</button>
-					  <button class="btn feature-type" value="C">Cells</button>
-					  <button class="btn feature-type" value="B">Bubbles</button>
+					<div id="dataToggle" class="btn-group features" data-toggle="buttons-radio">
+					  <button class="btn feature-type points" value="P"></button>
+					  <button class="btn feature-type cells" value="C"></button>
+					  <button class="btn feature-type bubbles" value="B"></button>
 					</div>
 				</div>
 			</div>
@@ -33,14 +33,15 @@
 			</div>
 			<div class="divider"></div>
 			<div class="data-toggle">
-				<div id="dataToggle" class="btn-group" data-toggle="buttons-radio">
+				<div id="dataToggle" class="btn-group colors" data-toggle="buttons-radio">
 				  <button class="btn color-type" value="S">Solid Color</button>
 				  <button class="btn color-type" value="L">Gradient</button>
 				</div>
 			</div>
 			<div class="color-gradient">
-				<input type="text" id="colorInputLow" class="color-picker black" size="6" placeholder="Low value" />
-				<input type="text" id="colorInputHigh" class="color-picker black" size="6" placeholder="High value" />	
+				<div id="gradientEditor"></div>
+				<!-- <input type="text" id="colorInputLow" class="color-picker black" size="6" placeholder="Low value" />
+				<input type="text" id="colorInputHigh" class="color-picker black" size="6" placeholder="High value" />	 -->
 			</div>
 			<div class="color-solid">
 				<input type="text" id="colorInput" class="color-picker black" size="6" placeholder="Color Value"/>
@@ -60,7 +61,6 @@
 					<option value="M">display on map</option>
 				</select>
 			</div>
-			
 			
 			<div id="adminDataControls">
 				<div class="divider"></div>

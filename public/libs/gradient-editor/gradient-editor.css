@@ -1,6 +1,6 @@
 /* the container for the entire editor */
 .gradient-editor-container {
-  background-color: #666;
+  
 }
 
 /* the area that contains the gradient */
@@ -33,7 +33,7 @@
 
 /* the area the contains the color stops */
 .gradient-editor-colors {
-  background: gray;
+  background: #e1e1e1;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;

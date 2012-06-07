@@ -23,6 +23,9 @@
 @import url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css");
 @import url("jquery-ui-1.8.16.custom.css");
 
+@import url("../libs/gradient-editor/gradient-editor.css");
+@import url("../libs/colorpicker/css/colorpicker.css");
+
 @import url("embed.css");
 
 #home 

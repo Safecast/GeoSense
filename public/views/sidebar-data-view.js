@@ -79,10 +79,21 @@ window.SideBarDataView = Backbone.View.extend({
 			}});
 		this.$("#colorInputHigh").miniColors('value','#fff');
 	
-		console.log('render');
+		this.$("#gradientEditor").gradientEditor({
+				width: 220,  
+				height: 30,
+				stopWidth: 12,
+				stopHeight: 10,
+				initialColor: "#ff00ff",
+				onChange: function() {},
+				colors: [
+					{position: 0.0, color: "#000000"},
+					{position: 1.0, color: "#ffffff"}
+				]
+		});
+
 		this.fetchParameters();
 	
-		
         return this;
     },
 

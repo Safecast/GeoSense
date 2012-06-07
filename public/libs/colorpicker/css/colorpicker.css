@@ -78,6 +78,8 @@
   background-color: rgba(0,0,0,0);
 }
 .colorpicker_new_color {
+	display:none;
+
 	position: absolute;
 	width: 60px;
 	height: 30px;
@@ -86,6 +88,8 @@
 	background: #f00;
 }
 .colorpicker_current_color {
+	display:none;
+
 	position: absolute;
 	width: 60px;
 	height: 30px;
@@ -94,6 +98,8 @@
 	background: #f00;
 }
 .colorpicker input {
+	display:none;
+
 	background-color: transparent;
 	border: 1px solid transparent;
 	position: absolute;
@@ -108,6 +114,8 @@
 	height: 11px;
 }
 .colorpicker_hex {
+	display:none;
+
 	position: absolute;
 	width: 72px;
 	height: 22px;
@@ -116,15 +124,21 @@
 	top: 172px;
 }
 .colorpicker_hex input {
+	display:none;
+
 	right: 6px;
 }
 .colorpicker_field {
+	display:none;
+
 	height: 22px;
 	width: 62px;
 	background-position: top;
 	position: absolute;
 }
 .colorpicker_field span {
+	display:none;
+
 	position: absolute;
 	width: 12px;
 	height: 22px;
@@ -134,41 +148,56 @@
 	cursor: n-resize;
 }
 .colorpicker_rgba_r {
+	display:none;
+
 	background-image: url(../images/colorpicker_rgb_r.png);
 	top: 52px;
 	left: 212px;
 }
 .colorpicker_rgba_g {
+	display:none;
+
 	background-image: url(../images/colorpicker_rgb_g.png);
 	top: 82px;
 	left: 212px;
 }
 .colorpicker_rgba_b {
+	display:none;
+
 	background-image: url(../images/colorpicker_rgb_b.png);
 	top: 112px;
 	left: 212px;
 }
 .colorpicker_rgba_a {
+	display:none;
+
 	background-image: url(../images/colorpicker_rgb_a.png);
 	top: 142px;
 	left: 212px;
 }
 .colorpicker_hsba_h {
+	display:none;
+
 	background-image: url(../images/colorpicker_hsb_h.png);
 	top: 52px;
 	left: 282px;
 }
 .colorpicker_hsba_s {
+	display:none;
+
 	background-image: url(../images/colorpicker_hsb_s.png);
 	top: 82px;
 	left: 282px;
 }
 .colorpicker_hsba_b {
+	display:none;
+
 	background-image: url(../images/colorpicker_hsb_b.png);
 	top: 112px;
 	left: 282px;
 }
 .colorpicker_hsba_a {
+	display:none;
 	background-image: url(../images/colorpicker_hsb_a.png);
 	top: 142px;
 	left: 282px;
