@@ -38,14 +38,14 @@ var AppRouter = Backbone.Router.extend({
         this.dataInfoView = new DataInfoView({vent: this.vent});
 		$('#app').append(this.dataInfoView.render().el);
 
-		this.chatView = new ChatView({vent: this.vent});
-        $('#app').append(this.chatView.render().el);
+		//this.chatView = new ChatView({vent: this.vent});
+        //$('#app').append(this.chatView.render().el);
 
 		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapAdminId:_mapAdminId, mapName:_mapName});
 		$('#app').append(this.setupView.render().el);
 		
-		this.graphView = new GraphView({vent: this.vent});
-		$('#app').append(this.graphView.render().el);
+		//this.graphView = new GraphView({vent: this.vent});
+		//$('#app').append(this.graphView.render().el);
 
 		
 		$('body').css("overflow","hidden");
