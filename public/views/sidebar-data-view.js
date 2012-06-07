@@ -79,22 +79,39 @@ window.SideBarDataView = Backbone.View.extend({
 			}});
 		this.$("#colorInputHigh").miniColors('value','#fff');
 	
+		this.fetchParameters();
+	
+        return this;
+    },
+
+    initGradientEditor: function() {
+    	var colors = [];
+    	var self = this;
+    	for (var i = 0; i < this.colors.length; i++) {
+			colors[i] = {
+				color: this.colors[i].color,
+				position: this.colors[i].position || 0.0
+			};
+    	}
+    	if (colors.length == 1) {
+    		colors[1] = {
+				color: colors[0].color,
+				position: 1.0
+			};
+    	}
+
 		this.$("#gradientEditor").gradientEditor({
 				width: 220,  
 				height: 30,
 				stopWidth: 12,
 				stopHeight: 10,
 				initialColor: "#ff00ff",
-				onChange: function() {},
-				colors: [
-					{position: 0.0, color: "#000000"},
-					{position: 1.0, color: "#ffffff"}
-				]
+				onChange: function(colors) {
+					self.colors = colors;
+					self.enableUpdateButton();
+				},
+				colors: colors
 		});
-
-		this.fetchParameters();
-	
-        return this;
     },
 
 	fetchParameters: function()
@@ -130,7 +147,6 @@ window.SideBarDataView = Backbone.View.extend({
 		var self = this;
 
 		this.colors = collection.options.colors;
-		console.log(this.colors, 'CCCCC');
 		this.colorType = collection.options.colorType;
 		this.featureType = collection.options.featureType;
 		this.visible = collection.options.visible;
@@ -140,8 +156,7 @@ window.SideBarDataView = Backbone.View.extend({
 		this.visibilityChanged();
 
 		this.$("#colorInput").miniColors('value', this.colors[0].color);
-		this.$("#colorInputLow").miniColors('value', this.colors[0].color);
-		this.$("#colorInputHigh").miniColors('value', this.colors[this.colors.length - 1].color);
+		this.initGradientEditor();
 		
 		console.log('setParameters', this.featureType);
 		this.disableUpdateButton();
@@ -162,11 +177,8 @@ window.SideBarDataView = Backbone.View.extend({
 		//this.collection.unbindCollection();
 				
 		if (this.colorType == ColorType.SOLID) {
-			this.colors[0] = {color: this.$('#colorInput').val()};
-		} else {
-			this.colors[0] = {color: this.$('#colorInputLow').val(), position: 0.0};
+			this.colors = [{color: this.$('#colorInput').val()}];
 		}
-		this.colors[1] = {color: this.$('#colorInputHigh').val(), position: 1.0};
 		
 		var postData = {
 			visible: this.visible,

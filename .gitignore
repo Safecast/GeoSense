@@ -35,3 +35,6 @@ Thumbs.db
 *.scpt
 
 node_modules/*
+node_modules/.bin/express
+
+node_modules/.bin/express

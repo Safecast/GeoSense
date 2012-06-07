@@ -104,6 +104,7 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 	loc: {type: [Number], index: '2d'},
 	val: [Number],
 	label: String,
+	url: String,
 	datetime: Date,
 	created: Date,
 	modified: Date,	
@@ -113,6 +114,7 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: String, // TODO: deprecated
 	title: String,
 	description: String,
+	unit: [String],
 	maxVal: Number,
 	minVal: Number,
 	timebased: Boolean,
@@ -196,7 +198,7 @@ app.post('/api/data/:file', function(req, res){
 			
 			var converter = {
 				val: function() {
-					return parseFloat(this.get('val'));
+					return [parseFloat(this.get('val'))];
 				}
 				,datetime: function() {
 					var d = Date.parse(String(this.get('date')));
@@ -214,7 +216,7 @@ app.post('/api/data/:file', function(req, res){
 		
 			var converter = {
 				val: function() {
-					return parseFloat(this.get('mag'));
+					return [parseFloat(this.get('mag'))];
 				}
 				,datetime: function() {
 					return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
@@ -228,7 +230,7 @@ app.post('/api/data/:file', function(req, res){
 		
 			var converter = {
 				val: function() {
-					return parseFloat(this.get('val'));
+					return [parseFloat(this.get('val'))];
 				}
 				,datetime: function() {
 					var d = Date.parse(String(this.get('year')));
@@ -780,14 +782,23 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 						for (var i = 0; i < datasets.length; i++) {
 							if (reduce) {
 								var reduced = datasets[i].get('value');
+								var resVal = [];
+								for (var v = 0; v < reduced.val.length; v++) {
+									resVal[v] = reduced.val[v].avg;
+								}
 								var p = {
-									val: reduced.val.avg,
-									count: reduced.val.count,
+									val: resVal,
+									count: reduced.count,
 									loc: [reduced.loc[0], reduced.loc[1]],
 								};
 							} else {
+								var resVal = [];
+								var val = datasets[i].get('val');
+								for (var v = 0; v < reduced.val.length; v++) {
+									resVal[v] = val[v].avg;
+								}
 								var p = {
-									val: datasets[i].get('val'),
+									val: resVal,
 									count: 1,
 									loc: datasets[i].get('loc'),
 								};

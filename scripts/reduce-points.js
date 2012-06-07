@@ -174,7 +174,7 @@ var ReductionKey = {
 var runGridReduce = function(collection, reduced_collection, value_fields, reduction_keys, indexes, options) {
 	var map = function() {
 		var keyValues = [];
-		var e = {};
+		var e = {count: 1};
 		for (var k in reduction_keys) {
 			var f = reduction_keys[k].get || reduction_keys[k];
 			var keyValue = f.call(reduction_keys[k], this[k]);
@@ -190,37 +190,43 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		var key = keyValues.join('|');
 		for (var k in value_fields) {
 			var value_field = value_fields[k];
-			e[value_field] = {
-				sum: this[value_field],
-				count: 1,
-				min: this[value_field],
-				max: this[value_field]
-			};
+			e[value_field] = [];
+			for (var v = 0; v < this[value_field].length; v++) {
+				e[value_field][v] = {
+					sum: this[value_field][v],
+					min: this[value_field][v],
+					max: this[value_field][v]
+				};
+			}
 		}
 		emit(key, e);
 	};
 	var reduce = function(key, values) {
-		var reduced = {};
+		var reduced = {count: 0};
 		for (var k in reduction_keys) {
 			reduced[k] = values[0][k];
 		}
 		for (var k in value_fields) {
 			var value_field = value_fields[k];
-			reduced[value_field] = {
-				sum: 0,
-				count: 0,
-				min: null,
-				max: null
-			};
+			reduced[value_field] = [];
+			for (var v = 0; v < values[0][value_field].length; v++) {
+				reduced[value_field][v] = {
+					sum: 0,
+					min: null,
+					max: null
+				};
+			}
 		}
 		values.forEach(function(doc) {
 			for (var k in value_fields) {
 				var value_field = value_fields[k];
+				reduced.count += doc.count;
 				var r = reduced[value_field];
-				r.sum += doc[value_field].sum;
-				r.count += doc[value_field].count;
-				if (r.min == null || r.min > doc[value_field].min) r.min = doc[value_field].min;
-				if (r.max == null || r.max < doc[value_field].max) r.max = doc[value_field].max;
+				for (var v = 0; v < r.length; v++) {
+					r[v].sum += doc[value_field][v].sum;
+					if (r[v].min == null || r[v].min > doc[value_field][v].min) r[v].min = doc[value_field][v].min;
+					if (r[v].max == null || r[v].max < doc[value_field][v].max) r[v].max = doc[value_field][v].max;
+				}
 			}
 		});
 		return reduced;
@@ -228,7 +234,9 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 	var finalize = function(key, value) {
 		for (var k in value_fields) {
 			var value_field = value_fields[k];
-			value[value_field].avg = value[value_field].sum / value[value_field].count;
+			for (var v = 0; v < value[value_field].length; v++) {
+				value[value_field][v].avg = value[value_field][v].sum / value.count;
+			}
 		}
 		return value;
 	};

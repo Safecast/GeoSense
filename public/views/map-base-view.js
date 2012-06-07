@@ -195,6 +195,8 @@ window.MapViewBase = Backbone.View.extend({
 		var max = Number(c.maxVal);
 		var val = model.get('val');
 		var count = model.get('count');
+
+		console.log(c, 'CCCC');
 		
 		var color;
 		switch (params.colorType) {
