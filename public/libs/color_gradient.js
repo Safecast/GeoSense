@@ -21,6 +21,7 @@ var ColorGradient = function(colors) {
 				colors[i].color.replace('#', '0x') : colors[i].color)
 		};
 	}
+	// sort by position
 	this.colors.sort(function(a, b) { return (a.position - b.position) });
 }
 
