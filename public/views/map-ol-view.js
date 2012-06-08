@@ -279,6 +279,9 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	initLayerForCollection: function(collection)
 	{ 
+		MapOLView.__super__.initLayerForCollection.call(this, collection);
+
+		var self = this;
 		var minBubbleSize = 2;
 		var maxBubbleSize = 30;
 
@@ -400,8 +403,12 @@ window.MapOLView = window.MapViewBase.extend({
         selectCtrl.activate();		*/
 
 		layer.events.on({
-            'featureselected': this.featureSelected,
-            'featureunselected': this.featureUnselected
+            'featureselected': function(evt) {
+            	self.featureSelected(evt)
+            },
+            'featureunselected': function(evt) {
+            	self.featureUnselected(evt);
+            }
         });
 
         /*var hover = new OpenLayers.Control.SelectFeature(layer, {
@@ -499,7 +506,6 @@ window.MapOLView = window.MapViewBase.extend({
 	drawLayerForCollection: function(collection) 
 	{
 		if (this.addFeatures[collection.collectionId]) {
-			console.log('addFeatures '+this.addFeatures[collection.collectionId].length + ' to '+this.layerArray[collection.collectionId]);		
 			this.layerArray[collection.collectionId].addFeatures(this.addFeatures[collection.collectionId]);
 			delete this.addFeatures[collection.collectionId];
 		}
@@ -663,21 +669,14 @@ window.MapOLView = window.MapViewBase.extend({
 			    min = this.toWebMercator(viewportSW),
 			    max = this.toWebMercator(viewportNE),
 			    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
-
-			    console.log(center);
-
-		    break;
+			    break;
 
 		    default:
-		    
 		    	var center = {x: result.x, y: result.y};
-		    	console.log(center);
-
 		    	if(result.zoom) {
 		    		var zoom = result.zoom;
 		    	}
-
-		    break;
+			    break;
 		}
 
 		if (center) {

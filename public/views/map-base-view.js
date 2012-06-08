@@ -5,6 +5,7 @@ window.MapViewBase = Backbone.View.extend({
 		this.collections = {};
 		this.layerArray = {};
 		this.vent = options.vent;
+		this.colorGradients = {};
 		_.bindAll(this, "setMapLocation");
 		options.vent.bind("setMapLocation", this.setMapLocation);
 		
@@ -171,6 +172,11 @@ window.MapViewBase = Backbone.View.extend({
 	*/
 	initLayerForCollection: function(collection)
 	{ 
+		switch (collection.params.colorType) {
+			case ColorType.LINEAR_GRADIENT:
+				this.colorGradients[collection.collectionId] = new ColorGradient(collection.params.colors);
+				break;
+		}
 	},
 
 	/**
@@ -195,19 +201,15 @@ window.MapViewBase = Backbone.View.extend({
 		var max = Number(c.maxVal);
 		var val = model.get('val');
 		var count = model.get('count');
+		var normVal = (val - min) / (max - min);
 
-		console.log(c, 'CCCC');
-		
 		var color;
 		switch (params.colorType) {
 			case ColorType.SOLID: 
 				color = params.colors[0].color;
 				break;
 			case ColorType.LINEAR_GRADIENT:
-				var rainbow = new Rainbow();
-				rainbow.setSpectrum(params.colors[0].color, params.colors[params.colors.length - 1].color);		
-				rainbow.setNumberRange(min, max);
-				color = '#' + rainbow.colourAt(val);
+				color = this.colorGradients[collectionId].colorAt(normVal);
 				break;
 		}
 
@@ -216,6 +218,7 @@ window.MapViewBase = Backbone.View.extend({
 			min: min,
 			max: max,
 			val: val,
+			normVal: normVal,
 			count: count,
 			size: count / this.collections[collectionId].maxCount
 		}, collectionId);

@@ -280,7 +280,6 @@ var AppRouter = Backbone.Router.extend({
 			success: function(data) {
 				var scope = this;
 				self.vent.trigger("setStateType", 'loading');
-					console.log(data);
 
 				var mapId = _mapId;
 				var maxVal = data.maxVal;
@@ -375,8 +374,6 @@ var AppRouter = Backbone.Router.extend({
 	},
 	
 	addSideBarDataView:function (options) {
-		console.log('---');
-		console.log(options);
 		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
 		$('#accordion').append(this.sideBarDataView.render().el);
 	},

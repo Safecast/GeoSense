@@ -45,7 +45,6 @@ PointCollection = Backbone.Collection.extend({
     parse: function(resp, xhr) {
     	if (resp['items']) {
     		this.fullCount = resp.fullCount;
-    		console.log(resp.fullCount);
     		this.maxCount = resp.maxCount;
     		this.originalCount = resp.originalCount;
     		resp = resp['items'];

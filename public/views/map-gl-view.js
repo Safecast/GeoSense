@@ -290,6 +290,7 @@ window.MapGLView = window.MapViewBase.extend({
 	*/
 	initLayerForCollection: function(collection)
 	{
+		MapGLView.__super__.initLayerForCollection.call(this, collection);
 		this.layerArray[collection.collectionId] = {
 			data: [],
 			colors: []

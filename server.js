@@ -1155,14 +1155,14 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 	var options = {
 		visible : Boolean(req.body.visible),
 		featureType : String(req.body.featureType),
-		colors : req.body.colors,
-		colorType : String(req.body.colorType)
+		colors: req.body.colors,
+		colorType: String(req.body.colorType)
 	};
 
 	for (var i = 0; i < options.colors.length; i++) {
 		var c = options.colors[i];
-		if (c.position) {
-			c.position = Number(c.position);
+		if (c.position || options.colorType != 'S') {
+			c.position = Number(c.position) || 0.0;
 		}
 	}
 	

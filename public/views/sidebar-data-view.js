@@ -116,8 +116,6 @@ window.SideBarDataView = Backbone.View.extend({
 
 	fetchParameters: function()
 	{	
-		console.log('fetchParameters');
-
 		var self = this;
 		$.ajax({
 			type: 'GET',
@@ -158,7 +156,6 @@ window.SideBarDataView = Backbone.View.extend({
 		this.$("#colorInput").miniColors('value', this.colors[0].color);
 		this.initGradientEditor();
 		
-		console.log('setParameters', this.featureType);
 		this.disableUpdateButton();
 	},
 
