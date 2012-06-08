@@ -283,14 +283,14 @@ window.MapOLView = window.MapViewBase.extend({
 
 		var self = this;
 		var minBubbleSize = 2;
-		var maxBubbleSize = 30;
+		var maxBubbleSize = 60;
 
 		var context = {
             getColor: function(feature) {
                 return feature.attributes.color;
             },
-            getBubbleSize: function(feature) {
-                return minBubbleSize + feature.attributes.size * (maxBubbleSize - minBubbleSize);
+            getBubbleRadius: function(feature) {
+                return minBubbleSize + feature.attributes.size * (maxBubbleSize - minBubbleSize) / 2;
             }
         };
 
@@ -358,7 +358,7 @@ window.MapOLView = window.MapViewBase.extend({
 			case FeatureType.BUBBLES:
 			
 				var style = new OpenLayers.Style({
-				    pointRadius: '${getBubbleSize}',
+				    pointRadius: '${getBubbleRadius}',
 				    strokeOpacity: 0,
 				    fillColor: '${getColor}',
 				    fillOpacity: .5

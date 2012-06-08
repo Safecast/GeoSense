@@ -32,7 +32,7 @@ var getWeek = function(date, dowOffset) {
 	var day = newYear.getDay() - dowOffset; //the day of week the year begins on
 	day = (day >= 0 ? day : day + 7);
 	var daynum = Math.floor((date.getTime() - newYear.getTime() - 
-	(date.getTimezoneOffset()-newYear.getTimezoneOffset())*60000)/86400000) + 1;
+		(date.getTimezoneOffset()-newYear.getTimezoneOffset()) * 60000) / 86400000) + 1;
 	var weeknum;
 	//if the year starts before the middle of a week
 	if(day < 4) {
@@ -169,6 +169,11 @@ var ReductionKey = {
 			return (collectionHasIndex(collection, index));
 		}
 		return this;
+	},
+	Histogram: function(min, max, steps) {
+		this.get = function(loc) {
+		};
+		this.name = 'hist-'+steps;
 	}
 };
 var runGridReduce = function(collection, reduced_collection, value_fields, reduction_keys, indexes, options) {
@@ -352,10 +357,17 @@ cur.forEach(function(collection) {
 		for (var g in GRID_SIZES) {
 			var grid_size = GRID_SIZES[g];
 			print('*** grid = '+g+' ***');
+
 			reducePoints({
 				collectionid: ReductionKey.copy, 
-				loc: new ReductionKey.LocGrid(grid_size)
+				val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, 100)
 			}, opts);
+
+
+			/*reducePoints({
+				collectionid: ReductionKey.copy, 
+				loc: new ReductionKey.LocGrid(grid_size)
+			}, opts);*/
 			
 			/*reducePoints({
 				collectionid: ReductionKey.copy, 
