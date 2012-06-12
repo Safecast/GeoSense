@@ -28,6 +28,8 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 
 if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
 
+var COLOR_GRADIENT_STEP = 1 / 30.0;
+
 //APP GLOBALS
 var tilt = 0.41;
 

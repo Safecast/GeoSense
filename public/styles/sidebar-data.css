@@ -13,6 +13,16 @@
 	background-image: url(../assets/vis-bubbles-tmp.png);
 }
 
+.sidebar-view .legend {
+	padding: 0 1em 1em 1em;
+}
+
+.sidebar-view .histogram {
+	background: #666;
+	width: 100%;
+	height: 40px;
+}
+
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features button {
 	width:76px;
 	height:50px;

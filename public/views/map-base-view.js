@@ -209,7 +209,7 @@ window.MapViewBase = Backbone.View.extend({
 				color = params.colors[0].color;
 				break;
 			case ColorType.LINEAR_GRADIENT:
-				color = this.colorGradients[collectionId].colorAt(normVal);
+				color = this.colorGradients[collectionId].colorAt(normVal, COLOR_GRADIENT_STEP);
 				break;
 		}
 
@@ -217,9 +217,12 @@ window.MapViewBase = Backbone.View.extend({
 			color: color,
 			min: min,
 			max: max,
-			val: val,
-			normVal: normVal,
-			count: count,
+			data: {
+				val: val,
+				normVal: normVal,
+				count: count,
+				altVal: model.get('altVal')
+			},
 			size: count / this.collections[collectionId].maxCount
 		}, collectionId);
     },

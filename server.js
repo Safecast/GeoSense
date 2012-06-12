@@ -102,7 +102,8 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
 var Point = mongoose.model('Point', new mongoose.Schema({
 	collectionid: String, 
 	loc: {type: [Number], index: '2d'},
-	val: [Number],
+	val: Number,
+	altVal: [mongoose.Schema.Types.Mixed],
 	label: String,
 	url: String,
 	datetime: Date,
@@ -114,7 +115,8 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	collectionid: String, // TODO: deprecated
 	title: String,
 	description: String,
-	unit: [String],
+	unit: String,
+	altUnit: [String],
 	maxVal: Number,
 	minVal: Number,
 	timebased: Boolean,
@@ -198,7 +200,7 @@ app.post('/api/data/:file', function(req, res){
 			
 			var converter = {
 				val: function() {
-					return [parseFloat(this.get('val'))];
+					return parseFloat(this.get('val'));
 				}
 				,datetime: function() {
 					var d = Date.parse(String(this.get('date')));
@@ -216,7 +218,7 @@ app.post('/api/data/:file', function(req, res){
 		
 			var converter = {
 				val: function() {
-					return [parseFloat(this.get('mag'))];
+					return parseFloat(this.get('mag'));
 				}
 				,datetime: function() {
 					return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
@@ -230,7 +232,7 @@ app.post('/api/data/:file', function(req, res){
 		
 			var converter = {
 				val: function() {
-					return [parseFloat(this.get('val'))];
+					return parseFloat(this.get('val'));
 				}
 				,datetime: function() {
 					var d = Date.parse(String(this.get('year')));
@@ -245,7 +247,10 @@ app.post('/api/data/:file', function(req, res){
 		
 			var converter = {
 				val: function() {
-					return [parseFloat(this.get('reading_value')), parseFloat(this.get('alt_reading_value'))];
+					return parseFloat(this.get('reading_value'));
+				}
+				,altVal: function() {
+					return [parseFloat(this.get('alt_reading_value'))];
 				}
 				,datetime: function() {
 					return new Date(this.get('reading_date'));
@@ -337,7 +342,7 @@ app.post('/api/data/:file', function(req, res){
 				};
 
 				var debugStats = function(pos) {
-					console.log('* '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone);
+					console.log('* '+collection.get('_id')+' '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone);
 				};
 
 				function postSave(self) {
@@ -504,6 +509,7 @@ app.post('/api/data/:file', function(req, res){
 			defaults: COLLECTION_DEFAULTS,
 			title: req.body.title,
 			description: req.body.description,
+			unit: "",
 			progress: 0,
 		}));
 	} else {
@@ -677,7 +683,39 @@ app.delete('/api/point/:id', function(req, res){
 // POINT COLLECTIONS
 //////////////////////
 
-app.get('/api/mappoints/:pointcollectionid', function(req, res){
+app.get('/api/histogram/:pointcollectionid', function(req, res) {
+	PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
+		if (!err && pointCollection) {
+			collectionName = 'r_points_hist-100';
+			var Model = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+			var query = {'value.collectionid': req.params.pointcollectionid};
+			console.log(query);
+			Model.find(query, function(err, datasets) {
+				if (err) {
+					res.send('ooops', 404);
+					return;
+				}
+				values = [];
+				for (var i = 0; i < datasets.length; i++) {
+					var reduced = datasets[i].get('value');
+					values[reduced.val.step] = reduced.count;
+				}
+				var histogram = []; 
+				for (var step = 0; step < 100; step++) {
+					histogram.push({
+						x: step,
+						y: values[step] ? values[step] : 0
+					})
+				}
+				res.send(histogram);
+			});
+		} else {
+			res.send('ooops', 404);
+		}
+	});
+});
+
+app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 
 	PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 		if (!err && pointCollection) {
@@ -776,27 +814,28 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res){
 				}
 
 				if (!time_grid) {
-					console.log(pointQuery);
 					ReducedPoint.find(pointQuery, function(err, datasets) {
 						if (err) return;
 						for (var i = 0; i < datasets.length; i++) {
 							if (reduce) {
 								var reduced = datasets[i].get('value');
-								var resVal = [];
-								for (var v = 0; v < reduced.val.length; v++) {
-									resVal[v] = reduced.val[v].avg;
+								var resVal = reduced.val.avg;
+								var resAltVal;
+								if (reduced.altVal != null) {
+									resAltVal = [];
+									for (var v = 0; v < reduced.altVal.length; v++) {
+										resAltVal[v] = reduced.altVal[v].avg;
+									}
 								}
 								var p = {
 									val: resVal,
+									altVal: resAltVal,
 									count: reduced.count,
 									loc: [reduced.loc[0], reduced.loc[1]],
 								};
 							} else {
 								var resVal = [];
-								var val = datasets[i].get('val');
-								for (var v = 0; v < reduced.val.length; v++) {
-									resVal[v] = val[v].avg;
-								}
+								var resVal = datasets[i].get('val');
 								var p = {
 									val: resVal,
 									count: 1,

@@ -80,6 +80,7 @@ window.SideBarDataView = Backbone.View.extend({
 		this.$("#colorInputHigh").miniColors('value','#fff');
 	
 		this.fetchParameters();
+		this.initHistogram();
 	
         return this;
     },
@@ -113,6 +114,37 @@ window.SideBarDataView = Backbone.View.extend({
 				colors: colors
 		});
     },
+
+	initHistogram: function()
+	{	
+		var self = this;
+		var graphEl = self.$('.histogram');
+		if (!graphEl.length) return;
+		$.ajax({
+			type: 'GET',
+			url: '/api/histogram/' + this.collection.collectionId,
+			success: function(data) {
+				var graph = new Rickshaw.Graph({
+					element: graphEl[0],
+					renderer: 'bar',
+					width: graphEl.innerWidth(), 
+					height: graphEl.innerHeight(),
+					series: [
+						{
+							data: data, 
+							color: '#aaa'
+						}
+					]
+				});
+
+				graph.render();
+				
+			},
+			error: function() {
+				console.error('failed to fetch histogram');
+			}
+		});
+	},
 
 	fetchParameters: function()
 	{	

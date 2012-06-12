@@ -435,7 +435,7 @@ window.MapOLView = window.MapViewBase.extend({
 		console.log('featureSelected');
 		// TODO: detail info panel
 		this.vent.trigger("updateDataInfo");
-		console.log(evt.feature.attributes.val, evt.feature.attributes.count);
+		console.log(evt.feature.attributes.data.val, evt.feature.attributes.data.count, evt.feature.attributes.data.altVal);
 	},
 
 	featureUnselected: function(evt) {
