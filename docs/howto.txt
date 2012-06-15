@@ -1,0 +1,5 @@
+Mongo dumping and cloning
+=========================
+
+mongodump -d geo -o ./dump
+mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p SEKRET ./dump/geo/
