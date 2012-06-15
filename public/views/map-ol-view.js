@@ -72,6 +72,7 @@ window.MapOLView = window.MapViewBase.extend({
 		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
 		//console.log('zoom: '+zoom+', resolution '+this.map.getResolution()+' '+this.map.getUnits());
+		//console.log('bounds', bounds);
 		return {
 			zoom: zoom,
 			bounds: bounds
@@ -116,7 +117,7 @@ window.MapOLView = window.MapViewBase.extend({
 						// Since the loadend event does not seem to be fired on the gmap layer,
 						// we just register a google event on the google map object directly.
 						google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
-							self.vent.trigger('mapReady');
+							self.vent.trigger('mapViewReady');
 						});
 					}
 				}
@@ -297,12 +298,12 @@ window.MapOLView = window.MapViewBase.extend({
         var layer;
 
         var selectStyle = {
-        	fillOpacity: .9,
+        	fillOpacity: DEFAULT_SELECTED_FEATURE_OPACITY,
 		    strokeColor: '#eee'
         };
         var temporaryStyle = {};
 
-		switch(collection.params.featureType)
+		switch(collection.options.featureType)
 		{
 			case FeatureType.POINTS:
 			
@@ -311,7 +312,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    strokeColor: '#333',
 				    strokeWidth: 2,
 				    pointRadius: 7,
-				    fillOpacity: .75,
+				    fillOpacity:  this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
 				}, {context: context});
 
@@ -337,7 +338,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    strokeColor: '#333',
 				    strokeWidth: 2,
 				    pointRadius: 7,
-				    fillOpacity: .6,
+				    fillOpacity: this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
 				}, {context: context});
 
@@ -361,7 +362,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    pointRadius: '${getBubbleRadius}',
 				    strokeOpacity: 0,
 				    fillColor: '${getColor}',
-				    fillOpacity: .5
+				    fillOpacity: this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
@@ -411,6 +412,7 @@ window.MapOLView = window.MapViewBase.extend({
             }
         });
 
+
         /*var hover = new OpenLayers.Control.SelectFeature(layer, {
             hover: true,
             highlightOnly: true,
@@ -432,14 +434,36 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 
 	featureSelected: function(evt) {
-		console.log('featureSelected');
-		// TODO: detail info panel
-		this.vent.trigger("updateDataInfo");
-		console.log(evt.feature.attributes.data.val, evt.feature.attributes.data.count, evt.feature.attributes.data.altVal);
+		var collectionId = evt.feature.attributes.collectionId;
+		var pointCollection = this.collections[collectionId].mapLayer.pointCollection;
+		obj = {
+			collectionId: collectionId,
+			data: [{
+				label: pointCollection.unit, 
+				value: formatDecimalNumber(evt.feature.attributes.data.val, 3)
+			}],
+			metadata: [{
+				label: '# of samples',
+				value: evt.feature.attributes.data.count
+			}]
+		}
+
+		var v = evt.feature.attributes.data.altVal;
+		if (v) {
+			for (var i = 0; i < v.length; i++) {
+				obj.data.push({
+					label: pointCollection.altUnit[i], 
+					value: formatDecimalNumber(v[i], 3)
+				});
+			}
+		}
+
+		this.vent.trigger("updateDetailData", obj);
+		
+
 	},
 
 	featureUnselected: function(evt) {
-		console.log('featureUnselected');
 	},
 
     addPointToLayer: function(model, opts, collectionId) 
@@ -467,7 +491,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var pt = new OpenLayers.Geometry.Point(lng, lat);
 		var geometry;
 
-		switch(collection.params.featureType)
+		switch(collection.options.featureType)
 		{
 			default:
 				pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));

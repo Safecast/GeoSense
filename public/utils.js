@@ -7,6 +7,17 @@ function formatLargeNumber(c) {
 	return c;
 }
 
+function formatDecimalNumber(c, decimalPlaces) {
+	if (c < 10) {
+		if (decimalPlaces == null) {
+			decimalPlaces = c < .1 ? 2 : 1;
+		}
+		var f = Math.pow(10, decimalPlaces);
+		return Math.round(c * f) / f;
+	}
+	return Math.round(c);
+}
+
 function getURLParameter(paramName) {
   var searchString = window.location.search.substring(1),
       i, val, params = searchString.split("&");
@@ -57,3 +68,20 @@ $.fn.blink = function() {
 	        .animate({opacity: .2}, 'slow', cycle);
 	})();
 };
+
+/**
+* Simple Python-style string formatting.
+*
+* Example:
+*
+*	"%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
+*/
+String.prototype.format = function(replacements) {
+  return this.replace(/\%\(([a-z0-9_]+)\)(s)/g, function(match, name, type) { 
+    return typeof replacements[name] != 'undefined'
+      ? replacements[name]
+      : match
+    ;
+  });
+};
+

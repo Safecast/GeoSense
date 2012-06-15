@@ -83,10 +83,10 @@ window.DataLibrary = Backbone.View.extend({
 		this.$('.data-container').append(dataDiv);
 	},
 	
-	dataDrop:function ( event, ui ) {
+	dataDrop: function (event, ui ) {
 	  	var draggable = ui.draggable;
-		collectionId = draggable.attr('data');
-		app.addFromDataLibrary(collectionId);
+		var pointCollectionId = draggable.attr('data');
+		app.bindCollectionToMap(pointCollectionId);
 		$(ui.draggable).css("display","none");
 	},
 	

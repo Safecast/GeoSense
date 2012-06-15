@@ -1,23 +1,137 @@
 .data-info
 {
-	display:none;
+	display: none;
 	z-index:1000;
 	position:absolute;
-	top:55px;
+	top:65px;
 	right:15px;
-	padding:10px;
-	box-shadow:  2px 0px 3px rgba(0, 0, 0, .2);
+	padding:20px;
+	box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, .2);
 
-	background-color:rgba(0,0,0,.8);
-	border:1px solid rgba(0,0,0,.0);
-	border-radius:3px;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px
+	background-color:rgba(0,0,0,.5);
+	border-color:#222;
+	border-radius:6px;
+	color: #fff;
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px
 }
+
+.data-info .accordion-heading .accordion-toggle {
+	padding: 0 0 .25em 0;
+}
+
+.data-info .accordion-group {
+	margin-bottom: 10px;
+	border: none;
+	width: 200px;
+	margin: 0;
+	padding: 0px;
+}
+
+.data-info .data-legend {
+	margin: 30px 0 0 0;
+}
+
+.data-info .data-legend:first-child {
+	margin: 0;
+} 
 
 .value
 {
 	color:white;
 	font-size:20pt;
 	font-weight:bold;
+}
+
+.data-info h4, .data-info h4 a {
+	font-weight: bold !important;
+	font-size: 22px !important;
+	color: white !important;
+}
+
+.data-info .status {
+	margin-bottom: .5em;
+}
+
+.data-info .legend {
+}
+
+.data-info .color-bar {
+	list-style: none;
+	padding: 0;
+	margin: 3px 0 0 0;
+}
+
+.data-info .color-bar li {
+	float: left;
+	overflow: hidden;
+}
+
+.data-info .color-bar li .segment {
+	font-weight: bold;
+	font-size: 12px;
+	padding: .25em;
+	text-align: center;
+	color: #000;
+	text-shadow: #FFF 1px 1px 1px;
+	border-top: 1px #ddd solid;
+	border-left: 1px #ddd solid;
+	border-right: 1px #666 solid;
+}
+
+.data-info .color-bar li:first-child .segment {
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+	margin-left: 0;
+}
+
+.data-info .color-bar li:last-child .segment {
+	border-top-right-radius: 4px;
+	border-bottom-right-radius: 4px;
+	margin-right: 0;
+}
+
+.data-info .histogram {
+	width: 200px;
+	height: 30px;
+}
+
+.data-info table {
+	padding: 0;
+	margin: 0;
+	width: 100%;
+}
+
+.data-info .value-label {
+	font-weight: normal;
+	line-height: 35px;
+	font-size: 20px;
+	text-align: left;
+	width: 50%;
+	overflow: hidden;
+	line-height: 1em;
+	padding: 0 1em 0 0;
+	white-space: nowrap;
+	color: #ddd;
+}
+
+.data-info .value {
+	font-weight: bold;
+	line-height: 35px;
+	font-size: 35px;
+	text-align: right;
+	width: 50%;
+	overflow: hidden;
+	padding: 0;
+	white-space: nowrap;
+}
+
+.data-info .detail-metadata .value-label {
+	line-height: 13px;
+	font-size: 13px;
+}
+
+.data-info .detail-metadata .value {
+	line-height: 13px;
+	font-size: 13px;
 }

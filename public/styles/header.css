@@ -33,8 +33,7 @@
 	padding-left:10px;
 	float:left;
 	color:white;
-	font-size:20pt;
-	line-height:20pt;
+	font-size:21pt;
 }
 
 #search
@@ -95,7 +94,7 @@
 	color:black;
 	padding-left:35px;
 	padding-right:1em;
-	font-size:10pt;
+	font-size:13pt;
 	color:#666;
 	line-height:26pt;
 	background-image:url('../assets/loader.gif');

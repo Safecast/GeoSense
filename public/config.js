@@ -28,7 +28,10 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 
 if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
 
-var COLOR_GRADIENT_STEP = 1 / 30.0;
+var COLOR_GRADIENT_STEP = null; // 1 / 500.0;
+
+var DEFAULT_FEATURE_OPACITY = .75;
+var DEFAULT_SELECTED_FEATURE_OPACITY = DEFAULT_FEATURE_OPACITY + (1 - DEFAULT_FEATURE_OPACITY) / 2;
 
 //APP GLOBALS
 var tilt = 0.41;
@@ -88,11 +91,8 @@ var _mapId = String;
 var _mapAdminId = String;
 var _mapName = String;
 var _mapCollections = [];
-var _boundCollections = {};
 var _commentArray = [];
 
-var _num_data_sources = 0;
-var _loaded_data_sources = 0;
 var pointCollection = new Array();
 var timeBasedPointCollection = new Array();
 

@@ -47,9 +47,10 @@ window.AddDataView = Backbone.View.extend({
 		
 		var urlPath = this.$('#dataInput').val();
 		
-		if (this.dataTitle != '' && urlPath != '')
+		// TODO: Add better validation 
+		if (true /* this.dataTitle != '' && urlPath != ''*/)
 		{
-			this.requestData({url:urlPath});
+			this.requestData();
 			this.$('.modal-body .alert').hide();
 		}
 		else
@@ -64,11 +65,11 @@ window.AddDataView = Backbone.View.extend({
 		//app.addData({data:this.responseData, title:this.dataTitle, description:this.dataDescription});
 	},
 	
-	requestData:function (options)
+	requestData:function(options)
 	{
 		var self = this;
 		dataType = 'csv';
-		if(dataType == 'json')
+		/*if(dataType == 'json')
 		{
 			var self = this;		
 			var jqxhr = $.getJSON(options.url, function(data) {})
@@ -79,12 +80,12 @@ window.AddDataView = Backbone.View.extend({
 			.error(function(err) { alert(err); })
 			.complete(function() {});
 		}
-		else if(dataType == 'csv')
-		{
+		else*/ if (dataType == 'csv') {
 			$.ajax({
 				type: 'POST',
-				url: '/api/data/' + options.url,
+				url: '/api/import/',
 				data: {
+					file: this.$('#dataInput').val(),
 					title: this.$('#titleInput').val(),
 					description: this.$('#descriptionInput').val(),
 					converter: this.$('#converterType').val()

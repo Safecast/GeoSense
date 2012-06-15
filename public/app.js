@@ -17,13 +17,13 @@ var AppRouter = Backbone.Router.extend({
     initialize:function() {
 		var self = this;
 		this.vent = _.extend({}, Backbone.Events);
-		this.vent.bind('mapReady', function() {
-			console.log('mapReady -- fetch collections');
-			self.fetchCollections();
+		this.vent.bind('mapViewReady', function() {
+			console.log('mapViewReady -- init map layers');
+			self.initMapLayers();
 		});
     }, 
 
-	render:function(state)
+	render: function(state)
 	{
 		var self = this;
 
@@ -71,80 +71,49 @@ var AppRouter = Backbone.Router.extend({
 	
 	setUniqueMap: function(uniqueMapId)
 	{
-		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
+		this.loadAndInitMap({mapId:uniqueMapId, state:'map'});
 	},
 	
 	setNewMap: function(uniqueMapId)
 	{
 		_setupRoute = true;
 		$('#app').empty();
-		this.setFromUniqueMapId({mapId:uniqueMapId, state:'map'});
+		this.loadAndInitMap({mapId:uniqueMapId, state:'map'});
 	},
 	
 	setUniqueGlobe: function(uniqueMapId)
 	{
-		this.setFromUniqueMapId({mapId:uniqueMapId, state:'mapgl'});
+		this.loadAndInitMap({mapId:uniqueMapId, state:'mapgl'});
 	},
 	
-	setFromUniqueMapId: function(options)
+	loadAndInitMap: function(options)
 	{
 		var self = this;
-		mapIdLength = options.mapId.length;
-		if(mapIdLength == 10) // Viewer Route
-		{
-			$.ajax({
-				type: 'GET',
-				url: '/api/map/' + options.mapId,
-				success: function(data) {
-					_admin = false;
-					_mapName = data[0].title;
-					_mapId = data[0].publicslug;
-					if(options.state == 'map')
-					{
-						self.map();
-					}
-					else
-					{
-						self.mapGL();
-					}
-
-					if(!self.sideBarView)
-						self.render(options.state);
-
-				},
-				error: function() {
-					console.error('failed to fetch unique map');
+		_admin = options.mapId.length == 15;
+		$.ajax({
+			type: 'GET',
+			url: '/api/map/' + (_admin ? 'admin/' : '') + options.mapId,
+			success: function(data) {
+				_mapName = data.title;
+				_mapId = data.publicslug;
+				self.mapInfo = data;
+				if (_admin) {
+					_mapAdminId = data.adminslug;
 				}
-			});
-			
-		} else if(mapIdLength == 15) // Admin Route
-		{
-			$.ajax({
-				type: 'GET',
-				url: '/api/map/admin/' + options.mapId,
-				success: function(data) {
-					_admin = true;
-					_mapName = data[0].title;
-					_mapId = data[0].publicslug;
-					_mapAdminId = data[0].adminslug;
-					if(options.state == 'map')
-					{
-						self.map();
-					}
-					else
-					{
-						self.mapGL();
-					}
-
-					if(!self.sideBarView)
-						self.render(options.state);
-
-				},
-				error: function() {
-					console.error('failed to fetch unique map');
+				if (options.state == 'map') {
+					self.map();
+				} else {
+					self.mapGL();
 				}
-			});
-		}
+
+				if (!self.sideBarView) {
+					self.render(options.state);
+				}
+			},
+			error: function() {
+				console.error('failed to fetch unique map');
+			}
+		});
 	},
 	
 	home:function () {
@@ -198,43 +167,6 @@ var AppRouter = Backbone.Router.extend({
         }
     },
 
-	fetchCollections: function(type)
-	{
-		var self = this;
-		$.ajax({
-			type: 'GET',
-			ajaxType: type,
-			url: '/api/map/' + _mapId,
-			success: function(data) {
-				var scope = this;
-				if(data[0].collections)
-				{
-					_mapCollections = data[0].collections;
-				
-					for(var i = 0; i < _mapCollections.length; ++i)
-					{						
-						$.ajax({
-							type: 'GET',
-							ajaxI: i,
-							url: '/api/pointcollection/' + _mapCollections[i].collectionid,
-							success: function(data) {
-								self.addExistingDataSource(data._id, scope.ajaxType)
-							},
-							error: function() {
-								console.error('failed to fetch distinct collections');
-							}
-						});
-					}
-					//Save the distinct collection Id(s) to app scope
-					_num_data_sources = _mapCollections.length;
-				}
-			},
-			error: function() {
-				console.error('failed to fetch distinct collections');
-			}
-		});
-	},
-	
 	pollForNewPointCollection: function(pointCollectionId, interval) {
 		if (interval) {
 			setTimeout(function() {
@@ -258,7 +190,6 @@ var AppRouter = Backbone.Router.extend({
 					app.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
 		    	} else {
 					app.bindCollectionToMap(pointCollectionId);
-					app.addExistingDataSource(data._id, 'newData');
 					app.vent.trigger("setStateType", 'post');
 		    	}
 		    }
@@ -266,95 +197,69 @@ var AppRouter = Backbone.Router.extend({
 
 	},
 
-	addExistingDataSource: function(index, type)
+	initMapLayers: function()
+	{
+		if (this.mapInfo.layers) {
+			for (var i = 0; i < this.mapInfo.layers.length; i++) {						
+				this.initMapLayer(this.mapInfo.layers[i].pointCollection._id)
+			}
+		}
+	},
+
+	initMapLayer: function(pointCollectionId)
 	{
 		var self = this;
-		
-		console.log('addExistingDataSource');
 
-		$.ajax({
-			type: 'GET',
-			ajaxIndex: index,
-			ajaxType: type,
-			url: '/api/pointcollection/' + index,
-			success: function(data) {
-				var scope = this;
-				self.vent.trigger("setStateType", 'loading');
+		var layer = this.getMapLayer(pointCollectionId);
+		console.log('initMapLayer '+pointCollectionId, layer);
 
-				var mapId = _mapId;
-				var maxVal = data.maxVal;
-				var minVal = data.minVal;
-				var title = data.title;
-				data.collectionId = data.collectionid = data._id; // TODO: deprecated
-							
-				var mapArea = self.mapView.getVisibleMapArea();							
-				var collectionOptions = {
-					collectionId: data.collectionId, 
-					mapId: mapId, 
-					maxVal: maxVal, 
-					minVal: minVal, 
-					name: name, 
-					newData: false,
-				};
+		var scope = this;
+		self.vent.trigger("setStateType", 'loading');
 
-				//Fetch point collections for map(s)
-
-				pointCollection[scope.ajaxIndex] = new PointCollection(collectionOptions);
-				pointCollection[scope.ajaxIndex].setVisibleMapArea(self.mapView.getVisibleMapArea());
-
-				pointCollection[scope.ajaxIndex].fetch({success: function(data) {
-
-					if(_firstLoad == true || scope.ajaxType == 'newData' || scope.ajaxType == 'dataLibrary')
-					{
-			 			self.addSideBarDataView({collectionId:data.collectionId,dataLength:data.length,title:title});
-					}
-								
-					//self.addMapCollection(data.collectionId, pointCollection[data.collectionId]);
-					self.mapView.addCollection(data);
+		layer.pointCollection.collectionId = layer.pointCollection.collectionid = pointCollectionId; // TODO: deprecated
 					
-					
-					_loaded_data_sources += 1;
-					if(_loaded_data_sources == _num_data_sources)
-						_firstLoad = false;
-						
-					self.vent.trigger("setStateType", 'complete');
-											
-				}});
+		var mapArea = self.mapView.getVisibleMapArea();							
+		var collectionOptions = {
+			pointCollectionId: pointCollectionId, 
+			mapId: _mapId, 
+			mapLayer: layer
+		};
 
-				//Fetch time based point collections for graph
-				if (1||data.timebased) {
-					collectionOptions.urlParams = {
-						t: 'w'
-					};
-					timeBasedPointCollection[scope.ajaxIndex] = new PointCollection(collectionOptions);
-					timeBasedPointCollection[scope.ajaxIndex].setVisibleMapArea(self.mapView.getVisibleMapArea());
-					timeBasedPointCollection[scope.ajaxIndex].fetch({success: function(data) {
-						self.graphView.addCollection(data.collectionId, timeBasedPointCollection[data.collectionId]);
-					}});
-				}
-					
-			},
-			error: function() {
-				console.error('failed to fetch existing data source');
-			}
-		});
-	},
-	
-	addFromDataLibrary: function(collectionId)
-	{
-		this.bindCollectionToMap(collectionId);
-		_num_data_sources+=1;
-		app.addExistingDataSource(collectionId, 'dataLibrary')
+		//Fetch point collections for map(s)
+
+		var collection = pointCollection[pointCollectionId] = new PointCollection(collectionOptions);
+		collection.setVisibleMapArea(self.mapView.getVisibleMapArea());
+		collection.fetch({success: function(collection) {
+ 			self.addDataPanelViews(pointCollectionId);
+			self.mapView.addCollection(collection);
+			self.vent.trigger("setStateType", 'complete');
+		}});
+
+		$('.data-info').show();
+
+		//Fetch time based point collections for graph
+		/*if (1||data.timebased) {
+			collectionOptions.urlParams = {
+				t: 'w'
+			};
+			var collection = timeBasedPointCollection[pointCollectionId] = new PointCollection(collectionOptions);
+			collection.setVisibleMapArea(self.mapView.getVisibleMapArea());
+			collection.fetch({success: function(collection) {
+				self.graphView.addCollection(collection);
+			}});
+		}*/
 			
 	},
 	
 	bindCollectionToMap: function(pointCollectionId)
 	{	
+		var self = this;
 		$.ajax({
 			type: 'POST',
 			url: '/api/bindmapcollection/' + _mapId + '/' + pointCollectionId,
 			success: function(data) {
-				
+				self.mapInfo = data;
+				self.initMapLayer(pointCollectionId);
 			},
 			error: function() {
 				console.error('failed to join map with collection');
@@ -372,15 +277,35 @@ var AppRouter = Backbone.Router.extend({
 	{
 		console.log('adding tweets');
 	},
+
+	getMapLayer: function(pointCollectionId)
+	{
+		for (var i = 0; i < this.mapInfo.layers.length; i++) {
+			if (pointCollectionId == this.mapInfo.layers[i].pointCollection._id) {
+				return this.mapInfo.layers[i];
+			}
+		}
+	},
 	
-	addSideBarDataView:function (options) {
-		this.sideBarDataView = new SideBarDataView({vent: this.vent,collection:pointCollection[options.collectionId], collectionId: options.collectionId, title:options.title, dataLength:options.dataLength});
-		$('#accordion').append(this.sideBarDataView.render().el);
+	addDataPanelViews:function(pointCollectionId) 
+	{
+		var viewOpts = {
+			vent: this.vent,
+			collection: pointCollection[pointCollectionId], 
+			collectionId: pointCollectionId, 
+			mapLayer: this.getMapLayer(pointCollectionId)
+		};
+
+		var sideBarDataView = new DataInspectorView(viewOpts);
+		$('#dataContainer .accordion').append(sideBarDataView.render().el);
+
+		var dataLegendView = new DataLegendView(viewOpts);
+		$('#data-info-view .accordion').append(dataLegendView.render().el);
 	},
 
 });
 
-tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header','sidebar','sidebar-data', 'chat', 'modal', 'add-data', 'edit-data', 'data-library', 'data-info'],
+tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header','sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 'edit-data', 'data-library', 'data-info'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });

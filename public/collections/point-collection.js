@@ -8,9 +8,15 @@ PointCollection = Backbone.Collection.extend({
 	
 	initialize: function(options) {
 						
-		this.baseUrl = '/api/mappoints/' + options.collectionId;
-		
-		this.collectionId = options.collectionId;
+		this.pointCollectionId = options.pointCollectionId;
+		this.baseUrl = '/api/mappoints/' + this.pointCollectionId;
+		this.mapLayer = options.mapLayer;
+
+		//TODO: deprecated
+		this.collectionId = this.pointCollectionId;
+
+		/*
+		// TODO: Use mapLayer.pointCollection instead
 		this.title = options.title;
 		this.maxVal = options.maxVal;
 		this.minVal = options.minVal;
@@ -20,9 +26,11 @@ PointCollection = Backbone.Collection.extend({
 		this.modifiedBy = options.modifiedBy;
 		this.timeBased = options.timebased;
 		this.defaults = options.defaults;
+		*/
+
 		this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 								
-		if(options.newData == true)	{
+		if (options.newData == true)	{
 			this.createAssociativeIndex();
 		}
 	},
@@ -38,7 +46,7 @@ PointCollection = Backbone.Collection.extend({
 	},
 
 	fetch: function(options) {
-		console.log('PointCollection.fetch');	
+		console.log('PointCollection.fetch '+this.pointCollectionId);	
 		return PointCollection.__super__.fetch.call(this, options);
 	},
 
@@ -60,9 +68,9 @@ PointCollection = Backbone.Collection.extend({
 			type: 'POST',
 			dataType: 'json',
 			data: data,
-			url: '/api/addpoints/' + this.collectionId,
+			url: '/api/addpoints/' + this.pointCollectionId,
 			success: function() {
-				console.log('Adding points for: ' + self.collectionId);
+				console.log('Adding points for: ' + self.pointCollectionId);
 				callback();
 			},
 			error: function() {
@@ -79,9 +87,9 @@ PointCollection = Backbone.Collection.extend({
 			type: 'POST',
 			dataType: 'json',
 			data: { jsonpost: this.defaults },
-			url: '/api/pointcollection/' + this.collectionId + '/' + this.title + '/' + _mapId + '/' + this.maxVal+ '/' + this.minVal,
+			url: '/api/pointcollection/' + this.pointCollectionId + '/' + this.title + '/' + _mapId + '/' + this.maxVal+ '/' + this.minVal,
 			success: function(data) {
-				console.log('created associated collection: ' + self.collectionId);
+				console.log('created associated collection: ' + self.pointCollectionId);
 			},
 			error: function() {
 				console.error('failed to create an associated collection');
@@ -90,12 +98,12 @@ PointCollection = Backbone.Collection.extend({
 	},
 	
 	unbindCollection: function() {
-		console.log('unbinding...');
+		console.log('unbinding '+this.pointCollectionId);
 		
 		var self = this;		
 	    $.ajax({
 			type: 'POST',
-			url: '/api/unbindmapcollection/'+_mapId+'/' + self.collectionId,
+			url: '/api/unbindmapcollection/'+_mapId+'/' + self.pointCollectionId,
 			success: function(data) {
 			},
 			error: function() {
@@ -111,10 +119,10 @@ PointCollection = Backbone.Collection.extend({
 			type: 'DELETE',
 			url: this.url,
 			success: function() {
-				console.log('Removed collection: ' + self.collectionId);
+				console.log('Removed collection: ' + self.pointCollectionId);
 			},
 			error: function() {
-				console.error('failed to remove collection: ' + self.collectionId);
+				console.error('failed to remove collection: ' + self.pointCollectionId);
 			}
 		});
 		
@@ -126,12 +134,12 @@ PointCollection = Backbone.Collection.extend({
 		var self = this;
 		$.ajax({
 			type: 'DELETE',
-			url: '/api/pointcollection/' + this.collectionId,
+			url: '/api/pointcollection/' + this.pointCollectionId,
 			success: function(data) {
-				console.log('Destroyed associated collection: ' + self.collectionId);
+				console.log('Destroyed associated collection: ' + self.pointCollectionId);
 			},
 			error: function() {
-				console.error('Failed to destroy associated collection: ' + self.collectionId);
+				console.error('Failed to destroy associated collection: ' + self.pointCollectionId);
 			}
 		})
 	},

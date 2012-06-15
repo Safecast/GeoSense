@@ -44,7 +44,8 @@
 	padding-left:30px;
 	height:25px;
 	color:#7a7a7a;
-	font-family: OswaldBook,sans-serif;
+/*	font-family: OswaldBook,sans-serif;*/
+	font-family: "AlternateGothicFSNo3", sans-serif;
 	font-size:11pt;
 }
 
@@ -67,7 +68,8 @@
 
 .header .links .link
 {
-	font-family: OswaldBook,sans-serif;
+/*	font-family: OswaldBook,sans-serif;*/
+	font-family: "AlternateGothicFSNo3", sans-serif;
 	font-size:11pt;
 	float:left;
 	color:#7a7a7a;

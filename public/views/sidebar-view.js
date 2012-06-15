@@ -173,12 +173,6 @@ window.SideBarView = Backbone.View.extend({
         return this;
     },
 
-	addDataToggle: function(options) {
-		
-		this.sideBarDataView = new SideBarDataView({vent: this.vent, url: options.url});
-        this.$('#accordion').append(this.sideBarDataView.render({number: options.number}).el);
-	},
-	
 	settingsTabClicked: function() {
 		if(_settingsVisible)
 		{

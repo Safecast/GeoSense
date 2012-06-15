@@ -17,8 +17,11 @@ var COLLECTION_DEFAULTS = {
 	visible: true,
 	featureType: 'C',
 	colorType: 'S',
-	colors: [{color: '#00C9FF'}]
+	colors: [{color: '#00C9FF'}],
+	opacity: null
 };
+
+var HISTOGRAM_STEPS = 100;
 
 //var profiler = require('v8-profiler');
 
@@ -100,23 +103,36 @@ app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
 //Models 
 
 var Point = mongoose.model('Point', new mongoose.Schema({
+	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
 	collectionid: String, 
-	loc: {type: [Number], index: '2d'},
-	val: Number,
+	loc: {type: [Number], index: '2d', required: true},
+	val: {type: Number, index: 1},
 	altVal: [mongoose.Schema.Types.Mixed],
 	label: String,
 	url: String,
-	datetime: Date,
+	datetime: {type: Date, index: 1},
 	created: Date,
 	modified: Date,	
 }));
 
+var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
+	visible: Boolean,
+	featureType: String,
+	colorType: String,
+	colors: [{
+		color: {type: String, required: true},
+		position: Number
+	}],
+	opacity: Number
+}));
+
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
-	collectionid: String, // TODO: deprecated
 	title: String,
 	description: String,
 	unit: String,
+	format: String,
 	altUnit: [String],
+	altFormat: [String],
 	maxVal: Number,
 	minVal: Number,
 	timebased: Boolean,
@@ -124,11 +140,17 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	modified: Date,
 	created_by: String,
 	modified_by: String,
-	defaults: mongoose.Schema.Types.Mixed,
+	defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
 	active: Boolean,
 	progress: Number,
 	busy: Boolean,
+	numBusy: Number,
 	reduce: Boolean
+}));
+
+var MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
+	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', index: 1 },
+	options: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
 }));
 
 var Map = mongoose.model('Map', new mongoose.Schema({
@@ -140,7 +162,7 @@ var Map = mongoose.model('Map', new mongoose.Schema({
 	modified: Date,
 	created_by: String,
 	modified_by: String,
-	collections: Array
+	layers: {type: [MapLayer.schema], index: 1}
 }));
 
 var Tweet = mongoose.model('Tweet', new mongoose.Schema({
@@ -175,10 +197,27 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 // DATA POST ROUTES 
 ////////////////////
 
-app.post('/api/data/:file', function(req, res){
+app.post('/api/import/', function(req, res){
+
+	// TODO: This only serves for testing
+	if (!req.body['file']) {
+		switch(req.body.converter) {
+			case 'Earthquake Dataset':
+				req.body['file'] = 'earthquakes.csv';
+				break;
+			
+			case 'Nuclear Reactors':
+				req.body['file'] = 'reactors.csv';
+				break;
+			
+			case 'Safecast Dataset':
+				req.body['file'] = 'measurements-out.csv';
+				break;
+		}
+	}
 	
-	var file = req.params.file;
-	var path = '/public/data/' + req.params.file;
+	var file = req.body['file'];
+	var path = '/public/data/' + req.body['file'];
 	var type =  file.split('.').pop();
 
 	var ConversionError = function() {};
@@ -199,16 +238,18 @@ app.post('/api/data/:file', function(req, res){
 		case 'Standard (loc, val, date)':
 			
 			var converter = {
-				val: function() {
-					return parseFloat(this.get('val'));
-				}
-				,datetime: function() {
-					var d = Date.parse(String(this.get('date')));
-					return new Date(d);
-				}
-				,loc: function() {
-					var loc = this.get('loc').split(' ');
-					return [parseFloat(loc[1]), parseFloat(loc[0])];
+				fields: {
+					val: function() {
+						return parseFloat(this.get('val'));
+					}
+					,datetime: function() {
+						var d = Date.parse(String(this.get('date')));
+						return new Date(d);
+					}
+					,loc: function() {
+						var loc = this.get('loc').split(' ');
+						return [parseFloat(loc[1]), parseFloat(loc[0])];
+					}
 				}
 			};
 			
@@ -217,13 +258,15 @@ app.post('/api/data/:file', function(req, res){
 		case 'Earthquake Dataset':
 		
 			var converter = {
-				val: function() {
-					return parseFloat(this.get('mag'));
+				fields: {
+					val: function() {
+						return parseFloat(this.get('mag'));
+					}
+					,datetime: function() {
+						return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
+					}
+					,loc: latLngWithCommaFromString('location')
 				}
-				,datetime: function() {
-					return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
-				}
-				,loc: latLngWithCommaFromString('location')
 			};
 		
 		break;
@@ -231,14 +274,16 @@ app.post('/api/data/:file', function(req, res){
 		case 'Nuclear Reactors':
 		
 			var converter = {
-				val: function() {
-					return parseFloat(this.get('val'));
+				fields: {
+					val: function() {
+						return parseFloat(this.get('val'));
+					}
+					,datetime: function() {
+						var d = Date.parse(String(this.get('year')));
+						return new Date(d);
+					}
+					,loc: latLngWithCommaFromString('location')
 				}
-				,datetime: function() {
-					var d = Date.parse(String(this.get('year')));
-					return new Date(d);
-				}
-				,loc: latLngWithCommaFromString('location')
 			};
 			
 		break;
@@ -246,17 +291,21 @@ app.post('/api/data/:file', function(req, res){
 		case 'Safecast Dataset':
 		
 			var converter = {
-				val: function() {
-					return parseFloat(this.get('reading_value'));
-				}
-				,altVal: function() {
-					return [parseFloat(this.get('alt_reading_value'))];
-				}
-				,datetime: function() {
-					return new Date(this.get('reading_date'));
-				}
-				,loc: function() {
-					return [parseFloat(this.get('longitude')), parseFloat(this.get('latitude'))];
+				fields: {
+					val: function() {
+						return parseFloat(this.get('value')) / (this.get('unit') == 'cpm' ? 350.0 : 1.0);
+					}
+					,altVal: function() {
+						return [parseFloat(this.get('value'))] * (this.get('unit') == 'cpm' ? 1.0 : 350.0);
+					}
+					,datetime: function() {
+						return new Date(this.get('captured_at'));
+					}
+					,loc: function() {
+						//return [parseFloat(this.get('lng')), parseFloat(this.get('lat'))];
+						// TODO: Temporarily switched due to invalid dump 
+						return [parseFloat(this.get('lat')), parseFloat(this.get('lng'))];
+					}
 				}
 			};
 		
@@ -275,6 +324,9 @@ app.post('/api/data/:file', function(req, res){
 		if (deg > 180) {
 			deg = 180 - deg % 180;
 		}
+		if (deg == 180) {
+			deg = -180;
+		}
 
 		return deg;
 	};
@@ -290,20 +342,16 @@ app.post('/api/data/:file', function(req, res){
 	
 	var convertOriginalToPoint = function(data, converters) {
 		var doc = {};
-		for (var destField in converters) {
-			var f = converters[destField];
+		for (var destField in converters.fields) {
+			var f = converters.fields[destField];
 			doc[destField] = f.apply(data);
 			if (doc[destField] instanceof ConversionError) {
 				console.log('ConversionError on field '+destField);
 				return false;
-			} else {
-				if (doc[destField] && destField == 'loc' && doc[destField].length) {
-					doc[destField][0] = clamp180(doc[destField][0]);
-					doc[destField][1] = clamp180(doc[destField][1]);
-				}
-				//console.log(doc[destField]);
-			}
+			} 
 		}
+		doc['loc'][0] = clamp180(doc['loc'][0]);
+		doc['loc'][1] = clamp180(doc['loc'][1]);
 		return new Point(doc);
 	}
 
@@ -375,7 +423,7 @@ app.post('/api/data/:file', function(req, res){
 					case 'csv':
 
 						csv()
-						    .fromPath(__dirname+ path)
+						    .fromPath(__dirname + path)
 						    .transform(function(data){
 						        data.unshift(data.pop());
 						        return data;
@@ -429,7 +477,7 @@ app.post('/api/data/:file', function(req, res){
 									model = null;
 
 									if (point) {
-										point.collectionid = newCollectionId;
+										point.pointCollection = collection;
 										point.created = new Date();
 										point.modified = new Date();
 										if (maxVal == undefined || maxVal < point.get('val')) {
@@ -497,21 +545,27 @@ app.post('/api/data/:file', function(req, res){
 	if (!appendCollectionId) {
 		console.log('Creating new collection');
 
-		var defaults = _.extend({}, COLLECTION_DEFAULTS);
-		for (var key in defaults) {
+		var defaults = new LayerOptions(COLLECTION_DEFAULTS);
+		for (var key in COLLECTION_DEFAULTS) {
 			if (req.body[key]) {
 				defaults[key] = req.body[key];
 			}
 		}
+		defaults.save(function(err) {
+			if (err) {
+				res.send('oops error', 500);
+				return;
+			}
+			runImport(new PointCollection({
+			    name: req.params.name,
+				defaults: defaults._id,
+				title: req.body.title || file,
+				description: req.body.description,
+				unit: "",
+				progress: 0,
+			}));
+		});
 
-		runImport(new PointCollection({
-		    name: req.params.name,
-			defaults: COLLECTION_DEFAULTS,
-			title: req.body.title,
-			description: req.body.description,
-			unit: "",
-			progress: 0,
-		}));
 	} else {
 		console.log('Appending to collection '+appendCollectionId);
 		PointCollection.findOne({_id: appendCollectionId}, function(err, collection) {
@@ -604,6 +658,10 @@ app.post('/api/chat/:mapid/:name/:text/:date', function(req, res){
 // POINTS 
 ///////////////
 
+// broken and currently unused
+
+
+/*
 app.get('/api/points', function(req, res){
   Point.find(function(err, datasets) {
      res.send(datasets);
@@ -678,6 +736,8 @@ app.delete('/api/point/:id', function(req, res){
     });
   });
 });
+*/
+
 
 //////////////////////
 // POINT COLLECTIONS
@@ -686,9 +746,9 @@ app.delete('/api/point/:id', function(req, res){
 app.get('/api/histogram/:pointcollectionid', function(req, res) {
 	PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 		if (!err && pointCollection) {
-			collectionName = 'r_points_hist-100';
+			collectionName = 'r_points_hist-' + HISTOGRAM_STEPS;
 			var Model = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
-			var query = {'value.collectionid': req.params.pointcollectionid};
+			var query = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 			console.log(query);
 			Model.find(query, function(err, datasets) {
 				if (err) {
@@ -701,7 +761,7 @@ app.get('/api/histogram/:pointcollectionid', function(req, res) {
 					values[reduced.val.step] = reduced.count;
 				}
 				var histogram = []; 
-				for (var step = 0; step < 100; step++) {
+				for (var step = 0; step < HISTOGRAM_STEPS; step++) {
 					histogram.push({
 						x: step,
 						y: values[step] ? values[step] : 0
@@ -739,15 +799,8 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 			}
 
 			var reduce = pointCollection.get('reduce');
-
-			if (reduce) {
-				var collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
-				var pointQuery = {'value.collectionid': req.params.pointcollectionid};
-			} else {
-				var collectionName = 'points';
-				var pointQuery = {'collectionid': req.params.pointcollectionid};
-			}
-
+			var collectionName;
+			var pointQuery;
 			var boxes;
 
 			if (urlObj.query.b && urlObj.query.b.length == 4) {
@@ -772,24 +825,28 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 						[[b[0], b[1]], [180, b[3]]],
 						[[-180, b[1]], [-180 + b[2] % 180, b[3]]]
 					];
+				} else if (b[0] > b[2]) {
+					boxes = [
+						[[b[0], b[1]], [180, b[3]]],
+						[[-180, b[1]], [b[2], b[3]]]
+					];
 				} else {
 					boxes = [
 						[[b[0], b[1]], [b[2], b[3]]]
 					];
 				}
+				console.log(b[0] > b[2], '----');
 
 				console.log('query within boxes: '+boxes.length);
 				console.log(boxes);
 			}
 
-			var ReducedPoint = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+			var PointModel;
 			var points = [];
 			var queryExecuted = false; 
 			var originalCount = 0;
 			var maxCount = 0;
 			var fullCount;
-
-			console.log('querying "' + collectionName + '"');
 
 			var dequeueBoxQuery = function() {
 				if (queryExecuted && (!boxes || boxes.length == 0)) {
@@ -808,14 +865,18 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 					return;
 				}
 
+				console.log('querying "' + collectionName + '" for '+pointCollection.get('title'));
+
 				if (boxes) {
 					var box = boxes.shift();
 					pointQuery[reduce ? 'value.loc' : 'loc'] = {$within: {$box : box}};
 				}
 
 				if (!time_grid) {
-					ReducedPoint.find(pointQuery, function(err, datasets) {
-						if (err) return;
+					PointModel.find(pointQuery, function(err, datasets) {
+						if (err || !datasets) {
+							res.send('ooops', 500);
+						}
 						for (var i = 0; i < datasets.length; i++) {
 							if (reduce) {
 								var reduced = datasets[i].get('value');
@@ -894,8 +955,20 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 				}
 			}
 
-			Point.count({'collectionid': req.params.pointcollectionid}, function(err, c) {
+			Point.count({'pointCollection': req.params.pointcollectionid}, function(err, c) {
 				fullCount = c;
+				console.log('fullCount', fullCount);
+				// TODO: should count points in all boxes and not reduce if < 1000
+				reduce = reduce && zoom < 14;
+				if (reduce) {
+					collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
+					pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+					PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+				} else {
+					collectionName = 'points';
+					pointQuery = {'pointCollection': req.params.pointcollectionid};
+					PointModel = Point;
+				}
 				dequeueBoxQuery();
 			});
 
@@ -1006,13 +1079,15 @@ app.delete('/api/collection/:id', function(req, res){
 
 //Associative Collection (keeps track of collection id & name)
 app.get('/api/pointcollection/:id', function(req, res){
-	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {busy: true}]}, function(err, pointCollection) {
-		if (!err && pointCollection) {
-			res.send(pointCollection);
-		} else {
-			res.send('ooops', 404);
-		}
-	});
+	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {busy: true}]})
+		.populate('defaults')
+		.run(function(err, pointCollection) {
+			if (!err && pointCollection) {
+				res.send(pointCollection);
+			} else {
+				res.send('ooops', 404);
+			}
+		});
 });
 
 //Return all Point Collections
@@ -1088,6 +1163,7 @@ app.get('/api/uniquemaps' , function(req, res){
 });
 
 //Returns the collections associated with a unique map by mapId
+/*
 app.get('/api/maps/:mapid' , function(req, res){
 	
 	PointCollection.find({mapid : req.params.mapid}, function(err, data){
@@ -1099,31 +1175,55 @@ app.get('/api/maps/:mapid' , function(req, res){
 		}
 	});
 });
+*/
+
+function deprecatedMap(map) {
+	var m = {};
+	var obj = map.toObject();
+	for (var k in obj) {
+		m[k] = obj[k];
+		if (k == 'layers') {
+			m['collections'] = [];
+			for (var i = 0; i < obj[k].length; i++) {
+				m['collections'].push({
+					options: obj[k][i].options,
+					collectionid: obj[k][i].pointCollection._id
+				});
+			}
+		}
+	}
+	return m;
+}
+
 
 //Returns a specific unique map by mapId
 app.get('/api/map/:publicslug', function(req, res){
 	
-	Map.find({publicslug: req.params.publicslug}, function(err, data) {
-	    if (!err) {
-	       res.send(data);
-	    } else
-		{point
-			res.send("oops",500);
-		}
-	});
+	Map.findOne({publicslug: req.params.publicslug})
+		.populate('layers.pointCollection')
+		.populate('layers.options')
+		.run(function(err, map) {
+		    if (!err) {
+		       	res.send(deprecatedMap(map));
+		    } else {
+				res.send("oops",500);
+			}
+		});
 });
 
 //Returns a specific unique map by mapId in admin state
-app.get('/api/map/admin/:adminslug', function(req, res){
+app.get('/api/map/admin/:adminslug', function(req, res) {
 	
-	Map.find({adminslug: req.params.adminslug}, function(err, data) {
-	    if (!err) {
-	       res.send(data);
-	    } else
-		{
-			res.send("oops",500);
-		}
-	});
+	Map.findOne({adminslug: req.params.adminslug})
+		.populate('layers.pointCollection')
+		.populate('layers.options')
+		.run(function(err, map) {
+		    if (!err) {
+		       	res.send(deprecatedMap(map));
+		    } else {
+				res.send("oops",500);
+			}
+		});
 });
 
 //Create a new map
@@ -1132,9 +1232,7 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	var currDate = Math.round((new Date).getTime() / 1000);
 	var collections = {};
 	
-	var map;
-	  map = new Map({
-	
+	var map = new Map({
 		title: req.params.name,
 		description: '',
 		adminslug: req.params.mapadminid,
@@ -1144,14 +1242,12 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 		created_by: '',
 		modified_by: '',
 		collections: collections,
+	});	
 	
-	  });	
-	
-	  map.save(function(err) {
+	map.save(function(err) {
 	    if (!err) {
 		 	res.send(map);
-	    } else
-		{
+	    } else {
 			res.send('oops', 500);
 		}
 	  });
@@ -1164,26 +1260,54 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 
 	console.log(req.body)
 
-    var find = PointCollection.findOne({_id: pointcollectionid, active: true}, function(err, collection) {
-	    if (err || !collection) {
-			res.send('oops', 404);
-			return;
-	    }
+    PointCollection.findOne({_id: pointcollectionid, active: true})
+    	.populate('defaults')
+    	.run(function(err, collection) {
+		    if (err || !collection) {
+				res.send('oops', 404);
+				return;
+		    }
 
-	    var link = {
-	    	collectionid: collection._id,
-	    	options: collection.defaults
-	    };
+		    var defaults = collection.defaults.toObject();
+		    delete defaults['_id'];
+		    var options = new LayerOptions(defaults);
 
-		Map.update({ publicslug: publicslug }, { $push : { collections: link} }, function(err) {
-	      if (!err) {
-	        console.log("collection bound to map");
-	        res.send('');
-	      } else {
-			res.send('oops error', 500);
-		  }
-	  	});
-    });
+		    options.save(function(err) {
+			    if (err) {
+					res.send('oops error', 500);
+					return;
+				}
+			    var layer = new MapLayer({
+			    	pointCollection: collection,
+			    	options: options._id
+			    });    
+
+				Map.findOne({ publicslug: publicslug }, function(err, map) {
+					if (err || !map) {
+						res.send('oops error', 500);
+						return;
+					}
+			      	map.layers.push(layer);
+			      	map.save(function(err, map) {
+						if (err) {
+							res.send('oops error', 500);
+							return;
+						}
+				        console.log("collection bound to map");
+						Map.findOne({_id: map._id})
+							.populate('layers.pointCollection')
+							.populate('layers.options')
+							.run(function(err, map) {
+							    if (!err) {
+							       	res.send(deprecatedMap(map));
+							    } else {
+									res.send("oops",500);
+								}
+							});
+				  	});
+			  	});
+		    });
+	    });
 });
 
 app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req, res){
@@ -1195,7 +1319,8 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 		visible : Boolean(req.body.visible),
 		featureType : String(req.body.featureType),
 		colors: req.body.colors,
-		colorType: String(req.body.colorType)
+		colorType: String(req.body.colorType),
+		opacity: Number(req.body.opacity) || null
 	};
 
 	for (var i = 0; i < options.colors.length; i++) {
@@ -1204,27 +1329,34 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 			c.position = Number(c.position) || 0.0;
 		}
 	}
-	
-	Map.findOne({publicslug: publicslug}, function(err, map) {
-		if (!err && map) {
-			console.log(map._id);
-			for (var i = 0; i < map.collections.length; i++) {
-				if (map.collections[i].collectionid == collectionid) {
-					map.collections[i].options = options;
-					break;
-				}
-			}
+	// sort by position
+	options.colors.sort(function(a, b) { return (a.position - b.position) });
 
-			Map.update({ publicslug: publicslug }, { $set : { collections: map.collections} }, function(err) {
-				if (!err) {
-					console.log('map updated');
+	Map.findOne({publicslug: publicslug})
+		.populate('layers.pointCollection')
+		.populate('layers.options')
+		.run(function(err, map) {
+			if (!err && map) {
+				console.log(map._id);
+				for (var i = 0; i < map.layers.length; i++) {
+					if (map.layers[i].pointCollection._id.toString() == collectionid) {
+						for (var k in options) {
+							map.layers[i].options[k] = options[k];
+						}
+						map.layers[i].options.save(function(err) {
+							if (err) {
+								res.send('oops error', 500);
+								return;
+							}
+							console.log('layer options updated');
+							res.send('');
+						});
+						break;
+					}
 				}
-			});
-			res.send('');
-			
-		} else {
-			res.send('ooops', 404);
-		}
+			} else {
+				res.send('ooops', 404);
+			}
 	  	});
 });
 
@@ -1232,21 +1364,30 @@ app.post('/api/unbindmapcollection/:publicslug/:collectionid', function(req, res
 	var publicslug =  String(req.params.publicslug);
     var collectionid = String(req.params.collectionid);
 	
-	Map.findOne({publicslug: publicslug}, function(err, map) {
-		if (!err && map) {
-			var keepCollections = [];
-			for (var i = 0; i < map.collections.length; i++) {
-				if (map.collections[i].collectionid != collectionid) {
-					keepCollections.push(map.collections[i]);
-					break;
+	Map.findOne({publicslug: publicslug})
+		.populate('layers.pointCollection')
+		.populate('layers.options')
+		.run(function(err, map) {
+			if (!err && map) {
+				for (var i = 0; i < map.layers.length; i++) {
+					if (map.layers[i].pointCollection._id.toString() == collectionid) {
+						map.layers[i].options.remove();
+						map.layers[i].remove();
+						break;
+					}
 				}
+				map.save(function(err) {
+					if (err) {
+						res.send('oops error', 500);
+						return;
+					}
+					console.log('map updated');
+					res.send('');
+				});
+			} else {
+				res.send('ooops', 404);
 			}
-			map.collections = keepCollections;			
-			map.save();
-		} else {
-			res.send('ooops', 404);
-		}
-  	});
+	  	});
 	
 });
 

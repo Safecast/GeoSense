@@ -13,6 +13,6 @@
 .embed #comments {
 	display:none;
 }
-.embed .sidebar-data #removeData {
+.embed .data-inspector #removeData {
 	display:none;
 }

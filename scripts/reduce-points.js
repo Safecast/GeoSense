@@ -1,3 +1,4 @@
+var HISTOGRAM_SIZES = [100];
 var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
 
 var GRID_SIZES = {
@@ -62,9 +63,13 @@ var clamp180 = function(deg) {
 	if (deg > 180) {
 		deg = 180 - deg % 180;
 	}
+	if (deg == 180) {
+		deg = -180;
+	}
 
 	return deg;
 };
+
 
 var ReductionKey = {
 	copy: function(value) {
@@ -223,6 +228,9 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 				}
 			}
 		}
+		if (stats) {
+			stats.running++;
+		}
 		emit(key, e);
 	};
 	var reduce = function(key, values) {
@@ -271,6 +279,10 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 				}
 			}
 		});
+
+		if (stats && stats.done != stats.running) {
+			stats.update(stats);
+		}
 		return reduced;
 	};
 	var finalize = function(key, value) {
@@ -291,32 +303,42 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 	if (!value_fields) {
 		value_fields = ['val'];
 	}
+
+	var scope = {
+		value_fields: value_fields,
+		reduction_keys: reduction_keys,
+		lpad: lpad,
+		getWeek: getWeek,
+		clamp180: clamp180
+	};
+	if (options.scope) {
+		for (var k in options.scope) {
+			scope[k] = options.scope[k];
+		}
+	}
+
 	var params = {
 		mapreduce: collection
 		,map: map
 		,reduce: reduce
 		,finalize: finalize
 		,out: {reduce: reduced_collection}
-		,scope: {
-			value_fields: value_fields,
-			reduction_keys: reduction_keys,
-			lpad: lpad,
-			getWeek: getWeek,
-			clamp180: clamp180
-		}
+		,scope: scope
 		,verbose: true
 		,keeptemp: true
 	};
 	if (options) {
 		for (k in options) {
-			params[k] = options[k];
+			if (k != 'scope') {
+				params[k] = options[k];
+			} 
 		}
 	}
-
 	var info = [];
 	for (var k in reduction_keys) {
 		info.push(reduction_keys[k].name || k);
 	}
+	var totalCount = db[collection].count(params.query);
 	print('* reducing '+collection+' to '+reduced_collection+' with key: '+info.join(' | ')+' ...');
 	var op = db.runCommand(params);
 	if (op.ok) {
@@ -364,7 +386,7 @@ var collectionHasIndex = function(collection, key) {
 	return false;
 };
 
-var reducePoints = function(reduction_keys, opts, value_fields) {
+var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 	var collection = 'points';
 	var info = ['r', collection];
 	for (var k in reduction_keys) {
@@ -373,10 +395,10 @@ var reducePoints = function(reduction_keys, opts, value_fields) {
 		}
 	}
 	var reduced_collection = info.join('_');
-	if (opts.query && opts.query.collectionid) {
-		print('* removing existing reduction for '+opts.query.collectionid);
+	if (opts.query && opts.query.pointCollection) {
+		print('* removing existing reduction for '+opts.query.pointCollection.toString());
 		db[reduced_collection].remove({
-			'value.collectionid': opts.query.collectionid
+			'value.pointCollection': opts.query.pointCollection
 		});
 	} else {
 		print('* dropping '+reduced_collection);
@@ -385,51 +407,91 @@ var reducePoints = function(reduction_keys, opts, value_fields) {
 	if (!value_fields) {
 		value_fields = ['val', 'altVal'];
 	}
+	if (!opts.scope) {
+		opts.scope = {};
+	}
+
+	if (opts.stats) {
+		opts.scope.stats = {
+			collectionId: opts.stats.collectionId,
+			total: opts.stats.total,
+			done: 0,
+			running: 0,
+			update: function(stats) {
+				if (stats.running / stats.total > .001) {
+					stats.done += stats.running;
+					db.pointcollections.update({_id: stats.collectionId}, {$inc: {progress: stats.running}});
+					stats.running = 0;
+				}
+			}
+		};
+	} else {
+		opts.scope.stats = false;
+	}	
+
 	return runGridReduce(collection, reduced_collection, value_fields, reduction_keys, {
 		count: 1,
-		avg: 1,
-		min: 1,
-		max: 1,
-		collectionid: 1
+		'val.avg': 1,
+		'val.min': 1,
+		'val.max': 1,
+		pointCollection: 1,
+		datetime: 1
 	}, opts);
 };
+
+var numGridSizes = 0;
+for (var g in GRID_SIZES) {
+	numGridSizes++;
+}
+var numHistograms = HISTOGRAM_SIZES.length;
 
 var cur = db.pointcollections.find({});
 cur.forEach(function(collection) {
 	if (collection.reduce) {
+		opts.query = {pointCollection: collection._id};
+		var statsTotal = db.points.count(opts.query) * (numGridSizes + numHistograms);
+		opts.stats = {total: statsTotal, collectionId: collection._id};
+		db.pointcollections.update({_id: collection._id}, {$set: {progress: 0, busy: true, numBusy: statsTotal}});
+
 		print('*** collection = '+collection.title+' ('+collection._id+') ***');
-		opts.query = {collectionid: collection._id.toString()};
+
 		print('*** histogram ***');
-		reducePoints({
-			collectionid: ReductionKey.copy, 
-			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, 100)
-		}, opts, []);
+		for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
+			reducePoints(collection._id, {
+				pointCollection: ReductionKey.copy, 
+				val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
+			}, opts, []);
+		}
+		
 		for (var g in GRID_SIZES) {
 			var grid_size = GRID_SIZES[g];
 			print('*** grid = '+g+' ***');
 
-			/*reducePoints({
-				collectionid: ReductionKey.copy, 
+			reducePoints(collection._id, {
+				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.LocGrid(grid_size)
-			}, opts);*/
+			}, opts);
 			
 			/*reducePoints({
-				collectionid: ReductionKey.copy, 
+				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.LocGrid(grid_size), 
 				datetime: new ReductionKey.Weekly()
 			}, opts);*/
 			
 			/*reducePoints({
-				collectionid: ReductionKey.copy, 
+				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.LocGrid(grid_size), 
 				datetime: new ReductionKey.Yearly()
 			}, opts);*/
 
 			/*reducePoints({
-				collectionid: ReductionKey.copy, 
+				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.LocGrid(grid_size), 
 				datetime: new ReductionKey.Daily()
 			}, opts);*/
 		}
+
+		db.pointcollections.update({_id: collection._id}, {$set: {busy: false, numBusy: 0}});
+
 	}
 });

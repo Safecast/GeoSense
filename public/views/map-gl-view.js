@@ -232,7 +232,7 @@ window.MapGLView = window.MapViewBase.extend({
 	    this.globe = new DAT.Globe(container);
 
 	    this.animate();
-		this.vent.trigger('mapReady');
+		this.vent.trigger('mapViewReady');
 
 	    /*
 	    var data = [];

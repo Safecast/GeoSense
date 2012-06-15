@@ -1,5 +1,6 @@
 @import url("reset.css");
 @import url("global.css");
+@import url("../assets/type/alternategothicfs_no3/stylesheet.css");
 
 @import url("homepage.css");
 @import url("setup.css");
@@ -9,7 +10,7 @@
 @import url("modal.css");
 @import url("add-data.css");
 @import url("sidebar.css");
-@import url("sidebar-data.css");
+@import url("data-inspector.css");
 @import url("chat.css");
 @import url("data-library.css");
 @import url("graph.css");

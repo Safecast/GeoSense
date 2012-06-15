@@ -38,9 +38,8 @@ window.GraphView = Backbone.View.extend({
 		$.ajax({
 			type: 'GET',
 			url: '/api/map/' + _mapId,
-			success: function(data) {
-				
-				$.each(data[0].collections, function(key, collection) { 
+			success: function(data) {				
+				$.each(data.collections, function(key, collection) { 
 					self.mapParams[collection.collectionid] = collection;
 				});
 			},
@@ -50,13 +49,13 @@ window.GraphView = Backbone.View.extend({
 		});
 	},
 
-	addCollection: function(id, collection)
+	addCollection: function(collection)
 	{
 		var self = this;
-		this.collections[id] = collection;
-		this.collections[id].bind('reset', this.reset, this);
-		this.collections[id].bind('add', this.addOne, this);
-		this.addCollectionToGraph(this.collections[id]);
+		this.collections[collection.pointCollectionId] = collection;
+		collection.bind('reset', this.reset, this);
+		collection.bind('add', this.addOne, this);
+		this.addCollectionToGraph(collection);
 	},
 
 	updateGraphCollections: function(visibleMapArea)

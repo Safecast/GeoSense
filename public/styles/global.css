@@ -57,6 +57,8 @@
 
 }
 
+
+
 html {
 	
 }
@@ -94,15 +96,18 @@ h1 {
 
 h2,
 h3 {
-	font-family: OswaldLight,sans-serif;
+/*	font-family: OswaldLight,sans-serif;*/
+	font-family: "AlternateGothicFSNo3", sans-serif;
 	
 	font-size:15pt;
 	font-weight: bold;
 	color: #353535;
 }
 
+
 h4 {
-	font-family: OswaldBold,sans-serif;
+/*	font-family: OswaldBold, sans-serif;*/
+	font-family: "AlternateGothicFSNo3", sans-serif;
 }
 
 input, textarea {

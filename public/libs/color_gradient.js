@@ -18,6 +18,7 @@ var ColorGradient = function(colors) {
 	for (var i = colors.length - 1; i >= 0; i--) {
 		this.colors[i] = {
 			position: colors[i].position,
+			// convert color strings to int
 			color: parseInt(colors[i].color[0] == '#' ?
 				colors[i].color.replace('#', '0x') : colors[i].color)
 		};
@@ -48,23 +49,30 @@ ColorGradient.prototype.lerpRGB = function(p, a, b) {
 };
 
 ColorGradient.prototype.intColorAt = function(p, step) {
-
 	if (step) {
 		p = (p - p % step) / 1;
-		/*this.gradientCache[step] = {};
-		for (var i = 0.0; i <= 1.0; i += step) {
-
-		}*/
+		if (!this.gradientCache[step]) {
+			this.gradientCache[step] = {};
+		} else if (this.gradientCache[step][p] != null) {
+			console.log('cached', p);
+			return this.gradientCache[step][p];
+		}
 	}
 
 	for (var i = this.colors.length - 1; i > 0; i--) {
 		if (this.colors[i].position < p) break;
 	}
 	var lo = i;
-	var hi = i + 1 < this.colors.length ? i + 1 : i;
+	var hi = i + 1 >= this.colors.length || this.colors[lo].position > p ? i : i + 1;
 	var normP = this.colors[hi].position == this.colors[lo].position ? 0.0 :
 		(p - this.colors[lo].position) / (this.colors[hi].position - this.colors[lo].position);
-	return this.lerpRGB(normP, this.colors[lo].color, this.colors[hi].color);
+	var intColor = this.lerpRGB(normP, this.colors[lo].color, this.colors[hi].color);
+
+	if (step) {
+		this.gradientCache[step][p] = intColor;
+	}
+
+	return intColor;
 };
 
 ColorGradient.prototype.colorAt = function(p, step) {
