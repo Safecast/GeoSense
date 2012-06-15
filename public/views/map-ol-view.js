@@ -71,7 +71,7 @@ window.MapOLView = window.MapViewBase.extend({
 		NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
 		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
-		//console.log('zoom: '+zoom+', resolution '+this.map.getResolution()+' '+this.map.getUnits());
+		//console.log('zoom: '+zoom+', resolution '+this.selectedmap.getResolution()+' '+this.map.getUnits());
 		//console.log('bounds', bounds);
 		return {
 			zoom: zoom,
@@ -788,7 +788,6 @@ window.MapOLView = window.MapViewBase.extend({
 	removeCollectionFromMap: function(model) {
 
 		console.log('removeCollectionFromMap? '+model.collectionId);
-		console.log(this.layerArray);
 		if (this.layerArray[model.collectionId]) {
 			this.layerArray[model.collectionId].destroyFeatures();
 			
