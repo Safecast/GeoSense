@@ -22,8 +22,13 @@ var AppRouter = Backbone.Router.extend({
 			self.initMapLayers();
 		});
 
-		if(_embed)
+		var embed = this.getURLParameter('embed');
+		if(embed == 1)
+		{
+			console.log('embed: ' + embed);
+
 			this.renderAsEmbed();
+		}
     }, 
 
 	render: function(state) {
@@ -64,7 +69,12 @@ var AppRouter = Backbone.Router.extend({
 		if(_setupRoute) {
 			$('#setupModal').modal('show');	
 		}
+	},
 
+	getURLParameter:function(name) {
+	    return decodeURI(
+	        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+	    );
 	},
 
 	renderAsEmbed:function()
@@ -80,8 +90,6 @@ var AppRouter = Backbone.Router.extend({
 		console.log("Rendering GeoSense map as embed...")
 		$('.map-gl-view').addClass('full');
 		$('.message').addClass('.embed');
-		
-		//$('.olControlPanZoomBar').css("margin-left",0);
 	},
 
 	setUniqueMapName: function(name)
@@ -91,7 +99,8 @@ var AppRouter = Backbone.Router.extend({
 	
 	setUniqueMap: function(uniqueMapId)
 	{
-		this.loadAndInitMap({mapId:uniqueMapId, state:'map'});
+		splitUniqueMapId=uniqueMapId.split('?');
+		this.loadAndInitMap({mapId:splitUniqueMapId[0], state:'map'});
 	},
 	
 	setNewMap: function(uniqueMapId)
