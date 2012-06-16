@@ -40,10 +40,18 @@ var application_root = __dirname,
 var app = express.createServer();
 
 //local
-mongoose.connect('mongodb://localhost/geo');
+if(process.env.NODE_ENV == 'development')
+{
+	db_path = 'mongodb://localhost/geo'
+}
+else if (process.env.NODE_ENV == 'production')
+{
+	db_path = 'mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485'
+}
 
 //production
-//mongoose.connect('mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485');
+console.log(db_path);
+mongoose.connect(db_path);
 
 app.configure(function(){
 	app.use(express.static(__dirname + '/public'));
