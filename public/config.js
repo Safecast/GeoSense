@@ -82,8 +82,16 @@ var taggedObjects = [
 	])
 ];
 
-var _panelLoaded = false;
+if(window.location.hostname == 'localhost' || window.location.hostname == 'http://hollow-warrior-5556.herokuapp.com/')
+{
+	var _embed = false;
+}
+else
+{
+	var _embed = true;
+}
 
+var _panelLoaded = false;
 var _admin = true;
 var _firstLoad = true;
 var _setupRoute = false;

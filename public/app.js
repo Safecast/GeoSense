@@ -21,10 +21,13 @@ var AppRouter = Backbone.Router.extend({
 			console.log('mapViewReady -- init map layers');
 			self.initMapLayers();
 		});
+
+		if(_embed)
+			this.renderAsEmbed();
     }, 
 
-	render: function(state)
-	{
+	render: function(state) {
+
 		var self = this;
 
 		window.document.title = _mapName + ' – GeoSense';
@@ -46,7 +49,6 @@ var AppRouter = Backbone.Router.extend({
 		
 		//this.graphView = new GraphView({vent: this.vent});
 		//$('#app').append(this.graphView.render().el);
-
 		
 		$('body').css("overflow","hidden");
 
@@ -55,13 +57,31 @@ var AppRouter = Backbone.Router.extend({
 			$('body').addClass("embed");
 		}
 		
-		this.addCommentData();
+		//this.addCommentData();
 		
 		this.vent.trigger("setToggleStates", {state:state});
 		
 		if(_setupRoute) {
 			$('#setupModal').modal('show');	
 		}
+
+	},
+
+	renderAsEmbed:function()
+	{
+		var link = $("<link>");
+		link.attr({
+        	type: 'text/css',
+        	rel: 'stylesheet',
+        	href: 'styles/embed.css'
+		});
+		$("head").append( link ); 
+
+		console.log("Rendering GeoSense map as embed...")
+		$('.map-gl-view').addClass('full');
+		$('.message').addClass('.embed');
+		
+		//$('.olControlPanZoomBar').css("margin-left",0);
 	},
 
 	setUniqueMapName: function(name)

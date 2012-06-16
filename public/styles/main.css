@@ -27,8 +27,6 @@
 @import url("../libs/gradient-editor/gradient-editor.css");
 @import url("../libs/colorpicker/css/colorpicker.css");
 
-@import url("embed.css");
-
 #home 
 {
 	overflow-y:scroll;

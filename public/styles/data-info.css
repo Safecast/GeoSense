@@ -51,6 +51,7 @@
 
 .data-info .status {
 	margin-bottom: .5em;
+	color:#888;
 }
 
 .data-info .legend {
@@ -73,10 +74,7 @@
 	padding: .25em;
 	text-align: center;
 	color: #000;
-	text-shadow: #FFF 1px 1px 1px;
-	border-top: 1px #ddd solid;
-	border-left: 1px #ddd solid;
-	border-right: 1px #666 solid;
+	text-shadow:rgba(255,255,255,.8) 0px 1px 0px;
 }
 
 .data-info .color-bar li:first-child .segment {
@@ -92,6 +90,7 @@
 }
 
 .data-info .histogram {
+	display:none;
 	width: 200px;
 	height: 30px;
 }
@@ -100,6 +99,10 @@
 	padding: 0;
 	margin: 0;
 	width: 100%;
+}
+
+.data-info .detail-data {
+	margin-top:15px;
 }
 
 .data-info .value-label {
@@ -112,7 +115,7 @@
 	line-height: 1em;
 	padding: 0 1em 0 0;
 	white-space: nowrap;
-	color: #ddd;
+	color: #888;
 }
 
 .data-info .value {
@@ -129,6 +132,7 @@
 .data-info .detail-metadata .value-label {
 	line-height: 13px;
 	font-size: 13px;
+
 }
 
 .data-info .detail-metadata .value {
