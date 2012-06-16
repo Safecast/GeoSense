@@ -82,7 +82,8 @@ var taggedObjects = [
 	])
 ];
 
-console.log('host: ' + window.location.hostname);
+console.log('host: ');
+console.log(window.location);
 
 if(window.location.hostname == 'localhost' || window.location.hostname == 'hollow-warrior-5556.herokuapp.com')
 {
