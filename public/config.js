@@ -82,7 +82,7 @@ var taggedObjects = [
 	])
 ];
 
-if(window.location.hostname == 'localhost' || window.location.hostname == 'http://hollow-warrior-5556.herokuapp.com/')
+if(window.location.hostname == 'localhost' || window.location.hostname == 'hollow-warrior-5556.herokuapp.com')
 {
 	var _embed = false;
 }
