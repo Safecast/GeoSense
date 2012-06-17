@@ -137,7 +137,7 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 
 		this.setMapLocation(_defaultMapLocation);
-				
+
 		//this.map.events.register("mousemove", this.map, function (b) {
 			// var a = this;
 			//         var c = this.getLonLatFromPixel(b.xy),
@@ -703,6 +703,12 @@ window.MapOLView = window.MapViewBase.extend({
 			    break;
 		}
 
+		if(_defaultMapZoom)
+		{
+			zoom = _defaultMapZoom;
+			_defaultMapZoom = null;
+		}
+
 		if (center) {
 		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
 		}		
@@ -739,7 +745,7 @@ window.MapOLView = window.MapViewBase.extend({
 	            var lonlat = self.map.getLonLatFromPixel(evt.xy);
 		    	translation = new Geometry.Point(lonlat.x, lonlat.y);
 				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-				console.log(evt);
+				//console.log(evt);
 
 
 				//self.vent.trigger('broadcastMessage', '@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
@@ -787,7 +793,7 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	removeCollectionFromMap: function(model) {
 
-		console.log('removeCollectionFromMap? '+model.collectionId);
+		//console.log('removeCollectionFromMap? '+model.collectionId);
 		if (this.layerArray[model.collectionId]) {
 			this.layerArray[model.collectionId].destroyFeatures();
 			

@@ -30,7 +30,7 @@ var application_root = __dirname,
   	path = require("path"),
   	mongoose = require('mongoose'),
   	twitter = require('ntwitter'),
-	nowjs = require("now"),
+	//nowjs = require("now"),
 	csv = require('csv'),    
 	date = require('datejs'),
 	url = require('url'),
@@ -42,7 +42,7 @@ var app = express.createServer();
 //local
 if(process.env.NODE_ENV == 'development')
 {
-	db_path = 'mongodb://localhost/geo'
+	db_path = 'mongodb://localhost/geo';
 }
 else if (process.env.NODE_ENV == 'production')
 {
@@ -66,30 +66,31 @@ app.configure(function(){
 ////////////////
 // CHAT SERVER
 ////////////////
-var everyone = nowjs.initialize(app);
+// var everyone = nowjs.initialize(app);
 
-// Send message to everyone on the users group
-everyone.now.distributeMessage = function(message){
-    var group = nowjs.getGroup(this.now.serverRoom);
-    console.log(group);
-    console.log('******************** distribute '+message);
-    group.now.receiveMessage(this.now.name, message);
-};
+// // Send message to everyone on the users group
+// everyone.now.distributeMessage = function(message){
+//     var group = nowjs.getGroup(this.now.serverRoom);
+//     console.log(group);
+//     console.log('******************** distribute '+message);
+//     group.now.receiveMessage(this.now.name, message);
+// };
 
-everyone.now.joinRoom = function(newRoom){
-    var newGroup = nowjs.getGroup(newRoom);
-    console.log(this.user);
-    console.log('-----------------'+this.user.clientId+' joined '+newRoom);
-    newGroup.addUser(this.user.clientId);
-    //newGroup.now.receiveMessage('New user joined the room', this.now.name);
-    this.now.serverRoom = newRoom;
-};
+// everyone.now.joinRoom = function(newRoom){
+//     var newGroup = nowjs.getGroup(newRoom);
+//     console.log(this.user);
+//     console.log('-----------------'+this.user.clientId+' joined '+newRoom);
+//     newGroup.addUser(this.user.clientId);
+//     //newGroup.now.receiveMessage('New user joined the room', this.now.name);
+//     this.now.serverRoom = newRoom;
+// };
 
 /////////////////
 // STATIC ROUTES
 ////////////////
 
 //Admin Route
+
 app.get(/^\/[a-zA-Z0-9]{15}(|\/setup)(|\/globe)(|\/map)(|\/)(|\/?)$/, function(req, res){
    res.sendfile('public/index.html');
 });
@@ -97,11 +98,6 @@ app.get(/^\/[a-zA-Z0-9]{15}(|\/setup)(|\/globe)(|\/map)(|\/)(|\/?)$/, function(r
 //View Route
 app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)$/, function(req, res){
    res.sendfile('public/index.html');
-});
-
-//Test Query Route
-app.get(/^\/[a-zA-Z0-9]{10}(|\/query)$/, function(req, res){
-   res.sendfile('public/query.html');
 });
 
 ///////////

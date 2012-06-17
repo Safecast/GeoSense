@@ -71,16 +71,16 @@ if (IS_AR || IS_TOP_DOWN || IS_TAGGED_GLOBE) {
 	WORLD_ROT_Z = 0;
 }
 
-var taggedObjects = [
-	new TaggedObject('globe', [
-		new ObjectTag((globeTag && globeTag != 1 ? globeTag : 'Left-Hand-3'), [0, 0, 0])
-	]),
-	new TaggedObject('lens', [
-		new ObjectTag((lensTag && lensTag != 1 ? lensTag : 'Left-Hand-1'), [0, 0, 0]),
-		//new ObjectTag('Object-03', [-150, 100, 0]),
-		//new ObjectTag('Object-06', [150, -100, 0])
-	])
-];
+// var taggedObjects = [
+// 	new TaggedObject('globe', [
+// 		new ObjectTag((globeTag && globeTag != 1 ? globeTag : 'Left-Hand-3'), [0, 0, 0])
+// 	]),
+// 	new TaggedObject('lens', [
+// 		new ObjectTag((lensTag && lensTag != 1 ? lensTag : 'Left-Hand-1'), [0, 0, 0]),
+// 		//new ObjectTag('Object-03', [-150, 100, 0]),
+// 		//new ObjectTag('Object-06', [150, -100, 0])
+// 	])
+//];
 
 var _panelLoaded = false;
 var _admin = true;
@@ -97,7 +97,8 @@ var timeBasedPointCollection = new Array();
 
 
 var _defaultMapStyle = 'dark';
-var _defaultMapLocation = 'Japan';
+var _defaultMapLocation = 'Fukushima';
+var _defaultMapZoom = 6;
 
 var _settingsVisible = false;
 var _graphVisible = false;
