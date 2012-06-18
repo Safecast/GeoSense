@@ -149,7 +149,7 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	progress: Number,
 	busy: Boolean,
 	numBusy: Number,
-	reduce: Boolean
+	reduce: Boolean,
 }));
 
 var MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
@@ -194,6 +194,34 @@ var Comment = mongoose.model('Comment', new mongoose.Schema({
 	text: String,
 	date: Date,
 }));
+
+
+// TODO: Due to a mongodb bug, counting is really slow even if there is 
+// an index: https://jira.mongodb.org/browse/SERVER-1752
+// To address this we currently cache the count as long for 
+// as the server is running, but mongodb 2.3 should fix this issue.
+var COUNT_CACHE = {};
+function modelCount(model, query, callback) {
+	console.log('counting', query);
+
+	cacheKey = model.modelName + '-';
+	for (var k in query) {
+		cacheKey += k + '-' + query[k];
+	}
+
+	if (!COUNT_CACHE[cacheKey]) {
+		model.count(query, function(err, count) {
+			if (!err) {
+				COUNT_CACHE[cacheKey] = count;
+			}			
+			callback(err, count);
+		});
+	} else {
+		console.log('cached count '+cacheKey+': '+COUNT_CACHE[cacheKey]);
+		callback(false, COUNT_CACHE[cacheKey]);
+	}
+}
+
 
 // Routes
 
@@ -959,9 +987,8 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 				}
 			}
 
-			Point.count({'pointCollection': req.params.pointcollectionid}, function(err, c) {
+			modelCount(Point, {'pointCollection': req.params.pointcollectionid}, function(err, c) {
 				fullCount = c;
-				console.log('fullCount', fullCount);
 				// TODO: should count points in all boxes and not reduce if < 1000
 				reduce = reduce && zoom < 14;
 				if (reduce) {

@@ -1,3 +1,9 @@
+Dev server
+==========
+
+NODE_ENV=development nodemon server.js
+
+
 Mongo dumping and cloning
 =========================
 
