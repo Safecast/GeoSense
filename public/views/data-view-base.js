@@ -175,6 +175,7 @@ window.DataViewBase = Backbone.View.extend({
 			}
 		}
 
+		// construct color bar
 		for (var i = 0; i < this.colors.length; i++) {
 			var val;
 			if (this.colors.length > 1 && this.colorType == ColorType.LINEAR_GRADIENT) {
@@ -185,12 +186,20 @@ window.DataViewBase = Backbone.View.extend({
 			} else {
 				val = formatDecimalNumber(this.mapLayer.pointCollection.minVal) + '–' + formatDecimalNumber(this.mapLayer.pointCollection.maxVal);
 			}
-			var li = '<li style="width: '+Math.floor(100 / this.colors.length)+'%;">'
-				+ '<div class="segment" style="background: '+this.colors[i].color+'">'+val+'</div></li>';
+			if (i == 0) {
+				val = UnitFormat.LEGEND.format({
+					value: val, 
+					unit: this.mapLayer.pointCollection.unit
+				});
+			}			
+			var li = 
+				'<li style="width: '+Math.floor(100 / this.colors.length)+'%;">'
+				+ '<div class="segment" style="background: '+this.colors[i].color+'">'+val+'</div>'
+				+ '</li>';
 			this.$('.color-bar').append(li);
 		}
+		this.$('.legend .unit').html(this.mapLayer.pointCollection.unit);
 
-		this.$("#colorInput").miniColors('value', this.colors[0].color);
 		this.initGradientEditor();
 		this.disableUpdateButton();
 	},
@@ -271,10 +280,10 @@ window.DataViewBase = Backbone.View.extend({
 
 		switch(this.colorType) {
 			case ColorType.SOLID: 
-				this.$('.legend-button').css('background-color', this.color);
+				this.$('.legend-button').css('background-color', this.colors[0].color);
 				break;
 			case ColorType.LINEAR_GRADIENT: 
-				this.$('.legend-button').css('background-color', this.colorLow)	
+				this.$('.legend-button').css('background-color', this.colors[0].color)	
 				break;
 		}
 

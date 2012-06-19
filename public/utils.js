@@ -85,3 +85,17 @@ String.prototype.format = function(replacements) {
   });
 };
 
+Date.prototype.format = function(format) {
+  var replacements = {
+  	d: this.getDate(),
+  	m: this.getMonth(),
+  	y: this.getFullYear()
+  };
+  return format.replace(/\%([a-z0-9_]+)/g, function(match, name, type) { 
+    return typeof replacements[name] != 'undefined'
+      ? replacements[name]
+      : match
+    ;
+  });
+};
+

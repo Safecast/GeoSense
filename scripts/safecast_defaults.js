@@ -1,5 +1,5 @@
 // Good defaults for Safecast and Earthquakes
-o = db.pointcollections.findOne({"title" : "Safecast"});
+o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : "measurements-out.csv"}]});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"unit": "μSv/h",
@@ -33,7 +33,7 @@ db.layeroptions.update({_id: o.defaults}, {$set:
 });
 print('Updated Safecast');
 
-o = db.pointcollections.findOne({"title" : /Earthquakes.*/});
+o = db.pointcollections.findOne({"title" : /Earthquakes.*/i});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"title": "Earthquakes 1973–2011",

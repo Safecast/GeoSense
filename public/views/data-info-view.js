@@ -37,15 +37,15 @@ window.DataInfoView = Backbone.View.extend({
 			if (obj.metadata[i]['label']) {
 				items += '<tr><th class="value-label">' + obj.metadata[i]['label'] + '</th><td class="value">' + obj.metadata[i]['value'] + '</td></tr>';
 			} else {
-				items += '<tr><td colspan="2" class="value">' + obj.metadata[i]['value'] + '</td></tr>';
+				items += '<tr><td colspan="2" class="value single">' + obj.metadata[i]['value'] + '</td></tr>';
 			}
 		} 	
 		table.html(items);
 
 		var collapsible = $('.collapse', legend);
-		if (1||!collapsible.is(':visible')) {
-			collapsible.collapse('show');
-		}
+		// hide first to prevent flicker
+		collapsible.collapse('hide');
+		collapsible.collapse('show');
 	},
 
     hideDetailData: function(obj)

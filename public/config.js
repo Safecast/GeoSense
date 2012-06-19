@@ -14,6 +14,14 @@ var ColorType = {
 	LINEAR_GRADIENT: 'L'
 }
 
+var DateFormat = {
+	DATE_SHORT: "%m/%d/%y"
+};
+
+var UnitFormat = {
+	LEGEND: '%(value)s'
+}
+
 ColorType.DEFAULT = ColorType.SOLID;
 
 var DEBUG = 1;

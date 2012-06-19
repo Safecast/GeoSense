@@ -343,8 +343,8 @@ window.MapOLView = window.MapViewBase.extend({
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
-					projection: new OpenLayers.Projection("EPSG:4326"),
-					sphericalMercator: true,
+					//projection: new OpenLayers.Projection("EPSG:4326"),
+					//sphericalMercator: true,
 				    styleMap: new OpenLayers.StyleMap({
 				        "default": style,
 				        "temporary": temporaryStyle,
@@ -437,6 +437,9 @@ window.MapOLView = window.MapViewBase.extend({
 		var collectionId = evt.feature.attributes.collectionId;
 		var pointCollection = this.collections[collectionId].mapLayer.pointCollection;
 
+		var maxDate = new Date(evt.feature.attributes.data.datetime.max).format(DateFormat.DATE_SHORT);
+		var minDate = new Date(evt.feature.attributes.data.datetime.min).format(DateFormat.DATE_SHORT);
+
 		obj = {
 			collectionId: collectionId,
 			data: [{
@@ -447,7 +450,7 @@ window.MapOLView = window.MapViewBase.extend({
 				label: '# of samples',
 				value: evt.feature.attributes.data.count
 			}, {
-				value: 'from '+evt.feature.attributes.data.datetime.min+' to '+evt.feature.attributes.data.datetime.max
+				value: minDate+'–'+maxDate
 			}]
 		}
 
