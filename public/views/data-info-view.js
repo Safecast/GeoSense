@@ -14,11 +14,13 @@ window.DataInfoView = Backbone.View.extend({
 		this.dataTitle = '';
 		this.dataColor = '#ffffff';
 
-		_.bindAll(this, "updateDetailData");
-	 	options.vent.bind("updateDetailData", this.updateDetailData);
+		_.bindAll(this, "showDetailData");
+	 	options.vent.bind("showDetailData", this.showDetailData);
+		_.bindAll(this, "hideDetailData");
+	 	options.vent.bind("hideDetailData", this.hideDetailData);
     },
 
-    updateDetailData: function(obj)
+    showDetailData: function(obj)
 	{	
 		var legend = this.$('.data-legend.'+obj.collectionId);
 
@@ -44,6 +46,13 @@ window.DataInfoView = Backbone.View.extend({
 		if (1||!collapsible.is(':visible')) {
 			collapsible.collapse('show');
 		}
+	},
+
+    hideDetailData: function(obj)
+	{	
+		var legend = this.$('.data-legend.'+obj.collectionId);
+		var collapsible = $('.collapse', legend);
+		collapsible.collapse('hide');
 	},
 
     render: function() {

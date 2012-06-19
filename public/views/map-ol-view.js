@@ -461,12 +461,15 @@ window.MapOLView = window.MapViewBase.extend({
 			}
 		}
 
-		this.vent.trigger("updateDetailData", obj);
-		
-
+		this.vent.trigger("showDetailData", obj);
 	},
 
 	featureUnselected: function(evt) {
+		var collectionId = evt.feature.attributes.collectionId;
+		obj = {
+			collectionId: collectionId
+		};
+		this.vent.trigger("hideDetailData", obj);
 	},
 
     addPointToLayer: function(model, opts, collectionId) 
