@@ -436,6 +436,7 @@ window.MapOLView = window.MapViewBase.extend({
 	featureSelected: function(evt) {
 		var collectionId = evt.feature.attributes.collectionId;
 		var pointCollection = this.collections[collectionId].mapLayer.pointCollection;
+
 		obj = {
 			collectionId: collectionId,
 			data: [{
@@ -445,6 +446,8 @@ window.MapOLView = window.MapViewBase.extend({
 			metadata: [{
 				label: '# of samples',
 				value: evt.feature.attributes.data.count
+			}, {
+				value: 'from '+evt.feature.attributes.data.datetime.min+' to '+evt.feature.attributes.data.datetime.max
 			}]
 		}
 

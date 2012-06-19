@@ -219,7 +219,8 @@ window.MapViewBase = Backbone.View.extend({
 				val: val,
 				normVal: normVal,
 				count: count,
-				altVal: model.get('altVal')
+				altVal: model.get('altVal'),
+				datetime: model.get('datetime')
 			},
 			size: count / this.collections[collectionId].maxCount
 		}, collectionId);

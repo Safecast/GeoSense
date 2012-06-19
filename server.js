@@ -125,7 +125,8 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
 	colorType: String,
 	colors: [{
 		color: {type: String, required: true},
-		position: Number
+		position: Number,
+		interpolation: String
 	}],
 	opacity: Number
 }));
@@ -924,15 +925,16 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 									val: resVal,
 									altVal: resAltVal,
 									count: reduced.count,
+									datetime: reduced.datetime,
 									loc: [reduced.loc[0], reduced.loc[1]],
 								};
 							} else {
-								var resVal = [];
-								var resVal = datasets[i].get('val');
 								var p = {
-									val: resVal,
+									val: datasets[i].get('val'),
+									altVal: datasets[i].get('altVal'),
 									count: 1,
-									loc: datasets[i].get('loc'),
+									datetime: datasets[i].get('datetime'),
+									loc: datasets[i].get('loc'),									
 								};
 							}
 							points.push(p);
@@ -1234,11 +1236,15 @@ app.get('/api/map/:publicslug', function(req, res){
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-		    if (!err) {
-		       	res.send(deprecatedMap(map));
-		    } else {
-				res.send("oops",500);
+			if (err) {
+				res.send("oops", 500);
+				return;
+			} else if (!map) {
+				res.send("oops", 404);
+				return;
 			}
+
+	       	res.send(deprecatedMap(map));
 		});
 });
 
@@ -1249,11 +1255,15 @@ app.get('/api/map/admin/:adminslug', function(req, res) {
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-		    if (!err) {
-		       	res.send(deprecatedMap(map));
-		    } else {
-				res.send("oops",500);
+			if (err) {
+				res.send("oops", 500);
+				return;
+			} else if (!map) {
+				res.send("oops", 404);
+				return;
 			}
+
+	       	res.send(deprecatedMap(map));
 		});
 });
 

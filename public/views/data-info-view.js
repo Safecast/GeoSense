@@ -32,11 +32,14 @@ window.DataInfoView = Backbone.View.extend({
 		var table = $('.detail-metadata', legend);
 		var items = '';
 		for (var i = 0; i < obj.metadata.length; i++) {
-			items += '<tr><th class="value-label">' + obj.metadata[i]['label'] + '</th><td class="value">' + obj.metadata[i]['value'] + '</td></tr>';
+			if (obj.metadata[i]['label']) {
+				items += '<tr><th class="value-label">' + obj.metadata[i]['label'] + '</th><td class="value">' + obj.metadata[i]['value'] + '</td></tr>';
+			} else {
+				items += '<tr><td colspan="2" class="value">' + obj.metadata[i]['value'] + '</td></tr>';
+			}
 		} 	
 		table.html(items);
 
-		
 		var collapsible = $('.collapse', legend);
 		if (1||!collapsible.is(':visible')) {
 			collapsible.collapse('show');

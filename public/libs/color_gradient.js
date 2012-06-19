@@ -16,36 +16,44 @@ var ColorGradient = function(colors) {
 	this.colors = [];
 	this.gradientCache = {};
 	for (var i = colors.length - 1; i >= 0; i--) {
+		var intColor = parseInt(colors[i].color[0] == '#' ?
+			colors[i].color.replace('#', '0x') : colors[i].color);
 		this.colors[i] = {
 			position: colors[i].position,
 			// convert color strings to int
-			color: parseInt(colors[i].color[0] == '#' ?
-				colors[i].color.replace('#', '0x') : colors[i].color)
+			color: intColor,
+			interpolation: colors[i].interpolation,
+			// split channels of color
+			channels: [
+				(intColor &  0xff0000) >> 16,
+				(intColor &  0x00ff00) >> 8,
+				(intColor &  0x0000ff)
+			]
 		};
 	}
 	// sort by position
 	this.colors.sort(function(a, b) { return (a.position - b.position) });
+	this.defaultInterpolation = this.interpolation.lerpRGB;
 }
 
-ColorGradient.prototype.lerpRGB = function(p, a, b) { 
-	// separate R, G, B channels
-	var cA = [
-		(a &  0xff0000) >> 16,
-		(a &  0x00ff00) >> 8,
-		(a &  0x0000ff)
-	];
-	var cB = [
-		(b &  0xff0000) >> 16,
-		(b &  0x00ff00) >> 8,
-		(b &  0x0000ff)
-	];
-	// lerp and add channels 
-	var lerpInt = function(p, a, b) { 
-		return Math.round(a + (b - a) * p);
-	};
-	return (lerpInt(p, cA[0], cB[0]) << 16)
-		+ (lerpInt(p, cA[1], cB[1]) << 8)
-		+ lerpInt(p, cA[2], cB[2]);
+ColorGradient.prototype.interpolation = {
+	// returns result of linear interpolation between two colors
+	lerpRGB: function(p, a, b) { 
+		// separate R, G, B channels
+		var cA = a.channels;
+		var cB = b.channels;
+		// lerp and add channels 
+		var lerpInt = function(p, a, b) { 
+			return Math.round(a + (b - a) * p);
+		};
+		return (lerpInt(p, cA[0], cB[0]) << 16)
+			+ (lerpInt(p, cA[1], cB[1]) << 8)
+			+ lerpInt(p, cA[2], cB[2]);
+	},
+	// returns lower color
+	threshold: function(p, a, b) {
+		return a.color;
+	}
 };
 
 ColorGradient.prototype.intColorAt = function(p, step) {
@@ -66,7 +74,14 @@ ColorGradient.prototype.intColorAt = function(p, step) {
 	var hi = i + 1 >= this.colors.length || this.colors[lo].position > p ? i : i + 1;
 	var normP = this.colors[hi].position == this.colors[lo].position ? 0.0 :
 		(p - this.colors[lo].position) / (this.colors[hi].position - this.colors[lo].position);
-	var intColor = this.lerpRGB(normP, this.colors[lo].color, this.colors[hi].color);
+	
+	var interpolation = this.colors[lo].interpolation;
+	if (!interpolation) {
+		f = this.defaultInterpolation;
+	} else {
+		f = this.interpolation[interpolation];
+	}
+	var intColor = f(normP, this.colors[lo], this.colors[hi]);
 
 	if (step) {
 		this.gradientCache[step][p] = intColor;
