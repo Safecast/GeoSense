@@ -382,37 +382,6 @@ window.MapOLView = window.MapViewBase.extend({
 		this.layerArray[layer.collectionId] = layer;
 		this.map.addLayers([this.layerArray[layer.collectionId]]);
 
-        /*var highlightCtrl = new OpenLayers.Control.SelectFeature(layer, {
-            hover: true,
-            highlightOnly: true,
-            renderIntent: "temporary",
-            eventListeners: {
-                beforefeaturehighlighted: report,
-                featurehighlighted: report,
-                featureunhighlighted: report
-            }
-        });
-
-        var selectCtrl = new OpenLayers.Control.SelectFeature(layer,
-            {clickout: true}
-        );
-
-        this.map.addControl(highlightCtrl);
-        this.map.addControl(selectCtrl);
-
-        highlightCtrl.activate();
-        selectCtrl.activate();		*/
-
-		layer.events.on({
-            'featureselected': function(evt) {
-            	self.featureSelected(evt)
-            },
-            'featureunselected': function(evt) {
-            	self.featureUnselected(evt);
-            }
-        });
-
-
         /*var hover = new OpenLayers.Control.SelectFeature(layer, {
             hover: true,
             highlightOnly: true,
@@ -421,25 +390,37 @@ window.MapOLView = window.MapViewBase.extend({
 		this.map.addControl(hover);
 		hover.activate();*/
 
-		var select = new OpenLayers.Control.SelectFeature(layer, {
-            clickout: true, toggle: false,
-            multiple: false, hover: false,
-            toggleKey: "ctrlKey", // ctrl key removes from selection
-            multipleKey: "shiftKey", // shift key adds to selection
-            box: false
-        });
-		this.map.addControl(select);
-		select.activate();
+		var selectControl = new OpenLayers.Control.SelectFeature(
+		  layer, {
+		     clickout: true, multiple: false, hover: false, box: false,
+		     onBeforeSelect: function(feature) {
+		        // TODO: Since the layer is redrawn on select, selection is very slow.
+		        // Workaround: Add code to add feature to highlight layer, then return false.
+		        // self.featureSelected(feature);
+		        // return false;
+		     },
+		     onSelect: function(feature) {
+		        self.featureSelected(feature);
+		     },
+		     onUnselect: function(feature) {
+		        self.featureUnselected(feature);
+		        // TODO: See above
+		        // add code to remove feature from highlight layer
+		     },
+		  }
+		);
+		this.map.addControl(selectControl);
+		selectControl.activate();
 		
 	},
 
-	featureSelected: function(evt) {
-		var model = evt.feature.attributes.model;
-		this.vent.trigger("showDetailData", evt.feature.attributes.collectionId, model);
+	featureSelected: function(feature) {
+		var model = feature.attributes.model;
+		this.vent.trigger("showDetailData", feature.attributes.collectionId, model);
 	},
 
-	featureUnselected: function(evt) {
-		this.vent.trigger("hideDetailData", evt.feature.attributes.collectionId);
+	featureUnselected: function(feature) {
+		this.vent.trigger("hideDetailData", feature.attributes.collectionId);
 	},
 
     addPointToLayer: function(model, opts, collectionId) 
