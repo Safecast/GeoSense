@@ -68,13 +68,14 @@ window.DataInfoView = Backbone.View.extend({
 			}
 		}
 
-		var metadata = [];
+		var metadata = [
+			{
+				label: __('# of samples'),
+				value: count
+			}
+		];
 		if (count > 1) {
-			metadata = [
-				{
-					label: __('# of samples'),
-					value: count
-				},
+			metadata = metadata.concat([
 				{
 					label: __('peak', {
 						unit: pointCollection.unit
@@ -93,7 +94,7 @@ window.DataInfoView = Backbone.View.extend({
 					}),
 					value: formatDecimalNumber(val.avg, 3)
 				} 
-			];
+			]);
 		}
 
 		return {
@@ -133,11 +134,14 @@ window.DataInfoView = Backbone.View.extend({
 
 		var collapsible = $('.collapse', legend);
 		// hide first to prevent flicker
-		//collapsible.collapse('hide');
-
-		this.$('.data-legend .collapse').collapse('hide');
-
+		collapsible.collapse('hide');
 		collapsible.collapse('show');
+		this.$('.data-legend .collapse').each(function() {
+			if (this != collapsible[0]) {
+				$(this).collapse('hide');
+			}
+		});
+
 	},
 
     hideDetailData: function(pointCollectionId)
