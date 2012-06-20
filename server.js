@@ -4,6 +4,8 @@ var METERS_PER_DEG_LON = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Pr
 var METERS_PER_PX_AT_ZOOM_0 = 156543.03390625;
 var DEG_PER_PX_AT_ZOOM_0 = METERS_PER_DEG_LON / METERS_PER_PX_AT_ZOOM_0;*/
 
+var config = require("./public/config.js");
+
 var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
 var GRID_SIZES = {
 //	'-1': 2,
@@ -12,6 +14,12 @@ var GRID_SIZES = {
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
+
+var DataStatus = {
+	IMPORTING: 'I',
+	REDUCING: 'R',
+	DONE: 'D'
+};
 
 var COLLECTION_DEFAULTS = {
 	visible: true,
@@ -62,6 +70,33 @@ app.configure(function(){
   	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   	app.set('views', path.join(application_root, "views"));
 });
+
+
+/*
+var zlib = require('zlib');
+var http = require('http');
+var fs = require('fs');
+function compressResponse(request, response, data) {	
+  var acceptEncoding = request.headers['accept-encoding'];
+  if (!acceptEncoding) {
+    acceptEncoding = '';
+  }
+
+  // Note: this is not a conformant accept-encoding parser.
+  // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
+  if (acceptEncoding.match(/\bdeflate\b/)) {
+    response.writeHead(200, { 'content-encoding': 'deflate' });
+    data.pipe(zlib.createDeflate()).pipe(response);
+  } else if (acceptEncoding.match(/\bgzip\b/)) {
+    response.writeHead(200, { 'content-encoding': 'gzip' });
+    data.pipe(zlib.createGzip()).pipe(response);
+  } else {
+    response.writeHead(200, {});
+    data.pipe(response);
+  }
+}
+*/
+
 
 ////////////////
 // CHAT SERVER
@@ -119,6 +154,8 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 	modified: Date,	
 }));
 
+Point.schema.index({loc: '2d', pointCollection: 1})
+
 var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
 	visible: Boolean,
 	featureType: String,
@@ -128,27 +165,28 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
 		position: Number,
 		interpolation: String
 	}],
-	opacity: Number
+	opacity: Number,
+	datetimeFormat: String,
+	valFormat: String,
+	altValFormat: [String],
 }));
 
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	title: String,
 	description: String,
 	unit: String,
-	format: String,
 	altUnit: [String],
-	altFormat: [String],
 	maxVal: Number,
 	minVal: Number,
-	timebased: Boolean,
+	timeBased: Boolean,
 	created: Date, 
 	modified: Date,
 	created_by: String,
 	modified_by: String,
 	defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
 	active: Boolean,
+	status: String,
 	progress: Number,
-	busy: Boolean,
 	numBusy: Number,
 	reduce: Boolean,
 }));
@@ -312,8 +350,10 @@ app.post('/api/import/', function(req, res){
 						return parseFloat(this.get('val'));
 					}
 					,datetime: function() {
-						var d = Date.parse(String(this.get('year')));
-						return new Date(d);
+						return new Date(String(this.get('year')));
+					},
+					label: function() {
+						return this.get('Facility') + ' (' + this.get('ISO country code') + ')';
 					}
 					,loc: latLngWithCommaFromString('location')
 				}
@@ -326,11 +366,11 @@ app.post('/api/import/', function(req, res){
 			var converter = {
 				fields: {
 					val: function() {
-						return parseFloat(this.get('value')) / (this.get('unit') == 'cpm' ? 350.0 : 1.0);
+						return parseFloat(this.get('value')) * (this.get('unit') == 'cpm' ? 1.0 : 350.0);
 					}
-					,altVal: function() {
-						return [parseFloat(this.get('value'))] * (this.get('unit') == 'cpm' ? 1.0 : 350.0);
-					}
+					/*,altVal: function() {
+						return [parseFloat(this.get('value'))] / (this.get('unit') == 'cpm' ? 350.0 : 1.0);
+					}*/
 					,datetime: function() {
 						return new Date(this.get('captured_at'));
 					}
@@ -369,7 +409,7 @@ app.post('/api/import/', function(req, res){
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-	var limitMax = 0;
+	var limitMax = 30000;
 	var limitSkip = 0;
 	var appendCollectionId = null;
 	
@@ -390,7 +430,7 @@ app.post('/api/import/', function(req, res){
 
 	var runImport = function(collection) {
 		collection.active = false;
-		collection.busy = true;
+		collection.status = DataStatus.IMPORTING;
 
 		collection.save(function(err, collection) {
 		    if (!err) {
@@ -414,7 +454,7 @@ app.post('/api/import/', function(req, res){
 			    	collection.maxVal = maxVal;
 					collection.minVal = minVal;
 					collection.active = true;
-					collection.busy = false;
+					collection.status = DataStatus.DONE;
 					collection.reduce = numDone > 1000;
 					collection.collectionid = collection.get('_id'); // TODO: deprecated
 					collection.save(function(err) {
@@ -902,16 +942,19 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 
 				if (boxes) {
 					var box = boxes.shift();
-					pointQuery[reduce ? 'value.loc' : 'loc'] = {$within: {$box : box}};
+					pointQuery[PointModel != Point ? 'value.loc' : 'loc'] = {$within: {$box : box}};
 				}
 
 				if (!time_grid) {
 					PointModel.find(pointQuery, function(err, datasets) {
 						if (err || !datasets) {
+							console.log(err);
 							res.send('ooops', 500);
+							return;
 						}
+						console.log(datasets);
 						for (var i = 0; i < datasets.length; i++) {
-							if (reduce) {
+							if (PointModel != Point) {
 								var reduced = datasets[i].get('value');
 								var resVal = reduced.val.avg;
 								var resAltVal;
@@ -928,6 +971,9 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 									datetime: reduced.datetime,
 									loc: [reduced.loc[0], reduced.loc[1]],
 								};
+
+								var p = reduced;
+
 							} else {
 								var p = {
 									val: datasets[i].get('val'),
@@ -995,14 +1041,22 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 				reduce = reduce && zoom < 14;
 				if (reduce) {
 					collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
-					pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 					PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+					pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+					dequeueBoxQuery();
 				} else {
+					/*
 					collectionName = 'points';
-					pointQuery = {'pointCollection': req.params.pointcollectionid};
 					PointModel = Point;
+					pointQuery = {'pointCollection': req.params.pointcollectionid};
+					dequeueBoxQuery();
+					*/
+					
+					collectionName = 'r_points_loc-0';
+					PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+					pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+					dequeueBoxQuery();
 				}
-				dequeueBoxQuery();
 			});
 
 

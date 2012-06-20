@@ -36,16 +36,15 @@
 	margin: 30px 0 0 0;
 }
 
-.data-info .legend .unit {
+.data-info .legend .unit, .data-info h5 {
 	margin-top: .25em;
-	background: #222;
+	background-color:rgba(50,50,50,.5);
 	padding: .1em .25em .4em .25em;
 	text-align: center;
 	font-weight: bold;
-	font-weight: bold;
 	border-radius: 4px;
 	-moz-border-radius:4px;
-	-webkit-border-radius:4px
+	-webkit-border-radius:4px;
 }
 
 .data-info .data-legend:first-child {
@@ -95,6 +94,8 @@
 	text-align: center;
 	color: #000;
 	text-shadow:rgba(255,255,255,.8) 0px 1px 0px;
+	border-right: 1px rgba(0,0,0,.25) solid;
+	border-bottom: 1px rgba(0,0,0,.25) solid;
 }
 
 .data-info .color-bar li:first-child .segment {
@@ -131,11 +132,26 @@
 	font-size: 20px;
 	text-align: left;
 	width: 50%;
-	overflow: hidden;
 	line-height: 1em;
 	padding: 0 1em 0 0;
 	white-space: nowrap;
 	color: #999;
+}
+
+.data-info .value-label.single {
+	padding: 0 .0 .3em 0;
+	text-align: center;
+	font-weight: bold;
+	border-radius: 4px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+}
+
+.data-info h5 {
+	color: #fff;
+	font-size: 18px;
+	margin: 0;
+	padding: .2em .25em .3em .25em;
 }
 
 .data-info .value {
@@ -144,17 +160,16 @@
 	font-size: 35px;
 	text-align: right;
 	width: 50%;
-	overflow: hidden;
 	padding: 0;
 	white-space: nowrap;
 }
 
 .data-info .micro, .data-info .legend .unit {
-	font-size: 13px;
+	font-size: 12px;
 }
 
-.data-info .detail-metadata .value-label {
-	font-size: 13px;
+.data-info .detail-metadata .value-label, .data-info .detail-metadata .value.single {
+	font-size: 12px;
 	color: #999;
 	line-height: 1.5em;
 	font-weight: normal;
@@ -162,9 +177,9 @@
 
 .data-info .detail-metadata .value {
 	font-size: 13px;
-	color: #999;
+	color: #bbb;
 	line-height: 1.5em;
-	font-weight: normal;
+	font-weight: bold;
 }
 
 .data-info .value.single {
@@ -173,8 +188,5 @@
 
 .data-info .detail-metadata {
 	margin-top: 1em;
-}
-
-.data-info .detail-metadata .value {
 }
 

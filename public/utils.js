@@ -69,6 +69,14 @@ $.fn.blink = function() {
 	})();
 };
 
+var lpad = function(str, padString, length) {
+	var s = new String(str);
+    while (s.length < length) {
+        s = padString + s;
+    }
+    return s;
+};
+
 /**
 * Simple Python-style string formatting.
 *
@@ -77,7 +85,7 @@ $.fn.blink = function() {
 *	"%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
 */
 String.prototype.format = function(replacements) {
-  return this.replace(/\%\(([a-z0-9_]+)\)(s)/g, function(match, name, type) { 
+  return this.replace(/\%\(([a-z0-9_]+)\)(s)/ig, function(match, name, type) { 
     return typeof replacements[name] != 'undefined'
       ? replacements[name]
       : match
@@ -85,17 +93,44 @@ String.prototype.format = function(replacements) {
   });
 };
 
+function __(str, replacements) {
+	return (locale.strings[str] || str).format(replacements);
+}
+
+/**
+* Simple Python-style date formatting.
+*
+* Example:
+*
+*	new Date().format('%d %m %y')
+*/
 Date.prototype.format = function(format) {
-  var replacements = {
-  	d: this.getDate(),
-  	m: this.getMonth(),
-  	y: this.getFullYear()
-  };
-  return format.replace(/\%([a-z0-9_]+)/g, function(match, name, type) { 
-    return typeof replacements[name] != 'undefined'
-      ? replacements[name]
+  var self = this;
+  return format.replace(/\%([a-z0-9_]+)/ig, function(match, name, type) { 
+    return typeof self.formatReplacements[name] != 'undefined'
+      ? self.formatReplacements[name].call(self)
       : match
     ;
   });
 };
 
+Date.prototype.formatReplacements = {
+  	d: function() {
+  		return lpad(this.getDate(), '0', 2);
+  	},
+  	m: function() {
+  		return lpad(this.getMonth(), '0', 2);
+  	},
+  	Y: function() {
+  		return this.getFullYear();
+  	},
+  	y: function() { 
+  		return new String(this.getFullYear()).substr(2, 2);
+  	},
+  	B: function() { 
+  		return locale.MONTH_NAMES[this.getMonth()] 
+  	},
+  	b: function() { 
+  		return locale.ABBR_MONTH_NAMES[this.getMonth()] 
+  	}
+};

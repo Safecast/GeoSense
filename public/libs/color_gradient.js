@@ -15,33 +15,39 @@ Released under MIT License
 var ColorGradient = function(colors) {	
 	this.colors = [];
 	this.gradientCache = {};
-	for (var i = colors.length - 1; i >= 0; i--) {
-		var intColor = parseInt(colors[i].color[0] == '#' ?
-			colors[i].color.replace('#', '0x') : colors[i].color);
-		this.colors[i] = {
-			position: colors[i].position,
-			// convert color strings to int
-			color: intColor,
-			interpolation: colors[i].interpolation,
-			// split channels of color
-			channels: [
-				(intColor &  0xff0000) >> 16,
-				(intColor &  0x00ff00) >> 8,
-				(intColor &  0x0000ff)
-			]
-		};
+	if (colors) {
+		for (var i = colors.length - 1; i >= 0; i--) {
+			var intColor = parseInt(colors[i].color[0] == '#' ?
+				colors[i].color.replace('#', '0x') : colors[i].color);
+			this.colors[i] = {
+				position: colors[i].position,
+				// convert color strings to int
+				color: intColor,
+				interpolation: colors[i].interpolation,
+				// split channels of color
+				channels: this.getChannels(intColor)
+			};
+		}
 	}
 	// sort by position
 	this.colors.sort(function(a, b) { return (a.position - b.position) });
 	this.defaultInterpolation = this.interpolation.lerpRGB;
 }
 
+ColorGradient.prototype.getChannels = function(intColor) {
+	return [
+		(intColor &  0xff0000) >> 16,
+		(intColor &  0x00ff00) >> 8,
+		(intColor &  0x0000ff)
+	];
+}
+
 ColorGradient.prototype.interpolation = {
 	// returns result of linear interpolation between two colors
 	lerpRGB: function(p, a, b) { 
 		// separate R, G, B channels
-		var cA = a.channels;
-		var cB = b.channels;
+		var cA = a.channels || ColorGradient.prototype.getChannels(a.color);
+		var cB = b.channels || ColorGradient.prototype.getChannels(b.color);
 		// lerp and add channels 
 		var lerpInt = function(p, a, b) { 
 			return Math.round(a + (b - a) * p);
@@ -90,9 +96,13 @@ ColorGradient.prototype.intColorAt = function(p, step) {
 	return intColor;
 };
 
-ColorGradient.prototype.colorAt = function(p, step) {
+ColorGradient.prototype.intToHexColor = function(intColor) {
 	var zeroPad = function(str, len) {
 		return new Array(str.length < len ? len + 1 - str.length : 0).join('0') + str;
 	}
-	return '#' + zeroPad(this.intColorAt(p, step).toString(16), 6);
+	return '#' + zeroPad(intColor.toString(16), 6);
+}
+
+ColorGradient.prototype.colorAt = function(p, step) {
+	return this.intToHexColor(this.intColorAt(p, step));
 };

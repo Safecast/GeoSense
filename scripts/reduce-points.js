@@ -132,34 +132,19 @@ var ReductionKey = {
 			var grid_size = this.grid_size;
 			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))) return;
 
-			/*if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
-				print('warning: dropping point because loc not within +- 180');
-				print(loc);
-				return;
-			}*/
 			loc[0] = clamp180(loc[0]);
 			loc[1] = clamp180(loc[1]);
-			
-			var lng = loc[0];
-			var lat = loc[1];
-			// Mongo manual: The index space bounds are inclusive of the lower bound and exclusive of the upper bound.
-			if (lng == 180) {
-				lng = -180;
-			}
-			if (lat == 180) {
-				lat = -180;
-			}
-			var grid_lng = Math.round((lng - lng % grid_size) / grid_size);
-			var grid_lat = Math.round((lat - lat % grid_size) / grid_size);
-			var loc = [grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2];
 
-			/*if (loc[0] < -180 || loc[0] > 180 || loc[1] < -180 || loc[1] > 180) {
-				print('warning: dropping point because grid loc not within +- 180');
-				print(loc);
-				return;
-			}*/
-			loc[0] = clamp180(loc[0]);
-			loc[1] = clamp180(loc[1]);
+			if (grid_size) {
+				var grid_lng = Math.round((loc[0] - loc[0] % grid_size) / grid_size);
+				var grid_lat = Math.round((loc[1] - loc[1] % grid_size) / grid_size);
+				var loc = [grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2];
+				loc[0] = clamp180(loc[0]);
+				loc[1] = clamp180(loc[1]);
+			} else {
+				var grid_lng = loc[0];
+				var grid_lat = loc[1];
+			}
 
 			return [
 				grid_lng + ',' + grid_lat + ',' + grid_size, 
@@ -421,7 +406,7 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 		db[reduced_collection].drop();
 	}
 	if (!value_fields) {
-		value_fields = ['val', 'altVal', 'datetime'];
+		value_fields = ['val', 'altVal', 'datetime', 'label'];
 	}
 	if (!opts.scope) {
 		opts.scope = {};
@@ -463,17 +448,23 @@ var numHistograms = HISTOGRAM_SIZES.length;
 
 var cur = db.pointcollections.find({});
 cur.forEach(function(collection) {
-	if (collection.reduce) {
-		opts.query = {pointCollection: collection._id};
-		var statsTotal = db.points.count(opts.query) * (numGridSizes + numHistograms);
-		opts.stats = {total: statsTotal, collectionId: collection._id};
-		db.pointcollections.update({_id: collection._id}, {$set: {progress: 0, busy: true, numBusy: statsTotal}});
+	opts.query = {pointCollection: collection._id};
+	var statsTotal = db.points.count(opts.query) * (numGridSizes + numHistograms);
+	opts.stats = {total: statsTotal, collectionId: collection._id};
+	db.pointcollections.update({_id: collection._id}, {$set: {progress: 0, busy: true, numBusy: statsTotal}});
 
-		print('*** collection = '+collection.title+' ('+collection._id+') ***');
+	print('*** collection = '+collection.title+' ('+collection._id+') ***');
+	if (!collection.reduce) {
+		print('*** unreduced ***');
+		reducePoints(collection._id, {
+			pointCollection: ReductionKey.copy, 
+			loc: new ReductionKey.LocGrid(0)
+		}, opts);
 
+	} else if (collection.reduce) {
 		for (var g in GRID_SIZES) {
 			var grid_size = GRID_SIZES[g];
-			print('*** grid = '+g+' ***');
+			print('*** reducing for grid = '+g+' ***');
 
 			reducePoints(collection._id, {
 				pointCollection: ReductionKey.copy, 
@@ -498,16 +489,17 @@ cur.forEach(function(collection) {
 				datetime: new ReductionKey.Daily()
 			}, opts);*/
 		}
-
-		print('*** histogram ***');
-		for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
-			reducePoints(collection._id, {
-				pointCollection: ReductionKey.copy, 
-				val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
-			}, opts, []);
-		}
-
-		db.pointcollections.update({_id: collection._id}, {$set: {busy: false, numBusy: 0}});
-
 	}
+
+	/*
+	for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
+		print('*** reducing for histogram = '+HISTOGRAM_SIZES[i]+' ***');
+		reducePoints(collection._id, {
+			pointCollection: ReductionKey.copy, 
+			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
+		}, opts, []);
+	}
+	*/
+
+	db.pointcollections.update({_id: collection._id}, {$set: {busy: false, numBusy: 0}});
 });

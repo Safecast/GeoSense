@@ -175,6 +175,8 @@ window.DataViewBase = Backbone.View.extend({
 			}
 		}
 
+		var gradient = new ColorGradient(this.colors);
+
 		// construct color bar
 		for (var i = 0; i < this.colors.length; i++) {
 			var val;
@@ -191,14 +193,27 @@ window.DataViewBase = Backbone.View.extend({
 					value: val, 
 					unit: this.mapLayer.pointCollection.unit
 				});
-			}			
+			}		
+
+			var baseColor = this.colors[i].color;
+			var darkerColor = gradient.intToHexColor(gradient.interpolation.lerpRGB(.15, gradient.colors[i], {color: 0}));
+
 			var li = 
 				'<li style="width: '+Math.floor(100 / this.colors.length)+'%;">'
-				+ '<div class="segment" style="background: '+this.colors[i].color+'">'+val+'</div>'
+				+ '<div class="segment" style="background: '+baseColor
+				+ '; background: linear-gradient(top, '+baseColor+' 40%, '+darkerColor+' 80%)'
+				+ '; background: -webkit-gradient(linear, left top, left bottom, color-stop(.4, '+baseColor+'), color-stop(.8, '+darkerColor+'))'
+				+ '">'
+				+ val + '</div>'
 				+ '</li>';
 			this.$('.color-bar').append(li);
 		}
-		this.$('.legend .unit').html(this.mapLayer.pointCollection.unit);
+
+		if (this.mapLayer.pointCollection.unit) {
+			this.$('.legend .unit').html(this.mapLayer.pointCollection.unit);
+		} else {
+			this.$('.legend .unit').hide();
+		}
 
 		this.initGradientEditor();
 		this.disableUpdateButton();

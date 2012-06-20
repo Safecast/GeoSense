@@ -146,7 +146,7 @@ window.HeaderView = Backbone.View.extend({
 			case 'parsing':
 			  	stateIndicator.stop(true, true).fadeIn('fast');
 				var progress;
-				if (obj && obj.busy && obj.progress) {
+				if (obj && obj.status == DataStatus.IMPORTING && obj.progress) {
 					//progress = obj.progress - obj.progress % 1000;
 					progress = formatLargeNumber(obj.progress);
 				}

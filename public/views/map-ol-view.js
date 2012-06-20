@@ -299,7 +299,9 @@ window.MapOLView = window.MapViewBase.extend({
 
         var selectStyle = {
         	fillOpacity: DEFAULT_SELECTED_FEATURE_OPACITY,
-		    strokeColor: '#eee'
+		    strokeColor: '#eee',
+		    strokeOpacity: 1,
+		    strokeWidth: 2
         };
         var temporaryStyle = {};
 
@@ -310,7 +312,6 @@ window.MapOLView = window.MapViewBase.extend({
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
 				    strokeColor: '#333',
-				    strokeWidth: 2,
 				    pointRadius: 7,
 				    fillOpacity:  this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
@@ -336,7 +337,6 @@ window.MapOLView = window.MapViewBase.extend({
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
 				    strokeColor: '#333',
-				    strokeWidth: 2,
 				    pointRadius: 7,
 				    fillOpacity: this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
@@ -434,45 +434,12 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 
 	featureSelected: function(evt) {
-		var collectionId = evt.feature.attributes.collectionId;
-		var pointCollection = this.collections[collectionId].mapLayer.pointCollection;
-
-		var maxDate = new Date(evt.feature.attributes.data.datetime.max).format(DateFormat.DATE_SHORT);
-		var minDate = new Date(evt.feature.attributes.data.datetime.min).format(DateFormat.DATE_SHORT);
-
-		obj = {
-			collectionId: collectionId,
-			data: [{
-				label: pointCollection.unit, 
-				value: formatDecimalNumber(evt.feature.attributes.data.val, 3)
-			}],
-			metadata: [{
-				label: '# of samples',
-				value: evt.feature.attributes.data.count
-			}, {
-				value: minDate+'–'+maxDate
-			}]
-		}
-
-		var v = evt.feature.attributes.data.altVal;
-		if (v) {
-			for (var i = 0; i < v.length; i++) {
-				obj.data.push({
-					label: pointCollection.altUnit[i], 
-					value: formatDecimalNumber(v[i], 3)
-				});
-			}
-		}
-
-		this.vent.trigger("showDetailData", obj);
+		var model = evt.feature.attributes.model;
+		this.vent.trigger("showDetailData", evt.feature.attributes.collectionId, model);
 	},
 
 	featureUnselected: function(evt) {
-		var collectionId = evt.feature.attributes.collectionId;
-		obj = {
-			collectionId: collectionId
-		};
-		this.vent.trigger("hideDetailData", obj);
+		this.vent.trigger("hideDetailData", evt.feature.attributes.collectionId);
 	},
 
     addPointToLayer: function(model, opts, collectionId) 

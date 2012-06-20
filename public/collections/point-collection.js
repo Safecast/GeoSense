@@ -24,7 +24,7 @@ PointCollection = Backbone.Collection.extend({
 		this.modified = options.modified;
 		this.createdBy = options.created_by;
 		this.modifiedBy = options.modifiedBy;
-		this.timeBased = options.timebased;
+		this.timeBased = options.timeBased;
 		this.defaults = options.defaults;
 		*/
 

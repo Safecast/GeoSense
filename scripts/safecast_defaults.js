@@ -2,10 +2,11 @@
 o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : "measurements-out.csv"}]});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
-		"unit": "μSv/h",
-		"altUnit": ["cpm"]
+		"title": "Safecast",
+		"unit": "cpm",
+		"altUnit": ["μSv/h"]
 	}
-});
+}, false, true);
 db.layeroptions.update({_id: o.defaults}, {$set: 
 	{
 		"visible" : true,
@@ -37,9 +38,9 @@ o = db.pointcollections.findOne({"title" : /Earthquakes.*/i});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"title": "Earthquakes 1973–2011",
-		"unit": "Richter mag." 
+		"unit": "Magnitude" 
 	}
-});
+}, false, true);
 db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
 	{
 		"visible" : true,
@@ -59,9 +60,34 @@ db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:
 			}
 		],
 		"colorType" : "L",
-		"opacity" : 0.2
+		"opacity" : 0.2,
 	}
 });
 print('Updated Earthquakes');
+
+
+o = db.pointcollections.findOne({"title" : /Reactors.*/i});
+db.pointcollections.update({_id: o._id}, {$set:
+	{
+		"title": "Nuclear Reactors",
+		"unit": "MW" 
+	}
+}, false, true);
+db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
+	{
+		"visible" : true,
+		"featureType" : "P",
+		"colors" : [
+			{
+				"position" : 0,
+				"color" : "#bbbbbb"
+			},
+		],
+		"colorType" : "S",
+		"opacity" : 0.75,
+		"datetimeFormat": '%Y'
+	}
+});
+print('Updated Reactors');
 
 

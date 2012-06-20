@@ -111,7 +111,6 @@ window.MapViewBase = Backbone.View.extend({
 		collection.bind('add', this.addOne, this);
 		this.addCollectionToMap(collection);
 		this.vent.trigger("setStateType", 'complete');
-		
 	},
 	
 	addCommentCollection: function(collection)
@@ -195,7 +194,7 @@ window.MapViewBase = Backbone.View.extend({
 		var options = this.collections[collectionId].mapLayer.options;
 		var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
 		var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
-		var val = model.get('val');
+		var val = model.get('val').avg;
 		var count = model.get('count');
 		var normVal = (val - min) / (max - min);
 
@@ -215,12 +214,11 @@ window.MapViewBase = Backbone.View.extend({
 			color: color,
 			min: min,
 			max: max,
+			model: model,
 			data: {
 				val: val,
 				normVal: normVal,
 				count: count,
-				altVal: model.get('altVal'),
-				datetime: model.get('datetime')
 			},
 			size: count / this.collections[collectionId].maxCount
 		}, collectionId);

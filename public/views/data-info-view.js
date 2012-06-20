@@ -20,37 +20,129 @@ window.DataInfoView = Backbone.View.extend({
 	 	options.vent.bind("hideDetailData", this.hideDetailData);
     },
 
-    showDetailData: function(obj)
+    compileDetailDataForModel: function(pointCollectionId, model)
+    {
+		var mapLayer = app.getMapLayer(pointCollectionId);
+		var pointCollection = mapLayer.pointCollection;
+
+		var val = model.get('val');
+		var altVal = model.get('altVal');
+		var label = model.get('label');
+		var datetime = model.get('datetime');
+		var count = model.get('count');
+		var maxDate = new Date(datetime.max).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
+		var minDate = new Date(datetime.min).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
+
+		var data = [];
+
+		if (minDate) {
+			var formattedDate = minDate != maxDate ? __('%(minDate)s–%(maxDate)s', {
+					minDate: minDate,
+					maxDate: maxDate
+				}) : minDate;
+		} else {
+			var formattedDate = '';
+		}
+
+		if (label) {
+			data.push({
+				label: label.min + '<br />' + formattedDate
+			});
+		} else {
+			data.push({
+				label: formattedDate
+			});
+		}
+
+		data.push({
+			label: pointCollection.unit, 
+			value: formatDecimalNumber(val.avg, 3)
+		});
+
+		if (altVal) {
+			for (var i = 0; i < altVal.length; i++) {
+				data.push({
+					label: pointCollection.altUnit[i], 
+					value: formatDecimalNumber(altVal[i], 3)
+				});
+			}
+		}
+
+		var metadata = [];
+		if (count > 1) {
+			metadata = [
+				{
+					label: __('# of samples'),
+					value: count
+				},
+				{
+					label: __('peak', {
+						unit: pointCollection.unit
+					}),
+					value: formatDecimalNumber(val.max, 3)
+				}, 
+				{
+					label: __('minimum', {
+						unit: pointCollection.unit
+					}),
+					value: formatDecimalNumber(val.min, 3)
+				}, 
+				{
+					label: __('average', {
+						unit: pointCollection.unit
+					}),
+					value: formatDecimalNumber(val.avg, 3)
+				} 
+			];
+		}
+
+		return {
+			data: data,
+			metadata: metadata
+		};
+    },
+
+    showDetailData: function(pointCollectionId, model)    
 	{	
-		var legend = this.$('.data-legend.'+obj.collectionId);
+		var obj = this.compileDetailDataForModel(pointCollectionId, model);
+		var legend = this.$('.data-legend.'+pointCollectionId);
+
+		var getRow = function(o) {
+			if (o.label && o.value != null) {
+				return '<tr><th class="value-label">' + o.label + '</th><td class="value">' + o.value + '</td></tr>';
+			} else if (o.label) {
+				return '<tr><td colspan="2" class="value-label single"><h5>' + o.label + '</h5></td></tr>';
+			} else {
+				return '<tr><td colspan="2" class="value single">' + o.value + '</td></tr>';
+			}
+		};
 
 		var table = $('.detail-data', legend);
 		var items = '';
 		for (var i = 0; i < obj.data.length; i++) {
-			items += '<tr><th class="value-label">' + obj.data[i]['label'] + '</th><td class="value">' + obj.data[i]['value'] + '</td></tr>';
+			items += getRow(obj.data[i]);
 		} 	
 		table.html(items);
 
 		var table = $('.detail-metadata', legend);
 		var items = '';
 		for (var i = 0; i < obj.metadata.length; i++) {
-			if (obj.metadata[i]['label']) {
-				items += '<tr><th class="value-label">' + obj.metadata[i]['label'] + '</th><td class="value">' + obj.metadata[i]['value'] + '</td></tr>';
-			} else {
-				items += '<tr><td colspan="2" class="value single">' + obj.metadata[i]['value'] + '</td></tr>';
-			}
+			items += getRow(obj.metadata[i]);
 		} 	
 		table.html(items);
 
 		var collapsible = $('.collapse', legend);
 		// hide first to prevent flicker
-		collapsible.collapse('hide');
+		//collapsible.collapse('hide');
+
+		this.$('.data-legend .collapse').collapse('hide');
+
 		collapsible.collapse('show');
 	},
 
-    hideDetailData: function(obj)
+    hideDetailData: function(pointCollectionId)
 	{	
-		var legend = this.$('.data-legend.'+obj.collectionId);
+		var legend = this.$('.data-legend.'+pointCollectionId);
 		var collapsible = $('.collapse', legend);
 		collapsible.collapse('hide');
 	},

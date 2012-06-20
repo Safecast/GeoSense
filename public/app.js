@@ -213,7 +213,7 @@ var AppRouter = Backbone.Router.extend({
 				console.error('Failed to fetch new collection, trying again after timeout...');
 		    },
 		    success: function(data) {
-		    	if (data.busy) {
+		    	if (data.status == DataStatus.BUSY) {
 					app.vent.trigger("setStateType", 'parsing', data);
 					console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
 					app.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
@@ -267,7 +267,7 @@ var AppRouter = Backbone.Router.extend({
 		$('.data-info').show();
 
 		//Fetch time based point collections for graph
-		/*if (1||data.timebased) {
+		/*if (1||data.timeBased) {
 			collectionOptions.urlParams = {
 				t: 'w'
 			};
