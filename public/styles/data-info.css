@@ -93,6 +93,7 @@
 	padding: .25em;
 	text-align: center;
 	color: #000;
+	font-weight: bold;
 	text-shadow:rgba(255,255,255,.8) 0px 1px 0px;
 	border-right: 1px rgba(0,0,0,.25) solid;
 	border-bottom: 1px rgba(0,0,0,.25) solid;

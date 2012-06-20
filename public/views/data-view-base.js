@@ -199,7 +199,7 @@ window.DataViewBase = Backbone.View.extend({
 			var darkerColor = gradient.intToHexColor(gradient.interpolation.lerpRGB(.15, gradient.colors[i], {color: 0}));
 
 			var li = 
-				'<li style="width: '+Math.floor(100 / this.colors.length)+'%;">'
+				'<li style="width: '+Math.round(100 / this.colors.length * 100) / 100+'%;">'
 				+ '<div class="segment" style="background: '+baseColor
 				+ '; background: linear-gradient(top, '+baseColor+' 40%, '+darkerColor+' 80%)'
 				+ '; background: -webkit-gradient(linear, left top, left bottom, color-stop(.4, '+baseColor+'), color-stop(.8, '+darkerColor+'))'

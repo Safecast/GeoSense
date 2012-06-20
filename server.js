@@ -225,6 +225,42 @@ var Map = mongoose.model('Map', new mongoose.Schema({
 	layers: {type: [MapLayer.schema], index: 1}
 }));
 
+/*
+Adjusts minVal, maxVal and color positions for all layers if there are if 
+absPosition is defined for any color.
+
+This allows us to have colors with relative (normalized) positions between
+0 and 1, as well as colors with absolute positions, for which minVal and 
+maxVal may have to be adjusted if the absolute position is lower or greater. 
+*/
+Map.prototype.adjustScales = function() {
+	var map = this;
+	for (var i = 0; i < map.layers.length; i++) {
+		var colors = map.layers[i].options.colors;
+		var pointCollection = map.layers[i].pointCollection;
+		// adjust minVal and maxVal so that absPosition fits between them
+		for (var j = 0; j < colors.length; j++) {
+			if (colors[j].absPosition != null) {
+				map.layers[i].pointCollection.minVal = Math.min(
+					map.layers[i].pointCollection.minVal, colors[j].absPosition);
+				map.layers[i].pointCollection.maxVal = Math.max(
+					map.layers[i].pointCollection.maxVal, colors[j].absPosition);
+			}
+		}
+		// for each color, calculate new position if absPosition is set
+		for (var j = 0; j < colors.length; j++) {
+			if (colors[j].absPosition != null) {
+				console.log(colors[j].absPosition, pointCollection.minVal, pointCollection.maxVal);
+				var p = (colors[j].absPosition - pointCollection.minVal) / (pointCollection.maxVal - pointCollection.minVal);
+				//colors[j].position = Math.max(0, Math.min(p, 1)); // not necessary since minVal and maxVal are adjusted
+				colors[j].position = p;
+			}
+		}
+		// sort by position
+		colors.sort(function(a, b) { return (a.position - b.position) });
+	}
+}
+
 var Tweet = mongoose.model('Tweet', new mongoose.Schema({
 	collectionid: String,
 	mapid: String,
@@ -426,7 +462,7 @@ app.post('/api/import/', function(req, res){
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-	var limitMax = 30000;
+	var limitMax = 300000;
 	var limitSkip = 0;
 	var appendCollectionId = null;
 	
@@ -925,7 +961,6 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 						[[b[0], b[1]], [b[2], b[3]]]
 					];
 				}
-				console.log(b[0] > b[2], '----');
 
 				console.log('query within boxes: '+boxes.length);
 				console.log(boxes);
@@ -969,7 +1004,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 							res.send('ooops', 500);
 							return;
 						}
-						console.log(datasets);
+
 						for (var i = 0; i < datasets.length; i++) {
 							if (PointModel != Point) {
 								var reduced = datasets[i].get('value');
@@ -1299,7 +1334,6 @@ function deprecatedMap(map) {
 	return m;
 }
 
-
 //Returns a specific unique map by mapId
 app.get('/api/map/:publicslug', function(req, res){
 	
@@ -1315,6 +1349,7 @@ app.get('/api/map/:publicslug', function(req, res){
 				return;
 			}
 
+			map.adjustScales();
 	       	res.send(deprecatedMap(map));
 		});
 });
@@ -1334,6 +1369,7 @@ app.get('/api/map/admin/:adminslug', function(req, res) {
 				return;
 			}
 
+			map.adjustScales();
 	       	res.send(deprecatedMap(map));
 		});
 });
@@ -1411,6 +1447,7 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 							.populate('layers.options')
 							.run(function(err, map) {
 							    if (!err) {
+									map.adjustScales();
 							       	res.send(deprecatedMap(map));
 							    } else {
 									res.send("oops",500);

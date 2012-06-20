@@ -13,25 +13,40 @@ db.layeroptions.update({_id: o.defaults}, {$set:
 		"featureType" : "C",
 		"colors" : [
 			{
-				"position" : 0,
-				"color" : "#0785a8"
+				"absPosition" : 10,
+				"color" : "#0785a8",
+				"description": "basically no contamination"
 			},
 			{
-				"position" : 0.025,
-				"color" : "#ff00ff"
+				"absPosition" : 100, //0.3 * 350,
+				"color" : "#ff00ff",
+				"description": "minor contamination"
 			},
 			{
-				"position" : 0.25,
-				"color" : "#ff1111"
+				"absPosition" : 0.5 * 350,
+				"color" : "#ff1111",
+				"description": "moderate contamination"
 			},
 			{
-				"position" : 0.5363636363636364,
-				"color" : "#ffea00"
+				"absPosition" : 1.0 * 350,
+				"color" : "#ff8800",
+				"description": "high contamination"
+			},
+			{
+				"absPosition" : 1000, // 3.0 * 350,
+				"color" : "#ffdc00",
+				"description": "evacuation mandatory"
+			},
+			{
+				"absPosition" : 10.0 * 350,
+				"color" : "#ffff88",
+				"description": "extremely high contamination"
 			}
 		],
 		"colorType" : "L"
 	}
 });
+
 print('Updated Safecast');
 
 o = db.pointcollections.findOne({"title" : /Earthquakes.*/i});

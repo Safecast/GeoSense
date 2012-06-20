@@ -105,7 +105,7 @@ h3 {
 }
 
 
-h4, h5 {
+h4, h5, .condensed {
 /*	font-family: OswaldBold, sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
 }
