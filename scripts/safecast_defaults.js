@@ -15,6 +15,7 @@ db.layeroptions.update({_id: o.defaults}, {$set:
 			{
 				"absPosition" : 10,
 				"color" : "#0785a8",
+				"interpolation": "threshold",
 				"description": "basically no contamination"
 			},
 			{
