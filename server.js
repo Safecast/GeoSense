@@ -156,13 +156,30 @@ var Point = mongoose.model('Point', new mongoose.Schema({
 
 Point.schema.index({loc: '2d', pointCollection: 1})
 
+var ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
+	color: {type: String, required: true},
+	position: Number,
+	absPosition: Number,
+	interpolation: String,
+	title: String,
+	description: String
+}));
+
+// TODO implement color palette storage -- erasing old palettes
+
+var ColorPalette = mongoose.model('ColorPalette', new mongoose.Schema({
+	colors: {type: [ColorDefinition.schema]}
+}));
+
 var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
 	visible: Boolean,
 	featureType: String,
 	colorType: String,
+	//colorPalettes: {type: [ColorPalette.schema], index: 1},
 	colors: [{
 		color: {type: String, required: true},
 		position: Number,
+		absPosition: Number,
 		interpolation: String
 	}],
 	opacity: Number,
@@ -1413,19 +1430,21 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 	var options = {
 		visible : Boolean(req.body.visible),
 		featureType : String(req.body.featureType),
-		colors: req.body.colors,
 		colorType: String(req.body.colorType),
 		opacity: Number(req.body.opacity) || null
 	};
 
-	for (var i = 0; i < options.colors.length; i++) {
-		var c = options.colors[i];
+	var colors = req.body.colors;
+
+	for (var i = 0; i < colors.length; i++) {
+		var c = colors[i];
 		if (c.position || options.colorType != 'S') {
 			c.position = Number(c.position) || 0.0;
 		}
 	}
 	// sort by position
-	options.colors.sort(function(a, b) { return (a.position - b.position) });
+	colors.sort(function(a, b) { return (a.position - b.position) });
+	options.colors = colors;
 
 	Map.findOne({publicslug: publicslug})
 		.populate('layers.pointCollection')

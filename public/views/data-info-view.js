@@ -68,12 +68,12 @@ window.DataInfoView = Backbone.View.extend({
 			}
 		}
 
-		var metadata = [
+		var metadata = pointCollection.reduce ? [
 			{
 				label: __('# of samples'),
 				value: count
 			}
-		];
+		] : [];
 		if (count > 1) {
 			metadata = metadata.concat([
 				{
