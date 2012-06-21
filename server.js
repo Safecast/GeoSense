@@ -462,7 +462,7 @@ app.post('/api/import/', function(req, res){
 	var FIRST_ROW_IS_HEADER = true;
 	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
 	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-	var limitMax = 300000;
+	var limitMax = 0;
 	var limitSkip = 0;
 	var appendCollectionId = null;
 	
