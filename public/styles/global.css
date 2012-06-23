@@ -181,7 +181,7 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	color: #ccc;
 	font-size: 13px;
 	font-weight: normal;
-	padding: 0 15px 0 15px;
+	padding: 0 15px 0 16px;
 	line-height: 27px;
 }
 

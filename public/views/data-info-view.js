@@ -144,14 +144,22 @@ window.DataInfoView = Backbone.View.extend({
 				$('.detail', this).hide();
 			}
 		});
-
 	},
 
     hideDetailData: function(pointCollectionId)
 	{	
 		var legend = this.$('.data-legend.'+pointCollectionId);
 		var collapsible = $('.collapse', legend);
-		collapsible.collapse('hide');
+		$('.detail', collapsible).hide();
+		//collapsible.collapse('hide');
+
+		/*
+		if (this.$('.data-legend .detail:visible').length == 0) {
+			this.$('.data-legend .collapse').each(function() {
+				$(this).collapse('show');
+			});
+		}
+		*/
 	},
 
 	setPanelState: function(expand) {

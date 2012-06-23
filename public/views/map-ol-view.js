@@ -396,8 +396,8 @@ window.MapOLView = window.MapViewBase.extend({
 		     onBeforeSelect: function(feature) {
 		        // TODO: Since the layer is redrawn on select, selection is very slow.
 		        // Workaround: Add code to add feature to highlight layer, then return false.
-		         self.featureSelected(feature);
-		         return false;
+		         //self.featureSelected(feature);
+		         //return false;
 		     },
 		     onSelect: function(feature) {
 		        self.featureSelected(feature);

@@ -55,8 +55,8 @@ window.DataViewBase = Backbone.View.extend({
 		this.updateStatus();
 
 		this.$(".title").html(dataTitle);
-		this.$(".title").attr("href", "#collapse" + this.collectionId);
-		this.$("#collapse").attr("id", "collapse" + this.collectionId);
+		this.$(".title").attr("href", "#collapse-" + this.className + '-' + this.collectionId);
+		this.$("#collapse").attr("id", "collapse-" + this.className + '-' + this.collectionId);
 
 		if(!_admin) {
 			this.$('#adminDataControls').remove();

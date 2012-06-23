@@ -466,10 +466,10 @@ cur.forEach(function(collection) {
 
 	if (!collection.reduce) {
 		print('*** unreduced ***');
-		/*reducePoints(collection._id, {
+		reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(0)
-		}, opts);*/
+		}, opts);
 
 	} else if (collection.reduce) {
 		for (var g in GRID_SIZES) {
