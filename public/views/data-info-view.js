@@ -155,6 +155,31 @@ window.DataInfoView = Backbone.View.extend({
 		$(this.el).html(this.template());
 		var self = this;
 
+		$(this.el).draggable({
+
+			stop: function() {
+				var right = $(this).position().left + $(this).outerWidth();				
+				if (right == $('.snap.right').position().left) {
+					console.log('snap back 1');
+					// re-dock to right edge
+					$(this).css('left', 'auto');
+				}
+			},
+
+			snap: ".snap", snapMode: "outer"
+		});
+		$(this.el).css('position', 'absolute'); // draggable sets it to relative
+		this.$('a.extend').click(function() {
+			$(self.el).toggleClass('extended');
+			self.vent.trigger('dataInfoViewResized');
+			return false;
+		})
+		this.$('a.collapse').click(function() {
+			self.$('.accordion').toggle('fast');
+			return false;
+		})
+
         return this;
     },
+
 });

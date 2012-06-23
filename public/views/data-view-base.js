@@ -125,6 +125,11 @@ window.DataViewBase = Backbone.View.extend({
 		var self = this;
 		var graphEl = self.$('.histogram');
 
+		console.log($(this.el).closest('.extended').width());
+		console.log($(graphEl).width());
+
+
+
 		if (!graphEl.length) return;
 		
 		if (!this.histogramData) {
@@ -165,17 +170,28 @@ window.DataViewBase = Backbone.View.extend({
 			maxYRatio = 1 / graphH * CROP_DISTRIBUTION_RATIO;
 		}
 
+		var cropMaxVal;
+		/*
+		var color = this.colors[this.colors.length - 1];
+		if (color.absPosition) {
+			cropMaxVal = color.absPosition;
+		}*/
+
 		var cropUpperMaxY = !maxYRatio || yRatio > maxYRatio ? 
 			maxY : minY0 * 1 / maxYRatio;
 
 		var yValues = [];
+
+		var gradient = new ColorGradient(this.histogramColors || this.colors, 'threshold');
 
 		for (var i = 0; i < len; i++) {
 			/*croppedData.push({
 				x: data[i].x,
 				y: Math.min(cropUpperMaxY, data[i].y)
 			});*/
-			yValues.push(data[i].y);
+			if (cropMaxVal == null || data[i].val < cropMaxVal) {
+				yValues.push(data[i].y);
+			}
 		}
 
 		/*
@@ -195,6 +211,7 @@ window.DataViewBase = Backbone.View.extend({
 		graph.render();
 		*/
 
+		graphEl.html('');
 		var chart = d3.select(graphEl[0]).append("svg")
 		     .attr("class", "chart")
 		     .attr("width", graphW)
@@ -206,7 +223,6 @@ window.DataViewBase = Backbone.View.extend({
 			.clamp(true);		     
 		
 		var barW = graphW / yValues.length;
-		var gradient = new ColorGradient(this.histogramColors || this.colors, 'threshold');
 		var maxX = yValues.length - 1;
 
 		chart.selectAll("rect")

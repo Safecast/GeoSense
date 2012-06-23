@@ -108,7 +108,6 @@ h3 {
 	color: #353535;
 }
 
-
 h4, h5, .condensed {
 /*	font-family: OswaldBold, sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
@@ -157,4 +156,68 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	background-image:url('../assets/homepage/loader.gif');
 	background-position:center center;	
 	background-repeat:no-repeat;
+}
+
+.panel .panel-header {
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+.panel .panel-header .frame {
+	background-color:rgba(50, 50, 50, .5);
+	border-radius: 6px;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	margin: 4px;
+	cursor: move;
+}
+
+.panel .panel-header h3 {
+	float: left;
+	margin: 0px;
+	color: #ccc;
+	font-size: 13px;
+	font-weight: normal;
+	padding: 0 15px 0 15px;
+	line-height: 27px;
+}
+
+.panel .panel-header .buttons {
+	float: right;
+	list-style: none;
+	margin: 0 5px 0 0;
+}
+
+.panel .panel-header .buttons li {
+	float: right;
+	margin-left: .5em;
+	line-height: 27px;
+}
+
+.panel .panel-header a {
+	font-weight: bold;
+	color: white;
+}
+
+
+.snap {
+	background-color: red;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	visibility: hidden;
+	z-index: 999999;
+}
+
+.snap.top {
+	width: 100%;
+	height: 15px;
+}
+
+.snap.right {
+	width: 15px;
+	height: 100%;
 }

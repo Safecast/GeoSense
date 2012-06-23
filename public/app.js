@@ -43,9 +43,6 @@ var AppRouter = Backbone.Router.extend({
 		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
         $('#app').append(this.sideBarView.render().el);
 
-        this.dataInfoView = new DataInfoView({vent: this.vent});
-		$('#app').append(this.dataInfoView.render().el);
-
 		//this.chatView = new ChatView({vent: this.vent});
         //$('#app').append(this.chatView.render().el);
 
@@ -172,8 +169,15 @@ var AppRouter = Backbone.Router.extend({
             this.mapView = new MapOLView({
 				vent: self.vent
 			});
-			$('#app').append(this.mapView.render().el);
+			var mapEl = this.mapView.render().el;
+			$('#app').append(mapEl);
 			this.mapView.start();
+
+	        var snap = $('<div class="snap top" /><div class="snap right" />');
+			$(mapEl).append(snap);
+
+	        this.dataInfoView = new DataInfoView({vent: this.vent});
+			$(mapEl).append(this.dataInfoView.render().el);
         }	
     },
 

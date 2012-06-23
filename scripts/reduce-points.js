@@ -455,6 +455,15 @@ cur.forEach(function(collection) {
 	db.pointcollections.update({_id: collection._id}, {$set: {progress: 0, busy: true, numBusy: statsTotal}});
 
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
+
+	for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
+		print('*** reducing for histogram = '+HISTOGRAM_SIZES[i]+' ***');
+		reducePoints(collection._id, {
+			pointCollection: ReductionKey.copy, 
+			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
+		}, opts, []);
+	}
+
 	if (!collection.reduce) {
 		print('*** unreduced ***');
 		/*reducePoints(collection._id, {
@@ -492,16 +501,6 @@ cur.forEach(function(collection) {
 			}, opts);*/
 		}
 	}
-
 	
-	for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
-		print('*** reducing for histogram = '+HISTOGRAM_SIZES[i]+' ***');
-		reducePoints(collection._id, {
-			pointCollection: ReductionKey.copy, 
-			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
-		}, opts, []);
-	}
-	
-
 	db.pointcollections.update({_id: collection._id}, {$set: {status: "D", busy: false, numBusy: 0}});
 });
