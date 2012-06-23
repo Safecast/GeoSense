@@ -132,13 +132,16 @@ window.DataInfoView = Backbone.View.extend({
 		} 	
 		table.html(items);
 
+		this.setPanelState(true);	
 		var collapsible = $('.collapse', legend);
+		$('.detail', collapsible).show();
 		// hide first to prevent flicker
 		collapsible.collapse('hide');
 		collapsible.collapse('show');
 		this.$('.data-legend .collapse').each(function() {
 			if (this != collapsible[0]) {
 				$(this).collapse('hide');
+				$('.detail', this).hide();
 			}
 		});
 
@@ -149,6 +152,25 @@ window.DataInfoView = Backbone.View.extend({
 		var legend = this.$('.data-legend.'+pointCollectionId);
 		var collapsible = $('.collapse', legend);
 		collapsible.collapse('hide');
+	},
+
+	setPanelState: function(expand) {
+		var self = this;
+		if (expand == null) {
+			expand = $(self.el).is('.collapsed');
+		} 
+
+		if (!expand) {
+			$(self.el).addClass('collapsed');
+		} else {
+			$(self.el).removeClass('collapsed');
+		}
+
+		if ($(self.el).is('.collapsed')) {
+			self.$('.accordion').hide('fast');
+		} else {
+			self.$('.accordion').show('fast');
+		}
 	},
 
     render: function() {
@@ -173,9 +195,9 @@ window.DataInfoView = Backbone.View.extend({
 			$(self.el).toggleClass('extended');
 			self.vent.trigger('dataInfoViewResized');
 			return false;
-		})
+		});
 		this.$('a.collapse').click(function() {
-			self.$('.accordion').toggle('fast');
+			self.setPanelState();	
 			return false;
 		})
 

@@ -188,7 +188,7 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 .panel .panel-header .buttons {
 	float: right;
 	list-style: none;
-	margin: 0 5px 0 0;
+	margin: 4px 4px 0 0;
 }
 
 .panel .panel-header .buttons li {
@@ -200,8 +200,35 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 .panel .panel-header a {
 	font-weight: bold;
 	color: white;
+	width: 16px;
+	height: 16px;
+	display: block;
+	background-image: url(../assets/panel-buttons.png);
 }
 
+.panel .panel-header .buttons a span {
+	display: none;
+}
+
+.panel .panel-header .buttons a.extend {
+	background-position: 0px top;
+}
+
+.extended .panel .panel-header .buttons a.extend {
+	background-position: -16px top;
+}
+
+.panel .panel-header .buttons a.collapse {
+	background-position: -32px top;
+}
+
+.collapsed .panel .panel-header .buttons a.collapse {
+	background-position: -48px top;
+}
+
+.panel .panel-header .buttons a:hover {
+	background-position-y: bottom !important;
+}
 
 .snap {
 	background-color: red;
