@@ -98,6 +98,19 @@ h1 {
 	line-height:38px;
 }
 
+.state-indicator {
+	width: 16px;
+	height: 16px;
+}
+
+.state-indicator.loading {
+	background-image:url('../assets/loader.gif');
+}
+
+.panel .state-indicator.loading {
+	background-image:url('../assets/loader-light.gif');
+}
+
 h2,
 h3 {
 /*	font-family: OswaldLight,sans-serif;*/

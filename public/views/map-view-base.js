@@ -68,9 +68,10 @@ window.MapViewBase = Backbone.View.extend({
 
 	mapAreaChanged: function(visibleMapArea)
 	{
-		//this.vent.trigger("setStateType", 'loading');
+		var self = this;
 
 		$.each(this.collections, function(collectionid, collection) { 
+			self.vent.trigger("setStateType", 'loading', collection);
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
 		});
@@ -110,7 +111,6 @@ window.MapViewBase = Backbone.View.extend({
 		collection.bind('reset', this.reset, this);
 		collection.bind('add', this.addOne, this);
 		this.addCollectionToMap(collection);
-		this.vent.trigger("setStateType", 'complete');
 	},
 	
 	addCommentCollection: function(collection)
@@ -126,11 +126,12 @@ window.MapViewBase = Backbone.View.extend({
 		this.addCollectionToMap(this.collection);
     },
 
-	reset: function(model) {
-		this.removeCollectionFromMap(model);
-		if (model.length > 0) {
-			this.addCollectionToMap(this.collections[model.collectionId]);
+	reset: function(collection) {
+		this.removeCollectionFromMap(collection);
+		if (collection.length > 0) {
+			this.addCollectionToMap(this.collections[collection.collectionId]);
 		}
+		this.vent.trigger("setStateType", 'complete', collection);	
 	},
 
 	resetComments: function(model) {
@@ -147,7 +148,6 @@ window.MapViewBase = Backbone.View.extend({
 			self.addOne(model, collection.pointCollectionId);
 		});
 		this.drawLayerForCollection(collection);
-		this.vent.trigger("setStateType", 'complete');	
 	},
 
 	/**

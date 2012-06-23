@@ -125,11 +125,6 @@ window.DataViewBase = Backbone.View.extend({
 		var self = this;
 		var graphEl = self.$('.histogram');
 
-		console.log($(this.el).closest('.extended').width());
-		console.log($(graphEl).width());
-
-
-
 		if (!graphEl.length) return;
 		
 		if (!this.histogramData) {

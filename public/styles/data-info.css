@@ -22,6 +22,10 @@
 	display: none;
 }
 
+.panel .accordion-heading {
+	position: relative;
+}
+
 .panel .accordion-heading .accordion-toggle {
 	padding: 0 0 .25em 0;
 }
@@ -82,6 +86,12 @@
 .data-info .status {
 	margin-bottom: .5em;
 	color: #999;
+}
+
+.data-info .state-indicator {
+	position: absolute;
+	right: 0px;
+	top: 0px;
 }
 
 .data-info .legend {

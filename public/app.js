@@ -265,7 +265,8 @@ var AppRouter = Backbone.Router.extend({
 		collection.fetch({success: function(collection) {
  			self.addDataPanelViews(pointCollectionId);
 			self.mapView.addCollection(collection);
-			self.vent.trigger("setStateType", 'complete');
+			console.log('complete');
+			self.vent.trigger("setStateType", 'complete', layer.pointCollection);
 		}});
 
 		$('.data-info').show();
