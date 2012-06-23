@@ -18,4 +18,9 @@ window.DataInspectorView = window.DataViewBase.extend({
 		
     },
 
+    initialize: function(options) {
+		DataInspectorView.__super__.initialize.call(this, options);
+		this.histogramColors = [{color: "#666666"}];
+	}
+
 });

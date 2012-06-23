@@ -10,7 +10,7 @@
 
 	background-color:rgba(0,0,0,.5);
 	border-color:#222;
-	border-radius:6px;
+	border-radius:8px;
 	color: #fff;
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px
@@ -27,9 +27,13 @@
 .data-info .accordion-group {
 	margin-bottom: 10px;
 	border: none;
-	width: 200px;
+	width: 222px;
 	margin: 0;
 	padding: 0px;
+}
+
+.data-info .extended .accordion-group {
+	width: 444px;
 }
 
 .data-info .data-legend {
@@ -112,9 +116,20 @@
 }
 
 .data-info .histogram {
-	display:none;
-	width: 200px;
+/*	background-color:rgba(50,50,50,.25);*/
+	width: 222px;
 	height: 30px;
+}
+
+.data-info .histogram rect {
+	opacity: 0.8;
+	-moz-opacity: 0.8;
+	filter:alpha(opacity=8);
+}
+
+.data-info .extended .histogram {
+	width: 444px;
+	height: 100px;
 }
 
 .data-info table {

@@ -213,7 +213,7 @@ var AppRouter = Backbone.Router.extend({
 				console.error('Failed to fetch new collection, trying again after timeout...');
 		    },
 		    success: function(data) {
-		    	if (data.status == DataStatus.BUSY) {
+		    	if (data.status == DataStatus.IMPORTING || data.status == DataStatus.REDUCING) {
 					app.vent.trigger("setStateType", 'parsing', data);
 					console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
 					app.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					

@@ -32,6 +32,11 @@
 	
 }
 
+.sidebar-view .data-container .histogram {
+	height: 30px;
+	width: 222px;
+	margin-bottom: 4px;
+}
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.cells {
 	background-image:url('../assets/feature-cells.png');

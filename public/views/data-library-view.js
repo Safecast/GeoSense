@@ -79,7 +79,12 @@ window.DataLibrary = Backbone.View.extend({
 	
 	drawDataSource: function(data)
 	{
-		dataDiv = '<div class="data-item" id="dragLabel" data="'+data._id+'"><div class="data-icon"></div><div class="data-title">'+data.title+'</div></div>'
+		dataDiv = '<div class="data-item" id="dragLabel" data="'+data._id+'">'
+			+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
+			+(data.fullCount ? '<p class="data-count micro">'+formatLargeNumber(data.fullCount)+'</p>' : '')
+			+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')
+			+(data.source ? '<h5 class="data-source micro">Source: '+data.source+'</p>' : '')
+			+'</div>'
 		this.$('.data-container').append(dataDiv);
 	},
 	

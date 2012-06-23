@@ -1,4 +1,4 @@
-var HISTOGRAM_SIZES = [100];
+var HISTOGRAM_SIZES = [222, 100, 30]; 
 var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985;
 
 var GRID_SIZES = {
@@ -162,6 +162,7 @@ var ReductionKey = {
 	},
 	Histogram: function(min, max, steps) {
 		this.step = (max - min) / steps;
+		this.steps = steps;
 		this.min = min - min % this.step;
 		this.max = max - max % this.step;
 		this.get = function(val) {
@@ -446,7 +447,7 @@ for (var g in GRID_SIZES) {
 }
 var numHistograms = HISTOGRAM_SIZES.length;
 
-var cur = db.pointcollections.find({});
+var cur = db.pointcollections.find({status: 'U'});
 cur.forEach(function(collection) {
 	opts.query = {pointCollection: collection._id};
 	var statsTotal = db.points.count(opts.query) * (numGridSizes + numHistograms);
@@ -456,13 +457,14 @@ cur.forEach(function(collection) {
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
 	if (!collection.reduce) {
 		print('*** unreduced ***');
-		reducePoints(collection._id, {
+		/*reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(0)
-		}, opts);
+		}, opts);*/
 
 	} else if (collection.reduce) {
 		for (var g in GRID_SIZES) {
+
 			var grid_size = GRID_SIZES[g];
 			print('*** reducing for grid = '+g+' ***');
 
@@ -491,7 +493,7 @@ cur.forEach(function(collection) {
 		}
 	}
 
-	/*
+	
 	for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
 		print('*** reducing for histogram = '+HISTOGRAM_SIZES[i]+' ***');
 		reducePoints(collection._id, {
@@ -499,7 +501,7 @@ cur.forEach(function(collection) {
 			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
 		}, opts, []);
 	}
-	*/
+	
 
-	db.pointcollections.update({_id: collection._id}, {$set: {busy: false, numBusy: 0}});
+	db.pointcollections.update({_id: collection._id}, {$set: {status: "D", busy: false, numBusy: 0}});
 });

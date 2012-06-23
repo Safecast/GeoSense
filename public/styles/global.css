@@ -80,6 +80,10 @@ a {
 	cursor: pointer;
 }
 
+.micro {
+	font-size: 12px;
+}
+
 p {
   color: #7f7f7f;
   font-size:10pt;
@@ -108,6 +112,10 @@ h3 {
 h4, h5, .condensed {
 /*	font-family: OswaldBold, sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
+}
+
+h4 {
+	font-weight: bold;
 }
 
 input, textarea {

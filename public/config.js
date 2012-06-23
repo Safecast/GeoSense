@@ -43,15 +43,9 @@ var COLOR_GRADIENT_STEP = null; // 1 / 500.0;
 var DEFAULT_FEATURE_OPACITY = .75;
 var DEFAULT_SELECTED_FEATURE_OPACITY = DEFAULT_FEATURE_OPACITY + (1 - DEFAULT_FEATURE_OPACITY) / 2;
 
-
-
-
-
-
-
-
-
-
+// the higher this ratio, the more cropping of extreme high values in histograms if
+// cropDistribution == true
+var CROP_DISTRIBUTION_RATIO = 1 / 10;
 
 var _panelLoaded = false;
 var _admin = true;

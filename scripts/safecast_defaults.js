@@ -3,6 +3,8 @@ o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : "measu
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"title": "Safecast",
+		"description": "Safecast is a global sensor network for collecting and sharing radiation measurements to empower people with data about their environments.",
+		"source": "Safecast.org",
 		"unit": "cpm",
 		"altUnit": ["μSv/h"]
 	}
@@ -44,7 +46,8 @@ db.layeroptions.update({_id: o.defaults}, {$set:
 				"description": "extremely high contamination"
 			}
 		],
-		"colorType" : "L"
+		"colorType" : "L",
+		"cropDistribution" : true
 	}
 });
 
@@ -54,6 +57,8 @@ o = db.pointcollections.findOne({"title" : /Earthquakes.*/i});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"title": "Earthquakes 1973–2011",
+		"description": "A global record of earthquakes with magnitude 4.5 or greater.",
+		"source": "USGS/NEIC (PDE) 1973–2011",
 		"unit": "Magnitude" 
 	}
 }, false, true);
@@ -71,12 +76,12 @@ db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:
 				"color" : "#7fffd0"
 			},
 			{
-				"position" : 0.475,
+				"position" : 0.45,
 				"color" : "#e9ff45"
 			}
 		],
 		"colorType" : "L",
-		"opacity" : 0.2,
+		"opacity" : 0.3,
 	}
 });
 print('Updated Earthquakes');
@@ -86,6 +91,7 @@ o = db.pointcollections.findOne({"title" : /Reactors.*/i});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"title": "Nuclear Reactors",
+		"source": "World Nuclear Association",
 		"unit": "MW" 
 	}
 }, false, true);

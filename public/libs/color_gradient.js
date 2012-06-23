@@ -12,7 +12,7 @@ Released under MIT License
 *	]
 *
 */
-var ColorGradient = function(colors) {	
+var ColorGradient = function(colors, interpolation) {	
 	this.colors = [];
 	this.gradientCache = {};
 	if (colors) {
@@ -23,7 +23,7 @@ var ColorGradient = function(colors) {
 				position: colors[i].position,
 				// convert color strings to int
 				color: intColor,
-				interpolation: colors[i].interpolation,
+				interpolation: interpolation || colors[i].interpolation,
 				// split channels of color
 				channels: this.getChannels(intColor)
 			};

@@ -17,6 +17,7 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 
 var DataStatus = {
 	IMPORTING: 'I',
+	UNREDUCED: 'U',
 	REDUCING: 'R',
 	DONE: 'D'
 };
@@ -29,7 +30,9 @@ var COLLECTION_DEFAULTS = {
 	opacity: null
 };
 
-var HISTOGRAM_STEPS = 100;
+var HISTOGRAM_SIZES = [222, 100, 30]; 
+
+var MIN_CROP_DISTRIBUTION_RATIO = 10000; // if max > min * r --> crop histogram
 
 //var profiler = require('v8-profiler');
 
@@ -191,6 +194,7 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
 var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	title: String,
 	description: String,
+	source: String,
 	unit: String,
 	altUnit: [String],
 	maxVal: Number,
@@ -206,6 +210,7 @@ var PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	progress: Number,
 	numBusy: Number,
 	reduce: Boolean,
+	cropDistribution: Boolean
 }));
 
 var MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
@@ -506,9 +511,10 @@ app.post('/api/import/', function(req, res){
 					finalized = true;
 			    	collection.maxVal = maxVal;
 					collection.minVal = minVal;
+					collection.cropDistribution = minVal / maxVal > MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
-					collection.status = DataStatus.DONE;
 					collection.reduce = numDone > 1000;
+					collection.status = DataStatus.UNREDUCED;
 					collection.collectionid = collection.get('_id'); // TODO: deprecated
 					collection.save(function(err) {
 				    	debugStats('*** finalized and activated collection ***');
@@ -872,7 +878,7 @@ app.delete('/api/point/:id', function(req, res){
 app.get('/api/histogram/:pointcollectionid', function(req, res) {
 	PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 		if (!err && pointCollection) {
-			collectionName = 'r_points_hist-' + HISTOGRAM_STEPS;
+			collectionName = 'r_points_hist-' + HISTOGRAM_SIZES[0];
 			var Model = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 			var query = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 			console.log(query);
@@ -887,10 +893,11 @@ app.get('/api/histogram/:pointcollectionid', function(req, res) {
 					values[reduced.val.step] = reduced.count;
 				}
 				var histogram = []; 
-				for (var step = 0; step < HISTOGRAM_STEPS; step++) {
+				for (var step = 0; step < HISTOGRAM_SIZES[0]; step++) {
 					histogram.push({
 						x: step,
-						y: values[step] ? values[step] : 0
+						y: values[step] ? values[step] : 0,
+						val: 1 / HISTOGRAM_SIZES[0] * step * (pointCollection.maxVal - pointCollection.minVal) + pointCollection.minVal
 					})
 				}
 				res.send(histogram);
@@ -1218,7 +1225,7 @@ app.delete('/api/collection/:id', function(req, res){
 
 //Associative Collection (keeps track of collection id & name)
 app.get('/api/pointcollection/:id', function(req, res){
-	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {busy: true}]})
+	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: DataStatus.IMPORTING}]})
 		.populate('defaults')
 		.run(function(err, pointCollection) {
 			if (!err && pointCollection) {
@@ -1231,9 +1238,15 @@ app.get('/api/pointcollection/:id', function(req, res){
 
 //Return all Point Collections
 app.get('/api/pointcollections', function(req, res){
-  PointCollection.find({active: true}, function(err, datasets) {
-     res.send(datasets);
-  });
+  	PointCollection.find({active: true}, null, {sort: {'title': 1}}, function(err, datasets) {
+  		var sources = [];
+  		for (var i = 0; i < datasets.length; i++) {
+  			sources.push(datasets[i].toObject());
+  			// TODO: count
+  			//sources[i].fullCount = ;
+  		}
+    	res.send(sources);
+	});
 });
 
 /*
