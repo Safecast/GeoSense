@@ -333,7 +333,9 @@ var AppRouter = Backbone.Router.extend({
 		$('#dataContainer .accordion').append(sideBarDataView.render().el);
 
 		var dataLegendView = new DataLegendView(viewOpts);
-		$('#data-info-view .accordion').append(dataLegendView.render().el);
+		var el = dataLegendView.render().el;
+		$('#data-info-view .accordion').append(el);
+		$('.collapse', el).collapse('show');
 	},
 
 });
