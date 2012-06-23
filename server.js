@@ -685,7 +685,7 @@ app.post('/api/import/', function(req, res){
 		}
 		defaults.save(function(err) {
 			if (err) {
-				res.send('oops error', 500);
+				res.send('server error', 500);
 				return;
 			}
 			runImport(new PointCollection({
@@ -751,7 +751,7 @@ app.post('/api/comment/:commentid/:mapid/:lat/:lon/:name/:text/:date', function(
 	 	res.send(comment);
     } else
 	{
-		res.send('oops', 500);
+		res.send('server error', 500);
 	}
   });
 });
@@ -781,7 +781,7 @@ app.post('/api/chat/:mapid/:name/:text/:date', function(req, res){
 	 	res.send(chat);
     } else
 	{
-		res.send('oops', 500);
+		res.send('server error', 500);
 	}
   });
 });
@@ -884,7 +884,7 @@ app.get('/api/histogram/:pointcollectionid', function(req, res) {
 			console.log(query);
 			Model.find(query, function(err, datasets) {
 				if (err) {
-					res.send('ooops', 404);
+					res.send('server error', 500);
 					return;
 				}
 				values = [];
@@ -903,7 +903,7 @@ app.get('/api/histogram/:pointcollectionid', function(req, res) {
 				res.send(histogram);
 			});
 		} else {
-			res.send('ooops', 404);
+			res.send('collection not found', 404);
 		}
 	});
 });
@@ -1120,7 +1120,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 
 
 		} else {
-			res.send('ooops', 404);
+			res.send('collection not found', 404);
 		}
 	});
 
@@ -1166,6 +1166,7 @@ app.get('/api/collection/', function(req, res){
 });
 */
 
+/*
 app.post('/api/collection/:id', function(req, res){
 		
 	var point;
@@ -1187,6 +1188,8 @@ app.post('/api/collection/:id', function(req, res){
 		}
 	  });
 });
+
+*/
 
 /*
 app.post('/api/addpoints/:id', function(req, res){
@@ -1211,6 +1214,7 @@ app.post('/api/addpoints/:id', function(req, res){
 });
 */
 
+/*
 app.delete('/api/collection/:id', function(req, res){
    Point.remove({collectionid:req.params.id}, function(err) {
       if (!err) {
@@ -1222,8 +1226,8 @@ app.delete('/api/collection/:id', function(req, res){
 	  }
   });
 });
+*/
 
-//Associative Collection (keeps track of collection id & name)
 app.get('/api/pointcollection/:id', function(req, res){
 	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: DataStatus.IMPORTING}]})
 		.populate('defaults')
@@ -1231,7 +1235,7 @@ app.get('/api/pointcollection/:id', function(req, res){
 			if (!err && pointCollection) {
 				res.send(pointCollection);
 			} else {
-				res.send('ooops', 404);
+				res.send('collection not found', 404);
 			}
 		});
 });
@@ -1292,7 +1296,7 @@ app.delete('/api/pointcollection/:id', function(req, res){
 	        res.send('')
 	      }
 	      else {
-			res.send('oops', 500);
+			res.send('server error', 500);
 		  }
 	  });
 });
@@ -1355,10 +1359,10 @@ app.get('/api/map/:publicslug', function(req, res){
 		.populate('layers.options')
 		.run(function(err, map) {
 			if (err) {
-				res.send("oops", 500);
+				res.send("server error", 500);
 				return;
 			} else if (!map) {
-				res.send("oops", 404);
+				res.send("map not found", 404);
 				return;
 			}
 
@@ -1375,10 +1379,10 @@ app.get('/api/map/admin/:adminslug', function(req, res) {
 		.populate('layers.options')
 		.run(function(err, map) {
 			if (err) {
-				res.send("oops", 500);
+				res.send("server error", 500);
 				return;
 			} else if (!map) {
-				res.send("oops", 404);
+				res.send("map not found", 404);
 				return;
 			}
 
@@ -1409,7 +1413,7 @@ app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
 	    if (!err) {
 		 	res.send(map);
 	    } else {
-			res.send('oops', 500);
+			res.send('server error', 500);
 		}
 	  });
 });
@@ -1421,54 +1425,63 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 
 	console.log(req.body)
 
-    PointCollection.findOne({_id: pointcollectionid, active: true})
-    	.populate('defaults')
-    	.run(function(err, collection) {
-		    if (err || !collection) {
-				res.send('oops', 404);
+	Map.findOne({ publicslug: publicslug })
+		.populate('layers.pointCollection')
+		.run(function(err, map) {
+			if (err || !map) {
+				res.send('oops error', 404);
 				return;
-		    }
-
-		    var defaults = collection.defaults.toObject();
-		    delete defaults['_id'];
-		    var options = new LayerOptions(defaults);
-
-		    options.save(function(err) {
-			    if (err) {
-					res.send('oops error', 500);
+			}
+			for (var i = 0; i < map.layers.length; i++) {
+				if (map.layers[i].pointCollection._id.toString() == pointcollectionid) {
+					res.send('collection already bound', 409);
 					return;
 				}
-			    var layer = new MapLayer({
-			    	pointCollection: collection,
-			    	options: options._id
-			    });    
+			}
 
-				Map.findOne({ publicslug: publicslug }, function(err, map) {
-					if (err || !map) {
-						res.send('oops error', 500);
+		    PointCollection.findOne({_id: pointcollectionid, active: true})
+		    	.populate('defaults')
+		    	.run(function(err, collection) {
+				    if (err || !collection) {
+						res.send('oops', 404);
 						return;
-					}
-			      	map.layers.push(layer);
-			      	map.save(function(err, map) {
-						if (err) {
-							res.send('oops error', 500);
+				    }
+
+				    var defaults = collection.defaults.toObject();
+				    delete defaults['_id'];
+				    var options = new LayerOptions(defaults);
+
+				    options.save(function(err) {
+					    if (err) {
+							res.send('server error', 500);
 							return;
 						}
-				        console.log("collection bound to map");
-						Map.findOne({_id: map._id})
-							.populate('layers.pointCollection')
-							.populate('layers.options')
-							.run(function(err, map) {
-							    if (!err) {
-									map.adjustScales();
-							       	res.send(deprecatedMap(map));
-							    } else {
-									res.send("oops",500);
-								}
-							});
-				  	});
-			  	});
-		    });
+					    var layer = new MapLayer({
+					    	pointCollection: collection,
+					    	options: options._id
+					    });    
+
+				      	map.layers.push(layer);
+				      	map.save(function(err, map) {
+							if (err) {
+								res.send('server error', 500);
+								return;
+							}
+					        console.log("collection bound to map");
+							Map.findOne({_id: map._id})
+								.populate('layers.pointCollection')
+								.populate('layers.options')
+								.run(function(err, map) {
+								    if (!err) {
+										map.adjustScales();
+								       	res.send(deprecatedMap(map));
+								    } else {
+										res.send('server error', 500);
+									}
+								});
+					  	});
+				    });
+			    });
 	    });
 });
 
@@ -1509,7 +1522,7 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 						}
 						map.layers[i].options.save(function(err) {
 							if (err) {
-								res.send('oops error', 500);
+								res.send('server error', 500);
 								return;
 							}
 							console.log('layer options updated');
@@ -1518,8 +1531,10 @@ app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req
 						break;
 					}
 				}
+				res.send('collection not bound', 409);
+				return;
 			} else {
-				res.send('ooops', 404);
+				res.send('map not found', 404);
 			}
 	  	});
 });
@@ -1542,29 +1557,42 @@ app.post('/api/unbindmapcollection/:publicslug/:collectionid', function(req, res
 				}
 				map.save(function(err) {
 					if (err) {
-						res.send('oops error', 500);
+						res.send('server error', 500);
 						return;
 					}
 					console.log('map updated');
 					res.send('');
 				});
 			} else {
-				res.send('ooops', 404);
+				res.send('map not found', 404);
 			}
 	  	});
 	
 });
 
 app.delete('/api/map/:mapid', function(req, res){
-   Map.remove({mapid:req.params.mapid}, function(err) {
-      if (!err) {
-        console.log("map removed");
-        res.send('')
-      }
-      else {
-		res.send('oops error', 500);
-	  }
-  });
+	Map.findOne({publicslug: req.params.mapid})
+		.populate('layers.pointCollection')
+		.populate('layers.options')
+		.run(function(err, map) {
+			if (!err && map) {
+				while (map.layers.length > 0) {
+					map.layers[0].options.remove();
+					map.layers[0].remove();
+				}
+				map.remove(function(err) {
+					if (err) {
+						res.send('server error', 500);
+						return;
+					}
+					console.log('map removed');
+					res.send('');
+				});
+			} else {
+				res.send('map not found', 404);
+			}
+	  	});
+
 });
 
 ////////////

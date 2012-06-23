@@ -41,7 +41,6 @@ window.SetupView = Backbone.View.extend({
 	},
 
 	deleteMapClicked: function() {
-		console.log('hi');
 		$.ajax({
 			type: 'DELETE',
 			url: '/api/map/' + _mapId,

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-NODE_ENV=development node server.js
+NODE_ENV=development nodemon server.js
