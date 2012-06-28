@@ -1,8 +1,63 @@
+exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
+{
+    if (err) {
+        console.log('error', err);
+        switch (err.name) {
+            default:
+                // if not in DEBUG mode, most error messages should be hidden from client: 
+                sendErr = DEBUG ? err : {
+                    message: 'Server error'
+                };          
+                break;
+            case 'ValidationError':
+                // certain error messages should be available to client:
+                sendErr = err;
+                break;
+        }
+        res.send(sendErr, 500);
+        return true;
+    } else if (!op) {
+        res.send((name ? name + ' ' : '') + 'not found', 404);
+        return true;
+    } else if (permissionCallback && !permissionCallback(req, op)) {
+        res.send('permission denied', 403);
+        return true;
+    }
+
+    return false;
+}
+
 exports.import = function(into, mod) {
     for (var k in mod) {
         into[k] = mod[k];
     }
     return mod;
+}
+
+// TODO: Due to a mongodb bug, counting is really slow even if there is 
+// an index: https://jira.mongodb.org/browse/SERVER-1752
+// To address this we currently cache the count as long for 
+// as the server is running, but mongodb 2.3 should fix this issue.
+var COUNT_CACHE = {};
+exports.modelCount = function(model, query, callback) {
+    console.log('counting', query);
+
+    cacheKey = model.modelName + '-';
+    for (var k in query) {
+        cacheKey += k + '-' + query[k];
+    }
+
+    if (!COUNT_CACHE[cacheKey]) {
+        model.count(query, function(err, count) {
+            if (!err) {
+                COUNT_CACHE[cacheKey] = count;
+            }           
+            callback(err, count);
+        });
+    } else {
+        console.log('cached count '+cacheKey+': '+COUNT_CACHE[cacheKey]);
+        callback(false, COUNT_CACHE[cacheKey]);
+    }
 }
 
 // port of http://stackoverflow.com/a/25486
