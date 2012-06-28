@@ -1,3 +1,5 @@
+var config = require('./config.js');
+
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
     if (err) {
@@ -5,7 +7,7 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
         switch (err.name) {
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 
-                sendErr = DEBUG ? err : {
+                sendErr = config.DEBUG ? err : {
                     message: 'Server error'
                 };          
                 break;
