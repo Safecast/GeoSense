@@ -107,7 +107,7 @@ var MapAPI = function(app) {
 		
 		var currDate = Math.round((new Date).getTime() / 1000);
 		var collections = {};
-		var slugCounter = 0;
+		var slugCounter = 1;
 
 		var map = new Map({
 			title: req.body.title,
@@ -122,7 +122,7 @@ var MapAPI = function(app) {
 
 		var makeUniqueSlugAndSave = function() 
 		{
-			map.publicslug = utils.slugify(req.body.title) + (slugCounter ? '-' + slugCounter : '');
+			map.publicslug = utils.slugify(req.body.title) + (slugCounter > 1 ? '-' + slugCounter : '');
 			if (map.publicslug.match(config.RESERVED_URI)) {
 				slugCounter++;
 				makeUniqueSlugAndSave();

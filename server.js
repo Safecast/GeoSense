@@ -29,7 +29,7 @@ require('./api/point.js')(app);
 require('./api/import.js')(app);
 
 // Admin Route
-app.get(/^\/admin\/([a-z0-9]{32})(|\/(|globe|map|setup))$/, function(req, res){
+app.get(/^\/admin\/([a-f0-9]{32})(|\/(|globe|map|setup))$/, function(req, res){
 	models.Map.findOne({adminslug: req.params[0]}, function(err, map) {
 		if (utils.handleDbOp(req, res, err, map, 'map')) return;
 		permissions.canAdminMap(req, map, true);
