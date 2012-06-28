@@ -19,7 +19,7 @@ var e = {
 
 	// Reserve certain URIs and do not allow them for slugs without modification, such as:
 	// "admin", short words, short numbers, MD5 hashes 
-	RESERVED_URI: /^(admin|[a-z0-9]{1,8}|[0-9]{1,5}|[a-f0-9]{32})$/
+	RESERVED_URI: /^(admin|[a-z0-9]{1,7}|[0-9]{1,5}|[a-f0-9]{32})$/
 };
 
 if (DEV) {
