@@ -7,6 +7,18 @@ var DEBUG = DEV;
 var BASE_URI = !DEV ? 'geo.media.mit.edu/' : 'localhost:3000/';
 var BASE_URL = 'http://' + BASE_URI;
 
+var MapStatus = {
+	PRIVATE: 'P',
+	PUBLIC: 'A'
+}
+
+var DataStatus = {
+	IMPORTING: 'I',
+	UNREDUCED: 'U',
+	REDUCING: 'R',
+	DONE: 'D'
+};
+
 var FeatureType = {
 	POINTS: 'P',
 	CELLS: 'C',
@@ -14,12 +26,6 @@ var FeatureType = {
 };
 
 FeatureType.DEFAULT = FeatureType.CELLS;
-
-var DataStatus = {
-	IMPORTING: 'I',
-	REDUCING: 'R',
-	DONE: 'D'
-};
 
 var ColorType = {
 	SOLID: 'S',
@@ -32,6 +38,10 @@ var UnitFormat = {
 
 ColorType.DEFAULT = ColorType.SOLID;
 
+
+
+
+
 var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
 var GRID_SIZES = {
 //	'-1': 2,
@@ -40,6 +50,11 @@ var GRID_SIZES = {
 for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
+
+var HISTOGRAM_SIZES = [222, 100, 30]; 
+
+
+
 
 if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
 
@@ -70,4 +85,16 @@ var _settingsVisible = false;
 var _graphVisible = false;
 var _dataLibraryVisible = false;
 var _chatVisible = false;
+
 							
+if (module) {
+	module.exports = {
+		MapStatus: MapStatus,
+		FeatureType: FeatureType,
+		DataStatus: DataStatus,
+		ColorType: ColorType,
+		GRID_SIZES: GRID_SIZES,
+		HISTOGRAM_SIZES: HISTOGRAM_SIZES
+	};
+}
+

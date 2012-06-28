@@ -1,43 +1,11 @@
+var DEBUG = process.env.NODE_ENV == 'development';
+// Since dev server is restarted frequently and session would be lost, 
+// always allow user to admin map in DEBUG mode.
+var DEBUG_CIRCUMVENT_PERMISSIONS = true;
 
-/*var Proj4js = require('proj4js');
-var METERS_PER_DEG_LON = Proj4js.transform(new Proj4js.Proj("EPSG:4326"), new Proj4js.Proj("EPSG:900913"), new Proj4js.Point(1, 0)).x;
-var METERS_PER_PX_AT_ZOOM_0 = 156543.03390625;
-var DEG_PER_PX_AT_ZOOM_0 = METERS_PER_DEG_LON / METERS_PER_PX_AT_ZOOM_0;*/
-
+var utils = require("./utils.js")
 var config = require("./public/config.js");
-
-var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
-var GRID_SIZES = {
-//	'-1': 2,
-	'0': DEG_PER_PX_AT_ZOOM_0 * 4
-};
-for (var zoom = 1; zoom <= 15; zoom++) {
-	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
-}
-
-var MapStatus = {
-	PRIVATE: 'P',
-	PUBLIC: 'A'
-}
-
-var DataStatus = {
-	IMPORTING: 'I',
-	UNREDUCED: 'U',
-	REDUCING: 'R',
-	DONE: 'D'
-};
-
-var COLLECTION_DEFAULTS = {
-	visible: true,
-	featureType: 'C',
-	colorType: 'S',
-	colors: [{color: '#00C9FF'}],
-	opacity: null
-};
-
-var HISTOGRAM_SIZES = [222, 100, 30]; 
-
-var MIN_CROP_DISTRIBUTION_RATIO = 10000; // if max > min * r --> crop histogram
+utils.import(config, require("./config.js"));
 
 //var profiler = require('v8-profiler');
 
@@ -56,13 +24,8 @@ var application_root = __dirname,
 	_ = require('cloneextend');
 
 var app = express.createServer();
-var DEBUG = process.env.NODE_ENV == 'development';
 
 var RESERVED_URI = /^(admin|[0-9]{1,4})$/;
-
-// Since dev server is restarted frequently and session would be lost, 
-// always allow user to admin map in DEBUG mode.
-var DEBUG_CIRCUMVENT_PERMISSIONS = true;
 
 if (DEBUG) {
 	// local db
@@ -106,7 +69,7 @@ function canAdminMap(req, map, status) {
 }
 
 function canViewMap(req, map) {
-	return map.status == MapStatus.PUBLIC || canAdminMap(req, map);
+	return map.status == config.MapStatus.PUBLIC || canAdminMap(req, map);
 }
 
 function handleDbOp(req, res, err, op, name, permissionCallback) 
@@ -138,13 +101,6 @@ function handleDbOp(req, res, err, op, name, permissionCallback)
 	return false;
 }
 
-_slugify_strip_re = /[^\w\s-]/g;
-_slugify_hyphenate_re = /[-\s]+/g;
-function slugify(s) {
-	s = s.replace(_slugify_strip_re, '').trim().toLowerCase();
-	s = s.replace(_slugify_hyphenate_re, '-');
-	return s;
-}
 
 /*
 var zlib = require('zlib');
@@ -280,7 +236,7 @@ var Map = mongoose.model('Map', new mongoose.Schema({
 	adminslug: {type: String, required: true, index: {unique: true}},
 	publicslug: {type: String, required: true, index: {unique: true}},
 	featured: {type: Number, default: (DEBUG ? 1 : 0)}, 
-	status: {type: String, enum: [MapStatus.PRIVATE, MapStatus.PUBLIC], required: true, default: MapStatus.PUBLIC},
+	status: {type: String, enum: [config.MapStatus.PRIVATE, config.MapStatus.PUBLIC], required: true, default: config.MapStatus.PUBLIC},
 	created: Date,
 	modified: Date,
 	created_by: String,
@@ -302,25 +258,27 @@ Map.prototype.adjustScales = function() {
 		var colors = map.layers[i].options.colors;
 		var pointCollection = map.layers[i].pointCollection;
 		// adjust minVal and maxVal so that absPosition fits between them
-		for (var j = 0; j < colors.length; j++) {
-			if (colors[j].absPosition != null) {
-				map.layers[i].pointCollection.minVal = Math.min(
-					map.layers[i].pointCollection.minVal, colors[j].absPosition);
-				map.layers[i].pointCollection.maxVal = Math.max(
-					map.layers[i].pointCollection.maxVal, colors[j].absPosition);
+		if (colors) {
+			for (var j = 0; j < colors.length; j++) {
+				if (colors[j].absPosition != null) {
+					map.layers[i].pointCollection.minVal = Math.min(
+						map.layers[i].pointCollection.minVal, colors[j].absPosition);
+					map.layers[i].pointCollection.maxVal = Math.max(
+						map.layers[i].pointCollection.maxVal, colors[j].absPosition);
+				}
 			}
-		}
-		// for each color, calculate new position if absPosition is set
-		for (var j = 0; j < colors.length; j++) {
-			if (colors[j].absPosition != null) {
-				console.log(colors[j].absPosition, pointCollection.minVal, pointCollection.maxVal);
-				var p = (colors[j].absPosition - pointCollection.minVal) / (pointCollection.maxVal - pointCollection.minVal);
-				//colors[j].position = Math.max(0, Math.min(p, 1)); // not necessary since minVal and maxVal are adjusted
-				colors[j].position = p;
+			// for each color, calculate new position if absPosition is set
+			for (var j = 0; j < colors.length; j++) {
+				if (colors[j].absPosition != null) {
+					console.log(colors[j].absPosition, pointCollection.minVal, pointCollection.maxVal);
+					var p = (colors[j].absPosition - pointCollection.minVal) / (pointCollection.maxVal - pointCollection.minVal);
+					//colors[j].position = Math.max(0, Math.min(p, 1)); // not necessary since minVal and maxVal are adjusted
+					colors[j].position = p;
+				}
 			}
+			// sort by position
+			colors.sort(function(a, b) { return (a.position - b.position) });
 		}
-		// sort by position
-		colors.sort(function(a, b) { return (a.position - b.position) });
 	}
 }
 
@@ -544,7 +502,7 @@ app.post('/api/import/', function(req, res){
 
 	var runImport = function(collection) {
 		collection.active = false;
-		collection.status = DataStatus.IMPORTING;
+		collection.status = config.DataStatus.IMPORTING;
 
 		collection.save(function(err, collection) {
 		    if (!err) {
@@ -567,10 +525,10 @@ app.post('/api/import/', function(req, res){
 					finalized = true;
 			    	collection.maxVal = maxVal;
 					collection.minVal = minVal;
-					collection.cropDistribution = minVal / maxVal > MIN_CROP_DISTRIBUTION_RATIO;
+					collection.cropDistribution = minVal / maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
 					collection.reduce = numDone > 1000;
-					collection.status = DataStatus.UNREDUCED;
+					collection.status = config.DataStatus.UNREDUCED;
 					collection.collectionid = collection.get('_id'); // TODO: deprecated
 					collection.save(function(err) {
 				    	debugStats('*** finalized and activated collection ***');
@@ -733,8 +691,8 @@ app.post('/api/import/', function(req, res){
 	if (!appendCollectionId) {
 		console.log('Creating new collection');
 
-		var defaults = new LayerOptions(COLLECTION_DEFAULTS);
-		for (var key in COLLECTION_DEFAULTS) {
+		var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
+		for (var key in config.COLLECTION_DEFAULTS) {
 			if (req.body[key]) {
 				defaults[key] = req.body[key];
 			}
@@ -934,7 +892,7 @@ app.delete('/api/point/:id', function(req, res){
 app.get('/api/histogram/:pointcollectionid', function(req, res) {
 	PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 		if (!err && pointCollection) {
-			collectionName = 'r_points_hist-' + HISTOGRAM_SIZES[0];
+			collectionName = 'r_points_hist-' + config.HISTOGRAM_SIZES[0];
 			var Model = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 			var query = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 			console.log(query);
@@ -949,11 +907,11 @@ app.get('/api/histogram/:pointcollectionid', function(req, res) {
 					values[reduced.val.step] = reduced.count;
 				}
 				var histogram = []; 
-				for (var step = 0; step < HISTOGRAM_SIZES[0]; step++) {
+				for (var step = 0; step < config.HISTOGRAM_SIZES[0]; step++) {
 					histogram.push({
 						x: step,
 						y: values[step] ? values[step] : 0,
-						val: 1 / HISTOGRAM_SIZES[0] * step * (pointCollection.maxVal - pointCollection.minVal) + pointCollection.minVal
+						val: 1 / config.HISTOGRAM_SIZES[0] * step * (pointCollection.maxVal - pointCollection.minVal) + pointCollection.minVal
 					})
 				}
 				res.send(histogram);
@@ -971,7 +929,7 @@ app.get('/api/mappoints/:pointcollectionid', function(req, res) {
 			var urlObj = url.parse(req.url, true);
 
 			zoom = urlObj.query.z || 0;
-			grid_size = GRID_SIZES[zoom];
+			grid_size = config.GRID_SIZES[zoom];
 			console.log('zoom ' + zoom + ', grid size ' + grid_size);
 
 			var time_grid = false;
@@ -1285,7 +1243,7 @@ app.delete('/api/collection/:id', function(req, res){
 */
 
 app.get('/api/pointcollection/:id', function(req, res){
-	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: DataStatus.IMPORTING}]})
+	PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: config.DataStatus.IMPORTING}]})
 		.populate('defaults')
 		.run(function(err, pointCollection) {
 			if (!err && pointCollection) {
@@ -1364,7 +1322,7 @@ app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, 
 
 //Returns all unique maps
 app.get('/api/maps(\/latest|\/featured)' , function(req, res){
-	var query = {status: MapStatus.PUBLIC};
+	var query = {status: config.MapStatus.PUBLIC};
 	var options = {};
 	switch (req.params[0]) {
 		case '/latest':
@@ -1488,7 +1446,7 @@ app.post('/api/map', function(req, res){
 
 	var makeUniqueSlugAndSave = function() 
 	{
-		map.publicslug = slugify(req.body.title) + (slugCounter ? '-' + slugCounter : '');
+		map.publicslug = utils.slugify(req.body.title) + (slugCounter ? '-' + slugCounter : '');
 		if (map.publicslug.match(RESERVED_URI)) {
 			slugCounter++;
 			makeUniqueSlugAndSave();
