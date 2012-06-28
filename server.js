@@ -1,18 +1,11 @@
 var application_root = __dirname,
- 	utils = require("./utils.js"),	
 	config = require("./config.js"),
+	path = require("path"),
 	express = require("express"),
-  	path = require("path"),
   	mongoose = require('mongoose'),
-  	twitter = require('ntwitter'),
-	//nowjs = require("now"),
-	csv = require('csv'),    
-	date = require('datejs'),
-	url = require('url'),
-	util = require('util'),
-	uuid = require('node-uuid'),
-	md5 = require('MD5'),
-	_ = require('cloneextend');
+  	models = require('./models.js'),
+  	utils = require('./utils.js'),
+  	permissions = require('./permissions.js');
 
 var app = express.createServer();
 
@@ -37,9 +30,8 @@ require('./api/import.js')(app);
 
 // Admin Route
 app.get(/^\/admin\/([a-z0-9]{32})(|\/(|globe|map|setup))$/, function(req, res){
-	console.log(req.params);
-	Map.findOne({adminslug: req.params[0]}, function(err, map) {
-		if (handleDbOp(req, res, err, map, 'map')) return;
+	models.Map.findOne({adminslug: req.params[0]}, function(err, map) {
+		if (utils.handleDbOp(req, res, err, map, 'map')) return;
 		permissions.canAdminMap(req, map, true);
 		var url = '/admin/' + map.publicslug + req.params[1];
 		res.writeHead(302, {

@@ -1,7 +1,9 @@
 var config = require('../config.js'),
 	models = require("../models.js"),
 	permissions = require("../permissions.js"),
-	utils = require("../utils.js");
+	utils = require("../utils.js"),
+	uuid = require('node-uuid'),
+	md5 = require('MD5');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
@@ -22,7 +24,9 @@ var MapAPI = function(app) {
 				options.limit = 20;		
 				break;
 			case '/featured':
-				query.featured = {$gt: 0};
+				if (!config.DEBUG) {
+					query.featured = {$gt: 0};
+				}
 				options.sort = {'featured': -1};
 				break;
 		}

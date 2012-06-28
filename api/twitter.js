@@ -1,3 +1,5 @@
+var twitter = require('ntwitter');
+
 ////////////
 // TWEETS 
 ///////////

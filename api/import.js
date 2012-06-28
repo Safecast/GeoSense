@@ -1,147 +1,49 @@
 var config = require('../config.js'),
 	models = require("../models.js"),
 	permissions = require("../permissions.js"),
-	utils = require("../utils.js");
+	utils = require("../utils.js"),
+	conversion = require("./conversion/conversion.js"),
+  	mongoose = require('mongoose'),
+	csv = require('csv'),    
+	date = require('datejs'),
+	url = require('url');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
+	LayerOptions = models.LayerOptions,
 	handleDbOp = utils.handleDbOp;
 
 var ImportAPI = function(app) {
 	app.post('/api/import/', function(req, res){
 
 		// TODO: This only serves for testing
+		var converter;
 		if (!req.body['file']) {
 			switch(req.body.converter) {
+				default:
+					converter = require('./conversion/point/default.js').PointConverter;
+					break;
+
 				case 'Earthquake Dataset':
 					req.body['file'] = 'earthquakes.csv';
+					converter = require('./conversion/point/earthquakes.js').PointConverter;
 					break;
 				
 				case 'Nuclear Reactors':
 					req.body['file'] = 'reactors.csv';
+					converter = require('./conversion/point/reactors.js').PointConverter;
 					break;
 				
 				case 'Safecast Dataset':
 					req.body['file'] = 'measurements-out.csv';
+					converter = require('./conversion/point/safecast.js').PointConverter;
 					break;
 			}
 		}
 		
 		var file = req.body['file'];
-		var path = '/public/data/' + req.body['file'];
+		var path = '/../public/data/' + req.body['file'];
 		var type =  file.split('.').pop();
-
-		var ConversionError = function() {};
-
-		/**
-		* Converts a string like ' y.yyy ,  -xx.x' to [x, y]
-		*/	
-		var latLngWithCommaFromString = function(field) {
-			return function() {
-				var match = String(this.get(field)).match(/^\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*$/);
-				if (match) return [parseFloat(match[2]), parseFloat(match[1])];
-				return new ConversionError();
-			}
-		};
-
-		switch(req.body.converter) {
-			
-			case 'Standard (loc, val, date)':
-				
-				var converter = {
-					fields: {
-						val: function() {
-							return parseFloat(this.get('val'));
-						}
-						,datetime: function() {
-							var d = Date.parse(String(this.get('date')));
-							return new Date(d);
-						}
-						,loc: function() {
-							var loc = this.get('loc').split(' ');
-							return [parseFloat(loc[1]), parseFloat(loc[0])];
-						}
-					}
-				};
-				
-			break;
-			
-			case 'Earthquake Dataset':
-			
-				var converter = {
-					fields: {
-						val: function() {
-							return parseFloat(this.get('mag'));
-						}
-						,datetime: function() {
-							return new Date(this.get('year'), this.get('month') - 1, this.get('day'));
-						}
-						,loc: latLngWithCommaFromString('location')
-					}
-				};
-			
-			break;
-			
-			case 'Nuclear Reactors':
-			
-				var converter = {
-					fields: {
-						val: function() {
-							return parseFloat(this.get('val'));
-						}
-						,datetime: function() {
-							return new Date(String(this.get('year')));
-						},
-						label: function() {
-							return this.get('Facility') + ' (' + this.get('ISO country code') + ')';
-						}
-						,loc: latLngWithCommaFromString('location')
-					}
-				};
-				
-			break;
-			
-			case 'Safecast Dataset':
-			
-				var converter = {
-					fields: {
-						val: function() {
-							return parseFloat(this.get('value')) * (this.get('unit') == 'cpm' ? 1.0 : 350.0);
-						}
-						/*,altVal: function() {
-							return [parseFloat(this.get('value'))] / (this.get('unit') == 'cpm' ? 350.0 : 1.0);
-						}*/
-						,datetime: function() {
-							return new Date(this.get('captured_at'));
-						}
-						,loc: function() {
-							return [parseFloat(this.get('lng')), parseFloat(this.get('lat'))];
-						}
-					}
-				};
-			
-			break;
-			
-			default:
-		}
-
-		var clamp180 = function(deg) {
-			if (deg < -360 || deg > 360) {
-				deg = deg % 360;	
-			} 
-			if (deg < -180) {
-				deg = 180 + deg % 180;
-			}
-			if (deg > 180) {
-				deg = 180 - deg % 180;
-			}
-			if (deg == 180) {
-				deg = -180;
-			}
-
-			return deg;
-		};
-
 		var importCount = 0;
 		var fieldNames;
 		var FIRST_ROW_IS_HEADER = true;
@@ -151,21 +53,6 @@ var ImportAPI = function(app) {
 		var limitSkip = 0;
 		var appendCollectionId = null;
 		
-		var convertOriginalToPoint = function(data, converters) {
-			var doc = {};
-			for (var destField in converters.fields) {
-				var f = converters.fields[destField];
-				doc[destField] = f.apply(data);
-				if (doc[destField] instanceof ConversionError) {
-					console.log('ConversionError on field '+destField);
-					return false;
-				} 
-			}
-			doc['loc'][0] = clamp180(doc['loc'][0]);
-			doc['loc'][1] = clamp180(doc['loc'][1]);
-			return new Point(doc);
-		}
-
 		var runImport = function(collection) {
 			collection.active = false;
 			collection.status = config.DataStatus.IMPORTING;
@@ -285,7 +172,7 @@ var ImportAPI = function(app) {
 											}
 										});*/
 										
-										var point = convertOriginalToPoint(model, converter);
+										var point = conversion.convertModel(model, converter, Point);
 										model = null;
 
 										if (point) {
