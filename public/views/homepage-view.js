@@ -10,9 +10,9 @@ window.HomepageView = Backbone.View.extend({
 
     initialize: function(options) {
 	    this.template = _.template(tpl.get('homepage'));
-		this.fetchRecentMaps();
-		this.recentMaps = [];
-		this.recentMapSet = 0;
+		this.fetchFeaturedMaps();
+		this.featuredMaps = [];
+		this.featuredMapSet = 0;
 		this.numberOfMapsDisplay = 5;
 	},
 
@@ -21,30 +21,15 @@ window.HomepageView = Backbone.View.extend({
         return this;
     },
 
-	generateUniqueUrl: function(length) {
-		var chars, x;
-		if (length == null) {
-			length = 10;
-		}
-		chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		var name = [];
-		for (x = 0; x < length; x++) {
-			name.push(chars[Math.floor(Math.random() * chars.length)]);
-		}
-		return name.join('');
-	},
-	
-	fetchRecentMaps: function() {
+	fetchFeaturedMaps: function() {
 		var self = this;
 		$.ajax({
 			type: 'GET',
-			url: '/api/uniquemaps/',
+			url: '/api/maps/featured',
 			success: function(data) {
-				
-				for(i=0;i<data.length;i++)
-				{
-					currMap = '<tr><td>'+data[i].title+'</td><td><a target="_self" href="/'+data[i].adminslug+'">geo.media.mit.edu/'+ data[i].adminslug +'</a></td><tr>';
-					self.recentMaps.push(currMap);
+				for (i=0; i<data.length; i++) {
+					self.featuredMaps.push('<tr><td>'+data[i].title+'</td><td><a target="_self" href="/'+data[i].publicslug+'">'
+						+ BASE_URI + data[i].publicslug +'</a></td><tr>');
 				}
 				self.showRecentMaps();
 			},
@@ -56,7 +41,7 @@ window.HomepageView = Backbone.View.extend({
 	
 	showRecentMaps: function()
 	{
-		if((this.recentMapSet + this.numberOfMapsDisplay) >= this.recentMaps.length)
+		if((this.featuredMapSet + this.numberOfMapsDisplay) >= this.featuredMaps.length)
 		{
 			this.$('#nextMapSet').fadeOut('fast');
 		}
@@ -64,9 +49,9 @@ window.HomepageView = Backbone.View.extend({
 		var self = this;
 		self.$('#mapTable').fadeOut('fast',function(){
 			self.$('#mapTable').empty();
-			for(i=self.recentMapSet;i<(self.numberOfMapsDisplay + self.recentMapSet);i++)
+			for(i=self.featuredMapSet;i<(self.numberOfMapsDisplay + self.featuredMapSet);i++)
 			{
-				self.$('#mapTable').append(self.recentMaps[i]);
+				self.$('#mapTable').append(self.featuredMaps[i]);
 			}
 			self.$('#mapTable').fadeIn('fast');
 		});	
@@ -74,29 +59,27 @@ window.HomepageView = Backbone.View.extend({
 	
 	nextMapSetClicked: function()
 	{
-		this.recentMapSet+=this.numberOfMapsDisplay;
+		this.featuredMapSet+=this.numberOfMapsDisplay;
 		this.showRecentMaps();
 	},
 
 	createMapButtonClicked: function() {
-		
 		var self = this;
-		
-		this.mapid = this.generateUniqueUrl();
-		this.mapadminid = this.generateUniqueUrl(15);
-		
-		this.name = this.$('#appendedPrependedInput').val();
-		
-		if(this.name == '' || this.name == undefined)
-		{	
+
+		var postData = {
+			title: this.$('#appendedPrependedInput').val()
+		};
+
+		if (!postData.title || postData.title == '') {	
 			this.$('#errorMessage').show();
-		} else
-		{
+		} else {
+			console.log('creating map', postData);
 			$.ajax({
 				type: 'POST',
-				url: '/api/map/' + self.mapid + '/' + self.mapadminid + '/' + self.name,
+				url: '/api/map',
+				data: postData,
 				success: function(data) {
-					window.location.href= self.mapadminid + '/setup';
+					window.location.href = '/admin/' + data.publicslug+'/setup';
 				},
 				error: function() {
 					console.error('failed to create a new map');

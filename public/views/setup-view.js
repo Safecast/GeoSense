@@ -12,17 +12,15 @@ window.SetupView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('setup'));	
 		this.vent = options.vent;
-		this.mapId = options.mapId
-		this.mapAdminId = options.mapAdminId;
-		this.mapName = options.mapName;
+		this.mapInfo = options.mapInfo;
     },
 
     render: function() {
 		$(this.el).html(this.template());	
-		this.$('.map-name').html(this.mapName + ' admin');
+		this.$('.map-name').html(this.mapInfo.title + ' Setup');
 		
-		this.$('.map-url').val('http://geo.media.mit.edu/'+ this.mapId);
-		this.$('.map-admin-url').val('http://geo.media.mit.edu/'+ this.mapAdminId);
+		this.$('.map-url').val(BASE_URL + this.mapInfo.publicslug);
+		this.$('.map-admin-url').val(BASE_URL + 'admin/' + this.mapInfo.adminslug);
 		
 		this.$(".map-url").click(function() {
 		   $(this).select();
@@ -41,15 +39,16 @@ window.SetupView = Backbone.View.extend({
 	},
 
 	deleteMapClicked: function() {
+		var self = this;
 		$.ajax({
 			type: 'DELETE',
-			url: '/api/map/' + _mapId,
+			url: '/api/map/' + self.mapInfo._id,
 			success: function() {
-				console.log('deleted map: ' + _mapId);
-				window.location = '../';
+				console.log('deleted map: ' + self.mapInfo._id);
+				window.location = '/';
 			},
 			error: function() {
-				console.error('failed to delete map: ' + _mapId);
+				console.error('failed to delete map: ' + self.mapInfo._id);
 			}
 		});
 	},

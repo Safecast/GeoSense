@@ -19,8 +19,8 @@ window.ChatView = Backbone.View.extend({
 		$(this.el).html(this.template());	
 		
 		now.ready(function() {
-			now.joinRoom(_mapId);
-			console.log('joining room '+_mapId);
+			now.joinRoom(app.mapInfo._id);
+			console.log('joining room '+app.mapInfo._id);
 		});
 		
 		now.receiveMessage = function(name, message) {
@@ -45,7 +45,7 @@ window.ChatView = Backbone.View.extend({
 		var self = this;
 		$.ajax({
 			type: 'GET',
-			url: '/api/chat/' + _mapId,
+			url: '/api/chat/' + app.mapInfo._id,
 			success: function(data) {
 		
 				for(i=0;i<data.length;i++)
@@ -78,14 +78,13 @@ window.ChatView = Backbone.View.extend({
 			now.distributeMessage(message);
 			this.$("#message").val("");
 			
-			var mapid = _mapId;
 			var name = this.$('#userName').val();
 			var text = message;
 			var date = new Date();
 			
 			$.ajax({
 				type: 'POST',
-				url: '/api/chat/' + mapid + '/' + name + '/' + text + '/' + date,
+				url: '/api/chat/' + app.mapInfo._id + '/' + name + '/' + text + '/' + date,
 				success: function(data) {
 					console.log('stored chat message');
 				},

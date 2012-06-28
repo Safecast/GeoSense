@@ -15,6 +15,11 @@ for (var zoom = 1; zoom <= 15; zoom++) {
 	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
 }
 
+var MapStatus = {
+	PRIVATE: 'P',
+	PUBLIC: 'A'
+}
+
 var DataStatus = {
 	IMPORTING: 'I',
 	UNREDUCED: 'U',
@@ -46,22 +51,27 @@ var application_root = __dirname,
 	date = require('datejs'),
 	url = require('url'),
 	util = require('util'),
+	uuid = require('node-uuid'),
+	md5 = require('MD5'),
 	_ = require('cloneextend');
 
 var app = express.createServer();
+var DEBUG = process.env.NODE_ENV == 'development';
 
-//local
-if(process.env.NODE_ENV == 'development')
-{
+var RESERVED_URI = /^(admin|[0-9]{1,4})$/;
+
+// Since dev server is restarted frequently and session would be lost, 
+// always allow user to admin map in DEBUG mode.
+var DEBUG_CIRCUMVENT_PERMISSIONS = true;
+
+if (DEBUG) {
+	// local db
 	db_path = 'mongodb://localhost/geo';
-}
-else if (process.env.NODE_ENV == 'production')
-{
+} else if (process.env.NODE_ENV == 'production') {
+	// production db
 	db_path = 'mongodb://safecast:quzBw0k@penny.mongohq.com:10065/app4772485'
 }
 
-//production
-console.log(db_path);
 mongoose.connect(db_path);
 
 app.configure(function(){
@@ -69,11 +79,72 @@ app.configure(function(){
 	app.use(express.logger('dev'));
  	app.use(express.bodyParser());
 	app.use(express.methodOverride());
+	app.use(express.cookieParser());
+	app.use(express.session({ secret: "keyboard cat" }));	
   	app.use(app.router);
   	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   	app.set('views', path.join(application_root, "views"));
 });
 
+function canAdminMap(req, map, status) {
+	if (!req.session.admin) {
+		req.session.admin = {};
+	}
+	if (status != null) {
+		req.session.admin[map._id] = status == true; 
+		console.log('set map admin: '+map._id+' = '+status);
+	} else {
+		if (!DEBUG_CIRCUMVENT_PERMISSIONS) {
+			status = req.session.admin[map._id] == true;
+			console.log('is map admin: '+map._id+' == '+status);
+		} else {
+			status = true;
+			console.log('DEBUG on, is map admin: '+map._id+' == '+status);
+		}
+	}
+	return status;
+}
+
+function canViewMap(req, map) {
+	return map.status == MapStatus.PUBLIC || canAdminMap(req, map);
+}
+
+function handleDbOp(req, res, err, op, name, permissionCallback) 
+{
+	if (err) {
+		console.log('error', err);
+		switch (err.name) {
+			default:
+				// if not in DEBUG mode, most error messages should be hidden from client: 
+				sendErr = DEBUG ? err : {
+					message: 'Server error'
+				};			
+				break;
+			case 'ValidationError':
+				// certain error messages should be available to client:
+				sendErr = err;
+				break;
+		}
+		res.send(sendErr, 500);
+		return true;
+	} else if (!op) {
+		res.send((name ? name + ' ' : '') + 'not found', 404);
+		return true;
+	} else if (permissionCallback && !permissionCallback(req, op)) {
+		res.send('permission denied', 403);
+		return true;
+	}
+
+	return false;
+}
+
+_slugify_strip_re = /[^\w\s-]/g;
+_slugify_hyphenate_re = /[-\s]+/g;
+function slugify(s) {
+	s = s.replace(_slugify_strip_re, '').trim().toLowerCase();
+	s = s.replace(_slugify_hyphenate_re, '-');
+	return s;
+}
 
 /*
 var zlib = require('zlib');
@@ -122,21 +193,6 @@ function compressResponse(request, response, data) {
 //     //newGroup.now.receiveMessage('New user joined the room', this.now.name);
 //     this.now.serverRoom = newRoom;
 // };
-
-/////////////////
-// STATIC ROUTES
-////////////////
-
-//Admin Route
-
-app.get(/^\/[a-zA-Z0-9]{15}(|\/setup)(|\/globe)(|\/map)(|\/)(|\/?)$/, function(req, res){
-   res.sendfile('public/index.html');
-});
-
-//View Route
-app.get(/^\/[a-zA-Z0-9]{10}(|\/globe)(|\/map)$/, function(req, res){
-   res.sendfile('public/index.html');
-});
 
 ///////////
 // DATA API
@@ -219,10 +275,12 @@ var MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
 }));
 
 var Map = mongoose.model('Map', new mongoose.Schema({
-	title: String,
+	title: {type: String, required: true},
 	description: String,
-	adminslug: String,
-	publicslug: String,
+	adminslug: {type: String, required: true, index: {unique: true}},
+	publicslug: {type: String, required: true, index: {unique: true}},
+	featured: {type: Number, default: (DEBUG ? 1 : 0)}, 
+	status: {type: String, enum: [MapStatus.PRIVATE, MapStatus.PUBLIC], required: true, default: MapStatus.PUBLIC},
 	created: Date,
 	modified: Date,
 	created_by: String,
@@ -433,9 +491,7 @@ app.post('/api/import/', function(req, res){
 						return new Date(this.get('captured_at'));
 					}
 					,loc: function() {
-						//return [parseFloat(this.get('lng')), parseFloat(this.get('lat'))];
-						// TODO: Temporarily switched due to invalid dump 
-						return [parseFloat(this.get('lat')), parseFloat(this.get('lng'))];
+						return [parseFloat(this.get('lng')), parseFloat(this.get('lat'))];
 					}
 				}
 			};
@@ -1288,7 +1344,7 @@ app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, 
 
 
 //Delete a Post Collection
-app.delete('/api/pointcollection/:id', function(req, res){
+/*app.delete('/api/pointcollection/:id', function(req, res){
 	
 	PointCollection.remove({collectionid:req.params.id}, function(err) {
 	      if (!err) {
@@ -1300,29 +1356,42 @@ app.delete('/api/pointcollection/:id', function(req, res){
 		  }
 	  });
 });
+*/
 
 //////////
 // MAPS 
 /////////
 
 //Returns all unique maps
-app.get('/api/uniquemaps' , function(req, res){
-	
-	Map.find(function(err, data) {
-	    if (!err) {		
-	       res.send(data);
-	    } else
-		{
-			res.send("oops",500);
+app.get('/api/maps(\/latest|\/featured)' , function(req, res){
+	var query = {status: MapStatus.PUBLIC};
+	var options = {};
+	switch (req.params[0]) {
+		case '/latest':
+			options.sort = {'created': -1};
+			options.limit = 20;		
+			break;
+		case '/featured':
+			query.featured = {$gt: 0};
+			options.sort = {'featured': -1};
+			break;
+	}
+	Map.find(query, null, options, function(err, maps) {
+		if (handleDbOp(req, res, err, maps)) return;
+		var preparedMaps = [];
+		for (var i = 0; i < maps.length; i++) {
+			console.log(maps[i]);
+			preparedMaps[i] = prepareMapResult(req, maps[i]);			
 		}
+		res.send(preparedMaps);
 	});
 });
 
-//Returns the collections associated with a unique map by mapId
+//Returns the collections associated with a unique map by map _id
 /*
 app.get('/api/maps/:mapid' , function(req, res){
 	
-	PointCollection.find({mapid : req.params.mapid}, function(err, data){
+	PointCollection.find({_id : req.params.mapid}, function(err, data){
 		if (!err) {
 			res.send(data);
 		} else
@@ -1333,12 +1402,18 @@ app.get('/api/maps/:mapid' , function(req, res){
 });
 */
 
-function deprecatedMap(map) {
-	var m = {};
+function prepareMapResult(req, map) {
+	map.adjustScales();
+	var m = {
+		admin: canAdminMap(req, map)
+	};
 	var obj = map.toObject();
 	for (var k in obj) {
-		m[k] = obj[k];
+		if (k != 'adminslug' || m.admin) {
+			m[k] = obj[k];
+		}
 		if (k == 'layers') {
+			// TODO: Deprecated conversion to 'collections'
 			m['collections'] = [];
 			for (var i = 0; i < obj[k].length; i++) {
 				m['collections'].push({
@@ -1351,87 +1426,104 @@ function deprecatedMap(map) {
 	return m;
 }
 
-//Returns a specific unique map by mapId
+//Returns a specific unique map by publicslug
 app.get('/api/map/:publicslug', function(req, res){
-	
 	Map.findOne({publicslug: req.params.publicslug})
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (err) {
-				res.send("server error", 500);
-				return;
-			} else if (!map) {
-				res.send("map not found", 404);
-				return;
-			}
-
-			map.adjustScales();
-	       	res.send(deprecatedMap(map));
+			if (handleDbOp(req, res, err, map, 'map', canViewMap)) return;
+	       	res.send(prepareMapResult(req, map));
 		});
 });
 
-//Returns a specific unique map by mapId in admin state
-app.get('/api/map/admin/:adminslug', function(req, res) {
-	
+// Admin Route
+app.get(/^\/admin\/([a-z0-9]{32})(|\/(|globe|map|setup))$/, function(req, res){
+	console.log(req.params);
+	Map.findOne({adminslug: req.params[0]}, function(err, map) {
+		if (handleDbOp(req, res, err, map, 'map')) return;
+		canAdminMap(req, map, true);
+		var url = '/admin/' + map.publicslug + req.params[1];
+		res.writeHead(302, {
+			'Location': url
+		});
+		res.end();
+	});
+});
+
+//Returns a specific unique map by adminslug, and sets its admin state to true for current session
+app.get('/api/map/admin/:adminslug', function(req, res) {	
 	Map.findOne({adminslug: req.params.adminslug})
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (err) {
-				res.send("server error", 500);
-				return;
-			} else if (!map) {
-				res.send("map not found", 404);
-				return;
-			}
-
-			map.adjustScales();
-	       	res.send(deprecatedMap(map));
+			if (handleDbOp(req, res, err, map, 'map')) return;
+			canAdminMap(req, map, true);
+	       	res.send(prepareMapResult(req, map));
 		});
 });
 
+// Static Route
+app.get(/^\/(admin\/)?[a-zA-Z0-9\-\_]+(|\/(globe|map|setup))$/, function(req, res){
+	res.sendfile('public/index.html');
+});
+
 //Create a new map
-app.post('/api/map/:mapid/:mapadminid/:name', function(req, res){
+app.post('/api/map', function(req, res){
 	
 	var currDate = Math.round((new Date).getTime() / 1000);
 	var collections = {};
-	
+	var slugCounter = 0;
+
 	var map = new Map({
-		title: req.params.name,
+		title: req.body.title,
 		description: '',
-		adminslug: req.params.mapadminid,
-		publicslug: req.params.mapid,
+		adminslug: md5(uuid.v4()),
 		created: currDate,
 		modified: currDate,
 		created_by: '',
 		modified_by: '',
 		collections: collections,
 	});	
-	
-	map.save(function(err) {
-	    if (!err) {
-		 	res.send(map);
-	    } else {
-			res.send('server error', 500);
+
+	var makeUniqueSlugAndSave = function() 
+	{
+		map.publicslug = slugify(req.body.title) + (slugCounter ? '-' + slugCounter : '');
+		if (map.publicslug.match(RESERVED_URI)) {
+			slugCounter++;
+			makeUniqueSlugAndSave();
+			return;
 		}
-	  });
+	    console.log('post new map, looking for existing slug "'+map.publicslug+'"')
+		Map.findOne({publicslug: map.publicslug}, function(err, existingMap) {
+			if (handleDbOp(req, res, err, true)) return;
+			if (existingMap) {
+				console.log('publicslug "' + map.publicslug + '" exists, increasing counter');
+				slugCounter++;
+				makeUniqueSlugAndSave();
+			} else {
+				console.log('saving map')
+				map.save(function(err, map) {
+					if (handleDbOp(req, res, err, map, 'map')) return;
+					canAdminMap(req, map, true);
+				 	res.send(map);
+				});
+			}
+		});
+	}
+
+	makeUniqueSlugAndSave();
 });
 
-app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, res){
+app.post('/api/bindmapcollection/:mapid/:pointcollectionid', function(req, res){
 	
-	var publicslug = req.params.publicslug;
     var pointcollectionid = req.params.pointcollectionid;
 
-	console.log(req.body)
-
-	Map.findOne({ publicslug: publicslug })
+	Map.findOne({_id: req.params.mapid})
 		.populate('layers.pointCollection')
 		.run(function(err, map) {
-			if (err || !map) {
-				res.send('oops error', 404);
-				return;
-			}
+			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+
 			for (var i = 0; i < map.layers.length; i++) {
 				if (map.layers[i].pointCollection._id.toString() == pointcollectionid) {
 					res.send('collection already bound', 409);
@@ -1442,10 +1534,7 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 		    PointCollection.findOne({_id: pointcollectionid, active: true})
 		    	.populate('defaults')
 		    	.run(function(err, collection) {
-				    if (err || !collection) {
-						res.send('oops', 404);
-						return;
-				    }
+					if (handleDbOp(req, res, err, collection, 'collection')) return;
 
 				    var defaults = collection.defaults.toObject();
 				    delete defaults['_id'];
@@ -1473,8 +1562,7 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 								.populate('layers.options')
 								.run(function(err, map) {
 								    if (!err) {
-										map.adjustScales();
-								       	res.send(deprecatedMap(map));
+								       	res.send(prepareMapResult(req, map));
 								    } else {
 										res.send('server error', 500);
 									}
@@ -1485,114 +1573,105 @@ app.post('/api/bindmapcollection/:publicslug/:pointcollectionid', function(req, 
 	    });
 });
 
-app.post('/api/updatemapcollection/:publicslug/:pointcollectionid', function(req, res){
+app.post('/api/updatemapcollection/:mapid/:pointcollectionid', function(req, res){
 	
-	var publicslug = req.params.publicslug;
     var collectionid = req.params.pointcollectionid;
 
-	var options = {
-		visible : Boolean(req.body.visible),
-		featureType : String(req.body.featureType),
-		colorType: String(req.body.colorType),
-		opacity: Number(req.body.opacity) || null
-	};
-
-	var colors = req.body.colors;
-
-	for (var i = 0; i < colors.length; i++) {
-		var c = colors[i];
-		if (c.position || options.colorType != 'S') {
-			c.position = Number(c.position) || 0.0;
-		}
-	}
-	// sort by position
-	colors.sort(function(a, b) { return (a.position - b.position) });
-	options.colors = colors;
-
-	Map.findOne({publicslug: publicslug})
+	Map.findOne({_id: req.params.mapid})
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (!err && map) {
-				console.log(map._id);
-				for (var i = 0; i < map.layers.length; i++) {
-					if (map.layers[i].pointCollection._id.toString() == collectionid) {
-						for (var k in options) {
-							map.layers[i].options[k] = options[k];
-						}
-						map.layers[i].options.save(function(err) {
-							if (err) {
-								res.send('server error', 500);
-								return;
-							}
-							console.log('layer options updated');
-							res.send('');
-						});
-						break;
-					}
+			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+
+			var options = {
+				visible : Boolean(req.body.visible),
+				featureType : String(req.body.featureType),
+				colorType: String(req.body.colorType),
+				opacity: Number(req.body.opacity) || null
+			};
+
+			var colors = req.body.colors;
+
+			for (var i = 0; i < colors.length; i++) {
+				var c = colors[i];
+				if (c.position || options.colorType != 'S') {
+					c.position = Number(c.position) || 0.0;
 				}
-				res.send('collection not bound', 409);
-				return;
-			} else {
-				res.send('map not found', 404);
 			}
+			// sort by position
+			colors.sort(function(a, b) { return (a.position - b.position) });
+			options.colors = colors;
+
+			for (var i = 0; i < map.layers.length; i++) {
+				if (map.layers[i].pointCollection._id.toString() == collectionid) {
+					for (var k in options) {
+						map.layers[i].options[k] = options[k];
+					}
+					map.layers[i].options.save(function(err) {
+						if (err) {
+							res.send('server error', 500);
+							return;
+						}
+						console.log('layer options updated');
+						res.send('');
+					});
+					return;
+				}
+			}
+
+			res.send('collection not bound', 409);
+			return;
 	  	});
 });
 
-app.post('/api/unbindmapcollection/:publicslug/:collectionid', function(req, res){
-	var publicslug =  String(req.params.publicslug);
+app.post('/api/unbindmapcollection/:mapid/:collectionid', function(req, res){
     var collectionid = String(req.params.collectionid);
 	
-	Map.findOne({publicslug: publicslug})
+	Map.findOne({_id: req.params.mapid})
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (!err && map) {
-				for (var i = 0; i < map.layers.length; i++) {
-					if (map.layers[i].pointCollection._id.toString() == collectionid) {
-						map.layers[i].options.remove();
-						map.layers[i].remove();
-						break;
-					}
+			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+
+			for (var i = 0; i < map.layers.length; i++) {
+				if (map.layers[i].pointCollection._id.toString() == collectionid) {
+					map.layers[i].options.remove();
+					map.layers[i].remove();
+					break;
 				}
-				map.save(function(err) {
-					if (err) {
-						res.send('server error', 500);
-						return;
-					}
-					console.log('map updated');
-					res.send('');
-				});
-			} else {
-				res.send('map not found', 404);
 			}
+			map.save(function(err) {
+				if (err) {
+					res.send('server error', 500);
+					return;
+				}
+				console.log('map updated');
+				res.send('');
+			});
 	  	});
-	
 });
 
 app.delete('/api/map/:mapid', function(req, res){
-	Map.findOne({publicslug: req.params.mapid})
+	Map.findOne({_id: req.params.mapid})
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (!err && map) {
-				while (map.layers.length > 0) {
-					map.layers[0].options.remove();
-					map.layers[0].remove();
-				}
-				map.remove(function(err) {
-					if (err) {
-						res.send('server error', 500);
-						return;
-					}
-					console.log('map removed');
-					res.send('');
-				});
-			} else {
-				res.send('map not found', 404);
-			}
-	  	});
+			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
 
+			while (map.layers.length > 0) {
+				map.layers[0].options.remove();
+				map.layers[0].remove();
+			}
+
+			map.remove(function(err) {
+				if (err) {
+					res.send('server error', 500);
+					return;
+				}
+				console.log('map removed');
+				res.send('');
+			});
+	  	});
 });
 
 ////////////

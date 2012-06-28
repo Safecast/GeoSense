@@ -702,36 +702,6 @@ window.MapOLView = window.MapViewBase.extend({
 	            var lonlat = self.map.getLonLatFromPixel(evt.xy);
 		    	translation = new Geometry.Point(lonlat.x, lonlat.y);
 				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-				//console.log(evt);
-
-
-				//self.vent.trigger('broadcastMessage', '@setViewport {"x": '+lonlat.lon+', "y": '+lonlat.lat+'}');
-
-				//Temporary!!!!
-				// var commentid = 0123456;
-				// 				var mapid = _mapId;
-				// 				var lat = lonlat.lat;
-				// 				var lon = lonlat.lon
-				// 				var name = 'beef';
-				// 				var text = 'burrito';
-				// 				var date = new Date();
-				// 
-				// 				$.ajax({
-				// 					type: 'POST',
-				// 					url: '/api/comment/' + commentid + '/' + mapid + '/' + lat + '/' + lon + '/' + name + '/' + text + '/' + date,
-				// 					success: function(data) {
-				// 						console.log('stored comment');
-				// 						comment = new Feature(
-				// 							new Geometry.Point(lon, lat),
-				// 							{cls: "one"}
-				// 						);
-				// 						self.commentLayer.addFeatures(comment);
-				// 						
-				// 					},
-				// 					error: function() {
-				// 						console.error('failed to store comment');
-				// 					}
-				// 				});
             },
 
             onDblclick: function(evt) {  

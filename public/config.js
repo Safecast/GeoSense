@@ -1,6 +1,12 @@
 /* Config 
 */
 
+var DEV = 1;
+var DEBUG = DEV;
+
+var BASE_URI = !DEV ? 'geo.media.mit.edu/' : 'localhost:3000/';
+var BASE_URL = 'http://' + BASE_URI;
+
 var FeatureType = {
 	POINTS: 'P',
 	CELLS: 'C',
@@ -26,7 +32,6 @@ var UnitFormat = {
 
 ColorType.DEFAULT = ColorType.SOLID;
 
-var DEBUG = 1;
 var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985
 var GRID_SIZES = {
 //	'-1': 2,
@@ -48,12 +53,8 @@ var DEFAULT_SELECTED_FEATURE_OPACITY = DEFAULT_FEATURE_OPACITY + (1 - DEFAULT_FE
 var CROP_DISTRIBUTION_RATIO = 1 / 10;
 
 var _panelLoaded = false;
-var _admin = true;
 var _firstLoad = true;
-var _setupRoute = false;
-var _mapId = String;
-var _mapAdminId = String;
-var _mapName = String;
+
 var _mapCollections = [];
 var _commentArray = [];
 

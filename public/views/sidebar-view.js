@@ -22,7 +22,7 @@ window.SideBarView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('sidebar'));
 		this.vent = options.vent;
-		this.page = options.page;
+		this.mapView = options.mapView;
 		
 		_.bindAll(this, "setToggleStates");
 		options.vent.bind("setToggleStates", this.setToggleStates);	
@@ -35,13 +35,9 @@ window.SideBarView = Backbone.View.extend({
 		var self = this;
 
 		$(this.el).html(this.template());		
-		if(this.page == 'map')
-		{
-			this.$('#display2D').addClass('active');
-			
-		}
-		else if (this.page =='map-gl')
-		{
+		if(this.mapView == 'map') {
+			this.$('#display2D').addClass('active');			
+		} else if (this.page =='globe') {
 			this.$('#themeToggleGroup').hide();
 			this.$('#display3D').addClass('active');
 		}
@@ -165,8 +161,7 @@ window.SideBarView = Backbone.View.extend({
 			});
 		}
 
-		if(!_admin)
-		{
+		if (!app.isMapAdmin()) {
 			this.$('#dataManager').remove();
 		}
 					
@@ -203,17 +198,15 @@ window.SideBarView = Backbone.View.extend({
 	},
 	
 	setToggleStates: function(options){
-		var state = options.state;
+		var mapView = options.mapView;
 				
-		if(state == 'mapgl')
+		if (mapView == 'globe')
 		{
 			this.$('#display3D').addClass('active');
 			this.$('#display2D').removeClass('active');
 			this.$('#themeToggleGroup').fadeOut('fast');
 			this.$('#scaleToggleGroup').fadeIn('fast');
-		}
-		else if (state == 'map')
-		{
+		} else if (mapView == 'map') {
 			this.$('#display3D').removeClass('active');
 			this.$('#display2D').addClass('active');
 			this.$('#themeToggleGroup').fadeIn('fast');
@@ -253,19 +246,14 @@ window.SideBarView = Backbone.View.extend({
 	
 	display2DClicked: function() {
 		//Todo: Replace with proper routing
-		app.navigate(_mapId + "/map", {trigger: true});
+		app.navigate(app.mapInfo.publicslug + "/map", {trigger: true});
+		this.$('#themeToggleGroup').show();
 	},
 
 	display3DClicked: function() {
 		//Todo: Replace with proper routing
-		if(!_admin)
-		{
-			app.navigate(_mapId + "/globe", {trigger: true});
-		} else if(_admin)
-		{
-			app.navigate(_mapAdminId + "/globe", {trigger: true});
-		}
-		
+		app.navigate(app.mapInfo.publicslug + "/globe", {trigger: true});
+		this.$('#themeToggleGroup').hide();
 	},
 	
 	addDataClicked: function() {

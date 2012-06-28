@@ -58,7 +58,7 @@ window.DataViewBase = Backbone.View.extend({
 		this.$(".title").attr("href", "#collapse-" + this.className + '-' + this.collectionId);
 		this.$("#collapse").attr("id", "collapse-" + this.className + '-' + this.collectionId);
 
-		if(!_admin) {
+		if (!app.isMapAdmin()) {
 			this.$('#adminDataControls').remove();
 		}
 		
@@ -352,7 +352,7 @@ window.DataViewBase = Backbone.View.extend({
 		
 		$.ajax({
 			type: 'POST',
-			url: '/api/updatemapcollection/' + _mapId + '/' + this.collection.collectionId,
+			url: '/api/updatemapcollection/' + app.mapInfo._id + '/' + this.collection.collectionId,
 			dataType: 'json',
 			data: postData,
 			success: function(data) {
@@ -362,7 +362,7 @@ window.DataViewBase = Backbone.View.extend({
 					updateObject: postData});
 			},
 			error: function() {
-				console.error('failed to join map with collection');
+				console.error('failed to update layer options');
 			}
 		});	
 			

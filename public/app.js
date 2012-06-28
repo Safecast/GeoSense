@@ -1,24 +1,35 @@
 var AppRouter = Backbone.Router.extend({
 
-    routes:{
-		":mapId/globe":"setUniqueGlobe",
-		":mapId/globe/":"setUniqueGlobe",
-		":mapId/map":"setUniqueMap",
-		":mapId/map/":"setUniqueMap",
-		":mapId/map/:query":"setUniqueMap",
-		":mapId/globe/:query":"setUniqueGlobe",
-		":mapId/setup":"setNewMap",
-		":mapId/":"setUniqueMap",
-		":mapId":"setUniqueMap",
-		"removed":"home",
-		"":"home",
+    routes: {
+/*		":slug/globe": "routeGlobe",
+		":slug/globe/": "routeGlobe",
+		":slug/map": "routeMap",
+		":slug/map/": "routeMap",
+		":slug/map/:query": "routeMap",
+		":slug/globe/:query": "routeGlobe",
+		":slug/setup": "routeNewMap",
+		":slug/": "routeMap",
+		":slug": "routeMap",
+		"removed": "home",
+		"":"home",*/
     },
 
     initialize:function() {
 		var self = this;
+
+		var router = this,
+			routes = [
+				[/^(admin\/)?([a-zA-Z0-9\-\_]+)(|\/globe|\/map|\/setup)\/?(\?.*)?$/, 'mainRoute'],
+				['removed', 'homeRoute'],
+				['', 'homeRoute']
+			];
+
+		_.each(routes, function(route) {
+			router.route.apply(router, route);
+		});
+
 		this.vent = _.extend({}, Backbone.Events);
 		this.vent.bind('mapViewReady', function() {
-			console.log('mapViewReady -- init map layers');
 			self.initMapLayers();
 		});
 
@@ -31,24 +42,86 @@ var AppRouter = Backbone.Router.extend({
 		}
     }, 
 
-	render: function(state) {
+	mainRoute: function(admin, slug, view, query)
+	{
+		var mapView = '';
+		if (view) {
+			view = view.split('/')[1];
+			this.setupRoute = view == 'setup';
+			if (!this.setupRoute) {
+				mapView = view;
+			} else {
+				$('#app').empty();
+			}
+		}
+		this.adminRoute = admin;
+		console.log('mainRoute', slug, mapView, query);
+		this.loadAndInitMap(slug, mapView);
+	},
+
+	homeRoute: function () {
+		
+		if(_firstLoad) {
+			_firstLoad = false;
+			this.homepageView = new HomepageView();
+	        $('#home').append(this.homepageView.render().el);
+		} else {
+			window.location.reload(true);			
+		}
+	},
+
+    initMapView: function(mapView) {
+		var self = this;
+			
+		if (this.mapView) {
+			this.mapView.remove();
+			this.mapView = null;
+		}
+
+		switch (mapView) {
+			case 'map':
+				var viewClass = MapOLView;
+				break;
+			case 'globe':
+				var viewClass = MapGLView;
+				break;
+		}		
+		
+        this.mapView = new viewClass({
+			vent: self.vent
+		});
+
+		var mapEl = this.mapView.render().el;
+		$('#app').append(mapEl);
+		this.mapView.start();
+
+        var snap = $('<div class="snap top" /><div class="snap right" />');
+		$(mapEl).append(snap);
+
+        this.dataInfoView = new DataInfoView({vent: this.vent});
+		$(mapEl).append(this.dataInfoView.render().el);
+    },
+	
+	isMapAdmin: function()
+	{
+		return this.adminRoute && this.mapInfo.admin; 
+	},
+
+	render: function(mapView) {
 
 		var self = this;
 
-		window.document.title = _mapName + ' – GeoSense';
+		window.document.title = this.mapInfo.title + ' – GeoSense';
 
- 		this.headerView = new HeaderView({vent: this.vent, mapName:_mapName});
+ 		this.headerView = new HeaderView({vent: this.vent, title: this.mapInfo.title});
         $('#app').append(this.headerView.render().el);
 
-		this.sideBarView = new SideBarView({vent: this.vent, page: 'map'});
+		this.sideBarView = new SideBarView({vent: this.vent, mapView: mapView});
         $('#app').append(this.sideBarView.render().el);
 
 		//this.chatView = new ChatView({vent: this.vent});
         //$('#app').append(this.chatView.render().el);
 
-		this.setupView = new SetupView({vent: this.vent, mapId:_mapId, mapAdminId:_mapAdminId, mapName:_mapName});
-		$('#app').append(this.setupView.render().el);
-		
 		//this.graphView = new GraphView({vent: this.vent});
 		//$('#app').append(this.graphView.render().el);
 		
@@ -61,20 +134,18 @@ var AppRouter = Backbone.Router.extend({
 		
 		//this.addCommentData();
 		
-		this.vent.trigger("setToggleStates", {state:state});
+		this.vent.trigger("setToggleStates", {mapView: mapView});
 		
-		if(_setupRoute) {
-			$('#setupModal').modal('show');	
+		if (this.isMapAdmin()) {
+			this.setupView = new SetupView({vent: this.vent, mapInfo: this.mapInfo});
+			$('#app').append(this.setupView.render().el);
+			if (this.setupRoute) {
+				$('#setupModal').modal('show');	
+			}
 		}
 	},
 
-	getURLParameter:function(name) {
-	    return decodeURI(
-	        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-	    );
-	},
-
-	renderAsEmbed:function()
+	renderAsEmbed: function()
 	{
 		var link = $("<link>");
 		link.attr({
@@ -89,116 +160,41 @@ var AppRouter = Backbone.Router.extend({
 		$('.message').addClass('.embed');
 	},
 
-	setUniqueMapName: function(name)
-	{
-		_mapName = name;		
-	},
-	
-	setUniqueMap: function(uniqueMapId)
-	{
-		splitUniqueMapId=uniqueMapId.split('?');
-		this.loadAndInitMap({mapId:splitUniqueMapId[0], state:'map'});
-	},
-	
-	setNewMap: function(uniqueMapId)
-	{
-		_setupRoute = true;
-		$('#app').empty();
-		this.loadAndInitMap({mapId:uniqueMapId, state:'map'});
-	},
-	
-	setUniqueGlobe: function(uniqueMapId)
-	{
-		this.loadAndInitMap({mapId:uniqueMapId, state:'mapgl'});
-	},
-	
-	loadAndInitMap: function(options)
+	loadAndInitMap: function(slug, mapView)
 	{
 		var self = this;
-		_admin = options.mapId.length == 15;
 		$.ajax({
 			type: 'GET',
-			url: '/api/map/' + (_admin ? 'admin/' : '') + options.mapId,
+			url: '/api/map/' + slug,
 			success: function(data) {
-				_mapName = data.title;
-				_mapId = data.publicslug;
 				self.mapInfo = data;
-				if (_admin) {
-					_mapAdminId = data.adminslug;
-				}
-				if (options.state == 'map') {
-					self.map();
-				} else {
-					self.mapGL();
+				switch (mapView) {
+					default:
+						mapView = 'map';
+						break;
+					case 'map':
+						break;
+					case 'globe':						
+						break;
 				}
 
+				self.initMapView(mapView);
+
 				if (!self.sideBarView) {
-					self.render(options.state);
+					self.render(mapView);
 				}
 			},
 			error: function() {
-				console.error('failed to fetch unique map');
+				console.error('failed to load map', slug);
 			}
 		});
 	},
-	
-	home:function () {
-		
-		if(_firstLoad)
-		{
-			_firstLoad = false;
-			this.homepageView = new HomepageView();
-	        $('#home').append(this.homepageView.render().el);
-		} else
-		{
-			window.location.reload(true);			
-		}
+
+	getURLParameter:function(name) {
+	    return decodeURI(
+	        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+	    );
 	},
-
-    map:function () {
-		var self = this;
-			
-		if(this.mapView)
-		{
-			this.mapView.remove();
-			this.mapView = null;
-		}
-		
-	    if (!this.mapView)
-		{
-            this.mapView = new MapOLView({
-				vent: self.vent
-			});
-			var mapEl = this.mapView.render().el;
-			$('#app').append(mapEl);
-			this.mapView.start();
-
-	        var snap = $('<div class="snap top" /><div class="snap right" />');
-			$(mapEl).append(snap);
-
-	        this.dataInfoView = new DataInfoView({vent: this.vent});
-			$(mapEl).append(this.dataInfoView.render().el);
-        }	
-    },
-
-	mapGL:function () {
-		var self = this;
-				
-		if(this.mapView)
-		{
-			this.mapView.remove();
-			this.mapView = null;
-		}
-				
-	    if (!this.mapView)
-		{			
-            this.mapView = new MapGLView({
-				vent: self.vent
-			});
-			$('#app').append(this.mapView.render().el);
-			this.mapView.start();
-        }
-    },
 
 	pollForNewPointCollection: function(pointCollectionId, interval) {
 		if (interval) {
@@ -254,7 +250,7 @@ var AppRouter = Backbone.Router.extend({
 		var mapArea = self.mapView.getVisibleMapArea();							
 		var collectionOptions = {
 			pointCollectionId: pointCollectionId, 
-			mapId: _mapId, 
+			mapId: app.mapInfo._id, 
 			mapLayer: layer
 		};
 
@@ -290,7 +286,7 @@ var AppRouter = Backbone.Router.extend({
 		var self = this;
 		$.ajax({
 			type: 'POST',
-			url: '/api/bindmapcollection/' + _mapId + '/' + pointCollectionId,
+			url: '/api/bindmapcollection/' + this.mapInfo._id + '/' + pointCollectionId,
 			success: function(data) {
 				self.mapInfo = data;
 				self.initMapLayer(pointCollectionId);

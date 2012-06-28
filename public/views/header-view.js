@@ -17,7 +17,7 @@ window.HeaderView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('header'));
 		this.vent = options.vent;	
-		this.mapName = options.mapName;
+		this.title = options.title;
 		
 		_.bindAll(this, "setStateType");
 		this.vent.bind("setStateType", this.setStateType);
@@ -28,7 +28,7 @@ window.HeaderView = Backbone.View.extend({
 		this.setTitle();
 		this.settingsButtonClicked();
 		
-		if(!_admin)
+		if (!app.isMapAdmin())
 		{
 			this.$('#setupButton').remove();
 			this.$('#graphButton').css("right",270);
@@ -48,7 +48,7 @@ window.HeaderView = Backbone.View.extend({
 	},
 	
 	setTitle: function() {
-		this.$('.brand').html('<h1>GeoSense</h1><h3>'+this.mapName+'</h3>');
+		this.$('.brand').html('<h1>GeoSense</h1><h3>'+this.title+'</h3>');
 	},
 
 	settingsButtonClicked: function() {
