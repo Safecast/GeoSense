@@ -1,11 +1,9 @@
 var DEBUG = process.env.NODE_ENV == 'development';
-// Since dev server is restarted frequently and session would be lost, 
-// always allow user to admin map in DEBUG mode.
-var DEBUG_CIRCUMVENT_PERMISSIONS = true;
 
 var utils = require("./utils.js")
-var config = require("./public/config.js");
-utils.import(config, require("./config.js"));
+var config = require("./config.js");
+
+var permissions = require("./permissions.js")
 
 //var profiler = require('v8-profiler');
 
@@ -48,29 +46,6 @@ app.configure(function(){
   	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   	app.set('views', path.join(application_root, "views"));
 });
-
-function canAdminMap(req, map, status) {
-	if (!req.session.admin) {
-		req.session.admin = {};
-	}
-	if (status != null) {
-		req.session.admin[map._id] = status == true; 
-		console.log('set map admin: '+map._id+' = '+status);
-	} else {
-		if (!DEBUG_CIRCUMVENT_PERMISSIONS) {
-			status = req.session.admin[map._id] == true;
-			console.log('is map admin: '+map._id+' == '+status);
-		} else {
-			status = true;
-			console.log('DEBUG on, is map admin: '+map._id+' == '+status);
-		}
-	}
-	return status;
-}
-
-function canViewMap(req, map) {
-	return map.status == config.MapStatus.PUBLIC || canAdminMap(req, map);
-}
 
 function handleDbOp(req, res, err, op, name, permissionCallback) 
 {
@@ -1338,7 +1313,6 @@ app.get('/api/maps(\/latest|\/featured)' , function(req, res){
 		if (handleDbOp(req, res, err, maps)) return;
 		var preparedMaps = [];
 		for (var i = 0; i < maps.length; i++) {
-			console.log(maps[i]);
 			preparedMaps[i] = prepareMapResult(req, maps[i]);			
 		}
 		res.send(preparedMaps);
@@ -1363,7 +1337,7 @@ app.get('/api/maps/:mapid' , function(req, res){
 function prepareMapResult(req, map) {
 	map.adjustScales();
 	var m = {
-		admin: canAdminMap(req, map)
+		admin: permissions.canAdminMap(req, map)
 	};
 	var obj = map.toObject();
 	for (var k in obj) {
@@ -1390,7 +1364,7 @@ app.get('/api/map/:publicslug', function(req, res){
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (handleDbOp(req, res, err, map, 'map', canViewMap)) return;
+			if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 	       	res.send(prepareMapResult(req, map));
 		});
 });
@@ -1400,7 +1374,7 @@ app.get(/^\/admin\/([a-z0-9]{32})(|\/(|globe|map|setup))$/, function(req, res){
 	console.log(req.params);
 	Map.findOne({adminslug: req.params[0]}, function(err, map) {
 		if (handleDbOp(req, res, err, map, 'map')) return;
-		canAdminMap(req, map, true);
+		permissions.canAdminMap(req, map, true);
 		var url = '/admin/' + map.publicslug + req.params[1];
 		res.writeHead(302, {
 			'Location': url
@@ -1416,7 +1390,7 @@ app.get('/api/map/admin/:adminslug', function(req, res) {
 		.populate('layers.options')
 		.run(function(err, map) {
 			if (handleDbOp(req, res, err, map, 'map')) return;
-			canAdminMap(req, map, true);
+			permissions.canAdminMap(req, map, true);
 	       	res.send(prepareMapResult(req, map));
 		});
 });
@@ -1463,7 +1437,7 @@ app.post('/api/map', function(req, res){
 				console.log('saving map')
 				map.save(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map')) return;
-					canAdminMap(req, map, true);
+					permissions.canAdminMap(req, map, true);
 				 	res.send(map);
 				});
 			}
@@ -1480,7 +1454,7 @@ app.post('/api/bindmapcollection/:mapid/:pointcollectionid', function(req, res){
 	Map.findOne({_id: req.params.mapid})
 		.populate('layers.pointCollection')
 		.run(function(err, map) {
-			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+			if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 			for (var i = 0; i < map.layers.length; i++) {
 				if (map.layers[i].pointCollection._id.toString() == pointcollectionid) {
@@ -1539,7 +1513,7 @@ app.post('/api/updatemapcollection/:mapid/:pointcollectionid', function(req, res
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+			if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 			var options = {
 				visible : Boolean(req.body.visible),
@@ -1589,7 +1563,7 @@ app.post('/api/unbindmapcollection/:mapid/:collectionid', function(req, res){
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+			if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 			for (var i = 0; i < map.layers.length; i++) {
 				if (map.layers[i].pointCollection._id.toString() == collectionid) {
@@ -1614,7 +1588,7 @@ app.delete('/api/map/:mapid', function(req, res){
 		.populate('layers.pointCollection')
 		.populate('layers.options')
 		.run(function(err, map) {
-			if (handleDbOp(req, res, err, map, 'map', canAdminMap)) return;
+			if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 			while (map.layers.length > 0) {
 				map.layers[0].options.remove();
