@@ -86,8 +86,7 @@ var _graphVisible = false;
 var _dataLibraryVisible = false;
 var _chatVisible = false;
 
-							
-if (module) {
+if (!this.Document) {
 	module.exports = {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
