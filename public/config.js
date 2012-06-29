@@ -45,8 +45,11 @@ var DEFAULT_SELECTED_FEATURE_OPACITY = DEFAULT_FEATURE_OPACITY + (1 - DEFAULT_FE
 var CROP_DISTRIBUTION_RATIO = 1 / 10;
 
 var DEFAULT_MAP_STYLE = 'dark';
-var DEFAULT_MAP_LOCATION = 'Fukushima';
-var DEFAULT_MAP_ZOOM = 6;
+
+var DEFAULT_MAP_AREA = {
+	center: [0, 0],
+	zoom: 0
+};
 
 if (!this.Document) {
 	// Not browser: export settings for Node module

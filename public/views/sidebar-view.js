@@ -17,6 +17,7 @@ window.SideBarView = Backbone.View.extend({
 		'click #toggleCommentsVisible' : 'toggleCommentsVisibleClicked',
 		'click #toggleCommentsHidden' : 'toggleCommentsHiddenClicked',
 		'click #settingsTab' : 'settingsTabClicked',
+		'click #savePosition' : 'savePositionClicked',
     },
 
     initialize: function(options) {
@@ -26,10 +27,62 @@ window.SideBarView = Backbone.View.extend({
 		
 		_.bindAll(this, "setToggleStates");
 		options.vent.bind("setToggleStates", this.setToggleStates);	
+
+		_.bindAll(this, "mapAreaChanged");
+		options.vent.bind("mapAreaChanged", this.mapAreaChanged);  
+
 		if (IS_AR || IS_LOUPE || IS_TAGGED_GLOBE) {
 			new OblessdClient({vent: options.vent, taggedObjects: taggedObjects, track: true});
 		}
     },
+
+    mapAreaChanged: function(mapArea)
+    {
+    	this.enableSavePositionButton();
+    	this.initialArea = mapArea;
+    	console.log('MAP AREA CHANGED');
+    },
+
+	enableSavePositionButton: function()
+	{
+		this.$('#savePosition').attr('disabled', false);
+		this.$('#savePosition').removeClass('disabled');
+	},
+	
+	disableSavePositionButton: function()
+	{
+		this.$('#savePosition').attr('disabled', true);
+		this.$('#savePosition').addClass('disabled');
+	},
+
+	savePositionClicked: function()
+	{
+		//build json and update
+		var self = this;
+		//this.collection.unbindCollection();
+				
+		if (this.colorType == ColorType.SOLID) {
+			this.colors = [{color: this.$('#colorInput').val()}];
+		}
+		
+		var postData = {
+			initialArea: this.initialArea
+		};
+		
+		$.ajax({
+			type: 'POST',
+			url: '/api/map/' + app.mapInfo._id,
+			dataType: 'json',
+			data: postData,
+			success: function(data) {
+		    	self.disableSavePositionButton();
+			},
+			error: function() {
+				console.error('failed to update map');
+			}
+		});	
+			
+	},
 
     render: function() {
 		var self = this;

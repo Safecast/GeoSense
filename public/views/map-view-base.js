@@ -1,51 +1,56 @@
 window.MapViewBase = Backbone.View.extend({
 
+	uriViewName: undefined, 
+
     initialize: function(options) {
 		var self = this;
 		this.collections = {};
 		this.layerArray = {};
 		this.vent = options.vent;
 		this.layerOptions = {};
-		_.bindAll(this, "setMapLocation");
-		options.vent.bind("setMapLocation", this.setMapLocation);
+		_.bindAll(this, "geocodeAndSetMapLocation");
+		options.vent.bind("geocodeAndSetMapLocation", this.geocodeAndSetMapLocation);
 		
 		_.bindAll(this, "redrawCollection");
 		options.vent.bind("redrawCollection", this.redrawCollection);  
 
-		options.vent.bind("setViewport", function(params) {
-			self.setViewport(params);  
+		if (options.visibleMapArea) {
+			this.initialVisibleMapArea = options.visibleMapArea;
+		}
+
+		/*
+		options.vent.bind("setVisibleMapArea", function(params) {
+			self.setVisibleMapArea(params);  
 		});
 		options.vent.bind("broadcastMessageReceived", function(message) {
 			var match = new String(message).match(/^@([a-zA-Z0-9_]+)( (.*))?$/);
 			if (match) {
 				switch (match[1]) {
-					case 'setViewport':
+					case 'setVisibleMapArea':
 						if (!IS_REMOTE_CONTROLLED) return;
 						var obj = $.parseJSON(match[3]);
 						if (obj) {
-							self.vent.trigger('setViewport', obj);
+							self.vent.trigger('setVisibleMapArea', obj);
 						}
 						return;
 				}
 			}
 		});
+*/
 	},
 
-	setMapLocation: function(addr)
+	geocodeAndSetMapLocation: function(addr)
 	{				
 		var self = this;
 		
 		geocoder = new google.maps.Geocoder();
-		geocoder.geocode( {'address': addr}, function (results, status)
-			{
-				if (status == google.maps.GeocoderStatus.OK)
-				{
-					results.type = 'google';
-					self.setViewport(results);
-				}
-				else { 	
-					alert ("Cannot find " + addr + "! Status: " + status);
-				}
+		geocoder.geocode( {'address': addr}, function (results, status) {
+			if (status == google.maps.GeocoderStatus.OK) {
+				results.type = 'google';
+				self.setVisibleMapArea(results);
+			} else { 	
+				alert ("Cannot find " + addr + "! Status: " + status);
+			}
 		});
 	},
 
@@ -63,7 +68,15 @@ window.MapViewBase = Backbone.View.extend({
 	/**
 	* Required to be implemented by descendants.
 	*/
-	setViewport: function(to) {
+	setVisibleMapArea: function(to) {
+	},
+
+	start: function() 
+	{
+		if (this.initialVisibleMapArea) {
+			this.MapAreaChangedInitially = true;
+			this.setVisibleMapArea(this.initialVisibleMapArea);
+		}
 	},
 
 	mapAreaChanged: function(visibleMapArea)
@@ -76,7 +89,18 @@ window.MapViewBase = Backbone.View.extend({
 			collection.fetch();
 		});
 
+		if (!this.MapAreaChangedInitially) {
+			var uri = app.genMapURI(this.uriViewName, {
+				x: visibleMapArea.center[0],
+				y: visibleMapArea.center[1],
+				zoom: visibleMapArea.zoom
+			});
+			app.navigate(uri);
+		}
+
+		this.MapAreaChangedInitially = false;
 		this.vent.trigger("updateGraphCollections", visibleMapArea);
+		this.vent.trigger("mapAreaChanged", visibleMapArea);
 	},
 
 	redrawCollection: function(args)

@@ -12,6 +12,20 @@ var AppRouter = Backbone.Router.extend({
 		":slug": "routeMap",
 		"removed": "home",
 		"":"home",*/
+
+		"": "homeRoute",
+		"removed": "homeRoute",
+
+		"admin/:slug": "mapAdminRoute",
+		"admin/:slug/:view": "mapAdminRoute",
+		"admin/:slug/:view/:x,:y": "mapAdminRoute",
+		"admin/:slug/:view/:x,:y/:zoom": "mapAdminRoute",
+
+		":slug": "mapRoute",
+		":slug/:view": "mapRoute",
+		":slug/:view/:x,:y": "mapRoute",
+		":slug/:view/:x,:y/:zoom": "mapRoute",
+
     },
 
     initialize: function() 
@@ -27,16 +41,16 @@ var AppRouter = Backbone.Router.extend({
 		this.dataLibraryVisible = false;
 		this.chatVisible = false;
 
-		var router = this,
+		/*var router = this,
 			routes = [
-				[/^(admin\/)?([a-zA-Z0-9\-\_]+)(|\/globe|\/map|\/setup)\/?(\?.*)?$/, 'mainRoute'],
+				[/^(admin\/)?([a-zA-Z0-9\-\_]+)(|\/globe|\/map|\/setup)\/?(\?.*)?$/, '__mainRoute'],
 				['removed', 'homeRoute'],
 				['', 'homeRoute']
 			];
 
 		_.each(routes, function(route) {
 			router.route.apply(router, route);
-		});
+		});*/
 
 		this.vent = _.extend({}, Backbone.Events);
 		this.vent.bind('mapViewReady', function() {
@@ -49,6 +63,49 @@ var AppRouter = Backbone.Router.extend({
 			this.renderAsEmbed();
 		}
     }, 
+
+    mapRoute: function(slug, view, x, y, zoom)
+    {
+		var mapView;
+		if (view) {
+			this.setupRoute = view == 'setup';
+			if (!this.setupRoute) {
+				mapView = view;
+			} else {
+				$('#app').empty();
+			}
+		}
+		var center;
+		if (x != undefined && y != undefined) {
+			x = parseFloat(x);
+			y = parseFloat(y);
+			if (!isNaN(x) && !isNaN(y)) {
+				center = [x, y];
+			}
+		}
+
+    	console.log(slug, 'mapView:', mapView, 'center:', center, 'zoom:', zoom);
+		this.loadAndInitMap(slug, mapView, center, zoom);
+    },
+
+    mapAdminRoute: function(slug, view, x, y, zoom)
+    {
+    	this.adminRoute = true;
+    	this.mapRoute(slug, view, x, y, zoom);
+    },
+
+    genMapURI: function(view, opts)
+    {
+    	var uri = (this.adminRoute ? 'admin/' : '') 
+    		+ this.mapInfo.publicslug + '/' + view;
+    	if (opts.x != undefined) {
+	    	uri += '/%(x)s,%(y)s';
+    	}
+    	if (opts.zoom != undefined) {
+    		uri += '/%(zoom)s';
+    	}
+    	return uri.format(opts);
+    },
 
 	mainRoute: function(admin, slug, view, query)
 	{
@@ -79,7 +136,7 @@ var AppRouter = Backbone.Router.extend({
 		}
 	},
 
-    initMapView: function(mapView) 
+    initMapView: function(mapView, center, zoom) 
     {
 		var self = this;
 			
@@ -96,10 +153,26 @@ var AppRouter = Backbone.Router.extend({
 				var viewClass = MapGLView;
 				break;
 		}		
-		
+	
+		var visibleMapArea = DEFAULT_MAP_AREA;
+		if (this.mapInfo.initialArea.center.length) {
+			visibleMapArea.center = this.mapInfo.initialArea.center;
+		}
+		if (this.mapInfo.initialArea.zoom != undefined) {
+			visibleMapArea.zoom = this.mapInfo.initialArea.zoom;
+		}
+		if (center) {
+			visibleMapArea.center = center;
+		}
+		if (zoom) {
+			visibleMapArea.zoom = zoom;
+		}
+
         this.mapView = new viewClass({
-			vent: self.vent
+			vent: self.vent,
+			visibleMapArea: visibleMapArea
 		});
+		this.mapView.uriViewName = mapView;
 
 		var mapEl = this.mapView.render().el;
 		$('#app').append(mapEl);
@@ -170,7 +243,7 @@ var AppRouter = Backbone.Router.extend({
 		$('.message').addClass('.embed');
 	},
 
-	loadAndInitMap: function(slug, mapView)
+	loadAndInitMap: function(slug, mapView, center, zoom)
 	{
 		var self = this;
 		$.ajax({
@@ -188,7 +261,7 @@ var AppRouter = Backbone.Router.extend({
 						break;
 				}
 
-				self.initMapView(mapView);
+				self.initMapView(mapView, center, zoom);
 
 				if (!self.sideBarView) {
 					self.render(mapView);

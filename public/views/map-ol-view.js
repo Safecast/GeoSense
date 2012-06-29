@@ -66,14 +66,17 @@ window.MapOLView = window.MapViewBase.extend({
 		var map = this.map;
 		var zoom = map.getZoom();
 		var extent = map.getExtent();
-		SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
+		var center = map.getCenter();
+		center.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+		var SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
 		SE.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-		NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
+		var NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
 		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
 		//console.log('zoom: '+zoom+', resolution '+this.selectedmap.getResolution()+' '+this.map.getUnits());
 		//console.log('bounds', bounds);
 		return {
+			center: [center.lon, center.lat],
 			zoom: zoom,
 			bounds: bounds
 		};
@@ -131,15 +134,15 @@ window.MapOLView = window.MapViewBase.extend({
 		this.updateMapStyle(DEFAULT_MAP_STYLE);
 				
 		//this.detectMapClick();
+
+		var scaleLine = new OpenLayers.Control.ScaleLine();
+        this.map.addControl(scaleLine);		
 		
 		if (DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
 		}
 
-		this.setMapLocation(DEFAULT_MAP_LOCATION);
-
-		var scaleLine = new OpenLayers.Control.ScaleLine();
-        this.map.addControl(scaleLine);		
+		MapOLView.__super__.start.call(this);
 	},
 	
 	getItems: function (a, b, c) {
@@ -607,45 +610,45 @@ window.MapOLView = window.MapViewBase.extend({
 		translation = new Geometry.Point(lng, lat);
 		translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
 				
-	  	return { x: translation.x, y: translation.y };
+	  	return [translation.x, translation.y];
 	},
 		
-	setViewport: function(result)
+	setVisibleMapArea: function(result)
 	{
-		switch(result.type)
-		{
-			case 'google':
+		var center;
+		var zoom;
+		console.log('setVisibleMapArea', result);
 
-				var first = result[0],
-			
+		switch(result.type) {
+			case 'google':
+				var first = result[0],			
 			    center = this.toWebMercator(first.geometry.location),
 			    viewport = first.geometry.viewport,
 			    viewportSW = viewport.getSouthWest(),
 			    viewportNE = viewport.getNorthEast(),
 			    min = this.toWebMercator(viewportSW),
 			    max = this.toWebMercator(viewportNE),
-			    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min.x, min.y, max.x, max.y));
+			    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min[0], min[1], max[0], max[1]));
 			    break;
 
 		    default:
-		    	var center = {x: result.x, y: result.y};
-		    	if(result.zoom) {
-		    		var zoom = result.zoom;
+				translation = new Geometry.Point(result.center[0], result.center[1]);
+				translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));	
+				center = [translation.x, translation.y]; 
+		    	if (result.zoom != undefined) {
+		    		zoom = result.zoom;
 		    	}
 			    break;
 		}
 
-		if(DEFAULT_MAP_ZOOM)
-		{
-			zoom = DEFAULT_MAP_ZOOM;
-			DEFAULT_MAP_ZOOM = null;
-		}
+		console.log('setVisibleMapArea', 'center:', center, 'zoom:', zoom);
 
 		if (center) {
-		    this.map.setCenter(new OpenLayers.LonLat(center.x, center.y), zoom);		
+		    this.map.setCenter(new OpenLayers.LonLat(center[0], center[1]), zoom);		
 		}		
 	},
 	
+	/*
 	detectMapClick: function ()
 	{
 		var self = this;
@@ -692,6 +695,7 @@ window.MapOLView = window.MapViewBase.extend({
 		this.map.addControl(dblClick);
 		dblClick.activate();
 	},
+	*/
 	
 	removeCollectionFromMap: function(model) {
 

@@ -49,7 +49,7 @@ app.error(function(err, req, res, next){
 */
 
 // Admin Route
-app.get(/^\/admin\/([a-f0-9]{32})(|\/(|globe|map|setup))\/?$/, function(req, res){
+app.get(/^\/admin\/([a-f0-9]{32})(|\/(|globe|map|setup))/, function(req, res){
 	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {
 		if (utils.handleDbOp(req, res, err, map, 'map')) return;
 		permissions.canAdminMap(req, map, true);
@@ -62,7 +62,7 @@ app.get(/^\/admin\/([a-f0-9]{32})(|\/(|globe|map|setup))\/?$/, function(req, res
 });
 
 // Static Route
-app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))\/?$/, function(req, res) {
+app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))/, function(req, res) {
 	var admin = req.params[0];
 	var slug = req.params[1];
 	if (slug) {

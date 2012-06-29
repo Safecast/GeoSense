@@ -261,7 +261,7 @@ window.MapGLView = window.MapViewBase.extend({
 
 
 	start: function() {
-	
+		MapGLView.__super__.start.call(this);
 	},
 
 	/*
@@ -333,7 +333,7 @@ window.MapGLView = window.MapViewBase.extend({
 		this.globe.createPoints();
 	},
 
-	setViewport: function(result)
+	setVisibleMapArea: function(result)
 	{
 		var first = result[0],
 		    center = this.toWebMercator(first.geometry.location),

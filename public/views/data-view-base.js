@@ -445,12 +445,14 @@ window.DataViewBase = Backbone.View.extend({
 
 	enableUpdateButton: function()
 	{
+		this.$('#updateData').attr('disabled', true);
 		this.$('#updateData').removeClass('disabled');
 		this.$('#updateData').addClass('btn-primary');
 	},
 	
 	disableUpdateButton: function()
 	{
+		this.$('#updateData').attr('disabled', false);
 		this.$('#updateData').removeClass('btn-primary');
 		this.$('#updateData').addClass('disabled');
 	},

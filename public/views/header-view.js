@@ -42,7 +42,9 @@ window.HeaderView = Backbone.View.extend({
 		if (event.keyCode == 13) {
 			if (this.$("#search'").is(":focus")) {
 				var addr = $('#search').val();
-				this.vent.trigger("setMapLocation", addr);
+				if (addr != '') {
+					this.vent.trigger("geocodeAndSetMapLocation", addr);
+				}
 			}
 		}
 	},

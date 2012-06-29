@@ -140,7 +140,7 @@ var MapAPI = function(app) {
 					map.save(function(err, map) {
 						if (handleDbOp(req, res, err, map, 'map')) return;
 						permissions.canAdminMap(req, map, true);
-					 	res.send(map);
+					 	res.send(prepareMapResult(req, map));
 					});
 				}
 			});
@@ -282,6 +282,28 @@ var MapAPI = function(app) {
 					}
 					console.log('map updated');
 					res.send('');
+				});
+		  	});
+	});
+
+	app.post('/api/map/:mapid', function(req, res){
+		Map.findOne({_id: req.params.mapid})
+			.populate('layers.pointCollection')
+			.populate('layers.options')
+			.run(function(err, map) {
+				if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
+
+				if (req.body.initialArea) {
+					map.initialArea = req.body.initialArea;
+				}
+
+				map.save(function(err, map) {
+					if (err) {
+						res.send('server error', 500);
+						return;
+					}
+					console.log('map updated');
+				 	res.send(prepareMapResult(req, map));
 				});
 		  	});
 	});
