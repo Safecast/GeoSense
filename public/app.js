@@ -1,18 +1,6 @@
 var AppRouter = Backbone.Router.extend({
 
     routes: {
-/*		":slug/globe": "routeGlobe",
-		":slug/globe/": "routeGlobe",
-		":slug/map": "routeMap",
-		":slug/map/": "routeMap",
-		":slug/map/:query": "routeMap",
-		":slug/globe/:query": "routeGlobe",
-		":slug/setup": "routeNewMap",
-		":slug/": "routeMap",
-		":slug": "routeMap",
-		"removed": "home",
-		"":"home",*/
-
 		"": "homeRoute",
 		"removed": "homeRoute",
 
@@ -39,17 +27,6 @@ var AppRouter = Backbone.Router.extend({
 		this.graphVisible = false;
 		this.dataLibraryVisible = false;
 		this.chatVisible = false;
-
-		/*var router = this,
-			routes = [
-				[/^(admin\/)?([a-zA-Z0-9\-\_]+)(|\/globe|\/map|\/setup)\/?(\?.*)?$/, '__mainRoute'],
-				['removed', 'homeRoute'],
-				['', 'homeRoute']
-			];
-
-		_.each(routes, function(route) {
-			router.route.apply(router, route);
-		});*/
 
 		this.vent = _.extend({}, Backbone.Events);
 		this.vent.bind('mapViewReady', function() {
