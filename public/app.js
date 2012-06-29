@@ -70,6 +70,18 @@ var AppRouter = Backbone.Router.extend({
     	this.mapRoute(slug, view, x, y, zoom);
     },
 
+	homeRoute: function() 
+	{
+		
+		if (this.firstLoad) {
+			this.firstLoad = false;
+			this.homepageView = new HomepageView();
+	        $('#home').append(this.homepageView.render().el);
+		} else {
+			window.location.reload(true);			
+		}
+	},
+
     genMapURI: function(view, opts)
     {
     	var uri = (this.adminRoute ? 'admin/' : '') 
@@ -84,35 +96,6 @@ var AppRouter = Backbone.Router.extend({
     	}
     	return uri.format(opts);
     },
-
-	mainRoute: function(admin, slug, view, query)
-	{
-		var mapView = '';
-		if (view) {
-			view = view.split('/')[1];
-			this.setupRoute = view == 'setup';
-			if (!this.setupRoute) {
-				mapView = view;
-			} else {
-				$('#app').empty();
-			}
-		}
-		this.adminRoute = admin;
-		console.log('mainRoute', slug, mapView, query);
-		this.loadAndInitMap(slug, mapView);
-	},
-
-	homeRoute: function() 
-	{
-		
-		if (this.firstLoad) {
-			this.firstLoad = false;
-			this.homepageView = new HomepageView();
-	        $('#home').append(this.homepageView.render().el);
-		} else {
-			window.location.reload(true);			
-		}
-	},
 
     initMapView: function(mapView, center, zoom) 
     {
