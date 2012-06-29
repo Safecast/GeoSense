@@ -193,3 +193,14 @@
     -o-transition: all .3s linear;
     -ms-transition: all .3s linear;
 }
+
+.olControlScaleLineTop, .olControlScaleLineBottom {
+	border-color: #666 !important;
+}
+
+.olControlScaleLine {
+	right: 20px !important;
+	bottom: 20px !important;
+	left: auto !important;
+	color: #666 !important;
+}

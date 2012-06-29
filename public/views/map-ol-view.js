@@ -138,33 +138,8 @@ window.MapOLView = window.MapViewBase.extend({
 
 		this.setMapLocation(DEFAULT_MAP_LOCATION);
 
-		//this.map.events.register("mousemove", this.map, function (b) {
-			// var a = this;
-			//         var c = this.getLonLatFromPixel(b.xy),
-			//             f = this.getExtent(),
-			//             g = this.getCurrentSize();
-			//         if (a.baseMapType == "google") {
-			//             var h = new OpenLayers.Projection("EPSG:900913"),
-			//                 j = new OpenLayers.Projection("EPSG:4326");
-			//             c.transform(h, j);
-			//             f.transform(h, j)
-			//         }
-			//         g = f.getWidth() / g.w;
-			//         g = self.getItems(c.lon, c.lat, g * (2 + this.zoom / this.numZoomLevels * 2));
-			//         f = "";
-			//         f = g.length;
-			//         $tooltip = $("#map-tooltip");
-			//         f > 0 ? (a.curItem = a.model.items[g[0]], c = 30, f > 1 ? ($("#map-tooltip .tooltip-info").html("[ " + g.length + " more ]"), $("#map-tooltip .tooltip-info").css("display", "inline"), c = 60) : ($("#map-tooltip .tooltip-info").html(""), $("#map-tooltip .tooltip-info").css("display", "none")), f = "<span>" + a.curItem.title + "</span> ", $("#map-tooltip .tooltip-title").html(f), g = this.getSize(), f = b.xy.x, h = b.xy.y + 20, j = $tooltip.outerWidth(), f + 200 + 10 > g.w && (f -= j), h + c > g.h && (h = b.xy.y - c), $tooltip.css({
-			//             left: f,
-			//             top: h,
-			//             display: "block"
-			//         })) : ($tooltip.css({
-			//             display: "none"
-			//         }), a.curItem = null)
-			// 
-			// 		console.log(a);
-	    //});
-		
+		var scaleLine = new OpenLayers.Control.ScaleLine();
+        this.map.addControl(scaleLine);		
 	},
 	
 	getItems: function (a, b, c) {
