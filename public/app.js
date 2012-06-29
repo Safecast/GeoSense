@@ -14,7 +14,8 @@ var AppRouter = Backbone.Router.extend({
 		"":"home",*/
     },
 
-    initialize:function() {
+    initialize: function() 
+    {
 		var self = this;
 
 		this.firstLoad = true;
@@ -66,7 +67,8 @@ var AppRouter = Backbone.Router.extend({
 		this.loadAndInitMap(slug, mapView);
 	},
 
-	homeRoute: function () {
+	homeRoute: function() 
+	{
 		
 		if (this.firstLoad) {
 			this.firstLoad = false;
@@ -77,7 +79,8 @@ var AppRouter = Backbone.Router.extend({
 		}
 	},
 
-    initMapView: function(mapView) {
+    initMapView: function(mapView) 
+    {
 		var self = this;
 			
 		if (this.mapView) {
@@ -114,8 +117,8 @@ var AppRouter = Backbone.Router.extend({
 		return this.adminRoute && this.mapInfo.admin; 
 	},
 
-	render: function(mapView) {
-
+	render: function(mapView) 
+	{
 		var self = this;
 
 		window.document.title = this.mapInfo.title + ' – GeoSense';
@@ -197,7 +200,8 @@ var AppRouter = Backbone.Router.extend({
 		});
 	},
 
-	getURLParameter:function(name) {
+	getURLParameter:function(name) 
+	{
 	    return decodeURI(
 	        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
 	    );
@@ -369,8 +373,10 @@ var AppRouter = Backbone.Router.extend({
 
 });
 
-tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header','sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 'edit-data', 'data-library', 'data-info'],
+tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header',
+	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
+	'edit-data', 'data-library', 'data-info'],
     function () {
         app = new AppRouter();
         Backbone.history.start({ pushState: true });
-});
+	});
