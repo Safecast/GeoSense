@@ -40,17 +40,19 @@ window.SetupView = Backbone.View.extend({
 
 	deleteMapClicked: function() {
 		var self = this;
-		$.ajax({
-			type: 'DELETE',
-			url: '/api/map/' + self.mapInfo._id,
-			success: function() {
-				console.log('deleted map: ' + self.mapInfo._id);
-				window.location = '/';
-			},
-			error: function() {
-				console.error('failed to delete map: ' + self.mapInfo._id);
-			}
-		});
+		if (window.confirm(__('Are you sure you want to delete this map? This action cannot be reversed!'))) {
+			$.ajax({
+				type: 'DELETE',
+				url: '/api/map/' + self.mapInfo._id,
+				success: function() {
+					console.log('deleted map: ' + self.mapInfo._id);
+					window.location = '/';
+				},
+				error: function() {
+					console.error('failed to delete map: ' + self.mapInfo._id);
+				}
+			});
+		}
 	},
 
 });

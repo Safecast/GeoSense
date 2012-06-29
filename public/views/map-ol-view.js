@@ -617,8 +617,7 @@ window.MapOLView = window.MapViewBase.extend({
 	{
 		var center;
 		var zoom;
-		console.log('setVisibleMapArea', result);
-
+		
 		switch(result.type) {
 			case 'google':
 				var first = result[0],			
