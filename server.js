@@ -28,9 +28,29 @@ require('./api/map.js')(app);
 require('./api/point.js')(app);
 require('./api/import.js')(app);
 
+/*
+// TODO: Implement proper error handling with friendly 404 und 500 pages
+
+function NotFound(msg){
+	this.name = 'NotFound';
+	Error.call(this, msg);
+	Error.captureStackTrace(this, arguments.callee);
+}
+NotFound.prototype.__proto__ = Error.prototype;
+
+app.error(function(err, req, res, next){
+	console.log('app error', err);
+    if (err instanceof NotFound) {
+        res.send('404 template');
+    } else {
+        next(err);
+    }
+});
+*/
+
 // Admin Route
 app.get(/^\/admin\/([a-f0-9]{32})(|\/(|globe|map|setup))\/?$/, function(req, res){
-	models.Map.findOne({adminslug: req.params[0]}, function(err, map) {
+	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {
 		if (utils.handleDbOp(req, res, err, map, 'map')) return;
 		permissions.canAdminMap(req, map, true);
 		var url = '/admin/' + map.publicslug + req.params[1];
@@ -42,7 +62,17 @@ app.get(/^\/admin\/([a-f0-9]{32})(|\/(|globe|map|setup))\/?$/, function(req, res
 });
 
 // Static Route
-app.get(/^\/(admin\/)?[a-zA-Z0-9\-\_]+(|\/(globe|map|setup))\/?$/, function(req, res){
+app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))\/?$/, function(req, res) {
+	var admin = req.params[0];
+	var slug = req.params[1];
+	if (slug) {
+		// check if map exists so that a proper error page appears if it doesn't
+		models.Map.findOne({publicslug: slug, active: true}, function(err, map) {
+			if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
+			res.sendfile('public/index.html');
+		});
+		return;
+	}
 	res.sendfile('public/index.html');
 });
 

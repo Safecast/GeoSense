@@ -5,6 +5,8 @@ var config = {
 
 	DEBUG: DEV,	
 
+	// since dev server restarts frequently and sessions are lost, circumvent 
+	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,
 
 	COLLECTION_DEFAULTS: {

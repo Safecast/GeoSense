@@ -76,11 +76,13 @@ this.MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
 }));
 
 this.Map = mongoose.model('Map', new mongoose.Schema({
+	active: {type: Boolean, default: true},
 	title: {type: String, required: true},
 	description: String,
 	adminslug: {type: String, required: true, index: {unique: true}},
 	publicslug: {type: String, required: true, index: {unique: true}},
 	featured: {type: Number, default: 0}, 
+	// TODO: Enforce privacy (currently unused because no user login required)
 	status: {type: String, enum: [config.MapStatus.PRIVATE, config.MapStatus.PUBLIC], required: true, default: config.MapStatus.PUBLIC},
 	created: Date,
 	modified: Date,
