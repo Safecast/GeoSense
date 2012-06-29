@@ -97,12 +97,14 @@ var AppRouter = Backbone.Router.extend({
     genMapURI: function(view, opts)
     {
     	var uri = (this.adminRoute ? 'admin/' : '') 
-    		+ this.mapInfo.publicslug + '/' + view;
-    	if (opts.x != undefined) {
-	    	uri += '/%(x)s,%(y)s';
-    	}
-    	if (opts.zoom != undefined) {
-    		uri += '/%(zoom)s';
+    		+ this.mapInfo.publicslug + (view ? '/' + view : '');
+    	if (opts) {
+	    	if (opts.x != undefined) {
+		    	uri += '/%(x)s,%(y)s';
+	    	}
+	    	if (opts.zoom != undefined) {
+	    		uri += '/%(zoom)s';
+	    	}
     	}
     	return uri.format(opts);
     },

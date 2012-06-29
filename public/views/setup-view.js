@@ -35,7 +35,9 @@ window.SetupView = Backbone.View.extend({
 
 	saveClicked: function() {
 		console.log('save');
-		$('#setupModal').modal('hide')
+		$('#setupModal').modal('hide');
+		app.navigate(app.genMapURI());
+		return false;
 	},
 
 	deleteMapClicked: function() {
@@ -53,6 +55,7 @@ window.SetupView = Backbone.View.extend({
 				}
 			});
 		}
+		return false;
 	},
 
 });
