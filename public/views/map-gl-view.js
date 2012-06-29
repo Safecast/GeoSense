@@ -335,14 +335,6 @@ window.MapGLView = window.MapViewBase.extend({
 
 	setVisibleMapArea: function(result)
 	{
-		var first = result[0],
-		    center = this.toWebMercator(first.geometry.location),
-		    viewport = first.geometry.viewport,
-		    viewportSW = viewport.getSouthWest(),
-		    viewportNE = viewport.getNorthEast(),
-		    min = this.toWebMercator(viewportSW),
-		    max = this.toWebMercator(viewportNE);		
-			//Do something here
 	},
 
     /*addOne: function(model) 

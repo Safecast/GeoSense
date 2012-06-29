@@ -25,7 +25,6 @@ var AppRouter = Backbone.Router.extend({
 		":slug/:view": "mapRoute",
 		":slug/:view/:x,:y": "mapRoute",
 		":slug/:view/:x,:y/:zoom": "mapRoute",
-
     },
 
     initialize: function() 
@@ -453,5 +452,7 @@ tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header',
 	'edit-data', 'data-library', 'data-info'],
     function () {
         app = new AppRouter();
-        Backbone.history.start({ pushState: true });
+        if (!Backbone.history.start({ pushState: true })) {
+	    	$('#app').html('page not found');
+        }
 	});
