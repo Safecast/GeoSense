@@ -53,14 +53,14 @@ window.HeaderView = Backbone.View.extend({
 
 	settingsButtonClicked: function() {
 				
-		if(_settingsVisible)
+		if(app.settingsVisible)
 		{
 			$('#settingsButton').html('<i class="icon-arrow-right icon-white"></i> Show Settings');
 			$('.sidebar-view').addClass('visible');
 			$('.map-view').addClass('full');
 			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
-			_settingsVisible = false;
+			app.settingsVisible = false;
 		}
 		else
 		{
@@ -69,22 +69,22 @@ window.HeaderView = Backbone.View.extend({
 			$('.map-view').removeClass('full');
 			$('.map-gl-view').removeClass('full');
 			$('.sidebar-view .black-overlay').removeClass('visible');
-			_settingsVisible = true;
+			app.settingsVisible = true;
 		}	
 	},
 	
 	graphButtonClicked: function() {
 				
-		if(_graphVisible == true)
+		if(app.graphVisible == true)
 		{
-			_graphVisible = false;
+			app.graphVisible = false;
 			
 			$('.graph-view').removeClass('visible');
 			$('.header-view .graph').removeClass('active');
 		}
 		else
 		{
-			_graphVisible = true;
+			app.graphVisible = true;
 			
 			$('.graph-view').addClass('visible');
 			$('.header-view .graph').addClass('active');

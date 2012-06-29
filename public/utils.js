@@ -85,16 +85,19 @@ var lpad = function(str, padString, length) {
 *	"%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
 */
 String.prototype.format = function(replacements) {
-  return this.replace(/\%\(([a-z0-9_]+)\)(s)/ig, function(match, name, type) { 
-    return typeof replacements[name] != 'undefined'
-      ? replacements[name]
-      : match
-    ;
-  });
+	return this.replace(/\%\(([a-z0-9_]+)\)(s|i)/ig, function(match, name, type) { 
+		return typeof replacements[name] != 'undefined'
+			? replacements[name]
+			: match;
+	});
 };
 
 function __(str, replacements) {
-	return (locale.strings[str] || str).format(replacements);
+	var s = (locale.strings[str] || str);
+	if (replacements) {
+		return s.format(replacements);
+	}
+	return s;
 }
 
 /**

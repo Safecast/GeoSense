@@ -97,11 +97,11 @@ window.ChatView = Backbone.View.extend({
 	
 	chatToggleClicked: function()
 	{
-		if(_chatVisible == true)
+		if(app.chatVisible == true)
 		{ 
-			_chatVisible = false
+			app.chatVisible = false
 		} else {
-			_chatVisible = true
+			app.chatVisible = true
 		}
 			
 		this.toggleChatVisibility();
@@ -109,14 +109,14 @@ window.ChatView = Backbone.View.extend({
 	
 	toggleChatVisibility: function()
 	{
-		if(_chatVisible == true)
+		if(app.chatVisible == true)
 		{
 			$(this.el).addClass('visible');
-			_chatVisible = true;
+			app.chatVisible = true;
 		} else
 		{
 			$(this.el).removeClass('visible');
-			_chatVisible = false;
+			app.chatVisible = false;
 		}
 	},
 	

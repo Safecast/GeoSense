@@ -44,12 +44,10 @@ window.DataLibrary = Backbone.View.extend({
 			url: '/api/pointcollections',
 			success: function(data) {
 
-				$.each(data, function(key, val) { 
-					//Check to see if the map already has the collection
-					valStr = String(val.collectionid);
-					var search = jQuery.inArray(valStr,_mapCollections);
-					if(search == -1)
-						self.drawDataSource(val);
+				$.each(data, function(key, pointCollection) { 
+					if (!app.pointCollections[pointCollection._id]) {
+						self.drawDataSource(pointCollection);
+					}
 				});
 				
 				self.$('#dragLabel').draggable({
@@ -105,7 +103,7 @@ window.DataLibrary = Backbone.View.extend({
 		    left: -350,
 		  }, 400, 'easeOutQuad', function() {
 				$('#dropZone').remove();
-				_dataLibraryVisible = false;
+				app.dataLibraryVisible = false;
 				$(window).unbind();
 				$(self.el).remove();
 				return this;

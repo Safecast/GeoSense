@@ -169,7 +169,7 @@ window.SideBarView = Backbone.View.extend({
     },
 
 	settingsTabClicked: function() {
-		if(_settingsVisible)
+		if(app.settingsVisible)
 		{
 			$('#settingsTabText').html('SHOW');
 			$('#settingsTab').addClass('hidden');
@@ -177,7 +177,7 @@ window.SideBarView = Backbone.View.extend({
 			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
 			$('.olControlPanZoomBar').css("margin-left",0);
-			_settingsVisible = false;
+			app.settingsVisible = false;
 		}
 		else
 		{
@@ -190,7 +190,7 @@ window.SideBarView = Backbone.View.extend({
 			$('.map-view').removeClass('full');
 			
 			$('.sidebar-view .black-overlay').removeClass('visible');
-			_settingsVisible = true;
+			app.settingsVisible = true;
 		}
 		
 		this.vent.trigger("redrawMap");
@@ -220,15 +220,15 @@ window.SideBarView = Backbone.View.extend({
 	
 	toggleDataLibrary: function(){
 		
-		if(_dataLibraryVisible == false)
+		if(app.dataLibraryVisible == false)
 		{
 			this.dataLibraryView = new DataLibrary();
 		    $(this.el).append(this.dataLibraryView.render().el);
-			_dataLibraryVisible = true;
+			app.dataLibraryVisible = true;
 		}
 		else
 		{
-			_dataLibraryVisible = false;
+			app.dataLibraryVisible = false;
 		}		
 	},
 

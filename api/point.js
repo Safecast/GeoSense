@@ -151,6 +151,7 @@ var PointAPI = function(app) {
 							fullCount: fullCount,
 							originalCount: originalCount,
 							maxCount: maxCount,
+							gridSize: grid_size,
 							items: points
 						};
 						res.send(data);

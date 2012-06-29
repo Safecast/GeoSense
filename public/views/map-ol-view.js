@@ -128,7 +128,7 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		//this.addCommentLayer();
 				
-		this.updateMapStyle(_defaultMapStyle);
+		this.updateMapStyle(DEFAULT_MAP_STYLE);
 				
 		//this.detectMapClick();
 		
@@ -136,7 +136,7 @@ window.MapOLView = window.MapViewBase.extend({
 			this.map.addControl(new OpenLayers.Control.MousePosition());
 		}
 
-		this.setMapLocation(_defaultMapLocation);
+		this.setMapLocation(DEFAULT_MAP_LOCATION);
 
 		//this.map.events.register("mousemove", this.map, function (b) {
 			// var a = this;
@@ -456,7 +456,7 @@ window.MapOLView = window.MapViewBase.extend({
 				break;
 
 			case FeatureType.CELLS:
-				var gw = GRID_SIZES[this.getVisibleMapArea().zoom] / 2;
+				var gw = collection.gridSize / 2;
 				var pts = [
 					new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
 					new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),
@@ -660,10 +660,10 @@ window.MapOLView = window.MapViewBase.extend({
 			    break;
 		}
 
-		if(_defaultMapZoom)
+		if(DEFAULT_MAP_ZOOM)
 		{
-			zoom = _defaultMapZoom;
-			_defaultMapZoom = null;
+			zoom = DEFAULT_MAP_ZOOM;
+			DEFAULT_MAP_ZOOM = null;
 		}
 
 		if (center) {

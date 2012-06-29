@@ -165,7 +165,8 @@ var MapAPI = function(app) {
 					}
 				}
 
-			    PointCollection.findOne({_id: pointcollectionid, active: true})
+			    PointCollection.findOne({_id: pointcollectionid, $or: [{active: true}, 
+			    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 			    	.populate('defaults')
 			    	.run(function(err, collection) {
 						if (handleDbOp(req, res, err, collection, 'collection')) return;

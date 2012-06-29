@@ -37,7 +37,26 @@ window.DataViewBase = Backbone.View.extend({
     },
 
     updateStatus: function() {
-		var status = formatLargeNumber(this.collection.originalCount) + ' of ' + formatLargeNumber(this.collection.fullCount);
+    	var status = '';
+    	switch (this.mapLayer.pointCollection.status) {
+    		case DataStatus.DONE:
+    			if (this.collection.originalCount != undefined) {
+					status = __('%(number)i of %(total)i', {
+						number: formatLargeNumber(this.collection.originalCount),
+						total: formatLargeNumber(this.collection.fullCount)
+					});
+    			}
+				break;
+    		case DataStatus.IMPORTING:
+    			status = __('importing…');
+				break;
+    		case DataStatus.UNREDUCED:
+    			status = __('queued for crunching…');
+				break;
+    		case DataStatus.REDUCING:
+    			status = __('crunching…');
+				break;
+    	}
 		this.$(".status").html(status);
     },
 

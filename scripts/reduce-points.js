@@ -1,19 +1,7 @@
-var HISTOGRAM_SIZES = [222, 100, 30]; 
-var DEG_PER_PX_AT_ZOOM_0 = 0.7111111112100985;
-
-var GRID_SIZES = {
-//	'-1': 2,
-	'0': DEG_PER_PX_AT_ZOOM_0 * 4
-};
-
-for (var zoom = 1; zoom <= 15; zoom++) {
-	GRID_SIZES[zoom] = GRID_SIZES[zoom - 1] / 2;
+var opts = {};
+for (var k in config.REDUCE_SETTINGS.DB_OPTIONS) {
+	opts[k] = config.REDUCE_SETTINGS.DB_OPTIONS[k];
 }
-
-var opts = {
-	limit: null
-};
-
 
 var lpad = function(str, padString, length) {
 	var s = new String(str);
@@ -441,66 +429,67 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 	}, opts);
 };
 
-var numGridSizes = 0;
-for (var g in GRID_SIZES) {
-	numGridSizes++;
-}
-var numHistograms = HISTOGRAM_SIZES.length;
+var numHistograms = config.HISTOGRAM_SIZES.length;
 
 var cur = db.pointcollections.find({status: 'U'});
+
+print('*** number of collections to reduce: ' + cur.count() + ' ***');
+
 cur.forEach(function(collection) {
 	opts.query = {pointCollection: collection._id};
-	var statsTotal = db.points.count(opts.query) * (numGridSizes + numHistograms);
+	var statsTotal = db.points.count(opts.query) * (config.NUM_ZOOM_LEVELS + numHistograms);
 	opts.stats = {total: statsTotal, collectionId: collection._id};
-	db.pointcollections.update({_id: collection._id}, {$set: {progress: 0, busy: true, numBusy: statsTotal}});
+	db.pointcollections.update({_id: collection._id}, {$set: {status: "R", progress: 0, numBusy: statsTotal}});
 
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
 
-	for (var i = 0; i < HISTOGRAM_SIZES.length; i++) {
-		print('*** reducing for histogram = '+HISTOGRAM_SIZES[i]+' ***');
+	for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
+		print('*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***');
 		reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
-			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, HISTOGRAM_SIZES[i])
+			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, config.HISTOGRAM_SIZES[i])
 		}, opts, []);
 	}
 
 	if (!collection.reduce) {
-		print('*** unreduced ***');
+		print('*** creating unreduced copy of original ***');
 		reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(0)
 		}, opts);
 
 	} else if (collection.reduce) {
-		for (var g in GRID_SIZES) {
+		for (var g in config.GRID_SIZES) {
 
-			var grid_size = GRID_SIZES[g];
-			print('*** reducing for grid = '+g+' ***');
+			var grid_size = config.GRID_SIZES[g];
+			print('*** reducing original for grid = '+g+' ***');
 
 			reducePoints(collection._id, {
 				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.LocGrid(grid_size)
 			}, opts);
 			
-			/*reducePoints({
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.LocGrid(grid_size), 
-				datetime: new ReductionKey.Weekly()
-			}, opts);*/
-			
-			/*reducePoints({
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.LocGrid(grid_size), 
-				datetime: new ReductionKey.Yearly()
-			}, opts);*/
+			if (config.REDUCE_SETTINGS.TIME_BASED) {
+				reducePoints({
+					pointCollection: ReductionKey.copy, 
+					loc: new ReductionKey.LocGrid(grid_size), 
+					datetime: new ReductionKey.Weekly()
+				}, opts);
+				
+				reducePoints({
+					pointCollection: ReductionKey.copy, 
+					loc: new ReductionKey.LocGrid(grid_size), 
+					datetime: new ReductionKey.Yearly()
+				}, opts);
 
-			/*reducePoints({
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.LocGrid(grid_size), 
-				datetime: new ReductionKey.Daily()
-			}, opts);*/
+				reducePoints({
+					pointCollection: ReductionKey.copy, 
+					loc: new ReductionKey.LocGrid(grid_size), 
+					datetime: new ReductionKey.Daily()
+				}, opts);
+			}
 		}
 	}
 	
-	db.pointcollections.update({_id: collection._id}, {$set: {status: "D", busy: false, numBusy: 0}});
+	db.pointcollections.update({_id: collection._id}, {$set: {status: "D", numBusy: 0}});
 });

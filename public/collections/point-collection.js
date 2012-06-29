@@ -51,6 +51,7 @@ PointCollection = Backbone.Collection.extend({
     		this.fullCount = resp.fullCount;
     		this.maxCount = resp.maxCount;
     		this.originalCount = resp.originalCount;
+    		this.gridSize = resp.gridSize;
     		resp = resp['items'];
     	}
 		return PointCollection.__super__.parse.call(this, resp, xhr);

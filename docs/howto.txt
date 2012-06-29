@@ -9,3 +9,13 @@ Mongo dumping and cloning
 
 mongodump -d geo -o ./dump
 mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p SEKRET ./dump/geo/
+
+
+Executing reduction script
+==========================
+
+mongo DATABASE -u USER -p SEKRET config.js scripts/reduce-points.js
+
+For dev server:
+
+mongo geo config.js scripts/reduce-points.js

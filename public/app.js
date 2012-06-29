@@ -17,6 +17,15 @@ var AppRouter = Backbone.Router.extend({
     initialize:function() {
 		var self = this;
 
+		this.firstLoad = true;
+		this.pointCollections = {};
+		this.timeBasedPointCollections = {};
+
+		this.settingsVisible = false;
+		this.graphVisible = false;
+		this.dataLibraryVisible = false;
+		this.chatVisible = false;
+
 		var router = this,
 			routes = [
 				[/^(admin\/)?([a-zA-Z0-9\-\_]+)(|\/globe|\/map|\/setup)\/?(\?.*)?$/, 'mainRoute'],
@@ -34,10 +43,8 @@ var AppRouter = Backbone.Router.extend({
 		});
 
 		var embed = this.getURLParameter('embed');
-		if(embed == 1)
-		{
+		if (embed == 1) {
 			console.log('embed: ' + embed);
-
 			this.renderAsEmbed();
 		}
     }, 
@@ -61,8 +68,8 @@ var AppRouter = Backbone.Router.extend({
 
 	homeRoute: function () {
 		
-		if(_firstLoad) {
-			_firstLoad = false;
+		if (this.firstLoad) {
+			this.firstLoad = false;
 			this.homepageView = new HomepageView();
 	        $('#home').append(this.homepageView.render().el);
 		} else {
@@ -151,7 +158,7 @@ var AppRouter = Backbone.Router.extend({
 		link.attr({
         	type: 'text/css',
         	rel: 'stylesheet',
-        	href: 'styles/embed.css'
+        	href: '/styles/embed.css'
 		});
 		$("head").append( link ); 
 
@@ -196,36 +203,6 @@ var AppRouter = Backbone.Router.extend({
 	    );
 	},
 
-	pollForNewPointCollection: function(pointCollectionId, interval) {
-		if (interval) {
-			setTimeout(function() {
-				app.pollForNewPointCollection(pointCollectionId);
-			}, interval);
-			return;
-		}
-
-		console.log('pollForNewPointCollection: '+pointCollectionId);
-
-		$.ajax({
-			type: 'GET',
-			url: '/api/pointcollection/' + pointCollectionId,
-		    error: function() {
-				console.error('Failed to fetch new collection, trying again after timeout...');
-		    },
-		    success: function(data) {
-		    	if (data.status == DataStatus.IMPORTING || data.status == DataStatus.REDUCING) {
-					app.vent.trigger("setStateType", 'parsing', data);
-					console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
-					app.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
-		    	} else {
-					app.bindCollectionToMap(pointCollectionId);
-					app.vent.trigger("setStateType", 'post');
-		    	}
-		    }
-		});
-
-	},
-
 	initMapLayers: function()
 	{
 		if (this.mapInfo.layers) {
@@ -254,16 +231,17 @@ var AppRouter = Backbone.Router.extend({
 			mapLayer: layer
 		};
 
-		//Fetch point collections for map(s)
+		var collection = this.pointCollections[pointCollectionId] = new PointCollection(collectionOptions);
+		self.addDataPanelViews(pointCollectionId);
 
-		var collection = pointCollection[pointCollectionId] = new PointCollection(collectionOptions);
-		collection.setVisibleMapArea(self.mapView.getVisibleMapArea());
-		collection.fetch({success: function(collection) {
- 			self.addDataPanelViews(pointCollectionId);
-			self.mapView.addCollection(collection);
-			console.log('complete');
-			self.vent.trigger("setStateType", 'complete', layer.pointCollection);
-		}});
+		if (layer.pointCollection.status == DataStatus.DONE) {
+			this.fetchMapLayer(pointCollectionId);
+		} else {
+			self.vent.trigger("setStateType", 'loading', collection);
+			app.pollForNewPointCollection(pointCollectionId, INITIAL_POLL_INTERVAL);
+			//self.vent.trigger("setStateType", 'parsing');
+
+		}
 
 		$('.data-info').show();
 
@@ -272,13 +250,67 @@ var AppRouter = Backbone.Router.extend({
 			collectionOptions.urlParams = {
 				t: 'w'
 			};
-			var collection = timeBasedPointCollection[pointCollectionId] = new PointCollection(collectionOptions);
+			var collection = this.timeBasedPointCollections[pointCollectionId] = new PointCollection(collectionOptions);
 			collection.setVisibleMapArea(self.mapView.getVisibleMapArea());
 			collection.fetch({success: function(collection) {
 				self.graphView.addCollection(collection);
 			}});
 		}*/
-			
+	},
+
+	pollForNewPointCollection: function(pointCollectionId, interval) 
+	{
+		var self = this;
+
+		if (interval) {
+			setTimeout(function() {
+				self.pollForNewPointCollection(pointCollectionId);
+			}, interval);
+			return;
+		}
+
+		console.log('pollForNewPointCollection: '+pointCollectionId);
+		$.ajax({
+			type: 'GET',
+			url: '/api/pointcollection/' + pointCollectionId,
+		    error: function() {
+				console.error('Failed to fetch new collection, trying again after timeout...');
+		    },
+		    success: function(data) {
+		    	self.updatePointCollectionAfterPolling(data);
+		    }
+		});
+	},
+
+	updatePointCollectionAfterPolling: function(data) 
+	{
+		var pointCollectionId = data._id;
+		var layer = this.getMapLayer(pointCollectionId);
+		layer.pointCollection = data;
+
+		if (data.status !== DataStatus.DONE) {
+			console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
+			this.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
+			//app.vent.trigger("setStateType", 'parsing', data);
+			// TODO: update panel status
+		} else {
+			this.fetchMapLayer(pointCollectionId);
+			this.vent.trigger("setStateType", 'complete', this.pointCollections[pointCollectionId]);
+			//app.vent.trigger("setStateType", 'post');
+		}
+	},
+
+	fetchMapLayer: function(pointCollectionId)
+	{
+		var self = this;
+		var collection = this.pointCollections[pointCollectionId];
+		var layer = this.getMapLayer(pointCollectionId);
+		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
+		collection.fetch({success: function(collection) {
+			self.mapView.addCollection(collection);
+			console.log('complete');
+			self.vent.trigger("setStateType", 'complete', layer.pointCollection);
+		}});
 	},
 	
 	bindCollectionToMap: function(pointCollectionId)
@@ -321,7 +353,7 @@ var AppRouter = Backbone.Router.extend({
 	{
 		var viewOpts = {
 			vent: this.vent,
-			collection: pointCollection[pointCollectionId], 
+			collection: this.pointCollections[pointCollectionId], 
 			collectionId: pointCollectionId, 
 			mapLayer: this.getMapLayer(pointCollectionId)
 		};
