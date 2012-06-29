@@ -431,7 +431,7 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 
 var numHistograms = config.HISTOGRAM_SIZES.length;
 
-var cur = db.pointcollections.find({status: 'U'});
+var cur = db.pointcollections.find({status: config.DataStatus.UNREDUCED});
 
 print('*** number of collections to reduce: ' + cur.count() + ' ***');
 
@@ -439,7 +439,7 @@ cur.forEach(function(collection) {
 	opts.query = {pointCollection: collection._id};
 	var statsTotal = db.points.count(opts.query) * (config.NUM_ZOOM_LEVELS + numHistograms);
 	opts.stats = {total: statsTotal, collectionId: collection._id};
-	db.pointcollections.update({_id: collection._id}, {$set: {status: "R", progress: 0, numBusy: statsTotal}});
+	db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
 
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
 
@@ -491,5 +491,5 @@ cur.forEach(function(collection) {
 		}
 	}
 	
-	db.pointcollections.update({_id: collection._id}, {$set: {status: "D", numBusy: 0}});
+	db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.COMPLETE, numBusy: 0}});
 });

@@ -9,11 +9,11 @@ var MapStatus = {
 	PUBLIC: 'A'
 }
 
-var DataStatus = {
+DataStatus = {
 	IMPORTING: 'I',
 	UNREDUCED: 'U',
 	REDUCING: 'R',
-	DONE: 'D'
+	COMPLETE: 'C'
 };
 
 var FeatureType = {
@@ -53,7 +53,6 @@ if (!this.Document) {
 	module.exports = {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
-		DataStatus: DataStatus,
 		ColorType: ColorType,
 	};
 } else {

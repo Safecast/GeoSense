@@ -234,7 +234,7 @@ var AppRouter = Backbone.Router.extend({
 		var collection = this.pointCollections[pointCollectionId] = new PointCollection(collectionOptions);
 		self.addDataPanelViews(pointCollectionId);
 
-		if (layer.pointCollection.status == DataStatus.DONE) {
+		if (layer.pointCollection.status == DataStatus.COMPLETE) {
 			this.fetchMapLayer(pointCollectionId);
 		} else {
 			self.vent.trigger("setStateType", 'loading', collection);
@@ -288,7 +288,7 @@ var AppRouter = Backbone.Router.extend({
 		var layer = this.getMapLayer(pointCollectionId);
 		layer.pointCollection = data;
 
-		if (data.status !== DataStatus.DONE) {
+		if (data.status !== DataStatus.COMPLETE) {
 			console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
 			this.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
 			//app.vent.trigger("setStateType", 'parsing', data);

@@ -39,7 +39,7 @@ window.DataViewBase = Backbone.View.extend({
     updateStatus: function() {
     	var status = '';
     	switch (this.mapLayer.pointCollection.status) {
-    		case DataStatus.DONE:
+    		case DataStatus.COMPLETE:
     			if (this.collection.originalCount != undefined) {
 					status = __('%(number)i of %(total)i', {
 						number: formatLargeNumber(this.collection.originalCount),

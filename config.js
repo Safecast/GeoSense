@@ -36,6 +36,13 @@ var config = {
 		},
 		// toggles time-based reduction
 		TIME_BASED: false,
+	},
+
+	DataStatus: {
+		IMPORTING: 'I',
+		UNREDUCED: 'U',
+		REDUCING: 'R',
+		COMPLETE: 'C'
 	}
 };
 
