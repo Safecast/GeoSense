@@ -16,10 +16,10 @@ window.MapGLView = window.MapViewBase.extend({
     initialize: function(options) {
 		MapGLView.__super__.initialize.call(this, options)
 	    this.template = _.template(tpl.get('map-gl'));
-		_.bindAll(this, "updateValueScale");
-		_.bindAll(this, "updateTaggedObject");
 	 	options.vent.bind("updateValueScale", this.updateValueScale);
+		_.bindAll(this, "updateValueScale");
 	 	options.vent.bind("updateTaggedObject", this.updateTaggedObject);
+		_.bindAll(this, "updateTaggedObject");
     	this.tweens = {};
     },
 

@@ -1,4 +1,4 @@
-.data-info
+.panel
 {
 	z-index:1000;
 	position:absolute;
@@ -12,13 +12,21 @@
 	color: #fff;
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
-
-	display: none;
-	width: 222px;
+	width: 300px;
 	overflow: scroll;
 }
 
-.data-info .detail {
+.panel h2 {
+	color: white;
+
+}
+
+.panel.data-info {
+	display: none;
+	width: 222px;
+}
+
+.panel.data-info .detail {
 	display: none;
 }
 
@@ -42,12 +50,12 @@
 	margin-top: 10px;	
 }
 
-.data-info .accordion-group:last-child {
+.panel .accordion-group:last-child {
 	margin-bottom: 20px;	
 }
 
 
-.data-info.extended, .data-info.extended .accordion-group {
+.panel.extended, .panel.extended .accordion-group {
 	width: 444px;
 }
 

@@ -82,9 +82,10 @@ var AppRouter = Backbone.Router.extend({
 		}
 	},
 
-    genMapURI: function(view, opts)
+    genMapURI: function(view, opts, admin)
     {
-    	var uri = (this.adminRoute ? 'admin/' : '') 
+    	var uri = ((admin || admin == undefined) && this.adminRoute ? 
+    		'admin/' : '') 
     		+ this.mapInfo.publicslug + (view ? '/' + view : '');
     	if (opts) {
 	    	if (opts.x != undefined) {
@@ -95,6 +96,11 @@ var AppRouter = Backbone.Router.extend({
 	    	}
     	}
     	return uri.format(opts);
+    },
+
+    genPublicURL: function()
+    {
+    	return BASE_URL + app.genMapURI(false, false, false);
     },
 
     initMapView: function(mapView, center, zoom) 
@@ -116,8 +122,9 @@ var AppRouter = Backbone.Router.extend({
 		}		
 	
 		var visibleMapArea = DEFAULT_MAP_AREA;
-		if (this.mapInfo.initialArea.center.length) {
-			visibleMapArea.center = this.mapInfo.initialArea.center;
+		if (this.mapInfo.initialArea && 
+			this.mapInfo.initialArea.center.length) {
+				visibleMapArea.center = this.mapInfo.initialArea.center;
 		}
 		if (this.mapInfo.initialArea.zoom != undefined) {
 			visibleMapArea.zoom = this.mapInfo.initialArea.zoom;
@@ -144,6 +151,15 @@ var AppRouter = Backbone.Router.extend({
 
         this.dataInfoView = new DataInfoView({vent: this.vent});
 		$(mapEl).append(this.dataInfoView.render().el);
+
+        this.mapInfoView = new MapInfoView({vent: this.vent, mapInfo: this.mapInfo});
+		$(mapEl).append(this.mapInfoView.render().el);
+		$(this.mapInfoView.el).hide();
+    },
+
+    showMapInfo: function() 
+    {
+		$(this.mapInfoView.el).show();
     },
 	
 	isMapAdmin: function()
@@ -157,7 +173,7 @@ var AppRouter = Backbone.Router.extend({
 
 		window.document.title = this.mapInfo.title + ' – GeoSense';
 
- 		this.headerView = new HeaderView({vent: this.vent, title: this.mapInfo.title});
+ 		this.headerView = new HeaderView({vent: this.vent, mapInfo: this.mapInfo});
         $('#app').append(this.headerView.render().el);
 
 		this.sideBarView = new SideBarView({vent: this.vent, mapView: mapView});
@@ -409,7 +425,7 @@ var AppRouter = Backbone.Router.extend({
 
 tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header',
 	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-	'edit-data', 'data-library', 'data-info'],
+	'edit-data', 'data-library', 'data-info', 'map-info'],
     function () {
         app = new AppRouter();
         if (!Backbone.history.start({ pushState: true })) {

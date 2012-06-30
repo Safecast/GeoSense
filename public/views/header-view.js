@@ -5,6 +5,7 @@ window.HeaderView = Backbone.View.extend({
 	
     events: {
 		'click #settingsButton': 'settingsButtonClicked',
+		'click #aboutMap': 'aboutMapClicked',
 		'click #aboutGeoSense:' : 'aboutGeoSenseClicked',
 		'click #postFacebook:' : 'postFacebookClicked',
 		'click #postTwitter:' : 'postTwitterClicked',
@@ -17,15 +18,18 @@ window.HeaderView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('header'));
 		this.vent = options.vent;	
-		this.title = options.title;
+		this.mapInfo = options.mapInfo;
 		
 		_.bindAll(this, "setStateType");
 		this.vent.bind("setStateType", this.setStateType);
+
+		_.bindAll(this, "updateMapInfo");
+	 	options.vent.bind("updateMapInfo", this.updateMapInfo);
     },
 
     render: function() {
 		$(this.el).html(this.template());
-		this.setTitle();
+		this.updateMapInfo();
 		this.settingsButtonClicked();
 		
 		if (!app.isMapAdmin())
@@ -49,8 +53,12 @@ window.HeaderView = Backbone.View.extend({
 		}
 	},
 	
-	setTitle: function() {
-		this.$('.brand').html('<h1>GeoSense</h1><h3>'+this.title+'</h3>');
+	updateMapInfo: function(mapInfo) 
+	{
+		if (mapInfo) {
+			this.mapInfo = mapInfo;
+		}
+		this.$('.brand').html('<h1>GeoSense</h1><h3>' + this.mapInfo.title + '</h3>');
 	},
 
 	settingsButtonClicked: function() {
@@ -107,31 +115,34 @@ window.HeaderView = Backbone.View.extend({
 		$('#myModal').modal('toggle');
 	},
 	
-	aboutSafecastClicked: function() {
-		
-		this.modalView = new ModalView();
-        $('body').append(this.modalView.render().el);
-		this.modalView.setTitle('About Safecast');
-		this.modalView.setBody('Body copy goes here!');
-		$('#myModal').modal('toggle');
+	aboutMapClicked: function() {
+		app.showMapInfo();
 	},
 	
 	postTwitterClicked: function() {
 		var tweet = {};
-		tweet.url = 'url';
-		tweet.text = 'Check out the Safecast map: ' + window.location;
-		tweet.via = "safecastdotorg";
+		var url = app.genPublicURL();
+		tweet.url = url;
+		tweet.text = __('Check out the %(title)s map: %(url)s', {
+			url: url,
+			title: this.mapInfo.title
+		});
+		if (this.mapInfo.twitter) {
+			tweet.via = this.mapInfo.twitter;
+		}
 
 		var url = 'https://twitter.com/share?' + $.param(tweet);
 
-		window.open(url, 'Tweet this post', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
+		window.open(url, __('Tweet this post'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 	},
 	
 	postFacebookClicked: function() {
 		var url = 'http://www.facebook.com/sharer.php?u='
-		url += encodeURIComponent(window.location);
-		url += '&t=Check out the Safecast map';
-		window.open('' + url, 'Share it on Facebook', 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
+		url += encodeURIComponent(app.genPublicURL());
+		url += '&t=' +encodeURIComponent(__('Check out the %(title)s map', {
+			title: this.mapInfo.title
+		}));
+		window.open('' + url, __('Share it on Facebook'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 	},
 	
 	setStateType: function(type, obj) {

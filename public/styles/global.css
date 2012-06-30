@@ -235,7 +235,7 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	background-position: -32px top;
 }
 
-.collapsed .panel .panel-header .buttons a.collapse {
+.panel.collapsed .panel-header .buttons a.collapse {
 	background-position: -48px top;
 }
 
@@ -260,4 +260,8 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 .snap.right {
 	width: 15px;
 	height: 100%;
+}
+
+.modal {
+	max-height: 600px !important;
 }

@@ -4,16 +4,41 @@
     <h2 class="map-name"></h2>
   </div>
   <div class="modal-body">
-    <p>From now until forever you'll be able to access this map from the following URLs</p>
-	<form class="well">
-	  	<h3><i class="icon-pencil"></i> ADMIN</h3>
-		<input class="map-admin-url"></input>
-		<h3><i class="icon-eye-open"></i> PUBLIC</h3>
-		<input class="map-url"></input>
-	</form>
+
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#setup-urls" data-toggle="tab">URLs</a></li>
+      <li><a href="#setup-metadata" data-toggle="tab">Map Info</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane active" id="setup-urls">
+        <p>You'll be able to access this map from the following URLs.</p>
+        <form class="well urls">
+          <h3><i class="icon-pencil"></i> ADMIN</h3>
+          <input class="map-admin-url" readonly="readonly"></input>
+          <h3><i class="icon-eye-open"></i> PUBLIC</h3>
+          <input class="map-url" readonly="readonly"></input>
+        </form>
+      </div>
+      <div class="tab-pane" id="setup-metadata">
+        <form class="well">
+          <h3>Map Title</h3>
+          <input name="title"></input>
+          <h3>Description</h3>
+          <textarea name="description"></textarea>
+          <h3>Author Info</h3>
+          <input name="author"></input>
+          <h3>Link URL</h3>
+          <input name="url"></input>
+          <h3>Twitter handle</h3>
+          <input name="twitter"></input>
+      </form>
+      </div>
+    </div>
+
   </div>
   <div class="modal-footer">
-	<a href="#" id="deleteMapButton" class="btn delete">Delete Map</a>
+	<a href="#" id="deleteMapButton" class="btn btn-danger delete">Delete Map</a>
     <a href="#" id="saveCloseButton" class="btn btn-success">Start Mapping!</a>
   </div>
 </div>

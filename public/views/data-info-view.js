@@ -1,7 +1,6 @@
-window.DataInfoView = Backbone.View.extend({
+window.DataInfoView = window.PanelViewBase.extend({
 
-    tagName: 'div',
-	className: 'data-info',
+	className: 'panel data-info',
 	
     events: {
     },
@@ -161,55 +160,5 @@ window.DataInfoView = Backbone.View.extend({
 		}
 		*/
 	},
-
-	setPanelState: function(expand) {
-		var self = this;
-		if (expand == null) {
-			expand = $(self.el).is('.collapsed');
-		} 
-
-		if (!expand) {
-			$(self.el).addClass('collapsed');
-		} else {
-			$(self.el).removeClass('collapsed');
-		}
-
-		if ($(self.el).is('.collapsed')) {
-			self.$('.accordion').hide('fast');
-		} else {
-			self.$('.accordion').show('fast');
-		}
-	},
-
-    render: function() {
-		$(this.el).html(this.template());
-		var self = this;
-
-		$(this.el).draggable({
-
-			stop: function() {
-				var right = $(this).position().left + $(this).outerWidth();				
-				if (right == $('.snap.right').position().left) {
-					console.log('snap back 1');
-					// re-dock to right edge
-					$(this).css('left', 'auto');
-				}
-			},
-
-			snap: ".snap", snapMode: "outer"
-		});
-		$(this.el).css('position', 'absolute'); // draggable sets it to relative
-		this.$('a.extend').click(function() {
-			$(self.el).toggleClass('extended');
-			self.vent.trigger('dataInfoViewResized');
-			return false;
-		});
-		this.$('a.collapse').click(function() {
-			self.setPanelState();	
-			return false;
-		})
-
-        return this;
-    },
 
 });

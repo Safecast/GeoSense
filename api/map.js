@@ -293,15 +293,18 @@ var MapAPI = function(app) {
 			.run(function(err, map) {
 				if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
-				if (req.body.initialArea) {
-					map.initialArea = req.body.initialArea;
+				var fields = ['title', 'description', 'author', 
+					'url', 'twitter', 'initialArea', 'displayInfo'];
+
+				for (var i = fields.length - 1; i >= 0; i--) {
+					var f = req.body[fields[i]];
+					if (f != undefined) {
+						map[fields[i]] = f;
+					}
 				}
 
 				map.save(function(err, map) {
-					if (err) {
-						res.send('server error', 500);
-						return;
-					}
+					if (handleDbOp(req, res, err, map, 'map')) return;
 					console.log('map updated');
 				 	res.send(prepareMapResult(req, map));
 				});

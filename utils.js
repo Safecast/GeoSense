@@ -10,13 +10,13 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
                 sendErr = config.DEBUG ? err : {
                     message: 'Server error'
                 };          
+                res.send(sendErr, 500);
                 break;
             case 'ValidationError':
                 // certain error messages should be available to client:
-                sendErr = err;
+                res.send(err, 403);
                 break;
         }
-        res.send(sendErr, 500);
         return true;
     } else if (!op) {
         res.send((name ? name + ' ' : '') + 'not found', 404);
