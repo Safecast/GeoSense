@@ -1,5 +1,16 @@
 var mongoose = require('mongoose'),
 	config = require('./config.js');
+	mongooseTypes = require("mongoose-types");
+
+mongooseTypes.loadTypes(mongoose);
+useTimestamps = mongooseTypes.useTimestamps
+
+this.User = mongoose.model('User', new mongoose.Schema({
+	name: String,
+	email: {type: mongoose.SchemaTypes.Email, required: true}	
+}));
+
+this.User.schema.plugin(useTimestamps);
 
 this.Point = mongoose.model('Point', new mongoose.Schema({
 	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
@@ -10,10 +21,9 @@ this.Point = mongoose.model('Point', new mongoose.Schema({
 	label: String,
 	url: String,
 	datetime: {type: Date, index: 1},
-	created: Date,
-	modified: Date,	
 }));
 
+this.Point.schema.plugin(useTimestamps);
 this.Point.schema.index({loc: '2d', pointCollection: 1})
 
 this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
@@ -57,18 +67,18 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	maxVal: Number,
 	minVal: Number,
 	timeBased: Boolean,
-	created: Date, 
-	modified: Date,
-	created_by: String,
-	modified_by: String,
 	defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
 	active: Boolean,
 	status: String,
 	progress: Number,
 	numBusy: Number,
 	reduce: Boolean,
-	cropDistribution: Boolean
+	cropDistribution: Boolean,
+	createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
+	modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
 }));
+
+this.PointCollection.schema.plugin(useTimestamps);
 
 this.MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
 	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', index: 1 },
@@ -92,12 +102,12 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
 	},
 	// TODO: Enforce privacy (currently unused because no user login required)
 	status: {type: String, enum: [config.MapStatus.PRIVATE, config.MapStatus.PUBLIC], required: true, default: config.MapStatus.PUBLIC},
-	created: Date,
-	modified: Date,
-	created_by: String,
-	modified_by: String,
-	layers: {type: [this.MapLayer.schema], index: 1}
+	layers: {type: [this.MapLayer.schema], index: 1},
+	createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
+	modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
 }));
+
+this.Map.schema.plugin(useTimestamps);
 
 /*
 Adjusts minVal, maxVal and color positions for all layers if there are if 
@@ -162,3 +172,4 @@ this.Comment = mongoose.model('Comment', new mongoose.Schema({
 	text: String,
 	date: Date,
 }));
+

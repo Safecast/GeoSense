@@ -1,4 +1,54 @@
-var config = require('./config.js');
+var config = require('./config.js'),
+    mailer = require('mailer'),
+    fs = require('fs');
+
+/**
+* Simple Python-style string formatting.
+*
+* Example:
+*
+*   "%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
+*/
+String.prototype.format = function(replacements) {
+    return this.replace(/\%\(([a-z0-9_]+)\)(s|i)/ig, function(match, name, type) { 
+        return typeof replacements[name] != 'undefined'
+            ? replacements[name]
+            : match;
+    });
+};
+
+function __(str, replacements) {
+    var s = (locale.strings[str] || str);
+    if (replacements) {
+        return s.format(replacements);
+    }
+    return s;
+}
+
+exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
+{
+    fs.readFile('template/email/' + bodyTemplate + '.txt', function(err, data) {
+        if (err) throw err;
+        if (!callback) {
+            callback = function() {};
+        }
+        body = new String(data).format(replacements);
+        console.log(body);
+        mailer.send({
+            host: config.SMTP_HOST,
+            port: config.SMTP_PORT,
+            domain: "geosense.media.mit.edu",
+            authentication: "login",
+            username: config.SMTP_USERNAME,
+            password: config.SMTP_PASSWORD,
+
+            to: to,
+            from: "geosense@media.mit.edu",
+            subject: subject,
+            body: body,
+        }, callback);
+    });
+}
 
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {

@@ -1,0 +1,12 @@
+Hello,
+
+You'll be able to access your map from the following URLs. 
+
+    ADMIN -- keep this link private:
+    %(adminUrl)s
+
+    PUBLIC -- share this link with others:
+    %(publicUrl)s
+
+Best,
+The GeoSense email robot

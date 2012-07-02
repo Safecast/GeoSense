@@ -57,6 +57,7 @@ if (!this.Document) {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
 		ColorType: ColorType,
+		BASE_URL: BASE_URL
 	};
 } else {
 	// Browser: define console.log if undefined

@@ -10,6 +10,7 @@ var Point = models.Point,
 	Map = models.Map,
 	MapLayer = models.MapLayer,
 	LayerOptions = models.LayerOptions,
+	User = models.User,
 	handleDbOp = utils.handleDbOp;
 
 var MapAPI = function(app) {
@@ -20,7 +21,7 @@ var MapAPI = function(app) {
 		var options = {};
 		switch (req.params[0]) {
 			case '/latest':
-				options.sort = {'created': -1};
+				options.sort = {'createdAt': -1};
 				options.limit = 20;		
 				break;
 			case '/featured':
@@ -30,14 +31,15 @@ var MapAPI = function(app) {
 				options.sort = {'featured': -1};
 				break;
 		}
-		Map.find(query, null, options, function(err, maps) {
-			if (handleDbOp(req, res, err, maps)) return;
-			var preparedMaps = [];
-			for (var i = 0; i < maps.length; i++) {
-				preparedMaps[i] = prepareMapResult(req, maps[i]);			
-			}
-			res.send(preparedMaps);
-		});
+		Map.find(query, null, options)
+			.run(function(err, maps) {
+				if (handleDbOp(req, res, err, maps)) return;
+				var preparedMaps = [];
+				for (var i = 0; i < maps.length; i++) {
+					preparedMaps[i] = prepareMapResult(req, maps[i]);			
+				}
+				res.send(preparedMaps);
+			});
 	});
 
 	//Returns the collections associated with a unique map by map _id
@@ -84,20 +86,26 @@ var MapAPI = function(app) {
 		Map.findOne({publicslug: req.params.publicslug})
 			.populate('layers.pointCollection')
 			.populate('layers.options')
+			.populate('createdBy')
+			.populate('modifiedBy')
 			.run(function(err, map) {
 				if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 		       	res.send(prepareMapResult(req, map));
 			});
 	});
 
-	//Returns a specific unique map by adminslug, and sets its admin state to true for current session
+	//Returns a specific unique map by adminslug, and sets its admin state to true for current 
+	//session
 	app.get('/api/map/admin/:adminslug', function(req, res) {	
 		Map.findOne({adminslug: req.params.adminslug})
 			.populate('layers.pointCollection')
 			.populate('layers.options')
+			.populate('createdBy')
+			.populate('modifiedBy')
 			.run(function(err, map) {
 				if (handleDbOp(req, res, err, map, 'map')) return;
 				permissions.canAdminMap(req, map, true);
+				req.session.user = map.createdBy;
 		       	res.send(prepareMapResult(req, map));
 			});
 	});
@@ -113,12 +121,10 @@ var MapAPI = function(app) {
 			title: req.body.title,
 			description: '',
 			adminslug: md5(uuid.v4()),
-			created: currDate,
-			modified: currDate,
-			created_by: '',
-			modified_by: '',
 			collections: collections,
 		});	
+
+		map.createdBy = map.modifiedBy = req.session.user;
 
 		var makeUniqueSlugAndSave = function() 
 		{
@@ -290,6 +296,8 @@ var MapAPI = function(app) {
 		Map.findOne({_id: req.params.mapid})
 			.populate('layers.pointCollection')
 			.populate('layers.options')
+			.populate('createdBy')
+			.populate('modifiedBy')
 			.run(function(err, map) {
 				if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
@@ -303,11 +311,54 @@ var MapAPI = function(app) {
 					}
 				}
 
-				map.save(function(err, map) {
-					if (handleDbOp(req, res, err, map, 'map')) return;
-					console.log('map updated');
-				 	res.send(prepareMapResult(req, map));
-				});
+				email = req.body['createdBy.email'];
+				var prevEmail = req.body.createdBy ? req.body.createdBy.email : null;
+
+				if (email && email != '') {
+					var user;
+					if (map.createdBy) {
+						user = map.createdBy;
+					} else {
+						user = new User();
+					}				
+					user.email = email;
+					user.save(function(err, user) {
+						if (err && err.errors.email) {
+							err.errors.email.path = 'createdBy.email';
+						}
+						if (handleDbOp(req, res, err, user, 'user')) return;
+						map.createdBy = map.modifiedBy = user;
+						map.save(function(err, map) {
+							if (handleDbOp(req, res, err, map, 'map')) return;
+							console.log('map updated');
+
+							// find again since createdBy and modifiedBy won't be populated after map.save()
+							Map.findOne({_id: req.params.mapid})
+								.populate('layers.pointCollection')
+								.populate('layers.options')
+								.populate('createdBy')
+								.populate('modifiedBy')
+								.run(function(err, map) {
+									if (handleDbOp(req, res, err, map, 'map')) return;
+								 	res.send(prepareMapResult(req, map));
+								 	if (prevEmail != user.email && config.SMTP_HOST) {
+										console.log('emailing info to user');
+									 	utils.sendEmail(user.email, 'Your map URLs', 'urls', {
+									 		adminUrl: config.BASE_URL + 'admin/' + map.adminslug,
+									 		publicUrl: config.BASE_URL + map.publicslug
+									 	});
+								 	}
+								});
+						});
+					});
+				} else {
+					map.createdBy = map.modifiedBy = null;
+					map.save(function(err, map) {
+						if (handleDbOp(req, res, err, map, 'map')) return;
+						console.log('map updated');
+					 	res.send(prepareMapResult(req, map));
+					});
+				}
 		  	});
 	});
 

@@ -69,6 +69,10 @@ app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))/, function(req, r
 		// check if map exists so that a proper error page appears if it doesn't
 		models.Map.findOne({publicslug: slug, active: true}, function(err, map) {
 			if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
+			if (admin) {
+				req.session.user = map.createdBy;
+				console.log('Implicitly authenticated user:', req.session.user);
+			}
 			res.sendfile('public/index.html');
 		});
 		return;

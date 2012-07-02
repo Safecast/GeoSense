@@ -6,32 +6,48 @@
   <div class="modal-body">
 
     <ul class="nav nav-tabs">
-      <li class="active"><a href="#setup-urls" data-toggle="tab">URLs</a></li>
-      <li><a href="#setup-metadata" data-toggle="tab">Map Info</a></li>
+      <li class="active"><a href="#setup-urls" data-toggle="tab">Map URLs</a></li>
+      <li><a id="tab-setup-metadata" href="#setup-metadata" data-toggle="tab">Edit map info</a></li>
     </ul>
 
     <div class="tab-content">
       <div class="tab-pane active" id="setup-urls">
-        <p>You'll be able to access this map from the following URLs.</p>
+        <p>You'll be able to access this map from the following URLs. We will email you this information if you <a href="#" class="enter-email">enter your email address</a> on the next tab.</p>
         <form class="well urls">
-          <h3><i class="icon-pencil"></i> ADMIN</h3>
+          <h3><i class="icon-pencil"></i> ADMIN – keep this link private:</h3>
           <input class="map-admin-url" readonly="readonly"></input>
-          <h3><i class="icon-eye-open"></i> PUBLIC</h3>
+          <h3><i class="icon-eye-open"></i> PUBLIC – share this link with others:</h3>
           <input class="map-url" readonly="readonly"></input>
         </form>
       </div>
       <div class="tab-pane" id="setup-metadata">
         <form class="well">
-          <h3>Map Title</h3>
-          <input name="title"></input>
-          <h3>Description</h3>
-          <textarea name="description"></textarea>
-          <h3>Author Info</h3>
-          <input name="author"></input>
-          <h3>Link URL</h3>
-          <input name="url"></input>
-          <h3>Twitter handle</h3>
-          <input name="twitter"></input>
+          <fieldset>
+            <h3>Map Title</h3>
+            <input name="title"></input>
+            <h3>Description</h3>
+            <textarea name="description"></textarea>
+          </fieldset>
+          <fieldset class="two-column">
+            <div>
+              <h3>Author Info</h3>
+              <input name="author"></input>
+            </div>
+            <div>
+              <h3>Your email adress (won't be displayed)</h3>
+              <input name="createdBy.email"></input>
+            </div>
+          </fieldset>
+          <fieldset class="two-column">
+            <div>
+              <h3>Link URL</h3>
+              <input name="url"></input>
+            </div>
+            <div>
+              <h3>Twitter handle</h3>
+              <input name="twitter"></input>
+            </div>
+            </fieldset>
       </form>
       </div>
     </div>

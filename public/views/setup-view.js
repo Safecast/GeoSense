@@ -29,7 +29,14 @@ window.SetupView = Backbone.View.extend({
 		this.$('.map-name').html(this.mapInfo.title + ' Setup');
 		this.mapInfoFields.each(function() {
 			$(this).removeClass('error');
-			$(this).val(self.mapInfo[this.name]);
+			var split = this.name.split('.');
+			if (split.length == 2) {
+				if (self.mapInfo[split[0]]) {
+					$(this).val(self.mapInfo[split[0]][split[1]]);
+				}
+			} else {
+				$(this).val(self.mapInfo[this.name]);
+			}
 		});
     },
 
@@ -48,6 +55,11 @@ window.SetupView = Backbone.View.extend({
 		
 		this.$(".map-admin-url").click(function() {
 		   $(this).select();
+		});
+
+		this.$(".enter-email").click(function() {
+			$('#tab-setup-metadata').trigger('click');
+			return false;
 		});
 
 		this.mapInfoFields = this.$('#setup-metadata input, #setup-metadata textarea');
@@ -97,7 +109,7 @@ window.SetupView = Backbone.View.extend({
 				console.error('failed to update map: ' + self.mapInfo._id);
 				if (data && data.errors) {
 					for (var k in data.errors) {
-						$('[name='+k+']', this.mapInfoFields).addClass('error');
+						$('[name="' + data.errors[k].path + '"]', this.mapInfoFields).addClass('error');
 					}
 					console.error('errors:', data.errors);
 				}

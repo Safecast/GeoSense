@@ -56,6 +56,7 @@ var ImportAPI = function(app) {
 		var runImport = function(collection) {
 			collection.active = false;
 			collection.status = config.DataStatus.IMPORTING;
+			collection.createdBy = collection.modifiedBy = req.session.user;
 
 			collection.save(function(err, collection) {
 			    if (!err) {

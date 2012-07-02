@@ -265,3 +265,13 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 .modal {
 	max-height: 600px !important;
 }
+
+fieldset.two-column div {
+	width: 50%;
+	overflow: hidden;
+	float: left;
+}
+
+fieldset.two-column input {
+	width: 230px;
+}
