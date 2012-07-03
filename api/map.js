@@ -64,7 +64,7 @@ var MapAPI = function(app) {
 		};
 		var obj = map.toObject();
 		for (var k in obj) {
-			if (k != 'adminslug' || m.admin) {
+			if (m.admin || (k != 'email' && k != 'adminslug')) {
 				m[k] = obj[k];
 			}
 			if (k == 'layers') {

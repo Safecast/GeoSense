@@ -203,7 +203,7 @@ window.MapGLView = window.MapViewBase.extend({
 	},
 
 	removeCollectionFromMap: function(model) {
-		var id = model.collectionId;
+		var id = model.pointCollectionId;
 		if (!this.widgets[id]) return;
 		var w = this.widgets[id];
 		for (var i = 0; i < w.length; i++) {
@@ -291,7 +291,7 @@ window.MapGLView = window.MapViewBase.extend({
 	initLayerForCollection: function(collection)
 	{
 		MapGLView.__super__.initLayerForCollection.call(this, collection);
-		this.layerArray[collection.collectionId] = {
+		this.featureLayers[collection.pointCollectionId] = {
 			data: [],
 			colors: []
 		}; 
@@ -304,11 +304,11 @@ window.MapGLView = window.MapViewBase.extend({
     addPointToLayer: function(model, opts, collectionId) 
     {
     	var loc = model.get('loc');
-    	this.layerArray[collectionId].data.push(loc[1]);
-    	this.layerArray[collectionId].data.push(loc[0]);
+    	this.featureLayers[collectionId].data.push(loc[1]);
+    	this.featureLayers[collectionId].data.push(loc[0]);
     	var val = model.get('val') / opts.max;
-    	this.layerArray[collectionId].data.push(val);
-    	this.layerArray[collectionId].colors.push(
+    	this.featureLayers[collectionId].data.push(val);
+    	this.featureLayers[collectionId].colors.push(
     		opts.color.replace('#', '0x'));
     },
 
@@ -319,13 +319,13 @@ window.MapGLView = window.MapViewBase.extend({
 	{
 		var colorIndex = 0;
 		var self = this;
-		this.globe.addData(this.layerArray[collection.collectionId].data, {
+		this.globe.addData(this.featureLayers[collection.pointCollectionId].data, {
 			format: 'magnitude', 
 			name: collection.get('_id'), 
 			animated: false,
 			colorFn: function(val) {
 				var c = new THREE.Color();
-				c.setHex(self.layerArray[collection.collectionId].colors[colorIndex]);
+				c.setHex(self.featureLayers[collection.pointCollectionId].colors[colorIndex]);
 				colorIndex++;
 				return c;
 			}

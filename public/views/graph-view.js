@@ -40,7 +40,7 @@ window.GraphView = Backbone.View.extend({
 			url: '/api/map/' + app.mapInfo._id,
 			success: function(data) {				
 				$.each(data.collections, function(key, collection) { 
-					self.mapParams[collection.collectionid] = collection;
+					self.mapParams[collection.pointCollectionId] = collection;
 				});
 			},
 			error: function() {
@@ -98,7 +98,7 @@ window.GraphView = Backbone.View.extend({
 	addCollectionToGraph: function(collection)
 	{
 		var self = this;
-		var currCollection = collection.collectionId;
+		var currCollection = collection.pointCollectionId;
 
 		this.graphPoints = [];	
 

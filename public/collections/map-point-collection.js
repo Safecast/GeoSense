@@ -1,4 +1,4 @@
-PointCollection = Backbone.Collection.extend({
+MapPointCollection = Backbone.Collection.extend({
 
 	model: Point,
 	
@@ -11,23 +11,6 @@ PointCollection = Backbone.Collection.extend({
 		this.pointCollectionId = options.pointCollectionId;
 		this.baseUrl = '/api/mappoints/' + this.pointCollectionId;
 		this.mapLayer = options.mapLayer;
-
-		//TODO: deprecated
-		this.collectionId = this.pointCollectionId;
-
-		/*
-		// TODO: Use mapLayer.pointCollection instead
-		this.title = options.title;
-		this.maxVal = options.maxVal;
-		this.minVal = options.minVal;
-		this.created = options.created;
-		this.modified = options.modified;
-		this.createdBy = options.created_by;
-		this.modifiedBy = options.modifiedBy;
-		this.timeBased = options.timeBased;
-		this.defaults = options.defaults;
-		*/
-
 		this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 	},
 
@@ -36,14 +19,14 @@ PointCollection = Backbone.Collection.extend({
 	},
 
 	setVisibleMapArea: function(visibleMapArea) {
-		console.log('PointCollection.setVisibleMapArea');	
+		console.log('MapPointCollection.setVisibleMapArea');	
 		this.urlParams.b = [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]];
 		this.urlParams.z = visibleMapArea.zoom;
 	},
 
 	fetch: function(options) {
-		console.log('PointCollection.fetch '+this.pointCollectionId);	
-		return PointCollection.__super__.fetch.call(this, options);
+		console.log('MapPointCollection.fetch '+this.pointCollectionId);	
+		return MapPointCollection.__super__.fetch.call(this, options);
 	},
 
     parse: function(resp, xhr) {
@@ -54,7 +37,7 @@ PointCollection = Backbone.Collection.extend({
     		this.gridSize = resp.gridSize;
     		resp = resp['items'];
     	}
-		return PointCollection.__super__.parse.call(this, resp, xhr);
+		return MapPointCollection.__super__.parse.call(this, resp, xhr);
     },
 
 	addData: function(data, callback) {

@@ -43,7 +43,6 @@ window.SideBarView = Backbone.View.extend({
     		center: mapArea.center,
     		zoom: mapArea.zoom
     	};
-    	console.log('MAP AREA CHANGED');
     },
 
 	enableSavePositionButton: function()

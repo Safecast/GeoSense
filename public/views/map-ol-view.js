@@ -263,6 +263,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var self = this;
 		var minBubbleSize = 2;
 		var maxBubbleSize = 60;
+		var pointCollectionId = collection.pointCollectionId;
 
 		var context = {
             getColor: function(feature) {
@@ -291,7 +292,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    fillColor: '${getColor}',
 				    strokeColor: '#333',
 				    pointRadius: 7,
-				    fillOpacity:  this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY,
+				    fillOpacity:  this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
 				}, {context: context});
 
@@ -316,7 +317,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    fillColor: '${getColor}',
 				    strokeColor: '#333',
 				    pointRadius: 7,
-				    fillOpacity: this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY,
+				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
 				}, {context: context});
 
@@ -340,7 +341,7 @@ window.MapOLView = window.MapViewBase.extend({
 				    pointRadius: '${getBubbleRadius}',
 				    strokeOpacity: 0,
 				    fillColor: '${getColor}',
-				    fillOpacity: this.layerOptions[collection.collectionId].opacity || DEFAULT_FEATURE_OPACITY
+				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
@@ -356,9 +357,8 @@ window.MapOLView = window.MapViewBase.extend({
 				break;
 		}
 
-		layer.collectionId = collection.collectionId;
-		this.layerArray[layer.collectionId] = layer;
-		this.map.addLayers([this.layerArray[layer.collectionId]]);
+		this.featureLayers[pointCollectionId] = layer;
+		this.map.addLayers([layer]);
 
         /*var hover = new OpenLayers.Control.SelectFeature(layer, {
             hover: true,
@@ -394,11 +394,11 @@ window.MapOLView = window.MapViewBase.extend({
 
 	featureSelected: function(feature) {
 		var model = feature.attributes.model;
-		this.vent.trigger("showDetailData", feature.attributes.collectionId, model);
+		this.vent.trigger("showDetailData", feature.attributes.pointCollectionId, model);
 	},
 
 	featureUnselected: function(feature) {
-		this.vent.trigger("hideDetailData", feature.attributes.collectionId);
+		this.vent.trigger("hideDetailData", feature.attributes.pointCollectionId);
 	},
 
     addPointToLayer: function(model, opts, collectionId) 
@@ -464,47 +464,18 @@ window.MapOLView = window.MapViewBase.extend({
 
 	drawLayerForCollection: function(collection) 
 	{
-		if (this.addFeatures[collection.collectionId]) {
-			this.layerArray[collection.collectionId].addFeatures(this.addFeatures[collection.collectionId]);
-			delete this.addFeatures[collection.collectionId];
+		var pointCollectionId = collection.pointCollectionId;
+		if (this.addFeatures[pointCollectionId]) {
+			this.featureLayers[pointCollectionId].addFeatures(
+				this.addFeatures[pointCollectionId]);
+			delete this.addFeatures[pointCollectionId];
 		}
-		this.layerArray[collection.collectionId].redraw();
+		this.featureLayers[pointCollectionId].redraw();
 	},
 	
-	toggleLayerVisibility: function(index, type, layer)
+	toggleLayerVisibility: function(pointCollectionId, type, layer)
 	{	
-		if(layer == 'comments')
-		{
-			if(type == 0)
-			{
-				this.commentLayer.setVisibility(false);
-			}else
-			{
-				this.commentLayer.setVisibility(true);
-			}	
-		}
-		else if (layer == 'tweets')
-		{
-			
-		} else
-		{		
-			var currCollection = index;
-			var currIndex;
-			$.each(this.layerArray, function(index, value) { 
-				if(value.collectionId == currCollection)
-					currIndex = index;
-			});
-		
-			currVisibility = this.layerArray[currIndex].getVisibility();
-		
-			if(type == 0)
-			{
-				this.layerArray[currIndex].setVisibility(false);
-			}else
-			{
-				this.layerArray[currIndex].setVisibility(true);
-			}
-		}
+		this.featureLayers[pointCollectionId].setVisibility(type);
 	},
 	
 	updateMapStyle: function(theme)
@@ -564,24 +535,12 @@ window.MapOLView = window.MapViewBase.extend({
 	
 	redrawLayer: function(layer)
 	{
-		
-		var currCollection = layer;
-		var currIndex;
-		$.each(this.layerArray, function(index, value) { 
-			if(value.collectionId == currCollection)
-				currIndex = index;
-		});
-	
-		currVisibility = this.layerArray[currIndex].getVisibility()
-		//Needs to be finished
-		//this.layerArray[currIndex].destroy();
-		//this.addCollectionAsLayer(this.collections[layer]);
-		
+		// TODO: Not implemented
 	},
 	
 	redrawMap: function()
 	{
-		
+		// TODO: Not implemented
 	},
 	
 	toWebMercator: function (googLatLng) {
@@ -696,17 +655,16 @@ window.MapOLView = window.MapViewBase.extend({
 	},
 	*/
 	
-	removeCollectionFromMap: function(model) {
-
-		//console.log('removeCollectionFromMap? '+model.collectionId);
-		if (this.layerArray[model.collectionId]) {
-			this.layerArray[model.collectionId].destroyFeatures();
+	removeCollectionFromMap: function(model) 
+	{
+		var pointCollectionId = model.pointCollectionId;
+		if (this.featureLayers[pointCollectionId]) {
+			this.featureLayers[pointCollectionId].destroyFeatures();
 			
 			// TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
-			/*this.map.removeLayer(this.layerArray[model.collectionId]);
-			this.layerArray[model.collectionId].destroy();
-			this.layerArray[model.collectionId] = null;
-			console.log('removeCollectionFromMap: '+model.collectionId);*/
+			/*this.map.removeLayer(this.featureLayers[pointCollectionId]);
+			this.featureLayers[pointCollectionId].destroy();
+			this.featureLayers[pointCollectionId] = null;*/
 		}
 	},
 

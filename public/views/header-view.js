@@ -153,12 +153,12 @@ window.HeaderView = Backbone.View.extend({
 		//return false;
 	},
 	
-	setStateType: function(type, obj) 
+	setStateType: function(type, pointCollectionId) 
 	{	
 		var stateIndicator = this.$('#stateIndicator');
 		var message = this.$('#stateIndicatorMessage');
 		
-		switch(type)
+		/*switch(type)
 		{
 			case 'drawing':
 			  	stateIndicator.stop(true, true).fadeIn('fast');
@@ -201,7 +201,7 @@ window.HeaderView = Backbone.View.extend({
 				break;
 			default:
 		  		//
-		}
+		}*/
 	},
 	
 	remove: function() 

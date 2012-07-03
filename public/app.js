@@ -288,8 +288,6 @@ var AppRouter = Backbone.Router.extend({
 
 		var scope = this;
 		self.vent.trigger("setStateType", 'loading');
-
-		layer.pointCollection.collectionId = layer.pointCollection.collectionid = pointCollectionId; // TODO: deprecated
 					
 		var mapArea = self.mapView.getVisibleMapArea();							
 		var collectionOptions = {
@@ -298,13 +296,13 @@ var AppRouter = Backbone.Router.extend({
 			mapLayer: layer
 		};
 
-		var collection = this.pointCollections[pointCollectionId] = new PointCollection(collectionOptions);
+		var collection = this.pointCollections[pointCollectionId] = new MapPointCollection(collectionOptions);
 		self.addDataPanelViews(pointCollectionId);
 
 		if (layer.pointCollection.status == DataStatus.COMPLETE) {
 			this.fetchMapLayer(pointCollectionId);
 		} else {
-			self.vent.trigger("setStateType", 'loading', collection);
+			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
 			app.pollForNewPointCollection(pointCollectionId, INITIAL_POLL_INTERVAL);
 			//self.vent.trigger("setStateType", 'parsing');
 
@@ -317,7 +315,7 @@ var AppRouter = Backbone.Router.extend({
 			collectionOptions.urlParams = {
 				t: 'w'
 			};
-			var collection = this.timeBasedPointCollections[pointCollectionId] = new PointCollection(collectionOptions);
+			var collection = this.timeBasedPointCollections[pointCollectionId] = new MapPointCollection(collectionOptions);
 			collection.setVisibleMapArea(self.mapView.getVisibleMapArea());
 			collection.fetch({success: function(collection) {
 				self.graphView.addCollection(collection);
@@ -358,7 +356,7 @@ var AppRouter = Backbone.Router.extend({
 		if (data.status !== DataStatus.COMPLETE) {
 			console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
 			this.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
-			this.vent.trigger("setStateType", 'loading', layer.pointCollection);
+			this.vent.trigger("setStateType", 'loading', layer.pointCollection._id);
 		} else {
 			this.fetchMapLayer(pointCollectionId);
 		}
@@ -372,7 +370,7 @@ var AppRouter = Backbone.Router.extend({
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
 		collection.fetch({success: function(collection) {
 			self.mapView.addCollection(collection);
-			self.vent.trigger("setStateType", 'complete', layer.pointCollection);
+			self.vent.trigger("setStateType", 'complete', layer.pointCollection._id);
 		}});
 	},
 	

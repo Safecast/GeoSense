@@ -39,9 +39,10 @@ window.DataViewBase = Backbone.View.extend({
 		this.vent.bind("setStateType", this.setStateType);
     },
 
-	setStateType: function(type, obj) 
+	setStateType: function(type, pointCollectionId) 
 	{	
-		if (!obj || obj._id != this.mapLayer.pointCollection._id) return;
+		if (!pointCollectionId || pointCollectionId != this.mapLayer.pointCollection._id) return;
+		console.log('setStateType', type, pointCollectionId);
 		this.updateStatus();
 
 		var stateIndicator = this.$('.state-indicator');
@@ -368,7 +369,7 @@ window.DataViewBase = Backbone.View.extend({
 			success: function(data) {
 				self.disableUpdateButton();
 				self.updateLegend(true);
-				self.vent.trigger("redrawCollection", {collectionId: self.mapLayer.pointCollection._id, 
+				self.vent.trigger("redrawCollection", {pointCollectionId: self.mapLayer.pointCollection._id, 
 					updateObject: postData});
 			},
 			error: function() {

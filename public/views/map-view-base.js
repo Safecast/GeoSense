@@ -5,7 +5,7 @@ window.MapViewBase = Backbone.View.extend({
     initialize: function(options) {
 		var self = this;
 		this.collections = {};
-		this.layerArray = {};
+		this.featureLayers = {};
 		this.vent = options.vent;
 		this.layerOptions = {};
 		_.bindAll(this, "geocodeAndSetMapLocation");
@@ -84,7 +84,7 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 
 		$.each(this.collections, function(collectionid, collection) { 
-			self.vent.trigger("setStateType", 'loading', collection);
+			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
 		});
@@ -105,23 +105,15 @@ window.MapViewBase = Backbone.View.extend({
 
 	redrawCollection: function(args)
 	{
-		return;
 		var self = this;
 
-		var collectionId = args.collectionId;
+		var pointCollectionId = args.pointCollectionId;
 		var update = args.updateObject;
 
 		for (var k in update) {
-			this.collections[collectionId].options[k] = update[k];	
+			this.collections[pointCollectionId].options[k] = update[k];	
 		}
-		this.initLayerOptionsForCollection(this.collections[collectionId]);
-
-		// TODO: This reload is NOT necessary -- SOLVE DIFFERENTLY
-		$.each(this.collections, function(collectionid, collection) { 
-			if(collectionid == collectionId)
-				collection.fetch();
-		});
-
+		this.initLayerOptionsForCollection(this.collections[pointCollectionId]);
 	},
 
 	addCollection: function(collection)
@@ -151,11 +143,12 @@ window.MapViewBase = Backbone.View.extend({
     },
 
 	reset: function(collection) {
+		var pointCollectionId = collection.pointCollectionId;
 		this.removeCollectionFromMap(collection);
 		if (collection.length > 0) {
-			this.addCollectionToMap(this.collections[collection.collectionId]);
+			this.addCollectionToMap(this.collections[pointCollectionId]);
 		}
-		this.vent.trigger("setStateType", 'complete', collection);	
+		this.vent.trigger("setStateType", 'complete', pointCollectionId);	
 	},
 
 	resetComments: function(model) {
@@ -166,7 +159,8 @@ window.MapViewBase = Backbone.View.extend({
 	addCollectionToMap: function(collection)
 	{
 		var self = this;
-		this.vent.trigger("setStateType", 'drawing');
+		var pointCollectionId = collection.pointCollectionId;
+		this.vent.trigger("setStateType", 'drawing', pointCollectionId);
 		this.initLayerForCollection(collection);
 		collection.each(function(model) {
 			self.addOne(model, collection.pointCollectionId);
@@ -179,9 +173,9 @@ window.MapViewBase = Backbone.View.extend({
 	*/
 	initLayerOptionsForCollection: function(collection)
 	{ 
-		this.layerOptions[collection.collectionId] = {
-		};
-		var opts = this.layerOptions[collection.collectionId];
+		var pointCollectionId = collection.pointCollectionId;
+		this.layerOptions[pointCollectionId] = {};
+		var opts = this.layerOptions[pointCollectionId];
 		opts.opacity = collection.options.opacity;
 		switch (collection.options.colorType) {
 			case ColorType.LINEAR_GRADIENT:
@@ -234,7 +228,7 @@ window.MapViewBase = Backbone.View.extend({
 		}
 
 		this.addPointToLayer(model, {
-			collectionId: collectionId,
+			pointCollectionId: collectionId,
 			color: color,
 			min: min,
 			max: max,

@@ -83,7 +83,6 @@ var ImportAPI = function(app) {
 						collection.active = true;
 						collection.reduce = numDone > 1000;
 						collection.status = config.DataStatus.UNREDUCED;
-						collection.collectionid = collection.get('_id'); // TODO: deprecated
 						collection.save(function(err) {
 					    	debugStats('*** finalized and activated collection ***');
 						});
