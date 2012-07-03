@@ -301,14 +301,14 @@ window.SideBarView = Backbone.View.extend({
 	},
 	
 	display2DClicked: function() {
-		//Todo: Replace with proper routing
-		app.navigate(app.mapInfo.publicslug + "/map", {trigger: true});
+		if (app.uriViewName == 'map') return false;
+		app.navigate(app.genMapURI('map'), {trigger: true});
 		this.$('#themeToggleGroup').show();
 	},
 
 	display3DClicked: function() {
-		//Todo: Replace with proper routing
-		app.navigate(app.mapInfo.publicslug + "/globe", {trigger: true});
+		if (app.uriViewName == 'globe') return false;
+		app.navigate(app.genMapURI('globe'), {trigger: true});
 		this.$('#themeToggleGroup').hide();
 	},
 	

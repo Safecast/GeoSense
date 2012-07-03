@@ -103,16 +103,17 @@ var AppRouter = Backbone.Router.extend({
     	return BASE_URL + app.genMapURI(false, false, false);
     },
 
-    initMapView: function(mapView, center, zoom) 
+    initMapView: function(mapViewName, center, zoom) 
     {
 		var self = this;
+		this.uriViewName = mapViewName;
 			
 		if (this.mapView) {
 			this.mapView.remove();
 			this.mapView = null;
 		}
 
-		switch (mapView) {
+		switch (this.uriViewName) {
 			case 'map':
 				var viewClass = MapOLView;
 				break;
@@ -140,7 +141,7 @@ var AppRouter = Backbone.Router.extend({
 			vent: self.vent,
 			visibleMapArea: visibleMapArea
 		});
-		this.mapView.uriViewName = mapView;
+		this.mapView.uriViewName = this.uriViewName;
 
 		var mapEl = this.mapView.render().el;
 		$('#app').append(mapEl);
@@ -178,9 +179,10 @@ var AppRouter = Backbone.Router.extend({
 		return this.adminRoute && this.mapInfo.admin; 
 	},
 
-	render: function(mapView) 
+	render: function() 
 	{
 		var self = this;
+		var mapView = this.uriViewName;
 
 		window.document.title = this.mapInfo.title + ' – GeoSense';
 
