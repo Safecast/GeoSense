@@ -34,14 +34,13 @@ window.MapInfoView = window.ModalView.extend({
 			}			
 			var f = this.mapInfo[fields[i]];
 
-			if (fields[i] == 'description') {
-				f = nl2p(f);
-			}
-			if (fields[i] == 'twitter') {
-				f = 'https://twitter.com/#!/' + f;
-			}
-
 			if (f && f != '') {
+				if (fields[i] == 'description') {
+					f = nl2p(f);
+				}
+				if (fields[i] == 'twitter') {
+					f = 'https://twitter.com/#!/' + f;
+				}
 				contentEl.html(f);
 				console.log(contentEl[0].tagName);
 				if (contentEl[0].tagName == 'A') {
