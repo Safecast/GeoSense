@@ -2,12 +2,13 @@ window.ModalView = Backbone.View.extend({
 
     tagName: 'div',
 	className: 'modal-view',
+	templateName: 'modal',
 	
     events: {
     },
 
     initialize: function(options) {
-	    this.template = _.template(tpl.get('modal'));
+	    this.template = _.template(tpl.get(this.templateName));
     },
 
     render: function() {
@@ -25,4 +26,13 @@ window.ModalView = Backbone.View.extend({
 		this.$('.modal-body .body').html(string);
 	},
   
+  	show: function() 
+  	{
+  		var self = this;
+        $('body').append(this.el);
+		$('.modal', this.el).modal('show');
+		$('.modal', this).on('hidden', function() {
+			$(self.el).remove();
+		});
+  	}
 });

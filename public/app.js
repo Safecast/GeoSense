@@ -153,13 +153,23 @@ var AppRouter = Backbone.Router.extend({
 		$(mapEl).append(this.dataInfoView.render().el);
 
         this.mapInfoView = new MapInfoView({vent: this.vent, mapInfo: this.mapInfo});
-		$(mapEl).append(this.mapInfoView.render().el);
-		$(this.mapInfoView.el).hide();
+        this.mapInfoView.render();
+		/*$(mapEl).append(this.mapInfoView.render().el);
+		$(this.mapInfoView.el).hide();*/
     },
 
     showMapInfo: function() 
     {
-		$(this.mapInfoView.el).show();
+		//$(this.mapInfoView.el).show();
+		this.mapInfoView.show();
+    },
+
+    showAbout: function() 
+    {
+		var modalView = new ModalView().render();
+		modalView.setTitle('About GeoSense');
+		modalView.setBody('GeoSense is an open publishing platform for visualization, social sharing, and data analysis of geospatial data. It explores the power of data analysis through robust layering and highly customizable data visualization. GeoSense supports the simultaneous comparison and individual styling for multiple massive data sources ranging from 10 thousand to 10 million geolocated points. It was developed by Anthony DeVincenzi and Samuel Luescher of the MIT Media Lab, alongside Hiroshi Ishii and Safecast.org.');
+		modalView.show();
     },
 	
 	isMapAdmin: function()
@@ -345,12 +355,9 @@ var AppRouter = Backbone.Router.extend({
 		if (data.status !== DataStatus.COMPLETE) {
 			console.log('Collection '+pointCollectionId+' is busy, polling again after timeout...');
 			this.pollForNewPointCollection(pointCollectionId, POLL_INTERVAL);					
-			//app.vent.trigger("setStateType", 'parsing', data);
-			// TODO: update panel status
+			this.vent.trigger("setStateType", 'loading', layer.pointCollection);
 		} else {
 			this.fetchMapLayer(pointCollectionId);
-			this.vent.trigger("setStateType", 'complete', this.pointCollections[pointCollectionId]);
-			//app.vent.trigger("setStateType", 'post');
 		}
 	},
 
@@ -362,7 +369,6 @@ var AppRouter = Backbone.Router.extend({
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
 		collection.fetch({success: function(collection) {
 			self.mapView.addCollection(collection);
-			console.log('complete');
 			self.vent.trigger("setStateType", 'complete', layer.pointCollection);
 		}});
 	},
@@ -425,7 +431,7 @@ var AppRouter = Backbone.Router.extend({
 
 tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header',
 	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-	'edit-data', 'data-library', 'data-info', 'map-info'],
+	'edit-data', 'data-library', 'data-info', 'map-info-modal'],
     function () {
         app = new AppRouter();
         if (!Backbone.history.start({ pushState: true })) {

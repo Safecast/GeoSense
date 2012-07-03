@@ -114,18 +114,12 @@ window.HeaderView = Backbone.View.extend({
 	
 	aboutGeoSenseClicked: function() 
 	{	
-		this.modalView = new ModalView();
-        $('body').append(this.modalView.render().el);
-		this.modalView.setTitle('About GeoSense');
-		this.modalView.setBody('GeoSense is an open publishing platform for visualization, social sharing, and data analysis of geospatial data. It explores the power of data analysis through robust layering and highly customizable data visualization. GeoSense supports the simultaneous comparison and individual styling for multiple massive data sources ranging from 10 thousand to 10 million geolocated points. It was developed by Anthony DeVincenzi and Samuel Luescher of the MIT Media Lab, alongside Hiroshi Ishii and Safecast.org.');
-		$('#myModal').modal('toggle');
-		//return false;
+		app.showAbout();
 	},
 	
 	aboutMapClicked: function() 
 	{
 		app.showMapInfo();
-		//return false;
 	},
 	
 	postTwitterClicked: function() 

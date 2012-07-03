@@ -108,6 +108,7 @@ window.SetupView = Backbone.View.extend({
 				var data = $.parseJSON(jqXHR.responseText);
 				console.error('failed to update map: ' + self.mapInfo._id);
 				if (data && data.errors) {
+					self.mapInfoFields.removeClass('error');
 					for (var k in data.errors) {
 						$('[name="' + data.errors[k].path + '"]', this.mapInfoFields).addClass('error');
 					}

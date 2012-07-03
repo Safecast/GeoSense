@@ -29,8 +29,8 @@ var config = {
 	MIN_CROP_DISTRIBUTION_RATIO: 10000, // if max > min * r --> crop histogram
 
 	// Reserve certain URIs and do not allow them for slugs without modification, such as:
-	// "admin", short words, short numbers, MD5 hashes 
-	RESERVED_URI: /^(admin|[a-z0-9]{1,7}|[0-9]{1,5}|[a-f0-9]{32})$/,
+	// "admin", short words, short numbers, base64 uuids 
+	RESERVED_URI: /^(admin|[a-z0-9]{1,7}|[0-9]{1,5}|[A-Za-z0-9\+\/]{24})$/,
 
 	REDUCE_SETTINGS: {
 		// could be used to pass options to reduce script, such as limit: n

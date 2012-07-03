@@ -120,7 +120,7 @@ var MapAPI = function(app) {
 		var map = new Map({
 			title: req.body.title,
 			description: '',
-			adminslug: md5(uuid.v4()),
+			adminslug: new Buffer(uuid.v4(), 'hex').toString('base64'),
 			collections: collections,
 		});	
 
@@ -235,7 +235,7 @@ var MapAPI = function(app) {
 
 				for (var i = 0; i < colors.length; i++) {
 					var c = colors[i];
-					if (c.position || options.colorType != 'S') {
+					if (c.position || options.colorType != config.ColorType.SOLID) {
 						c.position = Number(c.position) || 0.0;
 					}
 				}
@@ -311,10 +311,21 @@ var MapAPI = function(app) {
 					}
 				}
 
+				if (map.url && map.url != '') {
+					var split = map.url.split('://');
+					map.url = split.pop();
+					map.url = (split.length ? split.pop() : 'http') + '://' + map.url;
+				}
+
+				if (map.twitter && map.twitter != '') {
+					var split = map.twitter.split(/^@/);
+					map.twitter = split.pop();
+				}
+
 				email = req.body['createdBy.email'];
 				var prevEmail = req.body.createdBy ? req.body.createdBy.email : null;
 
-				if (email && email != '') {
+				if (email && email != '' && (!map.createdBy || map.createdBy.email != email)) {
 					var user;
 					if (map.createdBy) {
 						user = map.createdBy;
@@ -352,7 +363,9 @@ var MapAPI = function(app) {
 						});
 					});
 				} else {
-					map.createdBy = map.modifiedBy = null;
+					if (email == '') {
+						map.createdBy = map.modifiedBy = null;
+					}
 					map.save(function(err, map) {
 						if (handleDbOp(req, res, err, map, 'map')) return;
 						console.log('map updated');

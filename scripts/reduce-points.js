@@ -431,7 +431,9 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 
 var numHistograms = config.HISTOGRAM_SIZES.length;
 
-var cur = db.pointcollections.find({status: config.DataStatus.UNREDUCED});
+var cur = db.pointcollections.find({
+	status: config.DataStatus.UNREDUCED
+});
 
 print('*** number of collections to reduce: ' + cur.count() + ' ***');
 

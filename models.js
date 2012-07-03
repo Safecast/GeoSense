@@ -35,7 +35,7 @@ this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
 	description: String
 }));
 
-// TODO implement color palette storage -- erasing old palettes
+// TODO: implement color palette storage -- erasing old palettes
 
 this.ColorPalette = mongoose.model('ColorPalette', new mongoose.Schema({
 	colors: {type: [this.ColorDefinition.schema]}

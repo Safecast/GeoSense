@@ -49,6 +49,13 @@ function genQueryString(params, name) {
 	return url;
 }
 
+function nl2p(str)
+{
+	str = '<p>' + str.replace(/(\s*\n\s*){2}/, '</p><p>') + '</p>';
+	str = str.replace(/(\s*\n\s*){1}/, '<br />');
+	return str;
+}
+
 $.fn.updateFeedback = function() {
 	this.each(function() {
 		$(this).tempGlow({

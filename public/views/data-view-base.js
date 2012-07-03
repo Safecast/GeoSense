@@ -19,10 +19,10 @@ window.DataViewBase = Backbone.View.extend({
 		
     },
 
-    initialize: function(options) {
+    initialize: function(options) 
+    {
 		this.vent = options.vent;
 	    this.template = _.template(tpl.get('data-inspector'));
-		this.collectionId = options.collectionId;
 		this.title = options.mapLayer.pointCollection.title;
 		this.collection = options.collection;
 		this.mapLayer = options.mapLayer;
@@ -34,10 +34,32 @@ window.DataViewBase = Backbone.View.extend({
 		
 		this.collection.bind('add', this.addOne, this);
 		this.collection.bind('reset', this.addAll, this);
+
+		_.bindAll(this, "setStateType");
+		this.vent.bind("setStateType", this.setStateType);
     },
 
-    updateStatus: function() {
+	setStateType: function(type, obj) 
+	{	
+		if (!obj || obj._id != this.mapLayer.pointCollection._id) return;
+		this.updateStatus();
+
+		var stateIndicator = this.$('.state-indicator');
+		switch (type)
+		{
+			default:
+				stateIndicator.addClass('loading');
+				break;
+			case 'complete':
+				stateIndicator.removeClass('loading');
+				break;
+		}
+	},
+
+    updateStatus: function() 
+    {
     	var status = '';
+		var progress = this.mapLayer.pointCollection.progress;
     	switch (this.mapLayer.pointCollection.status) {
     		case DataStatus.COMPLETE:
     			if (this.collection.originalCount != undefined) {
@@ -48,22 +70,27 @@ window.DataViewBase = Backbone.View.extend({
     			}
 				break;
     		case DataStatus.IMPORTING:
-    			status = __('importing…');
+    			status = __(progress ? 'importing… %(count)s' : 'importing…', {
+    				count: formatLargeNumber(this.mapLayer.pointCollection.progress)
+    			});
 				break;
     		case DataStatus.UNREDUCED:
     			status = __('queued for crunching…');
 				break;
     		case DataStatus.REDUCING:
-    			status = __('crunching…');
+    			status = __(progress ? 'crunching… %(percent)s%' : 'crunching…', {
+    				percent: Math.round(progress / this.mapLayer.pointCollection.numBusy * 100)
+    			});
 				break;
     	}
 		this.$(".status").html(status);
     },
 
-    render: function() {
+    render: function() 
+    {
 		var self = this;
 		$(this.el).html(this.template());
-		$(this.el).addClass(this.mapLayer.pointCollection.collectionId);
+		$(this.el).addClass(this.mapLayer.pointCollection._id);
 				
 		if (this.title != '') {
 			dataTitle = this.title;
@@ -74,8 +101,8 @@ window.DataViewBase = Backbone.View.extend({
 		this.updateStatus();
 
 		this.$(".title").html(dataTitle);
-		this.$(".title").attr("href", "#collapse-" + this.className + '-' + this.collectionId);
-		this.$("#collapse").attr("id", "collapse-" + this.className + '-' + this.collectionId);
+		this.$(".title").attr("href", "#collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
+		this.$("#collapse").attr("id", "collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
 
 		if (!app.isMapAdmin()) {
 			this.$('#adminDataControls').remove();
@@ -104,12 +131,12 @@ window.DataViewBase = Backbone.View.extend({
 	
 
 		this.setParameters();
-		this.initHistogram();
 	
         return this;
     },
 
-    initGradientEditor: function() {
+    initGradientEditor: function() 
+    {
     	var colors = [];
     	var self = this;
     	for (var i = 0; i < this.colors.length; i++) {
@@ -126,16 +153,16 @@ window.DataViewBase = Backbone.View.extend({
     	}
 
 		this.$("#gradientEditor").gradientEditor({
-				width: 220,  
-				height: 30,
-				stopWidth: 12,
-				stopHeight: 10,
-				initialColor: "#ff00ff",
-				onChange: function(colors) {
-					self.colors = colors;
-					self.enableUpdateButton();
-				},
-				colors: colors
+			width: 220,  
+			height: 30,
+			stopWidth: 12,
+			stopHeight: 10,
+			initialColor: "#ff00ff",
+			onChange: function(colors) {
+				self.colors = colors;
+				self.enableUpdateButton();
+			},
+			colors: colors
 		});
     },
 
@@ -149,7 +176,7 @@ window.DataViewBase = Backbone.View.extend({
 		if (!this.histogramData) {
 			$.ajax({
 				type: 'GET',
-				url: '/api/histogram/' + this.collection.collectionId,
+				url: '/api/histogram/' + this.mapLayer.pointCollection._id,
 				success: function(data) {
 					self.histogramData = data;
 					self.initHistogram();
@@ -295,44 +322,8 @@ window.DataViewBase = Backbone.View.extend({
 			}
 		}
 
-		var gradient = new ColorGradient(this.colors);
-
-		// construct color bar
-		for (var i = 0; i < this.colors.length; i++) {
-			var val;
-			if (this.colors.length > 1 && this.colorType == ColorType.LINEAR_GRADIENT) {
-				val = formatDecimalNumber(this.mapLayer.pointCollection.minVal + this.colors[i].position * (this.mapLayer.pointCollection.maxVal - this.mapLayer.pointCollection.minVal));
-				if (i == this.colors.length - 1 && this.colors[i].position < 1) {
-					val += '+';
-				}			
-			} else {
-				val = formatDecimalNumber(this.mapLayer.pointCollection.minVal) + '–' + formatDecimalNumber(this.mapLayer.pointCollection.maxVal);
-			}
-			if (i == 0) {
-				val = UnitFormat.LEGEND.format({
-					value: val, 
-					unit: this.mapLayer.pointCollection.unit
-				});
-			}		
-
-			var baseColor = this.colors[i].color;
-			var darkerColor = gradient.intToHexColor(gradient.interpolation.lerpRGB(.15, gradient.colors[i], {color: 0}));
-
-			var li = 
-				'<li style="width: '+Math.round(100 / this.colors.length * 100) / 100+'%;">'
-				+ '<div class="segment" style="background: '+baseColor
-				+ '; background: linear-gradient(top, '+baseColor+' 40%, '+darkerColor+' 80%)'
-				+ '; background: -webkit-gradient(linear, left top, left bottom, color-stop(.4, '+baseColor+'), color-stop(.8, '+darkerColor+'))'
-				+ '">'
-				+ val + '</div>'
-				+ '</li>';
-			this.$('.color-bar').append(li);
-		}
-
-		if (this.mapLayer.pointCollection.unit) {
-			this.$('.legend .unit').html(this.mapLayer.pointCollection.unit);
-		} else {
-			this.$('.legend .unit').hide();
+		if (this.mapLayer.pointCollection.status == DataStatus.COMPLETE) {
+			this.updateLegend(true);
 		}
 
 		this.initGradientEditor();
@@ -371,13 +362,13 @@ window.DataViewBase = Backbone.View.extend({
 		
 		$.ajax({
 			type: 'POST',
-			url: '/api/updatemapcollection/' + app.mapInfo._id + '/' + this.collection.collectionId,
+			url: '/api/updatemapcollection/' + app.mapInfo._id + '/' + this.mapLayer.pointCollection._id,
 			dataType: 'json',
 			data: postData,
 			success: function(data) {
 				self.disableUpdateButton();
-				self.updateLegend();
-				self.vent.trigger("redrawCollection", {collectionId: self.collectionId, 
+				self.updateLegend(true);
+				self.vent.trigger("redrawCollection", {collectionId: self.mapLayer.pointCollection._id, 
 					updateObject: postData});
 			},
 			error: function() {
@@ -399,12 +390,8 @@ window.DataViewBase = Backbone.View.extend({
 		$('#editDataModal').modal('toggle');
    	},
 
-	displayDataState: function(state)
+	updateLegend: function(rebuildColorBar) 
 	{
-		console.log('Currently: ' + state);
-	},
-
-	updateLegend: function() {
 		if (this.visible) {
 			$(this.el).addClass('visible');
 			$(this.el).removeClass('hidden');
@@ -428,6 +415,49 @@ window.DataViewBase = Backbone.View.extend({
 			} else {
 				this.$('.legend-button').removeClass(FeatureType[t]);
 			}
+		}
+
+		if (this.mapLayer.pointCollection.unit) {
+			this.$('.legend .unit').html(this.mapLayer.pointCollection.unit);
+		} else {
+			this.$('.legend .unit').hide();
+		}
+
+		if (rebuildColorBar && this.$('.color-bar').length) {
+			this.initHistogram();
+			var gradient = new ColorGradient(this.colors);
+			var items = [];
+			for (var i = 0; i < this.colors.length; i++) {
+				var val;
+				if (this.colors.length > 1 && this.colorType == ColorType.LINEAR_GRADIENT) {
+					val = formatDecimalNumber(this.mapLayer.pointCollection.minVal + this.colors[i].position * (this.mapLayer.pointCollection.maxVal - this.mapLayer.pointCollection.minVal));
+					if (i == this.colors.length - 1 && this.colors[i].position < 1) {
+						val += '+';
+					}			
+				} else {
+					val = formatDecimalNumber(this.mapLayer.pointCollection.minVal) + '–' + formatDecimalNumber(this.mapLayer.pointCollection.maxVal);
+				}
+				if (i == 0) {
+					val = UnitFormat.LEGEND.format({
+						value: val, 
+						unit: this.mapLayer.pointCollection.unit
+					});
+				}		
+
+				var baseColor = this.colors[i].color;
+				var darkerColor = gradient.intToHexColor(gradient.interpolation.lerpRGB(.15, gradient.colors[i], {color: 0}));
+
+				items.push( 
+					'<li style="width: '+Math.round(100 / this.colors.length * 100) / 100+'%;">'
+					+ '<div class="segment" style="background: '+baseColor
+					+ '; background: linear-gradient(top, '+baseColor+' 40%, '+darkerColor+' 80%)'
+					+ '; background: -webkit-gradient(linear, left top, left bottom, color-stop(.4, '+baseColor+'), color-stop(.8, '+darkerColor+'))'
+					+ '">'
+					+ val + '</div>'
+					+ '</li>'
+				);
+			}
+			this.$('.color-bar').html(items.join(''));
 		}
 	},
 
@@ -521,12 +551,12 @@ window.DataViewBase = Backbone.View.extend({
 			case ColorType.SOLID: 
 				this.$('.color-gradient').hide();
 				this.$('.color-solid').show();
-				this.updateLegend();
+				this.updateLegend(true);
 				break;
 			case ColorType.LINEAR_GRADIENT: 
 			  	this.$('.color-gradient').show();
 				this.$('.color-solid').hide();
-				this.updateLegend();
+				this.updateLegend(true);
 			  	break;
 		}
 	},
@@ -544,7 +574,7 @@ window.DataViewBase = Backbone.View.extend({
 				this.visible = !this.visible;
 			}
 			this.enableUpdateButton();
-			this.vent.trigger("toggleLayerVisibility", this.collectionId, this.visible);
+			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
 		}
 
 		this.$('.visibility').each(function() {
