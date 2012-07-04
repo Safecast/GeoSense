@@ -254,7 +254,7 @@ var MapAPI = function(app) {
 								return;
 							}
 							console.log('layer options updated');
-							res.send('');
+							res.send(map.layers[i]);
 						});
 						return;
 					}

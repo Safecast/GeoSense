@@ -33,6 +33,9 @@ var AppRouter = Backbone.Router.extend({
 			self.initMapLayers();
 		});
 
+		_.bindAll(this, "updateMapLayer");
+	 	this.vent.bind("updateMapLayer", this.updateMapLayer);
+
 		var embed = this.getURLParameter('embed');
 		if (embed == 1) {
 			console.log('embed: ' + embed);
@@ -205,8 +208,6 @@ var AppRouter = Backbone.Router.extend({
 			$('body').addClass("embed");
 		}
 		
-		//this.addCommentData();
-		
 		this.vent.trigger("setToggleStates", {mapView: mapView});
 		
 		if (this.isMapAdmin()) {
@@ -323,6 +324,16 @@ var AppRouter = Backbone.Router.extend({
 		}*/
 	},
 
+	updateMapLayer: function(updatedLayer)
+	{
+		console.log('updateMapLayer', updatedLayer);
+		var layer = this.getMapLayer(updatedLayer.pointCollection._id);
+		for (var k in updatedLayer) {
+			layer[k] = updatedLayer[k];
+		}
+		this.vent.trigger('redrawMapLayer', layer);
+	},
+
 	pollForNewPointCollection: function(pointCollectionId, interval) 
 	{
 		var self = this;
@@ -390,17 +401,6 @@ var AppRouter = Backbone.Router.extend({
 		});	
 	},
 	
-	addCommentData: function(options)
-	{		
-		this.commentCollection = new CommentCollection({});
-		this.mapView.addCommentCollection(this.commentCollection);
-	},
-	
-	addTwitterData: function (options)
-	{
-		console.log('adding tweets');
-	},
-
 	getMapLayer: function(pointCollectionId)
 	{
 		for (var i = 0; i < this.mapInfo.layers.length; i++) {

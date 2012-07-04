@@ -11,8 +11,8 @@ window.MapViewBase = Backbone.View.extend({
 		_.bindAll(this, "geocodeAndSetMapLocation");
 		options.vent.bind("geocodeAndSetMapLocation", this.geocodeAndSetMapLocation);
 		
-		_.bindAll(this, "redrawCollection");
-		options.vent.bind("redrawCollection", this.redrawCollection);  
+		_.bindAll(this, "redrawMapLayer");
+		options.vent.bind("redrawMapLayer", this.redrawMapLayer);  
 
 		if (options.visibleMapArea) {
 			this.initialVisibleMapArea = options.visibleMapArea;
@@ -83,7 +83,7 @@ window.MapViewBase = Backbone.View.extend({
 	{
 		var self = this;
 
-		$.each(this.collections, function(collectionid, collection) { 
+		$.each(this.collections, function(collection) { 
 			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
@@ -103,57 +103,34 @@ window.MapViewBase = Backbone.View.extend({
 		this.vent.trigger("mapAreaChanged", visibleMapArea);
 	},
 
-	redrawCollection: function(args)
+	/**
+	* Required to be implemented by descendants.
+	*/
+	redrawMapLayer: function(layer)
 	{
-		var self = this;
-
-		var pointCollectionId = args.pointCollectionId;
-		var update = args.updateObject;
-
-		for (var k in update) {
-			this.collections[pointCollectionId].options[k] = update[k];	
-		}
-		this.initLayerOptionsForCollection(this.collections[pointCollectionId]);
+		this.initFeatureLayerOptions(this.collections[layer.pointCollection._id]);
 	},
 
 	addCollection: function(collection)
 	{	
 		console.log('addCollection '+collection.pointCollectionId);
-
-		// TODO: deprecated
-		collection.options = app.getMapLayer(collection.pointCollectionId).options;
-
 		this.collections[collection.pointCollectionId] = collection;
 		collection.bind('reset', this.reset, this);
 		collection.bind('add', this.addOne, this);
 		this.addCollectionToMap(collection);
 	},
 	
-	addCommentCollection: function(collection)
-	{
-		var self = this;
-		this.commentCollection = collection;
-		this.commentCollection.bind('reset', this.resetComments, this);
-		this.commentCollection.bind('add', this.addOneComment, this);
-		this.commentCollection.fetch();
-	},
-
     addAll: function() {	
 		this.addCollectionToMap(this.collection);
     },
 
 	reset: function(collection) {
 		var pointCollectionId = collection.pointCollectionId;
-		this.removeCollectionFromMap(collection);
+		this.destroyFeatureLayer(collection);
 		if (collection.length > 0) {
 			this.addCollectionToMap(this.collections[pointCollectionId]);
 		}
 		this.vent.trigger("setStateType", 'complete', pointCollectionId);	
-	},
-
-	resetComments: function(model) {
-		//this.removeCollectionFromMap(model);
-		this.addCommentToMap(model);
 	},
 
 	addCollectionToMap: function(collection)
@@ -161,25 +138,31 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		var pointCollectionId = collection.pointCollectionId;
 		this.vent.trigger("setStateType", 'drawing', pointCollectionId);
-		this.initLayerForCollection(collection);
+		
+		self.initFeatureLayerOptions(collection);
+		self.initFeatureLayer(collection);
 		collection.each(function(model) {
-			self.addOne(model, collection.pointCollectionId);
+			self.addOne(model, pointCollectionId);
 		});
-		this.drawLayerForCollection(collection);
+		self.drawLayerForCollection(collection);
+
+		setTimeout(function() {
+			self.vent.trigger("setStateType", 'complete', pointCollectionId);
+		}, 100);
 	},
 
 	/**
 	* Required to be implemented by descendants.
 	*/
-	initLayerOptionsForCollection: function(collection)
+	initFeatureLayerOptions: function(collection)
 	{ 
 		var pointCollectionId = collection.pointCollectionId;
 		this.layerOptions[pointCollectionId] = {};
 		var opts = this.layerOptions[pointCollectionId];
-		opts.opacity = collection.options.opacity;
-		switch (collection.options.colorType) {
+		opts.opacity = collection.mapLayer.options.opacity;
+		switch (collection.mapLayer.options.colorType) {
 			case ColorType.LINEAR_GRADIENT:
-				opts.colorGradient = new ColorGradient(collection.options.colors);
+				opts.colorGradient = new ColorGradient(collection.mapLayer.options.colors);
 				break;
 		}
 	},
@@ -187,9 +170,8 @@ window.MapViewBase = Backbone.View.extend({
 	/**
 	* Required to be implemented by descendants.
 	*/
-	initLayerForCollection: function(collection)
+	initFeatureLayer: function(collection)
 	{
-		this.initLayerOptionsForCollection(collection);
 	},
 
 	/**
@@ -240,18 +222,6 @@ window.MapViewBase = Backbone.View.extend({
 			},
 			size: count / this.collections[collectionId].maxCount
 		}, collectionId);
-    },
-	
-	updateFromNewCollection: function(collection)
-	{
+    }
 		
-	},
-	
-	addCommentToMap: function(collection)
-	{
-		var self = this;
-		collection.each(function(model) {
-			self.addOneComment(model);
-		});
-	}
 });

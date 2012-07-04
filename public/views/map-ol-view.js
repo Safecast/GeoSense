@@ -24,10 +24,7 @@ window.MapOLView = window.MapViewBase.extend({
 		
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
-	
-		_.bindAll(this, "redrawLayer");
-	 	options.vent.bind("redrawLayer", this.redrawLayer);
-			
+				
 		Feature = OpenLayers.Feature.Vector;
 		Geometry = OpenLayers.Geometry;
 		Rule = OpenLayers.Rule;
@@ -129,12 +126,8 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		this.map.addLayers([this.gmap]);
 				
-		//this.addCommentLayer();
-				
 		this.updateMapStyle(DEFAULT_MAP_STYLE);
 				
-		//this.detectMapClick();
-
 		var scaleLine = new OpenLayers.Control.ScaleLine();
         this.map.addControl(scaleLine);		
 		
@@ -158,7 +151,8 @@ window.MapOLView = window.MapViewBase.extend({
  		}
 		return e
 	},
-	
+
+	/*	
 	addCommentLayer: function()
 	{
 		var style = new OpenLayers.Style({
@@ -234,7 +228,7 @@ window.MapOLView = window.MapViewBase.extend({
 		this.map.addControl(select);
 		select.activate();
 		*/
-	},
+	/*},*/
 	
 	addKMLLayer: function(url)
 	{
@@ -255,10 +249,21 @@ window.MapOLView = window.MapViewBase.extend({
 	
 		this.map.addLayers([kml]);
 	},
+
+	destroyFeatureLayer: function(model) 
+	{
+		var pointCollectionId = model.pointCollectionId;
+		this.featureLayers[pointCollectionId].destroyFeatures();
+			
+		// TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
+		/*this.map.removeLayer(this.featureLayers[pointCollectionId]);
+		this.featureLayers[pointCollectionId].destroy();
+		this.featureLayers[pointCollectionId] = null;*/
+	},
 	
-	initLayerForCollection: function(collection)
+	initFeatureLayer: function(collection)
 	{ 
-		MapOLView.__super__.initLayerForCollection.call(this, collection);
+		MapOLView.__super__.initFeatureLayer.call(this, collection);
 
 		var self = this;
 		var minBubbleSize = 2;
@@ -284,7 +289,7 @@ window.MapOLView = window.MapViewBase.extend({
         };
         var temporaryStyle = {};
 
-		switch(collection.options.featureType)
+		switch(collection.mapLayer.options.featureType)
 		{
 			case FeatureType.POINTS:
 			
@@ -426,7 +431,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var pt = new OpenLayers.Geometry.Point(lng, lat);
 		var geometry;
 
-		switch(collection.options.featureType)
+		switch(collection.mapLayer.options.featureType)
 		{
 			default:
 				pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
@@ -533,9 +538,12 @@ window.MapOLView = window.MapViewBase.extend({
 		this.gmap.mapObject.setMapTypeId('styled');
 	},
 	
-	redrawLayer: function(layer)
+	redrawMapLayer: function(layer)
 	{
-		// TODO: Not implemented
+		MapOLView.__super__.redrawMapLayer.call(this, layer);
+		var pointCollectionId = layer.pointCollection._id;
+		this.destroyFeatureLayer(this.collections[pointCollectionId]);
+		this.addCollectionToMap(this.collections[pointCollectionId]);
 	},
 	
 	redrawMap: function()
@@ -605,69 +613,8 @@ window.MapOLView = window.MapViewBase.extend({
 		    this.map.setCenter(new OpenLayers.LonLat(center[0], center[1]), zoom);		
 		}		
 	},
-	
-	/*
-	detectMapClick: function ()
-	{
-		var self = this;
-        OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
-            defaultHandlerOptions: {
-                'single': true,
-                'double': false,
-                'pixelTolerance': 0,
-                'stopSingle': false,
-                'stopDouble': false
-            },
 
-            initialize: function(options) {
-                this.handlerOptions = OpenLayers.Util.extend(
-                    {}, this.defaultHandlerOptions
-                );
-                OpenLayers.Control.prototype.initialize.apply(
-                    this, arguments
-                ); 
-                this.handler = new OpenLayers.Handler.Click(
-                    this, {
-                        'click': this.onClick,
-                        'dblclick': this.onDblclick 
-                    }, this.handlerOptions
-                );
-            }, 
-
-            onClick: function(evt) {
-	            var lonlat = self.map.getLonLatFromPixel(evt.xy);
-		    	translation = new Geometry.Point(lonlat.x, lonlat.y);
-				translation.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-            },
-
-            onDblclick: function(evt) {  
-            }   
-
-        });
-
-		var dblClick = new OpenLayers.Control.Click({
-	        handlerOptions: {
-	            "double": true
-	        }
-	    });
-		this.map.addControl(dblClick);
-		dblClick.activate();
-	},
-	*/
-	
-	removeCollectionFromMap: function(model) 
-	{
-		var pointCollectionId = model.pointCollectionId;
-		if (this.featureLayers[pointCollectionId]) {
-			this.featureLayers[pointCollectionId].destroyFeatures();
-			
-			// TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
-			/*this.map.removeLayer(this.featureLayers[pointCollectionId]);
-			this.featureLayers[pointCollectionId].destroy();
-			this.featureLayers[pointCollectionId] = null;*/
-		}
-	},
-
+	/*	
 	addOneComment: function(model) {
 		var self = this;
 		
@@ -677,4 +624,5 @@ window.MapOLView = window.MapViewBase.extend({
 		);
 		this.commentLayer.addFeatures(comment);
     },
+    */
 });

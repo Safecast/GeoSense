@@ -197,12 +197,12 @@ window.MapGLView = window.MapViewBase.extend({
 	updateValueScale: function(scale) {
 		this.valueScale = scale;
 		for (var i in this.collections) {
-			this.removeCollectionFromMap(this.collections[i]);
+			this.destroyFeatureLayer(this.collections[i]);
 			this.addCollectionToMap(this.collections[i]);
 		}
 	},
 
-	removeCollectionFromMap: function(model) {
+	destroyFeatureLayer: function(model) {
 		var id = model.pointCollectionId;
 		if (!this.widgets[id]) return;
 		var w = this.widgets[id];
@@ -264,33 +264,12 @@ window.MapGLView = window.MapViewBase.extend({
 		MapGLView.__super__.start.call(this);
 	},
 
-	/*
-	createPointWidget: function(cls, lat, lng, val, initObj)
-	{
-		//var position = this.convertSphericalToCartesian(lat, lng);
-		//return new cls(position, val, initObj);
-		return  new cls(new THREE.Vector3(), val, initObj);
-	},
-
-	addPointWidget: function(model, widget) 
-	{
-		return;
-		widget.object3D.lookAt(meshPlanet.position);
-		this.world.add(widget.object3D);   
-		var id = model.get('collectionid');
-		if (!this.widgets[id]) {
-			this.widgets[id] = [];
-		}
-		this.widgets[id].push(widget);
-	},
-	*/
-
 	/**
 	* Required to be implemented by descendants.
 	*/
-	initLayerForCollection: function(collection)
+	initFeatureLayer: function(collection)
 	{
-		MapGLView.__super__.initLayerForCollection.call(this, collection);
+		MapGLView.__super__.initFeatureLayer.call(this, collection);
 		this.featureLayers[collection.pointCollectionId] = {
 			data: [],
 			colors: []
@@ -358,9 +337,5 @@ window.MapGLView = window.MapViewBase.extend({
 
     },
     */
-
-	addOneComment: function(model) {
-		//If we want to add comments to globe
-    },
   
 });

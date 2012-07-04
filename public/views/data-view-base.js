@@ -42,12 +42,11 @@ window.DataViewBase = Backbone.View.extend({
 	setStateType: function(type, pointCollectionId) 
 	{	
 		if (!pointCollectionId || pointCollectionId != this.mapLayer.pointCollection._id) return;
-		console.log('setStateType', type, pointCollectionId);
+		console.log('DataViewBase.setStateType', type, pointCollectionId);
 		this.updateStatus();
 
 		var stateIndicator = this.$('.state-indicator');
-		switch (type)
-		{
+		switch (type) {
 			default:
 				stateIndicator.addClass('loading');
 				break;
@@ -309,6 +308,7 @@ window.DataViewBase = Backbone.View.extend({
 		this.featureType = options.featureType;
 		this.visible = options.visible;
 
+		this.initGradientEditor();
 		this.featureTypeChanged();
 		this.colorTypeChanged();
 		this.visibilityChanged();
@@ -327,7 +327,6 @@ window.DataViewBase = Backbone.View.extend({
 			this.updateLegend(true);
 		}
 
-		this.initGradientEditor();
 		this.disableUpdateButton();
 	},
 
@@ -369,8 +368,7 @@ window.DataViewBase = Backbone.View.extend({
 			success: function(data) {
 				self.disableUpdateButton();
 				self.updateLegend(true);
-				self.vent.trigger("redrawCollection", {pointCollectionId: self.mapLayer.pointCollection._id, 
-					updateObject: postData});
+				self.vent.trigger('updateMapLayer', data);
 			},
 			error: function() {
 				console.error('failed to update layer options');

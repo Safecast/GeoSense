@@ -64,7 +64,7 @@ window.GraphView = Backbone.View.extend({
 		var self = this;
 		console.log('updating graph collection!');
 
-		$.each(this.collections, function(collectionid, collection) { 
+		$.each(this.collections, function(collection) { 
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
 		});
@@ -195,7 +195,6 @@ window.GraphView = Backbone.View.extend({
 		var self = this;
 				
 		//Prep point for graph	
-		var collectionId = pointCollectionId; 
 		var name = model.get('name');
 		var val = model.attributes.val;
 
@@ -205,8 +204,8 @@ window.GraphView = Backbone.View.extend({
 		var epoch = new Date(date).getTime()/1000;
 
 		//Set min/max values		
-		var maxVal = this.collections[collectionId].maxVal;
-		var minVal = this.collections[collectionId].minVal;
+		var maxVal = this.collections[pointCollectionId].maxVal;
+		var minVal = this.collections[pointCollectionId].minVal;
 		var normVal = val/maxVal;
 		
 		//console.log(epoch + " | " + normVal);
@@ -217,7 +216,7 @@ window.GraphView = Backbone.View.extend({
     },
 
 	reset: function(collection) {
-		//this.removeCollectionFromMap(model);
+		//this.destroyFeatureLayer(model);
 
 		this.graphPointCollection = []
 		this.addCollectionToGraph(collection);
