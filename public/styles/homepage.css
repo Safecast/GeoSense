@@ -542,7 +542,7 @@
 	color:#515151;
 }
 
-.recent .recent-table .map-table td, th
+.recent .recent-table .map-table td, .recent .recent-table .map-table th
 {
 	padding:15px;
 	color:#9a9a9a;

@@ -107,9 +107,79 @@ h1 {
 	background-image:url('../assets/loader.gif');
 }
 
+
+.panel
+{
+	z-index:1000;
+	position:absolute;
+	top:15px;
+	right:15px;
+	padding: 36px 20px 0 20px;
+	box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, .2);
+	background-color:rgba(100,100,100,.8);
+	border-color:#222;
+	border-radius:8px;
+	color: #ddd;
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
+	width: 300px;
+	overflow: scroll;
+	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
+}
+
+.map-style-dark .panel {
+	color: #999;
+	background-color:rgba(0,0,0,.5);
+	text-shadow:rgba(0,0,0,.8) 1px 1px 0px;
+}
+
+.panel h2 {
+	color: white;
+	background-color:rgba(0,0,0,.5);
+}
+
+.panel.data-info {
+	display: none;
+	width: 222px;
+}
+
+.panel.data-info .detail {
+	display: none;
+}
+
+.panel .accordion-heading {
+	position: relative;
+}
+
+.panel .accordion-heading .accordion-toggle {
+	padding: 0 0 .25em 0;
+}
+
+.panel .accordion-group {
+	margin-bottom: 10px;
+	border: none;
+	width: 222px;
+	margin: 0;
+	padding: 0px;
+}
+
+.panel .accordion-group:first-child {
+	margin-top: 10px;	
+}
+
+.panel .accordion-group:last-child {
+	margin-bottom: 20px;	
+}
+
+
+.panel.extended, .panel.extended .accordion-group {
+	width: 444px;
+}
+
 .panel .state-indicator.loading {
 	background-image:url('../assets/loader-light.gif');
 }
+
 
 h2,
 h3 {
