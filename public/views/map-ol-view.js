@@ -123,6 +123,7 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 
 		MapOLView.__super__.start.call(this);
+		this.add30kmtemp();
 	},
 	
 	getItems: function (a, b, c) {
@@ -384,6 +385,48 @@ window.MapOLView = window.MapViewBase.extend({
 		
 	},
 
+	add30kmtemp: function()
+	{
+		var style = new OpenLayers.Style({
+		    strokeColor: '#ffffff',
+		    pointRadius: 7,
+		    fillOpacity: 0,
+		    strokeOpacity: .8,
+		    strokeWidth: 1
+		}, {context: {}});
+
+		layer = new OpenLayers.Layer.Vector(null, {
+			projection: new OpenLayers.Projection("EPSG:4326"),
+			sphericalMercator: true,
+		    styleMap: new OpenLayers.StyleMap({
+		        "default": style,
+		    }),
+		    renderers: ["Canvas"],
+		    wrapDateLine: true
+		});
+
+		this.map.addLayers([layer]);
+
+
+		var ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
+		ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+		var geometry;
+
+		var radius = 30000;
+		var corners = [];
+
+		var step = Math.PI / 20;
+		for (var i = 0; i < Math.PI * 2; i += step) {
+			var pt = new OpenLayers.Geometry.Point(ctr.x + Math.cos(i) * radius, ctr.y + Math.sin(i) * radius);
+			corners.push(pt.x+' '+pt.y);
+		}
+		var wkt = 'POLYGON(' + corners.join(', ') + ')';
+		var geometry = OpenLayers.Geometry.fromWKT(wkt);
+
+		var feature = new OpenLayers.Feature.Vector(geometry, {});
+		layer.addFeatures([feature]);
+	},
+
 	featureSelected: function(feature) {
 		var model = feature.attributes.model;
 		this.vent.trigger("showDetailData", feature.attributes.pointCollectionId, model);
@@ -475,7 +518,6 @@ window.MapOLView = window.MapViewBase.extend({
 		var _visibility = "simplified"
 		
 		switch (theme) {
-			default:
 			case 'light':
 				var style = [
 				  {
@@ -489,6 +531,8 @@ window.MapOLView = window.MapViewBase.extend({
 				];
 				this.mapStyle = 'light';
 				break;
+			default:
+				theme = 'dark'
 			case 'dark':
 				var style = [
 				  {
