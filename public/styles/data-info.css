@@ -37,7 +37,7 @@
 	background-color: #333;
 }
 
-.unit .nav-pills .active a, .unit .nav-pills .active span {
+.unit .nav-pills .active a, .unit .nav-pills .active a:hover, .unit .nav-pills .active span {
 	color: white !important;
 	background-color: #666;
 }
