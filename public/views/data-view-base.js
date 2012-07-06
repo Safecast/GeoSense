@@ -435,6 +435,7 @@ window.DataViewBase = Backbone.View.extend({
 				self.vent.trigger('toggleValFormatter', self.mapLayer, formatter);
 				self.$('.unit-item').removeClass('active');
 				$(evt.currentTarget).addClass('active');
+				return false;
 			}
 		};
 
