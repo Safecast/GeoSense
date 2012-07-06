@@ -114,7 +114,7 @@ var MapAPI = function(app) {
 	app.post('/api/map', function(req, res)
 	{
 		if (!permissions.canCreateMap(req)) {
-            res.send(err, 403);
+            res.send('', 403);
             return;
 		}
 
