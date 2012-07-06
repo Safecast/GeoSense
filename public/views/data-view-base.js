@@ -445,8 +445,8 @@ window.DataViewBase = Backbone.View.extend({
 			ul.html('');
 			for (var i = 0; i < formatters.length; i++) {
 				var f = formatters[i];
-				var li = '<li class="unit-item ' 
-					+ (f == valFormatter ? ' active' : '') 
+				var li = '<li class="unit-item' 
+					+ (formatters.length > 1 && f == valFormatter ? ' active' : '') 
 					+ '">'
 					+ (formatters.length > 1 ? '<a href="#" class="unit-toggle">' : '<span>')
 					+ f.unit 
@@ -456,6 +456,7 @@ window.DataViewBase = Backbone.View.extend({
 				li.on('click', makeClickHandler(f));
 				ul.append(li);
 			}
+			
 			this.$('.legend .unit').show();
 		} else {
 			this.$('.legend .unit').hide();

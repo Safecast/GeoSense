@@ -14,16 +14,16 @@
 }
 
 .unit .nav-pills {
-	position: relative;
     margin: 0 auto !important;
     padding: 0 !important;
-    width: auto !important;
+    display: inline-block !important;
+    height: 18px !important;
 } 
 
 .unit .nav-pills a, .unit .nav-pills span {
 	color: #999 !important;
 	margin: 1px !important;
-	padding: 4px 8px 6px 8px !important;
+	padding: 3px 8px 5px 8px !important;
 	line-height: 14px;
 	display: block;
 
