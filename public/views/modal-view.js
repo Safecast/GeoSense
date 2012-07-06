@@ -1,7 +1,7 @@
 window.ModalView = Backbone.View.extend({
 
     tagName: 'div',
-	className: 'modal-view',
+	className: 'modal fade',
 	templateName: 'modal',
 	
     events: {
@@ -30,9 +30,15 @@ window.ModalView = Backbone.View.extend({
   	{
   		var self = this;
         $('body').append(this.el);
-		$('.modal', this.el).modal('show');
-		$('.modal', this).on('hidden', function() {
-			$(self.el).remove();
+		$(this.el).modal('show');
+		$(this.el).on('hidden', function() {
+			$(self.el).detach();
 		});
-  	}
+  	},
+
+    close: function()
+    {
+		$(this.el).modal('hide');
+    },
+
 });

@@ -14,10 +14,22 @@ this.User.schema.plugin(useTimestamps);
 
 this.Point = mongoose.model('Point', new mongoose.Schema({
 	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
-	collectionid: String, 
 	loc: {type: [Number], index: '2d', required: true},
 	val: {type: Number, index: 1},
 	altVal: [mongoose.Schema.Types.Mixed],
+	label: String,
+	url: String,
+	datetime: {type: Date, index: 1},
+}));
+
+this.Point.schema.plugin(useTimestamps);
+this.Point.schema.index({loc: '2d', pointCollection: 1})
+
+this.Shape = mongoose.model('Shape', new mongoose.Schema({
+	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
+	loc: {type: [Number], index: '2d', required: true},
+	type: {type: String, required: true},
+	geometry: {type: String, required: true},
 	label: String,
 	url: String,
 	datetime: {type: Date, index: 1},
@@ -80,9 +92,29 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 
 this.PointCollection.schema.plugin(useTimestamps);
 
+this.ShapeCollection = mongoose.model('ShapeCollection', new mongoose.Schema({
+	title: String,
+	description: String,
+	source: String,
+	timeBased: Boolean,
+	defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
+	active: Boolean,
+	status: String,
+	progress: Number,
+	numBusy: Number,
+	reduce: Boolean,
+	cropDistribution: Boolean,
+	createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
+	modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
+}));
+
+this.ShapeCollection.schema.plugin(useTimestamps);
+
 this.MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
 	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', index: 1 },
+	shapeCollection: { type: mongoose.Schema.ObjectId, ref: 'ShapeCollection', index: 1 },
 	options: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
+	status: {type: String, enum: [config.MapLayerType.POINTS, config.MapLayerType.SHAPES], required: true, default: config.MapLayerType.POINTS},
 }));
 
 this.Map = mongoose.model('Map', new mongoose.Schema({
@@ -148,26 +180,25 @@ this.Map.prototype.adjustScales = function() {
 }
 
 this.Tweet = mongoose.model('Tweet', new mongoose.Schema({
-	collectionid: String,
+	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
 	mapid: String,
 }));
 
 this.TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
-	collectionid: String,
+	pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
 	mapid: String,
 	name: String,
 }));
 
 this.Chat = mongoose.model('Chat', new mongoose.Schema({
-	mapid: String,
+	map: { type: mongoose.Schema.ObjectId, ref: 'Map', required: true, index: 1 },
 	name: String,
 	text: String,
 	date: Date,
 }));
 
 this.Comment = mongoose.model('Comment', new mongoose.Schema({
-	commentid: Number,
-	mapid: String,
+	map: { type: mongoose.Schema.ObjectId, ref: 'Map', required: true, index: 1 },
 	name: String,
 	text: String,
 	date: Date,

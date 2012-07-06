@@ -150,8 +150,17 @@
 
 .data-info .histogram {
 /*	background-color:rgba(50,50,50,.25);*/
+	position: relative;
 	width: 222px;
 	height: 30px;
+}
+
+.data-info .histogram .graph-max-y {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	font-size: 10px;
+	display: none;
 }
 
 .data-info .histogram rect {
@@ -215,6 +224,10 @@
 
 .data-info .micro, .data-info .legend .unit {
 	font-size: 12px;
+}
+
+.data-info .caret {
+	border-top: 4px solid white !important;
 }
 
 .data-info .detail-metadata .value-label, .data-info .detail-metadata .value.single {

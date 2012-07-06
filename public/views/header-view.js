@@ -4,13 +4,15 @@ window.HeaderView = Backbone.View.extend({
 	className: 'header-view',
 	
     events: {
-		'click #settingsButton': 'settingsButtonClicked',
 		'click #aboutMap': 'aboutMapClicked',
 		'click #aboutGeoSense:' : 'aboutGeoSenseClicked',
+		'click #shareLink:' : 'shareLinkClicked',
 		'click #postFacebook:' : 'postFacebookClicked',
 		'click #postTwitter:' : 'postTwitterClicked',
 		'click #setupButton' : 'setupButtonClicked',
 		'click #graphButton' : 'graphButtonClicked',
+		'click #mapView a' : 'mapViewToggleClicked',
+		'click #mapStyle .dropdown-menu a' : 'mapStyleToggleClicked',
 		
 		'keypress input': 'keyEvent',
     },
@@ -32,7 +34,6 @@ window.HeaderView = Backbone.View.extend({
     {
 		$(this.el).html(this.template());
 		this.updateMapInfo();
-		this.settingsButtonClicked();
 		
 		if (!app.isMapAdmin())
 		{
@@ -63,30 +64,25 @@ window.HeaderView = Backbone.View.extend({
 		this.$('.brand').html('<h1>GeoSense</h1><h3>' + this.mapInfo.title + '</h3>');
 	},
 
-	settingsButtonClicked: function() {
-				
-		if (app.settingsVisible)
-		{
-			$('#settingsButton').html('<i class="icon-arrow-right icon-white"></i> Show Settings');
-			$('.sidebar-view').addClass('visible');
-			$('.map-view').addClass('full');
-			$('.map-gl-view').addClass('full');
-			$('.sidebar-view .black-overlay').addClass('visible');
-			app.settingsVisible = false;
+	mapViewToggleClicked: function(evt)
+	{
+		var link = evt.currentTarget;
+		var mapViewName = link.href.split('#')[1];
+		if (mapViewName != app.mapViewName) {
+			app.navigate(app.genMapURI(mapViewName), {trigger: true});
 		}
-		else
-		{
-			$('#settingsButton').html('<i class="icon-arrow-left icon-white"></i> Hide Settings');
-			$('.sidebar-view').removeClass('visible');
-			$('.map-view').removeClass('full');
-			$('.map-gl-view').removeClass('full');
-			$('.sidebar-view .black-overlay').removeClass('visible');
-			app.settingsVisible = true;
-		}
-		return false;
+		evt.preventDefault();
+	},
+
+	mapStyleToggleClicked: function(evt)
+	{
+		var link = evt.currentTarget;
+		var style = link.href.split('#')[1];
+		app.setMapStyle(style);
+		evt.preventDefault();
 	},
 	
-	graphButtonClicked: function() 
+	graphButtonClicked: function(evt) 
 	{
 		if(app.graphVisible == true)
 		{
@@ -103,26 +99,34 @@ window.HeaderView = Backbone.View.extend({
 			$('.header-view .graph').addClass('active');
 			this.vent.trigger("drawGraph"); 
 		}
-		return false;
+		evt.preventDefault();
 	},
 	
-	setupButtonClicked: function() 
+	setupButtonClicked: function(evt) 
 	{
-		$('#setupModal').modal('show');	
-		return false;
+		app.showSetupView();
+		evt.preventDefault();
 	},
 	
-	aboutGeoSenseClicked: function() 
+	aboutGeoSenseClicked: function(evt) 
 	{	
 		app.showAbout();
+		evt.preventDefault();
 	},
 	
-	aboutMapClicked: function() 
+	aboutMapClicked: function(evt) 
 	{
 		app.showMapInfo();
+		evt.preventDefault();
 	},
 	
-	postTwitterClicked: function() 
+	shareLinkClicked: function(evt)
+	{
+		app.showShareLink();
+		evt.preventDefault();
+	},
+
+	postTwitterClicked: function(evt) 
 	{
 		var tweet = {};
 		var url = app.genPublicURL();
@@ -137,11 +141,10 @@ window.HeaderView = Backbone.View.extend({
 
 		var url = 'https://twitter.com/share?' + $.param(tweet);
 		window.open(url, __('Tweet this post'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
-
-		//return false;
+		evt.preventDefault();
 	},
 	
-	postFacebookClicked: function() 
+	postFacebookClicked: function(evt) 
 	{
 		var url = 'http://www.facebook.com/sharer.php?u='
 		url += encodeURIComponent(app.genPublicURL());
@@ -149,8 +152,7 @@ window.HeaderView = Backbone.View.extend({
 			title: this.mapInfo.title
 		}));
 		window.open('' + url, __('Share it on Facebook'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
-
-		//return false;
+		evt.preventDefault();
 	},
 	
 	setStateType: function(type, pointCollectionId) 

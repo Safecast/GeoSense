@@ -5,13 +5,20 @@
       <div class="state-indicator"></div>
     </h4>
     <div class="status"></div>
+    <div class="progress progress-striped active" style="display: none">
+      <div class="bar" style="width: 40%;"></div>
+    </div>
     <a class="legend-button toggle"></a>
   </div>
   <div id="collapse" class="accordion-body collapse">
     <div class="legend">
       <div class="histogram"></div>
       <ul class="color-bar clearfix condensed"></ul>
-      <div class="unit"></div>
+      <ul class="unit nav">
+        <li class="dropdown">
+          <span class="current-unit"></span><b class="caret"></b>
+        </li>
+      </ul>
     </div>
     <div class="detail">
       <table class="detail-data"></table>

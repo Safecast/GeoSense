@@ -78,9 +78,12 @@ window.DataViewBase = Backbone.View.extend({
     			status = __('queued for crunching…');
 				break;
     		case DataStatus.REDUCING:
+    			var percent = Math.round(progress / this.mapLayer.pointCollection.numBusy * 100);
     			status = __(progress ? 'crunching… %(percent)s%' : 'crunching…', {
-    				percent: Math.round(progress / this.mapLayer.pointCollection.numBusy * 100)
+    				percent: percent
     			});
+    			this.$('.progress .bar').css('width', percent + '%');
+    			this.$('.progress').show();
 				break;
     	}
 		this.$(".status").html(status);
@@ -225,6 +228,8 @@ window.DataViewBase = Backbone.View.extend({
 
 		var gradient = new ColorGradient(this.histogramColors || this.colors, 'threshold');
 
+		var histMaxY;
+
 		for (var i = 0; i < len; i++) {
 			/*croppedData.push({
 				x: data[i].x,
@@ -276,6 +281,8 @@ window.DataViewBase = Backbone.View.extend({
 		     	.style("fill", function(d, x) {
 		     		return gradient.colorAt(x / maxX);
 		     	});
+
+		graphEl.append('<span class="graph-max-y">' + cropUpperMaxY + '</span>');
 
 		/*chart.selectAll("line")
 		     .data(y.ticks(1))
@@ -417,7 +424,8 @@ window.DataViewBase = Backbone.View.extend({
 		}
 
 		if (this.mapLayer.pointCollection.unit) {
-			this.$('.legend .unit').html(this.mapLayer.pointCollection.unit);
+			this.$('.legend .current-unit').html(this.mapLayer.pointCollection.unit);
+			this.$('.legend .unit').show();
 		} else {
 			this.$('.legend .unit').hide();
 		}

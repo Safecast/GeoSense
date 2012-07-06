@@ -5,16 +5,12 @@ window.MapOLView = window.MapViewBase.extend({
 
 	addFeatures: {
 	},
-	
-    events: {
-		"keypress #map_canvas input" : "keyDown"
-    },
 
+    mapStyles: ['dark', 'light', 'full'],
+	
     initialize: function(options) {
 		MapOLView.__super__.initialize.call(this, options);
 	    this.template = _.template(tpl.get('map-ol'));
-	
-		$(document).on('keydown', this.keyDown);
 	
 		_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
@@ -34,15 +30,6 @@ window.MapOLView = window.MapViewBase.extend({
 		scope = this;
 		OpenLayers.ImgPath = "/assets/openlayers-light/";	
     },
-
-	keyDown: function(e)
-	{	
-		var key = e.keyCode;
-		if(key == 49 && previousKey == 49)
-			scope.addKMLLayer('data/coast.kml');
-			
-		previousKey = 49;
-	},
 
     render: function() {
 		$(this.el).html(this.template());				
@@ -79,7 +66,7 @@ window.MapOLView = window.MapViewBase.extend({
 		};
 	},
 
-	start: function() {
+	start: function(mapStyle) {
 		var self = this;
 					
 		this.gmap = new OpenLayers.Layer.Google("Google Streets", {
@@ -126,7 +113,7 @@ window.MapOLView = window.MapViewBase.extend({
 				
 		this.map.addLayers([this.gmap]);
 				
-		this.updateMapStyle(DEFAULT_MAP_STYLE);
+		this.updateMapStyle(mapStyle || this.defaultMapStyle);
 				
 		var scaleLine = new OpenLayers.Control.ScaleLine();
         this.map.addControl(scaleLine);		
@@ -487,45 +474,50 @@ window.MapOLView = window.MapViewBase.extend({
 	{		
 		var _visibility = "simplified"
 		
-		if(theme == 'light')
-		{
-			var style = [
-			  {
-			    stylers: [
-				      { saturation: -100 },
-				      { visibility: _visibility },
-				      { lightness: 8 },
-				      { gamma: 1.31 }
-				    ]
-			  }
-			];
-		} else if (theme == 'dark')
-		{
-			var style = [
-			  {
-			    stylers: [
-				      { saturation: -100 },
-				      { visibility: _visibility },
-				      { lightness: 45 },
-				      { invert_lightness: true },
-				      { gamma: 1.1 },
+		switch (theme) {
+			default:
+			case 'light':
+				var style = [
+				  {
+				    stylers: [
+					      { saturation: -100 },
+					      { visibility: _visibility },
+					      { lightness: 8 },
+					      { gamma: 1.31 }
+					    ]
+				  }
+				];
+				this.mapStyle = 'light';
+				break;
+			case 'dark':
+				var style = [
+				  {
+				    stylers: [
+					      { saturation: -100 },
+					      { visibility: _visibility },
+					      { lightness: 45 },
+					      { invert_lightness: true },
+					      { gamma: 1.1 },
 
-					]	
-			  },
-			  {
-			    featureType: "administrative",
-			    stylers: [
-			      { visibility: "off" }
-			    ]
-			  }
-			];
-		} else if (theme == 'none')
-		{
-			var style = [
-			  {
-			    stylers: []
-			  }
-			];	
+						]	
+				  },
+				  {
+				    featureType: "administrative",
+				    stylers: [
+				      { visibility: "off" }
+				    ]
+				  }
+				];
+				this.mapStyle = theme;
+				break;
+			case 'full':
+				var style = [
+				  {
+				    stylers: []
+				  }
+				];	
+				this.mapStyle = theme;
+				break;
 		}
 		
 		var stylers = style;	

@@ -6,13 +6,11 @@ var AppRouter = Backbone.Router.extend({
 
 		"admin/:slug": "mapAdminRoute",
 		"admin/:slug/:view": "mapAdminRoute",
-		"admin/:slug/:view/:x,:y": "mapAdminRoute",
-		"admin/:slug/:view/:x,:y/:zoom": "mapAdminRoute",
+		"admin/:slug/:view/:pos": "mapAdminRoute",
 
 		":slug": "mapRoute",
 		":slug/:view": "mapRoute",
-		":slug/:view/:x,:y": "mapRoute",
-		":slug/:view/:x,:y/:zoom": "mapRoute",
+		":slug/:view/:pos": "mapRoute",
     },
 
     initialize: function() 
@@ -22,8 +20,9 @@ var AppRouter = Backbone.Router.extend({
 		this.firstLoad = true;
 		this.pointCollections = {};
 		this.timeBasedPointCollections = {};
+		this.isRendered = false;
 
-		this.settingsVisible = false;
+		this.settingsVisible = true;
 		this.graphVisible = false;
 		this.dataLibraryVisible = false;
 		this.chatVisible = false;
@@ -36,46 +35,55 @@ var AppRouter = Backbone.Router.extend({
 		_.bindAll(this, "updateMapLayer");
 	 	this.vent.bind("updateMapLayer", this.updateMapLayer);
 
-		var embed = this.getURLParameter('embed');
-		if (embed == 1) {
-			console.log('embed: ' + embed);
-			this.renderAsEmbed();
-		}
+		this.isEmbedded = window != window.top;
     }, 
 
-    mapRoute: function(slug, view, x, y, zoom)
+    mapRoute: function(slug, viewName, pos)
     {
-		var mapView;
-		if (view) {
-			this.setupRoute = view == 'setup';
+		var mapViewName,
+			mapStyle,
+			center, 
+			zoom;
+
+		if (viewName) {
+			this.setupRoute = viewName == 'setup';
 			if (!this.setupRoute) {
-				mapView = view;
+				var split = viewName.split(':');
+				mapViewName = split.shift();
+				if (split.length) {
+					mapStyle = split.shift();
+				}
 			} else {
 				$('#app').empty();
 			}
 		}
-		var center;
-		if (x != undefined && y != undefined) {
-			x = parseFloat(x);
-			y = parseFloat(y);
-			if (!isNaN(x) && !isNaN(y)) {
-				center = [x, y];
+
+		if (pos != undefined) {
+			var split = pos.split(',');
+			if (split.length == 3) {
+				zoom = split.pop();
+			}
+			if (split.length == 2) {
+				x = parseFloat(split.shift());
+				y = parseFloat(split.shift());
+				if (!isNaN(x) && !isNaN(y)) {
+					center = [x, y];
+				}
 			}
 		}
 
-    	console.log(slug, 'mapView:', mapView, 'center:', center, 'zoom:', zoom);
-		this.loadAndInitMap(slug, mapView, center, zoom);
+    	console.log(slug, 'mapViewName:', mapViewName, 'mapStyle', mapStyle, 'center:', center, 'zoom:', zoom);
+		this.loadAndInitMap(slug, mapViewName, center, zoom, mapStyle);
     },
 
-    mapAdminRoute: function(slug, view, x, y, zoom)
+    mapAdminRoute: function(slug, viewName, pos)
     {
     	this.adminRoute = true;
-    	this.mapRoute(slug, view, x, y, zoom);
+    	this.mapRoute(slug, viewName, pos);
     },
 
 	homeRoute: function() 
-	{
-		
+	{		
 		if (this.firstLoad) {
 			this.firstLoad = false;
 			this.homepageView = new HomepageView();
@@ -85,46 +93,102 @@ var AppRouter = Backbone.Router.extend({
 		}
 	},
 
-    genMapURI: function(view, opts, admin)
+    genMapURI: function(mapViewName, opts, admin)
     {
+    	if (!mapViewName) {
+			mapViewName = this.mapViewName + 
+				(this.mapStyle != this.mapView.defaultMapStyle ? ':' + this.mapStyle : '');
+    	}
     	var uri = ((admin || admin == undefined) && this.adminRoute ? 
     		'admin/' : '') 
-    		+ this.mapInfo.publicslug + (view ? '/' + view : '');
+    		+ this.mapInfo.publicslug + (mapViewName ? '/' + mapViewName : '');
     	if (opts) {
-	    	if (opts.x != undefined) {
+	    	if (opts.x != undefined && opts.y != undefined) {
 		    	uri += '/%(x)s,%(y)s';
-	    	}
-	    	if (opts.zoom != undefined) {
-	    		uri += '/%(zoom)s';
+		    	if (opts.zoom != undefined) {
+		    		uri += ',%(zoom)s';
+		    	}
 	    	}
     	}
     	return uri.format(opts);
     },
 
-    genPublicURL: function()
+	genMapURIForVisibleArea: function(visibleMapArea)
+	{
+		if (!visibleMapArea) {
+			var visibleMapArea = this.mapView.getVisibleMapArea();
+		}
+		return app.genMapURI(null, {
+			x: visibleMapArea.center[0],
+			y: visibleMapArea.center[1],
+			zoom: visibleMapArea.zoom
+		});
+	},
+
+    genPublicURL: function(forVisibleMapArea)
     {
-    	return BASE_URL + app.genMapURI(false, false, false);
+    	return BASE_URL + (forVisibleMapArea || forVisibleMapArea == undefined ?
+    		this.genMapURIForVisibleArea() 
+    		: this.genMapURI(false, false, false));
     },
 
-    initMapView: function(mapViewName, center, zoom) 
+	loadAndInitMap: function(slug, mapViewName, center, zoom, mapStyle)
+	{
+		var self = this;
+		switch (mapViewName) {
+			default:
+				mapViewName = 'map';
+				break;
+			case 'map':
+				break;
+			case 'globe':						
+				break;
+		}
+		if (!self.mapInfo) {
+			$.ajax({
+				type: 'GET',
+				url: '/api/map/' + slug,
+				success: function(data) {
+					self.mapInfo = data;
+					self.initMapView(mapViewName, center, zoom, mapStyle);
+				},
+				error: function() {
+					console.error('failed to load map', slug);
+				}
+			});
+			return;
+		}
+		self.initMapView(mapViewName, center, zoom, mapStyle);
+	},
+
+    initMapView: function(mapViewName, center, zoom, mapStyle) 
     {
 		var self = this;
-		this.uriViewName = mapViewName;
+
+		if (!self.isRendered) {
+			self.render(mapViewName);
+		}
+
+		this.mapViewName = mapViewName;
 			
 		if (this.mapView) {
 			this.mapView.remove();
 			this.mapView = null;
 		}
 
-		switch (this.uriViewName) {
+		switch (this.mapViewName) {
 			case 'map':
 				var viewClass = MapOLView;
+				$('#navMap').addClass('active');
+				$('#navGlobe').removeClass('active');
 				break;
 			case 'globe':
 				var viewClass = MapGLView;
+				$('#navMap').removeClass('active');
+				$('#navGlobe').addClass('active');
 				break;
 		}		
-	
+
 		var visibleMapArea = DEFAULT_MAP_AREA;
 		if (this.mapInfo.initialArea && 
 			this.mapInfo.initialArea.center.length) {
@@ -144,11 +208,17 @@ var AppRouter = Backbone.Router.extend({
 			vent: self.vent,
 			visibleMapArea: visibleMapArea
 		});
-		this.mapView.uriViewName = this.uriViewName;
 
 		var mapEl = this.mapView.render().el;
 		$('#app').append(mapEl);
-		this.mapView.start();
+		this.mapView.start(mapStyle);
+
+		if (this.mapView.mapStyles.length) {
+			this.setMapStyle(mapView.mapStyle, false);
+			$('#mapStyle').show();
+		} else {
+			$('#mapStyle').hide();
+		}		
 
         var snap = $('<div class="snap top" /><div class="snap right" />');
 		$(mapEl).append(snap);
@@ -162,10 +232,38 @@ var AppRouter = Backbone.Router.extend({
 		$(this.mapInfoView.el).hide();*/
     },
 
+    setMapStyle: function(mapStyle, navigate)
+    {
+    	if (navigate || navigate == undefined) {
+	    	this.vent.trigger('updateMapStyle', mapStyle);
+			app.navigate(app.genMapURI(app.mapViewName + ':' + mapStyle), {trigger: false});
+    	}
+
+		$('#app').removeClass('map-style-'+this.mapStyle);
+		this.mapStyle = this.mapView.mapStyle;
+		$('#app').addClass('map-style-'+this.mapStyle);
+
+		var li = [];
+		for (var i = 0; i < this.mapView.mapStyles.length; i++) {
+			var s = this.mapView.mapStyles[i];
+			if (s != this.mapStyle) {
+				li.push('<li><a href="#' + s + '" data-toggle="dropdown">' + s + '</a></li>');
+			}
+		}
+		$('#mapStyle .dropdown-menu').html(li.join(''));
+		$('#mapStyleCurrent').text(this.mapView.mapStyle);
+    },
+
     showMapInfo: function() 
     {
 		//$(this.mapInfoView.el).show();
 		this.mapInfoView.show();
+    },
+
+    showShareLink: function()
+    {
+		var shareView = new ShareView().render();
+		shareView.show();
     },
 
     showAbout: function() 
@@ -176,6 +274,12 @@ var AppRouter = Backbone.Router.extend({
 				+ '\n\nDeveloped by Anthony DeVincenzi and Samuel Luescher of the MIT Media Lab, alongside Hiroshi Ishii and Safecast.org.'));
 		modalView.show();
     },
+
+    showSetupView: function() 
+    {
+    	console.log(this.setupView);
+		this.setupView.show();	
+    },
 	
 	isMapAdmin: function()
 	{
@@ -184,16 +288,17 @@ var AppRouter = Backbone.Router.extend({
 
 	render: function() 
 	{
+		console.log('app.render');
 		var self = this;
-		var mapView = this.uriViewName;
 
 		window.document.title = this.mapInfo.title + ' – GeoSense';
 
+        if (this.isEmbedded) {
+        	$('body').addClass('embed');	
+        }
+
  		this.headerView = new HeaderView({vent: this.vent, mapInfo: this.mapInfo});
         $('#app').append(this.headerView.render().el);
-
-		this.sideBarView = new SideBarView({vent: this.vent, mapView: mapView});
-        $('#app').append(this.sideBarView.render().el);
 
 		//this.chatView = new ChatView({vent: this.vent});
         //$('#app').append(this.chatView.render().el);
@@ -208,60 +313,17 @@ var AppRouter = Backbone.Router.extend({
 			$('body').addClass("embed");
 		}
 		
-		this.vent.trigger("setToggleStates", {mapView: mapView});
-		
 		if (this.isMapAdmin()) {
-			this.setupView = new SetupView({vent: this.vent, mapInfo: this.mapInfo});
-			$('#app').append(this.setupView.render().el);
+			this.sideBarView = new SideBarView({vent: this.vent});
+	        $('#app').append(this.sideBarView.render().el);
+	        $('#app').addClass('with-sidebar');
+			this.setupView = new SetupView({vent: this.vent, mapInfo: this.mapInfo}).render();
 			if (this.setupRoute) {
-				$('#setupModal').modal('show');	
+				this.showSetupView();
 			}
 		}
-	},
-
-	renderAsEmbed: function()
-	{
-		var link = $("<link>");
-		link.attr({
-        	type: 'text/css',
-        	rel: 'stylesheet',
-        	href: '/styles/embed.css'
-		});
-		$("head").append( link ); 
-
-		console.log("Rendering GeoSense map as embed...")
-		$('.map-gl-view').addClass('full');
-		$('.message').addClass('.embed');
-	},
-
-	loadAndInitMap: function(slug, mapView, center, zoom)
-	{
-		var self = this;
-		$.ajax({
-			type: 'GET',
-			url: '/api/map/' + slug,
-			success: function(data) {
-				self.mapInfo = data;
-				switch (mapView) {
-					default:
-						mapView = 'map';
-						break;
-					case 'map':
-						break;
-					case 'globe':						
-						break;
-				}
-
-				self.initMapView(mapView, center, zoom);
-
-				if (!self.sideBarView) {
-					self.render(mapView);
-				}
-			},
-			error: function() {
-				console.error('failed to load map', slug);
-			}
-		});
+		
+		self.isRendered = true;
 	},
 
 	getURLParameter:function(name) 
@@ -432,7 +494,7 @@ var AppRouter = Backbone.Router.extend({
 
 tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'header',
 	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-	'edit-data', 'data-library', 'data-info', 'map-info-modal'],
+	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share'],
     function () {
         app = new AppRouter();
         if (!Backbone.history.start({ pushState: true })) {

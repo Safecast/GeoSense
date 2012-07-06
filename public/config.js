@@ -24,6 +24,11 @@ var FeatureType = {
 
 FeatureType.DEFAULT = FeatureType.CELLS;
 
+var MapLayerType = {
+	POINTS: 'P',
+	SHAPES: 'S'
+};
+
 var ColorType = {
 	SOLID: 'S',
 	LINEAR_GRADIENT: 'L'
@@ -57,6 +62,7 @@ if (!this.Document) {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
 		ColorType: ColorType,
+		MapLayerType: MapLayerType,
 		BASE_URL: BASE_URL
 	};
 } else {

@@ -204,10 +204,10 @@
 
 .divider.large
 {
-	height:1px;
-	width:265px;
-	margin-top:15px;
-	background-color:rgba(0,0,0,.1);
+	height: 1px;
+	width: 100%;
+	margin-top: 15px;
+	background-color: rgba(0,0,0,.1);
 	border-bottom:1px solid rgba(255,255,255,1);
 }
 
@@ -222,15 +222,14 @@
 
 .sidebar-view .data-container
 {
-	position:relative;
-	top:20px;
-	left:20px;
-	right:20px;
+	padding: 20px;
 }
 
 .sidebar-view .data-container .accordion-group
 {
-	width:87%;
+}
+
+.sidebar-view .accordion-group, .sidebar-view .toggle-group {
 }
 
 .sidebar-view .data-container .accordion-inner
@@ -240,8 +239,6 @@
 
 .sidebar-view .data-container .accordion-inner .data-toggle
 {
-	height:40px;
-	margin-top:10px;
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle p
@@ -268,7 +265,6 @@
 
 .toggle-group
 {
-	width:87%;
 	background-color:rgba(0,0,0,.023);
 	box-shadow: inset 0px 0px 5px rgba(0, 0, 0, .05);
 	border:1px solid rgba(0,0,0,.05);

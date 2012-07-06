@@ -4,11 +4,6 @@ window.SideBarView = Backbone.View.extend({
 	className: 'sidebar-view',
 	
     events: {
-		'click #light_theme': 'lightFilterClicked',
-		'click #dark_theme': 'darkFilterClicked',
-		'click #standard_theme': 'standardFilterClicked',
-		'click #display2D': 'display2DClicked',
-		'click #display3D': 'display3DClicked',
 		'click #addData': 'addDataClicked',
 		'click #addDataLibrary': 'addDataLibraryClicked',
 		'click #scale_linear': 'scaleLinearClicked',
@@ -23,11 +18,7 @@ window.SideBarView = Backbone.View.extend({
     initialize: function(options) {
 	    this.template = _.template(tpl.get('sidebar'));
 		this.vent = options.vent;
-		this.mapView = options.mapView;
 		
-		_.bindAll(this, "setToggleStates");
-		options.vent.bind("setToggleStates", this.setToggleStates);	
-
 		_.bindAll(this, "mapAreaChanged");
 		options.vent.bind("mapAreaChanged", this.mapAreaChanged);  
 
@@ -90,12 +81,6 @@ window.SideBarView = Backbone.View.extend({
 		var self = this;
 
 		$(this.el).html(this.template());		
-		if(this.mapView == 'map') {
-			this.$('#display2D').addClass('active');			
-		} else if (this.page =='globe') {
-			this.$('#themeToggleGroup').hide();
-			this.$('#display3D').addClass('active');
-		}
 		this.$('#scale_linear').addClass('active');
 
 		if (!DEBUG || (!IS_AR && !IS_LOUPE && !IS_TAGGED_GLOBE)) {
@@ -219,53 +204,35 @@ window.SideBarView = Backbone.View.extend({
 		if (!app.isMapAdmin()) {
 			this.$('#dataManager').remove();
 		}
+
+		this.updateAppLayout();
 					
         return this;
     },
 
 	settingsTabClicked: function() {
-		if(app.settingsVisible)
-		{
+		app.settingsVisible = !app.settingsVisible;
+		this.vent.trigger("redrawMap");
+		this.updateAppLayout();
+	},
+
+	updateAppLayout: function() 
+	{
+		if (!app.settingsVisible) {
 			$('#settingsTabText').html('SHOW');
 			$('#settingsTab').addClass('hidden');
 			$('.sidebar-view').addClass('visible');
-			$('.map-gl-view').addClass('full');
 			$('.sidebar-view .black-overlay').addClass('visible');
-			$('.olControlPanZoomBar').css("margin-left",0);
-			app.settingsVisible = false;
-		}
-		else
-		{
+			$('#app').removeClass('sidebar-visible');
+			$('.map-view').removeClass('full');
+		} else {
 			$('#settingsTabText').html('HIDE');
 			$('#settingsTab').removeClass('hidden');
 			$('.sidebar-view').removeClass('visible');
-			
-			$('.olControlPanZoomBar').css("margin-left",300);
-			
-			$('.map-view').removeClass('full');
-			
 			$('.sidebar-view .black-overlay').removeClass('visible');
+			$('#app').addClass('sidebar-visible');
+			$('.map-view').addClass('full');
 			app.settingsVisible = true;
-		}
-		
-		this.vent.trigger("redrawMap");
-		
-	},
-	
-	setToggleStates: function(options){
-		var mapView = options.mapView;
-				
-		if (mapView == 'globe')
-		{
-			this.$('#display3D').addClass('active');
-			this.$('#display2D').removeClass('active');
-			this.$('#themeToggleGroup').fadeOut('fast');
-			this.$('#scaleToggleGroup').fadeIn('fast');
-		} else if (mapView == 'map') {
-			this.$('#display3D').removeClass('active');
-			this.$('#display2D').addClass('active');
-			this.$('#themeToggleGroup').fadeIn('fast');
-			this.$('#scaleToggleGroup').fadeOut('fast');
 		}
 	},
 	
@@ -287,30 +254,6 @@ window.SideBarView = Backbone.View.extend({
 		}		
 	},
 
-	lightFilterClicked: function() {
-		this.vent.trigger("updateMapStyle", 'light');
-	},
-
-	darkFilterClicked: function() {
-		this.vent.trigger("updateMapStyle", 'dark');
-	},
-	
-	standardFilterClicked: function() {
-		this.vent.trigger("updateMapStyle", 'standard'); 
-	},
-	
-	display2DClicked: function() {
-		if (app.uriViewName == 'map') return false;
-		app.navigate(app.genMapURI('map'), {trigger: true});
-		this.$('#themeToggleGroup').show();
-	},
-
-	display3DClicked: function() {
-		if (app.uriViewName == 'globe') return false;
-		app.navigate(app.genMapURI('globe'), {trigger: true});
-		this.$('#themeToggleGroup').hide();
-	},
-	
 	addDataClicked: function() {
 		
 		if(this.addDataView)

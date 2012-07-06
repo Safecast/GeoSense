@@ -8,6 +8,10 @@
 	border-bottom:1px solid rgba(255,255,255,.1);	
 }
 
+.header-view .nav-pills > li > a {
+	margin: 0 !important;
+}
+
 .header-view .navbar.navbar-fixed-top .navbar-inner
 {
 	padding-top:5px;
@@ -53,6 +57,10 @@
 {
 	background-color:#fff;
 	color:#FFF;
+}
+
+.search-query {
+	width: 230px;
 }
 
 #settingsButton
@@ -106,7 +114,7 @@
 .header-view .setup
 {
 	position:absolute;
-	right:260px;
+	right:290px;
 	top:12px;
 	width:24px;
 	height:24px;

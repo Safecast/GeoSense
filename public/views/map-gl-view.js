@@ -260,7 +260,7 @@ window.MapGLView = window.MapViewBase.extend({
     },
 
 
-	start: function() {
+	start: function(mapStyle) {
 		MapGLView.__super__.start.call(this);
 	},
 

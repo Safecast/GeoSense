@@ -23,14 +23,13 @@
 							<li><a href="http://www.media.mit.edu/" target="_blank">MIT Media Lab</a></li>
 						</ul>
 					</li>
-					<li class="divider-vertical"></li>
 					<li class="dropdown">
-						<a href="#"
-							class="dropdown-toggle"
+						<a class="dropdown-toggle"
 							data-toggle="dropdown">Share
 							<b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
+							<li id="shareLink"><a href="#">Link or embed</a></li>
 							<li id="postTwitter"><a href="#">Post to Twitter</a></li>
 							<li id="postFacebook"><a href="#">Share on Facebook</a></li>
 						</ul>
@@ -38,6 +37,27 @@
 					<li class="divider-vertical"></li>
 
 				</ul>
+
+				<ul id="mapView" class="nav nav-pills">
+				  <li id="navMap" class="active">
+				    <a href="#map">Map</a>
+				  </li>
+				  <!--<li id="navGlobe"  class="">
+				    <a href="#globe">3D Globe</a>
+				  </li>-->
+				</ul>
+				<ul id="mapStyle" class="nav">
+					<li class="dropdown">
+						<a href="#"
+							class="dropdown-toggle"
+							data-toggle="dropdown">Style: <span id="mapStyleCurrent"></span>
+							<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu">
+						</ul>
+					</li>
+				</ul>
+
 <!-- 				<div class='graph' id='graphButton'><div class='icon'></div></div>
  -->				<div class='setup' id='setupButton'><div class='icon'></div></div>
 				<input type="text" class="search-query" id="search" placeholder="Search">

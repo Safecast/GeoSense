@@ -42,7 +42,6 @@ window.MapInfoView = window.ModalView.extend({
 					f = 'https://twitter.com/#!/' + f;
 				}
 				contentEl.html(f);
-				console.log(contentEl[0].tagName);
 				if (contentEl[0].tagName == 'A') {
 					contentEl.attr('href', f);
 				}

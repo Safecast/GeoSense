@@ -18,11 +18,10 @@
 
 @import url("rickshaw.min.css");
 
-@import url("bootstrap.css");
 @import url("jquery.miniColors.css");
-
 @import url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css");
 @import url("jquery-ui-1.8.16.custom.css");
+@import url("bootstrap.css");
 
 @import url("../libs/gradient-editor/gradient-editor.css");
 @import url("../libs/colorpicker/css/colorpicker.css");
@@ -61,7 +60,7 @@
 	position:absolute;
 	top:50px;
 	left:0px;
-	width:300px;
+	width:400px;
 	bottom:0px;
 	-webkit-transition: all .3s linear;
     -moz-transition: all .3s linear;
@@ -80,7 +79,7 @@
 
 .sidebar-view.visible
 {
-	left:-300px;
+	left:-400px;
 	-webkit-transition: all .3s linear;
     -moz-transition: all .3s linear;
     -o-transition: all .3s linear;
@@ -177,3 +176,4 @@
 	width: 120px;
 	height: 120px;
 }
+

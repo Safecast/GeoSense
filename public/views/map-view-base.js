@@ -1,6 +1,7 @@
 window.MapViewBase = Backbone.View.extend({
 
-	uriViewName: undefined, 
+    mapStyles: [],
+    defaultMapStyle: DEFAULT_MAP_STYLE,
 
     initialize: function(options) {
 		var self = this;
@@ -71,7 +72,7 @@ window.MapViewBase = Backbone.View.extend({
 	setVisibleMapArea: function(to) {
 	},
 
-	start: function() 
+	start: function(mapStyle) 
 	{
 		if (this.initialVisibleMapArea) {
 			this.MapAreaChangedInitially = true;
@@ -83,19 +84,14 @@ window.MapViewBase = Backbone.View.extend({
 	{
 		var self = this;
 
-		$.each(this.collections, function(collection) { 
+		$.each(this.collections, function(key, collection) { 
 			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
 			collection.setVisibleMapArea(visibleMapArea);
 			collection.fetch();
 		});
 
 		if (!this.MapAreaChangedInitially) {
-			var uri = app.genMapURI(this.uriViewName, {
-				x: visibleMapArea.center[0],
-				y: visibleMapArea.center[1],
-				zoom: visibleMapArea.zoom
-			});
-			app.navigate(uri);
+			app.navigate(app.genMapURIForVisibleArea(visibleMapArea));
 		}
 
 		this.MapAreaChangedInitially = false;
@@ -194,7 +190,10 @@ window.MapViewBase = Backbone.View.extend({
 		var options = this.collections[collectionId].mapLayer.options;
 		var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
 		var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
-		var val = model.get('val').avg;
+		var val = model.get('val');
+		if (val.avg != null) {
+			val = val.avg;
+		}
 		var count = model.get('count');
 		var normVal = (val - min) / (max - min);
 

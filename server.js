@@ -48,6 +48,12 @@ app.error(function(err, req, res, next){
 });
 */
 
+app.get(/^$/, function(req, res) {
+	res.writeHead(403, {
+	});
+	res.end();
+});
+
 // Admin Route
 app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, res){
 	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {

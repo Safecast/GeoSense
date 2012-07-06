@@ -13,7 +13,7 @@
 	height:100%;
 }
 
-.data
+/*.data
 {
 	width:10px;
 	height:10px;
@@ -21,7 +21,7 @@
 	border-radius:10px;
 	opacity:.5;
 	box-shadow: 0 0 10px red;
-}
+}*/
 
 .zoom-buttons
 {
@@ -64,11 +64,20 @@
 
 .olControlPanZoomBar
 {
-	margin-left:300px;
+	margin-top:-40px;
+	margin-left:10px;
 	-webkit-transition: all .3s linear;
     -moz-transition: all .3s linear;
     -o-transition: all .3s linear;
     -ms-transition: all .3s linear;
+}
+
+.with-sidebar .olControlPanZoomBar {
+	margin-top: 10px;
+}
+
+.sidebar-visible .olControlPanZoomBar {
+	margin-left: 410px;
 }
 
 .olControlScaleLineTop, .olControlScaleLineBottom {

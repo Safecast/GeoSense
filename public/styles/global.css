@@ -275,3 +275,11 @@ fieldset.two-column div {
 fieldset.two-column input {
 	width: 230px;
 }
+
+.progress-striped {
+	height: 12px !important;
+}
+
+.progress-striped .bar {
+	background-color: #00C9FF !important;
+}

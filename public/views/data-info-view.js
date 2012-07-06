@@ -25,12 +25,13 @@ window.DataInfoView = window.PanelViewBase.extend({
 		var pointCollection = mapLayer.pointCollection;
 
 		var val = model.get('val');
+		var isAggregate = val.avg != null;
 		var altVal = model.get('altVal');
 		var label = model.get('label');
 		var datetime = model.get('datetime');
 		var count = model.get('count');
-		var maxDate = new Date(datetime.max).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
-		var minDate = new Date(datetime.min).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
+		var maxDate = new Date(isAggregate ? datetime.max : datetime).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
+		var minDate = new Date(isAggregate ? datetime.min : datetime).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
 
 		var data = [];
 
@@ -55,7 +56,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 
 		data.push({
 			label: pointCollection.unit, 
-			value: formatDecimalNumber(val.avg, 3)
+			value: formatDecimalNumber(isAggregate ? val.avg : val, 3)
 		});
 
 		if (altVal) {
@@ -70,7 +71,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 		var metadata = pointCollection.reduce ? [
 			{
 				label: __('# of samples'),
-				value: count
+				value: formatLargeNumber(count)
 			}
 		] : [];
 		if (count > 1) {
@@ -104,6 +105,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 
     showDetailData: function(pointCollectionId, model)    
 	{	
+		console.log('showDetailData', model);
 		var obj = this.compileDetailDataForModel(pointCollectionId, model);
 		var legend = this.$('.data-legend.'+pointCollectionId);
 

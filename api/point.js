@@ -176,31 +176,20 @@ var PointAPI = function(app) {
 							for (var i = 0; i < datasets.length; i++) {
 								if (PointModel != Point) {
 									var reduced = datasets[i].get('value');
-									var resVal = reduced.val.avg;
-									var resAltVal;
-									if (reduced.altVal != null) {
-										resAltVal = [];
-										for (var v = 0; v < reduced.altVal.length; v++) {
-											resAltVal[v] = reduced.altVal[v].avg;
-										}
-									}
 									var p = {
-										val: resVal,
-										altVal: resAltVal,
+										val: reduced.val,
+										altVal: reduced.altVal,
 										count: reduced.count,
 										datetime: reduced.datetime,
 										loc: [reduced.loc[0], reduced.loc[1]],
 									};
-
-									var p = reduced;
-
 								} else {
 									var p = {
 										val: datasets[i].get('val'),
 										altVal: datasets[i].get('altVal'),
 										count: 1,
 										datetime: datasets[i].get('datetime'),
-										loc: datasets[i].get('loc'),									
+										loc: datasets[i].get('loc'),
 									};
 								}
 								points.push(p);
@@ -265,16 +254,15 @@ var PointAPI = function(app) {
 						pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 						dequeueBoxQuery();
 					} else {
-						/*
-						collectionName = 'points';
-						PointModel = Point;
-						pointQuery = {'pointCollection': req.params.pointcollectionid};
-						dequeueBoxQuery();
-						*/
-						
-						collectionName = 'r_points_loc-0';
-						PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
-						pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+						if (pointCollection.get('reduce')) {
+							collectionName = 'points';
+							PointModel = Point;
+							pointQuery = {'pointCollection': req.params.pointcollectionid};
+						} else {
+							collectionName = 'r_points_loc-0';
+							PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+							pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+						}
 						dequeueBoxQuery();
 					}
 				});

@@ -1,7 +1,7 @@
-window.SetupView = Backbone.View.extend({
+window.SetupView = window.ModalView.extend({
 
     tagName: 'div',
-	className: 'setup-view',
+	className: 'setup-view modal fade',
 	
     events: {
 		'click #deleteMapButton' : 'deleteMapClicked',
@@ -13,7 +13,7 @@ window.SetupView = Backbone.View.extend({
 	    this.template = _.template(tpl.get('setup'));	
 		this.vent = options.vent;
 		this.mapInfo = options.mapInfo;
-		this.mapInfoChanged = true;
+		this.mapInfoChanged = false;
 
 		_.bindAll(this, "updateMapInfo");
 	 	options.vent.bind("updateMapInfo", this.updateMapInfo);
@@ -49,14 +49,10 @@ window.SetupView = Backbone.View.extend({
 		this.$('.map-url').val(BASE_URL + this.mapInfo.publicslug);
 		this.$('.map-admin-url').val(BASE_URL + 'admin/' + this.mapInfo.adminslug);
 		
-		this.$(".map-url").click(function() {
+		this.$(".map-url, .map-admin-url").click(function() {
 		   $(this).select();
 		});
 		
-		this.$(".map-admin-url").click(function() {
-		   $(this).select();
-		});
-
 		this.$(".enter-email").click(function() {
 			$('#tab-setup-metadata').trigger('click');
 			return false;
@@ -64,9 +60,15 @@ window.SetupView = Backbone.View.extend({
 
 		this.mapInfoFields = this.$('#setup-metadata input, #setup-metadata textarea');
 
-		this.mapInfoFields.bind('change keydown', function() {
-			self.mapInfoChanged = true;
-			self.$('#saveCloseButton').text(__('Save & close'));
+		this.mapInfoFields.each(function() {
+			$(this).on('change keydown', function() {
+				self.mapInfoChanged = true;
+				self.$('#saveCloseButton').text(__('Save & close'));
+			});
+		});
+
+		$(this.el).on('hidden', function() {
+			app.navigate(app.genMapURI(null));
 		});
 
 		this.updateMapInfo();
@@ -74,14 +76,9 @@ window.SetupView = Backbone.View.extend({
         return this;
     },
 
-    close: function()
-    {
-		$('#setupModal').modal('hide');
-		app.navigate(app.genMapURI());
-    },
-
 	saveClicked: function() 
 	{
+		console.log('saveClicked', this.mapInfoChanged);
 		if (!this.mapInfoChanged) {
 			this.close();
 			return false;
@@ -121,7 +118,7 @@ window.SetupView = Backbone.View.extend({
 		return false;
 	},
 
-	deleteMapClicked: function() {
+	deleteMapClicked: function(e) {
 		var self = this;
 		if (window.confirm(__('Are you sure you want to delete this map? This action cannot be reversed!'))) {
 			$.ajax({

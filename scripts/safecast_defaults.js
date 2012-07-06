@@ -1,5 +1,5 @@
 // Good defaults for Safecast and Earthquakes
-o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : "measurements-out.csv"}]});
+o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : "measurements.csv"}]});
 db.pointcollections.update({_id: o._id}, {$set:
 	{
 		"title": "Safecast",
@@ -111,5 +111,6 @@ db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:
 	}
 });
 print('Updated Reactors');
+
 
 
