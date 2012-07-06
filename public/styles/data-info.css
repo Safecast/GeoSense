@@ -13,9 +13,38 @@
 	-webkit-border-radius:4px;
 }
 
+.unit .nav-pills {
+	position: relative;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    width: auto !important;
+} 
+
+.unit .nav-pills a, .unit .nav-pills span {
+	color: #999 !important;
+	margin: 1px !important;
+	padding: 4px 8px 6px 8px !important;
+	line-height: 14px;
+	display: block;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.unit .nav-pills a:hover {
+	color: white !important;
+	background-color: #333;
+}
+
+.unit .nav-pills .active a, .unit .nav-pills .active span {
+	color: white !important;
+	background-color: #666;
+}
+
 .data-info .data-legend:first-child {
 	margin: 0;
-} 
+}
 
 .value
 {

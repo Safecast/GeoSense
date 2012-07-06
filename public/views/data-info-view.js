@@ -15,8 +15,14 @@ window.DataInfoView = window.PanelViewBase.extend({
 
 		_.bindAll(this, "showDetailData");
 	 	options.vent.bind("showDetailData", this.showDetailData);
+
 		_.bindAll(this, "hideDetailData");
 	 	options.vent.bind("hideDetailData", this.hideDetailData);
+
+		_.bindAll(this, "toggleValFormatter");
+	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
+
+	 	this.visibleDetailModels = {};
     },
 
     compileDetailDataForModel: function(pointCollectionId, model)
@@ -32,6 +38,8 @@ window.DataInfoView = window.PanelViewBase.extend({
 		var count = model.get('count');
 		var maxDate = new Date(isAggregate ? datetime.max : datetime).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
 		var minDate = new Date(isAggregate ? datetime.min : datetime).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
+
+		var valFormatter = mapLayer.sessionOptions.valFormatter;
 
 		var data = [];
 
@@ -55,18 +63,23 @@ window.DataInfoView = window.PanelViewBase.extend({
 		}
 
 		data.push({
-			label: pointCollection.unit, 
-			value: formatDecimalNumber(isAggregate ? val.avg : val, 3)
+			label: valFormatter.unit, 
+			value: valFormatter.format(isAggregate ? val.avg : val)
 		});
 
+		/*
+		TODO: Fix with formatters
 		if (altVal) {
 			for (var i = 0; i < altVal.length; i++) {
+				var altValFormat = mapLayer.options.altValFormat.length > i ?
+					mapLayer.options.altValFormat[i] : null;
 				data.push({
-					label: pointCollection.altUnit[i], 
-					value: formatDecimalNumber(altVal[i], 3)
+					label: altValFormat && altValFormat.unit ? altValFormat.unit : pointCollection.altUnit[i], 
+					value: formatVal(altVal[i], altValFormat)
 				});
 			}
 		}
+		*/
 
 		var metadata = pointCollection.reduce ? [
 			{
@@ -80,19 +93,19 @@ window.DataInfoView = window.PanelViewBase.extend({
 					label: __('peak', {
 						unit: pointCollection.unit
 					}),
-					value: formatDecimalNumber(val.max, 3)
+					value: valFormatter.format(val.max)
 				}, 
 				{
 					label: __('minimum', {
 						unit: pointCollection.unit
 					}),
-					value: formatDecimalNumber(val.min, 3)
+					value: valFormatter.format(val.min)
 				}, 
 				{
 					label: __('average', {
 						unit: pointCollection.unit
 					}),
-					value: formatDecimalNumber(val.avg, 3)
+					value: valFormatter.format(val.avg)
 				} 
 			]);
 		}
@@ -104,8 +117,9 @@ window.DataInfoView = window.PanelViewBase.extend({
     },
 
     showDetailData: function(pointCollectionId, model)    
-	{	
-		console.log('showDetailData', model);
+	{
+		this.visibleDetailModels[pointCollectionId] = model;
+
 		var obj = this.compileDetailDataForModel(pointCollectionId, model);
 		var legend = this.$('.data-legend.'+pointCollectionId);
 
@@ -148,7 +162,9 @@ window.DataInfoView = window.PanelViewBase.extend({
 	},
 
     hideDetailData: function(pointCollectionId)
-	{	
+	{
+		this.visibleDetailModels[pointCollectionId] = null;
+
 		var legend = this.$('.data-legend.'+pointCollectionId);
 		var collapsible = $('.collapse', legend);
 		$('.detail', collapsible).hide();
@@ -162,5 +178,13 @@ window.DataInfoView = window.PanelViewBase.extend({
 		}
 		*/
 	},
+
+    toggleValFormatter: function(mapLayer, formatter)
+    {	
+    	var pointCollectionId = mapLayer.pointCollection._id;
+		if (this.visibleDetailModels[pointCollectionId]) {
+			this.showDetailData(pointCollectionId, this.visibleDetailModels[pointCollectionId]);
+		}
+	}	
 
 });

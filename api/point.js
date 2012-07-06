@@ -182,6 +182,7 @@ var PointAPI = function(app) {
 										count: reduced.count,
 										datetime: reduced.datetime,
 										loc: [reduced.loc[0], reduced.loc[1]],
+										label: reduced.label
 									};
 								} else {
 									var p = {
@@ -190,6 +191,7 @@ var PointAPI = function(app) {
 										count: 1,
 										datetime: datasets[i].get('datetime'),
 										loc: datasets[i].get('loc'),
+										label: datasets[i].get('label')
 									};
 								}
 								points.push(p);

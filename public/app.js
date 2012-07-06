@@ -35,6 +35,9 @@ var AppRouter = Backbone.Router.extend({
 		_.bindAll(this, "updateMapLayer");
 	 	this.vent.bind("updateMapLayer", this.updateMapLayer);
 
+		_.bindAll(this, "toggleValFormatter");
+	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
+
 		this.isEmbedded = window != window.top;
     }, 
 
@@ -149,7 +152,7 @@ var AppRouter = Backbone.Router.extend({
 				type: 'GET',
 				url: '/api/map/' + slug,
 				success: function(data) {
-					self.mapInfo = data;
+					self.initMapInfo(data);
 					self.initMapView(mapViewName, center, zoom, mapStyle);
 				},
 				error: function() {
@@ -159,6 +162,39 @@ var AppRouter = Backbone.Router.extend({
 			return;
 		}
 		self.initMapView(mapViewName, center, zoom, mapStyle);
+	},
+
+	initMapInfo: function(mapInfo) 
+	{
+		var self = this;
+		self.mapInfo = mapInfo;
+		for (var i = self.mapInfo.layers.length - 1; i >= 0; i--) {
+			var mapLayer = self.mapInfo.layers[i];
+			mapLayer.sessionOptions = {};
+
+			if (mapLayer.options.valFormat) {
+				mapLayer.sessionOptions.valFormatters = [];
+				for (var j = 0; j == 0 || j < mapLayer.options.valFormat.length; j++) {
+					var valFormat = null;
+					if (j < mapLayer.options.valFormat.length) {
+						valFormat = mapLayer.options.valFormat[j];
+					}
+					if (!valFormat) {
+						valFormat = {};
+					}
+					if (!valFormat.unit) {
+						valFormat.unit = mapLayer.pointCollection.unit;
+					}
+					mapLayer.sessionOptions.valFormatters.push(new ValFormatter(valFormat));
+				}
+				mapLayer.sessionOptions.valFormatter = mapLayer.sessionOptions.valFormatters[0];
+			}
+		}
+	},
+
+	toggleValFormatter: function(mapLayer, formatter)
+	{
+		mapLayer.sessionOptions.valFormatter = formatter;
 	},
 
     initMapView: function(mapViewName, center, zoom, mapStyle) 
@@ -454,7 +490,7 @@ var AppRouter = Backbone.Router.extend({
 			type: 'POST',
 			url: '/api/bindmapcollection/' + this.mapInfo._id + '/' + pointCollectionId,
 			success: function(data) {
-				self.mapInfo = data;
+				self.initMapInfo(data);
 				self.initMapLayer(pointCollectionId);
 			},
 			error: function() {

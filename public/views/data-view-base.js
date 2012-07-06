@@ -16,7 +16,6 @@ window.DataViewBase = Backbone.View.extend({
 		'click #colorInput' : 'colorInputClicked',
 		'click #colorInputLow' : 'colorInputLowClicked',
 		'click #colorInputHigh' : 'colorInputHighClicked',
-		
     },
 
     initialize: function(options) 
@@ -37,6 +36,9 @@ window.DataViewBase = Backbone.View.extend({
 
 		_.bindAll(this, "setStateType");
 		this.vent.bind("setStateType", this.setStateType);
+
+		_.bindAll(this, "toggleValFormatter");
+	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
     },
 
 	setStateType: function(type, pointCollectionId) 
@@ -78,7 +80,7 @@ window.DataViewBase = Backbone.View.extend({
     			status = __('queued for crunching…');
 				break;
     		case DataStatus.REDUCING:
-    			var percent = Math.round(progress / this.mapLayer.pointCollection.numBusy * 100);
+    			var percent = Math.floor(progress / this.mapLayer.pointCollection.numBusy * 100);
     			status = __(progress ? 'crunching… %(percent)s%' : 'crunching…', {
     				percent: percent
     			});
@@ -398,6 +400,8 @@ window.DataViewBase = Backbone.View.extend({
 
 	updateLegend: function(rebuildColorBar) 
 	{
+		var self = this;
+
 		if (this.visible) {
 			$(this.el).addClass('visible');
 			$(this.el).removeClass('hidden');
@@ -423,8 +427,35 @@ window.DataViewBase = Backbone.View.extend({
 			}
 		}
 
-		if (this.mapLayer.pointCollection.unit) {
-			this.$('.legend .current-unit').html(this.mapLayer.pointCollection.unit);
+		var valFormatter = this.mapLayer.sessionOptions.valFormatter;
+		var unit = valFormatter.unit;
+
+		var makeClickHandler = function(formatter) {
+			return function(evt) {
+				self.vent.trigger('toggleValFormatter', self.mapLayer, formatter);
+				self.$('.unit-item').removeClass('active');
+				$(evt.currentTarget).addClass('active');
+			}
+		};
+
+		if (unit) {
+			var formatItems = [];
+			var formatters = this.mapLayer.sessionOptions.valFormatters;
+			var ul = this.$('.legend .unit ul');
+			ul.html('');
+			for (var i = 0; i < formatters.length; i++) {
+				var f = formatters[i];
+				var li = '<li class="unit-item ' 
+					+ (f == valFormatter ? ' active' : '') 
+					+ '">'
+					+ (formatters.length > 1 ? '<a href="#" class="unit-toggle">' : '<span>')
+					+ f.unit 
+					+ (formatters.length > 1 ? '</a>' : '</span>')
+					+ '</li>';
+				var li = $(li);
+				li.on('click', makeClickHandler(f));
+				ul.append(li);
+			}
 			this.$('.legend .unit').show();
 		} else {
 			this.$('.legend .unit').hide();
@@ -435,22 +466,6 @@ window.DataViewBase = Backbone.View.extend({
 			var gradient = new ColorGradient(this.colors);
 			var items = [];
 			for (var i = 0; i < this.colors.length; i++) {
-				var val;
-				if (this.colors.length > 1 && this.colorType == ColorType.LINEAR_GRADIENT) {
-					val = formatDecimalNumber(this.mapLayer.pointCollection.minVal + this.colors[i].position * (this.mapLayer.pointCollection.maxVal - this.mapLayer.pointCollection.minVal));
-					if (i == this.colors.length - 1 && this.colors[i].position < 1) {
-						val += '+';
-					}			
-				} else {
-					val = formatDecimalNumber(this.mapLayer.pointCollection.minVal) + '–' + formatDecimalNumber(this.mapLayer.pointCollection.maxVal);
-				}
-				if (i == 0) {
-					val = UnitFormat.LEGEND.format({
-						value: val, 
-						unit: this.mapLayer.pointCollection.unit
-					});
-				}		
-
 				var baseColor = this.colors[i].color;
 				var darkerColor = gradient.intToHexColor(gradient.interpolation.lerpRGB(.15, gradient.colors[i], {color: 0}));
 
@@ -460,13 +475,52 @@ window.DataViewBase = Backbone.View.extend({
 					+ '; background: linear-gradient(top, '+baseColor+' 40%, '+darkerColor+' 80%)'
 					+ '; background: -webkit-gradient(linear, left top, left bottom, color-stop(.4, '+baseColor+'), color-stop(.8, '+darkerColor+'))'
 					+ '">'
-					+ val + '</div>'
+					+ '</div>'
 					+ '</li>'
 				);
 			}
 			this.$('.color-bar').html(items.join(''));
+			this.setColorBarLabels();
 		}
 	},
+
+    toggleValFormatter: function(mapLayer, formatter)
+    {
+    	if (mapLayer != this.mapLayer) return;
+    	this.setColorBarLabels();
+    },
+
+	setColorBarLabels: function()
+	{
+		var isGradient = this.colors.length > 1 && this.colorType == ColorType.LINEAR_GRADIENT;
+		var segments = this.$('.color-bar .segment');
+		var valFormatter = this.mapLayer.sessionOptions.valFormatter;
+
+		for (var i = 0; i < this.colors.length; i++) {
+			var val;
+			if (isGradient) {
+				val = valFormatter.format(
+					this.mapLayer.pointCollection.minVal + this.colors[i].position * 
+					(this.mapLayer.pointCollection.maxVal - this.mapLayer.pointCollection.minVal));
+				if (i == this.colors.length - 1 && this.colors[i].position < 1) {
+					val += '+';
+				}			
+			} else {
+				val = valFormatter.format(this.mapLayer.pointCollection.minVal) 
+					+ '–' 
+					+ valFormatter.format(this.mapLayer.pointCollection.maxVal);
+			}
+			if (i == 0) {
+				val = UnitFormat.LEGEND.format({
+					value: val, 
+					unit: this.mapLayer.pointCollection.unit
+				});
+			}		
+
+			$(segments[i]).text(val);
+		}
+	},
+
 
 	addOne: function(data) {
 		var self = this;

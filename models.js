@@ -66,8 +66,16 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
 	}],
 	opacity: Number,
 	datetimeFormat: String,
-	valFormat: String,
-	altValFormat: [String],
+	valFormat: [{
+		unit: {type: String, required: true},
+		eq: {type: String, required: true},
+		formatString: String
+	}],
+	/*altValFormat: [{
+		unit: {type: String, required: true},
+		eq: {type: String, required: true},
+		formatString: String
+	}],*/
 }));
 
 this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
@@ -75,7 +83,7 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 	description: String,
 	source: String,
 	unit: String,
-	altUnit: [String],
+	altUnit: [String],	
 	maxVal: Number,
 	minVal: Number,
 	timeBased: Boolean,

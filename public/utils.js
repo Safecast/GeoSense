@@ -1,7 +1,7 @@
 function formatLargeNumber(c) {
 	if (c > 1000000) {
 		c = Math.round(c / 1000000 * 10) / 10 + 'M';
-	} else if (c > 1000) {
+	} else if (c > 5000) {
 		c = Math.round(c / 1000) + 'K';
 	}
 	return c;
@@ -10,12 +10,22 @@ function formatLargeNumber(c) {
 function formatDecimalNumber(c, decimalPlaces) {
 	if (c < 10) {
 		if (decimalPlaces == null) {
-			decimalPlaces = c < .1 ? 2 : 1;
+			decimalPlaces = 2;
 		}
 		var f = Math.pow(10, decimalPlaces);
 		return Math.round(c * f) / f;
 	}
 	return Math.round(c);
+}
+
+function autoFormatNumber(c)
+{
+	if (c > 1000) {
+		return formatLargeNumber(c);
+	} else if (c % 1 != 0) {
+		return formatDecimalNumber(c);
+	}
+	return c;
 }
 
 function getURLParameter(paramName) {
@@ -84,6 +94,52 @@ var lpad = function(str, padString, length) {
     return s;
 };
 
+function mathEval (exp) {
+    var reg = /(?:[a-z$_][a-z0-9$_]*)|(?:[;={}\[\]"'!&<>^\\?:])/ig,
+        valid = true;
+
+    // Detect valid JS identifier names and replace them
+    exp = exp.replace(reg, function ($0) {
+        // If the name is a direct member of Math, allow
+        if (Math.hasOwnProperty($0))
+            return "Math."+$0;
+        // Otherwise the expression is invalid
+        else
+            valid = false;
+    });
+
+    // Don't eval if our replace function flagged as invalid
+    if (!valid) {
+        console.log("Invalid arithmetic expression");
+    	return false;
+    } else {
+        try { return(eval(exp)); } catch (e) { console.log("Invalid arithmetic expression"); return false; };
+    }
+}
+
+function ValFormatter(format)
+{
+	this.eq = format.eq;
+	this.formatStr = format.formatStr;
+	this.unit = format.unit;
+}
+
+ValFormatter.prototype.format = function(val)
+{
+	if (this.eq) {
+		var eq = this.eq.format({
+			'val': val
+		});
+		val = mathEval(eq);
+	}
+	if (this.formatStr) {
+		return this.formatStr.format({
+			'val': val
+		});
+	}
+	return autoFormatNumber(val);
+}
+
 /**
 * Simple Python-style string formatting.
 *
@@ -92,7 +148,7 @@ var lpad = function(str, padString, length) {
 *	"%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
 */
 String.prototype.format = function(replacements) {
-	return this.replace(/\%\(([a-z0-9_]+)\)(s|i)/ig, function(match, name, type) { 
+	return this.replace(/\%\(([a-z0-9_]+)\)([sif])/ig, function(match, name, type) { 
 		return typeof replacements[name] != 'undefined'
 			? replacements[name]
 			: match;
