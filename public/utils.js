@@ -3,6 +3,8 @@ function formatLargeNumber(c) {
 		c = Math.round(c / 1000000 * 10) / 10 + 'M';
 	} else if (c > 5000) {
 		c = Math.round(c / 1000) + 'K';
+	} else if (c > 1000) {
+		return parseInt(c);
 	}
 	return c;
 }
