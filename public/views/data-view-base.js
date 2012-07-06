@@ -453,7 +453,9 @@ window.DataViewBase = Backbone.View.extend({
 					+ (formatters.length > 1 ? '</a>' : '</span>')
 					+ '</li>';
 				var li = $(li);
-				li.on('click', makeClickHandler(f));
+				if (formatters.length > 1) {
+					li.on('click', makeClickHandler(f));
+				}
 				ul.append(li);
 			}
 			
