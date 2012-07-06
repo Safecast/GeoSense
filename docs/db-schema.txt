@@ -1,9 +1,0 @@
-Mongo dumping and cloning
-=========================
-
-mongodump -d geo -o ./dump
-
-mongorestore -h penny.mongohq.com:10065 -d app4772485 -u safecast -p q****** /Users/Tony/Dropbox/testDump/geo
-
-
-

@@ -23,3 +23,6 @@ exports.canViewMap = function(req, map) {
 	return map.status == config.MapStatus.PUBLIC || canAdminMap(req, map);
 }
 
+exports.canCreateMap = function(req) {
+	return !config.LIMITED_PROD_ACCESS;
+}

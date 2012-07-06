@@ -1,7 +1,8 @@
-var DEV = 1;
+var IS_BROWSER = this.Document && true;
+var DEV = IS_BROWSER && window.location.href.indexOf('localhost:3000') != -1;
 var DEBUG = DEV;
 
-var BASE_URI = !DEV ? 'geo.media.mit.edu/' : 'localhost:3000/';
+var BASE_URI = !DEV ? 'hollow-warrior-5556.herokuapp.com/' : 'localhost:3000/';
 var BASE_URL = 'http://' + BASE_URI;
 
 var MapStatus = {
@@ -56,7 +57,7 @@ var DEFAULT_MAP_AREA = {
 	zoom: 0
 };
 
-if (!this.Document) {
+if (!IS_BROWSER) {
 	// Not browser: export settings for Node module
 	module.exports = {
 		MapStatus: MapStatus,

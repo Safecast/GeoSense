@@ -48,10 +48,14 @@ app.error(function(err, req, res, next){
 });
 */
 
-app.get(/^$/, function(req, res) {
-	res.writeHead(403, {
-	});
-	res.end();
+app.get('/', function(req, res) {
+	if (!config.LIMITED_PROD_ACCESS) {
+		res.sendfile('public/base.html');
+	} else {
+		// home page on production server is disabled for now
+		res.send('', 403);
+		res.end();
+	}
 });
 
 // Admin Route
@@ -79,11 +83,11 @@ app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))/, function(req, r
 				req.session.user = map.createdBy;
 				console.log('Implicitly authenticated user:', req.session.user);
 			}
-			res.sendfile('public/index.html');
+			res.sendfile('public/base.html');
 		});
 		return;
 	}
-	res.sendfile('public/index.html');
+	res.sendfile('public/base.html');
 });
 
 var port = process.env.PORT || 3000;

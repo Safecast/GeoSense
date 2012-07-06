@@ -111,8 +111,13 @@ var MapAPI = function(app) {
 	});
 
 	//Create a new map
-	app.post('/api/map', function(req, res){
-		
+	app.post('/api/map', function(req, res)
+	{
+		if (!permissions.canCreateMap(req)) {
+            res.send(err, 403);
+            return;
+		}
+
 		var currDate = Math.round((new Date).getTime() / 1000);
 		var collections = {};
 		var slugCounter = 1;

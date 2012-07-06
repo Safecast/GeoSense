@@ -1,21 +1,25 @@
 Dev server
 ==========
 
-NODE_ENV=development nodemon server.js
+	NODE_ENV=development nodemon server.js
 
 
 Mongo dumping and cloning
 =========================
 
-mongodump -d geo -o ./dump
-mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p SEKRET ./dump/geo/
+	mongodump -d geo -o ./dump
+	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p SEKRET ./dump/geo/
+
+For dev server:
+	
+	mongorestore -d geo ./dump/geo/
 
 
 Executing reduction script
 ==========================
 
-mongo DATABASE -u USER -p SEKRET config.js scripts/reduce-points.js
+	mongo DATABASE -u USER -p SEKRET config.js scripts/reduce-points.js
 
 For dev server:
 
-mongo geo config.js scripts/reduce-points.js
+	mongo geo config.js scripts/reduce-points.js

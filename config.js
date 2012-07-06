@@ -3,7 +3,9 @@ var DEV = !PROD; // process.env.NODE_ENV == 'development';
 
 var config = {
 
+	DEV: DEV,
 	DEBUG: DEV,	
+	LIMITED_PROD_ACCESS: !DEV,
 
 	// since dev server restarts frequently and sessions are lost, circumvent 
 	// session-based permissions in debug mode.
