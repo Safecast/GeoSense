@@ -88,7 +88,7 @@ exports.import = function(into, mod) {
 
 // TODO: Due to a mongodb bug, counting is really slow even if there is 
 // an index: https://jira.mongodb.org/browse/SERVER-1752
-// To address this we currently cache the count as long for 
+// To address this we currently cache the count for as long 
 // as the server is running, but mongodb 2.3 should fix this issue.
 var COUNT_CACHE = {};
 exports.modelCount = function(model, query, callback) {

@@ -14,7 +14,7 @@ var Point = models.Point,
 
 var MapAPI = function(app) {
 
-	//Returns all unique maps
+	// Returns a list of maps
 	app.get('/api/maps(\/latest|\/featured)' , function(req, res){
 		var query = {status: config.MapStatus.PUBLIC};
 		var options = {};
@@ -80,7 +80,7 @@ var MapAPI = function(app) {
 		return m;
 	}
 
-	//Returns a specific unique map by publicslug
+	//Returns a specific map by publicslug
 	app.get('/api/map/:publicslug', function(req, res){
 		Map.findOne({publicslug: req.params.publicslug})
 			.populate('layers.pointCollection')
@@ -93,7 +93,7 @@ var MapAPI = function(app) {
 			});
 	});
 
-	//Returns a specific unique map by adminslug, and sets its admin state to true for current 
+	//Returns a specific map by adminslug, and sets its admin state to true for current 
 	//session
 	app.get('/api/map/admin/:adminslug', function(req, res) {	
 		Map.findOne({adminslug: req.params.adminslug})
@@ -109,7 +109,7 @@ var MapAPI = function(app) {
 			});
 	});
 
-	//Create a new map
+	//Creates and returns a new map
 	app.post('/api/map', function(req, res)
 	{
 		if (!permissions.canCreateMap(req)) {

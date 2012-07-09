@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
 	mongooseTypes = require("mongoose-types");
 
 mongooseTypes.loadTypes(mongoose);
-useTimestamps = mongooseTypes.useTimestamps
+useTimestamps = mongooseTypes.useTimestamps;
 
 this.User = mongoose.model('User', new mongoose.Schema({
 	name: String,
@@ -150,7 +150,7 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
 this.Map.schema.plugin(useTimestamps);
 
 /*
-Adjusts minVal, maxVal and color positions for all layers if there are if 
+Adjusts minVal, maxVal and color positions for all layers if 
 absPosition is defined for any color.
 
 This allows us to have colors with relative (normalized) positions between
