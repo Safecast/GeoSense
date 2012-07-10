@@ -258,8 +258,6 @@ window.MapOLView = window.MapViewBase.extend({
 		MapOLView.__super__.initFeatureLayer.call(this, collection);
 
 		var self = this;
-		var minBubbleSize = 2;
-		var maxBubbleSize = 60;
 		var pointCollectionId = collection.pointCollectionId;
 
 		var context = {
@@ -270,7 +268,7 @@ window.MapOLView = window.MapViewBase.extend({
                 return feature.attributes.darkerColor;
             },
             getBubbleRadius: function(feature) {
-                return minBubbleSize + feature.attributes.size * (maxBubbleSize - minBubbleSize) / 2;
+                return MIN_BUBBLE_SIZE + feature.attributes.size * (MAX_BUBBLE_SIZE - MIN_BUBBLE_SIZE) / 2;
             }
         };
 
@@ -278,9 +276,9 @@ window.MapOLView = window.MapViewBase.extend({
 
         var selectStyle = {
         	fillOpacity: DEFAULT_SELECTED_FEATURE_OPACITY,
-		    strokeColor: '#eee',
+		    strokeColor: DEFAULT_SELECTED_STROKE_COLOR,
 		    strokeOpacity: 1,
-		    strokeWidth: 2
+		    strokeWidth: DEFAULT_SELECTED_STROKE_WIDTH
         };
         var temporaryStyle = {};
 
@@ -290,8 +288,8 @@ window.MapOLView = window.MapViewBase.extend({
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
 				    strokeColor: '${getDarkerColor}',
-				    pointRadius: 7,
-				    strokeWidth: 1,
+				    pointRadius: DEFAULT_POINT_RADIUS,
+				    strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
 				    fillOpacity:  this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: (this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY) * .8
 				}, {context: context});
@@ -315,9 +313,7 @@ window.MapOLView = window.MapViewBase.extend({
 			
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
-				    pointRadius: 7,
 				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
-				    //strokeColor: '#333',
 				    strokeOpacity: 0
 				}, {context: context});
 
@@ -414,20 +410,13 @@ window.MapOLView = window.MapViewBase.extend({
 
 		this.map.addLayers([layer]);
 
-
 		var ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
 		ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		var geometry;
 
-		var radius = 30000;
-		var corners = [];
+		var radius = 30000, numSegments = 35;
 
-		var step = Math.PI / 20;
-		for (var i = 0; i < Math.PI * 2; i += step) {
-			var pt = new OpenLayers.Geometry.Point(ctr.x + Math.cos(i) * radius, ctr.y + Math.sin(i) * radius);
-			corners.push(pt.x+' '+pt.y);
-		}
-		var wkt = 'POLYGON(' + corners.join(', ') + ')';
+		var wkt = wktCircle(ctr, radius, radius, numSegments);
 		var geometry = OpenLayers.Geometry.fromWKT(wkt);
 
 		var feature = new OpenLayers.Feature.Vector(geometry, {});
