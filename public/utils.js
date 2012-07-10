@@ -222,3 +222,14 @@ function multRGB(color, factor) {
 			+ channels[2];	
 	return '#' + zeroPad(intColor.toString(16), 6);
 }
+
+function wktCircle(ctr, xRadius, yRadius, numSegments)
+{
+	var corners = [];
+    var step = 2 * Math.PI / numSegments;
+    for (var i = 0; i < Math.PI * 2; i += step) {
+        corners.push((ctr.x + Math.cos(i) * xRadius) + ' ' + (ctr.y + Math.sin(i) * yRadius));
+    }
+    console.log('POLYGON(' + corners.join(', ') + ')');
+    return 'POLYGON((' + corners.join(', ') + '))';
+}
