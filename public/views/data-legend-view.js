@@ -19,4 +19,14 @@ window.DataLegendView = window.DataViewBase.extend({
 		this.initHistogram();
 	},
 
+	toggleLayerVisibility: function(pointCollectionId, state)
+	{	
+		DataLegendView.__super__.toggleLayerVisibility.call(this, pointCollectionId, state);
+		if (this.visible) {
+			$(this.el).css('opacity', 1);
+		} else {
+			$(this.el).css('opacity', .4);
+		}
+	}
+
 });

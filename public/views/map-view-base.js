@@ -19,6 +19,9 @@ window.MapViewBase = Backbone.View.extend({
 			this.initialVisibleMapArea = options.visibleMapArea;
 		}
 
+		_.bindAll(this, "toggleLayerVisibility");
+		options.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
+
 		/*
 		options.vent.bind("setVisibleMapArea", function(params) {
 			self.setVisibleMapArea(params);  
@@ -221,6 +224,13 @@ window.MapViewBase = Backbone.View.extend({
 	*/
 	drawLayerForCollection: function(collection) 
 	{
+	},
+
+	/**
+	* Required to be implemented by descendants.
+	*/
+	toggleLayerVisibility: function(pointCollectionId, state)
+	{	
 	}
 
 });

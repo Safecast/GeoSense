@@ -14,6 +14,8 @@ window.DataViewBase = Backbone.View.extend({
 		'click .visibility:' : 'visibilityChanged',
 		
 		'click #colorInput' : 'colorInputClicked',
+
+		'click .visibility': 'visibilityChanged'
     },
 
     initialize: function(options) 
@@ -37,6 +39,9 @@ window.DataViewBase = Backbone.View.extend({
 
 		_.bindAll(this, "toggleValFormatter");
 	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
+
+		_.bindAll(this, "toggleLayerVisibility");
+		options.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
     },
 
 	setStateType: function(type, pointCollectionId) 
@@ -49,9 +54,11 @@ window.DataViewBase = Backbone.View.extend({
 		switch (type) {
 			default:
 				stateIndicator.addClass('loading');
+				self.$('.visibility.toggle').hide();
 				break;
 			case 'complete':
 				stateIndicator.removeClass('loading');
+				self.$('.visibility.toggle').show();
 				break;
 		}
 	},
@@ -89,6 +96,21 @@ window.DataViewBase = Backbone.View.extend({
 		this.$(".status").html(status);
     },
 
+	updateToggleState: function(state) 
+	{
+		var self = this;
+		if (state == undefined) {
+			state = self.$(".collapse").is('.in');
+		}
+		if (state) {
+			self.$('.icon.in-out').removeClass('icon-chevron-right');
+			self.$('.icon.in-out').addClass('icon-chevron-down');
+		} else {
+			self.$('.icon.in-out').addClass('icon-chevron-right');
+			self.$('.icon.in-out').removeClass('icon-chevron-down');
+		}	
+	},
+
     render: function() 
     {
 		var self = this;
@@ -104,8 +126,16 @@ window.DataViewBase = Backbone.View.extend({
 		this.updateStatus();
 
 		this.$(".title").html(dataTitle);
-		this.$(".title").attr("href", "#collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
-		this.$("#collapse").attr("id", "collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
+		this.$(".accordion-toggle").attr("href", "#collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
+		this.$(".collapse").attr("id", "collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
+
+		this.$(".collapse").on('show', function() {
+			self.updateToggleState(true);
+		});
+		this.$(".collapse").on('hide', function() {
+			self.updateToggleState(false);
+		});
+		this.updateToggleState();
 
 		if (!app.isMapAdmin()) {
 			this.$('#adminDataControls').remove();
@@ -623,6 +653,31 @@ window.DataViewBase = Backbone.View.extend({
 		if (evt) evt.preventDefault();
 	},
 
+	toggleLayerVisibility: function(pointCollectionId, state)
+	{	
+		var self = this;
+		if (pointCollectionId != this.mapLayer.pointCollection._id) return;
+		this.visible = state;
+
+		this.$('.visibility').each(function() {
+			var val = $(this).val();
+			val = Number(val) != 0;
+			if (val == self.visible) {
+				$(this).addClass('active');
+			} else {
+				$(this).removeClass('active');
+			}
+		});
+
+		if (self.visible) {
+			this.$('.icon.visibility.toggle').addClass('icon-eye-open');
+			this.$('.icon.visibility.toggle').removeClass('icon-eye-close');
+		} else {
+			this.$('.icon.visibility.toggle').removeClass('icon-eye-open');
+			this.$('.icon.visibility.toggle').addClass('icon-eye-close');
+		}
+	},
+
 	visibilityChanged: function(evt)
 	{
 		var self = this;
@@ -638,16 +693,6 @@ window.DataViewBase = Backbone.View.extend({
 			this.enableUpdateButton();
 			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
 		}
-
-		this.$('.visibility').each(function() {
-			var val = $(this).val();
-			val = Number(val) != 0;
-			if (val == self.visible) {
-				$(this).addClass('active');
-			} else {
-				$(this).removeClass('active');
-			}
-		});
 
 		this.updateLegend();
 		if (evt) evt.preventDefault();

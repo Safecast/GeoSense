@@ -1,16 +1,19 @@
 <div class="accordion-group">
   <div class="accordion-heading">
     <h4>
-      <a class="title accordion-toggle" data-toggle="collapse" data-parent="#data-info-accordion" href="#collapse"></a>
-      <div class="state-indicator"></div>
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapse">
+        <span class="icon in-out icon-chevron-right icon-white"></span><span class="title"></span>
+      </a>
     </h4>
+    <a class="icon visibility toggle icon-eye-open icon-white" href="#"></a>
+    <div class="state-indicator"></div>
     <div class="status"></div>
     <div class="progress progress-striped active" style="display: none">
       <div class="bar" style="width: 40%;"></div>
     </div>
     <a class="legend-button toggle"></a>
   </div>
-  <div id="collapse" class="accordion-body collapse">
+  <div id="collapse" class="accordion-body collapse in">
     <div class="legend">
       <div class="histogram"></div>
       <ul class="color-bar clearfix condensed"></ul>

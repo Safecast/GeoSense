@@ -1,5 +1,5 @@
 .data-info .data-legend {
-	margin: 30px 0 0 0;
+	margin: 20px 0 0 0;
 }
 
 .data-info .legend .unit, .data-info h5 {
@@ -17,7 +17,7 @@
     margin: 0 auto !important;
     padding: 0 !important;
     display: inline-block !important;
-    height: 17px !important;
+    height: 16px !important;
 } 
 
 .unit .nav-pills a, .unit .nav-pills span {
@@ -59,14 +59,27 @@
 	color: white !important;
 }
 
+.panel h4 .icon {
+	margin: 5px 3px 0px 3px;
+}
+
+
+.panel h4 .icon.in-out {
+	margin-left: -3px;
+}
+
 .data-info .status {
 	margin-bottom: .5em;
 }
 
-.data-info .state-indicator {
+.data-info h4 {
+	width: 210px;	
+}
+
+.data-info .state-indicator, .data-info .visibility.toggle {
 	position: absolute;
 	right: 0px;
-	top: 0px;
+	top: 5px;
 }
 
 .data-info .legend {

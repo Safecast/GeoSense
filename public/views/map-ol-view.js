@@ -15,9 +15,6 @@ window.MapOLView = window.MapViewBase.extend({
 		_.bindAll(this, "updateMapStyle");
 	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
 	
-		_.bindAll(this, "toggleLayerVisibility");
-		options.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
-		
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
 				
@@ -518,9 +515,9 @@ window.MapOLView = window.MapViewBase.extend({
 		this.featureLayers[pointCollectionId].redraw();
 	},
 	
-	toggleLayerVisibility: function(pointCollectionId, type, layer)
+	toggleLayerVisibility: function(pointCollectionId, state)
 	{	
-		this.featureLayers[pointCollectionId].setVisibility(type);
+		this.featureLayers[pointCollectionId].setVisibility(state);
 	},
 	
 	updateMapStyle: function(theme)

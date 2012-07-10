@@ -101,10 +101,12 @@ h1 {
 .state-indicator {
 	width: 16px;
 	height: 16px;
+	display: none;
 }
 
 .state-indicator.loading {
 	background-image:url('../assets/loader.gif');
+	display: block;
 }
 
 
@@ -168,7 +170,7 @@ h1 {
 }
 
 .panel .accordion-group:last-child {
-	margin-bottom: 20px;	
+	margin-bottom: 10px;	
 }
 
 

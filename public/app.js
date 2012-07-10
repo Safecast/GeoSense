@@ -478,7 +478,6 @@ var AppRouter = Backbone.Router.extend({
 		var collection = this.pointCollections[pointCollectionId];
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
 		collection.fetch({success: function(collection) {
-			console.log('EEEEEEEEND FETCH');
 			self.vent.trigger("setStateType", 'complete', layer.pointCollection._id);
 		}});
 	},
@@ -523,7 +522,7 @@ var AppRouter = Backbone.Router.extend({
 		var dataLegendView = new DataLegendView(viewOpts);
 		var el = dataLegendView.render().el;
 		$('#data-info-view .accordion').append(el);
-		$('.collapse', el).collapse('show');
+		//$('.collapse', el).collapse('show');
 	},
 
 });
