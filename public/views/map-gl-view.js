@@ -280,7 +280,7 @@ window.MapGLView = window.MapViewBase.extend({
 	/**
 	* Required to be implemented by descendants.
 	*/
-    addPointToLayer: function(model, opts, collectionId) 
+    addFeatureToLayer: function(model, opts, collectionId) 
     {
     	var loc = model.get('loc');
     	this.featureLayers[collectionId].data.push(loc[1]);

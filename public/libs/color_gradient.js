@@ -96,11 +96,12 @@ ColorGradient.prototype.intColorAt = function(p, step) {
 	return intColor;
 };
 
+ColorGradient.prototype.zeroPad = function(str, len) {
+	return new Array(str.length < len ? len + 1 - str.length : 0).join('0') + str;
+}
+
 ColorGradient.prototype.intToHexColor = function(intColor) {
-	var zeroPad = function(str, len) {
-		return new Array(str.length < len ? len + 1 - str.length : 0).join('0') + str;
-	}
-	return '#' + zeroPad(intColor.toString(16), 6);
+	return '#' + this.zeroPad(intColor.toString(16), 6);
 }
 
 ColorGradient.prototype.colorAt = function(p, step) {

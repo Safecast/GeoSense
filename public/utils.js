@@ -202,3 +202,23 @@ Date.prototype.formatReplacements = {
   		return locale.ABBR_MONTH_NAMES[this.getMonth()] 
   	}
 };
+
+function zeroPad(str, len) {
+	return new Array(str.length < len ? len + 1 - str.length : 0).join('0') + str;
+}
+
+function multRGB(color, factor) {
+	var intColor = parseInt(color.replace('#', '0x'));
+	var channels = [
+		(intColor &  0xff0000) >> 16,
+		(intColor &  0x00ff00) >> 8,
+		(intColor &  0x0000ff)
+	];
+	for (var i = channels.length - 1; i >= 0; i--) {
+		channels[i] = Math.min(255, Math.round(channels[i] * factor));
+	}
+	intColor = (channels[0] << 16)
+			+ (channels[1] << 8)
+			+ channels[2];	
+	return '#' + zeroPad(intColor.toString(16), 6);
+}

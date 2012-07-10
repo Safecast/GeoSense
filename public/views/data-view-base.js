@@ -14,8 +14,6 @@ window.DataViewBase = Backbone.View.extend({
 		'click .visibility:' : 'visibilityChanged',
 		
 		'click #colorInput' : 'colorInputClicked',
-		'click #colorInputLow' : 'colorInputLowClicked',
-		'click #colorInputHigh' : 'colorInputHighClicked',
     },
 
     initialize: function(options) 
@@ -44,7 +42,7 @@ window.DataViewBase = Backbone.View.extend({
 	setStateType: function(type, pointCollectionId) 
 	{	
 		if (!pointCollectionId || pointCollectionId != this.mapLayer.pointCollection._id) return;
-		console.log('DataViewBase.setStateType', type, pointCollectionId);
+		//console.log('DataViewBase.setStateType', type, pointCollectionId);
 		this.updateStatus();
 
 		var stateIndicator = this.$('.state-indicator');
@@ -339,15 +337,17 @@ window.DataViewBase = Backbone.View.extend({
 		this.disableUpdateButton();
 	},
 
-	removeDataClicked: function()
+	removeDataClicked: function(evt)
 	{
 		var self = this;
 		$(this.el).fadeOut('fast');
 		self.collection.reset();
 		self.collection.unbindCollection();
+
+		if (evt) evt.preventDefault();
    	},
 
-	updateDataClicked: function()
+	updateDataClicked: function(evt)
 	{
 		//build json and update
 		var self = this;
@@ -384,9 +384,10 @@ window.DataViewBase = Backbone.View.extend({
 			}
 		});	
 			
+		if (evt) evt.preventDefault();
 	},
 
-	editDataClicked: function()
+	editDataClicked: function(evt)
 	{
 		var self = this;
 		
@@ -396,6 +397,8 @@ window.DataViewBase = Backbone.View.extend({
 		this.editDataView = new EditDataView({vent: this.vent, collection:this.collection});
         $('body').append(this.editDataView.render().el);
 		$('#editDataModal').modal('toggle');
+
+		if (evt) evt.preventDefault();
    	},
 
 	updateLegend: function(rebuildColorBar) 
@@ -467,11 +470,10 @@ window.DataViewBase = Backbone.View.extend({
 
 		if (rebuildColorBar && this.$('.color-bar').length) {
 			this.initHistogram();
-			var gradient = new ColorGradient(this.colors);
 			var items = [];
 			for (var i = 0; i < this.colors.length; i++) {
 				var baseColor = this.colors[i].color;
-				var darkerColor = gradient.intToHexColor(gradient.interpolation.lerpRGB(.15, gradient.colors[i], {color: 0}));
+				var darkerColor = multRGB(baseColor, .85);
 
 				items.push( 
 					'<li style="width: '+Math.round(100 / this.colors.length * 100) / 100+'%;">'
@@ -552,21 +554,12 @@ window.DataViewBase = Backbone.View.extend({
 		this.$('#updateData').addClass('disabled');
 	},
 
-	colorInputClicked: function()
+	colorInputClicked: function(evt)
 	{
 		this.enableUpdateButton();
+		if (evt) evt.preventDefault();
 	},
 	
-	colorInputLowClicked: function()
-	{
-		this.enableUpdateButton();
-	},
-	
-	colorInputHighClicked: function()
-	{
-		this.enableUpdateButton();
-	},
-
 	featureTypeChanged: function(evt)
 	{
 		var self = this;
@@ -592,6 +585,8 @@ window.DataViewBase = Backbone.View.extend({
 				$(this).hide();
 			}
 		});
+
+		if (evt) evt.preventDefault();
 	},
 
 	colorTypeChanged: function(evt)
@@ -624,6 +619,8 @@ window.DataViewBase = Backbone.View.extend({
 				this.updateLegend(true);
 			  	break;
 		}
+
+		if (evt) evt.preventDefault();
 	},
 
 	visibilityChanged: function(evt)
@@ -653,6 +650,7 @@ window.DataViewBase = Backbone.View.extend({
 		});
 
 		this.updateLegend();
+		if (evt) evt.preventDefault();
 	}
 
 });

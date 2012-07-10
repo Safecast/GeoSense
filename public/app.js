@@ -313,7 +313,6 @@ var AppRouter = Backbone.Router.extend({
 
     showSetupView: function() 
     {
-    	console.log(this.setupView);
 		this.setupView.show();	
     },
 	
@@ -397,6 +396,7 @@ var AppRouter = Backbone.Router.extend({
 
 		var collection = this.pointCollections[pointCollectionId] = new MapPointCollection(collectionOptions);
 		self.addDataPanelViews(pointCollectionId);
+		self.mapView.addCollection(collection);
 
 		if (layer.pointCollection.status == DataStatus.COMPLETE) {
 			this.fetchMapLayer(pointCollectionId);
@@ -474,11 +474,11 @@ var AppRouter = Backbone.Router.extend({
 	fetchMapLayer: function(pointCollectionId)
 	{
 		var self = this;
-		var collection = this.pointCollections[pointCollectionId];
 		var layer = this.getMapLayer(pointCollectionId);
+		var collection = this.pointCollections[pointCollectionId];
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
 		collection.fetch({success: function(collection) {
-			self.mapView.addCollection(collection);
+			console.log('EEEEEEEEND FETCH');
 			self.vent.trigger("setStateType", 'complete', layer.pointCollection._id);
 		}});
 	},

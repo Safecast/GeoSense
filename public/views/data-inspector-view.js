@@ -13,8 +13,6 @@ window.DataInspectorView = window.DataViewBase.extend({
 		'click .visibility:' : 'visibilityChanged',
 		
 		'click #colorInput' : 'colorInputClicked',
-		'click #colorInputLow' : 'colorInputLowClicked',
-		'click #colorInputHigh' : 'colorInputHighClicked',
 		
     },
 

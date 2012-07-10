@@ -19,7 +19,7 @@ MapPointCollection = Backbone.Collection.extend({
 	},
 
 	setVisibleMapArea: function(visibleMapArea) {
-		console.log('MapPointCollection.setVisibleMapArea');	
+		//console.log('MapPointCollection.setVisibleMapArea');	
 		this.urlParams.b = [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]];
 		this.urlParams.z = visibleMapArea.zoom;
 	},

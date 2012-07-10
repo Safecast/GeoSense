@@ -56,7 +56,17 @@ for (var zoom = 1; zoom < config.NUM_ZOOM_LEVELS; zoom++) {
 
 var utils;
 if (typeof require == 'function') {
-	utils = require("./utils.js");	
+	// can't import utils since that would result in a circular import
+	// utils = require("./utils.js");	
+	// re-define import function instead
+	utils = {
+		import: function(into, mod) {
+		    for (var k in mod) {
+		        into[k] = mod[k];
+		    }
+		    return mod;
+		}
+	};
 } 
 
 if (DEV) {

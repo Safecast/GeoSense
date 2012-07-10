@@ -116,16 +116,59 @@ window.MapViewBase = Backbone.View.extend({
 		this.addCollectionToMap(collection);
 	},
 	
-    addAll: function() {	
-		this.addCollectionToMap(this.collection);
+    addOne: function(model, collectionId) 
+    {
+		var c = this.collections[collectionId];
+		var options = this.collections[collectionId].mapLayer.options;
+		var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
+		var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
+		var val = model.get('val');
+		if (val.avg != null) {
+			val = val.avg;
+		}
+		var count = model.get('count');
+		var normVal = (val - min) / (max - min);
+
+		var color;
+		switch (options.colorType) {
+			case ColorType.SOLID: 
+				color = options.colors[0].color;
+				break;
+			case ColorType.LINEAR_GRADIENT:
+				color = this.layerOptions[collectionId].colorGradient
+					.colorAt(normVal, COLOR_GRADIENT_STEP);
+				break;
+		}
+
+		this.addFeatureToLayer(model, {
+			pointCollectionId: collectionId,
+			color: color,
+			darkerColor: multRGB(color, .75),
+			min: min,
+			max: max,
+			model: model,
+			data: {
+				val: val,
+				normVal: normVal,
+				count: count,
+			},
+			size: count / this.collections[collectionId].maxCount
+		}, collectionId);
+    },
+
+    addAll: function(collection) {	
+		//this.addCollectionToMap(this.collection);
+		var self = this;
+		var pointCollectionId = collection.pointCollectionId;
+		collection.each(function(model) {
+			self.addOne(model, pointCollectionId);
+		});
+		self.drawLayerForCollection(collection);
     },
 
 	reset: function(collection) {
 		var pointCollectionId = collection.pointCollectionId;
-		this.destroyFeatureLayer(collection);
-		if (collection.length > 0) {
-			this.addCollectionToMap(this.collections[pointCollectionId]);
-		}
+		this.addAll(collection);
 		this.vent.trigger("setStateType", 'complete', pointCollectionId);	
 	},
 
@@ -134,13 +177,9 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 		var pointCollectionId = collection.pointCollectionId;
 		this.vent.trigger("setStateType", 'drawing', pointCollectionId);
-		
 		self.initFeatureLayerOptions(collection);
 		self.initFeatureLayer(collection);
-		collection.each(function(model) {
-			self.addOne(model, pointCollectionId);
-		});
-		self.drawLayerForCollection(collection);
+		self.addAll(collection);
 
 		setTimeout(function() {
 			self.vent.trigger("setStateType", 'complete', pointCollectionId);
@@ -173,7 +212,7 @@ window.MapViewBase = Backbone.View.extend({
 	/**
 	* Required to be implemented by descendants.
 	*/
-    addPointToLayer: function(model, opts, collectionId) 
+    addFeatureToLayer: function(model, opts, collectionId) 
     {
     },
 
@@ -182,45 +221,6 @@ window.MapViewBase = Backbone.View.extend({
 	*/
 	drawLayerForCollection: function(collection) 
 	{
-	},
+	}
 
-    addOne: function(model, collectionId) 
-    {
-		var c = this.collections[collectionId];
-		var options = this.collections[collectionId].mapLayer.options;
-		var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
-		var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
-		var val = model.get('val');
-		if (val.avg != null) {
-			val = val.avg;
-		}
-		var count = model.get('count');
-		var normVal = (val - min) / (max - min);
-
-		var color;
-		switch (options.colorType) {
-			case ColorType.SOLID: 
-				color = options.colors[0].color;
-				break;
-			case ColorType.LINEAR_GRADIENT:
-				color = this.layerOptions[collectionId].colorGradient
-					.colorAt(normVal, COLOR_GRADIENT_STEP);
-				break;
-		}
-
-		this.addPointToLayer(model, {
-			pointCollectionId: collectionId,
-			color: color,
-			min: min,
-			max: max,
-			model: model,
-			data: {
-				val: val,
-				normVal: normVal,
-				count: count,
-			},
-			size: count / this.collections[collectionId].maxCount
-		}, collectionId);
-    }
-		
 });

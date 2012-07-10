@@ -167,11 +167,7 @@ var PointAPI = function(app) {
 
 					if (!time_grid) {
 						PointModel.find(pointQuery, function(err, datasets) {
-							if (err || !datasets) {
-								console.log(err);
-								res.send('ooops', 500);
-								return;
-							}
+							if (handleDbOp(req, res, err, datasets)) return;
 
 							for (var i = 0; i < datasets.length; i++) {
 								if (PointModel != Point) {

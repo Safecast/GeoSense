@@ -116,8 +116,9 @@ window.DataInfoView = window.PanelViewBase.extend({
 		};
     },
 
-    showDetailData: function(pointCollectionId, model)    
+    showDetailData: function(pointCollectionId, model, panelAnimation)    
 	{
+		panelAnimation = panelAnimation || panelAnimation == undefined;
 		this.visibleDetailModels[pointCollectionId] = model;
 
 		var obj = this.compileDetailDataForModel(pointCollectionId, model);
@@ -147,18 +148,20 @@ window.DataInfoView = window.PanelViewBase.extend({
 		} 	
 		table.html(items);
 
-		this.setPanelState(true);	
-		var collapsible = $('.collapse', legend);
-		$('.detail', collapsible).show();
-		// hide first to prevent flicker
-		collapsible.collapse('hide');
-		collapsible.collapse('show');
-		this.$('.data-legend .collapse').each(function() {
-			if (this != collapsible[0]) {
-				$(this).collapse('hide');
-				$('.detail', this).hide();
-			}
-		});
+		if (panelAnimation) {
+			this.setPanelState(true);	
+			var collapsible = $('.collapse', legend);
+			$('.detail', collapsible).show();
+			// hide first to prevent flicker
+			collapsible.collapse('hide');
+			collapsible.collapse('show');
+			this.$('.data-legend .collapse').each(function() {
+				if (this != collapsible[0]) {
+					$(this).collapse('hide');
+					$('.detail', this).hide();
+				}
+			});
+		}
 	},
 
     hideDetailData: function(pointCollectionId)
@@ -183,7 +186,7 @@ window.DataInfoView = window.PanelViewBase.extend({
     {	
     	var pointCollectionId = mapLayer.pointCollection._id;
 		if (this.visibleDetailModels[pointCollectionId]) {
-			this.showDetailData(pointCollectionId, this.visibleDetailModels[pointCollectionId]);
+			this.showDetailData(pointCollectionId, this.visibleDetailModels[pointCollectionId], false);
 		}
 	}	
 

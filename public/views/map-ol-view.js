@@ -248,6 +248,13 @@ window.MapOLView = window.MapViewBase.extend({
 		this.featureLayers[pointCollectionId].destroy();
 		this.featureLayers[pointCollectionId] = null;*/
 	},
+
+	reset: function(collection)
+	{
+		var pointCollectionId = collection.pointCollectionId;
+		this.featureLayers[pointCollectionId].destroyFeatures();
+		MapOLView.__super__.reset.call(this, collection);
+	},
 	
 	initFeatureLayer: function(collection)
 	{ 
@@ -261,6 +268,9 @@ window.MapOLView = window.MapViewBase.extend({
 		var context = {
             getColor: function(feature) {
                 return feature.attributes.color;
+            },
+            getDarkerColor: function(feature) {
+                return feature.attributes.darkerColor;
             },
             getBubbleRadius: function(feature) {
                 return minBubbleSize + feature.attributes.size * (maxBubbleSize - minBubbleSize) / 2;
@@ -277,16 +287,16 @@ window.MapOLView = window.MapViewBase.extend({
         };
         var temporaryStyle = {};
 
-		switch(collection.mapLayer.options.featureType)
-		{
+		switch (collection.mapLayer.options.featureType) {
 			case FeatureType.POINTS:
 			
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
-				    strokeColor: '#333',
+				    strokeColor: '${getDarkerColor}',
 				    pointRadius: 7,
+				    strokeWidth: 1,
 				    fillOpacity:  this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
-				    strokeOpacity: 0
+				    strokeOpacity: (this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY) * .8
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
@@ -308,10 +318,10 @@ window.MapOLView = window.MapViewBase.extend({
 			
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
-				    strokeColor: '#333',
-				    pointRadius: 7,
+				    //strokeColor: '#333',
+				    strokeWidth: 0,
 				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
-				    strokeOpacity: 0
+				    strokeOpacity: (this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY) * .2
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
@@ -436,7 +446,7 @@ window.MapOLView = window.MapViewBase.extend({
 		this.vent.trigger("hideDetailData", feature.attributes.pointCollectionId);
 	},
 
-    addPointToLayer: function(model, opts, collectionId) 
+    addFeatureToLayer: function(model, opts, collectionId) 
     {
     	var collection = this.collections[collectionId];
 
