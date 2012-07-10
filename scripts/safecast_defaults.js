@@ -23,7 +23,7 @@ if (o) {
 				},
 				{
 					"absPosition" : 100, //0.3 * 350,
-					"color" : "#ff00ff",
+					"color" : "#db5dc2",
 					"description": "minor contamination"
 				},
 				{
