@@ -318,10 +318,10 @@ window.MapOLView = window.MapViewBase.extend({
 			
 				var style = new OpenLayers.Style({
 				    fillColor: '${getColor}',
-				    //strokeColor: '#333',
-				    strokeWidth: 0,
+				    pointRadius: 7,
 				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
-				    strokeOpacity: (this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY) * .2
+				    //strokeColor: '#333',
+				    strokeOpacity: 0
 				}, {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
