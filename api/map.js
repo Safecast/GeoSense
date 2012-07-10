@@ -2,6 +2,7 @@ var config = require('../config.js'),
 	models = require("../models.js"),
 	permissions = require("../permissions.js"),
 	utils = require("../utils.js"),
+	uuid = require('node-uuid'),
 	md5 = require('MD5');
 
 var Point = models.Point,
