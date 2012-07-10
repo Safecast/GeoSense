@@ -1,5 +1,5 @@
 var config = require('./config.js'),
-    //mailer = require('mailer'),
+    mailer = require('mailer'),
     fs = require('fs');
 
 /**
