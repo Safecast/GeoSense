@@ -103,11 +103,11 @@ window.DataViewBase = Backbone.View.extend({
 			state = self.$(".collapse").is('.in');
 		}
 		if (state) {
-			self.$('.icon.in-out').removeClass('icon-chevron-right');
-			self.$('.icon.in-out').addClass('icon-chevron-down');
+			self.$('.icon.in-out').removeClass('out');
+			self.$('.icon.in-out').addClass('in');
 		} else {
-			self.$('.icon.in-out').addClass('icon-chevron-right');
-			self.$('.icon.in-out').removeClass('icon-chevron-down');
+			self.$('.icon.in-out').addClass('out');
+			self.$('.icon.in-out').removeClass('in');
 		}	
 	},
 

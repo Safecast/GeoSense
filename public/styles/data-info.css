@@ -65,7 +65,8 @@
 
 
 .panel h4 .icon.in-out {
-	margin-left: -3px;
+	margin-left: -16px;
+	margin-right: 0px;
 }
 
 .data-info .status {

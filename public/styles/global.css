@@ -282,12 +282,12 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	line-height: 27px;
 }
 
-.panel .panel-header a {
+.panel .panel-header a, .panel a .in-out {
 	font-weight: bold;
 	color: white;
 	width: 16px;
 	height: 16px;
-	display: block;
+	display: inline-block;
 	background-image: url(../assets/panel-buttons.png);
 }
 
@@ -311,7 +311,15 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	background-position: -48px top;
 }
 
-.panel .panel-header .buttons a:hover {
+.panel a .in-out.in {
+	background-position: -64px top;
+}
+
+.panel a .in-out.out {
+	background-position: -80px top;
+}
+
+.panel .panel-header .buttons a:hover, .panel a:hover .in-out {
 	background-position-y: bottom !important;
 }
 
