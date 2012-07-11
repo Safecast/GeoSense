@@ -158,21 +158,15 @@ h1 {
 }
 
 .panel .accordion-group {
-	margin-bottom: 10px;
 	border: none;
 	width: 222px;
 	margin: 0;
 	padding: 0px;
 }
 
-.panel .accordion-group:first-child {
-	margin-top: 10px;	
+.panel .accordion-body-content {
+	padding-bottom: 20px;
 }
-
-.panel .accordion-group:last-child {
-	margin-bottom: 10px;	
-}
-
 
 .panel.extended, .panel.extended .accordion-group {
 	width: 444px;
@@ -251,12 +245,16 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	left: 0px;
 }
 
+.panel .panel-body {
+	padding-top: 10px;
+}
+
 .panel .panel-header .frame {
 	background-color:rgba(50, 50, 50, .5);
 	border-radius: 6px;
 	-moz-border-radius:6px;
 	-webkit-border-radius:6px;
-	margin: 4px;
+	margin: 3px;
 	cursor: move;
 }
 
