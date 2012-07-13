@@ -130,11 +130,12 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
 	title: {type: String, required: true},
 	description: String,
 	author: String,
-	url: String,
+	link_url: String,
 	twitter: String,
 	displayInfo: Boolean,
 	adminslug: {type: String, required: true, index: {unique: true}},
 	publicslug: {type: String, required: true, index: {unique: true}},
+	host: {type: String, required: false, index: {unique: true, sparse: true}},
 	featured: {type: Number, default: 0}, 
 	initialArea: {
 		center: [Number, Number],

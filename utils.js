@@ -1,7 +1,6 @@
 var config = require('./config.js'),
     mailer = require('mailer'),
     fs = require('fs');
-
 /**
 * Simple Python-style string formatting.
 *
@@ -253,3 +252,26 @@ this.remapInternationalCharToAscii = function(c, skipSpecialTranscription)
     }
 }
 
+exports.loadFiles = function(filenames, callback)
+{
+    var loadIndex = 0;
+    var contents = {};
+    var loadNext = function(err, data) {
+        if (loadIndex > 0) {
+            if (err) {
+                callback(err, contents);
+                return;
+            }
+            contents[filenames[loadIndex - 1]] = data.toString();
+            if (loadIndex == filenames.length) {
+                callback(err, contents);
+                return;
+            }
+        }
+        fs.readFile(filenames[loadIndex], 'utf8', loadNext);
+        loadIndex++;
+    };
+    if (filenames.length) {
+        loadNext();
+    }
+}

@@ -27,9 +27,9 @@ window.HomepageView = Backbone.View.extend({
 			type: 'GET',
 			url: '/api/maps/featured',
 			success: function(data) {
-				for (i=0; i<data.length; i++) {
-					self.featuredMaps.push('<tr><td>'+data[i].title+'</td><td><a target="_self" href="/'+data[i].publicslug+'">'
-						+ BASE_URI + data[i].publicslug +'</a></td><tr>');
+				for (i = 0; i < data.length; i++) {
+					var url = genMapURL(data[i]);
+					self.featuredMaps.push('<tr><td>' + data[i].title + '</td><td><a target="_self" href="' + url + '">' + url + '</a></td><tr>');
 				}
 				self.showRecentMaps();
 			},
@@ -70,7 +70,7 @@ window.HomepageView = Backbone.View.extend({
 			title: this.$('#appendedPrependedInput').val()
 		};
 
-		if (!postData.title || postData.title == '') {	
+		if (!postData.title || postData.title == '') {	
 			this.$('#errorMessage').show();
 		} else {
 			console.log('creating map', postData);

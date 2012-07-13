@@ -23,7 +23,7 @@ var ColorGradient = function(colors, interpolation) {
 				position: colors[i].position,
 				// convert color strings to int
 				color: intColor,
-				interpolation: interpolation || colors[i].interpolation,
+				interpolation: interpolation || colors[i].interpolation,
 				// split channels of color
 				channels: this.getChannels(intColor)
 			};

@@ -1,9 +1,8 @@
 var IS_BROWSER = this.Document && true;
-var DEV = IS_BROWSER && window.location.href.indexOf('localhost:3000') != -1;
+var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
-var BASE_URI = !DEV ? 'hollow-warrior-5556.herokuapp.com/' : 'localhost:3000/';
-var BASE_URL = 'http://' + BASE_URI;
+var BASE_URL = 'http://' + (!DEV ? 'hollow-warrior-5556.herokuapp.com' : 'localhost:3000');
 
 var MapStatus = {
 	PRIVATE: 'P',
@@ -70,7 +69,6 @@ if (!IS_BROWSER) {
 		FeatureType: FeatureType,
 		ColorType: ColorType,
 		MapLayerType: MapLayerType,
-		BASE_URL: BASE_URL
 	};
 } else {
 	// Browser: define console.log if undefined

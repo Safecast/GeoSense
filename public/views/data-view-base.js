@@ -270,7 +270,7 @@ window.DataViewBase = Backbone.View.extend({
 				x: data[i].x,
 				y: Math.min(cropUpperMaxY, data[i].y)
 			});*/
-			if (cropMaxVal == null || data[i].val < cropMaxVal) {
+			if (cropMaxVal == null || data[i].val < cropMaxVal) {
 				yValues.push(data[i].y);
 			}
 		}

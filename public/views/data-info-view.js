@@ -118,7 +118,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 
     showDetailData: function(pointCollectionId, model, panelAnimation)    
 	{
-		panelAnimation = panelAnimation || panelAnimation == undefined;
+		panelAnimation = panelAnimation || panelAnimation == undefined;
 		this.visibleDetailModels[pointCollectionId] = model;
 
 		var obj = this.compileDetailDataForModel(pointCollectionId, model);

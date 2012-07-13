@@ -233,3 +233,32 @@ function wktCircle(ctr, xRadius, yRadius, numSegments)
     console.log('POLYGON(' + corners.join(', ') + ')');
     return 'POLYGON((' + corners.join(', ') + '))';
 }
+
+function genMapURI(mapInfo, mapViewName, opts, admin, slugField)
+{
+	var uri = (admin ? '/admin' : '') 
+		+ (slugField ? '/' + mapInfo[slugField] : '') 
+		+ (mapViewName && mapViewName != '' ? '/' + mapViewName : '');
+	
+	if (opts) {
+    	if (opts.x != undefined && opts.y != undefined) {
+	    	uri += '/%(x)s,%(y)s';
+	    	if (opts.zoom != undefined) {
+	    		uri += ',%(zoom)s';
+	    	}
+    	}
+	}
+	return uri.format(opts);
+}
+
+function genMapURL(mapInfo, opts, admin)
+{
+	var customHost = !admin && mapInfo.host && mapInfo.host != '';
+	if (customHost) {
+		var baseUrl = 'http://' + mapInfo.host;
+	} else {
+		var baseUrl = BASE_URL;
+	}
+	return baseUrl + genMapURI(mapInfo, false, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
+};
+

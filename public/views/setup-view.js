@@ -38,6 +38,9 @@ window.SetupView = window.ModalView.extend({
 				$(this).val(self.mapInfo[this.name]);
 			}
 		});
+
+		this.$('.map-url').val(app.genPublicURL());
+		this.$('.map-admin-url').val(app.genAdminURL());
     },
 
     render: function() 
@@ -45,9 +48,6 @@ window.SetupView = window.ModalView.extend({
     	var self = this;
 
 		$(this.el).html(this.template());	
-		
-		this.$('.map-url').val(BASE_URL + this.mapInfo.publicslug);
-		this.$('.map-admin-url').val(BASE_URL + 'admin/' + this.mapInfo.adminslug);
 		
 		this.$(".map-url, .map-admin-url").click(function() {
 		   $(this).select();
@@ -58,7 +58,7 @@ window.SetupView = window.ModalView.extend({
 			return false;
 		});
 
-		this.mapInfoFields = this.$('#setup-metadata input, #setup-metadata textarea');
+		this.mapInfoFields = this.$('#setup-metadata input, #setup-metadata textarea, #setup-custom-domain input');
 
 		this.mapInfoFields.each(function() {
 			$(this).on('change keydown', function() {

@@ -5,8 +5,11 @@ var application_root = __dirname,
   	mongoose = require('mongoose'),
   	models = require('./models.js'),
   	utils = require('./utils.js'),
-  	permissions = require('./permissions.js');
+  	permissions = require('./permissions.js'),
+  	ejs = require('ejs');
 
+var templates;
+var port = process.env.PORT || 3000;
 var app = express.createServer();
 
 console.log('connecting to db:', config.DB_PATH);
@@ -48,18 +51,24 @@ app.error(function(err, req, res, next){
 });
 */
 
-app.get('/', function(req, res) 
+function serveHome(req, res)
 {
 	if (!config.LIMITED_PROD_ACCESS) {
-		res.sendfile('public/base.html');
+		res.end(ejs.render(templates['public/base.html'], {
+			map_slug: false
+		}));
 	} else {
 		// home page on production server is disabled for now
 		res.send('', 403);
 		res.end();
 	}
-});
+}
+
+
+//app.get('/', serveHome);
 
 // Admin Route
+
 app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, res)
 {
 	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {
@@ -74,25 +83,75 @@ app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, 
 });
 
 // Static Route
-app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))/, function(req, res) 
+
+function staticRoute(req, res, slug, admin)
 {
-	var admin = req.params[0];
-	var slug = req.params[1];
-	if (slug) {
-		// check if map exists so that a proper error page appears if it doesn't
-		models.Map.findOne({publicslug: slug, active: true}, function(err, map) {
-			if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
-			if (admin) {
-				req.session.user = map.createdBy;
-				console.log('Implicitly authenticated user:', req.session.user);
-			}
-			res.sendfile('public/base.html');
-		});
-		return;
+	var serveMap = function(err, map) {
+		if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
+		console.log('serving map: '+map.publicslug+', admin: '+admin);
+		if (admin) {
+			req.session.user = map.createdBy;
+			console.log('Implicitly authenticated user:', req.session.user);
+		}
+		res.end(ejs.render(templates['public/base.html'], {
+			map_slug: map.publicslug
+		}));
 	}
-	res.sendfile('public/base.html');
+
+	console.log('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
+
+	if (slug) {
+		// For any hosts other than the default hosts, passing a slug is not allowed
+		// so that requests like <my-custom-host>/<somebody-else's-slug> are blocked.
+		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) == -1) {
+			res.send('', 403);
+			res.end();
+			return;
+		}
+ 		// Try to find map by slug
+		models.Map.findOne({publicslug: slug, active: true}, function(err, map) {
+			serveMap(err, map);
+		});
+	} else {
+		// Try to find map by host, or serve home page
+		models.Map.findOne({host: req.headers.host, active: true}, function(err, map) {
+			if (!err && !map) {
+				serveHome(req, res);
+				return;
+			}
+			serveMap(err, map);
+		});
+	}
+}
+
+app.get(/^\/admin\/(globe|map|setup)?/, function(req, res) 
+{
+	return staticRoute(req, res, null, true)
 });
 
-var port = process.env.PORT || 3000;
-app.listen(port, "0.0.0.0");
-console.log('Server running at http://0.0.0.0:' + port + "/");
+app.get(/^\/(globe|map|setup)?/, function(req, res) 
+{
+	return staticRoute(req, res, null, false)
+});
+
+app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup))?/, function(req, res) 
+{
+	return staticRoute(req, res, req.params[0], true)
+});
+
+app.get(/^\/([a-zA-Z0-9\-\_]+)?(\/(globe|map|setup))?/, function(req, res) 
+{
+	return staticRoute(req, res, req.params[0], false)
+});
+
+// Load templates and start listening
+
+utils.loadFiles(['public/base.html'], function(err, contents) {
+    if (err) {
+    	throw err;
+    } else {
+        templates = contents;
+		app.listen(port, "0.0.0.0");
+		console.log('Server running at http://0.0.0.0:' + port + "/");
+    }
+});

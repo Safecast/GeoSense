@@ -1,6 +1,9 @@
 var AppRouter = Backbone.Router.extend({
 
-    routes: {
+  	// custom routing happens in initialize()
+	routes: {},
+
+	defaultRoutes: {
 		"": "homeRoute",
 		"removed": "homeRoute",
 
@@ -11,11 +14,46 @@ var AppRouter = Backbone.Router.extend({
 		":slug": "mapRoute",
 		":slug/:view": "mapRoute",
 		":slug/:view/:pos": "mapRoute",
+	},
+
+    byHostRoutes: {
+		"removed": "homeRoute",
+
+		"admin": "mapAdminRouteByHost",
+		"admin/:view": "mapAdminRouteByHost",
+		"admin/:view/:pos": "mapAdminRouteByHost",
+
+		"": "mapRouteByHost",
+		":view": "mapRouteByHost",
+		":view/:pos": "mapRouteByHost",
+    },
+
+    getRoutes: function() 
+    {
+    	var r;
+    	if (window.MAP_SLUG) {
+    		console.log('route by custom host');
+    		r = this.byHostRoutes;
+    	} else {
+    		console.log('route by slug');
+    		r = this.defaultRoutes;
+    	}
+    	var routes = [];
+    	for (var k in r) {
+    		routes.unshift([
+    			k,
+    			r[k]
+    		]);
+    	}
+    	return routes;
     },
 
     initialize: function() 
     {
 		var self = this;
+	    _.each(this.getRoutes(), function(route) {
+	    	self.route.apply(self, route);
+	    });
 
 		this.firstLoad = true;
 		this.pointCollections = {};
@@ -31,6 +69,9 @@ var AppRouter = Backbone.Router.extend({
 		this.vent.bind('mapViewReady', function() {
 			self.initMapLayers();
 		});
+
+		this.adminRoute = false;
+		this.routingByHost = false;
 
 		_.bindAll(this, "updateMapLayer");
 	 	this.vent.bind("updateMapLayer", this.updateMapLayer);
@@ -75,7 +116,7 @@ var AppRouter = Backbone.Router.extend({
 			}
 		}
 
-    	console.log(slug, 'mapViewName:', mapViewName, 'mapStyle', mapStyle, 'center:', center, 'zoom:', zoom);
+    	console.log('slug:', slug, 'mapViewName:', mapViewName, 'mapStyle:', mapStyle, 'center:', center, 'zoom:', zoom);
 		this.loadAndInitMap(slug, mapViewName, center, zoom, mapStyle);
     },
 
@@ -83,6 +124,18 @@ var AppRouter = Backbone.Router.extend({
     {
     	this.adminRoute = true;
     	this.mapRoute(slug, viewName, pos);
+    },
+
+    mapRouteByHost: function(viewName, pos) 
+    {
+    	this.routingByHost = true;
+   		return this.mapRoute(window.MAP_SLUG, viewName, pos);
+    },
+
+    mapAdminRouteByHost: function(viewName, pos) 
+    {
+    	this.routingByHost = true;
+   		return this.mapAdminRoute(window.MAP_SLUG, viewName, pos);
     },
 
 	homeRoute: function() 
@@ -98,41 +151,43 @@ var AppRouter = Backbone.Router.extend({
 
     genMapURI: function(mapViewName, opts, admin)
     {
+    	var admin = (admin || admin == undefined) && this.adminRoute;
+
     	if (!mapViewName) {
 			mapViewName = this.mapViewName + 
-				(this.mapStyle != this.mapView.defaultMapStyle ? ':' + this.mapStyle : '');
+				(this.mapStyle && this.mapStyle != this.mapView.defaultMapStyle ? ':' + this.mapStyle : '');
     	}
-    	var uri = ((admin || admin == undefined) && this.adminRoute ? 
-    		'admin/' : '') 
-    		+ this.mapInfo.publicslug + (mapViewName ? '/' + mapViewName : '');
-    	if (opts) {
-	    	if (opts.x != undefined && opts.y != undefined) {
-		    	uri += '/%(x)s,%(y)s';
-		    	if (opts.zoom != undefined) {
-		    		uri += ',%(zoom)s';
-		    	}
-	    	}
-    	}
-    	return uri.format(opts);
-    },
 
-	genMapURIForVisibleArea: function(visibleMapArea)
-	{
-		if (!visibleMapArea) {
-			var visibleMapArea = this.mapView.getVisibleMapArea();
-		}
-		return app.genMapURI(null, {
-			x: visibleMapArea.center[0],
-			y: visibleMapArea.center[1],
-			zoom: visibleMapArea.zoom
-		});
-	},
+    	return genMapURI(this.mapInfo, mapViewName, opts, admin, this.routingByHost ? false : 'publicslug');
+    },
 
     genPublicURL: function(forVisibleMapArea)
     {
-    	return BASE_URL + (forVisibleMapArea || forVisibleMapArea == undefined ?
-    		this.genMapURIForVisibleArea() 
-    		: this.genMapURI(false, false, false));
+		return genMapURL(this.mapInfo, (forVisibleMapArea ? this.getURIOptsForVisibleMapArea() : false), false);
+
+    },
+
+    getURIOptsForVisibleMapArea: function(visibleMapArea)
+    {
+		if (!visibleMapArea) {
+			var visibleMapArea = this.mapView.getVisibleMapArea();
+		}
+		return {
+			x: visibleMapArea.center[0],
+			y: visibleMapArea.center[1],
+			zoom: visibleMapArea.zoom
+		};
+	},
+
+	genMapURIForVisibleArea: function(visibleMapArea)
+	{
+		return app.genMapURI(null, this.getURIOptsForVisibleMapArea(visibleMapArea));
+	},
+
+    genAdminURL: function()
+    {
+		return genMapURL(this.mapInfo, false, true);
+
     },
 
 	loadAndInitMap: function(slug, mapViewName, center, zoom, mapStyle)
@@ -270,7 +325,7 @@ var AppRouter = Backbone.Router.extend({
 
     setMapStyle: function(mapStyle, navigate)
     {
-    	if (navigate || navigate == undefined) {
+    	if (navigate || navigate == undefined) {
 	    	this.vent.trigger('updateMapStyle', mapStyle);
 			app.navigate(app.genMapURI(app.mapViewName + ':' + mapStyle), {trigger: false});
     	}

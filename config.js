@@ -7,6 +7,11 @@ var config = {
 	DEBUG: DEV,	
 	LIMITED_PROD_ACCESS: !DEV,
 
+	DEFAULT_HOSTS: [
+		'localhost:3000',
+		'hollow-warrior-5556.herokuapp.com'
+	],
+
 	// since dev server restarts frequently and sessions are lost, circumvent 
 	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,
