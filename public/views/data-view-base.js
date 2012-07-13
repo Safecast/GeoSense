@@ -53,12 +53,17 @@ window.DataViewBase = Backbone.View.extend({
 		var stateIndicator = this.$('.state-indicator');
 		switch (type) {
 			default:
+				stateIndicator.stop().fadeIn(0, function() {
+
+				});
 				stateIndicator.addClass('loading');
-				self.$('.visibility.toggle').hide();
+				self.$('.visibility.toggle').stop().fadeTo(0, 0);
 				break;
 			case 'complete':
-				stateIndicator.removeClass('loading');
-				self.$('.visibility.toggle').show();
+				stateIndicator.stop().fadeOut(500, function() {
+					stateIndicator.removeClass('loading');
+				});
+				self.$('.visibility.toggle').stop().fadeTo(1000, 1.0);
 				break;
 		}
 	},

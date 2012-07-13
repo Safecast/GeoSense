@@ -12,7 +12,7 @@ var app = express.createServer();
 console.log('connecting to db:', config.DB_PATH);
 mongoose.connect(config.DB_PATH);
 
-app.configure(function(){
+app.configure(function() {
 	app.use(express.static(__dirname + '/public'));
 	app.use(express.logger('dev'));
  	app.use(express.bodyParser());
@@ -48,7 +48,8 @@ app.error(function(err, req, res, next){
 });
 */
 
-app.get('/', function(req, res) {
+app.get('/', function(req, res) 
+{
 	if (!config.LIMITED_PROD_ACCESS) {
 		res.sendfile('public/base.html');
 	} else {
@@ -59,7 +60,8 @@ app.get('/', function(req, res) {
 });
 
 // Admin Route
-app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, res){
+app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, res)
+{
 	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {
 		if (utils.handleDbOp(req, res, err, map, 'map')) return;
 		permissions.canAdminMap(req, map, true);
@@ -72,7 +74,8 @@ app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, 
 });
 
 // Static Route
-app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))/, function(req, res) {
+app.get(/^\/(admin\/)?([a-zA-Z0-9\-\_]+)(|\/(globe|map|setup))/, function(req, res) 
+{
 	var admin = req.params[0];
 	var slug = req.params[1];
 	if (slug) {
