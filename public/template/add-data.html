@@ -26,14 +26,14 @@
 			</div>
 			<div class="tab-pane fade active in" id="JSON">
 				<div class="form-inline">
-					<input type="text" id="dataInput" class="input-large" placeholder="Select a file..." value=""></input>
+					<input type="text" id="fileInput" class="input-large" placeholder="Select a file..." value=""></input>
 					<a href="#" class="btn large"><p>Browse</p></a>
 			    </div><br>
-				<select id="converterType">
-					<option>Earthquake Dataset</option>
-	             	<option>Standard (loc, val, date)</option>            	
-	             	<option>Nuclear Reactors</option>
-	             	<option selected="selected">Safecast Dataset</option>
+				<select id="converter">
+					<option value="earthquakes">Earthquake Dataset</option>
+	             	<option value="">Standard (loc, val, date)</option>            	
+	             	<option value="reactors">Nuclear Reactors</option>
+	             	<option value="safecast" selected="selected">Safecast Dataset</option>
 				 </select>
 			</div>
 			<div class="tab-pane fade" id="GoogleFusion">

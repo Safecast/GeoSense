@@ -3,6 +3,7 @@ var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
 var BASE_URL = 'http://' + (!DEV ? 'hollow-warrior-5556.herokuapp.com' : 'localhost:3000');
+var CLOUDMADE_KEY = '20ad85b3809a478d914850709a80b3a5';
 
 var MapStatus = {
 	PRIVATE: 'P',
@@ -13,7 +14,8 @@ DataStatus = {
 	IMPORTING: 'I',
 	UNREDUCED: 'U',
 	REDUCING: 'R',
-	COMPLETE: 'C'
+	COMPLETE: 'C',
+	UNREDUCED_INC: 'UI'
 };
 
 var FeatureType = {
