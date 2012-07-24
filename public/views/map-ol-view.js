@@ -5,8 +5,6 @@ window.MapOLView = window.MapViewBase.extend({
 
 	addFeatures: {
 	},
-
-    mapStyles: ['dark', 'light', 'full'],
 	
     initialize: function(options) {
 		MapOLView.__super__.initialize.call(this, options);
@@ -65,14 +63,7 @@ window.MapOLView = window.MapViewBase.extend({
 
 	start: function(mapStyle) {
 		var self = this;
-					
-		this.gmap = new OpenLayers.Layer.Google("Google Streets", {
-			type: 'styled',
-			wrapDateLine: true,
-		    sphericalMercator: true,
-			baselayer: true
-		});		
-		        
+							        
 		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
 		    restrictedExtent = maxExtent.clone(),
 		    maxResolution = 156543.0339;
@@ -92,28 +83,21 @@ window.MapOLView = window.MapViewBase.extend({
 			controls: map_controls,
 			scope: this,
 			eventListeners: {
-               moveend: function(event) {
+                moveend: function(event) {
 					self.mapAreaChanged(self.getVisibleMapArea());
 				},
-				addlayer: function(event) {
-					if (event.layer.baselayer) {
-						// We need to wait for the map to be ready so we can get its bounds.
-						// Since the loadend event does not seem to be fired on the gmap layer,
-						// we just register a google event on the google map object directly.
-						google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
-							self.vent.trigger('mapViewReady');
-						});
-					}
-				}
             }
 		});	
-				
-		this.map.addLayers([this.gmap]);
-				
+
+		this.baselayer = this.BaseLayer.GoogleStreetMap(this.map, this);
+		this.mapStyles = this.baselayer.mapStyles;
+		this.map.addLayer(this.baselayer);
 		this.updateMapStyle(mapStyle || this.defaultMapStyle);
 				
 		var scaleLine = new OpenLayers.Control.ScaleLine();
         this.map.addControl(scaleLine);		
+
+        this.map.addControl(new OpenLayers.Control.Attribution());		
 		
 		if (DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
@@ -509,65 +493,9 @@ window.MapOLView = window.MapViewBase.extend({
 		this.featureLayers[pointCollectionId].setVisibility(state);
 	},
 	
-	updateMapStyle: function(theme)
+	updateMapStyle: function(style)
 	{		
-		var _visibility = "simplified"
-		
-		switch (theme) {
-			case 'light':
-				var style = [
-				  {
-				    stylers: [
-					      { saturation: -100 },
-					      { visibility: _visibility },
-					      { lightness: 8 },
-					      { gamma: 1.31 }
-					    ]
-				  }
-				];
-				this.mapStyle = 'light';
-				break;
-			default:
-				theme = 'dark'
-			case 'dark':
-				var style = [
-				  {
-				    stylers: [
-					      { saturation: -100 },
-					      { visibility: _visibility },
-					      { lightness: 45 },
-					      { invert_lightness: true },
-					      { gamma: 1.1 },
-
-						]	
-				  },
-				  {
-				    featureType: "administrative",
-				    stylers: [
-				      { visibility: "off" }
-				    ]
-				  }
-				];
-				this.mapStyle = theme;
-				break;
-			case 'full':
-				var style = [
-				  {
-				    stylers: []
-				  }
-				];	
-				this.mapStyle = theme;
-				break;
-		}
-		
-		var stylers = style;	
-		var styledMapOptions = {
-			name: "Styled Map",			
-		};
-		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
-
-		this.gmap.mapObject.mapTypes.set('styled', styledMapType);
-		this.gmap.mapObject.setMapTypeId('styled');
+		this.mapStyle = this.baselayer.setMapStyle(style);
 	},
 	
 	redrawMapLayer: function(layer)
@@ -658,3 +586,110 @@ window.MapOLView = window.MapViewBase.extend({
     },
     */
 });
+
+var BaseLayer = {};
+window.MapOLView.prototype.BaseLayer = BaseLayer;
+
+BaseLayer.GoogleStreetMap = function(map, mapView)
+{
+	var layer = new OpenLayers.Layer.Google("Google Street Map", {
+		type: 'styled',
+		wrapDateLine: true,
+	    sphericalMercator: true,
+		baselayer: true,
+	});
+
+	map.events.on({
+		'addlayer': function(event) {
+			if (event.layer.baselayer) {
+				// We need to wait for the map to be ready so we can get its bounds.
+				// Since the loadend event does not seem to be fired on the gmap layer,
+				// we just register a google event on the google map object directly.
+				if (event.layer == layer) {
+					google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
+						mapView.vent.trigger('mapViewReady');
+					});
+				}
+			}
+		}
+	});
+
+	layer.mapStyles = ['dark', 'light', 'full'];
+
+	layer.setMapStyle = function(styleName)
+	{
+		var _visibility = "simplified"
+		
+		switch (styleName) {
+			case 'light':
+				var style = [{
+				    stylers: [
+					      { saturation: -100 },
+					      { visibility: _visibility },
+					      { lightness: 8 },
+					      { gamma: 1.31 }
+					    ]
+				}];
+				break;
+			default:
+				styleName = 'dark';
+			case 'dark':
+				var style = [{
+				    stylers: [
+					      { saturation: -100 },
+					      { visibility: _visibility },
+					      { lightness: 45 },
+					      { invert_lightness: true },
+					      { gamma: 1.1 },
+
+						]	
+				},
+				{
+				    featureType: "administrative",
+				    stylers: [
+				      { visibility: "off" }
+				    ]
+				}];
+				break;
+			case 'full':
+				var style = [{
+				    stylers: []
+				}];	
+				break;
+		}
+		
+		var stylers = style;	
+		var styledMapOptions = {
+			name: "Styled Map",			
+		};
+		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
+
+		this.mapObject.mapTypes.set('styled', styledMapType);
+		this.mapObject.setMapTypeId('styled');
+
+		return styleName;
+	};
+
+	return layer;
+}
+
+BaseLayer.CloudMadeStreetMap = function(map, mapView)
+{
+	var layer = new OpenLayers.Layer.CloudMade("CloudMade Street Map", {
+	    key: CLOUDMADE_KEY,
+	    styleId: 68027,
+	    baselayer: true,
+	    eventListeners: {
+	    	loadend: function() {
+				mapView.vent.trigger('mapViewReady');
+	    	}
+	    }
+	});
+
+	layer.setMapStyle = function(styleName) {
+		return styleName;
+	};
+
+	//cloudmade.attribution shoud be '© 2009 CloudMade – Map data CCBYSA 2009 OpenStreetMap.org contributors – Terms of Use';
+	return layer;
+};
