@@ -87,6 +87,7 @@ window.DataViewBase = Backbone.View.extend({
     			});
 				break;
     		case DataStatus.UNREDUCED:
+    		case DataStatus.UNREDUCED_INC:
     			status = __('queued for crunching…');
 				break;
     		case DataStatus.REDUCING:
