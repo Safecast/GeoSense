@@ -45,10 +45,8 @@ window.AddDataView = Backbone.View.extend({
 		this.dataTitle = this.$('#titleInput').val();
 		this.dataDescription = this.$('#descriptionInput').val();
 		
-		var urlPath = this.$('#dataInput').val();
-		
 		// TODO: Add better validation 
-		if (true /* this.dataTitle != '' && urlPath != ''*/)
+		if (true /* this.dataTitle != '' && this.$('#fileInput').val() != ''*/)
 		{
 			this.requestData();
 			this.$('.modal-body .alert').hide();
@@ -85,10 +83,10 @@ window.AddDataView = Backbone.View.extend({
 				type: 'POST',
 				url: '/api/import/',
 				data: {
-					file: this.$('#dataInput').val(),
+					file: this.$('#fileInput').val(),
 					title: this.$('#titleInput').val(),
 					description: this.$('#descriptionInput').val(),
-					converter: this.$('#converterType').val()
+					converter: this.$('#converter').val()
 				},
 				success: function(responseData) {
 					if (responseData.pointCollectionId) {
