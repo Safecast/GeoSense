@@ -21,6 +21,9 @@
 		"MD5": "1.0.0",
 		"mongoose-types": "1.0.3",
 		"mailer": "0.6.7",
-		"ejs": "0.7.2"
+		"ejs": "0.7.2",
+		"optimist": "0.3.4",
+		"JSONStream": "0.3.1",
+		"request": "2.9.203"
   }
 }

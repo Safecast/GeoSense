@@ -376,7 +376,7 @@ var collectionHasIndex = function(collection, key) {
 	return false;
 };
 
-var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
+var reducePoints = function(collectionId, reduction_keys, opts, value_fields, removeFirst) {
 	var collection = 'points';
 	var info = ['r', collection];
 	for (var k in reduction_keys) {
@@ -385,14 +385,16 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 		}
 	}
 	var reduced_collection = info.join('_');
-	if (opts.query && opts.query.pointCollection) {
-		print('* removing existing reduction for '+opts.query.pointCollection.toString());
-		db[reduced_collection].remove({
-			'value.pointCollection': opts.query.pointCollection
-		});
-	} else {
-		print('* dropping '+reduced_collection);
-		db[reduced_collection].drop();
+	if (removeFirst) {
+		if (opts.query && opts.query.pointCollection) {
+			print('* removing existing reduction for '+opts.query.pointCollection.toString());
+			db[reduced_collection].remove({
+				'value.pointCollection': opts.query.pointCollection
+			});
+		} else {
+			print('* dropping '+reduced_collection);
+			db[reduced_collection].drop();
+		}
 	}
 	if (!value_fields) {
 		value_fields = ['val', 'altVal', 'datetime', 'label'];
@@ -429,12 +431,18 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields) {
 	}, opts);
 };
 
+var status = db.system.findOne({key: 'reductionStatus'});
+if (status && status.value != config.ReductionStatus.IDLE) {
+	print('*** Another reduction task has not been finished: quitting ***');
+	quit();
+}
+
+db.system.update({key: 'reductionStatus'}, {key: 'reductionStatus', value: config.ReductionStatus.REDUCING}, true);
+
 var numHistograms = config.HISTOGRAM_SIZES.length;
-
 var cur = db.pointcollections.find({
-	status: config.DataStatus.UNREDUCED
+	$or: [{status: config.DataStatus.UNREDUCED}, {status: config.DataStatus.UNREDUCED_INC}]
 });
-
 print('*** number of collections to reduce: ' + cur.count() + ' ***');
 
 cur.forEach(function(collection) {
@@ -442,8 +450,14 @@ cur.forEach(function(collection) {
 	var statsTotal = db.points.count(opts.query) * (config.NUM_ZOOM_LEVELS + numHistograms);
 	opts.stats = {total: statsTotal, collectionId: collection._id};
 	db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
+	var reducedAt = new Date;
 
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
+
+	if (collection.lastReducedAt) {
+		opts.query.createdAt = {$gt: collection.lastReducedAt};
+		print('*** incremental reduction of points created > '+collection.lastReducedAt);
+	}
 
 	for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
 		print('*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***');
@@ -493,5 +507,13 @@ cur.forEach(function(collection) {
 		}
 	}
 	
-	db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.COMPLETE, numBusy: 0}});
+	print('*** finishing collection ***');
+	db.pointcollections.update({_id: collection._id}, {$set: {
+		status: config.DataStatus.COMPLETE, 
+		numBusy: 0,
+		lastReducedAt: reducedAt
+	}});
 });
+
+db.system.update({key: 'reductionStatus'}, {key: 'reductionStatus', value: config.ReductionStatus.IDLE}, true);
+print('*** reduction completed ***');

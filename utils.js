@@ -1,6 +1,8 @@
 var config = require('./config.js'),
     mailer = require('mailer'),
-    fs = require('fs');
+    fs = require('fs'),
+    _ = require('cloneextend');
+
 /**
 * Simple Python-style string formatting.
 *
@@ -252,7 +254,7 @@ this.remapInternationalCharToAscii = function(c, skipSpecialTranscription)
     }
 }
 
-exports.loadFiles = function(filenames, callback)
+exports.loadFiles = function(filenames, baseDirName, callback)
 {
     var loadIndex = 0;
     var contents = {};
@@ -268,10 +270,29 @@ exports.loadFiles = function(filenames, callback)
                 return;
             }
         }
-        fs.readFile(filenames[loadIndex], 'utf8', loadNext);
+        fs.readFile((baseDirName ? baseDirName + '/' : '') + filenames[loadIndex], 'utf8', loadNext);
         loadIndex++;
     };
     if (filenames.length) {
         loadNext();
     }
+}
+
+exports.isEmpty = function(v)
+{
+    return typeof v == 'undefined'
+        || v == ''
+        || v == null
+        || v == undefined;
+}
+
+exports.deleteUndefined = function(obj) 
+{
+    for (var p in obj) {
+        if (typeof obj[p] == 'undefined') {
+            delete obj[p];
+        }
+    }
+
+    return obj;
 }

@@ -50,8 +50,14 @@ var config = {
 	DataStatus: {
 		IMPORTING: 'I',
 		UNREDUCED: 'U',
+		UNREDUCED_INC: 'UI',
 		REDUCING: 'R',
 		COMPLETE: 'C'
+	},
+
+	ReductionStatus: {
+		IDLE: 'I',
+		REDUCING: 'R'
 	}
 };
 

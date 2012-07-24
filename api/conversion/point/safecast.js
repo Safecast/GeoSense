@@ -11,6 +11,12 @@ this.PointConverter = {
 		,datetime: function() {
 			return new Date(this.get('captured_at'));
 		}
-		,loc: base.locFromFields('lng', 'lat')
+		,loc: base.locFromFields(['lng', 'longitude'], ['lat', 'latitude'])
+		,sourceId: function() {
+			return this.get('sourceId');
+		}
+		,incField: function() {
+			return this.get('sourceId');
+		}
 	}
 };

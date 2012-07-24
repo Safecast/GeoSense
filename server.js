@@ -12,7 +12,7 @@ var templates;
 var port = process.env.PORT || 3000;
 var app = express.createServer();
 
-console.log('connecting to db:', config.DB_PATH);
+console.log('*** connecting to db ***', config.DB_PATH);
 mongoose.connect(config.DB_PATH);
 
 app.configure(function() {
@@ -27,9 +27,8 @@ app.configure(function() {
   	app.set('views', path.join(application_root, "views"));
 });
 
-require('./api/map.js')(app);
-require('./api/point.js')(app);
-require('./api/import.js')(app);
+var API = require('./api/main.js');
+new API(app);
 
 /*
 // TODO: Implement proper error handling with friendly 404 und 500 pages
@@ -146,7 +145,7 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)?(\/(globe|map|setup))?/, function(req, res)
 
 // Load templates and start listening
 
-utils.loadFiles(['public/base.html'], function(err, contents) {
+utils.loadFiles(['public/base.html'], __dirname, function(err, contents) {
     if (err) {
     	throw err;
     } else {
@@ -154,4 +153,12 @@ utils.loadFiles(['public/base.html'], function(err, contents) {
 		app.listen(port, "0.0.0.0");
 		console.log('Server running at http://0.0.0.0:' + port + "/");
     }
+});
+
+process.on('uncaughtException', function(err) {
+	// TODO: notify admin
+	console.error(err.stack);
+	if (config.DEV) {
+		throw err;
+	}
 });

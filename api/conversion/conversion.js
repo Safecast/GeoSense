@@ -1,3 +1,6 @@
+var utils = require('../../utils.js'),
+	console = require('../../ext-console.js');
+
 var ConversionError = function() {};
 this.ConversionError = ConversionError;
 
@@ -7,7 +10,7 @@ this.convertModel = function(fromModel, converters, toModel) {
 		var f = converters.fields[destField];
 		doc[destField] = f.apply(fromModel);
 		if (doc[destField] instanceof ConversionError) {
-			console.log('ConversionError on field '+destField);
+			console.error('ConversionError on field '+destField);
 			return false;
 		} 
 	}
