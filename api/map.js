@@ -308,7 +308,7 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					var fields = ['title', 'description', 'author', 
-						'link_url', 'twitter', 'initialArea', 'displayInfo', 'host'];
+						'linkURL', 'twitter', 'initialArea', 'displayInfo', 'host'];
 
 					for (var i = fields.length - 1; i >= 0; i--) {
 						var f = req.body[fields[i]];
@@ -322,10 +322,10 @@ var MapAPI = function(app)
 						map.host = split.pop();
 					}
 
-					if (map.link_url && map.link_url != '') {
-						var split = map.link_url.split('://');
-						map.link_url = split.pop();
-						map.link_url = (split.length ? split.pop() : 'http') + '://' + map.link_url;
+					if (map.linkURL && map.linkURL != '') {
+						var split = map.linkURL.split('://');
+						map.linkURL = split.pop();
+						map.linkURL = (split.length ? split.pop() : 'http') + '://' + map.linkURL;
 					}
 
 					if (map.twitter && map.twitter != '') {

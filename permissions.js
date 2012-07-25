@@ -8,7 +8,7 @@ exports.canAdminMap = function(req, map, status) {
 		req.session.admin[map._id] = status == true; 
 		console.log('set map admin: '+map._id+' = '+status);
 	} else {
-		if (!config.DEBUG_CIRCUMVENT_PERMISSIONS) {
+		if (!config.DEBUG || !config.DEBUG_CIRCUMVENT_PERMISSIONS) {
 			status = req.session.admin[map._id] == true;
 			console.log('is map admin: '+map._id+' == '+status);
 		} else {

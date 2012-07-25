@@ -53,8 +53,11 @@ app.error(function(err, req, res, next){
 function serveHome(req, res)
 {
 	if (!config.LIMITED_PROD_ACCESS) {
+		// TODO: make sure the 'static' home page is served.
+		// currently, requesting /admin/existing-map without admin privileges 
+		// would still serve that map (in non-admin mode).
 		res.end(ejs.render(templates['public/base.html'], {
-			map_slug: false
+			mapSlugByHost: false
 		}));
 	} else {
 		// home page on production server is disabled for now
@@ -85,7 +88,7 @@ app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, 
 
 function staticRoute(req, res, slug, admin)
 {
-	var serveMap = function(err, map) {
+	var serveMap = function(err, map, routingByHost) {
 		if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
 		console.log('serving map: '+map.publicslug+', admin: '+admin);
 		if (admin) {
@@ -93,7 +96,7 @@ function staticRoute(req, res, slug, admin)
 			console.log('Implicitly authenticated user:', req.session.user);
 		}
 		res.end(ejs.render(templates['public/base.html'], {
-			map_slug: map.publicslug
+			mapSlugByHost: (routingByHost ? map.publicslug : false)
 		}));
 	}
 
@@ -112,36 +115,51 @@ function staticRoute(req, res, slug, admin)
 			serveMap(err, map);
 		});
 	} else {
+		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) != -1) {
+			serveHome(req, res);
+			return;
+		}
 		// Try to find map by host, or serve home page
 		models.Map.findOne({host: req.headers.host, active: true}, function(err, map) {
 			if (!err && !map) {
 				serveHome(req, res);
 				return;
 			}
-			serveMap(err, map);
+			serveMap(err, map, true);
 		});
 	}
 }
 
-app.get(/^\/admin\/(globe|map|setup)?/, function(req, res) 
+
+// routingByHost routes without slug. 
+
+// matches /admin[/view:options][/x,y,z]
+app.get(/^\/admin(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
 {
 	return staticRoute(req, res, null, true)
 });
 
-app.get(/^\/(globe|map|setup)?/, function(req, res) 
+// matches /[view:options][/x,y,z]
+app.get(/^\/((globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
 {
 	return staticRoute(req, res, null, false)
 });
 
-app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup))?/, function(req, res) 
+
+// regular routes including slug
+
+// matches /admin/slug/[/view:options][/x,y,z]
+app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
 {
 	return staticRoute(req, res, req.params[0], true)
 });
 
-app.get(/^\/([a-zA-Z0-9\-\_]+)?(\/(globe|map|setup))?/, function(req, res) 
+// matches /slug/[/view:options][/x,y,z]
+app.get(/^\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
 {
 	return staticRoute(req, res, req.params[0], false)
 });
+
 
 // Load templates and start listening
 
