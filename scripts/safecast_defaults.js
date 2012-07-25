@@ -135,5 +135,5 @@ if (m) {
 			"linkURL": "http://blog.safecast.org/about/"
 		}
 	});
-	print('Updated Earthquakes');
+	print('Updated Map');
 }

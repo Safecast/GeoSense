@@ -25,7 +25,7 @@ window.MapInfoView = window.ModalView.extend({
 		}
 
 		this.setTitle(this.mapInfo.title);
-		var fields = [/*'title',*/ 'description', 'author', 'url', 'twitter'];
+		var fields = [/*'title',*/ 'description', 'author', 'linkURL', 'twitter'];
 		for (var i = fields.length - 1; i >= 0; i--) {
 			var el = this.$('.' + fields[i]);
 			var contentEl = $('.content', el);
