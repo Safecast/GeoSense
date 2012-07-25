@@ -158,6 +158,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				var numDone = 0;
 				var ended = false;
 				var finalized = false;
+				var paused = false;
 
 				var finalize = function() {
 					finalized = true;
@@ -199,9 +200,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							}
 							return;
 						}
-				    	if (self.readStream) {
+
+				    	if (self.readStream && paused) {
 					    	debugStats('resume');
 					    	self.readStream.resume();
+					    	paused = false;
 					    }
 					}
 				}
@@ -224,9 +227,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					numRead++;
 			    	debugStats('on data', 'info');
 			    	var self = this;
-			    	if (self.readStream) {
-				    	self.readStream.pause();
-			    	}
+
 					if (FIRST_ROW_IS_HEADER && !fieldNames) {
 						fieldNames = data;
 				    	debugStats('using row as header');
@@ -265,9 +266,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							&& (!params.to || point.get('datetime') <= params.to)
 							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
 
-						console.log(collection.get('maxIncField'), point.get('incField'), point.get('incField') > collection.get('maxIncField'));
-
 						if (doSave) {
+					    	if (self.readStream) {
+						    	self.readStream.pause();
+						    	paused = true;
+					    	}
 							point.pointCollection = collection;
 							point.created = new Date();
 							point.modified = new Date();
