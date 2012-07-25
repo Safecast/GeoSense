@@ -1,3 +1,11 @@
+Updating and re-crunching a collection
+======================================
+
+<cd into project root on production server>
+node ./manage.js sync Safecast
+mongo penny.mongohq.com:10065/app4772485 -u USER -p PASSWORD ./config.js ./scripts/reduce-points.js
+
+
 Dev server
 ==========
 
@@ -8,7 +16,7 @@ Mongo dumping and cloning
 =========================
 
 	mongodump -d geo -o ./dump
-	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p SEKRET ./dump/geo/
+	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p PASSWORD ./dump/geo/
 
 For dev server:
 	

@@ -2,6 +2,7 @@
 
 var config = require("./config.js"),
 	mongoose = require('mongoose'),
+	models = require('./models.js'),
 	optimist = require('optimist'),
 	API = require('./api/main.js'),
 	utils = require('./utils.js'),
@@ -33,53 +34,73 @@ if (!module.parent) {
 		process.exit(0);
 	};
 
-	var objectId = args._.length > 1 && args._[1].match(/^[0-9a-f]{24}$/) ?
-		args._[1] : null;
-
-	if (objectId) {
-		//console.info('ObjectId: ' + objectId);
+	var runCommand = function(objectId) {
+		switch (args._[0]) {
+			case 'import':
+				var params = utils.deleteUndefined({
+					url: args.u || args.url,
+					path: args.p || args.path,
+					format: args.f || args.format,
+					converter: args.c || args.converter,
+					append: objectId,
+					from: args.from,
+					to: args.to,
+					max: args.max,
+					skip: args.skip,
+					incremental: args.incremental
+				});
+				if ((params.url || params.path) && params.format && connect()) {
+					api.import.import(params, null, null, exitCallback);
+					break;
+				}
+				exitCallback(false, true);
+				break;
+			case 'sync':
+				var params = utils.deleteUndefined({
+					pointCollectionId: objectId,
+					url: args.u || args.url,
+					path: args.p || args.path,
+					format: args.f || args.format,
+					converter: args.c || args.converter,
+					append: objectId,
+					from: args.from,
+					to: args.to,
+					max: args.max,
+					skip: args.skip,
+					incremental: args.incremental
+				});
+				if (params.pointCollectionId && connect()) {
+					api.import.sync(params, null, null, exitCallback);
+					break;
+				}
+			default:
+				exitCallback(false, true);
+		}
 	}
 
-	switch (args._[0]) {
-		case 'import':
-			var params = utils.deleteUndefined({
-				url: args.u || args.url,
-				path: args.p || args.path,
-				format: args.f || args.format,
-				converter: args.c || args.converter,
-				append: objectId,
-				from: args.from,
-				to: args.to,
-				max: args.max,
-				skip: args.skip,
-				incremental: args.incremental
+	if (args._.length > 1 && args._[1][0] != '-') {
+		var objectId = args._[1].match(/^[0-9a-f]{24}$/) ?
+			args._[1] : null;
+		if (objectId) {
+			runCommand(objectId);
+		} else {
+			var title = args._[1];
+			connect();
+			models.PointCollection.findOne({title: title}, function(err, result) {
+				if (err) {
+					exitCallback(err);
+					return;
+				}
+				if (!result) {
+					exitCallback(new Error('PointCollection not found: ' + title));
+					return;
+				}
+				runCommand(result._id.toString());
 			});
-			if ((params.url || params.path) && params.format && connect()) {
-				api.import.import(params, null, null, exitCallback);
-				break;
-			}
-			exitCallback(false, true);
-			break;
-		case 'sync':
-			var params = utils.deleteUndefined({
-				pointCollectionId: objectId,
-				url: args.u || args.url,
-				path: args.p || args.path,
-				format: args.f || args.format,
-				converter: args.c || args.converter,
-				append: objectId,
-				from: args.from,
-				to: args.to,
-				max: args.max,
-				skip: args.skip,
-				incremental: args.incremental
-			});
-			if (params.pointCollectionId && connect()) {
-				api.import.sync(params, null, null, exitCallback);
-				break;
-			}
-		default:
-			exitCallback(false, true);
+		}
+	} else {
+		runCommand();
 	}
+
 }
 
