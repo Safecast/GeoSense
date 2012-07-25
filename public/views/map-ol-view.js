@@ -493,9 +493,9 @@ window.MapOLView = window.MapViewBase.extend({
 		this.featureLayers[pointCollectionId].setVisibility(state);
 	},
 	
-	updateMapStyle: function(style)
+	updateMapStyle: function(styleName)
 	{		
-		this.mapStyle = this.baselayer.setMapStyle(style);
+		this.mapStyle = this.baselayer.setMapStyle(styleName);
 	},
 	
 	redrawMapLayer: function(layer)
@@ -614,23 +614,17 @@ BaseLayer.GoogleStreetMap = function(map, mapView)
 		}
 	});
 
-	layer.mapStyles = ['dark', 'light', 'full'];
+	layer.mapStyles = {
+		'dark': 'Dark', 
+		'light':'Light', 
+		'full': 'Full'
+	};
 
 	layer.setMapStyle = function(styleName)
 	{
 		var _visibility = "simplified"
 		
 		switch (styleName) {
-			case 'light':
-				var style = [{
-				    stylers: [
-					      { saturation: -100 },
-					      { visibility: _visibility },
-					      { lightness: 8 },
-					      { gamma: 1.31 }
-					    ]
-				}];
-				break;
 			default:
 				styleName = 'dark';
 			case 'dark':
@@ -649,6 +643,16 @@ BaseLayer.GoogleStreetMap = function(map, mapView)
 				    stylers: [
 				      { visibility: "off" }
 				    ]
+				}];
+				break;
+			case 'light':
+				var style = [{
+				    stylers: [
+					      { saturation: -100 },
+					      { visibility: _visibility },
+					      { lightness: 8 },
+					      { gamma: 1.31 }
+					    ]
 				}];
 				break;
 			case 'full':

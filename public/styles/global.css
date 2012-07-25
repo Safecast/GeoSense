@@ -365,3 +365,9 @@ fieldset.two-column input {
 .progress-striped .bar {
 	background-color: #00C9FF !important;
 }
+
+.navbar .nav .inactive > a, .navbar .nav .inactive > a:hover {
+  color: #aaa;
+  cursor: pointer;
+  background: transparent !important;
+}

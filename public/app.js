@@ -304,7 +304,7 @@ var AppRouter = Backbone.Router.extend({
 		$('#app').append(mapEl);
 		this.mapView.start(mapStyle);
 
-		if (this.mapView.mapStyles.length) {
+		if (this.mapView.mapStyles) {
 			this.setMapStyle(mapView.mapStyle, false);
 			$('#mapStyle').show();
 		} else {
@@ -325,6 +325,7 @@ var AppRouter = Backbone.Router.extend({
 
     setMapStyle: function(mapStyle, navigate)
     {
+    	var self = this;
     	if (navigate || navigate == undefined) {
 	    	this.vent.trigger('updateMapStyle', mapStyle);
 			app.navigate(app.genMapURI(app.mapViewName + ':' + mapStyle), {trigger: false});
@@ -335,14 +336,15 @@ var AppRouter = Backbone.Router.extend({
 		$('#app').addClass('map-style-'+this.mapStyle);
 
 		var li = [];
-		for (var i = 0; i < this.mapView.mapStyles.length; i++) {
-			var s = this.mapView.mapStyles[i];
-			if (s != this.mapStyle) {
-				li.push('<li><a href="#' + s + '" data-toggle="dropdown">' + s + '</a></li>');
-			}
-		}
+		$.each(this.mapView.mapStyles, function(styleName, title) {
+			var s = styleName;
+			li.push('<li' + (s == self.mapStyle ? ' class="inactive"' : '') + '>'
+				+ '<a href="#' + s + '" data-toggle="dropdown">' 
+				+ title
+				+ '</a></li>');
+		});
 		$('#mapStyle .dropdown-menu').html(li.join(''));
-		$('#mapStyleCurrent').text(this.mapView.mapStyle);
+		$('#mapStyleCurrent').text(this.mapView.mapStyles[this.mapView.mapStyle]);
     },
 
     showMapInfo: function() 

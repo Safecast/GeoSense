@@ -230,7 +230,6 @@ function wktCircle(ctr, xRadius, yRadius, numSegments)
     for (var i = 0; i < Math.PI * 2; i += step) {
         corners.push((ctr.x + Math.cos(i) * xRadius) + ' ' + (ctr.y + Math.sin(i) * yRadius));
     }
-    console.log('POLYGON(' + corners.join(', ') + ')');
     return 'POLYGON((' + corners.join(', ') + '))';
 }
 

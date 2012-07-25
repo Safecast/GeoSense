@@ -1,6 +1,6 @@
 window.MapViewBase = Backbone.View.extend({
 
-    mapStyles: [],
+    mapStyles: undefined,
     defaultMapStyle: DEFAULT_MAP_STYLE,
 
     initialize: function(options) {
