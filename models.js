@@ -27,8 +27,18 @@ this.User = mongoose.model('User', new mongoose.Schema({
 
 this.User.schema.plugin(useTimestamps);
 
+this.Job = mongoose.model('Job', new mongoose.Schema({
+    createdAt: Date,
+    updatedAt: Date,
+    type: {type: String, enum: [config.JobType.IMPORT, config.JobType.REDUCE], required: true},
+    status: {type: String, enum: [config.JobStatus.ACTIVE, config.JobStatus.IDLE], required: true, default: config.MapLayerType.POINTS},
+}));
+
+this.Job.schema.plugin(useTimestamps);
+
 this.Point = mongoose.model('Point', new mongoose.Schema({
     pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
+    importJob: { type: mongoose.Schema.ObjectId, ref: 'Job', required: false, index: 1 },
     loc: {type: [Number], index: '2d', required: true},
     val: {type: Number, index: 1},
     altVal: [mongoose.Schema.Types.Mixed],

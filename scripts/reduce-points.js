@@ -431,13 +431,14 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields, re
 	}, opts);
 };
 
-var status = db.system.findOne({key: 'reductionStatus'});
-if (status && status.value != config.ReductionStatus.IDLE) {
-	print('*** Another reduction task has not been finished: quitting ***');
+var job = db.jobs.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE});
+if (job && job.status != config.JobStatus.IDLE) {
+	print('*** Another reduction job ' + job._id + ' has not been finished: quitting ***');
 	quit();
 }
 
-db.system.update({key: 'reductionStatus'}, {key: 'reductionStatus', value: config.ReductionStatus.REDUCING}, true);
+db.jobs.insert({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE, updatedAt: new Date, createdAt: new Date});
+job = db.jobs.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE});
 
 var numHistograms = config.HISTOGRAM_SIZES.length;
 var cur = db.pointcollections.find({
@@ -515,5 +516,5 @@ cur.forEach(function(collection) {
 	}});
 });
 
-db.system.update({key: 'reductionStatus'}, {key: 'reductionStatus', value: config.ReductionStatus.IDLE}, true);
+db.jobs.update({_id: job._id}, {$set: {status: config.JobStatus.IDLE, updatedAt: new Date}});
 print('*** reduction completed ***');

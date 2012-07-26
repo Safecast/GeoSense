@@ -136,17 +136,35 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				console.error(err.message);
 				if (res) {
 					res.send('server error', 500);
+				}
+				if (callback) {
+					callback(err);
+				}
+				return;
+			}
+
+	    	var newCollectionId = collection.get('_id');
+	    	console.success('* saved PointCollection "'+collection.get('title')+'" = '+newCollectionId);
+
+			var job = new models.Job({status: config.JobStatus.ACTIVE, type: config.JobType.IMPORT});
+			job.save(function(err, job) {
+				if (err) {
+					console.error(err.message);
+					if (res) {
+						res.send('server error', 500);
+					}
 					if (callback) {
 						callback(err);
 					}
+					return;
 				}
-				return;
-			} else {
-		    	var newCollectionId = collection.get('_id');
-		    	console.success('* saved PointCollection "'+collection.get('title')+'" = '+newCollectionId);
+
+		    	console.success('*** job started ***');
+
 				var response = {
 					'pointCollectionId': newCollectionId,
 				};
+			
 				if (res) {
 					res.send(response);
 				}
@@ -176,10 +194,28 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					collection.reduce = numDone > 1000;
 					collection.status = !params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC;
 					collection.save(function(err) {
-				    	debugStats('*** finalized and activated collection ***', 'success');
-						if (callback) {
-							callback(false);
+						if (err) {
+							console.error(err.message);
+							if (callback) {
+								callback(err);
+							}
+							return;
 						}
+				    	debugStats('*** finalized and activated collection ***', 'success');
+						job.status = config.JobStatus.IDLE;
+						job.save(function(err) {
+							if (err) {
+								console.error(err.message);
+								if (callback) {
+									callback(err);
+								}
+								return;
+							}
+					    	debugStats('*** job completed ***', 'success');
+							if (callback) {
+								callback(false);
+							}
+						});
 					});
 				};
 
@@ -260,6 +296,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 
 						var model = new Model(doc);
 						var point = conversion.convertModel(model, converter, Point);
+						point.importJob = job;
 
 						var doSave = point 
 							&& (!params.from || point.get('datetime') >= params.from)
@@ -346,7 +383,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					console.info('*** Importing from path ***', params.path, '[converter=' + params.converter + ']');
 					parser.fromPath(params.path);
 				}
-			}
+			});
 		});
 	};
 

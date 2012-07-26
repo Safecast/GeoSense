@@ -55,9 +55,14 @@ var config = {
 		COMPLETE: 'C'
 	},
 
-	ReductionStatus: {
-		IDLE: 'I',
-		REDUCING: 'R'
+	JobType: {
+		IMPORT: 'I',
+		REDUCE: 'R'
+	},
+
+	JobStatus: {
+		ACTIVE: 'A',
+		IDLE: 'I'
 	}
 };
 
