@@ -697,3 +697,22 @@ BaseLayer.CloudMadeStreetMap = function(map, mapView)
 	//cloudmade.attribution shoud be '© 2009 CloudMade – Map data CCBYSA 2009 OpenStreetMap.org contributors – Terms of Use';
 	return layer;
 };
+
+BaseLayer.StamenMap = function(map, mapView)
+{	
+	var layer = new OpenLayers.Layer.Stamen("toner-lite", {
+	    baselayer: true,
+	    eventListeners: {
+	    	loadend: function() {
+				mapView.vent.trigger('mapViewReady');
+	    	}
+	    }
+	});
+
+	layer.setMapStyle = function(styleName) {
+		return styleName;
+	};
+
+	return layer;
+};
+
