@@ -39,7 +39,7 @@ window.MapInfoView = window.ModalView.extend({
 					f = nl2p(f);
 				}
 				if (fields[i] == 'twitter') {
-					f = 'https://twitter.com/#!/' + f;
+					f = 'https://twitter.com/' + f;
 				}
 				contentEl.html(f);
 				if (contentEl[0].tagName == 'A') {
