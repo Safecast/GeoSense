@@ -338,6 +338,7 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 
 		this.featureLayers[pointCollectionId] = layer;
+		this.toggleLayerVisibility(pointCollectionId, collection.mapLayer.options.visible);
 		this.map.addLayers([layer]);
 
         /*var hover = new OpenLayers.Control.SelectFeature(layer, {

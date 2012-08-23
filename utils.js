@@ -26,6 +26,15 @@ function __(str, replacements) {
     return s;
 }
 
+/**
+* Evaluates a value as Boolean as usual, with the exception that strings such as '0' or '1'
+# are cast as Number first (hence '0' evaluates as false), and the string 'false' will evaluate
+* as false. This is useful when posting boolean values without indication of a data type. 
+*/
+exports.smartBoolean = function(value) {
+    return isNaN(Number(value)) ? value != 'false' : Number(value) != 0;
+}
+
 exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
 {
     fs.readFile('template/email/' + bodyTemplate + '.txt', function(err, data) {

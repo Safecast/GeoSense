@@ -141,7 +141,6 @@ window.DataViewBase = Backbone.View.extend({
 		this.$(".collapse").on('hide', function() {
 			self.updateToggleState(false);
 		});
-		this.updateToggleState();
 
 		if (!app.isMapAdmin()) {
 			this.$('#adminDataControls').remove();
@@ -170,6 +169,10 @@ window.DataViewBase = Backbone.View.extend({
 	
 
 		this.setParameters();
+		if (!this.visible) {
+			this.$(".collapse").collapse('hide');
+		}
+		this.updateToggleState();
 	
         return this;
     },
@@ -404,6 +407,8 @@ window.DataViewBase = Backbone.View.extend({
 			unit: this.$('[name=unit]').val(),
 			altUnit: this.$('[name=altUnit]').val()
 		};
+
+		console.log('postData', postData);
 		
 		$.ajax({
 			type: 'POST',
@@ -686,6 +691,7 @@ window.DataViewBase = Backbone.View.extend({
 
 	visibilityChanged: function(evt)
 	{
+		console.log('visibilityChanged');
 		var self = this;
 		if (evt) {
 			if (!$(evt.currentTarget).hasClass('toggle')) {
@@ -698,6 +704,8 @@ window.DataViewBase = Backbone.View.extend({
 			}
 			this.enableUpdateButton();
 			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
+		} else {
+			this.toggleLayerVisibility(this.mapLayer.pointCollection._id, this.visible);
 		}
 
 		this.updateLegend();

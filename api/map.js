@@ -231,7 +231,7 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					var options = {
-						visible : Boolean(req.body.visible),
+						visible : utils.smartBoolean(req.body.visible),
 						featureType : String(req.body.featureType),
 						colorType: String(req.body.colorType),
 						opacity: Number(req.body.opacity) || null
