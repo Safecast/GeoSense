@@ -2,7 +2,7 @@ var IS_BROWSER = this.Document && true;
 var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
-var BASE_URL = 'http://' + (!DEV ? 'safecast-geosense.herokuapp.com' : 'localhost:3000');
+var BASE_URL = 'http://' + (!DEV ? 'geosense.herokuapp.com' : 'localhost:3000');
 var CLOUDMADE_KEY = '20ad85b3809a478d914850709a80b3a5';
 
 var MapStatus = {

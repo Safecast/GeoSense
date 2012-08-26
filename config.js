@@ -10,7 +10,7 @@ var config = {
 	DEFAULT_HOSTS: [
 		'localhost:3000',
 		'hollow-warrior-5556.herokuapp.com',
-		'safecast-geosense.herokuapp.com'
+		'geosense.herokuapp.com'
 	],
 
 	// since dev server restarts frequently and sessions are lost, circumvent 
