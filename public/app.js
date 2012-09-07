@@ -79,6 +79,9 @@ var AppRouter = Backbone.Router.extend({
 		_.bindAll(this, "toggleValFormatter");
 	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
 
+		_.bindAll(this, "toggleLayerVisibility");
+		this.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
+
 		this.isEmbedded = window != window.top;
     }, 
 
@@ -225,7 +228,9 @@ var AppRouter = Backbone.Router.extend({
 		self.mapInfo = mapInfo;
 		for (var i = self.mapInfo.layers.length - 1; i >= 0; i--) {
 			var mapLayer = self.mapInfo.layers[i];
-			mapLayer.sessionOptions = {};
+			mapLayer.sessionOptions = {
+				visible: mapLayer.options.visible
+			};
 
 			if (mapLayer.options.valFormat) {
 				mapLayer.sessionOptions.valFormatters = [];
@@ -244,6 +249,17 @@ var AppRouter = Backbone.Router.extend({
 				}
 				mapLayer.sessionOptions.valFormatter = mapLayer.sessionOptions.valFormatters[0];
 			}
+		}
+	},
+
+	toggleLayerVisibility: function(pointCollectionId, state)
+	{
+		var collection = this.pointCollections[pointCollectionId];
+		var mapLayer = this.getMapLayer(pointCollectionId);
+		mapLayer.sessionOptions.visible = state;
+		console.log('toggleLayerVisibility '+pointCollectionId, state, (state ? 'fetched: '+collection.visibleMapAreaFetched : ''));
+		if (state && !collection.visibleMapAreaFetched) {
+			this.fetchPointCollection(pointCollectionId, collection);
 		}
 	},
 
@@ -441,9 +457,6 @@ var AppRouter = Backbone.Router.extend({
 		var layer = this.getMapLayer(pointCollectionId);
 		console.log('initMapLayer '+pointCollectionId, layer);
 
-		var scope = this;
-		self.vent.trigger("setStateType", 'loading');
-					
 		var mapArea = self.mapView.getVisibleMapArea();							
 		var collectionOptions = {
 			pointCollectionId: pointCollectionId, 
@@ -460,8 +473,6 @@ var AppRouter = Backbone.Router.extend({
 		} else {
 			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
 			app.pollForNewPointCollection(pointCollectionId, INITIAL_POLL_INTERVAL);
-			//self.vent.trigger("setStateType", 'parsing');
-
 		}
 
 		$('.data-info').show();
@@ -473,9 +484,11 @@ var AppRouter = Backbone.Router.extend({
 			};
 			var collection = this.timeBasedPointCollections[pointCollectionId] = new MapPointCollection(collectionOptions);
 			collection.setVisibleMapArea(self.mapView.getVisibleMapArea());
-			collection.fetch({success: function(collection) {
-				self.graphView.addCollection(collection);
-			}});
+			if (layer.options.visible) {
+				collection.fetch({success: function(collection) {
+					self.graphView.addCollection(collection);
+				}});
+			}
 		}*/
 	},
 
@@ -528,15 +541,28 @@ var AppRouter = Backbone.Router.extend({
 		}
 	},
 
+	/*
+	this method is passed a collection instance since for the same point collection we might
+	fetch using different instances, for instance for time-based graphs.
+	*/
+	fetchPointCollection: function(pointCollectionId, collection)
+	{
+		var self = this;
+		self.vent.trigger("setStateType", 'loading', pointCollectionId);
+		collection.fetch({success: function(collection) {
+			self.vent.trigger("setStateType", 'complete', pointCollectionId);
+		}});
+	},
+
 	fetchMapLayer: function(pointCollectionId)
 	{
 		var self = this;
 		var layer = this.getMapLayer(pointCollectionId);
 		var collection = this.pointCollections[pointCollectionId];
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
-		collection.fetch({success: function(collection) {
-			self.vent.trigger("setStateType", 'complete', layer.pointCollection._id);
-		}});
+		if (layer.sessionOptions.visible) {
+			this.fetchPointCollection(pointCollectionId, collection);
+		}
 	},
 	
 	bindCollectionToMap: function(pointCollectionId)

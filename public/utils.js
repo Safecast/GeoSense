@@ -252,7 +252,7 @@ function genMapURI(mapInfo, mapViewName, opts, admin, slugField)
 
 function genMapURL(mapInfo, opts, admin)
 {
-	var customHost = !admin && mapInfo.host && mapInfo.host != '';
+	var customHost = !DEV && !admin && mapInfo.host && mapInfo.host != '';
 	if (customHost) {
 		var baseUrl = 'http://' + mapInfo.host;
 	} else {

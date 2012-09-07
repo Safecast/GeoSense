@@ -75,7 +75,10 @@ var PointAPI = function(app)
 				if (!err && pointCollection) {
 					var urlObj = url.parse(req.url, true);
 
-					zoom = urlObj.query.z || 0;
+					zoom = parseInt(urlObj.query.z) || 0;
+					if (isNaN(zoom)) {
+						zoom = 0;
+					}
 					grid_size = config.GRID_SIZES[zoom];
 					console.log('zoom ' + zoom + ', grid size ' + grid_size);
 

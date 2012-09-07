@@ -110,6 +110,7 @@ h1 {
 
 .state-indicator.loading {
 	background-image:url('../assets/loader.gif');
+	margin-top: -1px;
 	display: block;
 }
 

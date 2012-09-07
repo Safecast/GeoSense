@@ -88,9 +88,11 @@ window.MapViewBase = Backbone.View.extend({
 		var self = this;
 
 		$.each(this.collections, function(key, collection) { 
-			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
+			var mapLayer = app.getMapLayer(collection.pointCollectionId);
 			collection.setVisibleMapArea(visibleMapArea);
-			collection.fetch();
+			if (mapLayer.sessionOptions.visible) {
+				app.fetchPointCollection(collection.pointCollectionId, collection);
+			}
 		});
 
 		if (!this.MapAreaChangedInitially) {
@@ -172,7 +174,6 @@ window.MapViewBase = Backbone.View.extend({
 	reset: function(collection) {
 		var pointCollectionId = collection.pointCollectionId;
 		this.addAll(collection);
-		this.vent.trigger("setStateType", 'complete', pointCollectionId);	
 	},
 
 	addCollectionToMap: function(collection)
@@ -183,10 +184,6 @@ window.MapViewBase = Backbone.View.extend({
 		self.initFeatureLayerOptions(collection);
 		self.initFeatureLayer(collection);
 		self.addAll(collection);
-
-		setTimeout(function() {
-			self.vent.trigger("setStateType", 'complete', pointCollectionId);
-		}, 100);
 	},
 
 	/**

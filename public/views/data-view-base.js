@@ -47,24 +47,25 @@ window.DataViewBase = Backbone.View.extend({
 	setStateType: function(type, pointCollectionId) 
 	{	
 		if (!pointCollectionId || pointCollectionId != this.mapLayer.pointCollection._id) return;
-		//console.log('DataViewBase.setStateType', type, pointCollectionId);
 		this.updateStatus();
 
-		var stateIndicator = this.$('.state-indicator');
-		switch (type) {
-			default:
-				stateIndicator.stop().fadeIn(0, function() {
+		if (!this.mapLayer.sessionOptions.visible) return;
 
-				});
-				stateIndicator.addClass('loading');
-				self.$('.visibility.toggle').stop().fadeTo(0, 0);
-				break;
-			case 'complete':
-				stateIndicator.stop().fadeOut(500, function() {
-					stateIndicator.removeClass('loading');
-				});
-				self.$('.visibility.toggle').stop().fadeTo(1000, 1.0);
-				break;
+		var stateIndicator = this.$('.state-indicator');
+		if (stateIndicator.length) {
+			switch (type) {
+				default:
+					stateIndicator.stop().fadeIn(0);
+					stateIndicator.addClass('loading');
+					this.$('.visibility.toggle').stop().fadeTo(0, 0);
+					break;
+				case 'complete':
+					stateIndicator.stop().fadeOut(300, function() {
+						stateIndicator.removeClass('loading');
+					});
+					this.$('.visibility.toggle').stop().fadeTo(300, 1.0);
+					break;
+			}
 		}
 	},
 
@@ -74,11 +75,15 @@ window.DataViewBase = Backbone.View.extend({
 		var progress = this.mapLayer.pointCollection.progress;
     	switch (this.mapLayer.pointCollection.status) {
     		case DataStatus.COMPLETE:
-    			if (this.collection.originalCount != undefined) {
-					status = __('%(number)i of %(total)i', {
-						number: formatLargeNumber(this.collection.originalCount),
-						total: formatLargeNumber(this.collection.fullCount)
-					});
+    			if (this.mapLayer.sessionOptions.visible) {
+	    			if (this.collection.originalCount != undefined) {
+						status = __('%(number)i of %(total)i', {
+							number: formatLargeNumber(this.collection.originalCount),
+							total: formatLargeNumber(this.collection.fullCount)
+						});
+	    			}
+    			} else {
+    				status = '';
     			}
 				break;
     		case DataStatus.IMPORTING:
@@ -99,7 +104,17 @@ window.DataViewBase = Backbone.View.extend({
     			this.$('.progress').show();
 				break;
     	}
-		this.$(".status").html(status);
+
+    	var el = this.$(".status");
+    	var currentText = el.text();
+		if (status == '') {
+			if (currentText != '') {
+				el.hide('fast');
+			}
+		} else {
+			el.show('fast');
+		}
+		el.html(status + (status == '' && currentText != '' ? '&nbsp;' : ''));
     },
 
 	updateToggleState: function(state) 
@@ -687,11 +702,12 @@ window.DataViewBase = Backbone.View.extend({
 			this.$('.icon.visibility.toggle').removeClass('icon-eye-open');
 			this.$('.icon.visibility.toggle').addClass('icon-eye-close');
 		}
+
+		this.updateStatus();
 	},
 
 	visibilityChanged: function(evt)
 	{
-		console.log('visibilityChanged');
 		var self = this;
 		if (evt) {
 			if (!$(evt.currentTarget).hasClass('toggle')) {
@@ -707,7 +723,6 @@ window.DataViewBase = Backbone.View.extend({
 		} else {
 			this.toggleLayerVisibility(this.mapLayer.pointCollection._id, this.visible);
 		}
-
 		this.updateLegend();
 		if (evt) evt.preventDefault();
 	}
