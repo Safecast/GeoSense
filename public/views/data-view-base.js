@@ -108,9 +108,7 @@ window.DataViewBase = Backbone.View.extend({
     	var el = this.$(".status");
     	var currentText = el.text();
 		if (status == '') {
-			if (currentText != '') {
-				el.hide('fast');
-			}
+			el.hide('fast');
 		} else {
 			el.show('fast');
 		}
@@ -136,6 +134,7 @@ window.DataViewBase = Backbone.View.extend({
     {
 		var self = this;
 		$(this.el).html(this.template());
+		this.$(".status").hide();
 		$(this.el).addClass(this.mapLayer.pointCollection._id);
 				
 		if (this.title != '') {
