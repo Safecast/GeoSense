@@ -21,7 +21,9 @@ window.DataLegendView = window.DataViewBase.extend({
 
 	toggleLayerVisibility: function(pointCollectionId, state)
 	{	
+		if (pointCollectionId != this.mapLayer.pointCollection._id) return;
 		DataLegendView.__super__.toggleLayerVisibility.call(this, pointCollectionId, state);
+
 		if (this.visible) {
 			$(this.el).css('opacity', 1);
 		} else {

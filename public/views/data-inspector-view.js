@@ -29,7 +29,6 @@ window.DataInspectorView = window.DataViewBase.extend({
 		this.initPaletteEditor();
 		this.featureTypeChanged();
 		this.colorTypeChanged();
-		this.visibilityChanged();
 		this.initColorPicker(this.$("#colorInput"));
 	},
 

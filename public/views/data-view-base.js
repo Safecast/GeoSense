@@ -314,6 +314,7 @@ window.DataViewBase = Backbone.View.extend({
 		this.colorType = options.colorType;
 		this.featureType = options.featureType;
 		this.visible = options.visible;
+		this.visibilityChanged();
 
 		for (var k in options) {
 			var input = this.$('[name='+k+']');
