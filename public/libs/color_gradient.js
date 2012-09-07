@@ -31,7 +31,6 @@ var ColorGradient = function(colors, interpolation) {
 	}
 	// sort by position
 	this.colors.sort(function(a, b) { return (a.position - b.position) });
-	this.defaultInterpolation = this.interpolation.lerpRGB;
 }
 
 ColorGradient.prototype.getChannels = function(intColor) {
@@ -62,6 +61,8 @@ ColorGradient.prototype.interpolation = {
 	}
 };
 
+ColorGradient.prototype.interpolation.default = 'lerpRGB';
+
 ColorGradient.prototype.intColorAt = function(p, step) {
 	if (step) {
 		p = (p - p % step) / 1;
@@ -83,7 +84,7 @@ ColorGradient.prototype.intColorAt = function(p, step) {
 	
 	var interpolation = this.colors[lo].interpolation;
 	if (!interpolation) {
-		f = this.defaultInterpolation;
+		f = this.interpolation[this.interpolation.default];
 	} else {
 		f = this.interpolation[interpolation];
 	}

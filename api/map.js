@@ -243,7 +243,9 @@ var MapAPI = function(app)
 						var c = colors[i];
 						if (c.position || options.colorType != config.ColorType.SOLID) {
 							c.position = Number(c.position) || 0.0;
-							c.interpolation = 'threshold';
+						}
+						if (isNaN(c.absPosition)) {
+							c.absPosition = null;
 						}
 					}
 					// sort by position

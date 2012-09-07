@@ -140,6 +140,7 @@ window.MapViewBase = Backbone.View.extend({
 				color = options.colors[0].color;
 				break;
 			case ColorType.LINEAR_GRADIENT:
+			case ColorType.PALETTE:
 				color = this.layerOptions[collectionId].colorGradient
 					.colorAt(normVal, COLOR_GRADIENT_STEP);
 				break;
@@ -196,6 +197,7 @@ window.MapViewBase = Backbone.View.extend({
 		var opts = this.layerOptions[pointCollectionId];
 		opts.opacity = collection.mapLayer.options.opacity;
 		switch (collection.mapLayer.options.colorType) {
+			case ColorType.PALETTE:
 			case ColorType.LINEAR_GRADIENT:
 				opts.colorGradient = new ColorGradient(collection.mapLayer.options.colors);
 				break;

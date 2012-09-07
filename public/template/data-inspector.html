@@ -47,16 +47,37 @@
 								<div id="dataToggle" class="btn-group colors" data-toggle="buttons-radio">
 								  <button class="btn color-type" value="S">Solid Color</button>
 								  <button class="btn color-type" value="L">Gradient</button>
+								  <button class="btn color-type" value="P">Palette</button>
 								</div>
 							</div>
 							<div class="color-gradient">
 								<div class="histogram"></div>
 								<div id="gradientEditor"></div>
-								<!-- <input type="text" id="colorInputLow" class="color-picker black" size="6" placeholder="Low value" />
-								<input type="text" id="colorInputHigh" class="color-picker black" size="6" placeholder="High value" />	 -->
 							</div>
 							<div class="color-solid">
-								<input type="text" id="colorInput" class="color-picker black" size="6" placeholder="Color Value"/>
+								<input type="text" id="colorInput" class="color-picker black" size="6" placeholder="hex color"/>
+							</div>
+							<div class="color-palette">
+								<table>
+									<thead>
+										<th>Color</th>
+										<th>Value</th>
+										<th>Transition</th>
+									</thead>
+									<tbody>
+										<tr class="template" style="display: none">
+											<td><input name="color" type="text" class="color-picker black" size="6" placeholder="hex color" /></td>
+											<td><input name="absPosition" type="text" class="number" size="6" placeholder="position" /></td>
+											<td>
+												<select name="interpolation" class="min-width">
+													<option value="threshold">threshold</option>
+													<option value="lerpRGB">linear interpolation</option>
+													<option value="">default</option>
+												</select>
+											</td>
+										</tr>
+									</tbody>
+								</table>
 							</div>
 							<div class="color-options">
 								<label for="opacity">Opacity</label>
@@ -69,9 +90,9 @@
 								</select>
 							</div>
 							<div class="divider"></div>
-							<div class="map-color">
-								<label for="map-color">Detailed data</label>
-								<select name="map-color" class="map-color">
+							<div class="map-details">
+								<label for="map-detail-data">Detailed data</label>
+								<select name="map-detail-data" class="">
 									<option value="">do not display</option>
 									<option selected="selected" value="C">reveal on click</option>
 									<option value="M">display on map</option>

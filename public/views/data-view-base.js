@@ -160,28 +160,6 @@ window.DataViewBase = Backbone.View.extend({
 			this.$('#adminDataControls').remove();
 		}
 		
-		this.$("#colorInput").miniColors({
-		    change: function(hex, rgb) 
-			{ 
-				self.enableUpdateButton();
-			}});
-		this.$("#colorInput").miniColors('value','#0aa5ff');
-		
-		this.$("#colorInputLow").miniColors({
-		    change: function(hex, rgb) 
-			{ 
-				self.enableUpdateButton();
-			}});
-		this.$("#colorInputLow").miniColors('value','#333');
-		
-		this.$("#colorInputHigh").miniColors({
-		    change: function(hex, rgb) 
-			{ 
-				self.enableUpdateButton();
-			}});
-		this.$("#colorInputHigh").miniColors('value','#fff');
-	
-
 		this.setParameters();
 		if (!this.visible) {
 			this.$(".collapse").collapse('hide');
@@ -189,37 +167,6 @@ window.DataViewBase = Backbone.View.extend({
 		this.updateToggleState();
 	
         return this;
-    },
-
-    initGradientEditor: function() 
-    {
-    	var colors = [];
-    	var self = this;
-    	for (var i = 0; i < this.colors.length; i++) {
-			colors[i] = {
-				color: this.colors[i].color,
-				position: this.colors[i].position || 0.0
-			};
-    	}
-    	if (colors.length == 1) {
-    		colors[1] = {
-				color: colors[0].color,
-				position: 1.0
-			};
-    	}
-
-		this.$("#gradientEditor").gradientEditor({
-			width: 220,  
-			height: 30,
-			stopWidth: 12,
-			stopHeight: 10,
-			initialColor: "#ff00ff",
-			onChange: function(colors) {
-				self.colors = colors;
-				self.enableUpdateButton();
-			},
-			colors: colors
-		});
     },
 
 	initHistogram: function()
@@ -368,25 +315,24 @@ window.DataViewBase = Backbone.View.extend({
 		this.featureType = options.featureType;
 		this.visible = options.visible;
 
-		this.initGradientEditor();
-		this.featureTypeChanged();
-		this.colorTypeChanged();
-		this.visibilityChanged();
-
 		for (var k in options) {
 			var input = this.$('[name='+k+']');
 			if (input.length) {
 				input.val(options[k]);
 				input.change(function() {
-					self.enableUpdateButton();
 				});
 			}
 		}
+
+		$(this.el).delegate('input, select', 'change', function() {
+			self.enableUpdateButton();
+		});
 
 		if (this.mapLayer.pointCollection.status == DataStatus.COMPLETE) {
 			this.updateLegend(true);
 		}
 
+		console.log('disableUpdateButton');
 		this.disableUpdateButton();
 	},
 
@@ -406,8 +352,12 @@ window.DataViewBase = Backbone.View.extend({
 		var self = this;
 		//this.collection.unbindCollection();
 				
-		if (this.colorType == ColorType.SOLID) {
-			this.colors = [{color: this.$('#colorInput').val()}];
+		switch (this.colorType) {
+			case ColorType.SOLID:
+				this.colors = [{color: this.$('#colorInput').val()}];
+				break;
+			case ColorType.PALETTE:
+				this.colors = this.getColorsFromPaletteEditor();
 		}
 		
 		var postData = {
@@ -472,6 +422,7 @@ window.DataViewBase = Backbone.View.extend({
 			case ColorType.SOLID: 
 				this.$('.legend-button').css('background-color', this.colors[0].color);
 				break;
+			case ColorType.PALETTE: 
 			case ColorType.LINEAR_GRADIENT: 
 				this.$('.legend-button').css('background-color', this.colors[0].color)	
 				break;
@@ -553,7 +504,8 @@ window.DataViewBase = Backbone.View.extend({
 
 	setColorBarLabels: function()
 	{
-		var isGradient = this.colors.length > 1 && this.colorType == ColorType.LINEAR_GRADIENT;
+		var isGradient = this.colors.length > 1 
+			&& (this.colorType == ColorType.LINEAR_GRADIENT || this.colorType == ColorType.PALETTE);
 		var segments = this.$('.color-bar .segment');
 		var valFormatter = this.mapLayer.sessionOptions.valFormatter;
 
@@ -597,6 +549,7 @@ window.DataViewBase = Backbone.View.extend({
 
 	enableUpdateButton: function()
 	{
+		console.log('enableUpdateButton');
 		this.$('#updateData').attr('disabled', false);
 		this.$('#updateData').removeClass('disabled');
 		this.$('#updateData').addClass('btn-primary');
@@ -665,11 +618,19 @@ window.DataViewBase = Backbone.View.extend({
 		switch (this.colorType) {
 			case ColorType.SOLID: 
 				this.$('.color-gradient').hide();
+				this.$('.color-palette').hide();
 				this.$('.color-solid').show();
 				this.updateLegend(true);
 				break;
 			case ColorType.LINEAR_GRADIENT: 
 			  	this.$('.color-gradient').show();
+				this.$('.color-palette').hide();
+				this.$('.color-solid').hide();
+				this.updateLegend(true);
+			  	break;
+			case ColorType.PALETTE: 
+			  	this.$('.color-gradient').hide();
+				this.$('.color-palette').show();
 				this.$('.color-solid').hide();
 				this.updateLegend(true);
 			  	break;

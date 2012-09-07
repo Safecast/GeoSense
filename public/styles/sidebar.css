@@ -254,7 +254,17 @@
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group button
 {
-	width:115px;
+	width:77px;
+	padding-left: 1px;
+	padding-right: 1px;
+}
+
+input.color-picker, input.number {
+	width: 60px;
+}
+
+input.min-width, select.min-width {
+	width: auto;
 }
 
 .accordion-toggle.btn.btn-inverse

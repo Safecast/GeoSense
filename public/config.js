@@ -33,7 +33,8 @@ var MapLayerType = {
 
 var ColorType = {
 	SOLID: 'S',
-	LINEAR_GRADIENT: 'L'
+	LINEAR_GRADIENT: 'L',
+	PALETTE: 'P'
 }
 
 ColorType.DEFAULT = ColorType.SOLID;
