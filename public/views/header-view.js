@@ -136,7 +136,7 @@ window.HeaderView = Backbone.View.extend({
 		var tweet = {};
 		var url = app.genPublicURL(true);
 		tweet.url = url;
-		tweet.text = __('Check out the %(title)s map: %(url)s', {
+		tweet.text = __('Check out the %(title)s map:', {
 			url: url,
 			title: this.mapInfo.title
 		});
