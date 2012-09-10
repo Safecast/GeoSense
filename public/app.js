@@ -167,7 +167,6 @@ var AppRouter = Backbone.Router.extend({
     genPublicURL: function(forVisibleMapArea)
     {
 		return genMapURL(this.mapInfo, (forVisibleMapArea ? this.getURIOptsForVisibleMapArea() : false), false);
-
     },
 
     getURIOptsForVisibleMapArea: function(visibleMapArea)
@@ -175,11 +174,20 @@ var AppRouter = Backbone.Router.extend({
 		if (!visibleMapArea) {
 			var visibleMapArea = this.mapView.getVisibleMapArea();
 		}
-		return {
+		var opts = {
 			x: visibleMapArea.center[0],
 			y: visibleMapArea.center[1],
 			zoom: visibleMapArea.zoom
 		};
+		var defaults = {
+			x: (this.mapInfo.initialArea.center.length ? this.mapInfo.initialArea.center[0] : 0),
+			y: (this.mapInfo.initialArea.center.length ? this.mapInfo.initialArea.center[1] : 0),
+			zoom: (this.mapInfo.initialArea.zoom != undefined ? this.mapInfo.initialArea.zoom : 0)
+		};
+		if (defaults.x != opts.x || defaults.y != opts.y || defaults.zoom != opts.zoom) {
+			return opts;
+		}
+		return {};
 	},
 
 	genMapURIForVisibleArea: function(visibleMapArea)
@@ -268,6 +276,19 @@ var AppRouter = Backbone.Router.extend({
 		mapLayer.sessionOptions.valFormatter = formatter;
 	},
 
+	getDefaultVisibleMapArea: function()
+	{
+		var visibleMapArea = DEFAULT_MAP_AREA;
+		if (this.mapInfo.initialArea && 
+			this.mapInfo.initialArea.center.length) {
+				visibleMapArea.center = this.mapInfo.initialArea.center;
+		}
+		if (this.mapInfo.initialArea.zoom != undefined) {
+			visibleMapArea.zoom = this.mapInfo.initialArea.zoom;
+		}
+		return visibleMapArea;
+	},
+
     initMapView: function(mapViewName, center, zoom, mapStyle) 
     {
 		var self = this;
@@ -295,15 +316,7 @@ var AppRouter = Backbone.Router.extend({
 				$('#navGlobe').addClass('active');
 				break;
 		}		
-
-		var visibleMapArea = DEFAULT_MAP_AREA;
-		if (this.mapInfo.initialArea && 
-			this.mapInfo.initialArea.center.length) {
-				visibleMapArea.center = this.mapInfo.initialArea.center;
-		}
-		if (this.mapInfo.initialArea.zoom != undefined) {
-			visibleMapArea.zoom = this.mapInfo.initialArea.zoom;
-		}
+		var visibleMapArea = this.getDefaultVisibleMapArea();
 		if (center) {
 			visibleMapArea.center = center;
 		}

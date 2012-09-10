@@ -61,6 +61,11 @@ window.HeaderView = Backbone.View.extend({
 		if (mapInfo) {
 			this.mapInfo = mapInfo;
 		}
+		this.$('.brand').attr('href', app.genPublicURL());
+		this.$('.brand').click(function() {
+			app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
+			return false;
+		});
 		this.$('.brand').html('<h1>GeoSense</h1><h3>' + this.mapInfo.title + '</h3>');
 	},
 
@@ -129,7 +134,7 @@ window.HeaderView = Backbone.View.extend({
 	postTwitterClicked: function(evt) 
 	{
 		var tweet = {};
-		var url = app.genPublicURL();
+		var url = app.genPublicURL(true);
 		tweet.url = url;
 		tweet.text = __('Check out the %(title)s map: %(url)s', {
 			url: url,
@@ -147,7 +152,7 @@ window.HeaderView = Backbone.View.extend({
 	postFacebookClicked: function(evt) 
 	{
 		var url = 'http://www.facebook.com/sharer.php?u='
-		url += encodeURIComponent(app.genPublicURL());
+		url += encodeURIComponent(app.genPublicURL(true));
 		url += '&t=' +encodeURIComponent(__('Check out the %(title)s map', {
 			title: this.mapInfo.title
 		}));

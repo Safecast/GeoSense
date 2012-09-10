@@ -17,7 +17,7 @@ window.ShareView = window.ModalView.extend({
 
 	show: function()
 	{
-		var url = app.genPublicURL();
+		var url = app.genPublicURL(true);
 		this.$('.public-url').val(url);
 		this.$('.iframe').val(
 			'<iframe width="920" height="640" frameborder="0" scrolling="auto" marginwidth="0" marginheight="0" src="%(url)s"></iframe>'
