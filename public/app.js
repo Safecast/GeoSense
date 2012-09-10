@@ -177,7 +177,8 @@ var AppRouter = Backbone.Router.extend({
 		var opts = {
 			x: visibleMapArea.center[0],
 			y: visibleMapArea.center[1],
-			zoom: visibleMapArea.zoom
+			zoom: visibleMapArea.zoom,
+			mapViewName: 'map'
 		};
 		var defaults = {
 			x: (this.mapInfo.initialArea.center.length ? this.mapInfo.initialArea.center[0] : 0),

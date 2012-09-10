@@ -258,6 +258,6 @@ function genMapURL(mapInfo, opts, admin)
 	} else {
 		var baseUrl = BASE_URL;
 	}
-	return baseUrl + genMapURI(mapInfo, false, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
+	return baseUrl + genMapURI(mapInfo, opts.mapViewName, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
 };
 
