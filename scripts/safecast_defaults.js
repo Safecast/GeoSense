@@ -1,5 +1,5 @@
 // Good defaults for Safecast and Earthquakes
-o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : "measurements.csv"}]});
+o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : {$regex: "^measurements.*"}}]});
 if (o) {
 	db.pointcollections.update({_id: o._id}, {$set:
 		{
