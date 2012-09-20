@@ -49,6 +49,7 @@ window.MapViewBase = Backbone.View.extend({
 		
 		geocoder = new google.maps.Geocoder();
 		geocoder.geocode( {'address': addr}, function (results, status) {
+			console.log(results);
 			if (status == google.maps.GeocoderStatus.OK) {
 				results.type = 'google';
 				self.setVisibleMapArea(results);

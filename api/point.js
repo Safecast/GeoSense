@@ -155,6 +155,8 @@ var PointAPI = function(app)
 								fullCount: fullCount,
 								originalCount: originalCount,
 								maxCount: maxCount,
+								absMinVal: pointCollection.minVal,
+								absMaxVal: pointCollection.maxVal,
 								gridSize: grid_size,
 								items: points
 							};

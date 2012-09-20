@@ -24,6 +24,7 @@
 		"ejs": "0.7.2",
 		"optimist": "0.3.4",
 		"JSONStream": "0.3.1",
-		"request": "2.9.203"
+		"request": "2.9.203",
+		"cron": "1.0.1"
   }
 }
