@@ -20,8 +20,8 @@ var config = {
 	COLLECTION_DEFAULTS: {
 		visible: true,
 		featureType: 'C',
-		colorType: 'S',
-		colors: [{color: '#00C9FF'}],
+		colorType: 'L',
+		colors: [{position: 0, color: '#00C9FF'}, {position: 1.0, color: '#81ffff'}],
 		opacity: null
 	},
 

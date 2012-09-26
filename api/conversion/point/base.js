@@ -35,6 +35,22 @@ this.latLngWithCommaFromString = function(field)
 /**
 * Converts a string like ' y.yyy ,  -xx.x' to [x, y]
 */	
+this.smartLatLng = function(field) 
+{
+	var latLngWithCommaFromStringFunc = this.latLngWithCommaFromString(field);
+	return function() {
+		var val = this.get(field);
+		if (val instanceof Array) {
+			return [clamp180(val[0]), clamp180(val[1])];
+		}
+		return latLngWithCommaFromStringFunc.apply(this);
+	}
+};
+
+
+/**
+* Converts a string like ' y.yyy ,  -xx.x' to [x, y]
+*/	
 this.locFromFields = function(lngFields, latFields) 
 {
 	if (typeof lngFields == 'string') {
@@ -73,6 +89,6 @@ this.PointConverter =
 			var d = Date.parse(String(this.get('date')));
 			return new Date(d);
 		}
-		,loc: this.latLngWithCommaFromString('loc')
+		,loc: this.smartLatLng('loc')
 	}
 };

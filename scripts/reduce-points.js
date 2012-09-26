@@ -356,7 +356,9 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 				}
 			}
 		}
-		print('SUCCESS: reduced '+op.counts.input+' records to '+op.counts.output);
+		print('SUCCESS: reduced '+op.counts.input+' records to '
+			// can't use op.counts.output since it shows total number (including previously reduced)
+			+db[reduced_collection].count({'value.pointCollection': params.query.pointCollection})); 
 		return true;
 	} else {
 		print('ERROR: '+op.assertion);
