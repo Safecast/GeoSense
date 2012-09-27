@@ -72,6 +72,10 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		incremental: false
 	};
 
+	var allowedHeaderValues = {
+		gridSize: null
+	};
+
 	var params = _.cloneextend(defaults, params);
 
 	if (!params.format && params.path) {
@@ -125,6 +129,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	
 	var runImport = function(collection) 
 	{
+		var headerValues = {};
 		collection.active = false;
 		collection.status = config.DataStatus.IMPORTING;
 		collection.importParams = params;
@@ -191,6 +196,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					}
  					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
+					collection.numBusy = 0;
 					collection.reduce = numDone > 1000;
 					collection.status = !params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC;
 					collection.save(function(err) {
@@ -219,12 +225,14 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					});
 				};
 
-				var debugStats = function(pos, func) 
+				var debugStats = function(pos, func, info) 
 				{
 					if (!func) {
 						func = 'log';
 					}
-					console[func].apply(console, ['* '+collection.get('_id')+' '+pos+' -- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone]);
+					if ((pos != 'on data' && pos != 'on save') || (pos == 'on save' && numDone > 0 && numDone % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
+						console[func].apply(console, ['* '+collection.get('_id')+' '+pos, (info ? info : ''), '-- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone+(headerValues.totalCount ? ' of '+headerValues.totalCount : '')]);
+					}
 				};
 
 				function postSave(self) 
@@ -249,13 +257,27 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				{
 					return function(err, point) {
 						if (err) console.error(err.message);
-				    	debugStats('on save point ' + (point ? point.get('_id') : ''), 'success');
+				    	debugStats('on save', 'success', (point ? point.get('_id') : ''));
 						point = null;
 						numSaving--;
 						numDone++;
 				    	postSave(self);
 					}
 				}
+
+				function onHeader(header)
+				{
+					headerValues = header;
+					for (k in allowedHeaderValues) {
+						if (header[k]) {
+							console.log('* header ', k, header[k]);
+							collection[k] = header[k];
+						}
+					}
+					if (header.totalCount) {
+						collection.numBusy = header.totalCount;
+					}
+				} 
 
 				function onData(data, index) 
 				{
@@ -330,7 +352,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					    	postSave(self);
 						}
 
-						if (numRead == 1 || numRead % 1000 == 0) {
+						if (numRead == 1 || numRead % 5000 == 0) {
 					    	if (global.gc) {
 						    	// https://github.com/joyent/node/issues/2175
 						    	process.nextTick(function () {
@@ -345,7 +367,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 								});
 					    	}
 
-					    	debugStats('update progress');
+					    	debugStats('update progress', 'info', (collection.numBusy ? Math.round(collection.progress / collection.numBusy * 100)+'%' : ''));
 					    	collection.progress = numDone;
 					    	collection.save();
 						}
@@ -369,7 +391,8 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 			    var format = require('./formats/' + params.format + '.js');
 			    var parser = format.Parser();
 
-				parser.on('data', onData)								
+				parser.on('header', onHeader)								
+					.on('data', onData)								
 				    .on('end', onEnd)
 				    .on('error', onError);
 

@@ -80,7 +80,6 @@ var PointAPI = function(app)
 						zoom = 0;
 					}
 					grid_size = config.GRID_SIZES[zoom];
-					console.log('zoom ' + zoom + ', grid size ' + grid_size);
 
 					var time_grid = false;
 					switch (urlObj.query.t) {
@@ -96,6 +95,11 @@ var PointAPI = function(app)
 					}
 
 					var reduce = pointCollection.get('reduce');
+					if (pointCollection.gridSize && grid_size < pointCollection.gridSize) {
+						reduce = false;
+						grid_size = pointCollection.gridSize;
+					}
+					console.log('*********** zoom ' + zoom + ', grid size ' + grid_size+' '+pointCollection.gridSize);
 					var collectionName;
 					var pointQuery;
 					var boxes;

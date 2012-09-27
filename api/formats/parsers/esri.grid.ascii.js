@@ -345,6 +345,10 @@ module.exports = function(){
                 state.lastC = '';
                 return;
             } else {
+                csv.emit('header', {
+                    'gridSize': state.headerValues['cellsize'],
+                    'totalCount': state.headerValues['ncols'] * state.headerValues['nrows']
+                });
                 state.isHeader = false;
                 return;
             }

@@ -145,3 +145,39 @@ if (m) {
 	});
 	print('Updated Map');
 }
+
+o = db.pointcollections.findOne({"title" : {$regex: "^glp00.*"}});
+if (o) {
+	db.pointcollections.update({_id: o._id}, {$set:
+		{
+			"title": "Population Count",
+			"source": "NASA SEDAC GPWv3 (2000)",
+			"unit": "people" 
+		}
+	}, false, true);
+	print('Updated Population Count');
+}
+
+o = db.pointcollections.findOne({"title" : {$regex: "^glds.*"}});
+if (o) {
+	db.pointcollections.update({_id: o._id}, {$set:
+		{
+			"title": "Population Density",
+			"source": "NASA SEDAC GPWv3 (2000)",
+			"unit": "people per km²" 
+		}
+	}, false, true);
+	print('Updated Population Density');
+}
+
+o = db.pointcollections.findOne({"title" : {$regex: "^glarea.*"}});
+if (o) {
+	db.pointcollections.update({_id: o._id}, {$set:
+		{
+			"title": "Land Area",
+			"source": "NASA SEDAC GPWv3 (2000)",
+			"unit": "km²" 
+		}
+	}, false, true);
+	print('Updated Land Area');
+}

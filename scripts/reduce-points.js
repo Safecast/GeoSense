@@ -470,42 +470,45 @@ cur.forEach(function(collection) {
 		}, opts, []);
 	}
 
-	if (!collection.reduce) {
+	if (!collection.reduce || collection.gridSize) {
 		print('*** creating unreduced copy of original ***');
 		reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(0)
 		}, opts);
 
-	} else if (collection.reduce) {
-		for (var g in config.GRID_SIZES) {
+	} 
 
+	if (collection.reduce) {
+		for (var g in config.GRID_SIZES) {
 			var grid_size = config.GRID_SIZES[g];
+			if (!collection.gridSize || grid_size > collection.gridSize) {
 			print('*** reducing original for grid = '+g+' ***');
 
-			reducePoints(collection._id, {
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.LocGrid(grid_size)
-			}, opts);
-			
-			if (config.REDUCE_SETTINGS.TIME_BASED) {
-				reducePoints({
+				reducePoints(collection._id, {
 					pointCollection: ReductionKey.copy, 
-					loc: new ReductionKey.LocGrid(grid_size), 
-					datetime: new ReductionKey.Weekly()
+					loc: new ReductionKey.LocGrid(grid_size)
 				}, opts);
 				
-				reducePoints({
-					pointCollection: ReductionKey.copy, 
-					loc: new ReductionKey.LocGrid(grid_size), 
-					datetime: new ReductionKey.Yearly()
-				}, opts);
+				if (config.REDUCE_SETTINGS.TIME_BASED) {
+					reducePoints({
+						pointCollection: ReductionKey.copy, 
+						loc: new ReductionKey.LocGrid(grid_size), 
+						datetime: new ReductionKey.Weekly()
+					}, opts);
+					
+					reducePoints({
+						pointCollection: ReductionKey.copy, 
+						loc: new ReductionKey.LocGrid(grid_size), 
+						datetime: new ReductionKey.Yearly()
+					}, opts);
 
-				reducePoints({
-					pointCollection: ReductionKey.copy, 
-					loc: new ReductionKey.LocGrid(grid_size), 
-					datetime: new ReductionKey.Daily()
-				}, opts);
+					reducePoints({
+						pointCollection: ReductionKey.copy, 
+						loc: new ReductionKey.LocGrid(grid_size), 
+						datetime: new ReductionKey.Daily()
+					}, opts);
+				}
 			}
 		}
 	}

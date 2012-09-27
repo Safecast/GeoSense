@@ -117,6 +117,7 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     maxIncField: mongoose.Schema.Types.Mixed,
     importParams: mongoose.Schema.Types.Mixed,
     timeBased: Boolean,
+    gridSize: Number,
     defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
     active: Boolean,
     status: String,
