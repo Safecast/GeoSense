@@ -117,6 +117,24 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		params.converter = path.basename(params.converter);
 	}
 
+	if (params.bounds) {
+		if (typeof params.bounds == 'string') {
+			var b = params.bounds.split(',');
+			params.bounds = [[parseInt(b[0]), parseInt(b[1])], [parseInt(b[2]), parseInt(b[3])]];
+		}
+		if (params.bounds.length < 2 || params.bounds[0].length < 2 || params.bounds[1].length > 2
+			|| isNaN(params.bounds[0][0]) || isNaN(params.bounds[0][1]) || isNaN(params.bounds[1][0]) || isNaN(params.bounds[1][1])) {
+				var err = new Error('invalid bounds: ' + params.bounds);
+				if (callback) {
+					callback(err);
+					return;
+				}
+				throw err;
+		} 
+	}
+
+	console.log('import params', params);
+
 	converter = require('./conversion/point/' 
 		+ (params.converter && params.converter != '' ? params.converter : 'base') 
 		+ '.js').PointConverter;
@@ -302,7 +320,6 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							return;
 						}
 
-
 						if (FIRST_ROW_IS_HEADER) {
 							var doc = {};
 							for (var i = 0; i < fieldNames.length; i++) {
@@ -319,8 +336,10 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						var model = new Model(doc);
 						var point = conversion.convertModel(model, converter, Point);
 						point.importJob = job;
+						var loc = point.get('loc');
 
 						var doSave = point 
+							&& (!params.bounds || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
 							&& (!params.from || point.get('datetime') >= params.from)
 							&& (!params.to || point.get('datetime') <= params.to)
 							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));

@@ -164,7 +164,7 @@ if (o) {
 		{
 			"title": "Population Density",
 			"source": "NASA SEDAC GPWv3 (2000)",
-			"unit": "people per km²" 
+			"unit": "people/km²" 
 		}
 	}, false, true);
 

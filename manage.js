@@ -47,7 +47,8 @@ if (!module.parent) {
 					to: args.to,
 					max: args.max,
 					skip: args.skip,
-					incremental: args.incremental
+					incremental: args.incremental,
+					bounds: args.bounds
 				});
 				if ((params.url || params.path) && params.format && connect()) {
 					api.import.import(params, null, null, exitCallback);
@@ -67,7 +68,8 @@ if (!module.parent) {
 					to: args.to,
 					max: args.max,
 					skip: args.skip,
-					incremental: args.incremental
+					incremental: args.incremental,
+					bounds: args.bounds
 				});
 				if (params.pointCollectionId && connect()) {
 					api.import.sync(params, null, null, exitCallback);

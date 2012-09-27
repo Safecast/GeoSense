@@ -111,6 +111,7 @@ var PointAPI = function(app)
 
 						for (var i = 0; i < 4; i++) {
 							b[i] = parseFloat(b[i]) || 0;
+							b[i] = b[i] + (i < 2 ? -grid_size / 2 : grid_size / 2);
 						}
 
 						// Mongo currently doesn't handle the transition around the dateline (x = +-180)
