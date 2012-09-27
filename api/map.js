@@ -69,6 +69,9 @@ var MapAPI = function(app)
 					m[k] = obj[k];
 				}
 				if (k == 'layers') {
+					for (var i = 0; i < m[k].length; i++) {
+						delete m[k][i].pointCollection.importParams;
+					}
 					// TODO: Deprecated conversion to 'collections'
 					m['collections'] = [];
 					for (var i = 0; i < obj[k].length; i++) {

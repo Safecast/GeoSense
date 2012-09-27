@@ -406,8 +406,8 @@ module.exports = function(){
 
                         data = {
                             loc: [
-                                state.headerValues.xllcorner + state.headerValues.cellsize * state.colIndex,
-                                state.headerValues.yllcorner + state.headerValues.cellsize * (state.headerValues.nrows - 1 - state.rowIndex)
+                                state.headerValues.xllcorner + state.headerValues.cellsize * state.colIndex + state.headerValues.cellsize / 2,
+                                state.headerValues.yllcorner + state.headerValues.cellsize * (state.headerValues.nrows - 1 - state.rowIndex) + state.headerValues.cellsize / 2
                                 ],
                             val: line[i]
                         };
