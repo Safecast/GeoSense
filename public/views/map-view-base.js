@@ -1,8 +1,5 @@
 window.MapViewBase = Backbone.View.extend({
 
-    mapStyles: undefined,
-    defaultMapStyle: DEFAULT_MAP_STYLE,
-
     initialize: function(options) {
 		var self = this;
 		this.collections = {};
@@ -76,7 +73,7 @@ window.MapViewBase = Backbone.View.extend({
 	setVisibleMapArea: function(to) {
 	},
 
-	start: function(mapStyle) 
+	start: function(viewBase, viewStyle) 
 	{
 		if (this.initialVisibleMapArea) {
 			this.MapAreaChangedInitially = true;

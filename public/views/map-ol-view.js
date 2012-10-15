@@ -10,8 +10,11 @@ window.MapOLView = window.MapViewBase.extend({
 		MapOLView.__super__.initialize.call(this, options);
 	    this.template = _.template(tpl.get('map-ol'));
 	
-		_.bindAll(this, "updateMapStyle");
-	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
+		_.bindAll(this, "updateViewStyle");
+	 	options.vent.bind("updateViewStyle", this.updateViewStyle);
+
+		_.bindAll(this, "updateViewBase");
+	 	options.vent.bind("updateViewBase", this.updateViewBase);
 	
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
@@ -48,7 +51,7 @@ window.MapOLView = window.MapViewBase.extend({
 		var center = map.getCenter();
 		center.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
-		SE.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+		SE.transform(new OpenLayers .Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
 		NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 		var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
@@ -61,7 +64,7 @@ window.MapOLView = window.MapViewBase.extend({
 		};
 	},
 
-	start: function(mapStyle) {
+	start: function(viewBase, viewStyle) {
 		var self = this;
 							        
 		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
@@ -89,10 +92,7 @@ window.MapOLView = window.MapViewBase.extend({
             }
 		});	
 
-		this.baselayer = this.BaseLayer.GoogleStreetMap(this.map, this);
-		this.mapStyles = this.baselayer.mapStyles;
-		this.map.addLayer(this.baselayer);
-		this.updateMapStyle(mapStyle || this.defaultMapStyle);
+		this.updateViewBase(viewBase, viewStyle);
 				
 		var scaleLine = new OpenLayers.Control.ScaleLine();
         this.map.addControl(scaleLine);		
@@ -424,26 +424,11 @@ window.MapOLView = window.MapViewBase.extend({
     	var loc = model.get('loc');
 		var lng = loc[0];
 		var lat = loc[1];
-
-		// TODO: Crappy fix for points around the dateline -- look into layer.wrapDateLine		
-		/*var bounds = this.getVisibleMapArea().bounds;
-		if (bounds[0][0] < -180) {
-			//console.log('dateline left ');
-			if (lng > 0) {
-				lng = -180 - (180 - lng);
-			}
-		} else if (bounds[1][0] > 180) {
-			//console.log('dateline right ');
-			if (lng < 0) {
-				lng = 180 - (-180 - lng);
-			}
-		}*/
-		
 		var pt = new OpenLayers.Geometry.Point(lng, lat);
 		var geometry;
 
-		switch(collection.mapLayer.options.featureType)
-		{
+		switch(collection.mapLayer.options.featureType) {
+			
 			default:
 				pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 				geometry = pt;
@@ -494,9 +479,36 @@ window.MapOLView = window.MapViewBase.extend({
 		this.featureLayers[pointCollectionId].setVisibility(state);
 	},
 	
-	updateMapStyle: function(styleName)
+	updateViewBase: function(viewBase, viewStyle)
+	{
+		if (!viewBase || !this.ViewBase[viewBase]) {
+			viewBase = DEFAULT_MAP_VIEW_BASE;
+		}
+		if (viewBase == this.viewBase) return;
+
+		if (this.baselayer) {
+			this.map.removeLayer(this.baselayer.mapLayer);
+		}
+
+		this.baselayer = new this.ViewBase[viewBase](this.map, this, viewStyle || this.viewStyle);
+		this.viewBase = viewBase;
+		this.viewStyles = this.baselayer.mapStyles;
+		this.viewStyle = this.baselayer.mapStyle;
+		console.log(this.viewStyle, 'viewStyle');
+		this.defaultViewStyle = this.baselayer.defaultMapStyle;
+		this.map.addLayer(this.baselayer.mapLayer);
+
+		this.vent.trigger('viewOptionsChanged', this);
+	},
+
+	updateViewStyle: function(styleName)
 	{		
-		this.mapStyle = this.baselayer.setMapStyle(styleName);
+		if (this.baselayer.setMapStyle) {
+			if (this.baselayer.setMapStyle(styleName)) {
+				this.viewStyle = this.baselayer.mapStyle;
+				this.vent.trigger('viewOptionsChanged', this);
+			}
+		}
 	},
 	
 	redrawMapLayer: function(layer)
@@ -568,8 +580,6 @@ window.MapOLView = window.MapViewBase.extend({
 			    break;
 		}
 
-		console.log('setVisibleMapArea', 'center:', center, 'zoom:', zoom);
-
 		if (center) {
 		    this.map.setCenter(new OpenLayers.LonLat(center[0], center[1]), zoom);		
 		}		
@@ -588,46 +598,91 @@ window.MapOLView = window.MapViewBase.extend({
     */
 });
 
-var BaseLayer = {};
-window.MapOLView.prototype.BaseLayer = BaseLayer;
-
-BaseLayer.GoogleStreetMap = function(map, mapView)
+var Baselayer = window.MapOLView.prototype.Baselayer = OpenLayers.Class(
 {
-	var layer = new OpenLayers.Layer.Google("Google Street Map", {
-		type: 'styled',
-		wrapDateLine: true,
-	    sphericalMercator: true,
-		baselayer: true,
-	});
+	initialize: function(map, mapView, mapStyle)
+	{
+		this.map = map;
+		this.mapView = mapView;
+		this.setMapStyle(mapStyle);
+		this.initMapLayer();
+	},
 
-	map.events.on({
-		'addlayer': function(event) {
-			if (event.layer.baselayer) {
-				// We need to wait for the map to be ready so we can get its bounds.
-				// Since the loadend event does not seem to be fired on the gmap layer,
-				// we just register a google event on the google map object directly.
-				if (event.layer == layer) {
-					google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
-						mapView.vent.trigger('mapViewReady');
-					});
-				}
-			}
+	initMapLayer: function(mapStyle, change)
+	{
+	},
+
+	setMapStyle: function(styleName) 
+	{
+		var prevMapStyle = this.mapStyle;
+		if (this.mapStyles && this.mapStyles[styleName]) {
+			this.mapStyle = styleName;
+		} else {
+			this.mapStyle = this.defaultMapStyle;
 		}
-	});
+		if (prevMapStyle != this.mapStyle) {
+			if (this.mapLayer) {
+				this.applyMapStyle();
+			}
+			return true;
+		}
 
-	layer.mapStyles = {
-		'dark': 'Dark', 
-		'light':'Light', 
-		'full': 'Full'
-	};
+		return false;
+	},
 
-	layer.setMapStyle = function(styleName)
+	applyMapStyle: function() 
+	{
+		if (this.mapLayer) {
+			this.map.removeLayer(this.mapLayer);
+			this.initMapLayer();
+			this.map.addLayer(this.mapLayer);
+		}
+		return true;
+	},
+
+	mapStyles: null,
+	defaultMapStyle: DEFAULT_MAP_STYLE,
+	mapStyle: null
+});
+
+var ViewBase = window.MapOLView.prototype.ViewBase = {};
+
+ViewBase.gm = OpenLayers.Class(Baselayer,
+{
+	providerName: 'Google Maps',
+	initMapLayer: function(change)
+	{
+		var self = this;
+		var layer = this.mapLayer = new OpenLayers.Layer.Google("Google Maps", {
+			type: 'styled',
+			wrapDateLine: true,
+		    sphericalMercator: true,
+			baselayer: true,
+		});
+
+		if (!change) {
+			this.map.events.on({
+				'addlayer': function(event) {
+					if (event.layer.baselayer) {
+						// We need to wait for the map to be ready so we can get its bounds.
+						// Since the loadend event does not seem to be fired on the gmap layer,
+						// we just register a google event on the google map object directly.
+						if (event.layer == layer) {
+							self.applyMapStyle();
+							google.maps.event.addListenerOnce(event.layer.mapObject, 'idle', function() {
+								self.mapView.vent.trigger('mapViewReady');
+							});
+						}
+					}
+				}
+			});
+		}
+	},
+
+	applyMapStyle: function()
 	{
 		var _visibility = "simplified"
-		
-		switch (styleName) {
-			default:
-				styleName = 'dark';
+		switch (this.mapStyle) {
 			case 'dark':
 				var style = [{
 				    stylers: [
@@ -640,11 +695,12 @@ BaseLayer.GoogleStreetMap = function(map, mapView)
 						]	
 				},
 				{
-				    featureType: "administrative",
+				    elementType: "labels",
 				    stylers: [
 				      { visibility: "off" }
 				    ]
-				}];
+				}			
+				];
 				break;
 			case 'light':
 				var style = [{
@@ -654,7 +710,14 @@ BaseLayer.GoogleStreetMap = function(map, mapView)
 					      { lightness: 8 },
 					      { gamma: 1.31 }
 					    ]
-				}];
+				},
+				{
+				    elementType: "labels",
+				    stylers: [
+				      { visibility: "off" }
+				    ]
+				}			
+				];
 				break;
 			case 'full':
 				var style = [{
@@ -669,51 +732,101 @@ BaseLayer.GoogleStreetMap = function(map, mapView)
 		};
 		var styledMapType = new google.maps.StyledMapType(stylers, styledMapOptions);
 
-		this.mapObject.mapTypes.set('styled', styledMapType);
-		this.mapObject.setMapTypeId('styled');
+		this.mapLayer.mapObject.mapTypes.set('styled', styledMapType);
+		this.mapLayer.mapObject.setMapTypeId('styled');
+	},
 
-		return styleName;
-	};
+	mapStyles: {
+		'dark': 'Dark', 
+		'light':'Light', 
+		'full': 'Full'
+	},
 
-	return layer;
-}
+});
 
-BaseLayer.CloudMadeStreetMap = function(map, mapView)
+ViewBase.cm = OpenLayers.Class(Baselayer,
 {
-	var layer = new OpenLayers.Layer.CloudMade("CloudMade Street Map", {
-	    key: CLOUDMADE_KEY,
-	    styleId: 68027,
-	    baselayer: true,
-	    eventListeners: {
-	    	loadend: function() {
-				mapView.vent.trigger('mapViewReady');
-	    	}
-	    }
-	});
+	providerName: 'CloudMade',	
+	initMapLayer: function(change)
+	{
+		var self = this;
+		this.mapLayer = this.mapLayer = new OpenLayers.Layer.CloudMade("CloudMade", {
+		    key: CLOUDMADE_KEY,
+		    styleId: this.styleIds[this.mapStyle],
+		    baselayer: true,
+		    eventListeners: {
+		    	loadend: function() {
+		    		if (!change) {
+						self.mapView.vent.trigger('mapViewReady');
+					}
+		    	}
+		    }
+		});
+	},
 
-	layer.setMapStyle = function(styleName) {
-		return styleName;
-	};
+	mapStyles: {
+		'dark': 'Dark', 
+		'light': 'Light', 
+		'full': 'Full'
+	},
 
-	//cloudmade.attribution shoud be '© 2009 CloudMade – Map data CCBYSA 2009 OpenStreetMap.org contributors – Terms of Use';
-	return layer;
-};
+	styleIds: {
+		'dark': 74591,
+		'light': 74513,
+		'full': 998
+	}
+});
 
-BaseLayer.StamenMap = function(map, mapView)
-{	
-	var layer = new OpenLayers.Layer.Stamen("toner-lite", {
-	    baselayer: true,
-	    eventListeners: {
-	    	loadend: function() {
-				mapView.vent.trigger('mapViewReady');
-	    	}
-	    }
-	});
+ViewBase.osm = OpenLayers.Class(Baselayer,
+{
+	providerName: 'OpenStreetMap',
+	initMapLayer: function(change)
+	{
+		var self = this;
+		this.mapLayer = this.mapLayer = new OpenLayers.Layer.OSM(null, null, {
+		    baselayer: true,
+		    eventListeners: {
+		    	loadend: function() {
+		    		if (!change) {
+						self.mapView.vent.trigger('mapViewReady');
+					}
+		    	}
+		    }
+		});
+	},
 
-	layer.setMapStyle = function(styleName) {
-		return styleName;
-	};
+	defaultMapStyle: null
 
-	return layer;
-};
+});
 
+ViewBase.stm = OpenLayers.Class(Baselayer,
+{
+	providerName: 'Stamen',
+	initMapLayer: function(change)
+	{
+		var self = this;
+		this.mapLayer = this.mapLayer = new OpenLayers.Layer.Stamen(this.styleIds[this.mapStyle], {
+		    baselayer: true,
+		    eventListeners: {
+		    	loadend: function() {
+		    		if (!change) {
+						self.mapView.vent.trigger('mapViewReady');
+					}
+		    	}
+		    }
+		});
+	},
+
+	mapStyles: {
+		'dark': 'Toner',
+		'light': 'Toner Lite',
+		'watercolor': 'Watercolor'
+	},
+
+	styleIds: {
+		'dark': 'toner',
+		'light': 'toner-lite',
+		'watercolor': 'watercolor'
+	}
+
+});

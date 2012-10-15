@@ -207,6 +207,55 @@ if (o) {
 	print('Updated Population Density');
 }
 
+o = db.pointcollections.findOne({"title" : {$regex: "^glds00ag.asc"}});
+if (o) {
+	db.pointcollections.update({_id: o._id}, {$set:
+		{
+			"title": "Population Density",
+			"source": "NASA SEDAC GPWv3 (2000)",
+			"unit": "people/km²" 
+		}
+	}, false, true);
+
+	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
+		{colors: [
+			{
+				"color" : "#00C9FF",
+				"absPosition" : "1",
+				"interpolation" : "",
+				"position" : 0
+			},
+			{
+				"color" : "#81ffff",
+				"absPosition" : "5",
+				"interpolation" : "",
+				"position" : 0
+			},
+			{
+				"color" : "#eaff82",
+				"absPosition" : "100",
+				"interpolation" : "",
+				"position" : 0
+			},
+			{
+				"color" : "#ffa582",
+				"absPosition" : "1000",
+				"interpolation" : "",
+				"position" : 0
+			},
+			{
+				"color" : "#ff0033",
+				"absPosition" : "15000",
+				"interpolation" : "",
+				"position" : 0
+			},
+		]}
+	});
+
+
+	print('Updated Population Density');
+}
+
 o = db.pointcollections.findOne({"title" : {$regex: "^glarea.*"}});
 if (o) {
 	db.pointcollections.update({_id: o._id}, {$set:

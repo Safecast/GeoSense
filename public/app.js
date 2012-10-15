@@ -82,13 +82,17 @@ var AppRouter = Backbone.Router.extend({
 		_.bindAll(this, "toggleLayerVisibility");
 		this.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
 
+		_.bindAll(this, "viewOptionsChanged");
+	 	this.vent.bind("viewOptionsChanged", this.viewOptionsChanged);
+
 		this.isEmbedded = window != window.top;
     }, 
 
     mapRoute: function(slug, viewName, pos)
     {
 		var mapViewName,
-			mapStyle,
+			viewBase,
+			viewStyle,
 			center, 
 			zoom;
 
@@ -97,8 +101,11 @@ var AppRouter = Backbone.Router.extend({
 			if (!this.setupRoute) {
 				var split = viewName.split(':');
 				mapViewName = split.shift();
+				if (split.length > 1) {
+					viewBase = split.shift();
+				}
 				if (split.length) {
-					mapStyle = split.shift();
+					viewStyle = split.shift();
 				}
 			} else {
 				$('#app').empty();
@@ -119,8 +126,8 @@ var AppRouter = Backbone.Router.extend({
 			}
 		}
 
-    	console.log('slug:', slug, 'mapViewName:', mapViewName, 'mapStyle:', mapStyle, 'center:', center, 'zoom:', zoom);
-		this.loadAndInitMap(slug, mapViewName, center, zoom, mapStyle);
+    	console.log('slug:', slug, 'mapViewName:', mapViewName, 'viewBase:', viewBase, 'viewStyle:', viewStyle, 'center:', center, 'zoom:', zoom);
+		this.loadAndInitMap(slug, mapViewName, center, zoom, viewBase, viewStyle);
     },
 
     mapAdminRoute: function(slug, viewName, pos)
@@ -152,14 +159,23 @@ var AppRouter = Backbone.Router.extend({
 		}
 	},
 
+	genMapViewParam: function(mapViewName)
+	{
+    	if (!mapViewName || mapViewName == 'map') {
+    		var addBase = this.mapView.viewBase && this.mapView.viewBase != DEFAULT_MAP_VIEW_BASE;
+    		var addStyle = addBase || (this.mapView.viewStyle && this.mapView.viewStyle != this.mapView.defaultViewStyle);
+			mapViewName = this.mapViewName
+				+ (addStyle || addBase ? ':' : '')
+				+ (addBase ? this.mapView.viewBase + ':' : '')
+				+ (addStyle ? (this.mapView.viewStyle ? this.mapView.viewStyle : 'default') : '');
+    	}
+    	return mapViewName;
+	},
+
     genMapURI: function(mapViewName, opts, admin)
     {
     	var admin = (admin || admin == undefined) && this.adminRoute;
-
-    	if (!mapViewName) {
-			mapViewName = this.mapViewName + 
-				(this.mapStyle && this.mapStyle != this.mapView.defaultMapStyle ? ':' + this.mapStyle : '');
-    	}
+    	mapViewName = this.genMapViewParam(mapViewName);
 
     	return genMapURI(this.mapInfo, mapViewName, opts, admin, this.routingByHost ? false : 'publicslug');
     },
@@ -178,7 +194,7 @@ var AppRouter = Backbone.Router.extend({
 			x: visibleMapArea.center[0],
 			y: visibleMapArea.center[1],
 			zoom: visibleMapArea.zoom,
-			mapViewName: 'map'
+			mapViewName: this.genMapViewParam('map')
 		};
 		var defaults = {
 			x: (this.mapInfo.initialArea.center.length ? this.mapInfo.initialArea.center[0] : 0),
@@ -188,7 +204,9 @@ var AppRouter = Backbone.Router.extend({
 		if (defaults.x != opts.x || defaults.y != opts.y || defaults.zoom != opts.zoom) {
 			return opts;
 		}
-		return {};
+		return {
+			mapViewName: opts.mapViewName
+		};
 	},
 
 	genMapURIForVisibleArea: function(visibleMapArea)
@@ -202,7 +220,7 @@ var AppRouter = Backbone.Router.extend({
 
     },
 
-	loadAndInitMap: function(slug, mapViewName, center, zoom, mapStyle)
+	loadAndInitMap: function(slug, mapViewName, center, zoom, viewBase, viewStyle)
 	{
 		var self = this;
 		switch (mapViewName) {
@@ -220,7 +238,7 @@ var AppRouter = Backbone.Router.extend({
 				url: '/api/map/' + slug,
 				success: function(data) {
 					self.initMapInfo(data);
-					self.initMapView(mapViewName, center, zoom, mapStyle);
+					self.initMapView(mapViewName, center, zoom, viewBase, viewStyle);
 				},
 				error: function() {
 					console.error('failed to load map', slug);
@@ -228,7 +246,7 @@ var AppRouter = Backbone.Router.extend({
 			});
 			return;
 		}
-		self.initMapView(mapViewName, center, zoom, mapStyle);
+		self.initMapView(mapViewName, center, zoom, viewBase, viewStyle);
 	},
 
 	initMapInfo: function(mapInfo) 
@@ -290,7 +308,7 @@ var AppRouter = Backbone.Router.extend({
 		return visibleMapArea;
 	},
 
-    initMapView: function(mapViewName, center, zoom, mapStyle) 
+    initMapView: function(mapViewName, center, zoom, viewBase, viewStyle) 
     {
 		var self = this;
 
@@ -332,14 +350,9 @@ var AppRouter = Backbone.Router.extend({
 
 		var mapEl = this.mapView.render().el;
 		$('#app').append(mapEl);
-		this.mapView.start(mapStyle);
+		this.mapView.start(viewBase, viewStyle);
 
-		if (this.mapView.mapStyles) {
-			this.setMapStyle(mapView.mapStyle, false);
-			$('#mapStyle').show();
-		} else {
-			$('#mapStyle').hide();
-		}		
+		this.viewOptionsChanged(this.mapView);
 
         var snap = $('<div class="snap top" /><div class="snap right" />');
 		$(mapEl).append(snap);
@@ -353,29 +366,67 @@ var AppRouter = Backbone.Router.extend({
 		$(this.mapInfoView.el).hide();*/
     },
 
-    setMapStyle: function(mapStyle, navigate)
+	viewOptionsChanged: function(view)
+	{
+		var self = this;
+		if (view == this.mapView) {
+			$("#app").removeClass(function(index, css) {
+			    return (css.match(/\bmap-style-\S+/g) || []).join(' ');
+			});
+
+			if (this.mapView.viewStyles) {
+				$('#app').addClass('map-style-'+this.mapView.viewStyle);
+
+				var li = [];
+				$.each(this.mapView.viewStyles, function(styleName, title) {
+					var s = styleName;
+					li.push('<li' + (s == self.mapView.viewStyle ? ' class="inactive"' : '') + '>'
+						+ '<a href="#' + s + '" data-toggle="dropdown">' 
+						+ title
+						+ '</a></li>');
+				});
+				$('#viewStyle .dropdown-menu').html(li.join(''));
+				$('#viewStyleCurrent').text(this.mapView.viewStyles[this.mapView.viewStyle]);
+				$('#viewStyle').show();
+			} else {
+				$('#viewStyle').hide();
+			}	
+
+			if (this.mapView.viewBase) {
+				var li = [];
+				for (var key in this.mapView.ViewBase) {
+					var cls = this.mapView.ViewBase[key].prototype;
+					li.push('<li' + (key == self.mapView.viewBase ? ' class="inactive"' : '') + '>'
+						+ '<a href="#' + key + '" data-toggle="dropdown">' 
+						+ '<span class="view-base-thumb" style="background: url(/assets/baselayer-thumbs/' + key + '.png)"></span>'
+						+ '<span class="view-base-caption">' + cls.providerName + '</span>'
+						+ '</a></li>');
+				}
+				$('#viewBase .dropdown-menu').html(li.join(''));
+				$('#viewBaseCurrent').text(this.mapView.ViewBase[this.mapView.viewBase].prototype.providerName);
+				$('#viewBaselayer').show();
+			} else {
+				$('#viewBaselayer').hide();
+			}	
+
+		}
+	},
+
+    setViewStyle: function(viewStyle, navigate)
     {
-    	var self = this;
+    	this.vent.trigger('updateViewStyle', viewStyle);
     	if (navigate || navigate == undefined) {
-	    	this.vent.trigger('updateMapStyle', mapStyle);
-			app.navigate(app.genMapURI(app.mapViewName + ':' + mapStyle), {trigger: false});
+			app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
     	}
+	},
 
-		$('#app').removeClass('map-style-'+this.mapStyle);
-		this.mapStyle = this.mapView.mapStyle;
-		$('#app').addClass('map-style-'+this.mapStyle);
-
-		var li = [];
-		$.each(this.mapView.mapStyles, function(styleName, title) {
-			var s = styleName;
-			li.push('<li' + (s == self.mapStyle ? ' class="inactive"' : '') + '>'
-				+ '<a href="#' + s + '" data-toggle="dropdown">' 
-				+ title
-				+ '</a></li>');
-		});
-		$('#mapStyle .dropdown-menu').html(li.join(''));
-		$('#mapStyleCurrent').text(this.mapView.mapStyles[this.mapView.mapStyle]);
-    },
+    setViewBase: function(viewBase, navigate)
+    {
+    	this.vent.trigger('updateViewBase', viewBase);
+    	if (navigate || navigate == undefined) {
+			app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
+    	}
+	},
 
     showMapInfo: function() 
     {

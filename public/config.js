@@ -3,7 +3,7 @@ var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
 var BASE_URL = 'http://' + (!DEV ? 'geosense.herokuapp.com' : 'localhost:3000');
-var CLOUDMADE_KEY = '20ad85b3809a478d914850709a80b3a5';
+var CLOUDMADE_KEY = '0a77f5f7d290465f9fe419f4ee788c50';
 
 var MapStatus = {
 	PRIVATE: 'P',
@@ -58,6 +58,7 @@ var DEFAULT_FEATURE_OPACITY = .75,
 // cropDistribution == true
 var CROP_DISTRIBUTION_RATIO = 1 / 10;
 
+var DEFAULT_MAP_VIEW_BASE = 'gm';
 var DEFAULT_MAP_STYLE = 'dark';
 
 var DEFAULT_MAP_AREA = {

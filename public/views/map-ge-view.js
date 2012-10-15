@@ -11,8 +11,8 @@ window.MapGEView = window.MapViewBase.extend({
 	    this.template = _.template(tpl.get('map-ge'));
 	
 		/*
-		_.bindAll(this, "updateMapStyle");
-	 	options.vent.bind("updateMapStyle", this.updateMapStyle);
+		_.bindAll(this, "updateViewStyle");
+	 	options.vent.bind("updateViewStyle", this.updateViewStyle);
 	
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
@@ -36,7 +36,7 @@ window.MapGEView = window.MapViewBase.extend({
 	getVisibleMapArea: function() {
 	},
 
-	start: function(mapStyle) {
+	start: function(viewStyle) {
 		var self = this;
 							        
 	},

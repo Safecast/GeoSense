@@ -12,7 +12,8 @@ window.HeaderView = Backbone.View.extend({
 		'click #setupButton' : 'setupButtonClicked',
 		'click #graphButton' : 'graphButtonClicked',
 		'click #mapView a' : 'mapViewToggleClicked',
-		'click #mapStyle .dropdown-menu a' : 'mapStyleToggleClicked',
+		'click #viewBase .dropdown-menu a' : 'viewBaseToggleClicked',
+		'click #viewStyle .dropdown-menu a' : 'viewStyleToggleClicked',
 		
 		'keypress input': 'keyEvent',
     },
@@ -79,11 +80,19 @@ window.HeaderView = Backbone.View.extend({
 		evt.preventDefault();
 	},
 
-	mapStyleToggleClicked: function(evt)
+	viewBaseToggleClicked: function(evt)
+	{
+		var link = evt.currentTarget;
+		var viewBase = link.href.split('#')[1];
+		app.setViewBase(viewBase);
+		evt.preventDefault();
+	},
+
+	viewStyleToggleClicked: function(evt)
 	{
 		var link = evt.currentTarget;
 		var style = link.href.split('#')[1];
-		app.setMapStyle(style);
+		app.setViewStyle(style);
 		evt.preventDefault();
 	},
 	
