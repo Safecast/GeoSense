@@ -21,12 +21,14 @@ var clamp180 = function(deg)
 /**
 * Converts a string like ' y.yyy ,  -xx.x' to [x, y]
 */	
-this.latLngWithCommaFromString = function(field) 
+this.latLngWithCommaFromString = function(field, latIndex, lngIndex) 
 {
+	var latI = latIndex != undefined ? latIndex : 0;
+	var lngI = latIndex != undefined ? latIndex : 1;
 	return function() {
 		var match = String(this.get(field)).match(/^\s*([0-9\.\-]+)\s*[,\ ]\s*([0-9\.\-]+)\s*$/);
 		if (match) {
-			return [clamp180(parseFloat(match[2])), clamp180(parseFloat(match[1]))]
+			return [clamp180(parseFloat(match[lngI + 1])), clamp180(parseFloat(match[latI + 1]))]
 		};
 		return new ConversionError();
 	}
@@ -37,13 +39,35 @@ this.latLngWithCommaFromString = function(field)
 */	
 this.smartLatLng = function(field) 
 {
-	var latLngWithCommaFromStringFunc = this.latLngWithCommaFromString(field);
+	var fromStringFuncs = [
+		this.latLngWithCommaFromString('loc'),
+		this.latLngWithCommaFromString('location')
+	];
 	return function() {
-		var val = this.get(field);
-		if (val instanceof Array) {
-			return [clamp180(val[0]), clamp180(val[1])];
+		var lng = this.get('longitude') || this.get('lng') || this.get('lon') || this.get('x'),
+			lat = this.get('latitude') || this.get('lat') || this.get('y');
+		if (!lng || !lat) {
+			var val = this.get('loc') || this.get('location');
+			if (val instanceof Array) {
+				lng = val[0];
+				lat = val[1];
+			}
 		}
-		return latLngWithCommaFromStringFunc.apply(this);
+		if (lng && lat) {
+			lng = parseFloat(lng);
+			lat = parseFloat(lat);
+			if (!isNaN(lng) && !isNaN(lat)) {
+				var a = [clamp180(lng), clamp180(lat)];
+				return a;
+			}
+		}
+		for (var i = 0; i < fromStringFuncs.length; i++) {
+			var conv = fromStringFuncs[i].apply(this);
+			if (!(conv instanceof ConversionError)) {
+				break;
+			}
+		}
+		return conv;
 	}
 };
 
@@ -83,12 +107,19 @@ this.PointConverter =
 {
 	fields: {
 		val: function() {
-			return parseFloat(this.get('val'));
+			var val = this.get('val');
+			if (val) {
+				return parseFloat(val);
+			}
+			return null;
 		}
 		,datetime: function() {
 			var d = Date.parse(String(this.get('date')));
 			return new Date(d);
 		}
-		,loc: this.smartLatLng('loc')
+		,label: function() {
+			return this.get('label') || this.get('name');
+		}
+		,loc: this.smartLatLng()
 	}
 };

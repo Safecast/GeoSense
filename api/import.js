@@ -336,8 +336,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						var model = new Model(doc);
 						var point = conversion.convertModel(model, converter, Point);
 						point.importJob = job;
-						var loc = point.get('loc');
-
+						var loc = point ? point.get('loc') : null;
 						var doSave = point 
 							&& (!params.bounds || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
 							&& (!params.from || point.get('datetime') >= params.from)

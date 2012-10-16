@@ -6,7 +6,7 @@ Point = Backbone.Model.extend({
 	      return {
 			datetime: Date,
 	        loc: [0,0],
-			val: 0,
+			val: null,
 	      };
 	    },
 });

@@ -149,6 +149,8 @@ window.DataViewBase = Backbone.View.extend({
 		this.$(".accordion-toggle").attr("href", "#collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
 		this.$(".collapse").attr("id", "collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
 
+		console.log('updateToggleState', 'bla');
+
 		this.$(".collapse").on('show', function() {
 			self.updateToggleState(true);
 		});
@@ -162,7 +164,7 @@ window.DataViewBase = Backbone.View.extend({
 		
 		this.setParameters();
 		if (!this.visible) {
-			this.$(".collapse").collapse('hide');
+			//this.$(".collapse").collapse('hide');
 		}
 		this.updateToggleState();
 	

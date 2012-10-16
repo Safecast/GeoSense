@@ -31,7 +31,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 		var pointCollection = mapLayer.pointCollection;
 
 		var val = model.get('val');
-		var isAggregate = val.avg != null;
+		var isAggregate = val && val.avg != null;
 		var altVal = model.get('altVal');
 		var label = model.get('label');
 		var datetime = model.get('datetime');

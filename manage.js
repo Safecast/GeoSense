@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-var config = require("./config.js"),
+var path = require('path'),
+	config = require("./config.js"),
 	mongoose = require('mongoose'),
 	models = require('./models.js'),
 	optimist = require('optimist'),
@@ -50,6 +51,13 @@ if (!module.parent) {
 					incremental: args.incremental,
 					bounds: args.bounds
 				});
+				if (!params.format) {
+					var ext = path.extname(params.path || params.url || '').split('.').pop();
+					if (ext && ext != '') {
+						params.format = ext;
+					}
+				}
+
 				if ((params.url || params.path) && params.format && connect()) {
 					api.import.import(params, null, null, exitCallback);
 					break;

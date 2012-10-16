@@ -126,14 +126,16 @@ window.MapViewBase = Backbone.View.extend({
 		var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
 		var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
 		var val = model.get('val');
-		if (val.avg != null) {
+		if (val && val.avg != null) {
 			val = val.avg;
 		}
 		var count = model.get('count');
 		var normVal = (val - min) / (max - min);
 
 		var color;
-		switch (options.colorType) {
+		var colorType = val != null ? options.colorType : ColorType.SOLID;
+
+		switch (colorType) {
 			case ColorType.SOLID: 
 				color = options.colors[0].color;
 				break;
