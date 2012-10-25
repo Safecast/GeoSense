@@ -100,6 +100,8 @@ window.MapViewBase = Backbone.View.extend({
 		this.MapAreaChangedInitially = false;
 		this.vent.trigger("updateGraphCollections", visibleMapArea);
 		this.vent.trigger("mapAreaChanged", visibleMapArea);
+
+		console.log(visibleMapArea.zoom, this.baselayer.map.getNumZoomLevels());
 	},
 
 	/**

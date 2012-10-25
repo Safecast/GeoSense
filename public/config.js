@@ -66,6 +66,8 @@ var DEFAULT_MAP_AREA = {
 	zoom: 0
 };
 
+var MAP_NUM_ZOOM_LEVELS = 20;
+
 if (!IS_BROWSER) {
 	// Not browser: export settings for Node module
 	module.exports = {

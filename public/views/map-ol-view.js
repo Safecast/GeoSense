@@ -64,7 +64,8 @@ window.MapOLView = window.MapViewBase.extend({
 		};
 	},
 
-	start: function(viewBase, viewStyle) {
+	start: function(viewBase, viewStyle) 
+	{
 		var self = this;
 							        
 		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
@@ -75,14 +76,16 @@ window.MapOLView = window.MapViewBase.extend({
 			new OpenLayers.Control.PanZoomBar(),
 			new OpenLayers.Control.Navigation(),
 		];
+		console.log(map_controls);
 		
 		this.map = new OpenLayers.Map({
 		    div: "map_canvas",
-		    projection: new OpenLayers.Projection("EPSG:900913"),
-			displayProjection: new OpenLayers.Projection("EPSG:4326"),
+		    //projection: new OpenLayers.Projection("EPSG:900913"),
+			//displayProjection: new OpenLayers.Projection("EPSG:4326"),
 		    numZoomLevels: 16,
 			minZoomLevel: 3,
-		    maxResolution: maxResolution,
+
+		    //maxResolution: maxResolution,
 			controls: map_controls,
 			scope: this,
 			eventListeners: {
@@ -102,6 +105,23 @@ window.MapOLView = window.MapViewBase.extend({
 		if (DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
 		}
+
+		/*
+
+		var map = this.map = new OpenLayers.Map('map_canvas');
+        
+        var gmap = new OpenLayers.Layer.Google(
+            "Google Streets", // the default
+            {numZoomLevels: 20}
+        );
+
+
+        map.addLayers([gmap]);
+
+		*/
+
+
+
 
 		MapOLView.__super__.start.call(this);
 		this.add30kmtemp();
@@ -557,6 +577,7 @@ window.MapOLView = window.MapViewBase.extend({
 	{
 		var center;
 		var zoom;
+		console.log('setVisibleMapArea', result);
 		
 		switch(result.type) {
 			case 'google':
@@ -658,6 +679,7 @@ ViewBase.gm = OpenLayers.Class(Baselayer,
 			wrapDateLine: true,
 		    sphericalMercator: true,
 			baselayer: true,
+		    numZoomLevels: MAP_NUM_ZOOM_LEVELS
 		});
 
 		if (!change) {
@@ -754,6 +776,7 @@ ViewBase.cm = OpenLayers.Class(Baselayer,
 		    key: CLOUDMADE_KEY,
 		    styleId: this.styleIds[this.mapStyle],
 		    baselayer: true,
+		    numZoomLevels: MAP_NUM_ZOOM_LEVELS,
 		    eventListeners: {
 		    	loadend: function() {
 		    		if (!change) {
@@ -785,6 +808,7 @@ ViewBase.osm = OpenLayers.Class(Baselayer,
 		var self = this;
 		this.mapLayer = this.mapLayer = new OpenLayers.Layer.OSM(null, null, {
 		    baselayer: true,
+		    numZoomLevels: MAP_NUM_ZOOM_LEVELS,
 		    eventListeners: {
 		    	loadend: function() {
 		    		if (!change) {
@@ -807,6 +831,7 @@ ViewBase.stm = OpenLayers.Class(Baselayer,
 		var self = this;
 		this.mapLayer = this.mapLayer = new OpenLayers.Layer.Stamen(this.styleIds[this.mapStyle], {
 		    baselayer: true,
+		    numZoomLevels: MAP_NUM_ZOOM_LEVELS,
 		    eventListeners: {
 		    	loadend: function() {
 		    		if (!change) {

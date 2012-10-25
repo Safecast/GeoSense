@@ -164,7 +164,7 @@ window.DataViewBase = Backbone.View.extend({
 		
 		this.setParameters();
 		if (!this.visible) {
-			//this.$(".collapse").collapse('hide');
+			this.$(".collapse").collapse('hide');
 		}
 		this.updateToggleState();
 	
