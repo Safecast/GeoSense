@@ -10,9 +10,6 @@ window.DataViewBase = Backbone.View.extend({
 
 		'click .color-type:' : 'colorTypeChanged',
 		'click .feature-type:' : 'featureTypeChanged',
-		'click .legend-button:' : 'visibilityChanged',
-		'click .visibility:' : 'visibilityChanged',
-		
 		'click #colorInput' : 'colorInputClicked',
 
 		'click .visibility': 'visibilityChanged'
@@ -146,10 +143,10 @@ window.DataViewBase = Backbone.View.extend({
 		this.updateStatus();
 
 		this.$(".title").html(dataTitle);
+
+		// set attributes to link accordion toggle and body
 		this.$(".accordion-toggle").attr("href", "#collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
 		this.$(".collapse").attr("id", "collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
-
-		console.log('updateToggleState', 'bla');
 
 		this.$(".collapse").on('show', function() {
 			self.updateToggleState(true);
@@ -163,10 +160,6 @@ window.DataViewBase = Backbone.View.extend({
 		}
 		
 		this.setParameters();
-		if (!this.visible) {
-			this.$(".collapse").collapse('hide');
-		}
-		this.updateToggleState();
 	
         return this;
     },
@@ -667,6 +660,7 @@ window.DataViewBase = Backbone.View.extend({
 		}
 
 		this.updateStatus();
+		this.updateToggleState();
 	},
 
 	visibilityChanged: function(evt)

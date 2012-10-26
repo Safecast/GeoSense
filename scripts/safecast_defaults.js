@@ -23,7 +23,7 @@ if (o) {
 				},
 				{
 					"absPosition" : 100, //0.3 * 350,
-					"color" : "#db5dc2",
+					"color" : "#c55ddb",
 					"description": "minor contamination"
 				},
 				{
@@ -42,7 +42,7 @@ if (o) {
 					"description": "evacuation mandatory"
 				},
 				{
-					"absPosition" : 10.0 * 350,
+					"absPosition" : 3500.0,
 					"color" : "#ffff88",
 					"description": "extremely high contamination"
 				}
@@ -80,15 +80,15 @@ if (o) {
 			"featureType" : "B",
 			"colors" : [
 				{
-					"position" : 0,
+					"absPosition" : 4.5,
 					"color" : "#00C9FF"
 				},
 				{
-					"position" : 0.21818181818181817,
+					"absPosition" : 5.5,
 					"color" : "#7fffd0"
 				},
 				{
-					"position" : 0.45,
+					"absPosition" : 6.5,
 					"color" : "#e9ff45"
 				}
 			],
@@ -145,16 +145,20 @@ if (m) {
 		}
 	});
 	print('Updated Map');
-	/*
+	
 	for (var i = 0; i < m.layers.length; i++) {
 		var c = db.pointcollections.findOne({_id: m.layers[i].pointCollection});
-		print(m.layers[i].options);
-		var defaultOpts = db.layeroptions.findOne({_id: c.options});
-		delete defaultOpts['_id'];
-		db.layeroptions.update({_id: m.layers[i].options}, {$set: defaultOpts});
+		var defaultOpts = db.layeroptions.findOne({_id: c.defaults});
+		var opts = db.layeroptions.findOne({_id: m.layers[i].options});
+		for (var k in defaultOpts) {
+			if (k != '_id') {
+				opts[k] = defaultOpts[k];
+			}
+		}
+		db.layeroptions.update({_id: opts._id}, opts);
 		print('reset options for '+c.title);
 	}
-	*/
+	
 }
 
 o = db.pointcollections.findOne({"title" : {$regex: "^glp00.*"}});

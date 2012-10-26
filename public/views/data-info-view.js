@@ -152,12 +152,12 @@ window.DataInfoView = window.PanelViewBase.extend({
 			this.setPanelState(true);	
 			var collapsible = $('.collapse', legend);
 			$('.detail', collapsible).show();
-			// hide first to prevent flicker
-			collapsible.collapse('hide');
-			collapsible.collapse('show');
+			if (!collapsible.is('.in')) {
+				//collapsible.collapse('show');
+			}
 			this.$('.data-legend .collapse').each(function() {
 				if (this != collapsible[0]) {
-					$(this).collapse('hide');
+					//$(this).collapse('hide');
 					$('.detail', this).hide();
 				}
 			});

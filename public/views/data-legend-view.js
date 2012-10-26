@@ -24,10 +24,18 @@ window.DataLegendView = window.DataViewBase.extend({
 		if (pointCollectionId != this.mapLayer.pointCollection._id) return;
 		DataLegendView.__super__.toggleLayerVisibility.call(this, pointCollectionId, state);
 		
+		var collapsible = this.$('.collapse');
 		if (this.visible) {
 			$(this.el).css('opacity', 1);
+			if (!collapsible.is('.in')) {
+				collapsible.collapse('show');
+			}
 		} else {
 			$(this.el).css('opacity', .4);
+			if (collapsible.is('.in')) {
+				// TODO: disables the collabsible -- it can't be expanded after this call
+				collapsible.collapse('hide');
+			}
 		}
 	}
 
