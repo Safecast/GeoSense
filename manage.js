@@ -2,7 +2,6 @@
 
 var path = require('path'),
 	config = require("./config.js"),
-	mongoose = require('mongoose'),
 	models = require('./models.js'),
 	optimist = require('optimist'),
 	API = require('./api/main.js'),
@@ -16,25 +15,6 @@ if (!module.parent) {
 
 	console.log('GeoSense command-line utility');
 	
-	var connect = function() {
-		console.info('*** connecting to db ***', config.DB_PATH);
-		return mongoose.connect(config.DB_PATH);
-	};
-
-	var exitCallback = function(err, showHelp) {
-		if (showHelp) {
-			console.log(help);
-		}
-	    console.log('');
-		if (err) {
-			if (config.DEV) {
-				throw(err);
-			}
-			process.exit(1);
-		}
-		process.exit(0);
-	};
-
 	var runCommand = function(objectId) {
 		switch (args._[0]) {
 			case 'import':
@@ -58,11 +38,11 @@ if (!module.parent) {
 					}
 				}
 
-				if ((params.url || params.path) && params.format && connect()) {
-					api.import.import(params, null, null, exitCallback);
+				if ((params.url || params.path) && params.format && utils.connectDB()) {
+					api.import.import(params, null, null, utils.exitCallback);
 					break;
 				}
-				exitCallback(false, true);
+				utils.exitCallback(false, help);
 				break;
 			case 'sync':
 				var params = utils.deleteUndefined({
@@ -79,12 +59,12 @@ if (!module.parent) {
 					incremental: args.incremental,
 					bounds: args.bounds
 				});
-				if (params.pointCollectionId && connect()) {
-					api.import.sync(params, null, null, exitCallback);
+				if (params.pointCollectionId && utils.connectDB()) {
+					api.import.sync(params, null, null, utils.exitCallback);
 					break;
 				}
 			default:
-				exitCallback(false, true);
+				utils.exitCallback(false, help);
 		}
 	}
 
@@ -95,14 +75,14 @@ if (!module.parent) {
 			runCommand(objectId);
 		} else {
 			var title = args._[1];
-			connect();
+			utils.connectDB();
 			models.PointCollection.findOne({title: title}, function(err, result) {
 				if (err) {
-					exitCallback(err);
+					utils.exitCallback(err);
 					return;
 				}
 				if (!result) {
-					exitCallback(new Error('PointCollection not found: ' + title));
+					utils.exitCallback(new Error('PointCollection not found: ' + title));
 					return;
 				}
 				runCommand(result._id.toString());

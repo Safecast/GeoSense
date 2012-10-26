@@ -12,6 +12,7 @@
 		"express": "2.5.8",
 		"mongodb": "0.9.9-5",
 		"mongoose": "2.5.10",
+		"mongojs": "0.4.5",
 		"node-minify": "0.4.1",
 		"ntwitter": "0.2.10",
 		"oauth": "0.9.6",

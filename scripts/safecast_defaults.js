@@ -10,7 +10,7 @@ if (o) {
 			"altUnit": ["μSv/h"],
 		}
 	}, false, true);
-	db.layeroptions.update({_id: o.defaults}, {$set: 
+	var safecastOptions = {$set: 
 		{
 			"visible" : true,
 			"featureType" : "C",
@@ -18,7 +18,7 @@ if (o) {
 				{
 					"absPosition" : 10,
 					"color" : "#0785a8",
-					"interpolation": "threshold",
+					//"interpolation": "threshold",
 					"description": "basically no contamination"
 				},
 				{
@@ -58,7 +58,8 @@ if (o) {
 				}
 			]
 		}
-	});
+	};
+	db.layeroptions.update({_id: o.defaults}, safecastOptions);
 
 	print('Updated Safecast');
 }
@@ -144,6 +145,16 @@ if (m) {
 		}
 	});
 	print('Updated Map');
+	/*
+	for (var i = 0; i < m.layers.length; i++) {
+		var c = db.pointcollections.findOne({_id: m.layers[i].pointCollection});
+		print(m.layers[i].options);
+		var defaultOpts = db.layeroptions.findOne({_id: c.options});
+		delete defaultOpts['_id'];
+		db.layeroptions.update({_id: m.layers[i].options}, {$set: defaultOpts});
+		print('reset options for '+c.title);
+	}
+	*/
 }
 
 o = db.pointcollections.findOne({"title" : {$regex: "^glp00.*"}});

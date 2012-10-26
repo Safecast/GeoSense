@@ -1,7 +1,8 @@
 var config = require('./config.js'),
     mailer = require('mailer'),
     fs = require('fs'),
-    _ = require('cloneextend');
+    _ = require('cloneextend'),
+    mongoose = require('mongoose');
 
 /**
 * Simple Python-style string formatting.
@@ -60,6 +61,12 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
     });
 }
 
+exports.connectDB = function(callback) {
+    console.info('*** connecting to db ***', config.DB_PATH);
+    return mongoose.connect(config.DB_PATH, callback);
+};
+
+
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
     if (err) {
@@ -96,6 +103,21 @@ exports.import = function(into, mod) {
     }
     return mod;
 }
+
+exports.exitCallback = function(err, showHelp) {
+    if (showHelp) {
+        console.log(showHelp);
+    }
+    console.log('');
+    if (err) {
+        if (config.DEV) {
+            throw(err);
+        }
+        process.exit(1);
+    }
+    process.exit(0);
+};
+
 
 // TODO: Due to a mongodb bug, counting is really slow even if there is 
 // an index: https://jira.mongodb.org/browse/SERVER-1752
