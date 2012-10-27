@@ -8,6 +8,7 @@ if (o) {
 			"source": "Safecast.org",
 			"unit": "cpm",
 			"altUnit": ["μSv/h"],
+			"sync": true
 		}
 	}, false, true);
 	var safecastOptions = {$set: 

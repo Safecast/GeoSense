@@ -124,6 +124,7 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     progress: Number,
     numBusy: Number,
     reduce: Boolean,
+    sync: Boolean,
     cropDistribution: Boolean,
     createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
     modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
