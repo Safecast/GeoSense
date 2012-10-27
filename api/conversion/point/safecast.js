@@ -20,6 +20,7 @@ this.PointConverter = {
 	fields: {
 		val: function() {
 			var val = parseFloat(this.get('Value')) * (this.get('Unit') == 'cpm' ? 1.0 : 350.0);
+			// filter out corrupt values
 			if (isNaN(val) || val < 0 || val > 50000) {
 				return new ConversionError('Invalid Value'); 
 			}
@@ -29,7 +30,12 @@ this.PointConverter = {
 			return [parseFloat(this.get('value'))] / (this.get('unit') == 'cpm' ? 350.0 : 1.0);
 		}*/
 		,datetime: function() {
-			return new Date(this.get('Captured Time'));
+			var d = new Date(this.get('Captured Time'));
+			// filter out corrupt dates
+			if (d.getFullYear() == 1969) {
+				return new ConversionError('Invalid Captured Time');
+			}
+			return d;
 		}
 		,loc: this.locFromFields(['lng', 'Longitude'], ['lat', 'Latitude'])
 		,sourceId: function() {

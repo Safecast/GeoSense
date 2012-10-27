@@ -124,6 +124,7 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     progress: Number,
     numBusy: Number,
     reduce: Boolean,
+    maxReduceZoom: Number,
     sync: Boolean,
     cropDistribution: Boolean,
     createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },

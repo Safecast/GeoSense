@@ -8,7 +8,8 @@ if (o) {
 			"source": "Safecast.org",
 			"unit": "cpm",
 			"altUnit": ["μSv/h"],
-			"sync": true
+			"sync": true,
+			"maxReduceZoom": 17
 		}
 	}, false, true);
 	var safecastOptions = {$set: 
@@ -137,14 +138,14 @@ if (m) {
 			"description": 'Safecast is a global project working to empower people with data, primarily by mapping environmental data, enabling people to both contribute and freely use the data collected. Through joint efforts with partners such as International Medcom, Keio University, The John S. and James L. Knight Foundation and GlobalGiving, Safecast has been building a radiation sensor network comprised of static and mobile sensors actively deployed in Japan, as well as elsewhere around the world.\n\nSafecast supports the idea that more data – freely available data – is better. This map displays data collected by Safecast volunteers since March 2011. To download this dataset, or for more information about Safecast, <a href="http://blog.safecast.org/about/">please visit the main site</a>.',
 			"twitter": "safecast",
 			"linkURL": "http://blog.safecast.org/about/",
-			"linkTitle": "About Safecast",
+			"linkTitle": "Safecast website",
 			"host" : "map.safecast.org",
 			"initialArea" : {
 				"center" : [
 					140.17260417661612,
 					36.94429246653226
 				],
-				"zoom" : 5
+				"zoom" : 8
 			},
 		}
 	});

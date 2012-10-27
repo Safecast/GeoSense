@@ -256,7 +256,7 @@ var PointAPI = function(app)
 					utils.modelCount(Point, {'pointCollection': req.params.pointcollectionid}, function(err, c) {
 						fullCount = c;
 						// TODO: should count points in all boxes and not reduce if < 1000
-						reduce = reduce && zoom < 14;
+						reduce = reduce && (!pointCollection.maxReduceZoom || zoom <= pointCollection.maxReduceZoom);
 						if (reduce) {
 							collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
 							PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);

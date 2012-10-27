@@ -482,7 +482,7 @@ cur.forEach(function(collection) {
 	if (collection.reduce) {
 		for (var g in config.GRID_SIZES) {
 			var grid_size = config.GRID_SIZES[g];
-			if (!collection.gridSize || grid_size > collection.gridSize) {
+			if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
 			print('*** reducing original for grid = '+g+' ***');
 
 				reducePoints(collection._id, {
