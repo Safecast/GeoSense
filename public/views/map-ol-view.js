@@ -425,7 +425,7 @@ window.MapOLView = window.MapViewBase.extend({
 		ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 		var geometry;
 
-		var radius = 30000, numSegments = 35;
+		var radius = 30000, numSegments = 50;
 
 		var wkt = wktCircle(ctr, radius, radius, numSegments);
 		var geometry = OpenLayers.Geometry.fromWKT(wkt);
