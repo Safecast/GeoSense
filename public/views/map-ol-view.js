@@ -68,22 +68,16 @@ window.MapOLView = window.MapViewBase.extend({
 	{
 		var self = this;
 							        
-		var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
-		    restrictedExtent = maxExtent.clone(),
-		    maxResolution = 156543.0339;
-		
 		map_controls = [ 
 			new OpenLayers.Control.PanZoomBar(),
 			new OpenLayers.Control.Navigation(),
 		];
-		console.log(map_controls);
 		
 		this.map = new OpenLayers.Map({
 		    div: "map_canvas",
-		    //projection: new OpenLayers.Projection("EPSG:900913"),
-			//displayProjection: new OpenLayers.Projection("EPSG:4326"),
-		    numZoomLevels: 16,
-			minZoomLevel: 3,
+		    projection: new OpenLayers.Projection("EPSG:900913"),
+			displayProjection: new OpenLayers.Projection("EPSG:4326"),
+		    numZoomLevels: MAP_NUM_ZOOM_LEVELS,
 
 		    //maxResolution: maxResolution,
 			controls: map_controls,
@@ -95,12 +89,24 @@ window.MapOLView = window.MapViewBase.extend({
             }
 		});	
 
+		//var extent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508);
+		//this.map.setOptions({restrictedExtent: extent});
+
 		this.updateViewBase(viewBase, viewStyle);
 				
 		var scaleLine = new OpenLayers.Control.ScaleLine();
         this.map.addControl(scaleLine);		
 
         this.map.addControl(new OpenLayers.Control.Attribution());		
+
+        var r = this.baselayer.mapLayer.resolutions;
+        var res = [];
+        for (var i = 0; i < r.length; i++) {
+			var p = new OpenLayers.Geometry.Point(r[i], 0);
+			res.push(p.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).x);
+
+        }
+        console.log(res);
 		
 		if (DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
