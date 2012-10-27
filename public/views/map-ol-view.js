@@ -402,7 +402,7 @@ window.MapOLView = window.MapViewBase.extend({
 	add30kmtemp: function()
 	{
 		var style = new OpenLayers.Style({
-		    strokeColor: '#ffffff',
+		    strokeColor: '#999999',
 		    pointRadius: 7,
 		    fillOpacity: 0,
 		    strokeOpacity: .8,
@@ -625,6 +625,7 @@ window.MapOLView = window.MapViewBase.extend({
     */
 });
 
+
 var Baselayer = window.MapOLView.prototype.Baselayer = OpenLayers.Class(
 {
 	initialize: function(map, mapView, mapStyle)
@@ -671,6 +672,7 @@ var Baselayer = window.MapOLView.prototype.Baselayer = OpenLayers.Class(
 	defaultMapStyle: DEFAULT_MAP_STYLE,
 	mapStyle: null
 });
+
 
 var ViewBase = window.MapOLView.prototype.ViewBase = {};
 
@@ -768,7 +770,7 @@ ViewBase.gm = OpenLayers.Class(Baselayer,
 		'dark': 'Dark', 
 		'light':'Light', 
 		'full': 'Full'
-	},
+	}
 
 });
 
@@ -804,6 +806,7 @@ ViewBase.cm = OpenLayers.Class(Baselayer,
 		'light': 74513,
 		'full': 998
 	}
+
 });
 
 ViewBase.osm = OpenLayers.Class(Baselayer,
