@@ -67,6 +67,13 @@ window.HeaderView = Backbone.View.extend({
 			app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
 			return false;
 		});
+		if (this.mapInfo.linkURL) {
+			this.$('#authorLink').show();
+			this.$('#authorLink a').attr('href', this.mapInfo.linkURL);
+			this.$('#authorLink .text').text(this.mapInfo.linkTitle || this.mapInfo.title);
+		} else {
+			this.$('#authorLink').hide();
+		}
 		this.$('.brand').html('<h1>GeoSense</h1><h3>' + this.mapInfo.title + '</h3>');
 	},
 

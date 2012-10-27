@@ -167,6 +167,7 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
     description: String,
     author: String,
     linkURL: String,
+    linkTitle: String,
     twitter: String,
     displayInfo: Boolean,
     adminslug: {type: String, required: true, index: {unique: true}},

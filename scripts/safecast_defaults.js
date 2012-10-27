@@ -56,7 +56,8 @@ if (o) {
 					"unit": 'μSv/h',
 					"eq": '%(val)f/350'
 				}
-			]
+			],
+			"datetimeFormat": "%Y/%m/%d"
 		}
 	};
 	db.layeroptions.update({_id: o.defaults}, safecastOptions);
@@ -76,7 +77,7 @@ if (o) {
 	}, false, true);
 	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
 		{
-			"visible" : true,
+			"visible" : false,
 			"featureType" : "B",
 			"colors" : [
 				{
@@ -94,6 +95,7 @@ if (o) {
 			],
 			"colorType" : "L",
 			"opacity" : 0.3,
+			"datetimeFormat": "%Y/%m"
 		}
 	});
 	print('Updated Earthquakes');
@@ -134,6 +136,7 @@ if (m) {
 			"description": 'Safecast is a global project working to empower people with data, primarily by mapping environmental data, enabling people to both contribute and freely use the data collected. Through joint efforts with partners such as International Medcom, Keio University, The John S. and James L. Knight Foundation and GlobalGiving, Safecast has been building a radiation sensor network comprised of static and mobile sensors actively deployed in Japan, as well as elsewhere around the world.\n\nSafecast supports the idea that more data – freely available data – is better. This map displays data collected by Safecast volunteers since March 2011. To download this dataset, or for more information about Safecast, <a href="http://blog.safecast.org/about/">please visit the main site</a>.',
 			"twitter": "safecast",
 			"linkURL": "http://blog.safecast.org/about/",
+			"linkTitle": "About Safecast",
 			"host" : "map.safecast.org",
 			"initialArea" : {
 				"center" : [
