@@ -32,7 +32,7 @@ var config = {
 	GRID_SIZES: {
 	},
 
-	GRID_SIZE_PIXELS: 16,
+	GRID_SIZE_PIXELS: 15,
 
 	HISTOGRAM_SIZES: [222, 100, 30],
 

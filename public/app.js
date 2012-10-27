@@ -59,6 +59,7 @@ var AppRouter = Backbone.Router.extend({
 		this.pointCollections = {};
 		this.timeBasedPointCollections = {};
 		this.isRendered = false;
+		this.mapLayersInitialized = false;
 
 		this.settingsVisible = true;
 		this.graphVisible = false;
@@ -67,7 +68,9 @@ var AppRouter = Backbone.Router.extend({
 
 		this.vent = _.extend({}, Backbone.Events);
 		this.vent.bind('mapViewReady', function() {
-			self.initMapLayers();
+			if (!self.mapLayersInitialized) {
+				self.initMapLayers();
+			}
 		});
 
 		this.adminRoute = false;
@@ -513,6 +516,7 @@ var AppRouter = Backbone.Router.extend({
 				this.initMapLayer(this.mapInfo.layers[i].pointCollection._id)
 			}
 		}
+		this.mapLayersInitialized = true;
 	},
 
 	initMapLayer: function(pointCollectionId)

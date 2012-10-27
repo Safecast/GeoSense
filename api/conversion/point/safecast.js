@@ -19,7 +19,11 @@ this.locFromFields = function(lngFields, latFields)
 this.PointConverter = {
 	fields: {
 		val: function() {
-			return parseFloat(this.get('Value')) * (this.get('Unit') == 'cpm' ? 1.0 : 350.0);
+			var val = parseFloat(this.get('Value')) * (this.get('Unit') == 'cpm' ? 1.0 : 350.0);
+			if (isNaN(val) || val < 0 || val > 50000) {
+				return new ConversionError('Invalid Value'); 
+			}
+			return val;
 		}
 		/*,altVal: function() {
 			return [parseFloat(this.get('value'))] / (this.get('unit') == 'cpm' ? 350.0 : 1.0);

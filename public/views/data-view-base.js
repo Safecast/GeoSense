@@ -79,6 +79,12 @@ window.DataViewBase = Backbone.View.extend({
 							total: formatLargeNumber(this.collection.fullCount)
 						});
 	    			}
+	    			if (this.mapLayer.pointCollection.sync) {
+						status += ' <span class="small">' + __('(updated %(date)s)', {
+							date: new Date(this.mapLayer.pointCollection.updatedAt)
+								.format(locale.formats.DATE_SHORT)
+						}) + '</span>';
+	    			}
     			} else {
     				status = '';
     			}

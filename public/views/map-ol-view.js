@@ -635,7 +635,7 @@ var Baselayer = window.MapOLView.prototype.Baselayer = OpenLayers.Class(
 		this.initMapLayer();
 	},
 
-	initMapLayer: function(mapStyle, change)
+	initMapLayer: function(change)
 	{
 	},
 
@@ -661,7 +661,7 @@ var Baselayer = window.MapOLView.prototype.Baselayer = OpenLayers.Class(
 	{
 		if (this.mapLayer) {
 			this.map.removeLayer(this.mapLayer);
-			this.initMapLayer();
+			this.initMapLayer(true);
 			this.map.addLayer(this.mapLayer);
 		}
 		return true;
