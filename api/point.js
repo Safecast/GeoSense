@@ -99,15 +99,14 @@ var PointAPI = function(app)
 						reduce = false;
 						grid_size = pointCollection.gridSize;
 					}
-					console.log('*********** zoom ' + zoom + ', grid size ' + grid_size+' '+pointCollection.gridSize);
+					console.log('*********** zoom ' + zoom + ', grid size ' + grid_size);
 					var collectionName;
 					var pointQuery;
 					var boxes;
 
 					if (urlObj.query.b && urlObj.query.b.length == 4) {
 						var b = urlObj.query.b;
-						console.log('bounds:');	
-						console.log(b);
+						console.log('bounds:', b);	
 
 						for (var i = 0; i < 4; i++) {
 							b[i] = parseFloat(b[i]) || 0;
@@ -138,8 +137,7 @@ var PointAPI = function(app)
 							];
 						}
 
-						console.log('query within boxes: '+boxes.length);
-						console.log(boxes);
+						console.log('query within boxes: ', boxes.length, boxes);
 					}
 
 					var PointModel;
@@ -192,6 +190,7 @@ var PointAPI = function(app)
 											label: reduced.label
 										};
 									} else {
+										console.log(datasets[i].get('sourceId'),'********');
 										var p = {
 											val: datasets[i].get('val'),
 											altVal: datasets[i].get('altVal'),

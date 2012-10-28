@@ -26,16 +26,12 @@ this.PointConverter = {
 			}
 			return val;
 		}
-		/*,altVal: function() {
-			return [parseFloat(this.get('value'))] / (this.get('unit') == 'cpm' ? 350.0 : 1.0);
-		}*/
 		,datetime: function() {
-			var d = new Date(this.get('Captured Time'));
-			// filter out corrupt dates
-			if (d.getFullYear() == 1969) {
+			var d = this.get('Captured Time');
+			if (d == null || d == '') {
 				return new ConversionError('Invalid Captured Time');
 			}
-			return d;
+			return new Date(d);
 		}
 		,loc: this.locFromFields(['lng', 'Longitude'], ['lat', 'Latitude'])
 		,sourceId: function() {
