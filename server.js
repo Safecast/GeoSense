@@ -10,45 +10,37 @@ var application_root = __dirname,
 
 var templates;
 var port = process.env.PORT || 3000;
-var app = express.createServer();
+var app = express();
 
 console.log('*** connecting to db ***', config.DB_PATH);
 mongoose.connect(config.DB_PATH);
 
+
 app.configure(function() {
 	app.use(express.static(__dirname + '/public'));
 	app.use(express.logger('dev'));
- 	app.use(express.bodyParser());
+  	app.use(express.compress());
 	app.use(express.methodOverride());
+ 	app.use(express.bodyParser());
 	app.use(express.cookieParser());
 	app.use(express.session({ secret: "keyboard cat" }));	
   	app.use(app.router);
   	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+	
+	/*
+	// TODO: Proper error handling with friendly error pages
+	function errorHandler(err, req, res, next) {
+		console.error(err.stack);
+		res.send(500, 'Something broke!');
+	}
+	app.use(errorHandler);
+	*/
+  	
   	app.set('views', path.join(application_root, "views"));
 });
 
 var API = require('./api/main.js');
 new API(app);
-
-/*
-// TODO: Implement proper error handling with friendly 404 und 500 pages
-
-function NotFound(msg){
-	this.name = 'NotFound';
-	Error.call(this, msg);
-	Error.captureStackTrace(this, arguments.callee);
-}
-NotFound.prototype.__proto__ = Error.prototype;
-
-app.error(function(err, req, res, next){
-	console.log('app error', err);
-    if (err instanceof NotFound) {
-        res.send('404 template');
-    } else {
-        next(err);
-    }
-});
-*/
 
 function serveHome(req, res)
 {

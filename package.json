@@ -9,7 +9,7 @@
   		"v8-profiler":"3.6.2beta2",
     	"csv":"0.0.13",
 		"datejs":"0.0.2",
-		"express": "2.5.8",
+		"express": "3.0.0",
 		"mongodb": "0.9.9-5",
 		"mongoose": "2.5.10",
 		"mongojs": "0.4.5",
@@ -26,6 +26,7 @@
 		"optimist": "0.3.4",
 		"JSONStream": "0.3.1",
 		"request": "2.9.203",
-		"cron": "1.0.1"
+		"cron": "1.0.1",
+		"node-compress": "0.1.0"
   }
 }
