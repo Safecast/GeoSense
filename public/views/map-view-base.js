@@ -160,7 +160,7 @@ window.MapViewBase = Backbone.View.extend({
 				normVal: normVal,
 				count: count,
 			},
-			size: count / this.collections[collectionId].maxCount
+			size: count / this.collections[collectionId].maxReducedCount
 		}, collectionId);
     },
 

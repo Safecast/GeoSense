@@ -34,7 +34,8 @@ MapPointCollection = Backbone.Collection.extend({
     parse: function(resp, xhr) {
     	if (resp['items']) {
     		this.fullCount = resp.fullCount;
-    		this.maxCount = resp.maxCount;
+    		this.maxReducedCount = resp.maxReducedCount;
+    		this.resultCount = resp.resultCount;
     		this.originalCount = resp.originalCount;
     		this.gridSize = resp.gridSize;
     		resp = resp['items'];

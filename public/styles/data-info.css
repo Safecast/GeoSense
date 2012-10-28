@@ -9,6 +9,12 @@
 	-webkit-border-radius:4px;
 }
 
+.data-info .updated {
+	display: inline-block;
+	float: right;
+	color: #666;
+}
+
 .unit .nav-pills {
     margin: 0 auto !important;
     padding: 0 !important;

@@ -147,7 +147,7 @@ var PointAPI = function(app)
 					var points = [];
 					var queryExecuted = false; 
 					var originalCount = 0;
-					var maxCount = 0;
+					var maxReducedCount = 0;
 					var fullCount;
 
 					var dequeueBoxQuery = function() {
@@ -160,7 +160,8 @@ var PointAPI = function(app)
 							var data = {
 								fullCount: fullCount,
 								originalCount: originalCount,
-								maxCount: maxCount,
+								resultCount: points.length,
+								maxReducedCount: maxReducedCount,
 								absMinVal: pointCollection.minVal,
 								absMaxVal: pointCollection.maxVal,
 								gridSize: grid_size,
@@ -205,7 +206,7 @@ var PointAPI = function(app)
 									}
 									points.push(p);
 									originalCount += p.count;
-									maxCount = Math.max(maxCount, p.count);
+									maxReducedCount = Math.max(maxReducedCount, p.count);
 								}
 								queryExecuted = true;
 								dequeueBoxQuery();
@@ -247,7 +248,7 @@ var PointAPI = function(app)
 									var p = datasets[i].value;
 									points.push(p);
 									originalCount += p.count;
-									maxCount = Math.max(maxCount, p.count);
+									maxReducedCount = Math.max(maxReducedCount, p.count);
 								}
 								queryExecuted = true;
 								dequeueBoxQuery();
