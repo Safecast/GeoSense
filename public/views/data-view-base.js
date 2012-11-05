@@ -546,7 +546,7 @@ window.DataViewBase = Backbone.View.extend({
 			$(segments[i]).text(val);
 		}
 
-		if (!this.hasNumbers) {
+		if (!hasNumbers) {
 			this.$('.legend .unit').hide();
 		} else {
 			this.$('.legend .unit').show();

@@ -35,16 +35,16 @@ Running Dev server
 Mongo dumping and cloning
 =========================
 
-	mongodump -d geo -o ./dump
-	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p PASSWORD --drop ./dump/geo/
+	mongodump -d geo -o ~/tmp/dump
+	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p PASSWORD --drop .~/tmp/dump/geo/
 
 For dev server:
 	
-	mongorestore -d geo  --drop ./dump/geo/
+	mongorestore -d geo  --drop .~/tmp/dump/geo/
 
 For prod server:
 
-	 mongorestore -h penny.mongohq.com:10065 -d app4772485 -u safecast -p PASSWORD --drop ./dump/geo/
+	 mongorestore -h penny.mongohq.com:10065 -d app4772485 -u safecast -p PASSWORD --drop .~/tmp/dump/geo/
 
 
 Executing reduction script
