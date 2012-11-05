@@ -365,6 +365,7 @@ var AppRouter = Backbone.Router.extend({
 
         this.mapInfoView = new MapInfoView({vent: this.vent, mapInfo: this.mapInfo});
         this.mapInfoView.render();
+
 		/*$(mapEl).append(this.mapInfoView.render().el);
 		$(this.mapInfoView.el).hide();*/
     },
@@ -517,6 +518,11 @@ var AppRouter = Backbone.Router.extend({
 			}
 		}
 		this.mapLayersInitialized = true;
+        if (this.mapInfo.tour && this.mapInfo.tour.steps.length) {
+			var mapEl = this.mapView.el;
+	        this.mapTourView = new MapTourView({vent: this.vent, mapInfo: this.mapInfo});
+			$(mapEl).append(this.mapTourView.render().el);
+        }
 	},
 
 	initMapLayer: function(pointCollectionId)
@@ -681,7 +687,7 @@ var AppRouter = Backbone.Router.extend({
 
 tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'map-ge', 'header',
 	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share'],
+	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share', 'map-tour'],
     function () {
         app = new AppRouter();
         if (!Backbone.history.start({ pushState: true })) {

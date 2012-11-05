@@ -72,19 +72,21 @@ window.DataViewBase = Backbone.View.extend({
 		var progress = this.mapLayer.pointCollection.progress;
     	switch (this.mapLayer.pointCollection.status) {
     		case DataStatus.COMPLETE:
-    			if (this.mapLayer.sessionOptions.visible) {
-	    			if (this.collection.originalCount != undefined) {
-						status = __('%(number)i of %(total)i', {
-							number: formatLargeNumber(this.collection.originalCount),
-							total: formatLargeNumber(this.collection.fullCount)
-						});
-		    			if (this.mapLayer.pointCollection.sync) {
-							status += ' <span class="updated micro">' + __('updated %(date)s', {
-								date: new Date(this.mapLayer.pointCollection.updatedAt)
-									.format(locale.formats.DATE_SHORT)
-							}) + '</span>';
-		    			}
-		    		}
+    			if (this.mapLayer.sessionOptions.visible && this.collection.originalCount != undefined) {
+					status = __('%(number)i of %(total)i', {
+						number: formatLargeNumber(this.collection.originalCount),
+						total: formatLargeNumber(this.collection.fullCount)
+					});
+	    			if (this.mapLayer.pointCollection.sync) {
+						status += ' <span class="updated micro">' + __('updated %(date)s', {
+							date: new Date(this.mapLayer.pointCollection.updatedAt)
+								.format(locale.formats.DATE_SHORT)
+						}) + '</span>';
+	    			}
+					//$('.download-collection.' + collection.pointCollectionId).attr('href', collection.url());
+					var url = app.mapView.collections[this.mapLayer.pointCollection._id].url();
+					status += ' <a target="_blank" class="download-collection ' + this.mapLayer.pointCollection._id +'" href="' 
+						+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
     			} else {
     				status = '';
     			}
@@ -174,6 +176,7 @@ window.DataViewBase = Backbone.View.extend({
 	{	
 		var self = this;
 		var graphEl = self.$('.histogram');
+		graphEl.show();
 
 		if (!graphEl.length) return;
 		
@@ -227,7 +230,7 @@ window.DataViewBase = Backbone.View.extend({
 
 		var yValues = [];
 
-		var gradient = new ColorGradient(this.histogramColors || this.colors, 'threshold');
+		var gradient = new ColorGradient(this.histogramColors || this.colors/*, 'threshold'*/);
 
 		var histMaxY;
 
@@ -477,7 +480,9 @@ window.DataViewBase = Backbone.View.extend({
 		}
 
 		if (rebuildColorBar && this.$('.color-bar').length) {
-			this.initHistogram();
+			if (this.mapLayer.options.histogram) {
+				this.initHistogram();
+			}
 			var items = [];
 			for (var i = 0; i < this.colors.length; i++) {
 				var baseColor = this.colors[i].color;
@@ -510,29 +515,41 @@ window.DataViewBase = Backbone.View.extend({
 			&& (this.colorType == ColorType.LINEAR_GRADIENT || this.colorType == ColorType.PALETTE);
 		var segments = this.$('.color-bar .segment');
 		var valFormatter = this.mapLayer.sessionOptions.valFormatter;
+		var hasNumbers = false;
 
 		for (var i = 0; i < this.colors.length; i++) {
 			var val;
-			if (isGradient) {
-				val = valFormatter.format(
-					this.mapLayer.pointCollection.minVal + this.colors[i].position * 
-					(this.mapLayer.pointCollection.maxVal - this.mapLayer.pointCollection.minVal));
-				if (i == this.colors.length - 1 && this.colors[i].position < 1) {
-					val += '+';
-				}			
+			if (!this.colors[i].title) {
+				hasNumbers = true;
+				if (isGradient) {
+					val = valFormatter.format(
+						this.mapLayer.pointCollection.minVal + this.colors[i].position * 
+						(this.mapLayer.pointCollection.maxVal - this.mapLayer.pointCollection.minVal));
+					if (i == this.colors.length - 1 && this.colors[i].position < 1) {
+						val += '+';
+					}			
+				} else {
+					val = valFormatter.format(this.mapLayer.pointCollection.minVal) 
+						+ '–' 
+						+ valFormatter.format(this.mapLayer.pointCollection.maxVal);
+				}
+				if (i == 0) {
+					val = UnitFormat.LEGEND.format({
+						value: val, 
+						unit: this.mapLayer.pointCollection.unit
+					});
+				}		
 			} else {
-				val = valFormatter.format(this.mapLayer.pointCollection.minVal) 
-					+ '–' 
-					+ valFormatter.format(this.mapLayer.pointCollection.maxVal);
+				val = this.colors[i].title;
 			}
-			if (i == 0) {
-				val = UnitFormat.LEGEND.format({
-					value: val, 
-					unit: this.mapLayer.pointCollection.unit
-				});
-			}		
 
 			$(segments[i]).text(val);
+		}
+
+		if (!this.hasNumbers) {
+			this.$('.legend .unit').hide();
+		} else {
+			this.$('.legend .unit').show();
 		}
 	},
 

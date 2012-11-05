@@ -22,8 +22,23 @@ window.DataInfoView = window.PanelViewBase.extend({
 		_.bindAll(this, "toggleValFormatter");
 	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
 
+		_.bindAll(this, "enableLayers");
+	 	this.vent.bind("enableLayers", this.enableLayers);
+
 	 	this.visibleDetailModels = {};
     },
+
+    enableLayers: function(indexes)
+    {
+    	for (var i = app.mapInfo.layers.length - 1; i >= 0; i--) {
+    		var el = this.$('.data-legend.' + app.mapInfo.layers[i].pointCollection._id);
+    		if (indexes.indexOf(i) != -1) {
+    			el.show();
+    		} else {
+    			el.hide();
+    		}
+    	}
+    }, 
 
     compileDetailDataForModel: function(pointCollectionId, model)
     {
@@ -36,18 +51,23 @@ window.DataInfoView = window.PanelViewBase.extend({
 		var label = model.get('label');
 		var datetime = model.get('datetime');
 		var count = model.get('count');
-		var maxDate = new Date(isAggregate ? datetime.max : datetime).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
-		var minDate = new Date(isAggregate ? datetime.min : datetime).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT);
+		var maxDate = isAggregate ? datetime.max : datetime;
+		var minDate = isAggregate ? datetime.min : datetime;
+
+		var maxDateFormatted = maxDate ? 
+			new Date(maxDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
+		var minDateFormatted = minDate ? 
+			new Date(minDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
 
 		var valFormatter = mapLayer.sessionOptions.valFormatter;
 
 		var data = [];
 
-		if (minDate) {
-			var formattedDate = minDate != maxDate ? __('%(minDate)s–%(maxDate)s', {
-					minDate: minDate,
-					maxDate: maxDate
-				}) : minDate;
+		if (minDateFormatted) {
+			var formattedDate = minDateFormatted != maxDateFormatted ? __('%(minDate)s–%(maxDate)s', {
+					minDate: minDateFormatted,
+					maxDate: maxDateFormatted
+				}) : minDateFormatted;
 		} else {
 			var formattedDate = '';
 		}
@@ -66,6 +86,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 			label: valFormatter.unit, 
 			value: valFormatter.format(isAggregate ? val.avg : val)
 		});
+		console.log(data);
 
 		/*
 		TODO: Fix with formatters
@@ -83,7 +104,7 @@ window.DataInfoView = window.PanelViewBase.extend({
 
 		var metadata = pointCollection.reduce ? [
 			{
-				label: __('# of samples'),
+				label: __('no. of ') + (mapLayer.options.itemTitlePlural || 'samples'),
 				value: formatLargeNumber(count)
 			}
 		] : [];

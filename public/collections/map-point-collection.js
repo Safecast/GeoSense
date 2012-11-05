@@ -6,10 +6,10 @@ MapPointCollection = Backbone.Collection.extend({
 		return point.get('datetime');
 	},
 	
-	initialize: function(options) {
-						
+	initialize: function(options) 
+	{
 		this.pointCollectionId = options.pointCollectionId;
-		this.baseUrl = '/api/mappoints/' + this.pointCollectionId;
+		this.baseUrl = '/api/mappoints/' + options.mapId + '/' + this.pointCollectionId;
 		this.mapLayer = options.mapLayer;
 		this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 		this.visibleMapAreaFetched = false;

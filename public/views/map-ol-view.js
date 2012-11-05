@@ -18,6 +18,9 @@ window.MapOLView = window.MapViewBase.extend({
 	
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
+
+		_.bindAll(this, "enableLayers");
+	 	this.vent.bind("enableLayers", this.enableLayers);
 				
 		Feature = OpenLayers.Feature.Vector;
 		Geometry = OpenLayers.Geometry;
@@ -106,7 +109,6 @@ window.MapOLView = window.MapViewBase.extend({
 			res.push(p.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).x);
 
         }
-        console.log(res);
 		
 		if (DEBUG) {
 			this.map.addControl(new OpenLayers.Control.MousePosition());
@@ -279,6 +281,9 @@ window.MapOLView = window.MapViewBase.extend({
             },
             getBubbleRadius: function(feature) {
                 return MIN_BUBBLE_SIZE + feature.attributes.size * (MAX_BUBBLE_SIZE - MIN_BUBBLE_SIZE) / 2;
+            },
+            getStrokeWidth: function(feature) {
+                return MIN_POLYGON_STROKE_WIDTH + feature.attributes.size * (MAX_POLYGON_STROKE_WIDTH - MIN_POLYGON_STROKE_WIDTH);
             }
         };
 
@@ -326,6 +331,35 @@ window.MapOLView = window.MapViewBase.extend({
 				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
 				    strokeOpacity: 0
 				}, {context: context});
+
+				layer = new OpenLayers.Layer.Vector(null, {
+					//projection: new OpenLayers.Projection("EPSG:4326"),
+					//sphericalMercator: true,
+				    styleMap: new OpenLayers.StyleMap({
+				        "default": style,
+				        "temporary": temporaryStyle,
+				        "select": selectStyle
+				    }),
+				    renderers: ["Canvas"],
+				    wrapDateLine: true
+				});
+
+				break;
+
+			case FeatureType.POLYGONS:
+			
+				var style = new OpenLayers.Style({
+				    fillColor: '${getColor}',
+				    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
+				    strokeOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
+				    strokeColor: '${getColor}',
+				    strokeWidth: '${getStrokeWidth}',
+				}, {context: context});
+
+				var selectStyle = new OpenLayers.Style(_.extend(selectStyle, {
+				    strokeColor: '${getColor}',
+				    strokeWidth: '${getStrokeWidth}'
+				}), {context: context});
 
 				layer = new OpenLayers.Layer.Vector(null, {
 					//projection: new OpenLayers.Projection("EPSG:4326"),
@@ -448,9 +482,11 @@ window.MapOLView = window.MapViewBase.extend({
     	var collection = this.collections[collectionId];
 
     	var loc = model.get('loc');
+    	var extra = model.get('extra');
 		var lng = loc[0];
 		var lat = loc[1];
 		var pt = new OpenLayers.Geometry.Point(lng, lat);
+		var pts;
 		var geometry;
 
 		switch(collection.mapLayer.options.featureType) {
@@ -460,21 +496,33 @@ window.MapOLView = window.MapViewBase.extend({
 				geometry = pt;
 				break;
 
+			case FeatureType.POLYGONS:
+				// tmp
+				if (extra && extra.min && extra.min.endLoc) {
+					pts = [
+						pt,
+						new OpenLayers.Geometry.Point(extra.min.endLoc[0], extra.min.endLoc[1])
+					];
+				}
+
 			case FeatureType.CELLS:
-				var gw = collection.gridSize / 2;
-				var pts = [
-					new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
-					new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),
-					new OpenLayers.Geometry.Point(pt.x + gw, pt.y + gw),
-					new OpenLayers.Geometry.Point(pt.x + gw, pt.y - gw)
-				];
-				var corners = [];
+				if (!pts) {
+					var gw = collection.gridSize / 2;
+					pts = [
+						new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
+						new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),
+						new OpenLayers.Geometry.Point(pt.x + gw, pt.y + gw),
+						new OpenLayers.Geometry.Point(pt.x + gw, pt.y - gw)
+					];
+				}
+
+				var strPts = [];
 				for (var i = 0; i < pts.length; i++) {
 					var pt = pts[i];
 					pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-					corners.push(pt.x+' '+pt.y);
+					strPts.push(pt.x+' '+pt.y);
 				}
-				var wkt = 'POLYGON(' + corners.join(', ') + ')';
+				var wkt = 'POLYGON(' + strPts.join(', ') + ')';
 				var geometry = OpenLayers.Geometry.fromWKT(wkt);
 				break;
 		}
@@ -504,6 +552,16 @@ window.MapOLView = window.MapViewBase.extend({
 	{	
 		this.featureLayers[pointCollectionId].setVisibility(state);
 	},
+
+    enableLayers: function(indexes)
+    {
+    	for (var i = app.mapInfo.layers.length - 1; i >= 0; i--) {
+    		var visible = indexes.indexOf(i) != -1;
+    		var pointCollectionId = app.mapInfo.layers[i].pointCollection._id;
+			this.featureLayers[pointCollectionId].setVisibility(visible);
+    		//this.vent.trigger('toggleLayerVisibility', pointCollectionId, visible);
+    	}
+    }, 
 	
 	updateViewBase: function(viewBase, viewStyle)
 	{

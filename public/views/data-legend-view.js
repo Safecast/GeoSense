@@ -16,7 +16,9 @@ window.DataLegendView = window.DataViewBase.extend({
 	 },
 
 	dataInfoViewResized: function(options) {
-		this.initHistogram();
+		if (this.mapLayer.options.histogram) {
+			this.initHistogram();
+		}
 	},
 
 	toggleLayerVisibility: function(pointCollectionId, state)

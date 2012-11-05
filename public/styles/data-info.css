@@ -15,6 +15,10 @@
 	color: #666;
 }
 
+.data-legend .histogram {
+	display: none;
+}
+
 .unit .nav-pills {
     margin: 0 auto !important;
     padding: 0 !important;
@@ -174,7 +178,7 @@ s}
 	width: 50%;
 	line-height: 1em;
 	padding: 0 .25em 0 0;
-	white-space: nowrap;
+	white-space: auto;
 }
 
 .data-info .value-label.single {
@@ -182,6 +186,7 @@ s}
 	text-align: center;
 	font-weight: bold;
 	border-radius: 4px;
+	white-space: auto;
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
 }

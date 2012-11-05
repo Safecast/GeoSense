@@ -39,7 +39,7 @@ app.configure(function() {
   	app.set('views', path.join(application_root, "views"));
 });
 
-var API = require('./api/main.js');
+var API = require('./api');
 new API(app);
 
 function serveHome(req, res)

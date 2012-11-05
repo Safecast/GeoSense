@@ -428,41 +428,46 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		});
 	};
 
-	if (!params.append) {
-		console.info('*** Creating new collection ***');
-		var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
-		for (var key in config.COLLECTION_DEFAULTS) {
-			if (params[key]) {
-				defaults[key] = params[key];
-			}
-		}
-		defaults.save(function(err, res) {
-			if (err) {
-				console.error(err.message);
-				if (res) {
-					res.send('server error', 500);
-					if (callback) {
-						callback(err);
-					}
+	var converterInit = converter.init || function(callback) {
+		callback();
+	};
+	converterInit(function() {
+		if (!params.append) {
+			console.info('*** Creating new collection ***');
+			var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
+			for (var key in config.COLLECTION_DEFAULTS) {
+				if (params[key]) {
+					defaults[key] = params[key];
 				}
-				return;
 			}
-			runImport(new PointCollection({
-				defaults: defaults._id,
-				title: params.title || path.basename(params.url || params.path),
-				description: params.description,
-				unit: "",
-				progress: 0,
-			}));
-		});
+			defaults.save(function(err, res) {
+				if (err) {
+					console.error(err.message);
+					if (res) {
+						res.send('server error', 500);
+						if (callback) {
+							callback(err);
+						}
+					}
+					return;
+				}
+				runImport(new PointCollection({
+					defaults: defaults._id,
+					title: params.title || path.basename(params.url || params.path),
+					description: params.description,
+					unit: "",
+					progress: 0,
+				}));
+			});
 
-	} else {
-		console.info('*** Appending to collection ***', params.append);
-		PointCollection.findOne({_id: params.append}, function(err, collection) {
-			if (!self.validateExistingCollection(err, collection, callback)) return;
-			runImport(collection);
-		});
-	}
+		} else {
+			console.info('*** Appending to collection ***', params.append);
+			PointCollection.findOne({_id: params.append}, function(err, collection) {
+				if (!self.validateExistingCollection(err, collection, callback)) return;
+				runImport(collection);
+			});
+		}
+	});
 }
 
 ImportAPI.prototype.sync = function(params, req, res, callback) 

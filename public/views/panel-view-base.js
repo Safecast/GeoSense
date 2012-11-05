@@ -21,13 +21,20 @@ window.PanelViewBase = Backbone.View.extend({
 		}
 	},
 
+	setTitle: function(string)
+	{
+		this.$('h3').html(string);
+	},
+
     render: function() {
+    	console.log(this);
 		$(this.el).html(this.template());
 		var self = this;
 
 		$(this.el).draggable({
 			start: function() {
 				//$(this).css('right', 'auto');
+				$(this).css('bottom', 'auto');
 			},
 			stop: function() {
 				var right = $(this).position().left + $(this).outerWidth();				

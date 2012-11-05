@@ -21,7 +21,8 @@ DataStatus = {
 var FeatureType = {
 	POINTS: 'P',
 	CELLS: 'C',
-	BUBBLES: 'B' 
+	BUBBLES: 'B',
+	POLYGONS: 'Y' 
 };
 
 FeatureType.DEFAULT = FeatureType.CELLS;
@@ -52,7 +53,9 @@ var DEFAULT_FEATURE_OPACITY = .75,
 	DEFAULT_SELECTED_STROKE_COLOR = '#eee',
 	DEFAULT_POINT_RADIUS = 7,
 	DEFAULT_POINT_STROKE_WIDTH = 1,
-	DEFAULT_SELECTED_STROKE_WIDTH = 2;
+	DEFAULT_SELECTED_STROKE_WIDTH = 2,
+	MIN_POLYGON_STROKE_WIDTH = 2,
+	MAX_POLYGON_STROKE_WIDTH = DEFAULT_POINT_RADIUS * 4;
 
 // the higher this ratio, the more cropping of extreme high values in histograms if
 // cropDistribution == true

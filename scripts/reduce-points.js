@@ -164,13 +164,72 @@ var ReductionKey = {
 	}
 };
 
+ReductionKey.Connections = function() {
+	this.get = function(loc, doc) {
+		return [
+			Math.min(doc.extra.start_station, doc.extra.end_station) + '-' + Math.max(doc.extra.start_station, doc.extra.end_station),
+			loc
+		];
+	};
+	this.name = 'connections';
+	this.index = function(collection, field_name) {
+		var index = {};
+		index[field_name] = '2d';
+		collection.ensureIndex(index);
+		return (collectionHasIndex(collection, index));
+	}
+	return this;
+};
+
+ReductionKey.ConnectionsGender = function() {
+	this.get = function(loc, doc) {
+		return [
+			Math.min(doc.extra.start_station, doc.extra.end_station) + '-' + Math.max(doc.extra.start_station, doc.extra.end_station) 
+				+ '-' + doc.extra.gender,
+			loc
+		];
+	};
+	this.name = 'connections_gender';
+	this.index = function(collection, field_name) {
+		var index = {};
+		index[field_name] = '2d';
+		collection.ensureIndex(index);
+		return (collectionHasIndex(collection, index));
+	}
+	return this;
+};
+
+ReductionKey.ConnectionsSocial = function(useGender, minutesApart) {
+	this.minutesApart = minutesApart || 1;
+	this.useGender = useGender;
+	this.get = function(loc, doc) {
+		t = doc.datetime;
+		var min = t.getUTCMinutes();
+		min -= min % this.minutesApart;
+		return [
+			doc.extra.start_station + '-' + doc.extra.end_station
+				+ '-' + t.getFullYear()+''+lpad(t.getMonth(), '0', 2)+''+lpad(t.getUTCDate(), '0', 2)+'-'+lpad(t.getUTCHours(), '0', 2)+':'+lpad(min, '0', 2)
+				+ (this.useGender ? '-' + doc.extra.gender : ''),
+			loc
+		];
+	};
+	this.name = 'connections_social' + (useGender ? '_gender' : '');
+	this.index = function(collection, field_name) {
+		var index = {};
+		index[field_name] = '2d';
+		collection.ensureIndex(index);
+		return (collectionHasIndex(collection, index));
+	}
+	return this;
+};
+
 var runGridReduce = function(collection, reduced_collection, value_fields, reduction_keys, indexes, options) {
 	var map = function() {
 		var keyValues = [];
 		var e = {count: 1};
 		for (var k in reduction_keys) {
 			var f = reduction_keys[k].get || reduction_keys[k];
-			var keyValue = f.call(reduction_keys[k], this[k]);
+			var keyValue = f.call(reduction_keys[k], this[k], this);
 			if (!keyValue) return;
 			if (keyValue instanceof Array) {
 				keyValues.push(keyValue[0]);
@@ -191,7 +250,7 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 							min: this[value_field][v],
 							max: this[value_field][v]
 						};
-						if (isNumber(this[value_field][v])) {
+						if (isNumber(this[value_field][v]) || value_field == 'extra') {
 							e[value_field][v].sum = this[value_field][v];
 						}
 					}
@@ -200,7 +259,7 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 						min: this[value_field],
 						max: this[value_field]
 					};
-					if (isNumber(this[value_field])) {
+					if (isNumber(this[value_field]) || value_field == 'extra') {
 						e[value_field].sum = this[value_field];
 					}
 				}
@@ -231,12 +290,22 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 						}
 					}
 				} else {
-					reduced[value_field] = {
-						min: null,
-						max: null
-					};
-					if (values[0][value_field].sum != null) {
-						reduced[value_field].sum = 0;
+					if (value_field == 'extra') {
+						reduced[value_field] = {
+							min: {},
+							max: {}
+						};
+						if (values[0][value_field].sum != null) {
+							reduced[value_field].sum = {};
+						}
+					} else {
+						reduced[value_field] = {
+							min: null,
+							max: null
+						};
+						if (values[0][value_field].sum != null) {
+							reduced[value_field].sum = 0;
+						}
 					}
 				}
 			}
@@ -254,6 +323,24 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 							}
 							if (r[v].min == null || r[v].min > doc[value_field][v].min) r[v].min = doc[value_field][v].min;
 							if (r[v].max == null || r[v].max < doc[value_field][v].max) r[v].max = doc[value_field][v].max;
+						}
+					} else if (value_field == 'extra') {
+						for (var objKey in doc[value_field].min) {
+							var vMin = doc[value_field].min[objKey];
+							var vMax = doc[value_field].max[objKey];
+							if (r.min[objKey] == undefined || r.min[objKey] > vMin) r.min[objKey] = vMin;
+							if (r.max[objKey] == undefined || r.max[objKey] < vMax) r.max[objKey] = vMax;
+							if (doc[value_field].sum != null) {
+								var vSum = doc[value_field].sum[objKey];
+								if (isNumber(vSum)) {
+									if (!r.sum[objKey]) {
+										r.sum[objKey] = 0;
+									}
+									r.sum[objKey] += vSum;
+								} else {
+									delete r.sum[objKey];
+								}
+							}
 						}
 					} else {
 						if (doc[value_field].sum != null) {
@@ -283,7 +370,14 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 					}
 				} else {
 					if (value[value_field].sum != null) {
-						value[value_field].avg = value[value_field].sum / value.count;
+						if (value_field == 'extra') {
+							value[value_field].avg = {};
+							for (var objKey in value[value_field].sum) {
+								value[value_field].avg[objKey] = value[value_field].sum[objKey] / value.count;
+							}
+						} else {
+							value[value_field].avg = value[value_field].sum / value.count;
+						}
 					}
 				}
 			}
@@ -399,7 +493,7 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields, re
 		}
 	}
 	if (!value_fields) {
-		value_fields = ['val', 'altVal', 'datetime', 'label'];
+		value_fields = ['val', 'altVal', 'datetime', 'label', 'extra'];
 	}
 	if (!opts.scope) {
 		opts.scope = {};
@@ -480,34 +574,59 @@ cur.forEach(function(collection) {
 	} 
 
 	if (collection.reduce) {
-		for (var g in config.GRID_SIZES) {
-			var grid_size = config.GRID_SIZES[g];
-			if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
-			print('*** reducing original for grid = '+g+' ***');
 
-				reducePoints(collection._id, {
-					pointCollection: ReductionKey.copy, 
-					loc: new ReductionKey.LocGrid(grid_size)
-				}, opts);
-				
-				if (config.REDUCE_SETTINGS.TIME_BASED) {
-					reducePoints({
-						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size), 
-						datetime: new ReductionKey.Weekly()
-					}, opts);
-					
-					reducePoints({
-						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size), 
-						datetime: new ReductionKey.Yearly()
-					}, opts);
+		if (collection.title == 'Trips') {
 
-					reducePoints({
+			// tmp
+			print('*** special reductions ***');
+			reducePoints(collection._id, {
+				pointCollection: ReductionKey.copy, 
+				loc: new ReductionKey.ConnectionsSocial(true)
+			}, opts);
+			reducePoints(collection._id, {
+				pointCollection: ReductionKey.copy, 
+				loc: new ReductionKey.ConnectionsSocial()
+			}, opts);
+			reducePoints(collection._id, {
+				pointCollection: ReductionKey.copy, 
+				loc: new ReductionKey.Connections()
+			}, opts);
+			reducePoints(collection._id, {
+				pointCollection: ReductionKey.copy, 
+				loc: new ReductionKey.ConnectionsGender()
+			}, opts);
+
+
+		} else {
+			for (var g in config.GRID_SIZES) {
+				var grid_size = config.GRID_SIZES[g];
+				if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
+				print('*** reducing original for grid = '+g+' ***');
+
+					reducePoints(collection._id, {
 						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size), 
-						datetime: new ReductionKey.Daily()
+						loc: new ReductionKey.LocGrid(grid_size)
 					}, opts);
+		
+					if (config.REDUCE_SETTINGS.TIME_BASED) {
+						reducePoints({
+							pointCollection: ReductionKey.copy, 
+							loc: new ReductionKey.LocGrid(grid_size), 
+							datetime: new ReductionKey.Weekly()
+						}, opts);
+						
+						reducePoints({
+							pointCollection: ReductionKey.copy, 
+							loc: new ReductionKey.LocGrid(grid_size), 
+							datetime: new ReductionKey.Yearly()
+						}, opts);
+
+						reducePoints({
+							pointCollection: ReductionKey.copy, 
+							loc: new ReductionKey.LocGrid(grid_size), 
+							datetime: new ReductionKey.Daily()
+						}, opts);
+					}
 				}
 			}
 		}

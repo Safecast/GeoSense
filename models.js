@@ -42,6 +42,7 @@ this.Point = mongoose.model('Point', new mongoose.Schema({
     loc: {type: [Number], index: '2d', required: true},
     val: {type: Number, index: 1},
     altVal: [mongoose.Schema.Types.Mixed],
+    extra: mongoose.Schema.Types.Mixed,
     label: String,
     url: String,
     datetime: {type: Date, index: 1},
@@ -90,15 +91,27 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
         color: {type: String, required: true},
         position: Number,
         absPosition: Number,
-        interpolation: String
+        interpolation: String,
+        label: String
     }],
+    reduction: String,
     opacity: Number,
+    featureSizeAttr: String,
+    featureColorAttr: String,
     datetimeFormat: String,
     valFormat: [{
         unit: {type: String, required: true},
         eq: {type: String, required: true},
         formatString: String
     }],
+    filterQuery: mongoose.Schema.Types.Mixed,
+    queryOptions: mongoose.Schema.Types.Mixed,
+    title: String,
+    description: String,
+    histogram: {type: mongoose.Schema.Types.Mixed, default: true},
+    itemTitle: String,
+    itemTitlePlural: String
+
     /*altValFormat: [{
         unit: {type: String, required: true},
         eq: {type: String, required: true},
@@ -132,6 +145,7 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     createdAt: Date,
     updatedAt: Date,
     lastReducedAt: Date,
+    linkedPointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: false, index: 1 },
 }));
 
 this.PointCollection.schema.plugin(useTimestamps);
@@ -186,7 +200,14 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
     createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
     modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    tour: {
+        steps: [{
+        layers: [Number],
+        title: String,
+        body: String
+        }]
+    }
 }));
 
 this.Map.schema.plugin(useTimestamps);

@@ -4,7 +4,7 @@ var path = require('path'),
 	config = require("./config.js"),
 	models = require('./models.js'),
 	optimist = require('optimist'),
-	API = require('./api/main.js'),
+	API = require('./api'),
 	utils = require('./utils.js'),
 	console = require('./ext-console.js');
 
@@ -14,6 +14,17 @@ if (!module.parent) {
     	help = 'Usage: node api.js [command] [options]';
 
 	console.log('GeoSense command-line utility');
+
+	/*
+	var runCommand = function(args) {
+		for (var i = 0; i < api.cli.commands.length; i++) {
+			if (cmdName == api.cli.commands[i]) {
+				api.cli[cmdName].apply(api, args, utils.exitCallback);
+				break;
+			}
+		}
+	}
+	*/
 	
 	var runCommand = function(objectId) {
 		switch (args._[0]) {
@@ -63,6 +74,10 @@ if (!module.parent) {
 					api.import.sync(params, null, null, utils.exitCallback);
 					break;
 				}
+			case 'mapreduce':
+				var params = {};
+				api.mapReduce.mapReduce(params, null, null, utils.exitCallback);
+				break;
 			default:
 				utils.exitCallback(false, help);
 		}

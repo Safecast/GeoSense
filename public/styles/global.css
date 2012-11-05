@@ -136,6 +136,27 @@ h1 {
 	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
 }
 
+.panel.map-tour {
+	width: 720px;
+	top: auto;
+	right: auto;
+	left: 80px;
+	bottom: 40px;
+}
+
+.panel.map-tour .btn.next {
+	float: right;
+}
+
+.panel.map-tour a.close {
+	display: none;
+}
+
+.panel.map-tour .step-buttons, .panel.map-tour .step-body {
+	margin-bottom: 1em;
+}
+
+
 .map-style-dark .panel {
 	color: #999;
 	background-color:rgba(0,0,0,.5);

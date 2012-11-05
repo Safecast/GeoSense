@@ -115,11 +115,25 @@ this.PointConverter =
 		}
 		,datetime: function() {
 			var d = Date.parse(String(this.get('date')));
-			return new Date(d);
+			if (d) {
+				return new Date(d);
+			}
+			return null;
 		}
 		,label: function() {
 			return this.get('label') || this.get('name');
 		}
 		,loc: this.smartLatLng()
+		,sourceId: function() {
+			var id = this.get('sourceId');
+			if (id) {
+				numId = parseInt(id);
+				if (!isNaN(numId)) {
+					return numId;
+				}
+				return id;
+			}
+			return null;
+		}
 	}
 };

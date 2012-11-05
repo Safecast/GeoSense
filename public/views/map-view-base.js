@@ -100,8 +100,6 @@ window.MapViewBase = Backbone.View.extend({
 		this.MapAreaChangedInitially = false;
 		this.vent.trigger("updateGraphCollections", visibleMapArea);
 		this.vent.trigger("mapAreaChanged", visibleMapArea);
-
-		console.log(visibleMapArea.zoom, this.baselayer.map.getNumZoomLevels());
 	},
 
 	/**
@@ -131,11 +129,12 @@ window.MapViewBase = Backbone.View.extend({
 		if (val && val.avg != null) {
 			val = val.avg;
 		}
-		var count = model.get('count');
-		var normVal = (val - min) / (max - min);
-
-		var color;
-		var colorType = val != null ? options.colorType : ColorType.SOLID;
+		var count = model.get('count'),
+			normVal = (val - min) / (max - min),
+			normCount = count / this.collections[collectionId].maxReducedCount,
+			color,
+			colorType = val != null ? options.colorType : ColorType.SOLID,
+			size;
 
 		switch (colorType) {
 			case ColorType.SOLID: 
@@ -147,6 +146,16 @@ window.MapViewBase = Backbone.View.extend({
 					.colorAt(normVal, COLOR_GRADIENT_STEP);
 				break;
 		}
+
+		switch (options.featureSizeAttr) {
+			default:
+			case 'count':
+				size = normCount;
+				break;
+			case 'val':
+				size = normVal;
+				break
+		};
 
 		this.addFeatureToLayer(model, {
 			pointCollectionId: collectionId,
@@ -160,7 +169,7 @@ window.MapViewBase = Backbone.View.extend({
 				normVal: normVal,
 				count: count,
 			},
-			size: count / this.collections[collectionId].maxReducedCount
+			size: size
 		}, collectionId);
     },
 

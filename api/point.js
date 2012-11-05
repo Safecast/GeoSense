@@ -3,10 +3,12 @@ var config = require('../config.js'),
 	permissions = require("../permissions.js"),
 	utils = require("../utils.js"),
 	url = require('url'),
-	mongoose = require('mongoose');
+	mongoose = require('mongoose'),
+	_ = require('cloneextend');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
+	Map = models.Map,
 	handleDbOp = utils.handleDbOp;
 
 var PointAPI = function(app) 
@@ -17,7 +19,7 @@ var PointAPI = function(app)
 				if (!err && pointCollection) {
 					collectionName = 'r_points_hist-' + config.HISTOGRAM_SIZES[0];
 					var Model = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
-					var query = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+					var query = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 					console.log(query);
 					Model.find(query, function(err, datasets) {
 						if (err) {
@@ -69,222 +71,290 @@ var PointAPI = function(app)
 			});
 		});
 
-		app.get('/api/mappoints/:pointcollectionid', function(req, res) {
+		app.get('/api/mappoints/:mapid/:pointcollectionid', function(req, res) {
 
-			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
-				if (!err && pointCollection) {
-					var urlObj = url.parse(req.url, true);
-
-					zoom = parseInt(urlObj.query.z) || 0;
-					if (isNaN(zoom) || zoom < 0) {
-						zoom = 0;
-					}
-					if (zoom >= config.GRID_SIZES.length) {
-						zoom = config.GRID_SIZES.length - 1;
-					}
-					grid_size = config.GRID_SIZES[zoom];
-
-					var time_grid = false;
-					switch (urlObj.query.t) {
-						case 'y':
-							time_grid = 'yearly';
+//			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
+			Map.findOne({_id: req.params.mapid})
+				.populate('layers.pointCollection')
+				.populate('layers.options')
+				.populate('createdBy')
+				.populate('modifiedBy')
+				.run(function(err, map) {
+					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
+					var pointCollection, mapLayer;
+					for (var i = map.layers.length - 1; i >= 0; i--) {
+						if (map.layers[i].pointCollection._id == req.params.pointcollectionid) {
+							mapLayer = map.layers[i];
+							pointCollection = mapLayer.pointCollection;
 							break;
-						case 'w':
-							time_grid = 'weekly';
-							break;
-						case 'd':
-							time_grid = 'daily';
-							break;
+						}
 					}
 
-					var reduce = pointCollection.get('reduce');
-					if (pointCollection.gridSize && grid_size < pointCollection.gridSize) {
-						reduce = false;
-						grid_size = pointCollection.gridSize;
-					}
-					console.log('*********** zoom ' + zoom + ', grid size ' + grid_size);
-					var collectionName;
-					var pointQuery;
-					var boxes;
+					if (!err && pointCollection) {
+						var urlObj = url.parse(req.url, true);
 
-					if (urlObj.query.b && urlObj.query.b.length == 4) {
-						var b = urlObj.query.b;
-						console.log('bounds:', b);	
+						zoom = parseInt(urlObj.query.z) || 0;
+						if (isNaN(zoom) || zoom < 0) {
+							zoom = 0;
+						}
+						if (zoom >= config.GRID_SIZES.length) {
+							zoom = config.GRID_SIZES.length - 1;
+						}
+						grid_size = config.GRID_SIZES[zoom];
 
-						for (var i = 0; i < 4; i++) {
-							b[i] = parseFloat(b[i]) || 0;
-							b[i] = b[i] + (i < 2 ? -grid_size / 2 : grid_size / 2);
+						var time_grid = false;
+						switch (urlObj.query.t) {
+							case 'y':
+								time_grid = 'yearly';
+								break;
+							case 'w':
+								time_grid = 'weekly';
+								break;
+							case 'd':
+								time_grid = 'daily';
+								break;
 						}
 
-						// Mongo currently doesn't handle the transition around the dateline (x = +-180)
-						// This, if the bounds contain the dateline, we need to query for the box to 
-						// the left and the box to the right of it. 
-						if (b[0] < -180) {
-							boxes = [
-								[[180 + b[0] % 180, b[1]], [180, b[3]]],
-								[[-180, b[1]], [b[2], b[3]]]
-							];
-						} else if (b[2] > 180) {
-							boxes = [
-								[[b[0], b[1]], [180, b[3]]],
-								[[-180, b[1]], [-180 + b[2] % 180, b[3]]]
-							];
-						} else if (b[0] > b[2]) {
-							boxes = [
-								[[b[0], b[1]], [180, b[3]]],
-								[[-180, b[1]], [b[2], b[3]]]
-							];
-						} else {
-							boxes = [
-								[[b[0], b[1]], [b[2], b[3]]]
-							];
+						var reduce = pointCollection.get('reduce');
+						if (pointCollection.gridSize && grid_size < pointCollection.gridSize) {
+							reduce = false;
+							grid_size = pointCollection.gridSize;
 						}
+						console.log('*** zoom ' + zoom + ', grid size ' + grid_size);
+						var collectionName;
+						var pointQuery;
+						var boxes;
 
-						console.log('query within boxes: ', boxes.length, boxes);
-					}
+						if (urlObj.query.b && urlObj.query.b.length == 4) {
+							var b = urlObj.query.b;
+							console.log('bounds:', b);	
 
-					var PointModel;
-					var points = [];
-					var queryExecuted = false; 
-					var originalCount = 0;
-					var maxReducedCount = 0;
-					var fullCount;
-
-					var dequeueBoxQuery = function() {
-						if (queryExecuted && (!boxes || boxes.length == 0)) {
-							if (reduce) {
-								console.log('Found '+points.length+' reduction points for '+originalCount+' original points.');
-							} else {
-								console.log('Found '+points.length+' points.');
+							for (var i = 0; i < 4; i++) {
+								b[i] = parseFloat(b[i]) || 0;
+								b[i] = b[i] + (i < 2 ? -grid_size / 2 : grid_size / 2);
 							}
-							var data = {
-								fullCount: fullCount,
-								originalCount: originalCount,
-								resultCount: points.length,
-								maxReducedCount: maxReducedCount,
-								absMinVal: pointCollection.minVal,
-								absMaxVal: pointCollection.maxVal,
-								gridSize: grid_size,
-								items: points
-							};
-							res.send(data);
-							return;
+
+							// Mongo currently doesn't handle the transition around the dateline (x = +-180)
+							// This, if the bounds contain the dateline, we need to query for the box to 
+							// the left and the box to the right of it. 
+							if (b[0] < -180) {
+								boxes = [
+									[[180 + b[0] % 180, b[1]], [180, b[3]]],
+									[[-180, b[1]], [b[2], b[3]]]
+								];
+							} else if (b[2] > 180) {
+								boxes = [
+									[[b[0], b[1]], [180, b[3]]],
+									[[-180, b[1]], [-180 + b[2] % 180, b[3]]]
+								];
+							} else if (b[0] > b[2]) {
+								boxes = [
+									[[b[0], b[1]], [180, b[3]]],
+									[[-180, b[1]], [b[2], b[3]]]
+								];
+							} else {
+								boxes = [
+									[[b[0], b[1]], [b[2], b[3]]]
+								];
+							}
+
+							console.log('query within boxes: ', boxes.length, boxes);
 						}
 
-						console.log('querying "' + collectionName + '" for '+pointCollection.get('title'));
-
-						if (boxes) {
-							var box = boxes.shift();
-							pointQuery[PointModel != Point ? 'value.loc' : 'loc'] = {$within: {$box : box}};
-						}
-
-						if (!time_grid) {
-							PointModel.find(pointQuery, function(err, datasets) {
-								if (handleDbOp(req, res, err, datasets)) return;
-
-								for (var i = 0; i < datasets.length; i++) {
-									if (PointModel != Point) {
-										var reduced = datasets[i].get('value');
-										var p = {
-											val: reduced.val,
-											altVal: reduced.altVal,
-											count: reduced.count,
-											datetime: reduced.datetime,
-											loc: [reduced.loc[0], reduced.loc[1]],
-											label: reduced.label
-										};
-									} else {
-										console.log(datasets[i].get('sourceId'),'********');
-										var p = {
-											val: datasets[i].get('val'),
-											altVal: datasets[i].get('altVal'),
-											count: 1,
-											datetime: datasets[i].get('datetime'),
-											loc: datasets[i].get('loc'),
-											label: datasets[i].get('label')
-										};
-									}
-									points.push(p);
-									originalCount += p.count;
-									maxReducedCount = Math.max(maxReducedCount, p.count);
-								}
-								queryExecuted = true;
-								dequeueBoxQuery();
-							});
-						} else {
-							var command = {
-								mapreduce: collectionName,
-								query: pointQuery,
-								map: function() {
-									//var epoch = new Date(this.value.datetime).getTime() / 1000;
-									emit(this.value.datetime, {
-										val: this.value.val.sum,
-										count: this.value.val.count,
-										datetime: this.value.datetime
-									});
-								}.toString(),
-								reduce: function(key, values) {
-									var result = {
-										val: 0,
-										count: 0,
-										datetime: values[0].datetime
-									};
-									values.forEach(function(value) {
-										result.val += value.val;
-										result.count += value.count;
-									});
-									return result;
-								}.toString(),
-								finalize: function(key, value) {
-									value.val /= value.count;
-									return value;
-								}.toString(),
-								out: {inline: 1}
-							};
-							mongoose.connection.db.executeDbCommand(command, function(err, res) {
-								var datasets = res.documents[0].results;
-								if (!datasets || !datasets.length) return;
-								for (var i = 0; i < datasets.length; i++) {
-									var p = datasets[i].value;
-									points.push(p);
-									originalCount += p.count;
-									maxReducedCount = Math.max(maxReducedCount, p.count);
-								}
-								queryExecuted = true;
-								dequeueBoxQuery();
-							});
-						}
-					}
-
-					utils.modelCount(Point, {'pointCollection': req.params.pointcollectionid}, function(err, c) {
-						fullCount = c;
 						// TODO: should count points in all boxes and not reduce if < 1000
 						reduce = reduce && (!pointCollection.maxReduceZoom || zoom <= pointCollection.maxReduceZoom);
-						if (reduce) {
-							collectionName = 'r_points_loc-'+grid_size+(time_grid ? '_' + time_grid : '');
-							PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
-							pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
-							dequeueBoxQuery();
-						} else {
-							if (pointCollection.get('reduce')) {
-								collectionName = 'points';
-								PointModel = Point;
-								pointQuery = {'pointCollection': req.params.pointcollectionid};
-							} else {
-								collectionName = 'r_points_loc-0';
-								PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
-								pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+
+						var PointModel;
+						var points = [];
+						var queryExecuted = false; 
+						var originalCount = 0;
+						var maxReducedCount = 0;
+						var fullCount;
+						var reducedCollectionName = mapLayer.options.reduction ?
+							'r_points_' + mapLayer.options.reduction
+							: 'r_points_loc-%(grid_size)s' + (time_grid ? '-%(time_grid)s' : '');
+						
+						var queryOptions = {},
+							filterQuery = {};
+
+						var opts = mapLayer.options.queryOptions;
+						if (opts) {
+							for (var optsKey in opts) {
+								if (optsKey == 'sort') {
+									queryOptions[optsKey] = {};
+									for (var subKey in opts[optsKey])
+										var keys = subKey.split('|');
+										if (reduce) {
+											keys.unshift('value');
+										}
+										queryOptions[optsKey][keys.join('.')] = opts[optsKey][subKey];
+								} else {
+									queryOptions[optsKey] = opts[optsKey];
+								}
 							}
-							dequeueBoxQuery();
+							queryOptions = _.extend(config.API_RESULT_QUERY_OPTIONS, queryOptions);
 						}
-					});
+						if (mapLayer.options.filterQuery) {
+							for (var filterKey in mapLayer.options.filterQuery) {
+								var keys = filterKey.split('|');
+								if (reduce) {
+									keys.unshift('value');
+								}
+								var v = mapLayer.options.filterQuery[filterKey];
+								if (v instanceof Object) {
+									var obj = {};
+									for (var subKey in v) {
+										console.log('******************', v[subKey]);
+										// todo: need better escaping
+										obj[subKey.replace('\\$', '$')] = v[subKey];
+									}
+									v = obj;
+								}
+										console.log('******************', v);
+
+								filterQuery[keys.join('.')] = v;
+							}
+						}
+
+						var dequeueBoxQuery = function() {
+							if (queryExecuted && (!boxes || boxes.length == 0)) {
+								if (reduce) {
+									console.log('Found '+points.length+' reduction points for '+originalCount+' original points.');
+								} else {
+									console.log('Found '+points.length+' points.');
+								}
+								var data = {
+									fullCount: fullCount,
+									originalCount: originalCount,
+									resultCount: points.length,
+									maxReducedCount: maxReducedCount,
+									absMinVal: pointCollection.minVal,
+									absMaxVal: pointCollection.maxVal,
+									gridSize: grid_size,
+									items: points
+								};
+								res.send(data);
+								return;
+							}
+
+							if (boxes) {
+								var box = boxes.shift();
+								pointQuery[PointModel != Point ? 'value.loc' : 'loc'] = {$within: {$box : box}};
+							}
+
+							console.log('*** querying "' + collectionName + '" for '+pointCollection.get('title'), pointQuery, queryOptions);
+
+							if (!time_grid) {
+								PointModel.find(pointQuery, [], queryOptions, function(err, datasets) {
+									if (handleDbOp(req, res, err, datasets)) return;
+
+									for (var i = 0; i < datasets.length; i++) {
+										if (PointModel != Point) {
+											var reduced = datasets[i].get('value');
+											var p = {
+												val: reduced.val,
+												altVal: reduced.altVal,
+												count: reduced.count,
+												datetime: reduced.datetime,
+												loc: [reduced.loc[0], reduced.loc[1]],
+												label: reduced.label,
+												extra: reduced.extra
+											};
+										} else {
+											var p = {
+												val: datasets[i].get('val'),
+												altVal: datasets[i].get('altVal'),
+												count: 1,
+												datetime: datasets[i].get('datetime'),
+												loc: datasets[i].get('loc'),
+												label: datasets[i].get('label'),
+												extra: datasets[i].get('extra')
+											};
+										}
+										points.push(p);
+										originalCount += p.count;
+										maxReducedCount = Math.max(maxReducedCount, p.count);
+									}
+									queryExecuted = true;
+									dequeueBoxQuery();
+								});
+							} else {
+								var command = {
+									mapreduce: collectionName,
+									query: pointQuery,
+									map: function() {
+										//var epoch = new Date(this.value.datetime).getTime() / 1000;
+										emit(this.value.datetime, {
+											val: this.value.val.sum,
+											count: this.value.val.count,
+											datetime: this.value.datetime
+										});
+									}.toString(),
+									reduce: function(key, values) {
+										var result = {
+											val: 0,
+											count: 0,
+											datetime: values[0].datetime
+										};
+										values.forEach(function(value) {
+											result.val += value.val;
+											result.count += value.count;
+										});
+										return result;
+									}.toString(),
+									finalize: function(key, value) {
+										value.val /= value.count;
+										return value;
+									}.toString(),
+									out: {inline: 1}
+								};
+								mongoose.connection.db.executeDbCommand(command, function(err, res) {
+									var datasets = res.documents[0].results;
+									if (!datasets || !datasets.length) return;
+									for (var i = 0; i < datasets.length; i++) {
+										var p = datasets[i].value;
+										points.push(p);
+										originalCount += p.count;
+										maxReducedCount = Math.max(maxReducedCount, p.count);
+									}
+									queryExecuted = true;
+									dequeueBoxQuery();
+								});
+							}
+						}
+
+						utils.modelCount(Point, {'pointCollection': pointCollection.linkedPointCollection || pointCollection._id}, function(err, c) {
+							fullCount = c;
+							if (reduce) {
+								collectionName = reducedCollectionName.format({
+									time_grid: time_grid,
+									grid_size: grid_size
+								});
+								PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+								//pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
+								pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
+								pointQuery = _.extend(pointQuery, filterQuery);
+
+								dequeueBoxQuery();
+							} else {
+								if (pointCollection.get('reduce')) {
+									collectionName = 'points';
+									PointModel = Point;
+									pointQuery = {'pointCollection': req.params.pointcollectionid};
+								} else {
+									collectionName = 'r_points_loc-0';
+									PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+									pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
+								}
+								dequeueBoxQuery();
+							}
+						});
 
 
-				} else {
-					res.send('collection not found', 404);
-				}
-			});
-
+					} else {
+						res.send('collection not found', 404);
+					}
+				});
 		});
 	}
 };
