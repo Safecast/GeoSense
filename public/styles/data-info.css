@@ -92,6 +92,11 @@
 .data-info .legend {
 }
 
+.data-info .description {
+	margin-top: .5em;
+	color: white;
+}
+
 .data-info .color-bar {
 	list-style: none;
 	padding: 0;

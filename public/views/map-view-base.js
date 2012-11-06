@@ -108,6 +108,9 @@ window.MapViewBase = Backbone.View.extend({
 	redrawMapLayer: function(layer)
 	{
 		this.initFeatureLayerOptions(this.collections[layer.pointCollection._id]);
+		if (layer.sessionOptions.visible) {
+			this.vent.trigger("setStateType", 'drawing', pointCollectionId);
+		}
 	},
 
 	addCollection: function(collection)
@@ -147,15 +150,20 @@ window.MapViewBase = Backbone.View.extend({
 				break;
 		}
 
-		switch (options.featureSizeAttr) {
-			default:
-			case 'count':
-				size = normCount;
-				break;
-			case 'val':
-				size = normVal;
-				break
-		};
+		console.log('attr', options.featureSizeAttr == false, options.featureSizeAttr);
+		if (options.featureSizeAttr == false) {
+			size = 0;
+		} else {
+			switch (options.featureSizeAttr) {
+				default:
+				case 'count':
+					size = normCount;
+					break;
+				case 'val':
+					size = normVal;
+					break;
+			};
+		}
 
 		this.addFeatureToLayer(model, {
 			pointCollectionId: collectionId,
@@ -192,7 +200,6 @@ window.MapViewBase = Backbone.View.extend({
 	{
 		var self = this;
 		var pointCollectionId = collection.pointCollectionId;
-		this.vent.trigger("setStateType", 'drawing', pointCollectionId);
 		self.initFeatureLayerOptions(collection);
 		self.initFeatureLayer(collection);
 		self.addAll(collection);

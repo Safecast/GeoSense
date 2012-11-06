@@ -46,8 +46,6 @@ window.DataViewBase = Backbone.View.extend({
 		if (!pointCollectionId || pointCollectionId != this.mapLayer.pointCollection._id) return;
 		this.updateStatus();
 
-		if (!this.mapLayer.sessionOptions.visible) return;
-
 		var stateIndicator = this.$('.state-indicator');
 		if (stateIndicator.length) {
 			switch (type) {
@@ -318,7 +316,7 @@ window.DataViewBase = Backbone.View.extend({
 		this.colorType = options.colorType;
 		this.featureType = options.featureType;
 		this.visible = options.visible;
-		this.visibilityChanged();
+		//this.visibilityChanged();
 
 		for (var k in options) {
 			var input = this.$('[name='+k+']');
@@ -421,6 +419,12 @@ window.DataViewBase = Backbone.View.extend({
 		} else {
 			$(this.el).removeClass('visible');
 			$(this.el).addClass('hidden');
+		}
+
+		if (this.mapLayer.options.description) {
+			this.$('.description').show();
+			this.$('.description').html(this.mapLayer.options.description);
+		} else {
 		}
 
 		switch(this.colorType) {
@@ -658,7 +662,7 @@ window.DataViewBase = Backbone.View.extend({
 		if (evt) evt.preventDefault();
 	},
 
-	toggleLayerVisibility: function(pointCollectionId, state)
+	toggleLayerVisibility: function(pointCollectionId, state, hideCompletely)
 	{	
 		var self = this;
 		if (pointCollectionId != this.mapLayer.pointCollection._id) return;
@@ -677,9 +681,13 @@ window.DataViewBase = Backbone.View.extend({
 		if (self.visible) {
 			this.$('.icon.visibility.toggle').addClass('icon-eye-open');
 			this.$('.icon.visibility.toggle').removeClass('icon-eye-close');
+			$(this.el).show();
 		} else {
 			this.$('.icon.visibility.toggle').removeClass('icon-eye-open');
 			this.$('.icon.visibility.toggle').addClass('icon-eye-close');
+			if (hideCompletely) {
+				$(this.el).hide();
+			}
 		}
 
 		this.updateStatus();

@@ -26,8 +26,8 @@ window.PanelViewBase = Backbone.View.extend({
 		this.$('h3').html(string);
 	},
 
-    render: function() {
-    	console.log(this);
+    render: function() 
+    {
 		$(this.el).html(this.template());
 		var self = this;
 

@@ -96,8 +96,8 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     }],
     reduction: String,
     opacity: Number,
-    featureSizeAttr: String,
-    featureColorAttr: String,
+    featureSizeAttr: mongoose.Schema.Types.Mixed,
+    featureColorAttr: mongoose.Schema.Types.Mixed,
     datetimeFormat: String,
     valFormat: [{
         unit: {type: String, required: true},

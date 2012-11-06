@@ -166,6 +166,9 @@ var ReductionKey = {
 
 ReductionKey.Connections = function() {
 	this.get = function(loc, doc) {
+		if (doc.value) {
+			doc = doc.value;
+		}
 		return [
 			Math.min(doc.extra.start_station, doc.extra.end_station) + '-' + Math.max(doc.extra.start_station, doc.extra.end_station),
 			loc
@@ -596,7 +599,6 @@ cur.forEach(function(collection) {
 				loc: new ReductionKey.ConnectionsGender()
 			}, opts);
 
-
 		} else {
 			for (var g in config.GRID_SIZES) {
 				var grid_size = config.GRID_SIZES[g];
@@ -639,6 +641,10 @@ cur.forEach(function(collection) {
 		lastReducedAt: reducedAt
 	}});
 });
+
+
+
+
 
 db.jobs.update({_id: job._id}, {$set: {status: config.JobStatus.IDLE, updatedAt: new Date}});
 print('*** reduction completed ***');

@@ -194,6 +194,7 @@ var PointAPI = function(app)
 							}
 							queryOptions = _.extend(config.API_RESULT_QUERY_OPTIONS, queryOptions);
 						}
+
 						if (mapLayer.options.filterQuery) {
 							for (var filterKey in mapLayer.options.filterQuery) {
 								var keys = filterKey.split('|');

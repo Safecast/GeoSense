@@ -22,23 +22,8 @@ window.DataInfoView = window.PanelViewBase.extend({
 		_.bindAll(this, "toggleValFormatter");
 	 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
 
-		_.bindAll(this, "enableLayers");
-	 	this.vent.bind("enableLayers", this.enableLayers);
-
 	 	this.visibleDetailModels = {};
     },
-
-    enableLayers: function(indexes)
-    {
-    	for (var i = app.mapInfo.layers.length - 1; i >= 0; i--) {
-    		var el = this.$('.data-legend.' + app.mapInfo.layers[i].pointCollection._id);
-    		if (indexes.indexOf(i) != -1) {
-    			el.show();
-    		} else {
-    			el.hide();
-    		}
-    	}
-    }, 
 
     compileDetailDataForModel: function(pointCollectionId, model)
     {
@@ -86,7 +71,6 @@ window.DataInfoView = window.PanelViewBase.extend({
 			label: valFormatter.unit, 
 			value: valFormatter.format(isAggregate ? val.avg : val)
 		});
-		console.log(data);
 
 		/*
 		TODO: Fix with formatters

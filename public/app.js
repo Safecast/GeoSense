@@ -284,12 +284,17 @@ var AppRouter = Backbone.Router.extend({
 
 	toggleLayerVisibility: function(pointCollectionId, state)
 	{
+		var self = this;
 		var collection = this.pointCollections[pointCollectionId];
 		var mapLayer = this.getMapLayer(pointCollectionId);
 		mapLayer.sessionOptions.visible = state;
 		console.log('toggleLayerVisibility '+pointCollectionId, state, (state ? 'fetched: '+collection.visibleMapAreaFetched : ''));
 		if (state && !collection.visibleMapAreaFetched) {
-			this.fetchPointCollection(pointCollectionId, collection);
+			// wait for animations to complete before fetching
+			setTimeout(function() {
+				self.fetchPointCollection(pointCollectionId, collection);	
+			}, 300);
+			
 		}
 	},
 
@@ -514,14 +519,24 @@ var AppRouter = Backbone.Router.extend({
 	{
 		if (this.mapInfo.layers) {
 			for (var i = 0; i < this.mapInfo.layers.length; i++) {						
-				this.initMapLayer(this.mapInfo.layers[i].pointCollection._id)
+				var pointCollectionId = this.mapInfo.layers[i].pointCollection._id;
+				this.initMapLayer(pointCollectionId)
 			}
 		}
 		this.mapLayersInitialized = true;
+        
         if (this.mapInfo.tour && this.mapInfo.tour.steps.length) {
 			var mapEl = this.mapView.el;
 	        this.mapTourView = new MapTourView({vent: this.vent, mapInfo: this.mapInfo});
 			$(mapEl).append(this.mapTourView.render().el);
+        } else {
+			if (this.mapInfo.layers) {
+				for (var i = 0; i < this.mapInfo.layers.length; i++) {						
+					var pointCollectionId = this.mapInfo.layers[i].pointCollection._id;
+					var layer = this.getMapLayer(pointCollectionId);
+		        	this.vent.trigger('toggleLayerVisibility', pointCollectionId, layer.sessionOptions.visible);
+				}
+			}
         }
 	},
 
@@ -543,12 +558,12 @@ var AppRouter = Backbone.Router.extend({
 		self.addDataPanelViews(pointCollectionId);
 		self.mapView.addCollection(collection);
 
-		if (layer.pointCollection.status == DataStatus.COMPLETE) {
-			this.fetchMapLayer(pointCollectionId);
-		} else {
-			self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
-			app.pollForNewPointCollection(pointCollectionId, INITIAL_POLL_INTERVAL);
-		}
+		//if (layer.pointCollection.status == DataStatus.COMPLETE) {
+		//	this.fetchMapLayer(pointCollectionId);
+		//} else {
+		//	self.vent.trigger("setStateType", 'loading', collection.pointCollectionId);
+		//	app.pollForNewPointCollection(pointCollectionId, INITIAL_POLL_INTERVAL);
+		//}
 
 		$('.data-info').show();
 

@@ -39,8 +39,14 @@ window.MapTourView = window.PanelViewBase.extend({
 		this.step = step;
 		var stepInfo = this.mapInfo.tour.steps[this.step];
 		this.$('.step-body').html(stepInfo.body);
-		this.vent.trigger('enableLayers', stepInfo.layers);
 		this.setTitle(stepInfo.title || this.mapInfo.title);
+
+    	for (var i = app.mapInfo.layers.length - 1; i >= 0; i--) {
+    		var pointCollectionId = app.mapInfo.layers[i].pointCollection._id;
+    		var el = this.$('.data-legend.' + pointCollectionId);
+    		var visible = (stepInfo.layers.indexOf(i) != -1);
+    		this.vent.trigger('toggleLayerVisibility', pointCollectionId, visible, true);
+    	}
 	},
 
 	previousStep: function() 

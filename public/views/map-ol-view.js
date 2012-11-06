@@ -19,9 +19,6 @@ window.MapOLView = window.MapViewBase.extend({
 		_.bindAll(this, "redrawMap");
 	 	options.vent.bind("redrawMap", this.redrawMap);
 
-		_.bindAll(this, "enableLayers");
-	 	this.vent.bind("enableLayers", this.enableLayers);
-				
 		Feature = OpenLayers.Feature.Vector;
 		Geometry = OpenLayers.Geometry;
 		Rule = OpenLayers.Rule;
@@ -398,7 +395,6 @@ window.MapOLView = window.MapViewBase.extend({
 		}
 
 		this.featureLayers[pointCollectionId] = layer;
-		this.toggleLayerVisibility(pointCollectionId, collection.mapLayer.sessionOptions.visible);
 		this.map.addLayers([layer]);
 
         /*var hover = new OpenLayers.Control.SelectFeature(layer, {
@@ -552,16 +548,6 @@ window.MapOLView = window.MapViewBase.extend({
 	{	
 		this.featureLayers[pointCollectionId].setVisibility(state);
 	},
-
-    enableLayers: function(indexes)
-    {
-    	for (var i = app.mapInfo.layers.length - 1; i >= 0; i--) {
-    		var visible = indexes.indexOf(i) != -1;
-    		var pointCollectionId = app.mapInfo.layers[i].pointCollection._id;
-			this.featureLayers[pointCollectionId].setVisibility(visible);
-    		//this.vent.trigger('toggleLayerVisibility', pointCollectionId, visible);
-    	}
-    }, 
 	
 	updateViewBase: function(viewBase, viewStyle)
 	{
