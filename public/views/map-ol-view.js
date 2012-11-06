@@ -31,10 +31,11 @@ window.MapOLView = window.MapViewBase.extend({
 
     render: function() {
 		$(this.el).html(this.template());				
-        this.animate();
+        //this.animate();
         return this;
     },
 
+    /*
 	animate: function() {
 		var self = this;
 		var r = function() {
@@ -43,6 +44,7 @@ window.MapOLView = window.MapViewBase.extend({
 		};
 		r();
 	},
+	*/
 
 	getVisibleMapArea: function() {
 		var map = this.map;

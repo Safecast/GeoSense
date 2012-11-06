@@ -292,7 +292,7 @@ var AppRouter = Backbone.Router.extend({
 		if (state && !collection.visibleMapAreaFetched) {
 			// wait for animations to complete before fetching
 			setTimeout(function() {
-				self.fetchPointCollection(pointCollectionId, collection);	
+				self.fetchMapLayer(pointCollectionId);	
 			}, 300);
 			
 		}
@@ -639,16 +639,21 @@ var AppRouter = Backbone.Router.extend({
 	{
 		var self = this;
 		self.vent.trigger("setStateType", 'loading', pointCollectionId);
+
 		collection.fetch({success: function(collection) {
 			self.vent.trigger("setStateType", 'complete', pointCollectionId);
 		}});
 	},
 
+	/*
+	this method first updates a collections visible map area, and then fetches it.
+	*/
 	fetchMapLayer: function(pointCollectionId)
 	{
 		var self = this;
 		var layer = this.getMapLayer(pointCollectionId);
 		var collection = this.pointCollections[pointCollectionId];
+
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
 		if (layer.sessionOptions.visible) {
 			this.fetchPointCollection(pointCollectionId, collection);

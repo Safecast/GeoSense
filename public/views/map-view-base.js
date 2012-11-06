@@ -87,9 +87,8 @@ window.MapViewBase = Backbone.View.extend({
 
 		$.each(this.collections, function(key, collection) { 
 			var mapLayer = app.getMapLayer(collection.pointCollectionId);
-			collection.setVisibleMapArea(visibleMapArea);
 			if (mapLayer.sessionOptions.visible) {
-				app.fetchPointCollection(collection.pointCollectionId, collection);
+				app.fetchMapLayer(collection.pointCollectionId);
 			}
 		});
 
@@ -150,7 +149,6 @@ window.MapViewBase = Backbone.View.extend({
 				break;
 		}
 
-		console.log('attr', options.featureSizeAttr == false, options.featureSizeAttr);
 		if (options.featureSizeAttr == false) {
 			size = 0;
 		} else {
