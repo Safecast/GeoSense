@@ -187,7 +187,7 @@ Date.prototype.formatReplacements = {
   		return lpad(this.getDate(), '0', 2);
   	},
   	m: function() {
-  		return lpad(this.getMonth(), '0', 2);
+  		return lpad(this.getMonth() + 1, '0', 2);
   	},
   	Y: function() {
   		return this.getFullYear();

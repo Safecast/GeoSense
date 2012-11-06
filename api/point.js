@@ -177,46 +177,46 @@ var PointAPI = function(app)
 						var queryOptions = {},
 							filterQuery = {};
 
-						var opts = mapLayer.options.queryOptions;
-						if (opts) {
-							for (var optsKey in opts) {
-								if (optsKey == 'sort') {
-									queryOptions[optsKey] = {};
-									for (var subKey in opts[optsKey])
-										var keys = subKey.split('|');
-										if (reduce) {
-											keys.unshift('value');
-										}
-										queryOptions[optsKey][keys.join('.')] = opts[optsKey][subKey];
-								} else {
-									queryOptions[optsKey] = opts[optsKey];
-								}
+
+						var adjustKeys = function(obj, prefix, prefixLevel, level) {
+							var operators = ['gt', 'lt', 'gte', 'lte'],
+								newObj = {};
+							if (!level) {
+								level = 0;
 							}
-							queryOptions = _.extend(config.API_RESULT_QUERY_OPTIONS, queryOptions);
+							for (var k in obj) {
+								var v = obj[k],
+									newK;
+
+								if (operators.indexOf(k) != -1) {
+									newK = '$' + k;
+								} else {
+									var split = k.split('|');
+									if (prefix && (!prefixLevel || level >= prefixLevel)) {
+										split.unshift(prefix);
+									}
+									newK = split.join('.');
+								}
+
+								if (v instanceof Object && !(v instanceof Date)) {
+									v = adjustKeys(obj[k], prefix, prefixLevel, level + 1);
+								}
+								newObj[newK] = v;
+							}
+							return newObj;
+						}
+
+
+						if (mapLayer.options.queryOptions) {
+							queryOptions = _.extend(_.clone(config.API_RESULT_QUERY_OPTIONS), 
+								adjustKeys(mapLayer.options.queryOptions, reduce ? 'value' : null, 1));
 						}
 
 						if (mapLayer.options.filterQuery) {
-							for (var filterKey in mapLayer.options.filterQuery) {
-								var keys = filterKey.split('|');
-								if (reduce) {
-									keys.unshift('value');
-								}
-								var v = mapLayer.options.filterQuery[filterKey];
-								if (v instanceof Object) {
-									var obj = {};
-									for (var subKey in v) {
-										console.log('******************', v[subKey]);
-										// todo: need better escaping
-										obj[subKey.replace('\\$', '$')] = v[subKey];
-									}
-									v = obj;
-								}
-										console.log('******************', v);
-
-								filterQuery[keys.join('.')] = v;
-							}
+							filterQuery = _.extend(filterQuery, 
+								adjustKeys(mapLayer.options.filterQuery, reduce ? 'value' : null));
 						}
-
+						
 						var dequeueBoxQuery = function() {
 							if (queryExecuted && (!boxes || boxes.length == 0)) {
 								if (reduce) {

@@ -206,12 +206,17 @@ ReductionKey.ConnectionsSocial = function(useGender, minutesApart) {
 	this.minutesApart = minutesApart || 1;
 	this.useGender = useGender;
 	this.get = function(loc, doc) {
-		t = doc.datetime;
-		var min = t.getUTCMinutes();
-		min -= min % this.minutesApart;
+		st = new Date(doc.extra.start_date);
+		et = new Date(doc.extra.end_date);
+
+		var sMin = st.getUTCMinutes();
+		sMin -= sMin % this.minutesApart;
+		var eMin = et.getUTCMinutes();
+		eMin -= eMin % this.minutesApart;
+
 		return [
 			doc.extra.start_station + '-' + doc.extra.end_station
-				+ '-' + t.getFullYear()+''+lpad(t.getMonth(), '0', 2)+''+lpad(t.getUTCDate(), '0', 2)+'-'+lpad(t.getUTCHours(), '0', 2)+':'+lpad(min, '0', 2)
+				+ '-' + st.getFullYear()+''+lpad(st.getMonth(), '0', 2)+''+lpad(st.getUTCDate(), '0', 2)+'-'+lpad(st.getUTCHours(), '0', 2)+':'+lpad(sMin, '0', 2)+'-'+lpad(et.getUTCHours(), '0', 2)+':'+lpad(eMin, '0', 2)
 				+ (this.useGender ? '-' + doc.extra.gender : ''),
 			loc
 		];

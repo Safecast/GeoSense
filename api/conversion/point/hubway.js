@@ -92,9 +92,16 @@ this.PointConverter = {
 			var extra = {};
 			for (var i = f.length - 1; i >= 0; i--) {
 				var v = this.get(f[i]);
-				var n = parseFloat(v);
-				extra[f[i]] = isNaN(n) ? v : n;
+				if (v.match(/^[0-9\.]+$/)) {
+					extra[f[i]] = parseFloat(v);
+				} else if (v.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/)) {
+					extra[f[i]] = new Date(new time.Date(String(v + ':00')));
+				} else {
+					extra[f[i]] = v;
+				}
 			}
+
+			extra.week_day = extra.start_date.getDay();
 
 			var duration = parseFloat(this.get('duration'));
 			if (duration) {

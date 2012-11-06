@@ -44,6 +44,9 @@ window.DataInfoView = window.PanelViewBase.extend({
 		var minDateFormatted = minDate ? 
 			new Date(minDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
 
+		console.log(new Date(maxDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT),
+			maxDate, new Date(maxDate));
+
 		var valFormatter = mapLayer.sessionOptions.valFormatter;
 
 		var data = [];
