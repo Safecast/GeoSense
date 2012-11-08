@@ -22,9 +22,9 @@ window.SideBarView = Backbone.View.extend({
 		_.bindAll(this, "mapAreaChanged");
 		options.vent.bind("mapAreaChanged", this.mapAreaChanged);  
 
-		if (IS_AR || IS_LOUPE || IS_TAGGED_GLOBE) {
+		/*if (IS_AR || IS_LOUPE || IS_TAGGED_GLOBE) {
 			new OblessdClient({vent: options.vent, taggedObjects: taggedObjects, track: true});
-		}
+		}*/
     },
 
     mapAreaChanged: function(mapArea)
@@ -83,6 +83,7 @@ window.SideBarView = Backbone.View.extend({
 		$(this.el).html(this.template());		
 		this.$('#scale_linear').addClass('active');
 
+		/*
 		if (!DEBUG || (!IS_AR && !IS_LOUPE && !IS_TAGGED_GLOBE)) {
 			this.$('#arToggleGroup').remove();
 		} else {
@@ -199,7 +200,7 @@ window.SideBarView = Backbone.View.extend({
 					taggedObjects[1].tags[0].rel.loc.z = ui.value;
 				},
 			});
-		}
+		}*/
 
 		if (!app.isMapAdmin()) {
 			this.$('#dataManager').remove();

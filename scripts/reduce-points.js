@@ -587,10 +587,10 @@ cur.forEach(function(collection) {
 
 			// tmp
 			print('*** special reductions ***');
-			reducePoints(collection._id, {
+			/*reducePoints(collection._id, {
 				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.ConnectionsSocial(true)
-			}, opts);
+			}, opts);*/
 			reducePoints(collection._id, {
 				pointCollection: ReductionKey.copy, 
 				loc: new ReductionKey.ConnectionsSocial()
