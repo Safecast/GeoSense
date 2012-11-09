@@ -15,6 +15,10 @@
 	color: #666;
 }
 
+.data-info .description {
+	font-size: 12px;
+}
+
 .data-legend .histogram {
 	display: none;
 }
@@ -27,7 +31,7 @@
 } 
 
 .unit .nav-pills a, .unit .nav-pills span {
-	color: #999 !important;
+	color: #aaa !important;
 	margin: 1px !important;
 	padding: 3px 8px 5px 8px !important;
 	line-height: 14px;
@@ -94,7 +98,7 @@
 
 .data-info .description {
 	margin-top: .5em;
-	color: white;
+	color: #ccc;
 }
 
 .data-info .color-bar {
