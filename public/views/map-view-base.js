@@ -87,9 +87,8 @@ window.MapViewBase = Backbone.View.extend({
 
 		$.each(this.collections, function(key, collection) { 
 			var mapLayer = app.getMapLayer(collection.pointCollectionId);
-			if (mapLayer.sessionOptions.visible) {
-				app.fetchMapLayer(collection.pointCollectionId);
-			}
+			app.fetchMapLayer(collection.pointCollectionId);
+			self.vent.trigger("hideDetailData", collection.pointCollectionId);
 		});
 
 		if (!this.MapAreaChangedInitially) {

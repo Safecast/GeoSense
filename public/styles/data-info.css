@@ -1,12 +1,15 @@
-.data-info .legend .unit, .data-info h5 {
-	margin-top: .25em;
-	background-color:rgba(50,50,50,.5);
-	padding: .1em .25em .4em .25em;
-	text-align: center;
-	font-weight: bold;
+.data-info .legend .unit, .data-info h5, .data-info .description {
+	margin-top: 4px;
+	background-color:rgba(50,50,50,.6);
 	border-radius: 4px;
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
+}
+
+.data-info .legend .unit, .data-info h5 {
+	text-align: center;
+	font-weight: bold;
+	padding: .1em .25em .4em .25em;
 }
 
 .data-info .updated {
@@ -16,7 +19,9 @@
 }
 
 .data-info .description {
-	font-size: 12px;
+	font-size: 11px;
+	padding: .2em .75em .4em .75em;
+	color: #eee;
 }
 
 .data-legend .histogram {
@@ -94,11 +99,6 @@
 }
 
 .data-info .legend {
-}
-
-.data-info .description {
-	margin-top: .5em;
-	color: #ccc;
 }
 
 .data-info .color-bar {
@@ -217,7 +217,7 @@ s}
 	white-space: nowrap;
 }
 
-.data-info .micro, .data-info .legend .unit {
+.data-info .legend .unit {
 	font-size: 12px;
 }
 

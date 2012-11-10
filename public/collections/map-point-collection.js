@@ -12,7 +12,7 @@ MapPointCollection = Backbone.Collection.extend({
 		this.baseUrl = '/api/mappoints/' + options.mapId + '/' + this.pointCollectionId;
 		this.mapLayer = options.mapLayer;
 		this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
-		this.visibleMapAreaFetched = false;
+		this.fetched = this.visibleMapAreaFetched = false;
 	},
 
 	url: function() {
@@ -40,7 +40,7 @@ MapPointCollection = Backbone.Collection.extend({
     		this.gridSize = resp.gridSize;
     		resp = resp['items'];
     	}
-		this.visibleMapAreaFetched = true;
+		this.fetched = this.visibleMapAreaFetched = true;
 		return MapPointCollection.__super__.parse.call(this, resp, xhr);
     },
 

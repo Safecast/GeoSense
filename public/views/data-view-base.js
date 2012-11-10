@@ -70,21 +70,25 @@ window.DataViewBase = Backbone.View.extend({
 		var progress = this.mapLayer.pointCollection.progress;
     	switch (this.mapLayer.pointCollection.status) {
     		case DataStatus.COMPLETE:
-    			if (this.mapLayer.sessionOptions.visible && this.collection.originalCount != undefined) {
-					status = __('%(number)i of %(total)i', {
-						number: formatLargeNumber(this.collection.originalCount),
-						total: formatLargeNumber(this.collection.fullCount)
-					});
-	    			if (this.mapLayer.pointCollection.sync) {
-						status += ' <span class="updated micro">' + __('updated %(date)s', {
-							date: new Date(this.mapLayer.pointCollection.updatedAt)
-								.format(locale.formats.DATE_SHORT)
-						}) + '</span>';
-	    			}
-					//$('.download-collection.' + collection.pointCollectionId).attr('href', collection.url());
-					var url = app.mapView.collections[this.mapLayer.pointCollection._id].url();
-					status += ' <a target="_blank" class="download-collection ' + this.mapLayer.pointCollection._id +'" href="' 
-						+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+    			if (this.mapLayer.sessionOptions.visible) {
+    				if (this.collection.fetched) {
+						status = __('%(number)i of %(total)i', {
+							number: formatLargeNumber(this.collection.originalCount),
+							total: formatLargeNumber(this.collection.fullCount)
+						});
+		    			if (this.mapLayer.pointCollection.sync) {
+							status += ' <span class="updated micro">' + __('updated %(date)s', {
+								date: new Date(this.mapLayer.pointCollection.updatedAt)
+									.format(locale.formats.DATE_SHORT)
+							}) + '</span>';
+		    			}
+						//$('.download-collection.' + collection.pointCollectionId).attr('href', collection.url());
+						var url = this.collection.url();
+						status += ' <a target="_blank" class="download-collection ' + this.mapLayer.pointCollection._id +'" href="' 
+							+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+					} else {
+	    				status = 'loading…';
+					}
     			} else {
     				status = '';
     			}
@@ -154,8 +158,13 @@ window.DataViewBase = Backbone.View.extend({
 		this.$(".accordion-toggle").attr("href", "#collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
 		this.$(".collapse").attr("id", "collapse-" + this.className + '-' + this.mapLayer.pointCollection._id);
 
-		this.$(".collapse").on('show', function() {
+		this.$(".collapse").on('show', function(evt) {
 			self.updateToggleState(true);
+			if (!self.visible) {
+				console.log('set to visible');
+				self.visible = true;
+				self.visibilityChanged();
+			}
 		});
 		this.$(".collapse").on('hide', function() {
 			self.updateToggleState(false);
@@ -425,6 +434,7 @@ window.DataViewBase = Backbone.View.extend({
 			this.$('.description').show();
 			this.$('.description').html(this.mapLayer.options.description);
 		} else {
+			this.$('.description').hide();
 		}
 
 		switch(this.colorType) {
@@ -707,10 +717,8 @@ window.DataViewBase = Backbone.View.extend({
 				this.visible = !this.visible;
 			}
 			this.enableUpdateButton();
-			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
-		} else {
-			this.toggleLayerVisibility(this.mapLayer.pointCollection._id, this.visible);
 		}
+		this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
 		this.updateLegend();
 		if (evt) evt.preventDefault();
 	}

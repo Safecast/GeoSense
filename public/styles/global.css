@@ -83,7 +83,7 @@ a {
 .half-opacity { -moz-opacity:.50 !important; filter:alpha(opacity=50) !important; opacity:.50 !important; }
 
 .micro {
-	font-size: 12px;
+	font-size: 11px;
 }
 
 a:link.accordion-toggle {
