@@ -210,7 +210,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						collection.minVal = collection.minVal ? Math.min(minVal, collection.minVal) : minVal;
 					}
 					if (maxIncField != undefined) {
-						collection.maxIncField = collection.maxIncField ? Math.max(maxIncField, collection.maxIncField) : maxIncField;
+						if (!collection.maxIncField || collection.maxIncField < maxIncField) {
+							collection.maxIncField = maxIncField;
+						}
 					}
  					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
@@ -421,15 +423,24 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				    .on('end', onEnd)
 				    .on('error', onError);
 
+				var formatSource = function(str, pointCollection) {
+					if (params.incremental && pointCollection.maxIncField instanceof Date) {
+						return pointCollection.maxIncField.format(str);
+					}
+					return str;
+				};
+
 				if (params.stream) {
 					console.info('*** Importing from stream ***', params.stream, '[converter=' + params.converter + ']');
 					parser.fromStream(params.stream);
 				} else if (params.url) {
-					console.info('*** Importing from URL ***', params.url, '[converter=' + params.converter + ']');
-					parser.fromStream(format.Request({url: params.url}));
+					var url = formatSource(params.url, collection);
+					console.info('*** Importing from URL ***', url, '[converter=' + params.converter + ']');
+					parser.fromStream(format.Request({url: url}));
 				} else {
-					console.info('*** Importing from path ***', params.path, '[converter=' + params.converter + ']');
-					parser.fromPath(params.path);
+					var path = formatSource(params.path, collection);
+					console.info('*** Importing from path ***', path, '[converter=' + params.converter + ']');
+					parser.fromPath(path);
 				}
 			});
 		});

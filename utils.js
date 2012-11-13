@@ -28,6 +28,52 @@ function __(str, replacements) {
 }
 
 /**
+* Simple Python-style date formatting.
+*
+* Example:
+*
+*   new Date().format('%d %m %y')
+*/
+Date.prototype.format = function(format) {
+  var self = this;
+  return format.replace(/\%([a-z0-9_]+)/ig, function(match, name, type) { 
+    return typeof self.formatReplacements[name] != 'undefined'
+      ? self.formatReplacements[name].call(self)
+      : match
+    ;
+  });
+};
+
+var lpad = function(str, padString, length) {
+    var s = new String(str);
+    while (s.length < length) {
+        s = padString + s;
+    }
+    return s;
+};
+
+Date.prototype.formatReplacements = {
+    d: function() {
+        return lpad(this.getDate(), '0', 2);
+    },
+    m: function() {
+        return lpad(this.getMonth() + 1, '0', 2);
+    },
+    Y: function() {
+        return this.getFullYear();
+    },
+    y: function() { 
+        return new String(this.getFullYear()).substr(2, 2);
+    },
+    /*B: function() { 
+        return locale.MONTH_NAMES[this.getMonth()] 
+    },
+    b: function() { 
+        return locale.ABBR_MONTH_NAMES[this.getMonth()] 
+    }*/
+};
+
+/**
 * Evaluates a value as Boolean as usual, with the exception that strings such as '0' or '1'
 # are cast as Number first (hence '0' evaluates as false), and the string 'false' will evaluate
 * as false. This is useful when posting boolean values without indication of a data type. 
