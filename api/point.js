@@ -93,34 +93,34 @@ var PointAPI = function(app)
 					if (!err && pointCollection) {
 						var urlObj = url.parse(req.url, true);
 
-						zoom = parseInt(urlObj.query.z) || 0;
+						var zoom = parseInt(urlObj.query.z) || 0;
 						if (isNaN(zoom) || zoom < 0) {
 							zoom = 0;
 						}
 						if (zoom >= config.GRID_SIZES.length) {
 							zoom = config.GRID_SIZES.length - 1;
 						}
-						grid_size = config.GRID_SIZES[zoom];
+						var gridSize = config.GRID_SIZES[zoom];
 
-						var time_grid = false;
+						var timeGrid = false;
 						switch (urlObj.query.t) {
 							case 'y':
-								time_grid = 'yearly';
+								timeGrid = 'yearly';
 								break;
 							case 'w':
-								time_grid = 'weekly';
+								timeGrid = 'weekly';
 								break;
 							case 'd':
-								time_grid = 'daily';
+								timeGrid = 'daily';
 								break;
 						}
 
 						var reduce = pointCollection.get('reduce');
-						if (pointCollection.gridSize && grid_size < pointCollection.gridSize) {
+						if (pointCollection.gridSize && gridSize < pointCollection.gridSize) {
 							reduce = false;
-							grid_size = pointCollection.gridSize;
+							gridSize = pointCollection.gridSize;
 						}
-						console.log('*** zoom ' + zoom + ', grid size ' + grid_size);
+						console.log('*** zoom ' + zoom + ', grid size ' + gridSize);
 						var collectionName;
 						var pointQuery;
 						var boxes;
@@ -131,7 +131,7 @@ var PointAPI = function(app)
 
 							for (var i = 0; i < 4; i++) {
 								b[i] = parseFloat(b[i]) || 0;
-								b[i] = b[i] + (i < 2 ? -grid_size / 2 : grid_size / 2);
+								b[i] = b[i] + (i < 2 ? -gridSize / 2 : gridSize / 2);
 							}
 
 							// Mongo currently doesn't handle the transition around the dateline (x = +-180)
@@ -172,7 +172,7 @@ var PointAPI = function(app)
 						var fullCount;
 						var reducedCollectionName = mapLayer.options.reduction ?
 							'r_points_' + mapLayer.options.reduction
-							: 'r_points_loc-%(grid_size)s' + (time_grid ? '-%(time_grid)s' : '');
+							: 'r_points_loc-%(gridSize)s' + (timeGrid ? '-%(timeGrid)s' : '');
 						
 						var queryOptions = {},
 							filterQuery = {};
@@ -231,9 +231,10 @@ var PointAPI = function(app)
 									maxReducedCount: maxReducedCount,
 									absMinVal: pointCollection.minVal,
 									absMaxVal: pointCollection.maxVal,
-									gridSize: grid_size,
+									gridSize: gridSize,
 									items: points
 								};
+								console.log('----------', pointCollection.title, gridSize);
 								res.send(data);
 								return;
 							}
@@ -245,7 +246,7 @@ var PointAPI = function(app)
 
 							console.log('*** querying "' + collectionName + '" for '+pointCollection.get('title'), pointQuery, queryOptions);
 
-							if (!time_grid) {
+							if (!timeGrid) {
 								PointModel.find(pointQuery, [], queryOptions, function(err, datasets) {
 									if (handleDbOp(req, res, err, datasets)) return;
 
@@ -328,8 +329,8 @@ var PointAPI = function(app)
 							fullCount = c;
 							if (reduce) {
 								collectionName = reducedCollectionName.format({
-									time_grid: time_grid,
-									grid_size: grid_size
+									timeGrid: timeGrid,
+									gridSize: gridSize
 								});
 								PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
 								//pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};

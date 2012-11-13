@@ -437,6 +437,13 @@ window.DataViewBase = Backbone.View.extend({
 			this.$('.description').hide();
 		}
 
+		if (this.mapLayer.pointCollection.source) {
+			this.$('.source').show();
+			this.$('.source').html(__('Source: %(source)s', this.mapLayer.pointCollection));
+		} else {
+			this.$('.source').hide();
+		}
+
 		switch(this.colorType) {
 			case ColorType.SOLID: 
 				this.$('.legend-button').css('background-color', this.colors[0].color);

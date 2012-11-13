@@ -22,7 +22,7 @@ this.PointConverter = {
 			var val = parseFloat(this.get('Value')) * (this.get('Unit') == 'cpm' ? 1.0 : 350.0);
 			// filter out corrupt values
 			if (isNaN(val) || val < 0 || val > 50000) {
-				return new ConversionError('Invalid Value'); 
+				return new ConversionError('Invalid Value ('+this.get('Value')+')'); 
 			}
 			return val;
 		}

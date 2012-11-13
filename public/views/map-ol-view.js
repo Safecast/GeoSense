@@ -506,6 +506,7 @@ window.MapOLView = window.MapViewBase.extend({
 			case FeatureType.CELLS:
 				if (!pts) {
 					var gw = collection.gridSize / 2;
+					console.log(collection.gridSize);
 					pts = [
 						new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
 						new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),

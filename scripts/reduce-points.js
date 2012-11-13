@@ -350,7 +350,7 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 								}
 							}
 						}
-					} else {
+					} else if (doc[value_field] != undefined) {
 						if (doc[value_field].sum != null) {
 							r.sum += doc[value_field].sum;
 						}
@@ -556,20 +556,22 @@ cur.forEach(function(collection) {
 	opts.stats = {total: statsTotal, collectionId: collection._id};
 	db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
 	var reducedAt = new Date;
+	var incremental = collection.lastReducedAt;
 
 	print('*** collection = '+collection.title+' ('+collection._id+') ***');
 
-	if (collection.lastReducedAt) {
+	if (incremental) {
 		opts.query.createdAt = {$gt: collection.lastReducedAt};
 		print('*** incremental reduction of points created > '+collection.lastReducedAt);
 	}
+
 
 	for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
 		print('*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***');
 		reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
 			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, config.HISTOGRAM_SIZES[i])
-		}, opts, []);
+		}, opts, [], !incremental);
 	}
 
 	if (!collection.reduce || collection.gridSize) {
@@ -577,9 +579,10 @@ cur.forEach(function(collection) {
 		reducePoints(collection._id, {
 			pointCollection: ReductionKey.copy, 
 			loc: new ReductionKey.LocGrid(0)
-		}, opts);
+		}, opts, null, !incremental);
 
 	} 
+
 
 	if (collection.reduce) {
 
@@ -613,26 +616,26 @@ cur.forEach(function(collection) {
 					reducePoints(collection._id, {
 						pointCollection: ReductionKey.copy, 
 						loc: new ReductionKey.LocGrid(grid_size)
-					}, opts);
+					}, opts, null, !incremental);
 		
 					if (config.REDUCE_SETTINGS.TIME_BASED) {
 						reducePoints({
 							pointCollection: ReductionKey.copy, 
 							loc: new ReductionKey.LocGrid(grid_size), 
 							datetime: new ReductionKey.Weekly()
-						}, opts);
+						}, opts, null, !incremental);
 						
 						reducePoints({
 							pointCollection: ReductionKey.copy, 
 							loc: new ReductionKey.LocGrid(grid_size), 
 							datetime: new ReductionKey.Yearly()
-						}, opts);
+						}, opts, null, !incremental);
 
 						reducePoints({
 							pointCollection: ReductionKey.copy, 
 							loc: new ReductionKey.LocGrid(grid_size), 
 							datetime: new ReductionKey.Daily()
-						}, opts);
+						}, opts, null, !incremental);
 					}
 				}
 			}

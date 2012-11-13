@@ -43,10 +43,6 @@ window.DataInfoView = window.PanelViewBase.extend({
 			new Date(maxDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
 		var minDateFormatted = minDate ? 
 			new Date(minDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
-
-		console.log(new Date(maxDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT),
-			maxDate, new Date(maxDate));
-
 		var valFormatter = mapLayer.sessionOptions.valFormatter;
 
 		var data = [];
@@ -137,8 +133,10 @@ window.DataInfoView = window.PanelViewBase.extend({
 				return '<tr><th class="value-label">' + o.label + '</th><td class="value">' + o.value + '</td></tr>';
 			} else if (o.label) {
 				return '<tr><td colspan="2" class="value-label single"><h5>' + o.label + '</h5></td></tr>';
-			} else {
+			} else if (o.value != undefined) {
 				return '<tr><td colspan="2" class="value single">' + o.value + '</td></tr>';
+			} else {
+				return '';
 			}
 		};
 

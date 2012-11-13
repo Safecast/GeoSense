@@ -40,7 +40,7 @@ Mongo dumping and cloning
 
 For dev server:
 	
-	mongorestore -d geo  --drop .~/tmp/dump/geo/
+	mongorestore -d geo  --drop ~/tmp/dump/geo/
 
 For prod server:
 

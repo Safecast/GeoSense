@@ -30,7 +30,7 @@ this.latLngWithCommaFromString = function(field, latIndex, lngIndex)
 		if (match) {
 			return [clamp180(parseFloat(match[lngI + 1])), clamp180(parseFloat(match[latI + 1]))]
 		};
-		return new ConversionError();
+		return new ConversionError('string not matching supported format: '+this.get(field));
 	}
 };
 
@@ -94,12 +94,12 @@ this.locFromFields = function(lngFields, latFields)
 			var lat = this.get(latFields[i]);
 			if (lat != undefined) break;
 		}
-		lng = parseFloat(lng);
-		lat = parseFloat(lat);
-		if (!isNaN(lng) && !isNaN(lat) && lng != undefined && lat != undefined) {
-			return [clamp180(lng), clamp180(lat)]
+		lngF = parseFloat(lng);
+		latF = parseFloat(lat);
+		if (!isNaN(lngF) && !isNaN(latF) && lng != undefined && lat != undefined) {
+			return [clamp180(lngF), clamp180(latF)]
 		};
-		return new ConversionError();
+		return new ConversionError('invalid lng,lat: '+lng+','+lat);
 	}
 };
 

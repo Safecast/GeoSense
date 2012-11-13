@@ -1,4 +1,4 @@
-.data-info .legend .unit, .data-info h5, .data-info .description {
+.data-info .legend .unit, .data-info h5, .data-info .meta {
 	margin-top: 4px;
 	background-color:rgba(50,50,50,.6);
 	border-radius: 4px;
@@ -6,10 +6,13 @@
 	-webkit-border-radius:4px;
 }
 
-.data-info .legend .unit, .data-info h5 {
+.data-info .legend .unit, .data-info h5, .data-info .source {
 	text-align: center;
-	font-weight: bold;
 	padding: .1em .25em .4em .25em;
+}
+
+.data-info .legend .unit, .data-info h5 {
+	font-weight: bold;
 }
 
 .data-info .updated {
@@ -18,7 +21,7 @@
 	color: #666;
 }
 
-.data-info .description {
+.data-info .meta {
 	font-size: 11px;
 	padding: .2em .75em .4em .75em;
 	color: #eee;
