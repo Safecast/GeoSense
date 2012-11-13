@@ -234,7 +234,6 @@ var PointAPI = function(app)
 									gridSize: gridSize,
 									items: points
 								};
-								console.log('----------', pointCollection.title, gridSize);
 								res.send(data);
 								return;
 							}
@@ -339,7 +338,7 @@ var PointAPI = function(app)
 
 								dequeueBoxQuery();
 							} else {
-								if (pointCollection.get('reduce')) {
+								if (pointCollection.get('reduce') && !pointCollection.get('gridSize')) {
 									collectionName = 'points';
 									PointModel = Point;
 									pointQuery = {'pointCollection': req.params.pointcollectionid};
