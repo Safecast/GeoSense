@@ -215,7 +215,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
  					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
 					collection.numBusy = 0;
-					collection.reduce = numDone > 1000;
+					collection.reduce = collection.reduce || numDone > 1000;
 					collection.status = !params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC;
 					collection.save(function(err) {
 						if (err) {
@@ -342,6 +342,13 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							&& (!params.from || point.get('datetime') >= params.from)
 							&& (!params.to || point.get('datetime') <= params.to)
 							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
+
+						// !!tmp
+						if (params.incremental) {
+							var cf = collection.get('maxIncField'),
+								pf = point.get('incField');
+							console.log(typeof cf, cf, ' --- ', typeof pf, pf);
+						}
 
 						if (doSave) {
 					    	if (self.readStream) {

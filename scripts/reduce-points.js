@@ -574,6 +574,8 @@ cur.forEach(function(collection) {
 		}, opts, [], !incremental);
 	}
 
+	print ('reduce: '+collection.reduce);
+
 	if (!collection.reduce || collection.gridSize) {
 		print('*** creating unreduced copy of original ***');
 		reducePoints(collection._id, {

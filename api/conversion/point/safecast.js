@@ -31,14 +31,18 @@ this.PointConverter = {
 			if (d == null || d == '') {
 				return new ConversionError('Invalid Captured Time');
 			}
-			return new Date(d);
+			var date = Date(d);
+			if (date > new Date()) {
+				return new ConversionError('Ignoring future date (' + date + ')');
+			}
+			return date;
 		}
 		,loc: this.locFromFields(['lng', 'Longitude'], ['lat', 'Latitude'])
 		,sourceId: function() {
 			return this.get('MD5Sum');
 		}
 		,incField: function() {
-			return this.get('Captured Time');
+			return new Date(this.get('Captured Time'));
 		}
 	}
 };
