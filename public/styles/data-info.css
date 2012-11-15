@@ -27,6 +27,10 @@
 	color: #eee;
 }
 
+.data-info .meta.source {
+	color: #aaa;
+}
+
 .data-legend .histogram {
 	display: none;
 }
@@ -120,12 +124,11 @@ s}
 
 .data-info .color-bar li .segment {
 	font-weight: bold;
-	font-size: 12px;
-	padding: .25em .5em .25em .5em;
+	padding: .2em 0 .25em 0;
 	text-align: center;
-	color: #000;
+	color: #111;
 	font-weight: bold;
-	text-shadow:rgba(255,255,255,.8) 0px 1px 0px;
+	text-shadow:rgba(255,255,255,.8) 1px 1px 1px;
 	border-right: 1px rgba(0,0,0,.25) solid;
 	border-bottom: 1px rgba(0,0,0,.25) solid;
 }

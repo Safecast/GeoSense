@@ -177,29 +177,29 @@ if (o) {
 	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
 		{
 			visible: false,
-			opacity: .4,
+			opacity: .6,
 			"histogram": false, 
 			colors: [
 			{
-				"color" : "#777777",
+				"color" : "#333333",
 				"absPosition" : "1",
 				"interpolation" : "",
 				"position" : 0
 			},
 			{
-				"color" : "#999999",
+				"color" : "#666666",
 				"absPosition" : "5",
 				"interpolation" : "",
 				"position" : 0
 			},
 			{
-				"color" : "#bbbbbb",
+				"color" : "#999999",
 				"absPosition" : "100",
 				"interpolation" : "",
 				"position" : 0
 			},
 			{
-				"color" : "#dddddd",
+				"color" : "#cccccc",
 				"absPosition" : "1000",
 				"interpolation" : "",
 				"position" : 0
@@ -231,29 +231,29 @@ if (o) {
 	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
 		{
 		visible: false,
-		opacity: .4,
+		opacity: .6,
 		"histogram": false, 
-		colors: [
+			colors: [
 			{
-				"color" : "#777777",
+				"color" : "#333333",
 				"absPosition" : "1",
 				"interpolation" : "",
 				"position" : 0
 			},
 			{
-				"color" : "#999999",
+				"color" : "#666666",
 				"absPosition" : "5",
 				"interpolation" : "",
 				"position" : 0
 			},
 			{
-				"color" : "#bbbbbb",
+				"color" : "#999999",
 				"absPosition" : "100",
 				"interpolation" : "",
 				"position" : 0
 			},
 			{
-				"color" : "#dddddd",
+				"color" : "#cccccc",
 				"absPosition" : "1000",
 				"interpolation" : "",
 				"position" : 0

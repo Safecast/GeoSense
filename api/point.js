@@ -116,7 +116,7 @@ var PointAPI = function(app)
 						}
 
 						var reduce = pointCollection.get('reduce');
-						if (pointCollection.gridSize && gridSize < pointCollection.gridSize) {
+						if (pointCollection.gridSize && (gridSize < pointCollection.gridSize || !reduce)) {
 							reduce = false;
 							gridSize = pointCollection.gridSize;
 						}
