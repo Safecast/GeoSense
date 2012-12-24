@@ -2,7 +2,8 @@ var config = require('./config.js'),
     mailer = require('mailer'),
     fs = require('fs'),
     _ = require('cloneextend'),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    console = require('./ext-console');
 
 /**
 * Simple Python-style string formatting.
@@ -152,10 +153,10 @@ exports.import = function(into, mod) {
 
 exports.exitCallback = function(err, showHelp) {
     if (showHelp) {
-        console.log(showHelp);
+        console.info(showHelp);
     }
-    console.log('');
     if (err) {
+        console.error(err.message);
         if (config.DEV) {
             throw(err);
         }

@@ -206,7 +206,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					finalized = false,
 					paused = false;
 
-				var finalize = function() {
+				var finalize = function(parserErr) {
 					finalized = true;
 					if (maxVal != undefined) {
 				    	collection.maxVal = collection.maxVal ? Math.max(maxVal, collection.maxVal) : maxVal;
@@ -242,7 +242,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 								}
 								return;
 							}
-					    	debugStats('*** job completed ***', 'success', null, true);
+							if (!parserErr) {
+						    	debugStats('*** job completed ***', 'success', null, true);
+							} else {
+						    	debugStats('*** job failed ***', 'error', null, true);
+							}
 							if (callback) {
 								callback(false);
 							}
@@ -417,9 +421,10 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					}
 			    }
 
-			    function onError(error) 
+			    function onError(err) 
 			    {
-			        console.error(error.message);
+			        console.error(err.message);
+			        finalize(err);
 			    }
 
 			    var format = require('./formats/' + params.format + '.js');
@@ -498,15 +503,76 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 ImportAPI.prototype.sync = function(params, req, res, callback) 
 {
 	var self = this;
-	var pointCollectionId = params.pointCollectionId;
-	console.info('*** Sychronizing collection ***', pointCollectionId);
-	PointCollection.findOne({_id: params.pointCollectionId}, function(err, collection) {
+	var pointCollectionId = params.append;
+	console.info('*** Synchronizing collection ***', pointCollectionId);
+	PointCollection.findOne({_id: pointCollectionId}, function(err, collection) {
 		if (!self.validateExistingCollection(err, collection, callback)) return;
-		var importParams = _.cloneextend(collection.get('importParams'), params);
+		var originalParams = collection.get('importParams');
+		if (params.url || params.path) {
+			delete originalParams.url;
+			delete originalParams.path;
+		}
+		var importParams = _.cloneextend(originalParams, params);
 		importParams.incremental = true;
-		importParams.append = pointCollectionId;
 		self.import(importParams, req, res, callback);
 	});
+
+}
+
+function getImportParams(params) {
+	return utils.deleteUndefined({
+		url: params.u || params.url,
+		path: params.p || params.path,
+		format: params.f || params.format,
+		converter: params.c || params.converter,
+		append: params.append,
+		from: params.from,
+		to: params.to,
+		max: params.max,
+		skip: params.skip,
+		incremental: params.incremental,
+		interval: params.interval,
+		bounds: params.bounds
+	});
+}
+
+ImportAPI.prototype.cli = {
+	
+	import: function(params, callback, showHelp) {
+		var help = "Usage: node manage.js import [import-params]\n";
+		if (!showHelp && utils.connectDB()) {
+			params.append = params._[1];
+			this.import(getImportParams(params), null, null, callback);
+		} else {
+			callback(false, help);
+		}
+	},
+	
+	sync: function(params, callback, showHelp) {
+		var help = "Usage: node manage.js sync <object-id> [import-params]\n";
+		if (!showHelp && params._.length > 1 && utils.connectDB()) {
+			params.append = params._[1];
+			this.sync(getImportParams(params), null, null, callback);
+		} else {
+			callback(false, help);
+		}
+	},
+
+	'list-collections': function(params, callback, showHelp) {
+		if (utils.connectDB()) {
+			console.log('Existing collections:');
+			PointCollection.find({}).run(function(err, docs) {
+				if (!err) {
+					docs.forEach(function(doc) {
+						console.log('  *', doc._id, doc.title);
+					});
+				}
+				callback(err);
+			});
+		}
+	}
+
+
 
 }
 
