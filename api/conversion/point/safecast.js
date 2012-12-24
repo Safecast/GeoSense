@@ -31,7 +31,7 @@ this.PointConverter = {
 			if (d == null || d == '') {
 				return new ConversionError('Invalid Captured Time');
 			}
-			var date = Date(d);
+			var date = new Date(d);
 			if (date > new Date()) {
 				return new ConversionError('Ignoring future date (' + date + ')');
 			}
@@ -42,7 +42,7 @@ this.PointConverter = {
 			return this.get('MD5Sum');
 		}
 		,incField: function() {
-			return new Date(this.get('Captured Time'));
+			return new Date(this.get('Uploaded Time'));
 		}
 	}
 };

@@ -39,6 +39,7 @@ if (!module.parent) {
 					to: args.to,
 					max: args.max,
 					skip: args.skip,
+					interval: args.interval,
 					incremental: args.incremental,
 					bounds: args.bounds
 				});

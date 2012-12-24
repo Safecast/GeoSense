@@ -14,8 +14,9 @@
 @import url("data-library.css");
 @import url("graph.css");
 @import url("data-info.css");
+@import url("timeline.css");
 
-@import url("rickshaw.min.css");
+/*@import url("rickshaw.min.css");*/
 
 @import url("jquery.miniColors.css");
 @import url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css");

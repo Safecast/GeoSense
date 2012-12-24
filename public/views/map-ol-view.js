@@ -848,7 +848,7 @@ ViewBase.cm = OpenLayers.Class(Baselayer,
 	},
 
 	styleIds: {
-		'dark': 74591,
+		'dark': 74569,
 		'light': 74513,
 		'full': 998
 	}

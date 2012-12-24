@@ -13,7 +13,12 @@ window.DataLegendView = window.DataViewBase.extend({
 		this.vent = options.vent;
 		_.bindAll(this, "dataInfoViewResized");
 	 	options.vent.bind("dataInfoViewResized", this.dataInfoViewResized);
-	 },
+	},
+
+    updateStatus: function() 
+    {
+		DataLegendView.__super__.updateStatus.call(this);
+    },
 
 	dataInfoViewResized: function(options) {
 		if (this.mapLayer.options.histogram) {

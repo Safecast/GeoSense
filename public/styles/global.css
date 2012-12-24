@@ -136,6 +136,31 @@ h1 {
 	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
 }
 
+.map-style-dark .panel {
+	color: #aaa;
+	background-color:rgba(0,0,0,.5);
+	text-shadow:rgba(0,0,0,.8) 1px 1px 0px;
+}
+
+.panel h2 {
+	color: white;
+	background-color:rgba(0,0,0,.5);
+}
+
+.panel.timeline {
+	width: auto;
+	top: auto;
+	right: 0px;
+	left: 0px;
+	bottom: 0px;
+	background-color:rgba(60,60,60,1);
+}
+
+.panel.timeline .graph {
+	height: 300px;
+	width: 100%;
+}
+
 .panel.map-tour {
 	width: 600px;
 	top: auto;
@@ -156,17 +181,6 @@ h1 {
 	margin-bottom: 1em;
 }
 
-
-.map-style-dark .panel {
-	color: #aaa;
-	background-color:rgba(0,0,0,.5);
-	text-shadow:rgba(0,0,0,.8) 1px 1px 0px;
-}
-
-.panel h2 {
-	color: white;
-	background-color:rgba(0,0,0,.5);
-}
 
 .panel.data-info {
 	display: none;

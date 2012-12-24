@@ -164,7 +164,9 @@ window.DataInfoView = window.PanelViewBase.extend({
 			this.$('.data-legend .collapse').each(function() {
 				if (this != collapsible[0]) {
 					//$(this).collapse('hide');
-					$('.detail', this).hide();
+
+					// close other detail
+					//$('.detail', this).hide();
 				}
 			});
 		}

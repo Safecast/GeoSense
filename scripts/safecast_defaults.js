@@ -20,112 +20,80 @@ bindCollections = [];
 
 
 
-o = db.pointcollections.findOne({"title" : /Earthquakes.*/i});
-if (o) {
-	bindCollections.push(o._id);
 
-	db.pointcollections.update({_id: o._id}, {$set:
-		{
-			"title": "Earthquakes 1973–2011",
-			"description": "A global record of earthquakes with magnitude 4.5 or greater.",
-			"source": "USGS/NEIC (PDE) 1973–2011",
-			"unit": "Magnitude" 
-		}
-	}, false, true);
-	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
-		{
-			"visible" : false,
-			"featureType" : "B",
-			"colors" : [
-				{
-					"absPosition" : 4.5,
-					"color" : "#00C9FF"
-				},
-				{
-					"absPosition" : 5.5,
-					"color" : "#7fffd0"
-				},
-				{
-					"absPosition" : 6.5,
-					"color" : "#e9ff45"
-				}
-			],
-			"colorType" : "L",
-			"opacity" : 0.3,
-			"datetimeFormat": "%Y/%m"
-		}
-	});
-	print('Updated Earthquakes');
-}
+var f = db.pointcollections.find({$or: [{"title" : "Safecast"}, {"title" : {$regex: "^measurements.*"}}]});
+for (var i = 0; i < f.length(); i++) {
+	var o = f[i];
+	if (o) {
+		bindCollections.push(o._id);
+		var title = "Safecast" + (f.length() > 1 ? ' ('+(i+1)+')' : '');
 
-o = db.pointcollections.findOne({$or: [{"title" : "Safecast"}, {"title" : {$regex: "^measurements.*"}}]});
-if (o) {
-	bindCollections.push(o._id);
-	
-	db.pointcollections.update({_id: o._id}, {$set:
-		{
-			"title": "Safecast",
-			"description": "Safecast is a global sensor network for collecting and sharing radiation measurements to empower people with data about their environments.",
-			"source": "Safecast.org",
-			"unit": "cpm",
-			"altUnit": ["μSv/h"],
-			"sync": true,
-			"maxReduceZoom": 17
-		}
-	}, false, true);
-	var safecastOptions = {$set: 
-		{
-			"visible" : true,
-			"featureType" : "C",
-			"colors" : [
-				{
-					"absPosition" : 10,
-					"color" : "#0785a8",
-					//"interpolation": "threshold",
-					"description": "basically no contamination"
-				},
-				{
-					"absPosition" : 100, //0.3 * 350,
-					"color" : "#c55ddb",
-					"description": "minor contamination"
-				},
-				{
-					"absPosition" : 0.5 * 350,
-					"color" : "#ff1111",
-					"description": "moderate contamination"
-				},
-				{
-					"absPosition" : 1.0 * 350,
-					"color" : "#ff8800",
-					"description": "high contamination"
-				},
-				{
-					"absPosition" : 1000, // 3.0 * 350,
-					"color" : "#ffdc00",
-					"description": "evacuation mandatory"
-				},
-				{
-					"absPosition" : 3500.0,
-					"color" : "#ffff88",
-					"description": "extremely high contamination"
-				}
-			],
-			"colorType" : "L",
-			"cropDistribution" : true,
-			"valFormat": [
-				{
-				},
-				{
-					"unit": 'μSv/h',
-					"eq": '%(val)f/350'
-				}
-			],
-			"datetimeFormat": "%Y/%m/%d"
-		}
-	};
-	db.layeroptions.update({_id: o.defaults}, safecastOptions);
+		db.pointcollections.update({_id: o._id}, {$set:
+			{
+				"title": title,
+				"description": "Safecast is a global sensor network for collecting and sharing radiation measurements to empower people with data about their environments.",
+				"source": "Safecast.org",
+				"unit": "cpm",
+				"altUnit": ["μSv/h"],
+				"sync": true,
+				"maxReduceZoom": 17,
+				"timeBased": true
+			}
+		}, false, true);
+		var safecastOptions = {$set: 
+			{
+				"visible" : true,
+				"featureType" : "C",
+				"colors" : [
+					{
+						"absPosition" : 10,
+						"color" : "#0785a8",
+						//"interpolation": "threshold",
+						"description": "basically no contamination"
+					},
+					{
+						"absPosition" : 100, //0.3 * 350,
+						"color" : "#c55ddb",
+						"description": "minor contamination"
+					},
+					{
+						"absPosition" : 0.5 * 350,
+						"color" : "#ff1111",
+						"description": "moderate contamination"
+					},
+					{
+						"absPosition" : 1.0 * 350,
+						"color" : "#ff8800",
+						"description": "high contamination"
+					},
+					{
+						"absPosition" : 1000, // 3.0 * 350,
+						"color" : "#ffdc00",
+						"description": "evacuation mandatory"
+					},
+					{
+						"absPosition" : 3500.0,
+						"color" : "#ffff88",
+						"description": "extremely high contamination"
+					}
+				],
+				"colorType" : "L",
+				"cropDistribution" : true,
+				"valFormat": [
+					{
+					},
+					{
+						"unit": 'μSv/h',
+						"eq": '%(val)f/350'
+					}
+				],
+				"datetimeFormat": "%Y/%m/%d"
+			}
+		};
+		db.layeroptions.update({_id: o.defaults}, safecastOptions);
 
-	print('Updated Safecast');
+		print('Updated '+title);
+	}
 }
 
 o = db.pointcollections.findOne({"title" : /Reactors.*/i});
@@ -269,6 +237,44 @@ if (o) {
 
 
 	print('Updated Population Density (2015)');
+}
+
+o = db.pointcollections.findOne({"title" : /Earthquakes.*/i});
+if (o) {
+	bindCollections.push(o._id);
+
+	db.pointcollections.update({_id: o._id}, {$set:
+		{
+			"title": "Earthquakes 1973–2011",
+			"description": "A global record of earthquakes with magnitude 4.5 or greater.",
+			"source": "USGS/NEIC (PDE) 1973–2011",
+			"unit": "Magnitude" 
+		}
+	}, false, true);
+	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
+		{
+			"visible" : false,
+			"featureType" : "B",
+			"colors" : [
+				{
+					"absPosition" : 4.5,
+					"color" : "#00C9FF"
+				},
+				{
+					"absPosition" : 5.5,
+					"color" : "#7fffd0"
+				},
+				{
+					"absPosition" : 6.5,
+					"color" : "#e9ff45"
+				}
+			],
+			"colorType" : "L",
+			"opacity" : 0.5,
+			"datetimeFormat": "%Y/%m"
+		}
+	});
+	print('Updated Earthquakes');
 }
 
 

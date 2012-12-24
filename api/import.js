@@ -68,6 +68,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		format: null,
 		converter: 'base',
 		max: 0,
+		interval: 1,
 		skip: 0,
 		incremental: false
 	};
@@ -87,6 +88,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	}
 	if (utils.isEmpty(params.skip)) {
 		params.skip = defaults.skip;
+	}
+	if (utils.isEmpty(params.interval)) {
+		params.interval = defaults.interval;
 	}
 	if (params.from) {
 		params.from = new Date(params.from);
@@ -120,7 +124,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	if (params.bounds) {
 		if (typeof params.bounds == 'string') {
 			var b = params.bounds.split(',');
-			params.bounds = [[parseInt(b[0]), parseInt(b[1])], [parseInt(b[2]), parseInt(b[3])]];
+			params.bounds = [[parseFloat(b[0]), parseFloat(b[1])], [parseFloat(b[2]), parseFloat(b[3])]];
 		}
 		if (params.bounds.length < 2 || params.bounds[0].length < 2 || params.bounds[1].length > 2
 			|| isNaN(params.bounds[0][0]) || isNaN(params.bounds[0][1]) || isNaN(params.bounds[1][0]) || isNaN(params.bounds[1][1])) {
@@ -193,13 +197,14 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				}
 
 				var maxVal, minVal, maxIncField;
-				var numRead = 0;
-				var numImport = 0;
-				var numSaving = 0;
-				var numDone = 0;
-				var ended = false;
-				var finalized = false;
-				var paused = false;
+				var numRead = 0,
+					numImport = 0,
+					numSaving = 0,
+					numSaved = 0,
+					numSkipped = 0,
+					ended = false,
+					finalized = false,
+					paused = false;
 
 				var finalize = function() {
 					finalized = true;
@@ -217,7 +222,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
  					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
 					collection.numBusy = 0;
-					collection.reduce = collection.reduce || numDone > 1000;
+					collection.reduce = collection.reduce || numSaved > 1000;
 					collection.status = !params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC;
 					collection.save(function(err) {
 						if (err) {
@@ -237,7 +242,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 								}
 								return;
 							}
-					    	debugStats('*** job completed ***', 'success');
+					    	debugStats('*** job completed ***', 'success', null, true);
 							if (callback) {
 								callback(false);
 							}
@@ -245,13 +250,13 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					});
 				};
 
-				var debugStats = function(pos, func, info) 
+				var debugStats = function(pos, func, info, force) 
 				{
 					if (!func) {
 						func = 'log';
 					}
-					if ((pos != 'on data' && pos != 'on save') || (pos == 'on save' && numDone > 0 && numDone % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
-						console[func].apply(console, ['* '+collection.get('_id')+' '+pos, (info ? info : ''), '-- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numDone: '+numDone+(headerValues.totalCount ? ' of '+headerValues.totalCount : '')]);
+					if (force || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
+						console[func].apply(console, ['* '+collection.get('_id')+' '+pos, (info ? info : ''), '-- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numSaved: '+numSaved+(headerValues.totalCount ? ' of '+headerValues.totalCount : '')+', numSkipped: '+numSkipped]);
 					}
 				};
 
@@ -280,7 +285,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				    	debugStats('on save', 'success', (point ? point.get('_id') : ''));
 						point = null;
 						numSaving--;
-						numDone++;
+						numSaved++;
 				    	postSave(self);
 					}
 				}
@@ -311,8 +316,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				    	debugStats('using row as header');
 					} else {
 						numImport++;
-						if (numImport <= params.skip) {
+						if (numImport <= params.skip || numImport % params.interval != 0) {
 					    	debugStats('skipping row');
+					    	numSkipped++;
 					    	return;
 						}
 						if (params.max && numImport - params.skip > params.max) {
@@ -346,11 +352,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
 
 						// !!tmp
-						if (params.incremental) {
+						/*if (params.incremental) {
 							var cf = collection.get('maxIncField'),
 								pf = point.get('incField');
 							console.log(typeof cf, cf, ' --- ', typeof pf, pf);
-						}
+						}*/
 
 						if (doSave) {
 					    	if (self.readStream) {
@@ -375,7 +381,8 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							var saveHandler = makeSaveHandler(point, self);
 							point.save(saveHandler);
 						} else {
-							debugStats('* skipping point' + (model && model.get('sourceId') ? ' [sourceId=' + model.get('sourceId') + ']' : ''), 'warn');
+							debugStats('* skipping point' + (model && model.get('sourceId') ? ' [sourceId=' + model.get('sourceId') + ']' : ''));
+							numSkipped++;
 					    	postSave(self);
 						}
 
@@ -395,7 +402,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					    	}
 
 					    	debugStats('update progress', 'info', (collection.numBusy ? Math.round(collection.progress / collection.numBusy * 100)+'%' : ''));
-					    	collection.progress = numDone;
+					    	collection.progress = numSaved;
 					    	collection.save();
 						}
 					}

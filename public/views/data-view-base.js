@@ -46,6 +46,11 @@ window.DataViewBase = Backbone.View.extend({
 		if (!pointCollectionId || pointCollectionId != this.mapLayer.pointCollection._id) return;
 		this.updateStatus();
 
+		switch (this.mapLayer.pointCollection.status) {
+			case DataStatus.COMPLETE:
+				this.showLegend(true);
+		}
+
 		var stateIndicator = this.$('.state-indicator');
 		if (stateIndicator.length) {
 			switch (type) {
@@ -66,8 +71,10 @@ window.DataViewBase = Backbone.View.extend({
 
     updateStatus: function() 
     {
-    	var status = '';
-		var progress = this.mapLayer.pointCollection.progress;
+    	var status = '',
+    		countStatus = '',
+			progress = this.mapLayer.pointCollection.progress;
+
     	switch (this.mapLayer.pointCollection.status) {
     		case DataStatus.COMPLETE:
     			if (this.mapLayer.sessionOptions.visible) {
@@ -82,7 +89,6 @@ window.DataViewBase = Backbone.View.extend({
 									.format(locale.formats.DATE_SHORT)
 							}) + '</span>';
 		    			}
-						//$('.download-collection.' + collection.pointCollectionId).attr('href', collection.url());
 						var url = this.collection.url();
 						status += ' <a target="_blank" class="download-collection ' + this.mapLayer.pointCollection._id +'" href="' 
 							+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
@@ -340,8 +346,13 @@ window.DataViewBase = Backbone.View.extend({
 			self.enableUpdateButton();
 		});
 
-		if (this.mapLayer.pointCollection.status == DataStatus.COMPLETE) {
-			this.updateLegend(true);
+		switch (this.mapLayer.pointCollection.status) {
+			case DataStatus.COMPLETE:
+			case DataStatus.UNREDUCED_INC:
+				this.updateLegend(true);
+				break;
+			default:
+				this.hideLegend();
 		}
 
 		console.log('disableUpdateButton');
@@ -417,6 +428,16 @@ window.DataViewBase = Backbone.View.extend({
 
 		if (evt) evt.preventDefault();
    	},
+
+	showLegend: function() 
+	{
+		this.$('.legend').show();
+	},
+
+	hideLegend: function() 
+	{
+		this.$('.legend').hide();
+	},
 
 	updateLegend: function(rebuildColorBar) 
 	{

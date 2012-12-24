@@ -92,6 +92,8 @@ var PointAPI = function(app)
 
 					if (!err && pointCollection) {
 						var urlObj = url.parse(req.url, true);
+						var queryOptions = {},
+							filterQuery = {};
 
 						var zoom = parseInt(urlObj.query.z) || 0;
 						if (isNaN(zoom) || zoom < 0) {
@@ -102,17 +104,52 @@ var PointAPI = function(app)
 						}
 						var gridSize = config.GRID_SIZES[zoom];
 
-						var timeGrid = false;
-						switch (urlObj.query.t) {
-							case 'y':
-								timeGrid = 'yearly';
-								break;
-							case 'w':
-								timeGrid = 'weekly';
-								break;
-							case 'd':
-								timeGrid = 'daily';
-								break;
+						var timeGrid = false,
+							reduceKey = false;
+						if (urlObj.query.t) {
+							var split = urlObj.query.t.split(':');
+							switch (split[0]) {
+								case 'y':
+									timeGrid = 'yearly';
+									break;
+								case 'w':
+									timeGrid = 'weekly';
+									break;
+								case 'd':
+									timeGrid = 'daily';
+									break;
+							}
+							switch (urlObj.query.m) {
+								case 'datetime':
+									reduceKey = 'datetime';
+									break;
+							}
+							if (timeGrid) {
+								var newDate = function(endOfDay, y, m, d, h, i, s) {
+									if (m) {
+										m--;
+									} else {
+										m = 0;
+									}
+									if (!d) d = 1;
+									if (!h) h = (!endOfDay ? 0 : 23);
+									if (!i) i = (!endOfDay ? 0 : 59);
+									if (!s) s = (!endOfDay ? 0 : 59);
+									return new Date(parseInt(y), parseInt(m), parseInt(d), parseInt(h), parseInt(i), parseInt(s));
+								}
+								if (urlObj.query.from) {
+									var split = urlObj.query.from.split(/[:\-T]/);
+									split.unshift(false);
+									if (!filterQuery['value.datetime']) filterQuery['value.datetime'] = {};
+									filterQuery['value.datetime']['$gte'] = newDate.apply(null, split);
+								}
+								if (urlObj.query.to) {
+									var split = urlObj.query.to.split(/[:\-T]/);
+									split.unshift(true);
+									if (!filterQuery['value.datetime']) filterQuery['value.datetime'] = {};
+									filterQuery['value.datetime']['$lte'] = newDate.apply(null, split);
+								}
+							}
 						}
 
 						var reduce = pointCollection.get('reduce');
@@ -121,9 +158,7 @@ var PointAPI = function(app)
 							gridSize = pointCollection.gridSize;
 						}
 						console.log('*** zoom ' + zoom + ', grid size ' + gridSize);
-						var collectionName;
-						var pointQuery;
-						var boxes;
+						var collectionName, pointQuery, boxes;
 
 						if (urlObj.query.b && urlObj.query.b.length == 4) {
 							var b = urlObj.query.b;
@@ -135,7 +170,7 @@ var PointAPI = function(app)
 							}
 
 							// Mongo currently doesn't handle the transition around the dateline (x = +-180)
-							// This, if the bounds contain the dateline, we need to query for the box to 
+							// Thus, if the bounds contain the dateline, we need to query for the box to 
 							// the left and the box to the right of it. 
 							if (b[0] < -180) {
 								boxes = [
@@ -172,12 +207,8 @@ var PointAPI = function(app)
 						var fullCount;
 						var reducedCollectionName = mapLayer.options.reduction ?
 							'r_points_' + mapLayer.options.reduction
-							: 'r_points_loc-%(gridSize)s' + (timeGrid ? '-%(timeGrid)s' : '');
+							: 'r_points_loc-%(gridSize)s' + (timeGrid ? '_%(timeGrid)s' : '');
 						
-						var queryOptions = {},
-							filterQuery = {};
-
-
 						var adjustKeys = function(obj, prefix, prefixLevel, level) {
 							var operators = ['gt', 'lt', 'gte', 'lte'],
 								newObj = {};
@@ -245,7 +276,7 @@ var PointAPI = function(app)
 
 							console.log('*** querying "' + collectionName + '" for '+pointCollection.get('title'), pointQuery, queryOptions);
 
-							if (!timeGrid) {
+							if (!reduceKey) {
 								PointModel.find(pointQuery, [], queryOptions, function(err, datasets) {
 									if (handleDbOp(req, res, err, datasets)) return;
 
@@ -280,31 +311,37 @@ var PointAPI = function(app)
 									dequeueBoxQuery();
 								});
 							} else {
+								console.log('----------->', reduceKey, collectionName);
 								var command = {
 									mapreduce: collectionName,
 									query: pointQuery,
 									map: function() {
-										//var epoch = new Date(this.value.datetime).getTime() / 1000;
-										emit(this.value.datetime, {
-											val: this.value.val.sum,
-											count: this.value.val.count,
+										emit(this.value['datetime'], {
+											val: this.value.val,
+											count: this.value.count,
 											datetime: this.value.datetime
 										});
 									}.toString(),
 									reduce: function(key, values) {
 										var result = {
-											val: 0,
+											val: {
+												sum: 0,
+												max: values[0].val.max,
+												min: values[0].val.min
+											},
 											count: 0,
 											datetime: values[0].datetime
 										};
 										values.forEach(function(value) {
-											result.val += value.val;
+											result.val.sum += value.val.sum;
+											if (value.val.max > result.val.max) result.val.max = value.val.max;
+											if (value.val.min < result.val.min) result.val.min = value.val.min;
 											result.count += value.count;
 										});
 										return result;
 									}.toString(),
 									finalize: function(key, value) {
-										value.val /= value.count;
+										value.val.avg = value.val.sum / value.count;
 										return value;
 									}.toString(),
 									out: {inline: 1}

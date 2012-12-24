@@ -84,9 +84,10 @@ var ReductionKey = {
 			var week = getWeek(t, 1);
 			var day = t.getDay(),
 		      diff = t.getDate() - day + (day == 0 ? -6 : 1);
+			t.setDate(diff);
 			return [
 				t.getFullYear() + '' + lpad(week, '0', 2),
-				new Date(t.setDate(diff))
+				new Date(t.getFullYear(), t.getMonth(), t.getUTCDate())
 			];
 		};
 		this.name = 'weekly';
@@ -501,7 +502,10 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields, re
 		}
 	}
 	if (!value_fields) {
-		value_fields = ['val', 'altVal', 'datetime', 'label', 'extra'];
+		value_fields = ['val', 'altVal', 'label', 'extra'];
+		if (!reduction_keys['datetime']) {
+			value_fields.push('datetime');
+		}
 	}
 	if (!opts.scope) {
 		opts.scope = {};
@@ -588,57 +592,35 @@ cur.forEach(function(collection) {
 
 	if (collection.reduce) {
 
-		if (collection.title == 'Trips') {
+		for (var g in config.GRID_SIZES) {
+			var grid_size = config.GRID_SIZES[g];
+			if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
+			print('*** reducing original for grid = '+g+' ***');
 
-			// tmp
-			print('*** special reductions ***');
-			/*reducePoints(collection._id, {
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.ConnectionsSocial(true)
-			}, opts);*/
-			reducePoints(collection._id, {
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.ConnectionsSocial()
-			}, opts);
-			reducePoints(collection._id, {
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.Connections()
-			}, opts);
-			reducePoints(collection._id, {
-				pointCollection: ReductionKey.copy, 
-				loc: new ReductionKey.ConnectionsGender()
-			}, opts);
-
-		} else {
-			for (var g in config.GRID_SIZES) {
-				var grid_size = config.GRID_SIZES[g];
-				if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
-				print('*** reducing original for grid = '+g+' ***');
+				reducePoints(collection._id, {
+					pointCollection: ReductionKey.copy, 
+					loc: new ReductionKey.LocGrid(grid_size)
+				}, opts, null, !incremental);
+	
+				if (config.REDUCE_SETTINGS.TIME_BASED && collection.timeBased) {
+					reducePoints(collection._id, {
+						pointCollection: ReductionKey.copy, 
+						loc: new ReductionKey.LocGrid(grid_size), 
+						datetime: new ReductionKey.Weekly()
+					}, opts, null, !incremental);
+					/*
+					reducePoints(collection._id, {
+						pointCollection: ReductionKey.copy, 
+						loc: new ReductionKey.LocGrid(grid_size), 
+						datetime: new ReductionKey.Yearly()
+					}, opts, null, !incremental);
 
 					reducePoints(collection._id, {
 						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size)
+						loc: new ReductionKey.LocGrid(grid_size), 
+						datetime: new ReductionKey.Daily()
 					}, opts, null, !incremental);
-		
-					if (config.REDUCE_SETTINGS.TIME_BASED) {
-						reducePoints({
-							pointCollection: ReductionKey.copy, 
-							loc: new ReductionKey.LocGrid(grid_size), 
-							datetime: new ReductionKey.Weekly()
-						}, opts, null, !incremental);
-						
-						reducePoints({
-							pointCollection: ReductionKey.copy, 
-							loc: new ReductionKey.LocGrid(grid_size), 
-							datetime: new ReductionKey.Yearly()
-						}, opts, null, !incremental);
-
-						reducePoints({
-							pointCollection: ReductionKey.copy, 
-							loc: new ReductionKey.LocGrid(grid_size), 
-							datetime: new ReductionKey.Daily()
-						}, opts, null, !incremental);
-					}
+					*/
 				}
 			}
 		}

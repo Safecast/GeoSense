@@ -88,6 +88,9 @@ var AppRouter = Backbone.Router.extend({
 		_.bindAll(this, "viewOptionsChanged");
 	 	this.vent.bind("viewOptionsChanged", this.viewOptionsChanged);
 
+		_.bindAll(this, "updateVisibleDate");
+	 	this.vent.bind("updateVisibleDate", this.updateVisibleDate);
+
 		this.isEmbedded = window != window.top;
     }, 
 
@@ -368,6 +371,9 @@ var AppRouter = Backbone.Router.extend({
         this.dataInfoView = new DataInfoView({vent: this.vent});
 		$(mapEl).append(this.dataInfoView.render().el);
 
+        /*this.timelineView = new TimelineView({vent: this.vent});
+		$(mapEl).append(this.timelineView.render().el);*/
+
         this.mapInfoView = new MapInfoView({vent: this.vent, mapInfo: this.mapInfo});
         this.mapInfoView.render();
 
@@ -582,6 +588,18 @@ var AppRouter = Backbone.Router.extend({
 		}*/
 	},
 
+	updateVisibleDate: function(fromDate, toDate) 
+	{
+		var self = this;
+		$.each(this.pointCollections, function(key, collection) {
+			collection.urlParams.t = 'w';
+			collection.urlParams.from = fromDate.format('%Y-%m-%d');
+			collection.urlParams.to = toDate.format('%Y-%m-%d');
+			self.fetchMapLayer(collection.pointCollectionId);
+			console.log(collection.urlParams);
+		});
+	},
+
 	updateMapLayer: function(updatedLayer)
 	{
 		console.log('updateMapLayer', updatedLayer);
@@ -646,7 +664,7 @@ var AppRouter = Backbone.Router.extend({
 	},
 
 	/*
-	this method first updates a collections visible map area, and then fetches it.
+	this method first updates a collection's visible map area, and then fetches it.
 	*/
 	fetchMapLayer: function(pointCollectionId)
 	{
@@ -655,9 +673,16 @@ var AppRouter = Backbone.Router.extend({
 		var collection = this.pointCollections[pointCollectionId];
 
 		collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
+		console.log('fetch', layer);
 		if (layer.sessionOptions.visible) {
 			this.fetchPointCollection(pointCollectionId, collection);
+	
+			// TODO: fetch and render timeline
+			/*if (collection.timeBased) {
+				//this.timelineView.renderGraph(tmpUrl);
+			}*/
 		}
+
 	},
 	
 	bindCollectionToMap: function(pointCollectionId)
@@ -707,7 +732,7 @@ var AppRouter = Backbone.Router.extend({
 
 tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'map-ge', 'header',
 	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share', 'map-tour'],
+	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share', 'map-tour', 'timeline'],
     function () {
         app = new AppRouter();
         if (!Backbone.history.start({ pushState: true })) {

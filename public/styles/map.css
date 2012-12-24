@@ -7,6 +7,14 @@
 	right:0;
 }
 
+.map-style-dark .map-view {
+	background: #333;
+}
+
+.map-style-light .map-view {
+	background: #ccc;
+}
+
 .map-view .map
 {
 	width:100%;
