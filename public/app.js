@@ -732,7 +732,7 @@ var AppRouter = Backbone.Router.extend({
 
 tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'map-ge', 'header',
 	'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share', 'map-tour', 'timeline'],
+	'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share', 'map-tour'/*, 'timeline'*/],
     function () {
         app = new AppRouter();
         if (!Backbone.history.start({ pushState: true })) {
