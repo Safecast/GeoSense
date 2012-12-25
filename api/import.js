@@ -30,9 +30,10 @@ ImportAPI.prototype.validateExistingCollection = function(err, collection, callb
 		if (!err) {
 			err = new Error('PointCollection not found');
 		}
-		console.error(err.message);
 		if (callback) {
 			callback(err);
+		} else {
+			console.error(err.message);
 		}
 		return false;
 	}
@@ -196,8 +197,10 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					res.send(response);
 				}
 
-				var maxVal, minVal, maxIncField;
-				var numRead = 0,
+				var maxVal, 
+					minVal, 
+					maxIncField,
+					numRead = 0,
 					numImport = 0,
 					numSaving = 0,
 					numSaved = 0,
@@ -354,13 +357,6 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							&& (!params.from || point.get('datetime') >= params.from)
 							&& (!params.to || point.get('datetime') <= params.to)
 							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
-
-						// !!tmp
-						/*if (params.incremental) {
-							var cf = collection.get('maxIncField'),
-								pf = point.get('incField');
-							console.log(typeof cf, cf, ' --- ', typeof pf, pf);
-						}*/
 
 						if (doSave) {
 					    	if (self.readStream) {
@@ -519,7 +515,8 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 
 }
 
-function getImportParams(params) {
+function getImportParams(params) 
+{
 	return utils.deleteUndefined({
 		url: params.u || params.url,
 		path: params.p || params.path,
@@ -538,8 +535,10 @@ function getImportParams(params) {
 
 ImportAPI.prototype.cli = {
 	
-	import: function(params, callback, showHelp) {
-		var help = "Usage: node manage.js import [import-params]\n";
+	import: function(params, callback, showHelp) 
+	{
+		var help = "Usage: node manage.js import [import-params]\n"
+			+ "\nImports records from a URL or a file into a new point collection.\n";
 		if (!showHelp && utils.connectDB()) {
 			params.append = params._[1];
 			this.import(getImportParams(params), null, null, callback);
@@ -548,8 +547,13 @@ ImportAPI.prototype.cli = {
 		}
 	},
 	
-	sync: function(params, callback, showHelp) {
-		var help = "Usage: node manage.js sync <object-id> [import-params]\n";
+	sync: function(params, callback, showHelp) 
+	{
+		var help = "Usage: node manage.js sync <object-id> [import-params]\n"
+			+ "\nSynchronizes a point collection using the same import parameters "
+			+ "\nthat were used when last importing records into the collection."
+			+ "\nYou can override all arguments when syncing, for instance to import "
+			+ "\nrecords from a different data source into the same collection.\n";
 		if (!showHelp && params._.length > 1 && utils.connectDB()) {
 			params.append = params._[1];
 			this.sync(getImportParams(params), null, null, callback);
@@ -558,7 +562,8 @@ ImportAPI.prototype.cli = {
 		}
 	},
 
-	'list-collections': function(params, callback, showHelp) {
+	'list-collections': function(params, callback, showHelp) 
+	{
 		if (utils.connectDB()) {
 			console.log('Existing collections:');
 			PointCollection.find({}).run(function(err, docs) {
