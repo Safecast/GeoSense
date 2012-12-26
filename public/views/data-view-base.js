@@ -85,8 +85,10 @@ window.DataViewBase = Backbone.View.extend({
 						});
 		    			if (this.mapLayer.pointCollection.sync) {
 							status += ' <span class="updated micro">' + __('updated %(date)s', {
-								date: new Date(this.mapLayer.pointCollection.updatedAt)
-									.format(locale.formats.DATE_SHORT)
+								date: new Date(
+									this.mapLayer.pointCollection.reduce ? 
+									this.mapLayer.pointCollection.lastReducedAt : this.mapLayer.pointCollection.updatedAt)
+										.format(locale.formats.DATE_SHORT)
 							}) + '</span>';
 		    			}
 						var url = this.collection.url();
