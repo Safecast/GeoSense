@@ -107,7 +107,7 @@ if (o) {
 			"unit": "MW" 
 		}
 	}, false, true);
-	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
+	db.layeroptions.update({_id: o.defaults}, {$set:  
 		{
 			"visible" : true,
 			"featureType" : "P",
@@ -251,7 +251,7 @@ if (o) {
 			"unit": "Magnitude" 
 		}
 	}, false, true);
-	db.layeroptions.update({_id: ObjectId(o.defaults)}, {$set:  
+	db.layeroptions.update({_id: o.defaults}, {$set:  
 		{
 			"visible" : false,
 			"featureType" : "B",
