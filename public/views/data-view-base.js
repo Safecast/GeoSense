@@ -87,7 +87,9 @@ window.DataViewBase = Backbone.View.extend({
 							status += ' <span class="updated micro">' + __('updated %(date)s', {
 								date: new Date(
 									this.mapLayer.pointCollection.reduce ? 
-									this.mapLayer.pointCollection.lastReducedAt : this.mapLayer.pointCollection.updatedAt)
+									(this.mapLayer.pointCollection.updatedAt < this.mapLayer.pointCollection.lastReducedAt || !this.mapLayer.pointCollection.lastReducedAt ?
+										this.mapLayer.pointCollection.updatedAt : this.mapLayer.pointCollection.lastReducedAt) 
+									: this.mapLayer.pointCollection.updatedAt)
 										.format(locale.formats.DATE_SHORT)
 							}) + '</span>';
 		    			}
