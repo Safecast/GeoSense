@@ -9,7 +9,7 @@ Step 2: Overwrite public with public-optimized before pushing to Heroku
 
 ## Management commands
 
-# Importing a new file from scratch:
+### Importing a new file from scratch:
 
 	node ./manage.js import --url https://api.safecast.org/system/measurements.csv --format csv --converter safecast
 
@@ -17,7 +17,7 @@ Step 2: Overwrite public with public-optimized before pushing to Heroku
 
 	node ./manage.js import --path path/to/file.csv --format csv --converter safecast
 
-# Later, after the initial import, you might want to re-fetch the source file and sync your local data:
+### Later, after the initial import, you might want to re-fetch the source file and sync your local data:
 
 	node ./manage.js sync <collectionId> [options]
 
@@ -42,11 +42,11 @@ mongo penny.mongohq.com:10065/app4772485 -u USER -p PASSWORD ./config.js ./scrip
 	mongodump -d geo -o ./dump
 	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p PASSWORD --drop ./dump/geo/
 
-# For dev server:
+### For dev server:
 	
 	mongorestore -d geo  --drop ./dump/geo/
 
-# For prod server:
+### For prod server:
 
 	 mongorestore -h penny.mongohq.com:10065 -d app4772485 -u safecast -p PASSWORD --drop ./dump/geo/
 
@@ -55,6 +55,6 @@ mongo penny.mongohq.com:10065/app4772485 -u USER -p PASSWORD ./config.js ./scrip
 
 	mongo DATABASE -u USER -p SEKRET config.js scripts/reduce-points.js
 
-# For dev server:
+### For dev server:
 
 	mongo geo config.js scripts/reduce-points.js
