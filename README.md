@@ -1,16 +1,13 @@
 ## What's GeoSense?
-## ===================
 
 An open publishing platform for visualization, social sharing, and data analysis of geospatial data.
 
 ## Building
-## ===================
 
 Step 1: Run "node r.js -o public/libs/app.build.js" from project root
 Step 2: Overwrite public with public-optimized before pushing to Heroku
 
 ## Management commands
-## ===================
 
 # Importing a new file from scratch:
 
@@ -30,7 +27,6 @@ T# his basically runs the import command again, with the same arguments. You can
 
 
 ## Updating and re-crunching a collection
-## ======================================
 
 cd into project root on production server
 node ./manage.js sync Safecast
@@ -38,12 +34,10 @@ mongo penny.mongohq.com:10065/app4772485 -u USER -p PASSWORD ./config.js ./scrip
 
 
 ## Running Dev server
-## ==================
 
 	NODE_ENV=development nodemon server.js
 
 ## Mongo dumping and cloning
-## =========================
 
 	mongodump -d geo -o ./dump
 	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p PASSWORD --drop ./dump/geo/
@@ -58,7 +52,6 @@ mongo penny.mongohq.com:10065/app4772485 -u USER -p PASSWORD ./config.js ./scrip
 
 
 ## Executing reduction script
-## ==========================
 
 	mongo DATABASE -u USER -p SEKRET config.js scripts/reduce-points.js
 
