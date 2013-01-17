@@ -49,6 +49,7 @@ function serveHome(req, res)
 		// currently, requesting /admin/existing-map without admin privileges 
 		// would still serve that map (in non-admin mode).
 		res.end(ejs.render(templates['public/base.html'], {
+			nodeEnv: process.env.NODE_ENV,
 			mapSlugByHost: false
 		}));
 	} else {
@@ -88,6 +89,7 @@ function staticRoute(req, res, slug, admin)
 			console.log('Implicitly authenticated user:', req.session.user);
 		}
 		res.end(ejs.render(templates['public/base.html'], {
+			nodeEnv: process.env.NODE_ENV,
 			mapSlugByHost: (routingByHost ? map.publicslug : false)
 		}));
 	}
