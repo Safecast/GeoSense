@@ -99,6 +99,14 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	if (params.to) {
 		params.to = new Date(params.to);
 	}
+	if (utils.isEmpty(params.url) && utils.isEmpty(params.path)) {
+		var err = new Error('must specify url or path');
+		if (callback) {
+			callback(err);
+			return;
+		}
+		throw err;
+	}
 	if (typeof params.format != 'string') {
 		var err = new Error('invalid format');
 		if (callback) {
@@ -329,7 +337,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					    	return;
 						}
 						if (params.max && numImport - params.skip > params.max) {
-					    	debugStats('reached limit, ending');
+					    	debugStats('reached limit, ending', 'success', null, true);
 							ended = true;
 							self.end();
 							return;
@@ -381,9 +389,16 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							var saveHandler = makeSaveHandler(point, self);
 							point.save(saveHandler);
 						} else {
-							debugStats('* skipping point' + (model && model.get('sourceId') ? ' [sourceId=' + model.get('sourceId') + ']' : ''));
-							numSkipped++;
-					    	postSave(self);
+							if (point && params.break) {
+						    	debugStats('reached break point, ending', 'success', null, true);
+								ended = true;
+								self.end();
+								return;
+							} else {
+								debugStats('* skipping point' + (model && model.get('sourceId') ? ' [sourceId=' + model.get('sourceId') + ']' : ''));
+								numSkipped++;
+						    	postSave(self);
+							}
 						}
 
 						if (numRead == 1 || numRead % 5000 == 0) {
@@ -528,6 +543,7 @@ function getImportParams(params)
 		max: params.max,
 		skip: params.skip,
 		incremental: params.incremental,
+		break: params.break, 
 		interval: params.interval,
 		bounds: params.bounds
 	});
@@ -539,6 +555,7 @@ ImportAPI.prototype.cli = {
 	{
 		var help = "Usage: node manage.js import [import-params]\n"
 			+ "\nImports records from a URL or a file into a new point collection.\n";
+
 		if (!showHelp && utils.connectDB()) {
 			params.append = params._[1];
 			this.import(getImportParams(params), null, null, callback);

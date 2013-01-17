@@ -28,7 +28,7 @@ if (!module.parent) {
 					commands.push(cmdName);
 				}
 				if (api[k].cli[callCmdName]) {
-					api[k].cli[callCmdName].apply(api[k], [args, utils.exitCallback], showHelp);
+					api[k].cli[callCmdName].apply(api[k], [args, utils.exitCallback, showHelp]);
 					return;
 				}
 			}
