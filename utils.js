@@ -144,6 +144,11 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
     return false;
 }
 
+exports.collectionHasIndex = function(collection, index) {
+    // TODO: to be implemented
+    return true;
+}
+
 exports.import = function(into, mod) {
     for (var k in mod) {
         into[k] = mod[k];
@@ -164,6 +169,32 @@ exports.exitCallback = function(err, showHelp) {
     }
     process.exit(0);
 };
+
+exports.validateExistingCollection = function(err, collection, callback)
+{
+    if (err || !collection) {
+        if (!err) {
+            err = new Error('PointCollection not found');
+        }
+        if (callback) {
+            callback(err);
+        } else {
+            console.error(err.message);
+        }
+        return false;
+    }
+    if (collection.status == config.DataStatus.IMPORTING || collection.status == config.DataStatus.REDUCING) {
+        var err = new Error('Collection is currently busy');
+        console.error(err.message);
+        if (callback) {
+            callback(err);
+        }
+        return false;
+    }
+
+    return true;
+}
+
 
 
 // TODO: Due to a mongodb bug, counting is really slow even if there is 

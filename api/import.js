@@ -24,31 +24,6 @@ var ImportAPI = function(app) {
 	}
 }
 
-ImportAPI.prototype.validateExistingCollection = function(err, collection, callback)
-{
-	if (err || !collection) {
-		if (!err) {
-			err = new Error('PointCollection not found');
-		}
-		if (callback) {
-			callback(err);
-		} else {
-			console.error(err.message);
-		}
-		return false;
-	}
-	if (collection.status == config.DataStatus.IMPORTING || collection.status == config.DataStatus.REDUCING) {
-		var err = new Error('Collection is currently busy');
-		console.error(err.message);
-		if (callback) {
-			callback(err);
-		}
-		return false;
-	}
-
-	return true;
-}
-
 /**
 required params:
 	url | file | stream
@@ -504,7 +479,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		} else {
 			console.info('*** Appending to collection ***', params.append);
 			PointCollection.findOne({_id: params.append}, function(err, collection) {
-				if (!self.validateExistingCollection(err, collection, callback)) return;
+				if (!utils.validateExistingCollection(err, collection, callback)) return;
 				runImport(collection);
 			});
 		}
@@ -517,7 +492,7 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 	var pointCollectionId = params.append;
 	console.info('*** Synchronizing collection ***', pointCollectionId);
 	PointCollection.findOne({_id: pointCollectionId}, function(err, collection) {
-		if (!self.validateExistingCollection(err, collection, callback)) return;
+		if (!utils.validateExistingCollection(err, collection, callback)) return;
 		var originalParams = collection.get('importParams');
 		if (params.url || params.path) {
 			delete originalParams.url;

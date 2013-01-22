@@ -1,180 +1,33 @@
-var mongojs = require('mongojs'),
+var	models = require("../../models.js"),
+	Code = require('mongodb').Code,
+	mongoose = require('mongoose'),
 	config = require('../../config.js'),
-	utils = require('../../utils.js');
+	utils = require('../../utils.js'),
+	MapReduceKey = require('./key.js').MapReduceKey,
+	mapReduceScopeFunctions = require('./key.js').scopeFunctions,
+	console = require('../../ext-console.js');
+
+var Point = models.Point,
+	PointCollection = models.PointCollection,
+	Job = models.Job,
+	Map = models.Map,
+	handleDbOp = utils.handleDbOp;
 
 var opts = {};
 for (var k in config.REDUCE_SETTINGS.DB_OPTIONS) {
 	opts[k] = config.REDUCE_SETTINGS.DB_OPTIONS[k];
 }
 
-var lpad = function(str, padString, length) {
-	var s = new String(str);
-    while (s.length < length) {
-        s = padString + s;
-    }
-    return s;
-};
-
-// Returns the week number for this date.  dowOffset is the day of week the week.
-// "starts" on for your locale - it can be from 0 to 6. If dowOffset is 1 (Monday),
-// the week returned is the ISO 8601 week number.
-// @param int dowOffset
-// @return int
-var getWeek = function(date, dowOffset) {
-	dowOffset = typeof(dowOffset) == 'int' ? dowOffset : 0; //default dowOffset to zero
-	var newYear = new Date(date.getFullYear(),0,1);
-	var day = newYear.getDay() - dowOffset; //the day of week the year begins on
-	day = (day >= 0 ? day : day + 7);
-	var daynum = Math.floor((date.getTime() - newYear.getTime() - 
-		(date.getTimezoneOffset()-newYear.getTimezoneOffset()) * 60000) / 86400000) + 1;
-	var weeknum;
-	//if the year starts before the middle of a week
-	if(day < 4) {
-		weeknum = Math.floor((daynum+day-1)/7) + 1;
-		if(weeknum > 52) {
-			nYear = new Date(date.getFullYear() + 1,0,1);
-			nday = nYear.getDay() - dowOffset;
-			nday = nday >= 0 ? nday : nday + 7;
-			/*if the next year starts before the middle of
- 			  the week, it is week #1 of that year*/
-			weeknum = nday < 4 ? 1 : 53;
-		}
-	}
-	else {
-		weeknum = Math.floor((daynum+day-1)/7);
-	}
-	return weeknum;
-};
-
-var clamp180 = function(deg) {
-	if (deg < -360 || deg > 360) {
-		deg = deg % 360;	
-	} 
-	if (deg < -180) {
-		deg = 180 + deg % 180;
-	}
-	if (deg > 180) {
-		deg = 180 - deg % 180;
-	}
-	if (deg == 180) {
-		deg = -180;
-	}
-
-	return deg;
-};
-
-var ReductionKey = {
-	copy: function(value) {
-		return value;
-	},
-	Daily: function(t) {
-		this.get = function(t) {
-			return [
-				t.getFullYear()+''+lpad(t.getMonth(), '0', 2)+''+lpad(t.getUTCDate(), '0', 2),
-				new Date(t.getFullYear(), t.getMonth(), t.getUTCDate())
-			];	
-		};
-		this.name = 'daily';
-		this.index = function(collection, field_name) {
-			var index = {};
-			index[field_name] = 1;
-			collection.ensureIndex(index);
-			return (collectionHasIndex(collection, index));
-		}
-		return this;
-	},
-	Weekly: function(t) {
-		this.get = function(t) {
-			var week = getWeek(t, 1);
-			var day = t.getDay(),
-		      diff = t.getDate() - day + (day == 0 ? -6 : 1);
-			return [
-				t.getFullYear() + '' + lpad(week, '0', 2),
-				new Date(t.setDate(diff))
-			];
-		};
-		this.name = 'weekly';
-		this.index = function(collection, field_name) {
-			var index = {};
-			index[field_name] = 1;
-			collection.ensureIndex(index);
-			return (collectionHasIndex(collection, index));
-		}
-		return this;
-	},
-	Yearly: function(t) {
-		this.get = function(t) {
-			return [
-				t.getFullYear(),
-				new Date(t.getFullYear(), 0, 1)
-			];
-		};
-		this.name = 'yearly';
-		this.index = function(collection, field_name) {
-			var index = {};
-			index[field_name] = 1;
-			collection.ensureIndex(index);
-			return (collectionHasIndex(collection, index));
-		}
-		return this;
-	},
-	LocGrid: function(grid_size) {
-		this.grid_size = grid_size;
-		this.get = function(loc) {
-			var grid_size = this.grid_size;
-			if (!loc || isNaN(parseFloat(loc[0])) || isNaN(parseFloat(loc[1]))) return;
-
-			loc[0] = clamp180(loc[0]);
-			loc[1] = clamp180(loc[1]);
-
-			if (grid_size) {
-				var grid_lng = Math.round((loc[0] - loc[0] % grid_size) / grid_size);
-				var grid_lat = Math.round((loc[1] - loc[1] % grid_size) / grid_size);
-				var loc = [grid_lng * grid_size + grid_size / 2, grid_lat * grid_size + grid_size / 2];
-				loc[0] = clamp180(loc[0]);
-				loc[1] = clamp180(loc[1]);
-			} else {
-				var grid_lng = loc[0];
-				var grid_lat = loc[1];
-			}
-
-			return [
-				grid_lng + ',' + grid_lat + ',' + grid_size, 
-				loc
-			];
-		};
-		this.name = 'loc-'+this.grid_size;
-		this.index = function(collection, field_name) {
-			var index = {};
-			index[field_name] = '2d';
-			collection.ensureIndex(index);
-			return (collectionHasIndex(collection, index));
-		}
-		return this;
-	},
-	Histogram: function(min, max, steps) {
-		this.step = (max - min) / steps;
-		this.steps = steps;
-		this.min = min - min % this.step;
-		this.max = max - max % this.step;
-		this.get = function(val) {
-			var stepVal = val - val % this.step;
-			return [
-				stepVal, 
-				{step: Math.round((stepVal - this.min) / this.step), val: stepVal}
-			];
-		};
-		this.name = 'hist-'+steps;
-	}
-};
-
-var runGridReduce = function(collection, reduced_collection, value_fields, reduction_keys, indexes, options) {
-	var map = function() {
+var runMapReduce = function(collection, reduced_collection, valueFields, mapReduceKeys, indexes, options, callback) 
+{
+	var map = function() 
+	{
 		var keyValues = [];
 		var e = {count: 1};
-		for (var k in reduction_keys) {
-			var f = reduction_keys[k].get || reduction_keys[k];
-			var keyValue = f.call(reduction_keys[k], this[k]);
+		for (var k in mapReduceKeys) {
+			//var f = mapReduceKeys[k].get || mapReduceKeys[k];
+			var f = mapReduceKeys_code[k];
+			var keyValue = f.call(mapReduceKeys[k], this[k], this);
 			if (!keyValue) return;
 			if (keyValue instanceof Array) {
 				keyValues.push(keyValue[0]);
@@ -185,27 +38,27 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 			}
 		}
 		var key = keyValues.join('|');
-		for (var k in value_fields) {
-			var value_field = value_fields[k];
-			if (this[value_field] != null) {
-				if (this[value_field] instanceof Array) {
-					e[value_field] = [];
-					for (var v = 0; v < this[value_field].length; v++) {
-						e[value_field][v] = {
-							min: this[value_field][v],
-							max: this[value_field][v]
+		for (var k in valueFields) {
+			var valueField = valueFields[k];
+			if (this[valueField] != null) {
+				if (this[valueField] instanceof Array) {
+					e[valueField] = [];
+					for (var v = 0; v < this[valueField].length; v++) {
+						e[valueField][v] = {
+							min: this[valueField][v],
+							max: this[valueField][v]
 						};
-						if (isNumber(this[value_field][v])) {
-							e[value_field][v].sum = this[value_field][v];
+						if (isNumber(this[valueField][v]) || valueField == 'extra') {
+							e[valueField][v].sum = this[valueField][v];
 						}
 					}
 				} else {
-					e[value_field] = {
-						min: this[value_field],
-						max: this[value_field]
+					e[valueField] = {
+						min: this[valueField],
+						max: this[valueField]
 					};
-					if (isNumber(this[value_field])) {
-						e[value_field].sum = this[value_field];
+					if (isNumber(this[valueField]) || valueField == 'extra') {
+						e[valueField].sum = this[valueField];
 					}
 				}
 			}
@@ -215,96 +68,145 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		}
 		emit(key, e);
 	};
-	var reduce = function(key, values) {
+
+	var reduce = function(key, values) 
+	{
 		var reduced = {count: 0};
-		for (var k in reduction_keys) {
+		for (var k in mapReduceKeys) {
 			reduced[k] = values[0][k];
 		}
-		for (var k in value_fields) {
-			var value_field = value_fields[k];
-			if (values[0][value_field] != null) {
-				if (values[0][value_field] instanceof Array) {
-					reduced[value_field] = [];
-					for (var v = 0; v < values[0][value_field].length; v++) {
-						reduced[value_field][v] = {
+		for (var k in valueFields) {
+			var valueField = valueFields[k];
+			if (values[0][valueField] != null) {
+				if (values[0][valueField] instanceof Array) {
+					reduced[valueField] = [];
+					for (var v = 0; v < values[0][valueField].length; v++) {
+						reduced[valueField][v] = {
 							min: null,
 							max: null
 						};
-						if (values[0][value_field][v].sum != null) {
-							reduced[value_field][v].sum = 0;
+						if (values[0][valueField][v].sum != null) {
+							reduced[valueField][v].sum = 0;
 						}
 					}
 				} else {
-					reduced[value_field] = {
-						min: null,
-						max: null
-					};
-					if (values[0][value_field].sum != null) {
-						reduced[value_field].sum = 0;
+					if (valueField == 'extra') {
+						reduced[valueField] = {
+							min: {},
+							max: {}
+						};
+						if (values[0][valueField].sum != null) {
+							reduced[valueField].sum = {};
+						}
+					} else {
+						reduced[valueField] = {
+							min: null,
+							max: null
+						};
+						if (values[0][valueField].sum != null) {
+							reduced[valueField].sum = 0;
+						}
 					}
 				}
 			}
 		}
+
 		values.forEach(function(doc) {
 			reduced.count += doc.count;
-			for (var k in value_fields) {
-				var value_field = value_fields[k];
-				var r = reduced[value_field];
+			for (var k in valueFields) {
+				var valueField = valueFields[k];
+				var r = reduced[valueField];
 				if (r != null) {
 					if (r instanceof Array) {
 						for (var v = 0; v < r.length; v++) {
-							if (doc[value_field][v].sum != null) {
-								r[v].sum += doc[value_field][v].sum;
+							if (doc[valueField][v].sum != null) {
+								r[v].sum += doc[valueField][v].sum;
 							}
-							if (r[v].min == null || r[v].min > doc[value_field][v].min) r[v].min = doc[value_field][v].min;
-							if (r[v].max == null || r[v].max < doc[value_field][v].max) r[v].max = doc[value_field][v].max;
+							if (r[v].min == null || r[v].min > doc[valueField][v].min) r[v].min = doc[valueField][v].min;
+							if (r[v].max == null || r[v].max < doc[valueField][v].max) r[v].max = doc[valueField][v].max;
 						}
-					} else {
-						if (doc[value_field].sum != null) {
-							r.sum += doc[value_field].sum;
+					} else if (valueField == 'extra') {
+						for (var objKey in doc[valueField].min) {
+							var vMin = doc[valueField].min[objKey];
+							var vMax = doc[valueField].max[objKey];
+							if (r.min[objKey] == undefined || r.min[objKey] > vMin) r.min[objKey] = vMin;
+							if (r.max[objKey] == undefined || r.max[objKey] < vMax) r.max[objKey] = vMax;
+							if (doc[valueField].sum != null) {
+								var vSum = doc[valueField].sum[objKey];
+								if (isNumber(vSum)) {
+									if (!r.sum[objKey]) {
+										r.sum[objKey] = 0;
+									}
+									r.sum[objKey] += vSum;
+								} else {
+									delete r.sum[objKey];
+								}
+							}
 						}
-						if (r.min == null || r.min > doc[value_field].min) r.min = doc[value_field].min;
-						if (r.max == null || r.max < doc[value_field].max) r.max = doc[value_field].max;
+					} else if (doc[valueField] != undefined) {
+						if (doc[valueField].sum != null) {
+							r.sum += doc[valueField].sum;
+						}
+						if (r.min == null || r.min > doc[valueField].min) r.min = doc[valueField].min;
+						if (r.max == null || r.max < doc[valueField].max) r.max = doc[valueField].max;
 					}
 				}
 			}
 		});
 
 		if (stats && stats.done != stats.running) {
-			stats.update(stats);
+			updateStats(stats);
 		}
 		return reduced;
 	};
-	var finalize = function(key, value) {
-		for (var k in value_fields) {
-			var value_field = value_fields[k];
-			if (value[value_field] != null) {
-				if (value[value_field] instanceof Array) {
-					for (var v = 0; v < value[value_field].length; v++) {
-						if (value[value_field][v].sum != null) {
-							value[value_field][v].avg = value[value_field][v].sum / value.count;
+
+	var finalize = function(key, value) 
+	{
+		for (var k in valueFields) {
+			var valueField = valueFields[k];
+			if (value[valueField] != null) {
+				if (value[valueField] instanceof Array) {
+					for (var v = 0; v < value[valueField].length; v++) {
+						if (value[valueField][v].sum != null) {
+							value[valueField][v].avg = value[valueField][v].sum / value.count;
 						}
 					}
 				} else {
-					if (value[value_field].sum != null) {
-						value[value_field].avg = value[value_field].sum / value.count;
+					if (value[valueField].sum != null) {
+						if (valueField == 'extra') {
+							value[valueField].avg = {};
+							for (var objKey in value[valueField].sum) {
+								value[valueField].avg[objKey] = value[valueField].sum[objKey] / value.count;
+							}
+						} else {
+							value[valueField].avg = value[valueField].sum / value.count;
+						}
 					}
 				}
 			}
 		}
 		return value;
 	};
-	if (!value_fields) {
-		value_fields = ['val'];
+	if (!valueFields) {
+		valueFields = ['val'];
 	}
 
 	var scope = {
-		value_fields: value_fields,
-		reduction_keys: reduction_keys,
-		lpad: lpad,
-		getWeek: getWeek,
-		clamp180: clamp180
+		valueFields: valueFields,
+		mapReduceKeys: mapReduceKeys,
+		mapReduceKeys_code: {},
 	};
+	for (var key in mapReduceScopeFunctions) {
+		scope[key] = new Code(mapReduceScopeFunctions[key]);
+	}
+	// Since we can't pass functions to MongoDB directly, we need to convert
+	// them to a Code object first. Note that when these functions are called
+	// from the map() function, they are passed the MapReduceKey object.
+	for (var key in mapReduceKeys) {
+		//console.log('Converting '+key+' to mongodb.Code');
+		scope.mapReduceKeys_code[key] = new Code(mapReduceKeys[key].get);
+	}
+
 	if (options.scope) {
 		for (var k in options.scope) {
 			scope[k] = options.scope[k];
@@ -313,9 +215,9 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 
 	var params = {
 		mapreduce: collection
-		,map: map
-		,reduce: reduce
-		,finalize: finalize
+		,map: map.toString()
+		,reduce: reduce.toString()
+		,finalize: finalize.toString()
 		,out: {reduce: reduced_collection}
 		,scope: scope
 		,verbose: true
@@ -329,82 +231,117 @@ var runGridReduce = function(collection, reduced_collection, value_fields, reduc
 		}
 	}
 	var info = [];
-	for (var k in reduction_keys) {
-		info.push(reduction_keys[k].name || k);
+	for (var k in mapReduceKeys) {
+		info.push(mapReduceKeys[k].name || k);
 	}
-	var totalCount = db[collection].count(params.query);
-	print('* reducing '+collection+' to '+reduced_collection+' with key: '+info.join(' | ')+' ...');
-	var op = db.runCommand(params);
-	if (op.ok) {
-		for (var k in reduction_keys) {
-			if (reduction_keys[k].index) {
-				var field_name = 'value.' + k;
-				print('* building index for '+field_name+' ...');
-				if (!reduction_keys[k].index.call(reduction_keys[k], 
-						db[reduced_collection], field_name)) {
-					print('ERROR: could not build index');
-					return false;
+
+	var db = mongoose.connection;
+
+	db.collection(collection).count(params.query, function(err, totalCount) {
+		console.log('* running MapReduce for '+totalCount+' '+collection+' to '+reduced_collection+' with key: '+info.join(' | '));
+		mongoose.connection.db.executeDbCommand(params, function(err, op) {
+			if (err || (op.documents.length && op.documents[0].errmsg)) {
+				if (!err) {
+					err = new Error('MongoDB error: '+op.documents[0].errmsg);
+				}
+				console.error('*** error during MapReduce', err)
+			} else {
+				for (var k in mapReduceKeys) {
+					if (mapReduceKeys[k].index) {
+						var field_name = 'value.' + k;
+						console.log('* building index for '+field_name+' ...');
+						if (!mapReduceKeys[k].index.call(mapReduceKeys[k], 
+								db.collection(reduced_collection), field_name)) {
+							console.error('ERROR: could not build index');
+							return false;
+						}
+					}
+				}
+				if (indexes) {
+					for (var k in indexes) {
+						var field_name = 'value.' + k;
+						console.log('* building index for '+field_name+' ...');
+						var index = {};
+						index[field_name] = indexes[k];
+						db.collection(reduced_collection).ensureIndex(index);
+						if (!utils.collectionHasIndex(db.collection(reduced_collection), index)) {
+							console.error('ERROR: could not build index');
+							return false;
+						}
+					}
+				}
+
+				console.success('*** SUCCESS', op.documents[0].counts); 
+				/*print('SUCCESS: reduced '+op.counts.input+' records to '
+					// can't use op.counts.output since it shows total number (including previously reduced)
+					+db[reduced_collection].count({'value.pointCollection': params.query.pointCollection})); 
+				*/
+			}
+
+			callback(err);
+		});
+
+		
+		/*var op = db.runCommand(params);
+		if (op.ok) {
+			for (var k in mapReduceKeys) {
+				if (mapReduceKeys[k].index) {
+					var field_name = 'value.' + k;
+					print('* building index for '+field_name+' ...');
+					if (!mapReduceKeys[k].index.call(mapReduceKeys[k], 
+							db[reduced_collection], field_name)) {
+						print('ERROR: could not build index');
+						return false;
+					}
 				}
 			}
-		}
-		if (indexes) {
-			for (var k in indexes) {
-				var field_name = 'value.' + k;
-				print('* building index for '+field_name+' ...');
-				var index = {};
-				index[field_name] = indexes[k];
-				db[reduced_collection].ensureIndex(index);
-				if (!collectionHasIndex(db[reduced_collection], index)) {
-					print('ERROR: could not build index');
-					return false;
+			if (indexes) {
+				for (var k in indexes) {
+					var field_name = 'value.' + k;
+					print('* building index for '+field_name+' ...');
+					var index = {};
+					index[field_name] = indexes[k];
+					db[reduced_collection].ensureIndex(index);
+					if (!collectionHasIndex(db[reduced_collection], index)) {
+						print('ERROR: could not build index');
+						return false;
+					}
 				}
 			}
-		}
-		print('SUCCESS: reduced '+op.counts.input+' records to '
-			// can't use op.counts.output since it shows total number (including previously reduced)
-			+db[reduced_collection].count({'value.pointCollection': params.query.pointCollection})); 
-		return true;
-	} else {
-		print('ERROR: '+op.assertion);
-		return false;		
-	}
+			print('SUCCESS: reduced '+op.counts.input+' records to '
+				// can't use op.counts.output since it shows total number (including previously reduced)
+				+db[reduced_collection].count({'value.pointCollection': params.query.pointCollection})); 
+			return true;
+		} else {
+			print('ERROR: '+op.assertion);
+			return false;		
+		
+		}*/
+	});
 };
 
-var collectionHasIndex = function(collection, key) {
-	var indexes = collection.getIndexes();
-	for (var i = 0; i < indexes.length; i++) {
-		for (var j in key) {
-			if (indexes[i].key[j] && indexes[i].key[j] == key[j]) {
-				return true;
-			}
-		}
-	}
-	return false;
-};
-
-var reducePoints = function(collectionId, reduction_keys, opts, value_fields, removeFirst) {
+var runMapReduceForPoints = function(collectionId, mapReduceKeys, opts, callback) {
 	var collection = 'points';
 	var info = ['r', collection];
-	for (var k in reduction_keys) {
-		if (reduction_keys[k].name) {
-			info.push(reduction_keys[k].name);
+	for (var k in mapReduceKeys) {
+		if (mapReduceKeys[k].name) {
+			info.push(mapReduceKeys[k].name);
 		}
 	}
 	var reduced_collection = info.join('_');
-	if (removeFirst) {
-		if (opts.query && opts.query.pointCollection) {
-			print('* removing existing reduction for '+opts.query.pointCollection.toString());
-			db[reduced_collection].remove({
-				'value.pointCollection': opts.query.pointCollection
-			});
-		} else {
-			print('* dropping '+reduced_collection);
-			db[reduced_collection].drop();
+	if (!opts.query) {
+		opts.query = {};
+	}
+	opts.query.pointCollection = new mongoose.Types.ObjectId(collectionId);
+
+	var valueFields = opts.valueFields;
+	if (!valueFields) {
+		valueFields = ['val', 'altVal', 'label', 'extra'];
+		if (!mapReduceKeys['datetime']) {
+			valueFields.push('datetime');
 		}
 	}
-	if (!value_fields) {
-		value_fields = ['val', 'altVal', 'datetime', 'label'];
-	}
+
 	if (!opts.scope) {
 		opts.scope = {};
 	}
@@ -414,145 +351,229 @@ var reducePoints = function(collectionId, reduction_keys, opts, value_fields, re
 			collectionId: opts.stats.collectionId,
 			total: opts.stats.total,
 			done: 0,
-			running: 0,
-			update: function(stats) {
-				if (stats.running / stats.total > .001) {
-					stats.done += stats.running;
-					db.pointcollections.update({_id: stats.collectionId}, {$inc: {progress: stats.running}});
-					stats.running = 0;
-				}
-			}
+			running: 0
 		};
+		opts.scope.updateStats = new Code(function(stats) {
+			if (stats.running / stats.total > .001) {
+				stats.done += stats.running;
+				db.pointcollections.update({_id: stats.collectionId}, {$inc: {progress: stats.running}});
+				stats.running = 0;
+			}
+		});
 	} else {
 		opts.scope.stats = false;
 	}	
 
-	return runGridReduce(collection, reduced_collection, value_fields, reduction_keys, {
-		count: 1,
-		'val.avg': 1,
-		'val.min': 1,
-		'val.max': 1,
-		pointCollection: 1,
-		datetime: 1
-	}, opts);
+	var callRunMapReduce = function() {
+		runMapReduce(collection, reduced_collection, valueFields, mapReduceKeys, {
+				count: 1,
+				'val.avg': 1,
+				'val.min': 1,
+				'val.max': 1,
+				pointCollection: 1,
+				datetime: 1
+			}, opts, callback);	
+	}; 
+
+	if (opts.removeFirst) {
+		var db = mongoose.connection;
+		if (opts.query && opts.query.pointCollection) {
+			console.warn('* removing existing reduction for '+opts.query.pointCollection.toString());
+			db.collection(reduced_collection).remove({
+				'value.pointCollection': opts.query.pointCollection
+			}, callRunMapReduce);
+		} else {
+			console.warn('* dropping '+reduced_collection);
+			db.collection(reduced_collection).drop(callRunMapReduce);
+		}
+	} else {
+		callRunMapReduce();
+	}
+
 };
 
+
+
 var MapReduceAPI = function(app) {
-	var self = this;
 }
 
 MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 {
-	db.jobs.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE}, function(err, job) {
+	Job.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE}, function(err, job) {
 		if (job && job.status != config.JobStatus.IDLE) {
-			console.log('*** Another reduction job ' + job._id + ' has not been finished: quitting ***');
+			// tmp
+			/*console.log('*** Another reduction job ' + job._id + ' has not been finished: quitting ***');
 			if (callback) {
 				callback();
 			}
-			return;			
+			return;*/
+		} else {
+			job = new Job({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE, updatedAt: new Date, createdAt: new Date});
 		}
 
-		db.jobs.insert({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE, updatedAt: new Date, createdAt: new Date}, function(err, job) {
-			console.log(job);
-			db.jobs.update({_id: job._id}, {$set: {status: config.JobStatus.IDLE, updatedAt: new Date}}, {}, function(err) {
-				console.log(job);
-				console.log('*** reduction completed ***');
-				if (callback) {
-					callback();
+		PointCollection.findOne({_id: params.pointCollectionId}, function(err, collection) {
+			if (!utils.validateExistingCollection(err, collection, callback)) return;
+			job.save(function(err, job) {
+				var opts = {};
+				for (var k in config.REDUCE_SETTINGS.DB_OPTIONS) {
+					opts[k] = config.REDUCE_SETTINGS.DB_OPTIONS[k];
 				}
+
+				opts.query = {};
+				var incremental = collection.lastReducedAt;
+				opts.removeFirst = !incremental;
+
+				//var statsTotal = db.points.count(opts.query ... and pointCollection) * (config.NUM_ZOOM_LEVELS + numHistograms);
+				//opts.stats = {total: statsTotal, collectionId: collection._id};
+				//db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
+				
+				collection.status = config.DataStatus.REDUCING;
+				//collection.progress = 0;
+				//collection.numBusy: statsTotal;
+
+				collection.save(function(err, collection) {
+					var reducedAt = new Date;
+					var mapReduceCalls = [];
+
+					console.info('*** collection = '+collection.title+' ('+collection._id+') ***');
+
+					if (incremental) {
+						opts.query.createdAt = {$gt: collection.lastReducedAt};
+						console.log('*** incremental reduction of points created > '+collection.lastReducedAt);
+					}
+
+					for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
+						mapReduceCalls.push([
+							'*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***', 
+							{
+								pointCollection: new MapReduceKey.Copy(), 
+								val: new MapReduceKey.Histogram(collection.minVal, collection.maxVal, config.HISTOGRAM_SIZES[i]),
+							}
+						]);
+					}
+
+					if (!collection.reduce || collection.gridSize) {
+						mapReduceCalls.push([
+							'*** creating unreduced copy of original ***', 
+							{
+								pointCollection: new MapReduceKey.Copy(), 
+								loc: new MapReduceKey.LocGrid(0)
+							}
+						]);
+					} 
+
+
+					if (collection.reduce) {
+
+						for (var g in config.GRID_SIZES) {
+							var grid_size = config.GRID_SIZES[g];
+							if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
+
+								mapReduceCalls.push([
+									'*** MapReduce for zoom = '+g+' ***', 
+									{
+										pointCollection: new MapReduceKey.Copy(), 
+										loc: new MapReduceKey.LocGrid(grid_size)
+									}
+								]);
+					
+								if (config.REDUCE_SETTINGS.TIME_BASED && collection.timeBased) {
+									mapReduceCalls.push([
+										'*** MapReduce for time-based zoom = '+g+' ***', 
+										{
+											pointCollection: new MapReduceKey.Copy(), 
+											loc: new MapReduceKey.LocGrid(grid_size), 
+											datetime: new MapReduceKey.Yearly()
+										}
+									]);
+								}
+							}
+						}
+					}
+
+					var finalize = function(err) {
+						if (!err) {
+							console.success('*** MapReduce completed successfully ***');
+						}
+						collection.status = config.DataStatus.COMPLETE;
+						collection.lastReducedAt = reducedAt;
+						collection.save(function(err, collection) {
+							job.status = config.JobStatus.IDLE;
+							job.updatedAt = new Date;
+							job.save(function(err) {
+								if (callback) {
+									callback(err);
+								}
+							});
+						});
+					};
+
+					var dequeueMapReduceCall = function() {
+						if (!mapReduceCalls.length) {
+							finalize();
+						} else {
+							var call = mapReduceCalls.shift();
+							console.info(call[0]);
+							runMapReduceForPoints(params.pointCollectionId, call[1], opts, function(err, res) {
+								if (err) {
+									console.error('*** error during MapReduce ***')
+									callback(err);									
+								} else {
+									dequeueMapReduceCall();
+								}
+							});
+						}
+					};
+					
+					dequeueMapReduceCall();
+
+				});
 			});
 		});
 	});
-
 };
 
-
-/*
-
-
-var numHistograms = config.HISTOGRAM_SIZES.length;
-var cur = db.pointcollections.find({
-	$or: [{status: config.DataStatus.UNREDUCED}, {status: config.DataStatus.UNREDUCED_INC}]
-});
-print('*** number of collections to reduce: ' + cur.count() + ' ***');
-
-cur.forEach(function(collection) {
-	opts.query = {pointCollection: collection._id};
-	var statsTotal = db.points.count(opts.query) * (config.NUM_ZOOM_LEVELS + numHistograms);
-	opts.stats = {total: statsTotal, collectionId: collection._id};
-	db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
-	var reducedAt = new Date;
-
-	print('*** collection = '+collection.title+' ('+collection._id+') ***');
-
-	if (collection.lastReducedAt) {
-		opts.query.createdAt = {$gt: collection.lastReducedAt};
-		print('*** incremental reduction of points created > '+collection.lastReducedAt);
-	}
-
-	for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
-		print('*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***');
-		reducePoints(collection._id, {
-			pointCollection: ReductionKey.copy, 
-			val: new ReductionKey.Histogram(collection.minVal, collection.maxVal, config.HISTOGRAM_SIZES[i])
-		}, opts, []);
-	}
-
-	if (!collection.reduce || collection.gridSize) {
-		print('*** creating unreduced copy of original ***');
-		reducePoints(collection._id, {
-			pointCollection: ReductionKey.copy, 
-			loc: new ReductionKey.LocGrid(0)
-		}, opts);
-
-	} 
-
-	if (collection.reduce) {
-		for (var g in config.GRID_SIZES) {
-			var grid_size = config.GRID_SIZES[g];
-			if (!collection.gridSize || grid_size > collection.gridSize) {
-			print('*** reducing original for grid = '+g+' ***');
-
-				reducePoints(collection._id, {
-					pointCollection: ReductionKey.copy, 
-					loc: new ReductionKey.LocGrid(grid_size)
-				}, opts);
-				
-				if (config.REDUCE_SETTINGS.TIME_BASED) {
-					reducePoints({
-						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size), 
-						datetime: new ReductionKey.Weekly()
-					}, opts);
-					
-					reducePoints({
-						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size), 
-						datetime: new ReductionKey.Yearly()
-					}, opts);
-
-					reducePoints({
-						pointCollection: ReductionKey.copy, 
-						loc: new ReductionKey.LocGrid(grid_size), 
-						datetime: new ReductionKey.Daily()
-					}, opts);
-				}
+MapReduceAPI.prototype.mapReduceAll = function(params, req, res, callback)
+{
+	var self = this;
+	PointCollection.find({$or: [{status: config.DataStatus.UNREDUCED}, {status: config.DataStatus.UNREDUCED_INC}]}, function(err, collections) {
+		console.info('*** Collections to reduce: ' + collections.length);
+		if (err) {
+			callback(err);
+		}
+		var dequeuePointCollection = function(err) {
+			if (err || !collections.length) {
+				callback(err);
+			} else {
+				var collection = collections.pop();
+				params.pointCollectionId = collection._id.toString();
+				self.mapReduce(params, req, res, dequeuePointCollection);
 			}
 		}
-	}
+		dequeuePointCollection();
+	});
+}
+
+MapReduceAPI.prototype.cli = {
 	
-	print('*** finishing collection ***');
-	db.pointcollections.update({_id: collection._id}, {$set: {
-		status: config.DataStatus.COMPLETE, 
-		numBusy: 0,
-		lastReducedAt: reducedAt
-	}});
-});
+	mapreduce: function(params, callback, showHelp) 
+	{
+		var help = "Usage: node manage.js mapreduce [params]\n"
+			+ "\nRuns MapReduce for currently unreduced collections.\n";
 
-db.jobs.update({_id: job._id}, {$set: {status: config.JobStatus.IDLE, updatedAt: new Date}});
-print('*** reduction completed ***');
-
-
-*/
+		if (!showHelp && utils.connectDB()) {
+			if (params._.length) {
+				params.pointCollectionId = params._[1];
+			}
+			if (params.pointCollectionId) {
+				this.mapReduce(params, null, null, callback);
+			} else {
+				this.mapReduceAll(params, null, null, callback);
+			}
+		} else {
+			callback(false, help);
+		}
+	}
+}
 
 module.exports = MapReduceAPI;
