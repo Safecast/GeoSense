@@ -498,11 +498,15 @@ MapReduceAPI.prototype.mapReduceAll = function(params, req, res, callback)
 	PointCollection.find({$or: [{status: config.DataStatus.UNREDUCED}, {status: config.DataStatus.UNREDUCED_INC}]}, function(err, collections) {
 		console.info('*** Collections to reduce: ' + collections.length);
 		if (err) {
-			callback(err);
+			if (callback) {
+				callback(err);
+			}
 		}
 		var dequeuePointCollection = function(err) {
 			if (err || !collections.length) {
-				callback(err);
+				if (callback) {
+					callback(err);
+				}
 			} else {
 				var collection = collections.pop();
 				params.pointCollectionId = collection._id.toString();

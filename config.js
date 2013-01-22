@@ -7,6 +7,8 @@ var config = {
 	DEBUG: DEV,	
 	LIMITED_PROD_ACCESS: !DEV,
 
+	CLOCK_PROCESS_RUN_TIME: '0 0 * * * *',
+
 	DEFAULT_HOSTS: [
 		'localhost:3000',
 		'hollow-warrior-5556.herokuapp.com',

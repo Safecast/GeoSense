@@ -519,11 +519,15 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
 	PointCollection.find({sync: true, status: DataStatus.COMPLETE}, function(err, collections) {
 		console.info('*** Collections to sync: ' + collections.length);
 		if (err) {
-			callback(err);
+			if (callback) {
+				callback(err);
+			}
 		}
 		var dequeuePointCollection = function(err) {
 			if (err || !collections.length) {
-				callback(err);
+				if (callback) {
+					callback(err);
+				}
 			} else {
 				var collection = collections.pop();
 				params.append = collection._id.toString();
