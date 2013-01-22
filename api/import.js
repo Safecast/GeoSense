@@ -8,7 +8,8 @@ var config = require('../config.js'),
 	url = require('url'),
 	_ = require('cloneextend'),
 	path = require('path'),
-	console = require('../ext-console.js');
+	console = require('../ext-console.js'),
+	MapReduceAPI = require('./mapreduce');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
@@ -233,8 +234,16 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							} else {
 						    	debugStats('*** job failed ***', 'error', null, true);
 							}
-							if (callback) {
-								callback(false);
+							if (params.mapreduce) {
+								console.log('**** starting mapreduce');
+								var mapReduceParams = {
+									pointCollectionId: collection._id.toString()
+								};
+								new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
+							} else {
+								if (callback) {
+									callback(false);
+								}
 							}
 						});
 					});
@@ -502,7 +511,27 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 		importParams.incremental = true;
 		self.import(importParams, req, res, callback);
 	});
+}
 
+ImportAPI.prototype.syncAll = function(params, req, res, callback)
+{
+	var self = this;
+	PointCollection.find({sync: true, status: DataStatus.COMPLETE}, function(err, collections) {
+		console.info('*** Collections to sync: ' + collections.length);
+		if (err) {
+			callback(err);
+		}
+		var dequeuePointCollection = function(err) {
+			if (err || !collections.length) {
+				callback(err);
+			} else {
+				var collection = collections.pop();
+				params.append = collection._id.toString();
+				self.sync(params, req, res, dequeuePointCollection);
+			}
+		}
+		dequeuePointCollection();
+	});
 }
 
 function getImportParams(params) 
@@ -520,7 +549,8 @@ function getImportParams(params)
 		incremental: params.incremental,
 		break: params.break, 
 		interval: params.interval,
-		bounds: params.bounds
+		bounds: params.bounds,
+		mapreduce: params.mapreduce
 	});
 }
 
@@ -546,9 +576,13 @@ ImportAPI.prototype.cli = {
 			+ "\nthat were used when last importing records into the collection."
 			+ "\nYou can override all arguments when syncing, for instance to import "
 			+ "\nrecords from a different data source into the same collection.\n";
-		if (!showHelp && params._.length > 1 && utils.connectDB()) {
-			params.append = params._[1];
-			this.sync(getImportParams(params), null, null, callback);
+		if (!showHelp && utils.connectDB()) {
+			if (params._.length > 1) {
+				params.append = params._[1];
+				this.sync(getImportParams(params), null, null, callback);
+			} else {
+				this.syncAll(getImportParams(params), null, null, callback);
+			}
 		} else {
 			callback(false, help);
 		}

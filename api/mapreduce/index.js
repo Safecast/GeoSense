@@ -272,51 +272,10 @@ var runMapReduce = function(collection, reduced_collection, valueFields, mapRedu
 				}
 
 				console.success('*** SUCCESS', op.documents[0].counts); 
-				/*print('SUCCESS: reduced '+op.counts.input+' records to '
-					// can't use op.counts.output since it shows total number (including previously reduced)
-					+db[reduced_collection].count({'value.pointCollection': params.query.pointCollection})); 
-				*/
 			}
 
 			callback(err);
 		});
-
-		
-		/*var op = db.runCommand(params);
-		if (op.ok) {
-			for (var k in mapReduceKeys) {
-				if (mapReduceKeys[k].index) {
-					var field_name = 'value.' + k;
-					print('* building index for '+field_name+' ...');
-					if (!mapReduceKeys[k].index.call(mapReduceKeys[k], 
-							db[reduced_collection], field_name)) {
-						print('ERROR: could not build index');
-						return false;
-					}
-				}
-			}
-			if (indexes) {
-				for (var k in indexes) {
-					var field_name = 'value.' + k;
-					print('* building index for '+field_name+' ...');
-					var index = {};
-					index[field_name] = indexes[k];
-					db[reduced_collection].ensureIndex(index);
-					if (!collectionHasIndex(db[reduced_collection], index)) {
-						print('ERROR: could not build index');
-						return false;
-					}
-				}
-			}
-			print('SUCCESS: reduced '+op.counts.input+' records to '
-				// can't use op.counts.output since it shows total number (including previously reduced)
-				+db[reduced_collection].count({'value.pointCollection': params.query.pointCollection})); 
-			return true;
-		} else {
-			print('ERROR: '+op.assertion);
-			return false;		
-		
-		}*/
 	});
 };
 
