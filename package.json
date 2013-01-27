@@ -6,13 +6,11 @@
     "npm":  "1.0.x"
   },
   "dependencies": {
-  		"v8-profiler":"3.6.2beta2",
     	"csv":"0.0.13",
 		"datejs":"0.0.2",
 		"express": "3.0.0",
 		"mongodb": "0.9.9-5",
 		"mongoose": "2.5.10",
-		"mongojs": "0.4.5",
 		"ntwitter": "0.2.10",
 		"oauth": "0.9.6",
 		"twitter": "v0.1.18",
