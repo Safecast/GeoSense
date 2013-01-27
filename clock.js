@@ -3,10 +3,12 @@ var config = require("./config.js"),
 	api = new require('./api')(),
     CronJob = require('cron').CronJob;
 
+console.log('Clock process started');
+
 utils.connectDB(function(err) {
-	console.log('Clock process started, running task every '+config.CLOCK_PROCESS_RUN_TIME);
+	console.log('Initializing CronJob, running every '+config.CLOCK_PROCESS_RUN_TIME);
 	new CronJob(config.CLOCK_PROCESS_RUN_TIME, function() {
-		console.info('synching collections');
+		console.info('CronJob: synching collections');
 		api.import.syncAll();
 	}, null, true);
 });
