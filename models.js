@@ -47,6 +47,7 @@ this.Point = mongoose.model('Point', new mongoose.Schema({
     url: String,
     datetime: {type: Date, index: 1},
     sourceId: {type: mongoose.Schema.Types.Mixed, index: 1},
+    incField: {type: mongoose.Schema.Types.Mixed, index: 1},
     createdAt: Date,
     updatedAt: Date
 }));
