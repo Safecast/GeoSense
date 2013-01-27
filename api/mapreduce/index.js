@@ -1,3 +1,5 @@
+// TODO: max parameter should take into account skipped records
+
 var	models = require("../../models.js"),
 	Code = require('mongodb').Code,
 	mongoose = require('mongoose'),
@@ -237,8 +239,9 @@ var runMapReduce = function(collection, reduced_collection, valueFields, mapRedu
 
 	var db = mongoose.connection;
 
-	db.collection(collection).count(params.query, function(err, totalCount) {
-		console.log('* running MapReduce for '+totalCount+' '+collection+' to '+reduced_collection+' with key: '+info.join(' | '));
+	/*db.collection(collection).count(params.query, function(err, totalCount) {
+		console.log('* running MapReduce for '+totalCount+' '+collection+' to '+reduced_collection+' with key: '+info.join(' | '));*/
+		console.log('* running MapReduce for '+collection+' to '+reduced_collection+' with key: '+info.join(' | '));
 		mongoose.connection.db.executeDbCommand(params, function(err, op) {
 			if (err || (op.documents.length && op.documents[0].errmsg)) {
 				if (!err) {
@@ -276,7 +279,7 @@ var runMapReduce = function(collection, reduced_collection, valueFields, mapRedu
 
 			callback(err);
 		});
-	});
+	/*});*/
 };
 
 var runMapReduceForPoints = function(collectionId, mapReduceKeys, opts, callback) {
