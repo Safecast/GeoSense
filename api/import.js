@@ -39,6 +39,9 @@ optional params:
 ImportAPI.prototype.import = function(params, req, res, callback)
 {
 	var self = this;
+	if (!params) {
+		params = {};
+	}
 
 	var defaults = {
 		url: null, path: null, stream: null,
@@ -498,6 +501,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 ImportAPI.prototype.sync = function(params, req, res, callback) 
 {
 	var self = this;
+	if (!params) {
+		params = {};
+	}
 	var pointCollectionId = params.append;
 	console.info('*** Synchronizing collection ***', pointCollectionId);
 	PointCollection.findOne({_id: pointCollectionId}, function(err, collection) {
@@ -516,6 +522,9 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 ImportAPI.prototype.syncAll = function(params, req, res, callback)
 {
 	var self = this;
+	if (!params) {
+		params = {};
+	}
 	PointCollection.find({sync: true, status: DataStatus.COMPLETE}, function(err, collections) {
 		console.info('*** Collections to sync: ' + collections.length);
 		if (err) {

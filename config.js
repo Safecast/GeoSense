@@ -7,7 +7,7 @@ var config = {
 	DEBUG: DEV,	
 	LIMITED_PROD_ACCESS: !DEV,
 
-	CLOCK_PROCESS_RUN_TIME: '0 0 * * * *',
+	CLOCK_PROCESS_RUN_TIME: '0 10 * * * *',
 
 	DEFAULT_HOSTS: [
 		'localhost:3000',

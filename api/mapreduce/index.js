@@ -358,6 +358,9 @@ var MapReduceAPI = function(app) {
 
 MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 {
+	if (!params) {
+		params = {};
+	}
 	Job.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE}, function(err, job) {
 		if (job && job.status != config.JobStatus.IDLE) {
 			// tmp
@@ -495,6 +498,9 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 MapReduceAPI.prototype.mapReduceAll = function(params, req, res, callback)
 {
 	var self = this;
+	if (!params) {
+		params = {};
+	}
 	PointCollection.find({$or: [{status: config.DataStatus.UNREDUCED}, {status: config.DataStatus.UNREDUCED_INC}]}, function(err, collections) {
 		console.info('*** Collections to reduce: ' + collections.length);
 		if (err) {
