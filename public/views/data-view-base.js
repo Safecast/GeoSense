@@ -113,12 +113,17 @@ window.DataViewBase = Backbone.View.extend({
     			status = __('queued for crunching…');
 				break;
     		case DataStatus.REDUCING:
-    			var percent = Math.floor(progress / this.mapLayer.pointCollection.numBusy * 100);
-    			status = __(progress ? 'crunching… %(percent)s%' : 'crunching…', {
-    				percent: percent
-    			});
-    			this.$('.progress .bar').css('width', percent + '%');
-    			this.$('.progress').show();
+    			if (this.mapLayer.pointCollection.numBusy) {
+	    			var percent = Math.floor(progress / this.mapLayer.pointCollection.numBusy * 100);
+	    			status = __(progress ? 'crunching… %(percent)s%' : 'crunching…', {
+	    				percent: percent
+	    			});
+	    			this.$('.progress .bar').css('width', percent + '%');
+	    			this.$('.progress').show();
+    			} else {
+	    			status = __('crunching…', {
+	    			});
+    			}
 				break;
     	}
 

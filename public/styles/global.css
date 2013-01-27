@@ -132,7 +132,7 @@ h1 {
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
 	width: 300px;
-	overflow: scroll;
+	overflow: hidden;
 	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
 }
 
