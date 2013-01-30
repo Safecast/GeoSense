@@ -174,5 +174,3 @@ process.on('uncaughtException', function(err) {
 		throw err;
 	}
 });
-
-console.log(config.GRID_SIZES);
