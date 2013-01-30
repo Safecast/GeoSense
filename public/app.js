@@ -396,7 +396,7 @@ var AppRouter = Backbone.Router.extend({
 				$.each(this.mapView.viewStyles, function(styleName, title) {
 					var s = styleName;
 					li.push('<li' + (s == self.mapView.viewStyle ? ' class="inactive"' : '') + '>'
-						+ '<a href="#' + s + '" data-toggle="dropdown">' 
+						+ '<a href="#' + s + '">' 
 						+ title
 						+ '</a></li>');
 				});
@@ -412,7 +412,7 @@ var AppRouter = Backbone.Router.extend({
 				for (var key in this.mapView.ViewBase) {
 					var cls = this.mapView.ViewBase[key].prototype;
 					li.push('<li' + (key == self.mapView.viewBase ? ' class="inactive"' : '') + '>'
-						+ '<a href="#' + key + '" data-toggle="dropdown">' 
+						+ '<a href="#' + key + '">' 
 						+ '<span class="view-base-thumb" style="background: url(/assets/baselayer-thumbs/' + key + '.png)"></span>'
 						+ '<span class="view-base-caption">' + cls.providerName + '</span>'
 						+ '</a></li>');
