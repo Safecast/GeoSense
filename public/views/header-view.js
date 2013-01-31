@@ -49,6 +49,7 @@ window.HeaderView = Backbone.View.extend({
 	{		
 		if (event.keyCode == 13) {
 			if (this.$("#search'").is(":focus")) {
+				this.$("#search'").blur();
 				var addr = $('#search').val();
 				if (addr != '') {
 					this.vent.trigger("geocodeAndSetMapLocation", addr);
