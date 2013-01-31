@@ -142,7 +142,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		var headerValues = {};
 		collection.active = false;
 		collection.status = config.DataStatus.IMPORTING;
-		collection.importParams = params;
+		if (params.saveParams == undefined || params.saveParams) {
+			collection.importParams = params;
+		}
 		if (req && req.session) {
 			collection.createdBy = collection.modifiedBy = req.session.user;
 		}
@@ -540,6 +542,8 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
 			} else {
 				var collection = collections.pop();
 				params.append = collection._id.toString();
+				params.saveParams = false;
+				console.warn('*** params will not be saved since multiple collections are synced')
 				self.sync(params, req, res, dequeuePointCollection);
 			}
 		}
