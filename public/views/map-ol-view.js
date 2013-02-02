@@ -5,7 +5,8 @@ define([
 	'config',
 	'utils',
 	'text!templates/map-ol.html',
-	'views/map-view-base'
+	'views/map-view-base',
+	'lib/openlayers/cloudmade'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase) {
 	var MapOLView = MapViewBase.extend({
 

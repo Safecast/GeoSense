@@ -184,7 +184,7 @@ define([
 			if (this.firstLoad) {
 				this.firstLoad = false;
 				this.homepageView = new HomepageView();
-		        $('#home').append(this.homepageView.render().el);
+		        $('#app').append(this.homepageView.render().el);
 			} else {
 				window.location.reload(true);			
 			}

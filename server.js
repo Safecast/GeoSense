@@ -17,8 +17,10 @@ mongoose.connect(config.DB_PATH);
 
 
 app.configure(function() {
-	app.use(express.static(__dirname 
-		+ (process.env.NODE_ENV == 'production' ? '/public-build' : 'public')));
+	var staticDir = __dirname 
+		+ (process.env.NODE_ENV == 'production' ? '/public-build' : '/public');
+	console.log('Serving static files from '+staticDir);
+	app.use(express.static(staticDir));
 	app.use(express.logger('dev'));
   	app.use(express.compress());
 	app.use(express.methodOverride());

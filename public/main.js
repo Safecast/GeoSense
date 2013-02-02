@@ -33,6 +33,9 @@ require([
 	'jquery',
     'app',
     'jqueryui',
+    'lib/jquery/jquery.color',
+    'lib/jquery/jquery.glowing',
+    'lib/jquery/jquery.miniColors.min',
     'bootstrap',
     'locale'
 ], function($, App, ui) {
