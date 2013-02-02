@@ -1,3 +1,7 @@
+define([], function() {
+	return {};
+});
+
 function formatLargeNumber(c) {
 	if (c > 1000000) {
 		c = Math.round(c / 1000000 * 10) / 10 + 'M';

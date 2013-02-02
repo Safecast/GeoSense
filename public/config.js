@@ -1,4 +1,11 @@
 var IS_BROWSER = this.Document && true;
+
+if (IS_BROWSER) {
+	define([], function() {
+		return {};
+	});
+}
+
 var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
