@@ -17,7 +17,8 @@ mongoose.connect(config.DB_PATH);
 
 
 app.configure(function() {
-	app.use(express.static(__dirname + '/public'));
+	app.use(express.static(__dirname 
+		+ (process.env.NODE_ENV == 'production' ? '/public-build' : 'public'));
 	app.use(express.logger('dev'));
   	app.use(express.compress());
 	app.use(express.methodOverride());
