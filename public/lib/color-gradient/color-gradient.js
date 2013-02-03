@@ -2,17 +2,16 @@
 ColorGradient by Samuel Luescher <sam at luescher dot org>
 Released under MIT License
 */
-
-/**
-* Expects an array of objects containing a color and a position, for example:
-*
-*	[
-*		{color: "#FF0000", position: 0.0},
-*		{color: "#00FF00", position: 1.0}
-*	]
-*
-*/
 define([], function() {
+	/*
+	* Expects an array of objects containing a color and a position, for example:
+	*
+	*	[
+	*		{color: "#FF0000", position: 0.0},
+	*		{color: "#00FF00", position: 1.0}
+	*	]
+	*
+	*/
 	var ColorGradient = function(colors, interpolation) {	
 		this.colors = [];
 		this.gradientCache = {};
@@ -42,6 +41,10 @@ define([], function() {
 		];
 	}
 
+	var lerpInt = function(p, a, b) { 
+		return Math.round(a + (b - a) * p);
+	};
+
 	ColorGradient.prototype.interpolation = {
 		// returns result of linear interpolation between two colors
 		lerpRGB: function(p, a, b) { 
@@ -49,9 +52,6 @@ define([], function() {
 			var cA = a.channels || ColorGradient.prototype.getChannels(a.color);
 			var cB = b.channels || ColorGradient.prototype.getChannels(b.color);
 			// lerp and add channels 
-			var lerpInt = function(p, a, b) { 
-				return Math.round(a + (b - a) * p);
-			};
 			return (lerpInt(p, cA[0], cB[0]) << 16)
 				+ (lerpInt(p, cA[1], cB[1]) << 8)
 				+ lerpInt(p, cA[2], cB[2]);
