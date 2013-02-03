@@ -41,6 +41,9 @@ define([], function() {
 		];
 	}
 
+	/*
+	* Returns linear interpolation of integers a and b at position p between 0.0 and 1.0.
+	*/
 	var lerpInt = function(p, a, b) { 
 		return Math.round(a + (b - a) * p);
 	};
@@ -64,6 +67,10 @@ define([], function() {
 
 	ColorGradient.prototype.interpolation.default = 'lerpRGB';
 
+	/*
+	* Returns integer color for gradient at position p between 0.0 and 1.0 with an 
+	* optional step parameter for non-smooth (but cacheable) gradients.
+	*/ 
 	ColorGradient.prototype.intColorAt = function(p, step) {
 		if (step) {
 			p = (p - p % step) / 1;
@@ -106,6 +113,10 @@ define([], function() {
 		return '#' + this.zeroPad(intColor.toString(16), 6);
 	}
 
+	/*
+	* Returns hex color for gradient at position p between 0.0 and 1.0 with an 
+	* optional step parameter for non-smooth (but cacheable) gradients.
+	*/ 
 	ColorGradient.prototype.colorAt = function(p, step) {
 		return this.intToHexColor(this.intColorAt(p, step));
 	};
