@@ -77,7 +77,6 @@ define([], function() {
 			if (!this.gradientCache[step]) {
 				this.gradientCache[step] = {};
 			} else if (this.gradientCache[step][p] != null) {
-				console.log('cached', p);
 				return this.gradientCache[step][p];
 			}
 		}
