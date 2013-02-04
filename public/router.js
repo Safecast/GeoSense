@@ -93,6 +93,9 @@ define([
 
 			this.vent = _.extend({}, Backbone.Events);
 			this.vent.bind('mapViewReady', function() {
+				// remove site loading indicator
+				$('#loading-indicator').remove();
+				// init all map layers
 				if (!self.mapLayersInitialized) {
 					self.initMapLayers();
 				}
