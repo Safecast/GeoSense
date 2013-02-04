@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geo Queries</title>
+	<script src="/libs/jquery.1.7.1.min.js"></script>
+	
+	<script>
+
+		$(document).ready(function() {
+		
+			function setup(low_left, up_right){		
+				ZoomLevel.create(low_left, up_right);
+			}
+
+			var ZoomLevel = {
+				
+				/*
+				PARAMETERS
+				data_array = array of all the boxes
+				coordinates = array of all the points used to make the boxes
+				zoom_width = width of the window
+				zoom_length = length of the window
+				zoom_sw = lower left corner
+				zoom_ne = upper right corner
+				grid_length = number of boxes long
+				grid_width = number of boxes wide
+				*/
+				data_array: [], 
+				coordinates: [], 
+				zoom_width: null, 
+				zoom_length: null, 
+				zoom_sw: null, 
+				zoom_ne: null, 
+				grid_length: null, 
+				grid_width: null,
+
+				create: function(low_left, up_right){
+					this.grid_length = 15.0;
+					this.grid_width = 15.0;
+					this.defBounds(low_left, up_right);
+					this.defGrid();
+					this.defCoordinates();
+					this.createArray();
+					
+					console.log(this.data_array);
+				},
+
+				//Defines the dimensions of the view
+				defGrid: function(){
+					this.zoom_width = this.zoom_ne.lat - this.zoom_sw.lat;
+					this.zoom_length = this.zoom_ne.lng - this.zoom_sw.lng;
+				},
+
+				//Assigns the corners of the grid
+				defBounds: function(low_left, up_right){
+					this.zoom_sw = low_left;
+					this.zoom_ne = up_right;
+					console.log(this.zoom_sw);
+				},
+
+				//Creates the pairs of coordinates for each box to be created
+				defCoordinates: function(){
+					for (var n = 0; n < this.grid_width; n++){
+						for (var m = 0; m < this.grid_length; m++) {
+							var pair = {low_left: 
+								{	lng: this.zoom_sw.lng + m*(this.zoom_length / this.grid_length),
+									lat: this.zoom_sw.lat + n*(this.zoom_width / this.grid_width)
+								}, 
+								up_right: 
+								{
+									lng: this.zoom_sw.lng + (m+1)*(this.zoom_length / this.grid_length),
+									lat: this.zoom_sw.lat + (n+1)*(this.zoom_width / this.grid_width)
+								}};
+							this.coordinates.push(pair);
+						};//end for
+					};//end for
+				},
+
+				//Creates a box for each set of coordinates
+				createArray: function(){
+					var self = this;
+					this.coordinates.forEach(function(pair){
+						var box = new Box(pair.low_left, pair.up_right);
+						self.data_array.push(box);
+					});
+				},
+
+				/* HOW ARE WE DEFINING THE DIMENSIONS OF THE GRID?*/
+
+			}//end ZoomLevel
+
+			function Box(low_left, up_right){
+				this.center = defineCenter(low_left, up_right);
+				this.box_data = getPoints(low_left, up_right);
+				this.num_points = this.box_data.length;
+				this.minimum = minimum();
+				this.maximum = maximum();
+				this.mean = average(this.box_data);
+
+				return this;
+			}
+
+			function defineCenter(low_left, up_right){
+				return {lng: (up_right.lng - low_left.lng) / 2, lat: (up_right.lat - low_left.lat) / 2};
+			}//end defineCenter
+
+			function getPoints(low_left, up_right){
+				
+					var w = low_left.lng;
+					var s = low_left.lat;
+					var e = up_right.lng;
+					var n = up_right.lat;					
+					var boxArray = [];
+					$.ajax({
+						type: 'GET',
+						url: '/api/boxquery/' + s + "/" + w + "/" + n + "/" + e,
+						success: function(data) {
+							
+							boxArray.push(data);
+						},
+						error: function() {
+							console.error('failed to fetch existing data source');
+						}
+				});
+				return boxArray;	
+			}//end getPoints
+
+			function average(data){
+				var sum = 0;
+				for(point in data){
+					sum += point.reading_value;
+				}//end for-each
+				return sum / data.length;
+			
+			}//end average
+
+			function minimum(){
+				return 0;
+
+			}//end minimum
+
+			function maximum(){
+				return 0;
+
+			}//end maximum
+
+		app = {
+				parse: function(input){
+					temp = input.split(/[, ]/, 2);
+	               	var lng = parseFloat(temp[0]);
+	               	var lat = parseFloat(temp[1]);
+	                return {lng: lng, lat: lat};
+				},
+
+				init: function()
+				{
+					$("#submitButton").click(function() {
+						low_left = app.parse($('#inputBoxSE').val());
+						up_right = app.parse($('#inputBoxNW').val());
+						setup(low_left, up_right);
+					});
+
+					this.render();
+				},
+
+				render: function()
+				{
+				}
+			};
+			
+			app.init();
+
+		});
+	
+	</script>
+	
+  </head>
+
+  <body>
+	<div id='response'>Response</div>
+
+	<input id='inputBoxSE' value="120.20,30.72" placeholder='SW'></input>
+	<input id='inputBoxNW' value="147.61,45.41" placeholder='NE'></input>
+
+<!--	<input id='inputBoxSE' value="140.128,37.081" placeholder='SE'></input>
+	<input id='inputBoxNW' value="140.132,37.087" placeholder='NW'></input>-->
+	
+	<button id='submitButton'>go</button>
+  </body>
+</html>

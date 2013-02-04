@@ -1,0 +1,92 @@
+.chat-view
+{
+	color:#FFF;
+	padding:20px;
+	background-color:rgba(0,0,0,.8);
+	box-shadow:0px 5px 7px 0px rgba(0,0,0,0.6);
+}
+.chat-view .chat-container .messages
+{
+	position:absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:85px;
+	overflow-y:scroll;
+}
+.chat-view .chat-container .messages .message
+{
+	margin:5px;
+	background-color:rgba(255,255,255,.1);
+	padding:10px;
+	border-radius:5px;
+}
+.chat-view .chat-container .messages .message.historic
+{
+	opacity:.3;
+}
+.chat-view .chat-container .messages .message-name
+{
+	margin-left:20px;
+	color:#666;
+}
+.chat-view .chat-container .messages .message-name.historic
+{
+	opacity:.5;
+}
+.chat-view .chat-container
+{
+}
+.chat-view .chat-container.hidden
+{
+	display:none;
+}
+.chat-view .chat-toggle
+{
+	position:absolute;
+	top:15px;
+	left:-30px;
+	width:30px;
+	height:30px;
+	background-color:white;
+	cursor:pointer;
+	
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+	
+	background-color:rgba(0,0,0,.8);
+	box-shadow:0px 0px 7px 0px rgba(0,0,0,0.6);
+}
+.chat-view .chat-toggle i
+{
+	position:absolute;
+	top:8px;
+	left:8px;
+}
+.chat-view button.append
+{
+	border-bottom-left-radius: 0px;
+	border-top-left-radius: 0px;
+	border-left:0px;
+	height: 46px
+}
+#userName, #message
+{
+	border-bottom-right-radius: 0px;
+	border-top-right-radius: 0px;
+	height:40px;
+}
+.chat-view .lower-module
+{
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	padding:20px;
+	background-color:rgba(255,255,255,.1);
+	border-top:1px solid rgba(255,255,255,.05);
+}
+.chat-view .lower-module .chat
+{
+	display:none;
+}

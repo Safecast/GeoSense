@@ -34,7 +34,6 @@ Icon?
 Thumbs.db
 *.scpt
 
-public-build/*
 node_modules/*
 node_modules/.bin/express
 config-prod.js

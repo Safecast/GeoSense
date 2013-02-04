@@ -1,0 +1,17 @@
+.edit-data-view .modal-body .well.form-inline .input-large
+{
+	width:375px;
+}
+.edit-data-view .modal-body .well.form-inline .input-small
+{
+	width:200px;
+}
+.edit-data-view .modal-body .data-table
+{
+	max-height:200px;
+	overflow:scroll;
+}
+.edit-data-view .modal-body .alert
+{
+	display:none;
+}

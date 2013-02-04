@@ -1,0 +1,72 @@
+<div class="modal-header">
+  <a class="close" data-dismiss="modal">×</a>
+  <h2 class="map-name"></h2>
+</div>
+
+<div class="modal-body">
+
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#setup-urls" data-toggle="tab">Map URLs</a></li>
+    <li><a id="tab-setup-metadata" href="#setup-metadata" data-toggle="tab">Edit map info</a></li>
+    <li><a id="tab-setup-metadata" href="#setup-custom-domain" data-toggle="tab">Custom domain</a></li>
+  </ul>
+
+  <form class="well">
+    <div class="tab-content">
+      <div class="tab-pane active" id="setup-urls">
+        <p>You'll be able to access this map from the following URLs. We will email you this information if you <a href="#" class="enter-email">enter your email address</a> on the next tab.</p>
+        <div class="urls">
+          <h3><i class="icon-pencil"></i> ADMIN URL – keep this link private:</h3>
+          <input class="map-admin-url" readonly="readonly"></input>
+          <h3><i class="icon-eye-open"></i> PUBLIC URL – share this link with others:</h3>
+          <input class="map-url" readonly="readonly"></input>
+        </div>
+      </div>
+      <div class="tab-pane" id="setup-metadata">
+        <fieldset>
+          <h3>Map Title</h3>
+          <input name="title"></input>
+          <h3>Description</h3>
+          <textarea name="description"></textarea>
+        </fieldset>
+        <fieldset class="two-column">
+          <div>
+            <h3>Author Info</h3>
+            <input name="author"></input>
+          </div>
+          <div>
+            <h3>Your email adress (won't be displayed)</h3>
+            <input name="createdBy.email"></input>
+          </div>
+        </fieldset>
+        <fieldset class="two-column">
+          <div>
+            <h3>Link URL</h3>
+            <input name="linkURL"></input>
+          </div>
+          <div>
+            <h3>Link Title</h3>
+            <input name="linkTitle"></input>
+          </div>
+          <div>
+            <h3>Twitter handle</h3>
+            <input name="twitter"></input>
+          </div>
+        </fieldset>
+      </div>
+      <div class="tab-pane" id="setup-custom-domain">
+        <fieldset>
+          <h3>Your custom domain name</h3>
+          <input name="host" placeholder="Example: your-domain.com"></input>
+          <p>If you would like to have your custom domain point to this map, you can enter the domain name here.</p>
+        </fieldset>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<div class="modal-footer">
+<a href="#" id="deleteMapButton" class="btn btn-danger delete">Delete Map</a>
+  <a href="#" id="saveCloseButton" class="btn btn-success">Start Mapping!</a>
+</div>
