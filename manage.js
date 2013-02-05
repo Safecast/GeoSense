@@ -13,7 +13,7 @@ if (!module.parent) {
 	var args = optimist.argv,
     	help = 'Usage: node manage.js <command> [options]\n  or: node manage.js help <command> to show help for a specific command.';
 
-	console.log('GeoSense command-line utility');
+	console.info('*** GeoSense command-line utility ***');
 
 	var runCliCommand = function(args) {
 		var showHelp = args._[0] == 'help';

@@ -608,20 +608,18 @@ ImportAPI.prototype.cli = {
 	'list-collections': function(params, callback, showHelp) 
 	{
 		if (utils.connectDB()) {
-			console.log('Existing collections:');
 			PointCollection.find({}).run(function(err, docs) {
 				if (!err) {
+					console.success('Existing collections:', docs.length);
 					docs.forEach(function(doc) {
-						console.log('  *', doc._id, doc.title);
+						var dump = {_id: doc._id, title: doc.title, status: doc.status, "...": "..."};
+						console.log('*', dump);
 					});
 				}
 				callback(err);
 			});
 		}
 	}
-
-
-
 }
 
 

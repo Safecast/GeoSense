@@ -1,65 +1,109 @@
-## What's GeoSense?
+## What is GeoSense?
 
-An open publishing platform for visualization, social sharing, and data analysis of geospatial data.
+GeoSense is an open publishing platform for visualization, social sharing, and analysis of geospatial data. It aims to simplify the process of turning large 
+data collections into beautiful, interactive online maps.
 
-## Building
+## How to install GeoSense on your development machine
 
-Step 1: Run:
+The project is built on top of [Node.js](http://nodejs.org/) and uses 
+[mongoDB](http://www.mongodb.org/) as database. Please install Node.js with 
+NPM and mongoDB on your system first. There are installers and packages 
+available for many operating systems.
 
-	node r.js -o public/libs/app.build.js
+To get the GeoSense code, you can either download it from 
+[GitHub](https://github.com/Safecast/GeoSense) and extract it to a folder on
+your harddrive, or clone the repository using [Git](http://git-scm.com/) 
+(recommended so you can easily update to newer versions at a later point):
 
-from project root.
+	$ git clone git://github.com/Safecast/GeoSense.git
 
-Step 2: Overwrite public with public-optimized before pushing to Heroku
+Next, change into the GeoSense folder and install the dependencies using NPM:
 
-## Management commands
+	$ cd GeoSense
+	$ npm install
 
-### Importing a new file from scratch:
+You should now be ready to run the GeoSense development server.
 
-	node ./manage.js import --url https://api.safecast.org/system/measurements.csv --format csv --converter safecast
+
+## Running the development server
+
+Before you run the development server, make sure to start mongoDB, either in 
+its own terminal window:
+
+	$ mongod
+
+or as a background service:
+
+	$ mongod --fork --logpath /var/log/mongodb.log
+
+You can then run the development server using the following command from the 
+GeoSense folder:
+
+	$ node server.js NODE_ENV=development node server.js
+
+You should get a success message such as `Web server running at 
+http://0.0.0.0:3000/`. You'll now be able to open GeoSense in your web
+browser by typing `http://localhost:3000` in the location field.
+
+
+## Command-line interface
+
+In addition to the Graphical User Interface running in your web browser, 
+GeoSense comes with a Command-Line Interface (CLI) that enables you to script 
+certain tasks and perform them without user interaction. CLI actions include
+data import and aggregation into map grids.
+
+To run the CLI, run the following command from the GeoSense folder:
+
+	$ node manage.js
+
+This will display a list of available CLI actions, such as `import`. For 
+example, to display a list of all existing point collections in the database, 
+type:
+
+	$ node manage.js list-collections
+
+To receive more information about a specific action, pass `help` followed by 
+the action name to the CLI, for instance:
+
+	$ node manage.js help import
+
+
+### The `import` action
+
+Usage: `node manage.js import [import-params]`
+
+Imports records from a URL or a file into a new point collection.
+
+For example, to import a new data file from scratch, type:
+
+	$ node ./manage.js import --url https://api.safecast.org/system/measurements.csv --format csv --converter safecast
 
 *or*
 
-	node ./manage.js import --path path/to/file.csv --format csv --converter safecast
+	$ node ./manage.js import --path path/to/file.csv --format csv --converter safecast
 
-### Later, after the initial import, you might want to re-fetch the source file and sync your local data:
+Later, after the initial import, you might want to re-fetch the source file and sync your local data:
 
-	node ./manage.js sync <collectionId> [options]
+	$ node ./manage.js sync <collectionId> [options]
 
-T# his basically runs the import command again, with the same arguments. You can override these by passing options to the command, for instance the following would sync the collection with data from a *different* URL>:
+This basically runs the import command again, with the same arguments. You can override these by passing options to the command, for instance the following would sync the collection with data from a *different* URL>:
 
-	node ./manage.js sync <collectionId> --url https://api.safecast.org/api/<incremental-dump>
-
-
-## Updating and re-crunching a collection
-
-cd into project root on production server
-node ./manage.js sync Safecast
-mongo penny.mongohq.com:10065/app4772485 -u USER -p PASSWORD ./config.js ./scripts/reduce-points.js
+	$ node ./manage.js sync <collectionId> --url https://api.safecast.org/api/<incremental-dump>
 
 
-## Running Dev server
+### The `mapreduce` action
 
-	NODE_ENV=development nodemon server.js
-
-## Mongo dumping and cloning
-
-	mongodump -d geo -o ./dump
-	mongorestore -h penny.mongohq.com:10065 -d DATABASE -u USER -p PASSWORD --drop ./dump/geo/
-
-### For dev server:
-	
-	mongorestore -d geo  --drop ./dump/geo/
-
-### For prod server:
-
-	 mongorestore -h penny.mongohq.com:10065 -d app4772485 -u safecast -p PASSWORD --drop ./dump/geo/
+TODO: document most important CLI actions.
 
 
-## Executing reduction script
+## Building the project for deployment
 
-	mongo DATABASE -u USER -p SEKRET config.js scripts/reduce-points.js
+GeoSense utilizes [RequireJS](http://requirejs.org/) to create an optimized 
+build for faster page load times. To create a build, run the following command 
+from the GeoSense folder:
 
-### For dev server:
+	$ node r.js -o public/libs/app.build.js
 
-	mongo geo config.js scripts/reduce-points.js
+You now have an optimized copy of the `public/` folder ready for deployment 
+under `public-build`.

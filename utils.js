@@ -5,6 +5,23 @@ var config = require('./config.js'),
     mongoose = require('mongoose'),
     console = require('./ext-console');
 
+exports.connectDB = function(exitProcessOnError) 
+{
+    mongoose.connection.on('open', function (ref) {
+      console.success('Connected to mongoDB server.');
+    });
+
+    mongoose.connection.on('error', function (err) {
+        console.error('mongoDB connection error:', err.message);
+        if (exitProcessOnError == undefined || exitProcessOnError) {
+            process.exit(1);
+        }
+    });
+
+    console.info('Connecting to database', config.DB_PATH);
+    return mongoose.connect(config.DB_PATH).connection;
+};
+
 /**
 * Simple Python-style string formatting.
 *
@@ -107,12 +124,6 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
         }, callback);
     });
 }
-
-exports.connectDB = function(callback) {
-    console.info('*** connecting to db ***', config.DB_PATH);
-    return mongoose.connect(config.DB_PATH, callback);
-};
-
 
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {

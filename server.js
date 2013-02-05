@@ -6,20 +6,17 @@ var application_root = __dirname,
   	models = require('./models.js'),
   	utils = require('./utils.js'),
   	permissions = require('./permissions.js'),
-  	ejs = require('ejs');
+  	ejs = require('ejs'),
+    console = require('./ext-console');
 
 var templates;
 var port = process.env.PORT || 3000;
 var app = express();
 
-console.log('*** connecting to db ***', config.DB_PATH);
-mongoose.connect(config.DB_PATH);
-
-
 app.configure(function() {
 	var staticDir = __dirname 
 		+ (process.env.NODE_ENV == 'production' ? '/public-build' : '/public');
-	console.log('Serving static files from '+staticDir);
+	console.info('Serving static files from '+staticDir);
 	app.use(express.static(staticDir));
 	app.use(express.logger('dev'));
   	app.use(express.compress());
@@ -41,6 +38,8 @@ app.configure(function() {
   	
   	app.set('views', path.join(application_root, "views"));
 });
+
+utils.connectDB();
 
 var API = require('./api');
 new API(app);
@@ -166,7 +165,7 @@ utils.loadFiles(['public/base.html'], __dirname, function(err, contents) {
     } else {
         templates = contents;
 		app.listen(port, "0.0.0.0");
-		console.log('Server running at http://0.0.0.0:' + port + "/");
+		console.success('Web server running at http://0.0.0.0:' + port + "/");
     }
 });
 
