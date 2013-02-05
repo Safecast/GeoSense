@@ -6,11 +6,13 @@ data collections into beautiful, interactive online maps.
 ## How to install GeoSense on your development machine
 
 The project is built on top of [Node.js](http://nodejs.org/) and uses 
-[mongoDB](http://www.mongodb.org/) as database. Please install Node.js with 
-NPM and mongoDB on your system first. There are installers and packages 
-available for many operating systems. For instance, if you are using OS X
-you might want to look into installing the above requirements with 
-[Homebrew](http://mxcl.github.com/homebrew/), to name just one option. This 
+[mongoDB](http://www.mongodb.org/) as database. Please install Node.js 
+(including [NPM](https://npmjs.org/)) and mongoDB on your system first.
+
+There are installers and packages available for many operating systems. For 
+instance, if you are using OS X you might want to look into installing the 
+above requirements with [Homebrew](http://mxcl.github.com/homebrew/), to name 
+just one option. This 
 [tutorial](http://dreamerslab.com/blog/en/how-to-setup-a-node-js-development-environment-on-mac-osx-lion/) is a starting point.
 
 To get the GeoSense code, you can either download it from 
