@@ -1,6 +1,6 @@
-var MapAPI = require('./map.js'),
-	PointAPI = require('./point.js'),
-	ImportAPI = require('./import.js'),
+var MapAPI = require('./map'),
+	PointAPI = require('./point'),
+	ImportAPI = require('./import'),
 	MapReduceAPI = require('./mapreduce');
 
 var API = function(app)
