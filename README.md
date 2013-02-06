@@ -54,10 +54,10 @@ browser by typing `http://localhost:3000` in the location field.
 
 ## Command-line interface
 
-In addition to the Graphical User Interface running in your web browser, 
-GeoSense comes with a Command-Line Interface (CLI) that enables you to script 
-certain tasks and perform them without user interaction. CLI actions include
-data import and aggregation into map grids.
+In addition to the Graphical User Interface that is running in your web 
+browser, GeoSense comes with a Command-Line Interface (CLI) that enables you 
+to script certain tasks and perform them without user interaction. CLI actions 
+includedata import and aggregation into map grids.
 
 To run the CLI, run the following command from the GeoSense folder:
 
