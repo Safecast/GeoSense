@@ -57,7 +57,7 @@ browser by typing `http://localhost:3000` in the location field.
 In addition to the Graphical User Interface that is running in your web 
 browser, GeoSense comes with a Command-Line Interface (CLI) that enables you 
 to script certain tasks and perform them without user interaction. CLI actions 
-includedata import and aggregation into map grids.
+include data import and aggregation into map grids.
 
 To run the CLI, run the following command from the GeoSense folder:
 
@@ -69,8 +69,8 @@ type:
 
 	$ node manage.js list-collections
 
-To receive more information about a specific action, pass `help` followed by 
-the action name to the CLI, for instance:
+To receive more information about a specific action, pass `help` as the first 
+argument, followed by the action name. For instance:
 
 	$ node manage.js help import
 
