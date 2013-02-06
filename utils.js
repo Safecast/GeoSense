@@ -5,10 +5,13 @@ var config = require('./config.js'),
     mongoose = require('mongoose'),
     console = require('./ext-console');
 
-exports.connectDB = function(exitProcessOnError) 
+exports.connectDB = function(callback, exitProcessOnError) 
 {
     mongoose.connection.on('open', function (ref) {
-      console.success('Connected to mongoDB server.');
+        console.success('Connected to mongoDB server.');
+        if (callback) {
+            callback();
+        }
     });
 
     mongoose.connection.on('error', function (err) {
