@@ -22,19 +22,15 @@ your hard drive, or clone the repository using [Git](http://git-scm.com/).
 The latter is recommended so you can easily update to newer versions at a 
 later point). You also may have to install Git on your system first.
 
-Please notice that the `$` signs at the beginning of these commands
-is not part of what you have to type; it is merely there to denote the command
-prompt, which on your system typically looks like `your-machine:~ your-username$`.
-
 To acquire the code with Git, open a Terminal window and type the following
 command. 
 
-	$ git clone git://github.com/Safecast/GeoSense.git
+	git clone git://github.com/Safecast/GeoSense.git
 
 Next, change into the GeoSense folder and install the dependencies using NPM:
 
-	$ cd GeoSense
-	$ npm install
+	cd GeoSense
+	npm install
 
 You should now be ready to run the GeoSense development server.
 
@@ -44,16 +40,16 @@ You should now be ready to run the GeoSense development server.
 Before you run the development server, make sure to start MongoDB, either in 
 its own terminal window:
 
-	$ mongod
+	mongod
 
 or as a background service:
 
-	$ mongod --fork --logpath /var/log/MongoDB.log
+	mongod --fork --logpath /var/log/MongoDB.log
 
 You can then run the development server using the following command from the 
 GeoSense folder:
 
-	$ node server.js NODE_ENV=development node server.js
+	node server.js NODE_ENV=development node server.js
 
 You should get a success message such as `Web server running at 
 http://0.0.0.0:3000/`. You'll now be able to open GeoSense in your web
@@ -69,18 +65,18 @@ include data import and aggregation into map grids.
 
 To run the CLI, run the following command from the GeoSense folder:
 
-	$ node manage.js
+	node manage.js
 
 This will display a list of available CLI actions, such as `import`. For 
 example, to display a list of all existing point collections in the database, 
 type:
 
-	$ node manage.js list-collections
+	node manage.js list-collections
 
 To receive more information about a specific action, pass `help` as the first 
 argument, followed by the action name. For instance:
 
-	$ node manage.js help import
+	node manage.js help import
 
 
 ### The `import` action
@@ -91,19 +87,19 @@ Imports records from a URL or a file into a new point collection.
 
 For example, to import a new data file from scratch, type:
 
-	$ node ./manage.js import --url https://api.safecast.org/system/measurements.csv --format csv --converter safecast
+	node ./manage.js import --url https://api.safecast.org/system/measurements.csv --format csv --converter safecast
 
 *or*
 
-	$ node ./manage.js import --path path/to/file.csv --format csv --converter safecast
+	node ./manage.js import --path path/to/file.csv --format csv --converter safecast
 
 Later, after the initial import, you might want to re-fetch the source file and sync your local data:
 
-	$ node ./manage.js sync <collectionId> [options]
+	node ./manage.js sync <collectionId> [options]
 
 This basically runs the import command again, with the same arguments. You can override these by passing options to the command, for instance the following would sync the collection with data from a *different* URL>:
 
-	$ node ./manage.js sync <collectionId> --url https://api.safecast.org/api/<incremental-dump>
+	node ./manage.js sync <collectionId> --url https://api.safecast.org/api/<incremental-dump>
 
 
 ### The `mapreduce` action
@@ -117,7 +113,7 @@ GeoSense utilizes [RequireJS](http://requirejs.org/) to create an optimized
 build for faster page load times. To create a build, run the following command 
 from the GeoSense folder:
 
-	$ node r.js -o public/libs/app.build.js
+	node r.js -o public/libs/app.build.js
 
 You now have an optimized copy of the `public/` folder ready for deployment 
 under `public-build`.
