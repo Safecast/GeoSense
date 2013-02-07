@@ -39,8 +39,6 @@ app.configure(function() {
   	app.set('views', path.join(application_root, "views"));
 });
 
-utils.connectDB();
-
 var API = require('./api');
 new API(app);
 
@@ -157,16 +155,18 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/
 });
 
 
-// Load templates and start listening
+// Connect DB, load templates and start listening
 
-utils.loadFiles(['public/base.html'], __dirname, function(err, contents) {
-    if (err) {
-    	throw err;
-    } else {
-        templates = contents;
-		app.listen(port, "0.0.0.0");
-		console.success('Web server running at http://0.0.0.0:' + port + "/");
-    }
+utils.connectDB(function() {
+	utils.loadFiles(['public/base.html'], __dirname, function(err, contents) {
+	    if (err) {
+	    	throw err;
+	    } else {
+	        templates = contents;
+			app.listen(port, "0.0.0.0");
+			console.success('Web server running at http://0.0.0.0:' + port + "/");
+	    }
+	});
 });
 
 process.on('uncaughtException', function(err) {

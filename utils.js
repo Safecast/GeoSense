@@ -33,7 +33,7 @@ exports.connectDB = function(callback, exitProcessOnError)
 *   "%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
 */
 String.prototype.format = function(replacements) {
-    return this.replace(/\%\(([a-z0-9_]+)\)(s|i)/ig, function(match, name, type) { 
+    return this.replace(/\%\((.+?)\)(s|i)/ig, function(match, name, type) { 
         return typeof replacements[name] != 'undefined'
             ? replacements[name]
             : match;
