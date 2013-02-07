@@ -6,8 +6,8 @@ data collections into beautiful, interactive online maps.
 ## How to install GeoSense on your development machine
 
 The project is built on top of [Node.js](http://nodejs.org/) and uses 
-[mongoDB](http://www.mongodb.org/) as database. Please install Node.js 
-(including [NPM](https://npmjs.org/)) and mongoDB on your system first.
+[MongoDB](http://www.MongoDB.org/) as database. Please install Node.js 
+(including [NPM](https://npmjs.org/)) and MongoDB on your system first.
 
 There are installers and packages available for many operating systems. For 
 instance, if you are using OS X you might want to look into installing the 
@@ -41,14 +41,14 @@ You should now be ready to run the GeoSense development server.
 
 ## Running the development server
 
-Before you run the development server, make sure to start mongoDB, either in 
+Before you run the development server, make sure to start MongoDB, either in 
 its own terminal window:
 
 	$ mongod
 
 or as a background service:
 
-	$ mongod --fork --logpath /var/log/mongodb.log
+	$ mongod --fork --logpath /var/log/MongoDB.log
 
 You can then run the development server using the following command from the 
 GeoSense folder:
