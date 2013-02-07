@@ -27,7 +27,7 @@ is not part of what you have to type; it is merely there to denote the command
 prompt, which on your system typically looks like `your-machine:~ your-username$`.
 
 To acquire the code with Git, open a Terminal window and type the following
-command.
+command. 
 
 	$ git clone git://github.com/Safecast/GeoSense.git
 
