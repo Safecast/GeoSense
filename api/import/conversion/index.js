@@ -7,21 +7,6 @@ var ARRAY_SEPARATORS = /[,;]/;
 var ConversionError = function(msg) {
 	this.message = msg;
 };
-this.ConversionError = ConversionError;
-
-this.convertModel = function(fromModel, converter, toModel) {
-	var doc = {};
-	for (var destField in converter.fields) {
-		var f = converter.fields[destField];
-		doc[destField] = f.apply(fromModel, [doc]);
-		if (doc[destField] instanceof ConversionError) {
-			console.error('ConversionError on field ' + destField + ':', doc[destField].message);
-			return false;
-		} 
-	}
-	var m = new toModel(doc);
-	return m;
-}
 
 function isValidDate(d) {
   if ( Object.prototype.toString.call(d) !== "[object Date]" )
@@ -29,13 +14,33 @@ function isValidDate(d) {
   return !isNaN(d.getTime());
 }
 
+var clamp180 = this.clamp180 = function(deg) 
+{
+	if (deg < -360 || deg > 360) {
+		deg = deg % 360;	
+	} 
+	if (deg < -180) {
+		deg = 180 + deg % 180;
+	}
+	if (deg > 180) {
+		deg = 180 - deg % 180;
+	}
+	if (deg == 180) {
+		deg = -180;
+	}
+
+	return deg;
+};
+
 var Cast = {
+
 	Number: function(value, options) {
 		var num = Number(value);
 		if (!isNaN(num) && (!options.ignoreZero || num != 0)) {
 			return num;
 		}
 	},
+
 	String: function(value, options) {
 		if (value != undefined) {
 			var str = '' + value;
@@ -44,6 +49,7 @@ var Cast = {
 			}
 		}
 	},
+
 	Array: function(value, options) {
 	    if (value != undefined) {
 		    if (!Array.isArray(value)) {
@@ -53,6 +59,7 @@ var Cast = {
 		    }
 	    }
 	},
+
 	Date: function(value, options) {
 		if ((Array.isArray(value) && value.length == 3) || typeof(value) == 'string') {
 			date = new Date(value);
@@ -64,6 +71,7 @@ var Cast = {
 }
 
 var FieldType = {
+
 	Number: function(fromFields, options) {
 		var fromFields = Cast.Array(fromFields);
 		var l = fromFields.length;
@@ -83,6 +91,7 @@ var FieldType = {
 			}
 		};
 	},
+
 	Array: function(fromFields, options) {
 		var fromFields = Cast.Array(fromFields);
 		var l = fromFields.length;
@@ -110,6 +119,7 @@ var FieldType = {
 			return arr;
 		};
 	},
+
 	Date: function(fromFields, options) {
 		var fromFields = Cast.Array(fromFields);
 		var l = fromFields.length;
@@ -134,6 +144,7 @@ var FieldType = {
 			}
 		};
 	},
+
 	String: function(fromFields, options) {
 		var fromFields = Cast.Array(fromFields);
 		var l = fromFields.length;
@@ -157,6 +168,7 @@ var FieldType = {
 			}
 		};
 	},
+
 	LngLat: function(fromFields, options) {
 		var options = options || {};
 		var arrayOptions = _.cloneextend(options, {
@@ -167,6 +179,7 @@ var FieldType = {
 		return function() {
 			var arr = toArray.call(this);
 			if (arr && arr.length == 2) {
+				arr = [clamp180(arr[0]), clamp180(arr[1])];
 				if (!options.ignoreZero || (arr[0] != 0 && arr[1] != 0)) {
 					return arr;
 				} else {
@@ -175,6 +188,7 @@ var FieldType = {
 			}
 		}
 	},
+	
 	LatLng: function(fromFields, options) {
 		var toLngLat = FieldType.LngLat(fromFields, options);
 		return function() {
@@ -206,13 +220,34 @@ fieldDefs = {
 	// ...
 }
 */
-this.ConverterFactory = function(fieldDefs) {
-	var converter = {
-		fields: {}
-	};
-	for (var toField in fieldDefs) {
-		var d = fieldDefs[toField];
-		converter.fields[toField] = FieldType[d.type](d.fromFields, d.options);
+
+var Converter = function(fields) {
+	this.fields = fields;
+};
+
+Converter.prototype.convertModel = function(fromModel, toModel) {
+	var doc = {};
+	for (var destField in this.fields) {
+		var f = this.fields[destField];
+		doc[destField] = f.apply(fromModel, [doc]);
+		if (doc[destField] instanceof ConversionError) {
+			console.error('ConversionError on field ' + destField + ':', doc[destField].message);
+			return false;
+		} 
 	}
-	return converter;
+	var m = new toModel(doc);
+	return m;
+};
+
+module.exports = {
+	Converter: Converter,
+	ConversionError: ConversionError,
+	ConverterFactory: function(fieldDefs) {
+		var fields = {}
+		for (var toField in fieldDefs) {
+			var d = fieldDefs[toField];
+			fields[toField] = FieldType[d.type](d.fromFields, d.options);
+		}
+		return new Converter(fields);
+	}
 }

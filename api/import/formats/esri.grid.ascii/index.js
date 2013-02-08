@@ -1,4 +1,4 @@
-var	grid = require('./parsers/esri.grid.ascii.js'), 
+var	grid = require('./parser'), 
 	request = require('request');
 
 

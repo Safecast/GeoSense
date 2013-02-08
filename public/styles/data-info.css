@@ -105,6 +105,12 @@
 	top: 5px;
 }
 
+.data-info .inspector {
+	position: absolute;
+	right: 20px;
+	top: 5px;
+}
+
 .data-info .legend {
 }
 

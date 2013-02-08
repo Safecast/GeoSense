@@ -1,6 +1,6 @@
 var ConversionError = this.ConversionError = require('../').ConversionError;
 
-var clamp180 = function(deg) 
+var clamp180 = this.clamp180 = function(deg) 
 {
 	if (deg < -360 || deg > 360) {
 		deg = deg % 360;	
@@ -103,6 +103,7 @@ this.locFromFields = function(lngFields, latFields)
 	}
 };
 
+// TODO: Repair base converter
 this.fields = {
 	val: function() {
 		var val = this.get('val');

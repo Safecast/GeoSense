@@ -116,7 +116,7 @@ define([
 		{
 			this.initFeatureLayerOptions(this.collections[layer.pointCollection._id]);
 			if (layer.sessionOptions.visible) {
-				this.vent.trigger("setStateType", 'drawing', pointCollectionId);
+				this.vent.trigger("setStateType", 'drawing', layer.pointCollectionId);
 			}
 		},
 

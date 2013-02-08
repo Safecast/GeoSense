@@ -28,9 +28,9 @@ define([
 			$(this.el).html(this.template());
 			var self = this;
 			
-			this.$('#dragLabel').draggable({
+			this.$('.drag.label').draggable({
 				revert: true,
-				stack: '#dragLabel'
+				stack: '.drag.label'
 			});
 					
 			this.$('#map_canvas').droppable( {

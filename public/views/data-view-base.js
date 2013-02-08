@@ -194,7 +194,7 @@ define([
 			});
 
 			if (!app.isMapAdmin()) {
-				this.$('#adminDataControls').remove();
+				this.$('.admin-control').remove();
 			}
 			
 			this.setParameters();

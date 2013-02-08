@@ -42,18 +42,6 @@
 	display:none;
 }
 
-
-.add-data-view .modal-body .add
-{
-	display:block;
-}
-
-
-.add-data-view .modal-body .review
-{
-	display:none;
-}
-
 .add-data-view .modal-body .review .well div {
     text-align: center;
     font-family: 'Helvetica Neue', sans-serif;
@@ -72,24 +60,20 @@
 	cursor:pointer;
 }
 
-.label.lat {
+.label.to-field-lat {
     background-color: #c43c35;
 	padding:10px;
 
 }
-.label.lng {
+.label.to-field-lng {
     background-color: #f89406;
 	padding:10px;
 }
-.label.location {
+.label.to-field-val {
     background-color: #46a546;
 	padding:10px;
 }
-.label.name {
-    background-color: #62cffc;
-	padding:10px;
-}
-.label.intensity {
+.label.to-field-label {
     background-color: #62cffc;
 	padding:10px;
 }

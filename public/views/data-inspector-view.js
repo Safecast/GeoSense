@@ -5,8 +5,9 @@ define([
 	'config',
 	'utils',
 	'text!templates/data-inspector.html',
-	'views/data-view-base'
-], function($, _, Backbone, config, utils, templateHtml, DataViewBase) {
+	'views/data-view-base',
+	'lib/color-gradient/color-gradient'
+], function($, _, Backbone, config, utils, templateHtml, DataViewBase, ColorGradient) {
 	var DataInspectorView = DataViewBase.extend({
 
 		className: 'data-inspector',

@@ -134,25 +134,17 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	}
 
 	console.log('import params', params);
-	var converter, format, parser;
+	var Converter, format, parser;
 
 	if (!params.converter) {
 		params.converter = 'base';
 	}
 	if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
-		converter = require('./conversion/point/' 
+		Converter = require('./conversion/point/' 
 			+ params.converter);
 	} else {
 		console.log('Loading custom converter: '+params.converter);
-		converter = require(params.converter);
-	}
-	if (!converter.fields) {
-		var err = new Error('converter module does not export `fields` object');
-		if (callback) {
-			callback(err);
-			return;
-		}
-		throw err;
+		Converter = require(params.converter);
 	}
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
@@ -180,11 +172,25 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	
 	var runImport = function(collection) 
 	{
+		var converter = new Converter(params.fields);
+		if (!converter.convertModel) {
+			var err = new Error('converter module does not export `convertModel`');
+			if (callback) {
+				callback(err);
+				return;
+			}
+			throw err;
+		}
+
 		var headerValues = {};
 		collection.active = false;
 		collection.status = config.DataStatus.IMPORTING;
 		if (params.saveParams == undefined || params.saveParams) {
 			collection.importParams = params;
+			// TODO re-init converter with fields
+			/*if (params.fields || params.converter) {
+				collection.importParams.fields = converter.fields;
+			}*/
 		}
 		if (req && req.session) {
 			collection.createdBy = collection.modifiedBy = req.session.user;
@@ -387,7 +393,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						}
 
 						var model = new Model(doc);
-						var point = conversion.convertModel(model, converter, Point);
+						var point = converter.convertModel(model, Point);
 						point.importJob = job;
 						var loc = point ? point.get('loc') : null;
 						var doSave = point 
@@ -496,7 +502,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		});
 	};
 
-	var converterInit = converter.init || function(callback) {
+	var converterInit = Converter.init || function(callback) {
 		callback();
 	};
 	converterInit(function() {
@@ -605,7 +611,8 @@ function getImportParams(params)
 		break: params.break, 
 		interval: params.interval,
 		bounds: params.bounds,
-		mapreduce: params.mapreduce
+		mapreduce: params.mapreduce,
+		fields: (params.fields ? JSON.parse(params.fields) : undefined)
 	});
 }
 

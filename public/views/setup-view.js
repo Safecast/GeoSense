@@ -15,6 +15,7 @@ define([
 	    events: {
 			'click #deleteMapButton' : 'deleteMapClicked',
 			'click #saveCloseButton' : 'saveClicked',
+			'click #cancelButton' : 'cancelClicked',
 			
 	    },
 
@@ -68,11 +69,13 @@ define([
 			});
 
 			this.mapInfoFields = this.$('#setup-metadata input, #setup-metadata textarea, #setup-custom-domain input');
+			this.$('#cancelButton').hide();
 
 			this.mapInfoFields.each(function() {
 				$(this).on('change keydown', function() {
 					self.mapInfoChanged = true;
-					self.$('#saveCloseButton').text(__('Save & close'));
+					self.$('#cancelButton').show();
+					self.$('#saveCloseButton').text(__('Save and Close'));
 				});
 			});
 
@@ -124,6 +127,13 @@ define([
 				}
 			});
 
+			return false;
+		},
+
+		cancelClicked: function() 
+		{
+			this.updateMapInfo(this.mapInfo);
+			this.close();
 			return false;
 		},
 

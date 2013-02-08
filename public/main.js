@@ -4,7 +4,7 @@
 // There usage will become more apparent further along in the tutorial.
 require.config({
 	paths: {
-        jqueryui: 'lib/jquery/jquery-ui.min',
+        jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
     	underscore: 'lib/underscore/underscore',
     	backbone: 'lib/backbone/backbone',
         bootstrap: 'lib/bootstrap/js/bootstrap.min', 
@@ -36,6 +36,8 @@ require([
     'lib/jquery/jquery.color',
     'lib/jquery/jquery.glowing',
     'lib/jquery/jquery.miniColors.min',
+    'lib/colorpicker/js/colorpicker',
+    'lib/gradient-editor/gradient-editor',
     'bootstrap',
     'locale'
 ], function($, App, ui) {

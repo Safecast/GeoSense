@@ -62,7 +62,7 @@
 									<thead>
 										<th>Color</th>
 										<th>Value</th>
-										<th>Transition</th>
+										<th>Interpolation</th>
 									</thead>
 									<tbody>
 										<tr class="template" style="display: none">
@@ -70,9 +70,9 @@
 											<td><input name="absPosition" type="text" class="number" size="6" placeholder="position" /></td>
 											<td>
 												<select name="interpolation" class="min-width">
+													<option value="">(default)</option>
 													<option value="threshold">threshold</option>
-													<option value="lerpRGB">linear interpolation</option>
-													<option value="">default</option>
+													<option value="lerpRGB">linear</option>
 												</select>
 											</td>
 										</tr>
@@ -113,7 +113,7 @@
 		    
 		    </form>
 
-			<div id="adminDataControls">
+			<div>
 				<div class="divider"></div>
 		        <div id="dataToggleEdit" class="data-toggle edit">
 					<button class="btn" id="removeData">Remove</button>
