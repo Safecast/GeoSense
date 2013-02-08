@@ -1,4 +1,5 @@
 var utils = require('../../../utils.js'),
+	ValidationError = utils.ValidationError,
 	console = require('../../../ext-console.js'),
 	_ = require('cloneextend');
 
@@ -197,6 +198,22 @@ var FieldType = {
 				return [arr[1], arr[0]];
 			}
 		}
+	}, 
+
+	Object: function(fromFields, options) {
+		var fromFields = Cast.Array(fromFields);
+		var l = fromFields.length;
+		var options = options || {};
+		return function() {
+			var val = {};
+			for (var i = 0; i < l; i++) {
+				var obj = this.get(fromFields[i]);
+				if (typeof obj == 'object') {
+					val = _.cloneextend(val, obj);
+				}
+			}
+			return val;
+		}
 	}
 }
 
@@ -221,8 +238,19 @@ fieldDefs = {
 }
 */
 
-var Converter = function(fields) {
+var Converter = function(fieldDefs) {
+	var fields = {};
+	if (typeof fieldDefs != 'object') {
+		fieldDefs = {};
+	}
+
+	for (var toField in fieldDefs) {
+		var d = fieldDefs[toField];
+		fields[toField] = FieldType[d.type](d.fromFields || toField, d.options);
+	}
+
 	this.fields = fields;
+	this.fieldDefs = fieldDefs;
 };
 
 Converter.prototype.convertModel = function(fromModel, toModel) {
@@ -236,18 +264,67 @@ Converter.prototype.convertModel = function(fromModel, toModel) {
 		} 
 	}
 	var m = new toModel(doc);
+	console.log('...............', m, doc);
 	return m;
 };
 
 module.exports = {
 	Converter: Converter,
 	ConversionError: ConversionError,
-	ConverterFactory: function(fieldDefs) {
-		var fields = {}
-		for (var toField in fieldDefs) {
-			var d = fieldDefs[toField];
-			fields[toField] = FieldType[d.type](d.fromFields, d.options);
+	PointConverterFactory: function(fieldDefs) {
+		var errors = {},
+			valid = true;
+		if (typeof fieldDefs != 'object') {
+			fieldDefs = {};
 		}
-		return new Converter(fields);
+
+		for (var toField in fieldDefs) {
+			var d = fieldDefs[toField],
+				t;			
+			switch (toField) {
+				default:
+ 					if (!d.type || !FieldType[d.type]) {
+ 						d.type = 'String';
+ 					}
+ 					break;
+				case 'loc':
+ 					if (d.type != 'LatLng') {
+						d.type = 'LngLat';
+ 					}
+					break;
+				case 'val':
+					d.type = 'Number';
+					break;
+				case 'datetime':
+					d.type = 'Date';
+					break;
+				case 'label':
+					d.type = 'String';
+					break;
+			}
+
+			if (d.fromFields && (typeof d.fromFields == 'string' || (Array.isArray(d.fromFields) && d.fromFields.length > 0))) {
+				console.log('validated converter field definition', toField, d);
+			} else {
+				console.error('invalid converter field definition', toField, d);
+				valid = false;
+				errors[toField] = {
+					message: 'field ' + toField + ' has no Element fromFields'
+				};
+			}
+		}
+
+		if (!fieldDefs.loc) {
+			valid = false;
+			errors[toField] = {
+				message: 'Point X,Y is required'
+			};
+		}
+
+		if (valid) {
+			return new Converter(fieldDefs);
+		} else {
+			return new ValidationError(errors);
+		}
 	}
 }

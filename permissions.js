@@ -26,3 +26,7 @@ exports.canViewMap = function(req, map) {
 exports.canCreateMap = function(req) {
 	return !config.LIMITED_PROD_ACCESS;
 }
+
+exports.canImportData = function(req) {
+	return !config.LIMITED_PROD_ACCESS;
+}

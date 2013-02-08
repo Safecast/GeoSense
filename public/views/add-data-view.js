@@ -12,8 +12,8 @@ define([
 		className: 'add-data-view',
 		
 	    events: {
-			'click #dataButton': 'dataButtonClicked',
-			'click #dataConfirmButton' : 'dataConfirmButtonClicked',
+			'click #importButton': 'importButtonClicked',
+			'click .from-field .remove' : 'fromFieldRemoveClicked',
 	    },
 
 	    initialize: function(options) {
@@ -27,91 +27,132 @@ define([
 	    render: function() {
 			$(this.el).html(this.template());
 			var self = this;
+			this.$('.modal').addClass('large');
+
+			this.fromFieldTemplate = this.$('.from-data thead .element-template');
+			this.toFieldTemplate = this.$('.to-data thead .element-template');
+			this.$('.element-template').remove();
 			
-			this.$('.drag.label').draggable({
-				revert: true,
+			this.fromFieldColors = ['#c43c35', '#f89406', '#46a546', '#62cffc'];
+			this.fromFields = {
+				'location': 'location',
+				'Facility': 'Facility',
+				'val': 'val',
+				'year': 'year'
+			};
+
+			this.toFields = {
+				'loc': 'Point X,Y',
+				'val': 'Point Value',
+				'datetime':'Date',
+				'label': 'Point Label'
+			};
+
+			var i = 0;
+			for (var k in this.fromFields) {
+				var f = this.fromFieldTemplate.clone();
+				f.removeClass('element-template');
+				$('.name', f).text(this.fromFields[k]);
+				$('.label', f).css('background-color', this.fromFieldColors[i % this.fromFieldColors.length]);
+				$('.from-field', f).attr('data-from', k);
+				this.$('.from-data thead').append(f).show();
+				i++;
+			}
+
+			for (var k in this.toFields) {
+				var f = this.toFieldTemplate.clone();
+				f.removeClass('element-template');
+				$('.name', f).text(this.toFields[k]);
+				$('.to-field', f).attr('data-to', k);
+				this.$('.to-data thead').append(f).show();
+			}
+
+			this.$('.to-field').sortable({
+				connectWith: '.to-field'
+			});
+
+			this.$('.from-field').draggable({
+				revert: "invalid",
+				helper: "clone",
+				connectToSortable: '.to-field',
 				stack: '.drag.label'
 			});
 					
-			this.$('#map_canvas').droppable( {
-		      accept: '#dragLabel',
+			/*this.$('.drop-field').droppable( {
+		      accept: '.drag-field',
 		      hoverClass: '',
 		      drop: self.handleCardDrop
-		    } );
+		    } );*/
 				
 	        return this;
 	    },
 
-		handleCardDrop:function ( event, ui ) {
-		  var draggable = ui.draggable;
-		  alert( 'The square with ID "' + draggable.attr('id') + '" was dropped onto me!' );
-		},
-		
-		dataButtonClicked: function() {
-			//Todo: Verify string URL
-			var self = this;
-			this.dataTitle = this.$('#titleInput').val();
-			this.dataDescription = this.$('#descriptionInput').val();
-			
-			// TODO: Add better validation 
-			if (true /* this.dataTitle != '' && this.$('#fileInput').val() != ''*/)
-			{
-				this.requestData();
+	    fromFieldRemoveClicked: function(event) {
+			$(event.currentTarget).closest('.from-field').remove();
+			return false;
+	    },
+
+	    showAlert: function(html) {
+	    	if (!html) {
 				this.$('.modal-body .alert').hide();
-			}
-			else
-			{
+	    	} else {
 				this.$('.modal-body .alert').show();
+				this.$('.modal-body .alert').html(html);
+	    	}
+	    },
+
+	    getFieldDefs: function() {
+			var defs = {};
+			for (var k in this.toFields) {
+				console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
+				var fromFields = this.$('.to-field[data-to=' + k +'] .from-field');
+				defs[k] = {
+					fromFields: []
+				};
+				for (var i = 0; i < fromFields.length; i++) {
+					defs[k].fromFields.push($(fromFields[i]).attr('data-from'));
+				}
 			}
+			return defs;
+	    },
+		
+		importButtonClicked: function() {
+			this.startImport();
 		},
 		
-		dataConfirmButtonClicked: function()
-		{
-			//Todo: Validate fields
-			//app.addData({data:this.responseData, title:this.dataTitle, description:this.dataDescription});
-		},
-		
-		requestData:function(options)
+		startImport: function()
 		{
 			var self = this;
-			dataType = 'csv';
-			/*if(dataType == 'json')
-			{
-				var self = this;		
-				var jqxhr = $.getJSON(options.url, function(data) {})
-				.success(function(data) { 	
-					self.responseData = data;
-					self.showDataReview(data);
-				})
-				.error(function(err) { alert(err); })
-				.complete(function() {});
-			}
-			else*/ if (dataType == 'csv') {
-				$.ajax({
-					type: 'POST',
-					url: '/api/import/',
-					data: {
-						file: this.$('#fileInput').val(),
-						title: this.$('#titleInput').val(),
-						description: this.$('#descriptionInput').val(),
-						converter: this.$('#converter').val()
-					},
-					success: function(responseData) {
-						if (responseData.pointCollectionId) {
-							app.bindCollectionToMap(responseData.pointCollectionId);
-							$('#addDataModal').modal('hide');
-						} else {
-							// TODO: error
+			self.$('#importButton').attr('disabled', true);
+			$.ajax({
+				type: 'POST',
+				url: '/api/import/',
+				data: {
+					url: 'https://dl.dropbox.com/s/03cqpv1camzz4a1/reactors.csv',
+					fields: this.getFieldDefs()
+				},
+				success: function(responseData) {
+					app.bindCollectionToMap(responseData.pointCollectionId);
+					$('#addDataModal').modal('hide');
+					self.close();
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					var data = $.parseJSON(jqXHR.responseText);
+					console.error('import failed', data.errors);
+					var lis = '';
+					if (data && data.errors) {
+						for (var k in data.errors) {
+							lis += '<li>' + data.errors[k].message + '</li>';
 						}
-					},
-					error: function() {
-						console.error('failed to fetch unique map');
+						console.error('errors:', data.errors);
+						self.showAlert('<ul>' + lis + '</ul>');
 					}
-				});
-			}
+					self.$('#importButton').attr('disabled', false);
+				}
+			});
 		},
 		
-		showDataReview: function(data)
+/*		showDataReview: function(data)
 		{
 			var self = this;
 			
@@ -140,7 +181,7 @@ define([
 						
 				});	
 			});
-		},
+		},*/
 
 	});
 

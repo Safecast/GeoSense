@@ -2,6 +2,7 @@ var config = require('../../config.js'),
 	models = require("../../models.js"),
 	permissions = require("../../permissions.js"),
 	utils = require("../../utils.js"),
+	ValidationError = utils.ValidationError,
 	conversion = require("./conversion"),
   	mongoose = require('mongoose'),
 	date = require('datejs'),
@@ -11,24 +12,52 @@ var config = require('../../config.js'),
 	console = require('../../ext-console.js'),
 	MapReduceAPI = require('../mapreduce');
 
-var Point = models.Point,
-	PointCollection = models.PointCollection,
-	LayerOptions = models.LayerOptions,
+var LayerOptions = models.LayerOptions,
 	handleDbOp = utils.handleDbOp;
 
 var ImportAPI = function(app) {
 	var self = this;
 	if (app) {
 		app.post('/api/import/', function(req, res) {
-			// prevent arbitrary script inclusion:
+			if (!permissions.canImportData(req)) {
+	            res.send('', 403);
+	            return;
+			}
+			// prevent arbitrary script inclusion
 			if (req.body.converter) {
 				req.body.converter = path.basename('' + req.body.converter);				
 			}
 			if (req.body.format) {
 				req.body.format = path.basename('' + req.body.format);				
 			}
+			// prevent arbitrary file import
+			req.body.path = null;
 
-			self.import(req.body, req, res);
+			var errors = {};
+			var valid = true;
+			if (!req.body.url) {
+				valid = false;
+				errors.url = {
+					message: 'URL is missing'
+				};
+			}
+
+			var converter = conversion.PointConverterFactory(req.body.fields);
+			if (converter instanceof ValidationError) {
+				valid = false;
+				errors = _.cloneextend(errors, converter.errors);
+			} else {
+				req.body.converter = converter;
+			}
+
+			req.body.mapreduce = true;
+
+			if (!valid) {
+				var err = new ValidationError(errors);
+	            res.send(err, 403);
+			} else {
+				self.import(req.body, req, res);
+			}
 		});
 	}
 }
@@ -56,7 +85,6 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	var defaults = {
 		url: null, path: null, stream: null,
 		format: null,
-		converter: 'base',
 		max: 0,
 		interval: 1,
 		skip: 0,
@@ -108,14 +136,6 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		}
 		throw err;
 	}
-	if (typeof params.converter != 'string') {
-		var err = new Error('invalid converter: ' + params.converter);
-		if (callback) {
-			callback(err);
-			return;
-		}
-		throw err;
-	}
 
 	if (params.bounds) {
 		if (typeof params.bounds == 'string') {
@@ -134,17 +154,30 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	}
 
 	console.log('import params', params);
-	var Converter, format, parser;
+	var Converter, converter, format, parser;
 
-	if (!params.converter) {
-		params.converter = 'base';
-	}
-	if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
-		Converter = require('./conversion/point/' 
-			+ params.converter);
+	if (params.fields) {
+		console.log('Initializing converter with fieldDefs');
+		Converter = function() { return conversion.PointConverterFactory(params.fields) };
 	} else {
-		console.log('Loading custom converter: '+params.converter);
-		Converter = require(params.converter);
+		if ((typeof params.converter != 'string' && typeof params.converter != 'object') 
+			|| (typeof params.converter == 'object' && !params.converter.fields)) {
+				var err = new Error('invalid converter: ' + params.converter);
+				if (callback) {
+					callback(err);
+					return;
+				}
+				throw err;
+		} else if (typeof params.converter == 'string') {
+			if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
+				Converter = require('./conversion/' + params.converter);
+			} else {
+				console.log('Loading custom converter: '+params.converter);
+				Converter = require(params.converter);
+			}
+		} else {
+			converter = params.converter;
+		}
 	}
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
@@ -172,7 +205,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	
 	var runImport = function(collection) 
 	{
-		var converter = new Converter(params.fields);
+		if (!converter) {
+			converter = new Converter(params.fields);
+		}
 		if (!converter.convertModel) {
 			var err = new Error('converter module does not export `convertModel`');
 			if (callback) {
@@ -183,14 +218,13 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		}
 
 		var headerValues = {};
+		
 		collection.active = false;
 		collection.status = config.DataStatus.IMPORTING;
 		if (params.saveParams == undefined || params.saveParams) {
-			collection.importParams = params;
-			// TODO re-init converter with fields
-			/*if (params.fields || params.converter) {
-				collection.importParams.fields = converter.fields;
-			}*/
+			collection.importParams = _.cloneextend(params, {
+				fields: converter.fieldDefs
+			});
 		}
 		if (req && req.session) {
 			collection.createdBy = collection.modifiedBy = req.session.user;
@@ -208,7 +242,8 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 			}
 
 	    	var newCollectionId = collection.get('_id');
-	    	console.success('* saved PointCollection "'+collection.get('title')+'" = '+newCollectionId);
+	    	console.success('* saved '+collection.name+' "'+collection.get('title')+'" = '+newCollectionId);
+	    	console.log(collection);
 
 			var job = new models.Job({status: config.JobStatus.ACTIVE, type: config.JobType.IMPORT});
 			job.save(function(err, job) {
@@ -393,7 +428,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						}
 
 						var model = new Model(doc);
-						var point = converter.convertModel(model, Point);
+						var point = converter.convertModel(model, ToModel);
 						point.importJob = job;
 						var loc = point ? point.get('loc') : null;
 						var doSave = point 
@@ -407,7 +442,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						    	self.readStream.pause();
 						    	paused = true;
 					    	}
-							point.pointCollection = collection;
+							point.pointCollection = point.shapeCollection = collection;
 							point.created = new Date();
 							point.modified = new Date();
 							if (maxVal == undefined || maxVal < point.get('val')) {
@@ -502,46 +537,44 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		});
 	};
 
-	var converterInit = Converter.init || function(callback) {
-		callback();
-	};
-	converterInit(function() {
-		if (!params.append) {
-			console.info('*** Creating new collection ***');
-			var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
-			for (var key in config.COLLECTION_DEFAULTS) {
-				if (params[key]) {
-					defaults[key] = params[key];
-				}
-			}
-			defaults.save(function(err, res) {
-				if (err) {
-					console.error(err.message);
-					if (res) {
-						res.send('server error', 500);
-						if (callback) {
-							callback(err);
-						}
-					}
-					return;
-				}
-				runImport(new PointCollection({
-					defaults: defaults._id,
-					title: params.title || path.basename(params.url || params.path),
-					description: params.description,
-					unit: "",
-					progress: 0,
-				}));
-			});
+	var ToModel = models.Shape,
+		ToCollectionModel = models.ShapeCollection;
 
-		} else {
-			console.info('*** Appending to collection ***', params.append);
-			PointCollection.findOne({_id: params.append}, function(err, collection) {
-				if (!utils.validateExistingCollection(err, collection, callback)) return;
-				runImport(collection);
-			});
+	if (!params.append) {
+		console.info('*** Creating new collection ***');
+		var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
+		for (var key in config.COLLECTION_DEFAULTS) {
+			if (params[key]) {
+				defaults[key] = params[key];
+			}
 		}
-	});
+		defaults.save(function(err, res) {
+			if (err) {
+				console.error(err.message);
+				if (res) {
+					res.send('server error', 500);
+					if (callback) {
+						callback(err);
+					}
+				}
+				return;
+			}
+			runImport(new ToCollectionModel({
+				defaults: defaults._id,
+				title: params.title || path.basename(params.url || params.path),
+				description: params.description,
+				unit: "",
+				progress: 0,
+			}));
+		});
+
+	} else {
+		console.info('*** Appending to collection ***', params.append);
+		ToCollectionModel.findOne({_id: params.append}, function(err, collection) {
+			if (!utils.validateExistingCollection(err, collection, callback)) return;
+			runImport(collection);
+		});
+	}
 }
 
 ImportAPI.prototype.sync = function(params, req, res, callback) 
@@ -601,7 +634,7 @@ function getImportParams(params)
 		url: params.u || params.url,
 		path: params.p || params.path,
 		format: params.f || params.format,
-		converter: params.c || params.converter,
+		converter: params.c || params.converter, 
 		append: params.append,
 		from: params.from,
 		to: params.to,
@@ -612,7 +645,7 @@ function getImportParams(params)
 		interval: params.interval,
 		bounds: params.bounds,
 		mapreduce: params.mapreduce,
-		fields: (params.fields ? JSON.parse(params.fields) : undefined)
+		fields: (params.fields ? JSON.parse(params.fields) : undefined) // precedence over converter
 	});
 }
 

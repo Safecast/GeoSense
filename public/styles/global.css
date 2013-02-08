@@ -63,6 +63,10 @@ html {
 	
 }
 
+.element-template {
+	display: none;
+}
+
 body {
 	background-color:#edeeee;
 	font-family: Helvetica, Helvetica Neue, Arial, sans-serif;

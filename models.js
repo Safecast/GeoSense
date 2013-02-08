@@ -56,17 +56,14 @@ this.Point.schema.plugin(useTimestamps);
 this.Point.schema.index({loc: '2d', pointCollection: 1})
 
 this.Shape = mongoose.model('Shape', new mongoose.Schema({
-    pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
-    loc: {type: [Number], index: '2d', required: true},
+    shapeCollection: { type: mongoose.Schema.ObjectId, ref: 'ShapeCollection', required: true, index: 1 },
     type: {type: String, required: true},
-    geometry: {type: String, required: true},
-    label: String,
-    url: String,
-    datetime: {type: Date, index: 1},
+    geometry: mongoose.Schema.Types.Mixed,
+    properties: mongoose.Schema.Types.Mixed
 }));
 
 this.Shape.schema.plugin(useTimestamps);
-this.Shape.schema.index({loc: '2d', pointCollection: 1})
+this.Shape.schema.index({ws: '2d', en: '2d', shapeCollection: 1})
 
 this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
     color: {type: String, required: true},

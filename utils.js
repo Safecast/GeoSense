@@ -25,6 +25,11 @@ exports.connectDB = function(callback, exitProcessOnError)
     return mongoose.connect(config.DB_PATH).connection;
 };
 
+exports.ValidationError = function(errors) {
+    Error.call(this);
+    this.errors = errors;
+}
+
 /**
 * Simple Python-style string formatting.
 *
@@ -142,6 +147,7 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
                 res.send(sendErr, 500);
                 break;
             case 'ValidationError':
+                console.log(err);
                 // certain error messages should be available to client:
                 res.send(err, 403);
                 break;
