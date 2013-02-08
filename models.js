@@ -169,10 +169,11 @@ this.ShapeCollection = mongoose.model('ShapeCollection', new mongoose.Schema({
 this.ShapeCollection.schema.plugin(useTimestamps);
 
 this.MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
+    _id: { type: mongoose.Schema.ObjectId },
     pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', index: 1 },
     shapeCollection: { type: mongoose.Schema.ObjectId, ref: 'ShapeCollection', index: 1 },
     options: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
-    status: {type: String, enum: [config.MapLayerType.POINTS, config.MapLayerType.SHAPES], required: true, default: config.MapLayerType.POINTS},
+    type: {type: String, enum: [config.MapLayerType.POINTS, config.MapLayerType.SHAPES], required: true, default: config.MapLayerType.POINTS},
 }));
 
 this.Map = mongoose.model('Map', new mongoose.Schema({

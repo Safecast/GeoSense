@@ -264,7 +264,6 @@ Converter.prototype.convertModel = function(fromModel, toModel) {
 		} 
 	}
 	var m = new toModel(doc);
-	console.log('...............', m, doc);
 	return m;
 };
 

@@ -3,7 +3,8 @@ var config = require('../../config.js'),
 	permissions = require("../../permissions.js"),
 	utils = require("../../utils.js"),
 	uuid = require('node-uuid'),
-	md5 = require('MD5');
+	md5 = require('MD5'),
+	mongoose = require('mongoose');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
@@ -94,6 +95,7 @@ var MapAPI = function(app)
 				.populate('modifiedBy')
 				.run(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
+					console.log(map);
 			       	res.send(prepareMapResult(req, map));
 				});
 		});
@@ -196,12 +198,16 @@ var MapAPI = function(app)
 									return;
 								}
 							    var layer = new MapLayer({
+							    	_id: new mongoose.Types.ObjectId(),
+							    	layerId: new mongoose.Types.ObjectId(),
 							    	pointCollection: collection,
 							    	options: options._id
 							    });    
+							    console.log(layer);
 
 						      	map.layers.push(layer);
 						      	map.save(function(err, map) {
+						      		console.log(err);
 									if (err) {
 										res.send('server error', 500);
 										return;

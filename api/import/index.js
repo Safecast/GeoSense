@@ -445,6 +445,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							point.pointCollection = point.shapeCollection = collection;
 							point.created = new Date();
 							point.modified = new Date();
+							console.log(point);
 							if (maxVal == undefined || maxVal < point.get('val')) {
 								maxVal = point.get('val');
 							}
@@ -537,8 +538,8 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		});
 	};
 
-	var ToModel = models.Shape,
-		ToCollectionModel = models.ShapeCollection;
+	var ToModel = models.Point,
+		ToCollectionModel = models.PointCollection;
 
 	if (!params.append) {
 		console.info('*** Creating new collection ***');
