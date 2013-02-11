@@ -1,0 +1,87 @@
+.map-layer-editor button {
+	width:76px;
+	height:50px;
+	text-shadow:none;
+	vertical-align: middle;
+	background-color: #f5f5f5;
+	background-image: none;
+	border-color: none;
+	border-bottom-color: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.map-layer-editor .btn.save, .map-layer-editor .btn.undo {
+	float: right;
+	margin-left: 1em;
+}
+
+.map-layer-editor .btn.feature-type.cells {
+	background-image:url('../assets/feature-cells.png');
+	background-repeat:no-repeat;
+	background-position: 0px 0px;
+}
+
+.map-layer-editor .btn.feature-type.cells:hover, .btn.feature-type.cells.active {
+	background-image:url('../assets/feature-cells-active.png');
+	background-repeat:no-repeat;
+	background-position: 0px 0px;
+	border:1px solid #3fa8e1;
+}
+
+.map-layer-editor .btn.feature-type.points {
+	background-image:url('../assets/feature-points.png');
+	background-repeat:no-repeat;
+	background-position: 0px 0px;
+}
+
+.map-layer-editor .btn.feature-type.points:hover, .btn.feature-type.points.active {
+	background-image:url('../assets/feature-points-active.png');
+	background-repeat:no-repeat;
+	background-position: 0px 0px;
+	border:1px solid #3fa8e1;
+}
+
+.map-layer-editor .btn.feature-type.bubbles {
+	background-image:url('../assets/feature-bubbles.png');
+	background-repeat:no-repeat;
+	background-position: 0px 0px;
+}
+
+.map-layer-editor .btn.feature-type.bubbles:hover, .btn.feature-type.bubbles.active {
+	background-image:url('../assets/feature-bubbles-active.png');
+	background-repeat:no-repeat;
+	background-position: 0px 0px;
+	border:1px solid #3fa8e1;
+}
+
+.map-layer-editor .slider {
+}
+
+.map-layer-editor input.text, .map-layer-editor textarea.text {
+	width: 95%;
+}
+
+.map-layer-editor table.color-palette td {
+	white-space: nowrap;
+}
+
+.map-layer-editor table.color-palette td {
+	padding-right: .5em;
+}
+
+.map-layer-editor table.color-palette td:last-child {
+	padding-right: 0;
+	text-align: right;
+}
+
+.map-layer-editor .miniColors-trigger {
+	margin-bottom: 9px;
+}
+
+.map-layer-editor table.color-palette td input {
+	width: inherit;
+}
+

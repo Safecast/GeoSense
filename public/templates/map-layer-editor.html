@@ -1,0 +1,89 @@
+<div class="panel-header">
+    <div class="frame clearfix">
+        <h3>Layer: <span class="title"></span></h3>
+        <ul class="panel-controls">
+            <li><a class="panel-extend" href="#"><span class="icon icon-plus-sign icon-white"></span></a></li>
+            <li><a class="panel-collapse" href="#"><span class="icon icon-minus-sign icon-white"></span></a></li>
+            <li><a class="panel-close" href="#"><span class="icon icon-remove-sign icon-white"></span></a></li>
+        </ul>
+    </div>
+</div>
+<div class="panel-body">
+    <form class="tabbable"> <!-- Only required for left/right tabs -->
+        <div class="well">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#layer-features" data-toggle="tab">Map Features</a></li>
+              <li><a href="#layer-colors" data-toggle="tab">Colors</a></li>
+              <li><a href="#layer-info" data-toggle="tab">Layer Info</a></li>
+            </ul>
+
+            <div class="tab-content">
+
+                <fieldset class="tab-pane active" id="layer-features">
+                    <input class="model-input" name="options.featureType" type="hidden" />
+                    <div class="features">
+                        <p>
+                            <label>Feature Type</label>
+                            <div class="btn-group model-input" data-name="options.featureType" data-toggle="buttons-radio">
+                                <button class="btn feature-type points" value="P"></button>
+                                <button class="btn feature-type cells" value="C"></button>
+                                <button class="btn feature-type bubbles" value="B"></button>
+                            </div>
+                        </p>
+                        <p>
+                            <label for="">Opacity</label> <input class="number model-input" name="options.opacity" type="text" /> 
+                        </p>
+                        <div class="slider opacity-slider"></div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="tab-pane" id="layer-colors">
+                    <table class="color-palette">
+                        <thead>
+                            <th><label>Color</label></th>
+                            <th><label>Value</label></th>
+                            <th><label>Interpolation</label></th>
+                        </thead>
+                        <tbody>
+                            <tr class="element-template">
+                                <td><input name="color" type="text" class="color-picker black" size="6" placeholder="hex color" /></td>
+                                <td><input name="position" type="text" class="number" size="3" placeholder="position" /></td>
+                                <td>
+                                    <select name="interpolation" class="min-width">
+                                        <option value="">(default)</option>
+                                        <option value="threshold">threshold</option>
+                                        <option value="lerpRGB">linear</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <a class="remove-color" href="#"><span class="icon icon-remove"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="btn add-color"><span class="icon icon-plus"></span></a>
+                </fieldset>
+
+                <fieldset class="tab-pane" id="layer-info">
+                    <p>
+                        <label for="title">Title</label> <input class="text model-input" name="options.title" type="text" />
+                        <label for="unit">Unit</label> <input class="text model-input" name="options.unit" type="text" />
+                        <label for="description">Description</label> <textarea class="text model-input" name="options.description" rows="8"></textarea>
+                    </p>
+                    <p>
+                        <a href="#" class="btn btn-danger destroy">Remove Layer</a>
+                    </p>
+                </fieldset>
+            </div>
+            <div class="panel-buttons clearfix">
+                <label class="checkbox inline">
+                    <input class="preview" type="checkbox" checked="checked"> Preview
+                </label>
+                <a href="#" class="btn save btn-success">Save Layer</a>
+                <a href="#" class="btn undo">Undo</a>
+            </p>
+        </div>
+    </form>
+
+</div>
+

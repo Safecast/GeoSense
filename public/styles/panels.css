@@ -1,0 +1,225 @@
+
+.panel
+{
+	z-index:1000;
+	position:absolute;
+	top:15px;
+	right:15px;
+	padding: 33px 20px 0 20px;
+	box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, .2);
+	background-color:rgba(100,100,100,.8);
+	border-color:#222;
+	border-radius:8px;
+	color: #ddd;
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
+	width: 300px;
+	overflow: hidden;
+	/*
+	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
+	*/
+}
+
+.panel .panel-body {
+	margin-bottom: 20px;
+}
+
+.map-style-dark .panel {
+	color: #aaa;
+	background-color:rgba(0,0,0,.5);
+	/*
+	text-shadow:rgba(0,0,0,.8) 1px 1px 0px;
+	*/
+}
+
+.panel h2 {
+	color: white;
+	background-color:rgba(0,0,0,.5);
+}
+
+.panel-buttons {
+	margin-top: 2em;
+}
+
+.panel.timeline {
+	width: auto;
+	top: auto;
+	right: 0px;
+	left: 0px;
+	bottom: 0px;
+	background-color:rgba(60,60,60,1);
+}
+
+.panel.timeline .graph {
+	height: 300px;
+	width: 100%;
+}
+
+.panel.map-tour {
+	width: 600px;
+	top: auto;
+	right: auto;
+	left: 80px;
+	bottom: 40px;
+}
+
+.panel.data-info, .panel.data-detail {
+	display: none;
+	width: 222px;
+}
+
+.panel.map-tour .btn.next {
+	float: right;
+}
+
+.panel.map-tour a.close {
+	display: none;
+}
+
+.panel.map-tour .step-buttons, .panel.map-tour .step-body {
+	margin-bottom: 1em;
+}
+
+.panel .accordion-heading {
+	position: relative;
+}
+
+.panel .accordion-heading .accordion-toggle {
+	padding: 0 0 .25em 0;
+}
+
+.panel .accordion-group {
+	border: none;
+	width: 222px;
+	margin: 0;
+	padding: 0px;
+}
+
+.panel .accordion-body-content {
+	padding-bottom: 20px;
+}
+
+.panel.extended, .panel.extended .accordion-group {
+	width: 444px;
+}
+
+.panel .panel-header {
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+.panel .panel-body {
+}
+
+.panel .panel-header .frame {
+	background-color:rgba(50, 50, 50, .5);
+	border-radius: 6px;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	margin: 3px;
+	cursor: move;
+}
+
+.panel .panel-header h3 {
+	float: left;
+	margin: 0px;
+	color: #ccc;
+	font-size: 13px;
+	font-weight: normal;
+	padding: 0 15px 0 16px;
+}
+
+.panel a .in-out {
+	font-weight: bold;
+	color: white;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background-image: url(../assets/panel-buttons.png);
+}
+
+.panel .panel-controls {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	right: 0px;
+	top: 5px;
+}
+
+.panel .panel-header .panel-controls {
+	margin: 1px 8px 0 0;
+}
+
+.panel .panel-header .panel-controls .icon {
+	-moz-opacity:.75 !important; filter:alpha(opacity=75) !important; opacity:.75 !important; 
+}
+
+.panel .panel-controls li {
+	display: inline-block;
+	margin: 0px;
+	border-radius: 3px;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+}
+
+
+.panel .panel-controls li:hover {
+	background: #666;
+}
+
+.panel .panel-controls a, .data-info .data-legend .layer-controls .state-indicator {
+	padding: 2px 2px 1px 2px;
+	display: inline-block;
+}
+
+
+
+.panel .panel-header .buttons a span {
+	display: none;
+}
+
+.panel .panel-header .buttons a.extend {
+	background-position: 0px top;
+}
+
+.extended .panel .panel-header .buttons a.extend {
+	background-position: -16px top;
+}
+
+.panel .panel-header .buttons a.collapse {
+	background-position: -32px top;
+}
+
+.panel.collapsed .panel-header .buttons a.collapse {
+	background-position: -48px top;
+}
+
+.panel a .in-out.in {
+	background-position: -64px top;
+}
+
+.panel a .in-out.out {
+	background-position: -80px top;
+}
+
+.panel .panel-header .buttons a:hover, .panel a:hover .in-out {
+	background-position-y: bottom !important;
+}
+
+.panel table {
+	padding: 0;
+	margin: 0;
+	width: 100%;
+}
+
+.panel .box {
+	margin-top: 4px;
+	background-color:rgba(50,50,50,.6);
+	border-radius: 4px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+}
