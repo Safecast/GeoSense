@@ -26,9 +26,6 @@ define([
 			_.bindAll(this, "updateViewBase");
 		 	options.vent.bind("updateViewBase", this.updateViewBase);
 		
-			_.bindAll(this, "redrawMap");
-		 	options.vent.bind("redrawMap", this.redrawMap);
-
 			Feature = OpenLayers.Feature.Vector;
 			Geometry = OpenLayers.Geometry;
 			Rule = OpenLayers.Rule;
@@ -260,10 +257,11 @@ define([
 		{
 			var pointCollectionId = model.pointCollectionId;
 			this.featureLayers[pointCollectionId].destroyFeatures();
-				
+			this.map.removeLayer(this.featureLayers[pointCollectionId]);
+			this.featureLayers[pointCollectionId] = null;
+
 			// TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
-			/*this.map.removeLayer(this.featureLayers[pointCollectionId]);
-			this.featureLayers[pointCollectionId].destroy();
+			/*this.featureLayers[pointCollectionId].destroy();
 			this.featureLayers[pointCollectionId] = null;*/
 		},
 
@@ -599,11 +597,6 @@ define([
 			var pointCollectionId = layer.pointCollection._id;
 			this.destroyFeatureLayer(this.collections[pointCollectionId]);
 			this.addCollectionToMap(this.collections[pointCollectionId]);
-		},
-		
-		redrawMap: function()
-		{
-			// TODO: Not implemented
 		},
 		
 		toWebMercator: function (googLatLng) {

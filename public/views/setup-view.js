@@ -37,7 +37,7 @@ define([
 			}
 
 			this.$('.map-name').html(this.mapInfo.title + ' Setup');
-			this.mapInfoFields.each(function() {
+			this.modelFieldInputs.each(function() {
 				$(this).removeClass('error');
 				var split = this.name.split('.');
 				if (split.length == 2) {
@@ -68,10 +68,10 @@ define([
 				return false;
 			});
 
-			this.mapInfoFields = this.$('#setup-metadata input, #setup-metadata textarea, #setup-custom-domain input');
+			this.modelFieldInputs = this.$('#setup-metadata input, #setup-metadata textarea, #setup-custom-domain input');
 			this.$('#cancelButton').hide();
 
-			this.mapInfoFields.each(function() {
+			this.modelFieldInputs.each(function() {
 				$(this).on('change keydown', function() {
 					self.mapInfoChanged = true;
 					self.$('#cancelButton').show();
@@ -97,15 +97,15 @@ define([
 			}
 
 			var postData = {};
-			this.mapInfoFields.each(function() {
+			this.modelFieldInputs.each(function() {
 				postData[this.name] = $(this).val();
 			});
 
 			var self = this;
 			this.$('#saveCloseButton').attr('disabled', true);
 			$.ajax({
-				type: 'POST',
-				url: '/api/map/' + self.mapInfo._id,
+				type: 'PUT',
+				url: '/api/map/' + self.mapInfo.publicslug,
 				data: postData,
 				success: function(data) {
 					self.close();
@@ -117,9 +117,9 @@ define([
 					var data = $.parseJSON(jqXHR.responseText);
 					console.error('failed to update map: ' + self.mapInfo._id);
 					if (data && data.errors) {
-						self.mapInfoFields.removeClass('error');
+						self.modelFieldInputs.removeClass('error');
 						for (var k in data.errors) {
-							$('[name="' + data.errors[k].path + '"]', this.mapInfoFields).addClass('error');
+							$('[name="' + data.errors[k].path + '"]', this.modelFieldInputs).addClass('error');
 						}
 						console.error('errors:', data.errors);
 					}
@@ -142,7 +142,7 @@ define([
 			if (window.confirm(__('Are you sure you want to delete this map? This action cannot be reversed!'))) {
 				$.ajax({
 					type: 'DELETE',
-					url: '/api/map/' + self.mapInfo._id,
+					url: '/api/map/' + self.mapInfo.publicslug,
 					success: function() {
 						console.log('deleted map: ' + self.mapInfo._id);
 						window.location = '/';

@@ -26,17 +26,18 @@ var PointAPI = function(app)
 							res.send('server error', 500);
 							return;
 						}
-						values = [];
+						yValues = [];
 						for (var i = 0; i < datasets.length; i++) {
 							var reduced = datasets[i].get('value');
-							values[reduced.val.step] = reduced.count;
+							yValues[reduced.val.x] = reduced.count;
 						}
+						//console.log(values);
 						var histogram = []; 
-						for (var step = 0; step < config.HISTOGRAM_SIZES[0]; step++) {
+						for (var x = 0; x < config.HISTOGRAM_SIZES[0]; x++) {
 							histogram.push({
-								x: step,
-								y: values[step] ? values[step] : 0,
-								val: 1 / config.HISTOGRAM_SIZES[0] * step * (pointCollection.maxVal - pointCollection.minVal) + pointCollection.minVal
+								x: x,
+								y: yValues[x] ? yValues[x] : 0,
+								val: 1 / config.HISTOGRAM_SIZES[0] * x * (pointCollection.maxVal - pointCollection.minVal) + pointCollection.minVal
 							})
 						}
 						res.send(histogram);

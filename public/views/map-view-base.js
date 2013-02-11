@@ -95,7 +95,7 @@ define([
 			var self = this;
 
 			$.each(this.collections, function(key, collection) { 
-				var mapLayer = app.getMapLayer(collection.pointCollectionId);
+				var mapLayer = app.getMapLayerDeprecated(collection.pointCollectionId);
 				app.fetchMapLayer(collection.pointCollectionId);
 				self.vent.trigger("hideDetailData", collection.pointCollectionId);
 			});
@@ -220,10 +220,11 @@ define([
 			this.layerOptions[pointCollectionId] = {};
 			var opts = this.layerOptions[pointCollectionId];
 			opts.opacity = collection.mapLayer.options.opacity;
+			var mapLayer = app.getMapLayer(collection.mapLayer._id);
 			switch (collection.mapLayer.options.colorType) {
 				case ColorType.PALETTE:
 				case ColorType.LINEAR_GRADIENT:
-					opts.colorGradient = new ColorGradient(collection.mapLayer.options.colors);
+					opts.colorGradient = new ColorGradient(mapLayer.getNormalizedColors(collection.mapLayer.options.colors));
 					break;
 			}
 		},

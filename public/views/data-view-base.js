@@ -13,14 +13,6 @@ define([
 		className: 'data-inspector',
 		
 	    events: {
-			'click #removeData' : 'removeDataClicked',
-			'click #editData' : 'editDataClicked',
-			'click #updateData' : 'updateDataClicked',
-
-			'click .color-type' : 'colorTypeChanged',
-			'click .feature-type' : 'featureTypeChanged',
-			'click #colorInput' : 'colorInputClicked',
-
 			'click .visibility': 'visibilityChanged'
 	    },
 
@@ -227,7 +219,8 @@ define([
 
 			var data = this.histogramData;
 			var len = data.length;
-			var maxVal = self.mapLayer.pointCollection.maxVal;
+			var maxVal = self.mapLayer.pointCollection.maxVal,
+				minVal = self.mapLayer.pointCollection.minVal;
 			var graphH = graphEl.innerHeight(),
 				graphW = graphEl.innerWidth();
 
@@ -260,10 +253,10 @@ define([
 
 			var yValues = [];
 
-			var gradient = new ColorGradient(this.histogramColors || this.colors/*, 'threshold'*/);
+
+			var gradient = new ColorGradient(this.colors);
 
 			var histMaxY;
-
 			for (var i = 0; i < len; i++) {
 				/*croppedData.push({
 					x: data[i].x,
@@ -304,7 +297,6 @@ define([
 			
 			var barW = graphW / yValues.length;
 			var maxX = yValues.length - 1;
-
 			chart.selectAll("rect")
 					.data(yValues)
 				.enter().append("rect")
@@ -344,7 +336,7 @@ define([
 			var self = this;
 			var options = this.mapLayer.options;
 
-			this.colors = options.colors;
+			this.colors = app.getMapLayer(this.mapLayer._id).getNormalizedColors();
 			this.colorType = options.colorType;
 			this.featureType = options.featureType;
 			this.visible = options.visible;
@@ -359,10 +351,6 @@ define([
 				}
 			}
 
-			$(this.el).delegate('input, select', 'change', function() {
-				self.enableUpdateButton();
-			});
-
 			switch (this.mapLayer.pointCollection.status) {
 				case DataStatus.COMPLETE:
 				case DataStatus.UNREDUCED_INC:
@@ -372,79 +360,7 @@ define([
 					this.hideLegend();
 			}
 
-			console.log('disableUpdateButton');
-			this.disableUpdateButton();
 		},
-
-		removeDataClicked: function(evt)
-		{
-			var self = this;
-			$(this.el).fadeOut('fast');
-			self.collection.reset();
-			self.collection.unbindCollection();
-
-			if (evt) evt.preventDefault();
-	   	},
-
-		updateDataClicked: function(evt)
-		{
-			//build json and update
-			var self = this;
-			//this.collection.unbindCollection();
-					
-			switch (this.colorType) {
-				case ColorType.SOLID:
-					this.colors = [{color: this.$('#colorInput').val()}];
-					break;
-				case ColorType.PALETTE:
-					this.colors = this.getColorsFromPaletteEditor();
-			}
-			
-			var postData = {
-				visible: this.visible,
-				colorType: this.colorType,
-				colors: this.colors,
-				featureType: this.featureType,
-				opacity: this.$('[name=opacity]').val(),
-				title: this.$('[name=title]').val(),
-				description: this.$('[name=description]').val(),
-				unit: this.$('[name=unit]').val(),
-				altUnit: this.$('[name=altUnit]').val()
-			};
-
-			console.log('postData', postData);
-			
-			$.ajax({
-				type: 'POST',
-				url: '/api/updatemapcollection/' + app.mapInfo._id + '/' + this.mapLayer.pointCollection._id,
-				dataType: 'json',
-				data: postData,
-				success: function(data) {
-					self.disableUpdateButton();
-					self.updateLegend(true);
-					self.vent.trigger('updateMapLayer', data);
-				},
-				error: function() {
-					console.error('failed to update layer options');
-				}
-			});	
-				
-			if (evt) evt.preventDefault();
-		},
-
-		editDataClicked: function(evt)
-		{
-			var self = this;
-			
-			if(this.editDataView)
-				this.editDataView.remove();
-				
-			this.editDataView = new EditDataView({vent: this.vent, collection:this.collection});
-	        $('body').append(this.editDataView.render().el);
-			$('#editDataModal').modal('toggle');
-
-			if (evt) evt.preventDefault();
-	   	},
 
 		showLegend: function() 
 		{
@@ -625,98 +541,6 @@ define([
 			this.updateStatus();
 	    },
 
-		enableUpdateButton: function()
-		{
-			console.log('enableUpdateButton');
-			this.$('#updateData').attr('disabled', false);
-			this.$('#updateData').removeClass('disabled');
-			this.$('#updateData').addClass('btn-primary');
-		},
-		
-		disableUpdateButton: function()
-		{
-			this.$('#updateData').attr('disabled', true);
-			this.$('#updateData').removeClass('btn-primary');
-			this.$('#updateData').addClass('disabled');
-		},
-
-		colorInputClicked: function(evt)
-		{
-			this.enableUpdateButton();
-			if (evt) evt.preventDefault();
-		},
-		
-		featureTypeChanged: function(evt)
-		{
-			var self = this;
-			if (evt) {
-				var val = $(evt.currentTarget).val();
-				if (val == this.colorType) return;
-				this.featureType = val;
-				this.enableUpdateButton();
-			}
-
-			this.$('.feature-type').each(function() {
-				if ($(this).val() == self.featureType) {
-					$(this).addClass('active');
-				} else {
-					$(this).removeClass('active');
-				}
-			});
-
-			this.$('.feature-settings').each(function() {
-				if ($(this).hasClass(self.featureType)) {
-					$(this).show();
-				} else {
-					$(this).hide();
-				}
-			});
-
-			if (evt) evt.preventDefault();
-		},
-
-		colorTypeChanged: function(evt)
-		{
-			var self = this;
-			if (evt) {
-				var val = $(evt.currentTarget).val();
-				if (val == this.colorType) return;
-				this.colorType = val;
-				this.enableUpdateButton();
-			}
-
-			this.$('.color-type').each(function() {
-				if ($(this).val() == self.colorType) {
-					$(this).addClass('active');
-				} else {
-					$(this).removeClass('active');
-				}
-			});
-
-			switch (this.colorType) {
-				case ColorType.SOLID: 
-					this.$('.color-gradient').hide();
-					this.$('.color-palette').hide();
-					this.$('.color-solid').show();
-					this.updateLegend(true);
-					break;
-				case ColorType.LINEAR_GRADIENT: 
-				  	this.$('.color-gradient').show();
-					this.$('.color-palette').hide();
-					this.$('.color-solid').hide();
-					this.updateLegend(true);
-				  	break;
-				case ColorType.PALETTE: 
-				  	this.$('.color-gradient').hide();
-					this.$('.color-palette').show();
-					this.$('.color-solid').hide();
-					this.updateLegend(true);
-				  	break;
-			}
-
-			if (evt) evt.preventDefault();
-		},
-
 		toggleLayerVisibility: function(pointCollectionId, state, hideCompletely)
 		{	
 			var self = this;
@@ -761,7 +585,6 @@ define([
 				} else {
 					this.visible = !this.visible;
 				}
-				this.enableUpdateButton();
 			}
 			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
 			this.updateLegend();

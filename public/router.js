@@ -4,24 +4,24 @@ define([
 	'backbone',
 	'views/homepage-view',
 	'views/header-view',
-	'views/sidebar-view',
 	'views/setup-view',
 	'views/map-ol-view',
 	'views/data-info-view',
+	'views/data-detail-view',
 	'views/map-info-view',
-	'views/data-inspector-view',
+	'views/map-layer-editor-view',
 	'views/data-legend-view',
 	'views/modal-view',
 	'views/share-view',
 	'collections/map-point-collection',
 	'models/map',
 	'models/point',
-
-
-], function($, _, Backbone, HomepageView, HeaderView, SideBarView, 
-	SetupView, MapOLView, DataInfoView, MapInfoView, DataInspectorView, 
+	'models/map_layer'
+], function($, _, Backbone, HomepageView, HeaderView, 
+	SetupView, MapOLView, DataInfoView, DataDetailView,
+	MapInfoView, MapLayerEditorView,
 	DataLegendView, ModalView, ShareView,
-	MapPointCollection, Map, Point) {
+	MapPointCollection, Map, Point, MapLayer) {
 	
 	var AppRouter = Backbone.Router.extend({
 
@@ -80,11 +80,13 @@ define([
 		    	self.route.apply(self, route);
 		    });
 
+		    this.map = null;
 			this.firstLoad = true;
 			this.pointCollections = {};
 			this.timeBasedPointCollections = {};
 			this.isRendered = false;
 			this.mapLayersInitialized = false;
+			this.mapLayerEditorViews = {};
 
 			this.settingsVisible = true;
 			this.graphVisible = false;
@@ -107,6 +109,9 @@ define([
 			_.bindAll(this, "updateMapLayer");
 		 	this.vent.bind("updateMapLayer", this.updateMapLayer);
 
+			_.bindAll(this, "showMapLayerEditor");
+		 	this.vent.bind("showMapLayerEditor", this.showMapLayerEditor);
+
 			_.bindAll(this, "toggleValFormatter");
 		 	this.vent.bind("toggleValFormatter", this.toggleValFormatter);
 
@@ -118,6 +123,12 @@ define([
 
 			_.bindAll(this, "updateVisibleDate");
 		 	this.vent.bind("updateVisibleDate", this.updateVisibleDate);
+
+			_.bindAll(this, "showDetailData");
+		 	this.vent.bind("showDetailData", this.showDetailData);
+
+			_.bindAll(this, "hideDetailData");
+		 	this.vent.bind("hideDetailData", this.hideDetailData);
 
 			this.isEmbedded = window != window.top;
 	    }, 
@@ -266,29 +277,39 @@ define([
 				case 'globe':						
 					break;
 			}
+
 			if (!self.mapInfo) {
-				$.ajax({
-					type: 'GET',
-					url: '/api/map/' + slug,
-					success: function(data) {
-						self.initMapInfo(data);
+				this.map = new Map({publicslug: slug});
+				this.map.fetch({
+					success: function(model, response, options) {
+						self.initMapInfo(model.attributes);
 						self.initMapView(mapViewName, center, zoom, viewBase, viewStyle);
 					},
-					error: function() {
+					error: function(model, xhr, options) {
 						console.error('failed to load map', slug);
 					}
 				});
 				return;
 			}
+
 			self.initMapView(mapViewName, center, zoom, viewBase, viewStyle);
 		},
 
 		initMapInfo: function(mapInfo) 
 		{
-			var self = this;
-			self.mapInfo = mapInfo;
-			for (var i = self.mapInfo.layers.length - 1; i >= 0; i--) {
-				var mapLayer = self.mapInfo.layers[i];
+			this.mapLayersById = {};
+			this.mapInfo = mapInfo;
+
+			for (var i = this.mapInfo.layers.length - 1; i >= 0; i--) {
+
+				this.mapLayersById[this.mapInfo.layers[i]._id] = 
+					new MapLayer(this.mapInfo.layers[i], {
+						map: this.map
+					});
+
+				// TODO: only use model
+
+				var mapLayer = this.mapInfo.layers[i];
 				mapLayer.sessionOptions = {
 					visible: mapLayer.options.visible
 				};
@@ -317,7 +338,7 @@ define([
 		{
 			var self = this;
 			var collection = this.pointCollections[pointCollectionId];
-			var mapLayer = this.getMapLayer(pointCollectionId);
+			var mapLayer = this.getMapLayerDeprecated(pointCollectionId);
 			mapLayer.sessionOptions.visible = state;
 			console.log('toggleLayerVisibility '+pointCollectionId, state, (state ? 'fetched: '+collection.visibleMapAreaFetched : ''));
 			if (state && !collection.visibleMapAreaFetched) {
@@ -389,21 +410,22 @@ define([
 
 			var mapEl = this.mapView.render().el;
 			$('#app').append(mapEl);
+			this.$mainEl = $(mapEl);
+			this.mainEl = this.$mainEl[0];
 			this.mapView.start(viewBase, viewStyle);
 
 			this.viewOptionsChanged(this.mapView);
 
 	        var snap = $('<div class="snap top" /><div class="snap right" />');
-			$(mapEl).append(snap);
+			this.$mainEl.append(snap);
 
-	        this.dataInfoView = new DataInfoView({vent: this.vent});
-			$(mapEl).append(this.dataInfoView.render().el);
+	        this.dataInfoView = new DataInfoView({vent: this.vent}).render();
+	        this.attachPanelView(this.dataInfoView);
 
 	        /*this.timelineView = new TimelineView({vent: this.vent});
 			$(mapEl).append(this.timelineView.render().el);*/
 
-	        this.mapInfoView = new MapInfoView({vent: this.vent, mapInfo: this.mapInfo});
-	        this.mapInfoView.render();
+	        this.mapInfoView = new MapInfoView({model: this.map, vent: this.vent, mapInfo: this.mapInfo}).render();
 
 			/*$(mapEl).append(this.mapInfoView.render().el);
 			$(this.mapInfoView.el).hide();*/
@@ -530,9 +552,6 @@ define([
 			}
 			
 			if (this.isMapAdmin()) {
-				this.sideBarView = new SideBarView({vent: this.vent});
-		        $('#app').append(this.sideBarView.render().el);
-		        $('#app').addClass('with-sidebar');
 				this.setupView = new SetupView({vent: this.vent, mapInfo: this.mapInfo}).render();
 				if (this.setupRoute) {
 					this.showSetupView();
@@ -567,7 +586,7 @@ define([
 				if (this.mapInfo.layers) {
 					for (var i = 0; i < this.mapInfo.layers.length; i++) {						
 						var pointCollectionId = this.mapInfo.layers[i].pointCollection._id;
-						var layer = this.getMapLayer(pointCollectionId);
+						var layer = this.getMapLayerDeprecated(pointCollectionId);
 			        	this.vent.trigger('toggleLayerVisibility', pointCollectionId, layer.sessionOptions.visible);
 					}
 				}
@@ -578,7 +597,7 @@ define([
 		{
 			var self = this;
 
-			var layer = this.getMapLayer(pointCollectionId);
+			var layer = this.getMapLayerDeprecated(pointCollectionId);
 			console.log('initMapLayer '+pointCollectionId, layer);
 
 			var mapArea = self.mapView.getVisibleMapArea();							
@@ -628,14 +647,64 @@ define([
 			});
 		},
 
+	    showDetailData: function(pointCollectionId, model, panelAnimation)    
+		{
+			if (!this.dataDetailView) {
+		        this.dataDetailView = new DataDetailView({vent: this.vent}).render();
+			}
+	        this.attachPanelView(this.dataDetailView);
+			this.dataDetailView.snapToView(this.dataInfoView, 'left', true)
+				.hide().show('fast');
+			this.dataDetailView.showDetailData(pointCollectionId, model);
+		},
+
+	    hideDetailData: function(pointCollectionId)
+		{
+			if (this.dataDetailView) {
+				this.dataDetailView.detach();
+			}
+		},
+
 		updateMapLayer: function(updatedLayer)
 		{
 			console.log('updateMapLayer', updatedLayer);
-			var layer = this.getMapLayer(updatedLayer.pointCollection._id);
+			var layer = this.getMapLayerDeprecated(updatedLayer.pointCollection._id);
 			for (var k in updatedLayer) {
 				layer[k] = updatedLayer[k];
 			}
 			this.vent.trigger('redrawMapLayer', layer);
+		},
+
+		showMapLayerEditor: function(layerId)
+		{
+			var self = this;
+			if (!this.mapLayerEditorViews[layerId]) {
+				this.mapLayerEditorViews[layerId] = new MapLayerEditorView({
+					vent: this.vent,
+					model: this.getMapLayer(layerId)
+				}).render();
+			}
+
+			for (var k in this.mapLayerEditorViews) {
+				if (layerId != this.mapLayerEditorViews[k].model.get('_id')) {
+					this.mapLayerEditorViews[k].detach();
+				} else {
+					if (!this.mapLayerEditorViews[k].$el.is(':visible')) {
+						this.attachPanelView(this.mapLayerEditorViews[k]);
+						this.mapLayerEditorViews[k].snapToView(this.dataInfoView, 'left', true)
+							.hide().show('fast');
+					} else {
+						this.mapLayerEditorViews[k].hide('fast', function() {
+							self.mapLayerEditorViews[k].detach();
+						});
+					}
+				}
+			}
+		},
+
+		attachPanelView: function(panelView)
+		{
+			this.$mainEl.append(panelView.el);
 		},
 
 		pollForNewPointCollection: function(pointCollectionId, interval) 
@@ -665,7 +734,7 @@ define([
 		updatePointCollectionAfterPolling: function(data) 
 		{
 			var pointCollectionId = data._id;
-			var layer = this.getMapLayer(pointCollectionId);
+			var layer = this.getMapLayerDeprecated(pointCollectionId);
 			layer.pointCollection = data;
 
 			if (data.status !== DataStatus.COMPLETE) {
@@ -697,7 +766,7 @@ define([
 		fetchMapLayer: function(pointCollectionId)
 		{
 			var self = this;
-			var layer = this.getMapLayer(pointCollectionId);
+			var layer = this.getMapLayerDeprecated(pointCollectionId);
 			var collection = this.pointCollections[pointCollectionId];
 
 			collection.setVisibleMapArea(this.mapView.getVisibleMapArea());
@@ -713,24 +782,34 @@ define([
 
 		},
 		
-		bindCollectionToMap: function(pointCollectionId)
+		createMapLayer: function(pointCollectionId)
 		{	
 			var self = this;
-			$.ajax({
-				type: 'POST',
-				url: '/api/bindmapcollection/' + this.mapInfo._id + '/' + pointCollectionId,
-				success: function(data) {
-					self.initMapInfo(data);
+			var layer = new MapLayer({
+				pointCollectionId: pointCollectionId
+			}, {
+				map: this.map
+			});
+			console.log('creating map layer', layer);
+			layer.save({}, {
+	    		success: function(model, response, options) {
+					self.initMapInfo(model.attributes);
 					self.initMapLayer(pointCollectionId);
-				},
-				error: function() {
-					console.error('failed to join map with collection');
-				}
+	    		},
+	    		error: function(model, xhr, options) {
+					console.error('failed to create map layer');
+	    		}
 			});	
 		},
-		
-		getMapLayer: function(pointCollectionId)
+
+		getMapLayer: function(layerId)
 		{
+			return this.mapLayersById[layerId];
+		},
+		
+		getMapLayerDeprecated: function(pointCollectionId)
+		{
+			// TODO: remove this, deprecated by pointCollectioId
 			for (var i = 0; i < this.mapInfo.layers.length; i++) {
 				if (pointCollectionId == this.mapInfo.layers[i].pointCollection._id) {
 					return this.mapInfo.layers[i];
@@ -744,13 +823,8 @@ define([
 				vent: this.vent,
 				collection: this.pointCollections[pointCollectionId], 
 				collectionId: pointCollectionId, 
-				mapLayer: this.getMapLayer(pointCollectionId)
+				mapLayer: this.getMapLayerDeprecated(pointCollectionId)
 			};
-
-			if (this.isMapAdmin()) {
-				var sideBarDataView = new DataInspectorView(viewOpts);
-				$('#dataContainer .accordion').append(sideBarDataView.render().el);
-			}
 
 			var dataLegendView = new DataLegendView(viewOpts);
 			var el = dataLegendView.render().el;
@@ -761,16 +835,10 @@ define([
 	});
 
 	var initialize = function() {
-
-		/*tpl.loadTemplates(['homepage', 'graph', 'setup', 'map-ol', 'map-gl', 'map-ge', 'header',
-			'sidebar','data-inspector', 'data-legend', 'chat', 'modal', 'add-data', 
-			'edit-data', 'data-library', 'data-info', 'map-info-modal', 'share', 'map-tour'/*, 'timeline'*/  /*],
-		    function () {*/
-		        app = new AppRouter();
-		        if (!Backbone.history.start({ pushState: true })) {
-			    	$('#app').html('page not found');
-		        }
-	/*		});*/
+		app = new AppRouter();
+		if (!Backbone.history.start({ pushState: true })) {
+			$('#app').html('page not found');
+		}
 	};
 
  	return {

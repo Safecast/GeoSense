@@ -36,7 +36,7 @@ define([
 		{
 			DataInspectorView.__super__.setParameters.call(this);
 
-			this.initGradientEditor();
+			//this.initGradientEditor();
 			this.initPaletteEditor();
 			this.featureTypeChanged();
 			this.colorTypeChanged();

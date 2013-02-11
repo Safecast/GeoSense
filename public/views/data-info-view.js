@@ -18,9 +18,6 @@ define([
 	    	
 		    this.template = _.template(templateHtml);	
 			this.vent = options.vent;
-			this.responseData = null;
-			this.dataTitle = '';
-			this.dataColor = '#ffffff';
 
 			_.bindAll(this, "showDetailData");
 		 	options.vent.bind("showDetailData", this.showDetailData);
@@ -36,7 +33,7 @@ define([
 
 	    compileDetailDataForModel: function(pointCollectionId, model)
 	    {
-			var mapLayer = app.getMapLayer(pointCollectionId);
+			var mapLayer = app.getMapLayerDeprecated(pointCollectionId);
 			var pointCollection = mapLayer.pointCollection;
 
 			var val = model.get('val');

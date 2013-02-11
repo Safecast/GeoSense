@@ -41,9 +41,8 @@ this.Point = mongoose.model('Point', new mongoose.Schema({
     importJob: { type: mongoose.Schema.ObjectId, ref: 'Job', required: false, index: 1 },
     loc: {type: [Number], index: '2d', required: true},
     val: {type: Number, index: 1},
-    altVal: [mongoose.Schema.Types.Mixed],
-    extra: mongoose.Schema.Types.Mixed,
     label: String,
+    description: String,
     url: String,
     datetime: {type: Date, index: 1},
     sourceId: {type: mongoose.Schema.Types.Mixed, index: 1},
@@ -68,7 +67,6 @@ this.Shape.schema.index({ws: '2d', en: '2d', shapeCollection: 1})
 this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
     color: {type: String, required: true},
     position: Number,
-    absPosition: Number,
     interpolation: String,
     title: String,
     description: String
@@ -81,19 +79,18 @@ this.ColorPalette = mongoose.model('ColorPalette', new mongoose.Schema({
 }));
 
 this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
-    visible: Boolean,
-    featureType: String,
-    colorType: String,
+    visible: {type: Boolean, required: true},
+    featureType: {type: String, required: true},
+    colorType: {type: String, required: true, default: config.ColorType.LINEAR_GRADIENT},
     //colorPalettes: {type: [ColorPalette.schema], index: 1},
     colors: [{
         color: {type: String, required: true},
-        position: Number,
-        absPosition: Number,
-        interpolation: String,
+        position: String,
+        interpolation: {type: String, enum: ['linear', 'threshold']},
         label: String
     }],
     reduction: String,
-    opacity: Number,
+    opacity: {type: Number, required: true},
     featureSizeAttr: mongoose.Schema.Types.Mixed,
     featureColorAttr: mongoose.Schema.Types.Mixed,
     datetimeFormat: String,
@@ -116,6 +113,10 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
         formatString: String
     }],*/
 }));
+
+this.LayerOptions.schema.path('colors').validate(function (value) {
+    return value.length > 0;
+}, 'At least one color is required');
 
 this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     title: String,
@@ -213,7 +214,7 @@ this.Map.schema.plugin(useTimestamps);
 
 /*
 Adjusts minVal, maxVal and color positions for all layers if 
-absPosition is defined for any color.
+isAbsolute is true for any color.
 
 This allows us to have colors with relative (normalized) positions between
 0 and 1, as well as colors with absolute positions, for which minVal and 
@@ -224,27 +225,29 @@ this.Map.prototype.adjustScales = function() {
     for (var i = 0; i < map.layers.length; i++) {
         var colors = map.layers[i].options.colors;
         var pointCollection = map.layers[i].pointCollection;
-        // adjust minVal and maxVal so that absPosition fits between them
+        // adjust minVal and maxVal so that abs position fits between them
         if (colors) {
             for (var j = 0; j < colors.length; j++) {
-                if (colors[j].absPosition != null) {
+                if (colors[j][colors[j].length - 1] != '%') {
                     map.layers[i].pointCollection.minVal = Math.min(
-                        map.layers[i].pointCollection.minVal, colors[j].absPosition);
+                        map.layers[i].pointCollection.minVal, parseFloat(colors[j].position));
                     map.layers[i].pointCollection.maxVal = Math.max(
-                        map.layers[i].pointCollection.maxVal, colors[j].absPosition);
+                        map.layers[i].pointCollection.maxVal, parseFloat(colors[j].position));
                 }
             }
-            // for each color, calculate new position if absPosition is set
-            for (var j = 0; j < colors.length; j++) {
-                if (colors[j].absPosition != null) {
-                    console.log(colors[j].absPosition, pointCollection.minVal, pointCollection.maxVal);
-                    var p = (colors[j].absPosition - pointCollection.minVal) / (pointCollection.maxVal - pointCollection.minVal);
+            // for each color, calculate new position if isAbsolute
+/*            for (var j = 0; j < colors.length; j++) {
+                if (colors[j][colors[j].length - 1] != '%') {
+                    var p = (parseFloat(colors[j].position) - pointCollection.minVal) / (pointCollection.maxVal - pointCollection.minVal);
                     //colors[j].position = Math.max(0, Math.min(p, 1)); // not necessary since minVal and maxVal are adjusted
                     colors[j].position = p;
+                } else {
+                    colors[j].position = parseFloat(colors[j].position);
                 }
             }
             // sort by position
             colors.sort(function(a, b) { return (a.position - b.position) });
+            */
         }
     }
 }
@@ -273,4 +276,36 @@ this.Comment = mongoose.model('Comment', new mongoose.Schema({
     text: String,
     date: Date,
 }));
+
+
+/*
+
+this.Feature = mongoose.model('Feature', new mongoose.Schema({
+    FeatureCollection: { type: mongoose.Schema.ObjectId, ref: 'FeatureCollection', required: true, index: 1 },
+    bbox: {type: Array, index: '2d'},
+    geometry: {
+        type: {type: String, enum: ['Point', 'Polygon']},
+        coordinates: {type: Array, index: '2d'},
+        properties: mongoose.Schema.Types.Mixed
+    }
+}));
+
+// problem: can only index one- [] or two-dimensional [[]] arrays.
+
+> db.features.ensureIndex({"geometry.coordinate": "2d"})
+> db.features.save({geometry: {type: "Point", coordinate: [[1,1], [1,1]]}})
+> db.features.save({geometry: {type: "Point", coordinate: [[[1,1], [1,1]]]}})
+geo values have to be numbers: { 0: [ 1.0, 1.0 ], 1: [ 1.0, 1.0 ] }
+
+
+/*
+
+
+FeatureCollection,
+  "features": []
+
+
+*/
+
+
 

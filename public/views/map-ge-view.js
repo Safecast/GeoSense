@@ -23,9 +23,6 @@ define([
 			_.bindAll(this, "updateViewStyle");
 		 	options.vent.bind("updateViewStyle", this.updateViewStyle);
 		
-			_.bindAll(this, "redrawMap");
-		 	options.vent.bind("redrawMap", this.redrawMap);
-					
 			Feature = OpenLayers.Feature.Vector;
 			Geometry = OpenLayers.Geometry;
 			Rule = OpenLayers.Rule;

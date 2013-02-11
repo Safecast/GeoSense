@@ -5,12 +5,14 @@
 require.config({
 	paths: {
         jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
-    	underscore: 'lib/underscore/underscore',
+    	underscore: 'lib/underscore/underscore-min',
     	backbone: 'lib/backbone/backbone',
         bootstrap: 'lib/bootstrap/js/bootstrap.min', 
         d3: 'lib/d3/d3.v2.min',
     	text: 'lib/require/text',
-        locale: 'locale/locale.en'
+        locale: 'locale/locale.en',
+        deepextend: 'lib/backbone-deep-model/lib/underscore.mixin.deepExtend',
+        deepmodel: 'lib/backbone-deep-model/src/deep-model'
   	},
 
     shim: {
@@ -23,6 +25,9 @@ require.config({
         },
         'd3': {
             exports: 'd3'
+        },
+        'deepextend': {
+            deps: ['underscore']
         }
     }
 
@@ -31,16 +36,17 @@ require.config({
 require([
 	// Load our app module and pass it to our definition function
 	'jquery',
+    'underscore',
+    'backbone',
     'app',
     'jqueryui',
     'lib/jquery/jquery.color',
     'lib/jquery/jquery.glowing',
     'lib/jquery/jquery.miniColors.min',
     'lib/colorpicker/js/colorpicker',
-    'lib/gradient-editor/gradient-editor',
     'bootstrap',
     'locale'
-], function($, App, ui) {
+], function($, _, Backbone, App, ui) {
 	// The "app" dependency is passed in as "App"
 	App.initialize();
 });

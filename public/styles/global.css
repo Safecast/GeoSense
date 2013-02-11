@@ -84,7 +84,9 @@ a {
 	cursor: pointer;
 }
 
-.half-opacity { -moz-opacity:.50 !important; filter:alpha(opacity=50) !important; opacity:.50 !important; }
+.half-opacity { 
+	-moz-opacity:.50 !important; filter:alpha(opacity=50) !important; opacity:.50 !important; 
+}
 
 .micro {
 	font-size: 11px;
@@ -109,128 +111,31 @@ h1 {
 }
 
 .state-indicator {
-	width: 16px;
-	height: 16px;
 	display: none;
 }
 
 .state-indicator.loading {
-	background-image:url('../assets/loader.gif');
-	margin-top: -1px;
-	display: block;
+	background: url('../assets/loader.gif') no-repeat 50% 50%;
+	display: inline-block;
 }
 
 
-.panel
-{
-	z-index:1000;
-	position:absolute;
-	top:15px;
-	right:15px;
-	padding: 36px 20px 0 20px;
-	box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, .2);
-	background-color:rgba(100,100,100,.8);
-	border-color:#222;
-	border-radius:8px;
-	color: #ddd;
-	-moz-border-radius:8px;
-	-webkit-border-radius:8px;
-	width: 300px;
-	overflow: hidden;
-	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
-}
-
-.map-style-dark .panel {
-	color: #aaa;
-	background-color:rgba(0,0,0,.5);
-	text-shadow:rgba(0,0,0,.8) 1px 1px 0px;
-}
-
-.panel h2 {
-	color: white;
-	background-color:rgba(0,0,0,.5);
-}
-
-.panel.timeline {
-	width: auto;
-	top: auto;
-	right: 0px;
-	left: 0px;
-	bottom: 0px;
-	background-color:rgba(60,60,60,1);
-}
-
-.panel.timeline .graph {
-	height: 300px;
-	width: 100%;
-}
-
-.panel.map-tour {
-	width: 600px;
-	top: auto;
-	right: auto;
-	left: 80px;
-	bottom: 40px;
-}
-
-.panel.map-tour .btn.next {
-	float: right;
-}
-
-.panel.map-tour a.close {
-	display: none;
-}
-
-.panel.map-tour .step-buttons, .panel.map-tour .step-body {
-	margin-bottom: 1em;
-}
-
-
-.panel.data-info {
-	display: none;
-	width: 222px;
-}
-
-.panel.data-info .detail {
-	display: none;
-}
-
-.panel .accordion-heading {
-	position: relative;
-}
-
-.panel .accordion-heading .accordion-toggle {
-	padding: 0 0 .25em 0;
-}
-
-.panel .accordion-group {
-	border: none;
-	width: 222px;
-	margin: 0;
-	padding: 0px;
-}
-
-.panel .accordion-body-content {
-	padding-bottom: 20px;
-}
-
-.panel.extended, .panel.extended .accordion-group {
-	width: 444px;
-}
-
-.panel .state-indicator.loading {
-	background-image:url('../assets/loader-light.gif');
-}
 
 
 h2,
-h3 {
+h3, 
+fieldset label {
 /*	font-family: OswaldLight,sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
 	
 	font-size:15pt;
 	font-weight: bold;
 	color: #353535;
+}
+
+fieldset label {
+	font-size:12pt;
+	color:#555;
 }
 
 h4, h5, .condensed {
@@ -281,90 +186,6 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	background-image:url('../assets/homepage/loader.gif');
 	background-position:center center;	
 	background-repeat:no-repeat;
-}
-
-.panel .panel-header {
-	width: 100%;
-	position: absolute;
-	top: 0px;
-	right: 0px;
-	left: 0px;
-}
-
-.panel .panel-body {
-	padding-top: 10px;
-}
-
-.panel .panel-header .frame {
-	background-color:rgba(50, 50, 50, .5);
-	border-radius: 6px;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
-	margin: 3px;
-	cursor: move;
-}
-
-.panel .panel-header h3 {
-	float: left;
-	margin: 0px;
-	color: #ccc;
-	font-size: 13px;
-	font-weight: normal;
-	padding: 0 15px 0 16px;
-	line-height: 27px;
-}
-
-.panel .panel-header .buttons {
-	float: right;
-	list-style: none;
-	margin: 4px 4px 0 0;
-}
-
-.panel .panel-header .buttons li {
-	float: right;
-	margin-left: .5em;
-	line-height: 27px;
-}
-
-.panel .panel-header a, .panel a .in-out {
-	font-weight: bold;
-	color: white;
-	width: 16px;
-	height: 16px;
-	display: inline-block;
-	background-image: url(../assets/panel-buttons.png);
-}
-
-.panel .panel-header .buttons a span {
-	display: none;
-}
-
-.panel .panel-header .buttons a.extend {
-	background-position: 0px top;
-}
-
-.extended .panel .panel-header .buttons a.extend {
-	background-position: -16px top;
-}
-
-.panel .panel-header .buttons a.collapse {
-	background-position: -32px top;
-}
-
-.panel.collapsed .panel-header .buttons a.collapse {
-	background-position: -48px top;
-}
-
-.panel a .in-out.in {
-	background-position: -64px top;
-}
-
-.panel a .in-out.out {
-	background-position: -80px top;
-}
-
-.panel .panel-header .buttons a:hover, .panel a:hover .in-out {
-	background-position-y: bottom !important;
 }
 
 .snap {

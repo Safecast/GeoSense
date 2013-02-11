@@ -160,7 +160,7 @@ var MapReduceKey = {
 			var stepVal = val - val % this.step;
 			return [
 				stepVal, 
-				{step: Math.round((stepVal - this.min) / this.step), val: stepVal}
+				{x: Math.round((stepVal - this.min) / this.step)}
 			];
 		};
 		this.name = 'hist-'+steps;

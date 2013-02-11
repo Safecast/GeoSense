@@ -34,6 +34,37 @@ define([
 			this.$('h3').html(string);
 		},
 
+		snapToView: function(otherView, side, resetOther)
+		{
+			switch (side) {
+				case 'right':
+					this.$el.css('left', 
+						otherView.$el.position().left + otherView.$el.outerWidth()
+						+ 'px');
+					break;
+				case 'left':
+					this.$el.css('right', 
+						$(otherView.el.parentNode).innerWidth() - otherView.$el.position().left
+						+ 'px');
+					break;
+			}
+			if (resetOther) {
+				this.$el.css('top', otherView.$el.position().top + 'px');
+			}
+
+			return this;
+		},
+
+		show: function(speed) 
+		{
+			return this.$el.show(speed);
+		},
+
+		hide: function(speed)
+		{
+			return this.$el.hide(speed);
+		},
+
 	    render: function() 
 	    {
 			$(this.el).html(this.template());
@@ -45,18 +76,22 @@ define([
 					$(this).css('bottom', 'auto');
 				},
 				stop: function() {
-					var right = $(this).position().left + $(this).outerWidth();				
-					if (right == $('.snap.right').position().left) {
-						// re-dock to right edge
-						$(this).css('left', 'auto');
-					}
+					var el = this,
+						right = $(this).position().left + $(this).outerWidth();
+					$('.snap.right').each(function() {
+						if (right == $(this).position().left) {
+							console.log(this, $(this).position());
+							// re-dock to right edge
+							$(el).css('left', 'auto');
+						}
+					});
 				},
 
 				snap: ".snap, .panel", snapMode: "outer"
 			});
 			$(this.el).css('position', 'absolute'); // draggable sets it to relative
 
-			this.$('a.extend').click(function() {
+			this.$('a.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			
 				if ($(self.el).is('.extended')) {
 					self.setPanelState(true);
@@ -65,18 +100,23 @@ define([
 				return false;
 			});
 
-			this.$('a.collapse').click(function() {
+			this.$('a.panel-collapse').click(function() {
 				self.setPanelState();	
 				return false;
 			})
 
-			this.$('a.close').click(function() {
-				$(self.el).hide();
+			this.$('a.panel-close').click(function() {
+				self.detach();
 				return false;
 			});
 
 	        return this;
-	    }
+	    },
+
+		detach: function() 
+		{
+			this.$el.detach();
+		}
 
 	});	
 

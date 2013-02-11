@@ -2,23 +2,15 @@
 {
 }
 
-.modal h3
-{
-	font-size:12pt;
-	color:#555;
-}
-
 .modal input, .modal textarea
 {
 	width: 480px;
-	margin-bottom:10px;
-	font-size: 12pt;
-	color: #999;
 }
 
 .modal .urls input {
 	font-size: 16pt;
 	height: 40px;
+	color: #999;
 }
 
 .modal .urls input, .modal .urls textarea {

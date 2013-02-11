@@ -62,7 +62,7 @@ var ImportAPI = function(app) {
 	}
 }
 
-var REGEX_IS_REGULAR_MODULE = /^[a-z][a-z0-9_\/]*$/;
+var REGEX_IS_REGULAR_MODULE = /^[a-z][a-z0-9_\/\.]*$/;
 
 /**
 required params:
@@ -156,7 +156,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	console.log('import params', params);
 	var Converter, converter, format, parser;
 
-	if (params.fields) {
+	if (params.fields || params.converter == undefined) {
 		console.log('Initializing converter with fieldDefs');
 		Converter = function() { return conversion.PointConverterFactory(params.fields) };
 	} else {
@@ -181,8 +181,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	}
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
-		format = require('./formats/' 
-			+ params.format);
+		format = require('./formats/' + params.format);
 	} else {
 		console.log('Loading custom format: '+params.format);
 		format = require(params.format);
@@ -243,7 +242,6 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 
 	    	var newCollectionId = collection.get('_id');
 	    	console.success('* saved '+collection.name+' "'+collection.get('title')+'" = '+newCollectionId);
-	    	console.log(collection);
 
 			var job = new models.Job({status: config.JobStatus.ACTIVE, type: config.JobType.IMPORT});
 			job.save(function(err, job) {
@@ -367,7 +365,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 				function makeSaveHandler(point, self) 
 				{
 					return function(err, point) {
-						if (err) console.error(err.message);
+						if (err) {
+							console.error('Error saving point', err);
+						}
 				    	debugStats('on save', 'success', (point ? point.get('_id') : ''));
 						point = null;
 						numSaving--;
@@ -445,7 +445,6 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							point.pointCollection = point.shapeCollection = collection;
 							point.created = new Date();
 							point.modified = new Date();
-							console.log(point);
 							if (maxVal == undefined || maxVal < point.get('val')) {
 								maxVal = point.get('val');
 							}
@@ -586,7 +585,7 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 	}
 	var pointCollectionId = params.append;
 	console.info('*** Synchronizing collection ***', pointCollectionId);
-	PointCollection.findOne({_id: pointCollectionId}, function(err, collection) {
+	models.PointCollection.findOne({_id: pointCollectionId}, function(err, collection) {
 		if (!utils.validateExistingCollection(err, collection, callback)) return;
 		var originalParams = collection.get('importParams');
 		if (params.url || params.path) {
@@ -605,7 +604,7 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
 	if (!params) {
 		params = {};
 	}
-	PointCollection.find({sync: true, status: DataStatus.COMPLETE}, function(err, collections) {
+	models.PointCollection.find({sync: true, status: DataStatus.COMPLETE}, function(err, collections) {
 		console.info('*** Collections to sync: ' + collections.length);
 		if (err) {
 			if (callback) {
@@ -687,11 +686,11 @@ ImportAPI.prototype.cli = {
 	'list-collections': function(params, callback, showHelp) 
 	{
 		if (utils.connectDB()) {
-			PointCollection.find({}).run(function(err, docs) {
+			models.PointCollection.find({}).run(function(err, docs) {
 				if (!err) {
 					console.success('Existing collections:', docs.length);
 					docs.forEach(function(doc) {
-						var dump = {_id: doc._id, title: doc.title, status: doc.status, "...": "..."};
+						var dump = {_id: doc._id, title: doc.title, status: doc.status};
 						console.log('*', dump);
 					});
 				}

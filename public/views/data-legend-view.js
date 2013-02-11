@@ -13,6 +13,7 @@ define([
 		
 	    events: {
 			'click .visibility' : 'visibilityChanged',
+			'click .show-map-layer-editor': 'showMapLayerEditorClicked'
 	    },
 
 	    initialize: function(options) {
@@ -54,6 +55,12 @@ define([
 					}
 				}
 			}
+		},
+
+		showMapLayerEditorClicked: function(event)
+		{
+			this.vent.trigger('showMapLayerEditor', this.mapLayer._id);
+			return false;
 		}
 
 	});

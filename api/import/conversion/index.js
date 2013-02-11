@@ -37,7 +37,7 @@ var Cast = {
 
 	Number: function(value, options) {
 		var num = Number(value);
-		if (!isNaN(num) && (!options.ignoreZero || num != 0)) {
+		if (!isNaN(num) && (!options.skipZero || num != 0)) {
 			return num;
 		}
 	},
@@ -45,7 +45,7 @@ var Cast = {
 	String: function(value, options) {
 		if (value != undefined) {
 			var str = '' + value;
-			if (!options.ignoreEmpty || value != '') {
+			if (!options.skipEmpty || value != '') {
 				return str;
 			}
 		}
@@ -82,9 +82,9 @@ var FieldType = {
 				var num = Cast.Number(this.get(fromFields[i]), options);
 				if (num != undefined) {
 					if (options.min != undefined && num < options.min) {
-						return new ConversionError('Ignoring low number: ' + num);
+						return new ConversionError('Skipping low number: ' + num);
 					} else if (options.max != undefined && num > options.max) {
-						return new ConversionError('Ignoring high number:' + num);
+						return new ConversionError('Skipping high number:' + num);
 					} else {
 						return num;
 					}
@@ -102,6 +102,9 @@ var FieldType = {
 			var arr = [];
 			for (var i = 0; i < l; i++) {
 				var v = this.get(fromFields[i]);
+				if (Array.isArray(v) && l == 1) {
+					return v;
+				}
 				if (typeof v == 'string' && l == 1) {
 					if (v != undefined) {
 						arr = Cast.Array(v.split(ARRAY_SEPARATORS));
@@ -137,10 +140,10 @@ var FieldType = {
 				date = Cast.Date(numbers);
 			}
 			if (date) {
-				if (!options.ignoreFuture || date <= new Date()) {
+				if (!options.skipFuture || date <= new Date()) {
 					return date;			
 				} else {
-					return new ConversionError('Ignoring future date: ' + date);
+					return new ConversionError('Skipping future date: ' + date);
 				}
 			}
 		};
@@ -157,8 +160,8 @@ var FieldType = {
 				if (str != undefined) {
 					if (!options.format) {
 						return str;
-					} else if (options.ignoreEmpty && str == '') {
-						return new ConversionError('Ignoring empty string');
+					} else if (options.skipEmpty && str == '') {
+						return new ConversionError('Skipping empty string');
 					} else {
 						strings[fromFields[i]] = str;
 					}
@@ -174,17 +177,17 @@ var FieldType = {
 		var options = options || {};
 		var arrayOptions = _.cloneextend(options, {
 			cast: 'Number',
-			ignoreZero: false
+			skipZero: false
 		});
 		var toArray = FieldType.Array(fromFields, arrayOptions);
 		return function() {
 			var arr = toArray.call(this);
 			if (arr && arr.length == 2) {
 				arr = [clamp180(arr[0]), clamp180(arr[1])];
-				if (!options.ignoreZero || (arr[0] != 0 && arr[1] != 0)) {
+				if (!options.skipZero || (arr[0] != 0 && arr[1] != 0)) {
 					return arr;
 				} else {
-					console.warn('Ignoring LngLat [0,0]');
+					return new ConversionError('Skipping LngLat [0,0]');
 				}
 			}
 		}
@@ -228,9 +231,9 @@ fieldDefs = {
 		'options': { // all are optional
 			'min': <Number>, // for Number
 			'max': <Number>, // for Number
-			'ignoreEmpty': <Boolean>, // for Number
+			'skipEmpty': <Boolean>, // for Number
 			'igoreZero': <Boolean>, // for String
-			'ignoreFuture': <Boolean>, // for Date
+			'skipFuture': <Boolean>, // for Date
 			'cast': '<field-type>' // for Array elements
 		}
 	},
@@ -274,7 +277,16 @@ module.exports = {
 		var errors = {},
 			valid = true;
 		if (typeof fieldDefs != 'object') {
-			fieldDefs = {};
+			fieldDefs = {
+				loc: {
+					type: 'LngLat',
+					fromFields: 'loc'
+				},
+				val: {
+					type: 'Number',
+					fromFields: 'val'
+				}
+			};
 		}
 
 		for (var toField in fieldDefs) {

@@ -1,5 +1,6 @@
 @import url("reset.css");
 @import url("global.css");
+@import url("panels.css");
 @import url("../assets/type/alternategothicfs_no3/stylesheet.css");
 
 @import url("homepage.css");
@@ -9,11 +10,13 @@
 @import url("modal.css");
 @import url("add-data.css");
 @import url("sidebar.css");
-@import url("data-inspector.css");
+/*@import url("data-inspector.css");*/
 @import url("chat.css");
 @import url("data-library.css");
 @import url("graph.css");
 @import url("data-info.css");
+@import url("data-detail.css");
+@import url("map-layer-editor.css");
 /*@import url("timeline.css");*/
 
 /*@import url("rickshaw.min.css");*/

@@ -7,7 +7,8 @@ var	models = require("../../models.js"),
 	utils = require('../../utils.js'),
 	MapReduceKey = require('./key.js').MapReduceKey,
 	mapReduceScopeFunctions = require('./key.js').scopeFunctions,
-	console = require('../../ext-console.js');
+	console = require('../../ext-console.js'),
+	_ = require('cloneextend');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
@@ -16,136 +17,101 @@ var Point = models.Point,
 	handleDbOp = utils.handleDbOp;
 
 var opts = {};
-for (var k in config.REDUCE_SETTINGS.DB_OPTIONS) {
-	opts[k] = config.REDUCE_SETTINGS.DB_OPTIONS[k];
+for (var k in config.MAPREDUCE_SETTINGS.DB_OPTIONS) {
+	opts[k] = config.MAPREDUCE_SETTINGS.DB_OPTIONS[k];
 }
 
 var runMapReduce = function(collection, reduced_collection, valueFields, mapReduceKeys, indexes, options, callback) 
 {
 	var map = function() 
 	{
-		var keyValues = [];
 		var e = {count: 1};
+
+		// get the combined emit key 
+		var keyValues = [];
 		for (var k in mapReduceKeys) {
-			//var f = mapReduceKeys[k].get || mapReduceKeys[k];
-			var f = mapReduceKeys_code[k];
+			// get the emit key from the MapReduceKey's get() method
+			// var f = mapReduceKeys[k].get;
+			var f = mapReduceKeys_code[k]; 
 			var keyValue = f.call(mapReduceKeys[k], this[k], this);
 			if (!keyValue) return;
+
 			if (keyValue instanceof Array) {
+				// if the return value can either be an Array, the first element is the emit key and the second
+				// is an arbitrary value to be inserted into the data
 				keyValues.push(keyValue[0]);
 				e[k] = keyValue[1];
 			} else {
+				// otherwise the the emit key is inserted into the data
 				keyValues.push(keyValue);
 				e[k] = keyValue;
 			}
 		}
 		var key = keyValues.join('|');
+
+		// copy all value fields for aggregation
 		for (var k in valueFields) {
 			var valueField = valueFields[k];
 			if (this[valueField] != null) {
-				if (this[valueField] instanceof Array) {
-					e[valueField] = [];
-					for (var v = 0; v < this[valueField].length; v++) {
-						e[valueField][v] = {
-							min: this[valueField][v],
-							max: this[valueField][v]
-						};
-						if (isNumber(this[valueField][v]) || valueField == 'extra') {
-							e[valueField][v].sum = this[valueField][v];
-						}
-					}
-				} else {
-					e[valueField] = {
-						min: this[valueField],
-						max: this[valueField]
-					};
-					if (isNumber(this[valueField]) || valueField == 'extra') {
-						e[valueField].sum = this[valueField];
-					}
+				if (!e[valueField]) {
+					// a value field might also be an emit key field and would be populated with
+					// the value from the MapReduceKey's get() 
+					e[valueField] = {};
+				}
+				// the min and max fields are set to the field's value
+				e[valueField].min = this[valueField];
+				e[valueField].max = this[valueField];
+				// if the field is a number, it can be summed and averaged
+				if (isNumber(this[valueField])) {
+					e[valueField].sum = this[valueField];
 				}
 			}
 		}
+
 		if (stats) {
 			stats.running++;
 		}
+
 		emit(key, e);
 	};
 
 	var reduce = function(key, values) 
 	{
+		// initialize return object
 		var reduced = {count: 0};
+		// copy all emit key values from first element
 		for (var k in mapReduceKeys) {
 			reduced[k] = values[0][k];
 		}
+		// copy all value fields from first element
 		for (var k in valueFields) {
 			var valueField = valueFields[k];
 			if (values[0][valueField] != null) {
-				if (values[0][valueField] instanceof Array) {
-					reduced[valueField] = [];
-					for (var v = 0; v < values[0][valueField].length; v++) {
-						reduced[valueField][v] = {
-							min: null,
-							max: null
-						};
-						if (values[0][valueField][v].sum != null) {
-							reduced[valueField][v].sum = 0;
-						}
-					}
-				} else {
-					if (valueField == 'extra') {
-						reduced[valueField] = {
-							min: {},
-							max: {}
-						};
-						if (values[0][valueField].sum != null) {
-							reduced[valueField].sum = {};
-						}
-					} else {
-						reduced[valueField] = {
-							min: null,
-							max: null
-						};
-						if (values[0][valueField].sum != null) {
-							reduced[valueField].sum = 0;
-						}
-					}
+				reduced[valueField] = {};
+				// clone all fields so as not to create a reference 
+				for (var vk in values[0][valueField]) {
+					reduced[valueField][vk] = values[0][valueField][vk];
+				}
+				// reset min and max since they need to be populated in 
+				// the forEach below
+				reduced[valueField].min = null;
+				reduced[valueField].max = null;
+				// if the field is meant to be summed, reset the sum
+				if (values[0][valueField].sum != null) {
+					reduced[valueField].sum = 0;
 				}
 			}
 		}
 
 		values.forEach(function(doc) {
+			// add count from reduced document to total count
 			reduced.count += doc.count;
+			// iterate all value fields and determine min, max and sum if appicable
 			for (var k in valueFields) {
 				var valueField = valueFields[k];
 				var r = reduced[valueField];
 				if (r != null) {
-					if (r instanceof Array) {
-						for (var v = 0; v < r.length; v++) {
-							if (doc[valueField][v].sum != null) {
-								r[v].sum += doc[valueField][v].sum;
-							}
-							if (r[v].min == null || r[v].min > doc[valueField][v].min) r[v].min = doc[valueField][v].min;
-							if (r[v].max == null || r[v].max < doc[valueField][v].max) r[v].max = doc[valueField][v].max;
-						}
-					} else if (valueField == 'extra') {
-						for (var objKey in doc[valueField].min) {
-							var vMin = doc[valueField].min[objKey];
-							var vMax = doc[valueField].max[objKey];
-							if (r.min[objKey] == undefined || r.min[objKey] > vMin) r.min[objKey] = vMin;
-							if (r.max[objKey] == undefined || r.max[objKey] < vMax) r.max[objKey] = vMax;
-							if (doc[valueField].sum != null) {
-								var vSum = doc[valueField].sum[objKey];
-								if (isNumber(vSum)) {
-									if (!r.sum[objKey]) {
-										r.sum[objKey] = 0;
-									}
-									r.sum[objKey] += vSum;
-								} else {
-									delete r.sum[objKey];
-								}
-							}
-						}
-					} else if (doc[valueField] != undefined) {
+					if (doc[valueField] != undefined) {
 						if (doc[valueField].sum != null) {
 							r.sum += doc[valueField].sum;
 						}
@@ -159,36 +125,25 @@ var runMapReduce = function(collection, reduced_collection, valueFields, mapRedu
 		if (stats && stats.done != stats.running) {
 			updateStats(stats);
 		}
+
 		return reduced;
 	};
 
 	var finalize = function(key, value) 
 	{
+		// determine average
 		for (var k in valueFields) {
 			var valueField = valueFields[k];
 			if (value[valueField] != null) {
-				if (value[valueField] instanceof Array) {
-					for (var v = 0; v < value[valueField].length; v++) {
-						if (value[valueField][v].sum != null) {
-							value[valueField][v].avg = value[valueField][v].sum / value.count;
-						}
-					}
-				} else {
-					if (value[valueField].sum != null) {
-						if (valueField == 'extra') {
-							value[valueField].avg = {};
-							for (var objKey in value[valueField].sum) {
-								value[valueField].avg[objKey] = value[valueField].sum[objKey] / value.count;
-							}
-						} else {
-							value[valueField].avg = value[valueField].sum / value.count;
-						}
-					}
+				if (value[valueField].sum != null) {
+					value[valueField].avg = value[valueField].sum / value.count;
 				}
 			}
 		}
+
 		return value;
 	};
+
 	if (!valueFields) {
 		valueFields = ['val'];
 	}
@@ -298,7 +253,7 @@ var runMapReduceForPoints = function(collectionId, mapReduceKeys, opts, callback
 
 	var valueFields = opts.valueFields;
 	if (!valueFields) {
-		valueFields = ['val', 'altVal', 'label', 'extra'];
+		valueFields = ['val', 'label', 'description'];
 		if (!mapReduceKeys['datetime']) {
 			valueFields.push('datetime');
 		}
@@ -364,6 +319,10 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 	if (!params) {
 		params = {};
 	}
+	if (!params.options) {
+		params.options = config.MAPREDUCE_SETTINGS.OPTIONS;
+	}
+	console.log('mapReduce with params', params);
 	Job.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE}, function(err, job) {
 		if (job && job.status != config.JobStatus.IDLE) {
 			// tmp
@@ -380,12 +339,12 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 			if (!utils.validateExistingCollection(err, collection, callback)) return;
 			job.save(function(err, job) {
 				var opts = {};
-				for (var k in config.REDUCE_SETTINGS.DB_OPTIONS) {
-					opts[k] = config.REDUCE_SETTINGS.DB_OPTIONS[k];
+				for (var k in config.MAPREDUCE_SETTINGS.DB_OPTIONS) {
+					opts[k] = config.MAPREDUCE_SETTINGS.DB_OPTIONS[k];
 				}
 
 				opts.query = {};
-				var incremental = collection.lastReducedAt;
+				var incremental = collection.lastReducedAt && !params.rebuild;
 				opts.removeFirst = !incremental;
 
 				//var statsTotal = db.points.count(opts.query ... and pointCollection) * (config.NUM_ZOOM_LEVELS + numHistograms);
@@ -408,25 +367,28 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 					}
 
 					for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
-						mapReduceCalls.push([
-							'*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***', 
-							{
-								pointCollection: new MapReduceKey.Copy(), 
-								val: new MapReduceKey.Histogram(collection.minVal, collection.maxVal, config.HISTOGRAM_SIZES[i]),
-							}
-						]);
+						if (params.options.histogram) {
+							mapReduceCalls.push([
+								'*** reducing for histogram = '+config.HISTOGRAM_SIZES[i]+' ***', 
+								{
+									pointCollection: new MapReduceKey.Copy(), 
+									val: new MapReduceKey.Histogram(collection.minVal, collection.maxVal, config.HISTOGRAM_SIZES[i]),
+								}
+							]);
+						}
 					}
 
 					if (!collection.reduce || collection.gridSize) {
-						mapReduceCalls.push([
-							'*** creating unreduced copy of original ***', 
-							{
-								pointCollection: new MapReduceKey.Copy(), 
-								loc: new MapReduceKey.LocGrid(0)
-							}
-						]);
+						if (params.options.unreduced) {
+							mapReduceCalls.push([
+								'*** creating unreduced copy of original ***', 
+								{
+									pointCollection: new MapReduceKey.Copy(), 
+									loc: new MapReduceKey.LocGrid(0)
+								}
+							]);
+						}
 					} 
-
 
 					if (collection.reduce) {
 
@@ -434,15 +396,17 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 							var grid_size = config.GRID_SIZES[g];
 							if ((!collection.gridSize || grid_size > collection.gridSize) && (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
 
-								mapReduceCalls.push([
-									'*** MapReduce for zoom = '+g+' ***', 
-									{
-										pointCollection: new MapReduceKey.Copy(), 
-										loc: new MapReduceKey.LocGrid(grid_size)
-									}
-								]);
+								if (params.options.grid) {
+									mapReduceCalls.push([
+										'*** MapReduce for zoom = '+g+' ***', 
+										{
+											pointCollection: new MapReduceKey.Copy(), 
+											loc: new MapReduceKey.LocGrid(grid_size)
+										}
+									]);
+								}
 					
-								if (config.REDUCE_SETTINGS.TIME_BASED && collection.timeBased) {
+								if (params.options.timebased && collection.timeBased) {
 									mapReduceCalls.push([
 										'*** MapReduce for time-based zoom = '+g+' ***', 
 										{
@@ -531,11 +495,23 @@ MapReduceAPI.prototype.cli = {
 	mapreduce: function(params, callback, showHelp) 
 	{
 		var help = "Usage: node manage.js mapreduce [params]\n"
-			+ "\nRuns MapReduce for currently unreduced collections.\n";
+			+ "\nRuns MapReduce for currently unreduced collections.\n"
+			+ "\nOptional Parameters:\n"
+			+ '\n    --options "[grid],[timebased],[unreduced],[histogram]"\n'
+			+ '          Performs selective MapReduce only of the entered types.\n'
+			+ '\n    --rebuild\n'
+			+ '          Force complete rebuild even if MapReduce was already completed.\n'
 
 		if (!showHelp && utils.connectDB()) {
 			if (params._.length) {
 				params.pointCollectionId = params._[1];
+			}
+			if (params.options) {
+				var split = (params.options + '').split(',');
+				params.options = {};
+				for (var i = 0; i < split.length; i++) {
+					params.options[split[i]] = true; 
+				}
 			}
 			if (params.pointCollectionId) {
 				this.mapReduce(params, null, null, callback);

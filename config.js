@@ -23,8 +23,8 @@ var config = {
 		visible: true,
 		featureType: 'C',
 		colorType: 'L',
-		colors: [{position: 0, color: '#00C9FF'}, {position: 1.0, color: '#81ffff'}],
-		opacity: null
+		colors: [{position: '0%', color: '#00c9ff'}, {position: '100%', color: '#81ffff'}],
+		opacity: .5
 	},
 
 	NUM_ZOOM_LEVELS: 20,
@@ -48,12 +48,17 @@ var config = {
 	// "admin", short words, short numbers, base64 uuids 
 	RESERVED_URI: /^(admin|[a-z0-9]{1,7}|[0-9]{1,5}|[A-Za-z0-9\+\/]{24})$/,
 
-	REDUCE_SETTINGS: {
+	MAPREDUCE_SETTINGS: {
 		// could be used to pass options to reduce script, such as limit: n
 		DB_OPTIONS: {
 		},
 		// toggles time-based reduction
-		TIME_BASED: false,
+		OPTIONS: {
+			timebased: true, // create time-based reductions
+			grid: true, // create grid-based reductions
+			unreduced: true, // create unreduced copies
+			histogram: true // create histogram reductions
+		}
 	},
 
 	DataStatus: {

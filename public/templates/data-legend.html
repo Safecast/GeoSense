@@ -5,9 +5,11 @@
         <span class="icon in-out"></span><span class="title"></span>
       </a>
     </h4>
-    <a class="icon visibility toggle icon-eye-open icon-white" href="#"></a>
-    <a class="icon admin-control inspector icon-wrench icon-white" href="#"></a>
-    <div class="state-indicator"></div>
+    <ul class="panel-controls">
+      <li><span class="state-indicator">&nbsp;  </span></li>
+      <li><a class="visibility toggle" href="#"><span class="icon icon-eye-open icon-white" href="#"></span></a></li>
+      <li class="admin-control map-layer-editor"><a class="show-map-layer-editor" href="#"><span class="icon icon-wrench icon-white" href="#"></span></a></li>
+    </ul>
     <div class="status"></div>
     <div class="progress progress-striped active" style="display: none">
       <div class="bar" style="width: 40%;"></div>
@@ -19,17 +21,13 @@
       <div class="legend">
         <div class="histogram"></div>
         <ul class="color-bar clearfix condensed"></ul>
-        <div class="unit">
+        <div class="unit box">
           <ul class="nav nav-pills">
           </ul>
         </div>
         </ul>
         <div class="meta description"></div>
         <div class="meta source"></div>
-      </div>
-      <div class="detail">
-        <table class="detail-data"></table>
-        <table class="detail-metadata micro"></table>
       </div>
     </div>
   </div>

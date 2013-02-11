@@ -12,18 +12,20 @@ define([], function() {
 	*	]
 	*
 	*/
-	var ColorGradient = function(colors, interpolation) {	
+	var ColorGradient = function(colors, options) {	
 		this.colors = [];
 		this.gradientCache = {};
+		var options = options || {};
 		if (colors) {
 			for (var i = colors.length - 1; i >= 0; i--) {
 				var intColor = parseInt(colors[i].color[0] == '#' ?
 					colors[i].color.replace('#', '0x') : colors[i].color);
+				var p = parseFloat(colors[i].position);
 				this.colors[i] = {
 					position: colors[i].position,
 					// convert color strings to int
 					color: intColor,
-					interpolation: interpolation || colors[i].interpolation,
+					interpolation: options.interpolation || colors[i].interpolation,
 					// split channels of color
 					channels: this.getChannels(intColor)
 				};
@@ -86,6 +88,7 @@ define([], function() {
 		}
 		var lo = i;
 		var hi = i + 1 >= this.colors.length || this.colors[lo].position > p ? i : i + 1;
+
 		var normP = this.colors[hi].position == this.colors[lo].position ? 0.0 :
 			(p - this.colors[lo].position) / (this.colors[hi].position - this.colors[lo].position);
 		

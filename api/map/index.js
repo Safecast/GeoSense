@@ -4,7 +4,8 @@ var config = require('../../config.js'),
 	utils = require("../../utils.js"),
 	uuid = require('node-uuid'),
 	md5 = require('MD5'),
-	mongoose = require('mongoose');
+	mongoose = require('mongoose'),
+	_ = require('cloneextend');
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
@@ -86,7 +87,7 @@ var MapAPI = function(app)
 			return m;
 		}
 
-		//Returns a specific map by publicslug
+		// Returns a specific map by publicslug
 		app.get('/api/map/:publicslug', function(req, res){
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
@@ -100,8 +101,8 @@ var MapAPI = function(app)
 				});
 		});
 
-		//Returns a specific map by adminslug, and sets its admin state to true for current 
-		//session
+		// Returns a specific map by adminslug, and sets its admin state to true for current 
+		// session
 		app.get('/api/map/admin/:adminslug', function(req, res) {	
 			Map.findOne({adminslug: req.params.adminslug})
 				.populate('layers.pointCollection')
@@ -116,7 +117,7 @@ var MapAPI = function(app)
 				});
 		});
 
-		//Creates and returns a new map
+		// Creates and returns a new map
 		app.post('/api/map', function(req, res)
 		{
 			if (!permissions.canCreateMap(req)) {
@@ -166,152 +167,10 @@ var MapAPI = function(app)
 			makeUniqueSlugAndSave();
 		});
 
-		app.post('/api/bindmapcollection/:mapid/:pointcollectionid', function(req, res){
-			
-		    var pointcollectionid = req.params.pointcollectionid;
-
-			Map.findOne({_id: req.params.mapid})
-				.populate('layers.pointCollection')
-				.run(function(err, map) {
-					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-
-					for (var i = 0; i < map.layers.length; i++) {
-						if (map.layers[i].pointCollection._id.toString() == pointcollectionid) {
-							res.send('collection already bound', 409);
-							return;
-						}
-					}
-
-				    PointCollection.findOne({_id: pointcollectionid, $or: [{active: true}, 
-				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
-				    	.populate('defaults')
-				    	.run(function(err, collection) {
-							if (handleDbOp(req, res, err, collection, 'collection')) return;
-
-						    var defaults = collection.defaults.toObject();
-						    delete defaults['_id'];
-						    var options = new LayerOptions(defaults);
-
-						    options.save(function(err) {
-							    if (err) {
-									res.send('server error', 500);
-									return;
-								}
-							    var layer = new MapLayer({
-							    	_id: new mongoose.Types.ObjectId(),
-							    	layerId: new mongoose.Types.ObjectId(),
-							    	pointCollection: collection,
-							    	options: options._id
-							    });    
-							    console.log(layer);
-
-						      	map.layers.push(layer);
-						      	map.save(function(err, map) {
-						      		console.log(err);
-									if (err) {
-										res.send('server error', 500);
-										return;
-									}
-							        console.log("collection bound to map");
-									Map.findOne({_id: map._id})
-										.populate('layers.pointCollection')
-										.populate('layers.options')
-										.run(function(err, map) {
-										    if (!err) {
-										       	res.send(prepareMapResult(req, map));
-										    } else {
-												res.send('server error', 500);
-											}
-										});
-							  	});
-						    });
-					    });
-			    });
-		});
-
-		app.post('/api/updatemapcollection/:mapid/:pointcollectionid', function(req, res){
-			
-		    var collectionid = req.params.pointcollectionid;
-
-			Map.findOne({_id: req.params.mapid})
-				.populate('layers.pointCollection')
-				.populate('layers.options')
-				.run(function(err, map) {
-					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-
-					var options = {
-						visible : utils.smartBoolean(req.body.visible),
-						featureType : String(req.body.featureType),
-						colorType: String(req.body.colorType),
-						opacity: Number(req.body.opacity) || null
-					};
-
-					var colors = req.body.colors;
-
-					for (var i = 0; i < colors.length; i++) {
-						var c = colors[i];
-						if (c.position || options.colorType != config.ColorType.SOLID) {
-							c.position = Number(c.position) || 0.0;
-						}
-						if (isNaN(c.absPosition)) {
-							c.absPosition = null;
-						}
-					}
-					// sort by position
-					colors.sort(function(a, b) { return (a.position - b.position) });
-					options.colors = colors;
-
-					for (var i = 0; i < map.layers.length; i++) {
-						if (map.layers[i].pointCollection._id.toString() == collectionid) {
-							for (var k in options) {
-								map.layers[i].options[k] = options[k];
-							}
-							map.layers[i].options.save(function(err) {
-								if (err) {
-									res.send('server error', 500);
-									return;
-								}
-								console.log('layer options updated');
-								res.send(map.layers[i]);
-							});
-							return;
-						}
-					}
-
-					res.send('collection not bound', 409);
-					return;
-			  	});
-		});
-
-		app.post('/api/unbindmapcollection/:mapid/:collectionid', function(req, res){
-		    var collectionid = String(req.params.collectionid);
-			
-			Map.findOne({_id: req.params.mapid})
-				.populate('layers.pointCollection')
-				.populate('layers.options')
-				.run(function(err, map) {
-					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-
-					for (var i = 0; i < map.layers.length; i++) {
-						if (map.layers[i].pointCollection._id.toString() == collectionid) {
-							map.layers[i].options.remove();
-							map.layers[i].remove();
-							break;
-						}
-					}
-					map.save(function(err) {
-						if (err) {
-							res.send('server error', 500);
-							return;
-						}
-						console.log('map updated');
-						res.send('');
-					});
-			  	});
-		});
-
-		app.post('/api/map/:mapid', function(req, res){
-			Map.findOne({_id: req.params.mapid})
+		// Updates a map 
+		app.put('/api/map/:publicslug', function(req, res)
+		{
+			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
 				.populate('layers.options')
 				.populate('createdBy')
@@ -398,8 +257,10 @@ var MapAPI = function(app)
 			  	});
 		});
 
-		app.delete('/api/map/:mapid', function(req, res){
-			Map.findOne({_id: req.params.mapid})
+		// Deletes a map
+		app.delete('/api/map/:publicslug', function(req, res)
+		{
+			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
 				.populate('layers.options')
 				.run(function(err, map) {
@@ -416,6 +277,154 @@ var MapAPI = function(app)
 							return;
 						}
 						console.log('map removed');
+						res.send('');
+					});
+			  	});
+		});
+
+		// Updates options for a map layer
+		app.put('/api/map/:publicslug/layer/:layerId', function(req, res)
+		{
+			Map.findOne({publicslug: req.params.publicslug})
+				.populate('layers.pointCollection')
+				.populate('layers.options')
+				.run(function(err, map) {
+					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
+
+					console.log('updating layer ' + req.body._id + ' for map '+map.publicslug);
+
+					var options = req.body.options;
+
+					var colors = req.body.options.colors;
+					if (!Array.isArray(colors)) {
+						colors = [];
+					}
+
+					for (var i = 0; i < colors.length; i++) {
+						var c = colors[i];
+						c.position = c.position.match(/^[0-9]+(\.[0-9]+)?%?$/) ?
+							c.position : '0%';
+						c.color = c.color.match(/^#([a-fA-F0-9]{2}){3}$/) ?
+							c.color : '#000000';
+					}
+					// sort by position
+					colors.sort(function(a, b) { return (a.position - b.position) });
+					options.colors = colors;
+
+					for (var i = 0; i < map.layers.length; i++) {
+						if (map.layers[i]._id.toString() == req.params.layerId) {
+							for (var k in options) {
+								map.layers[i].options[k] = options[k];
+							}
+							map.layers[i].options.save(function(err) {
+								// prefix validation errors from 'options' field
+								if (err && err.name == 'ValidationError') {
+									var patchedErrors = {};
+									for (var k in err.errors) {
+										patchedErrors['options.' + k] = _.cloneextend(err.errors[k], {
+											path: 'options.' + err.errors[k].path
+										});
+									}
+									err.errors = patchedErrors;
+								}
+								// if no error, return layer
+								if (!handleDbOp(req, res, err, true)) {
+									console.log('layer options updated', options);
+									res.send(map.layers[i]);
+								}
+							});
+							return;
+						}
+					}
+
+					res.send('collection not bound', 409);
+					return;
+			  	});
+		});
+
+		// Creates a new map layer from a point collection
+		app.post('/api/map/:publicslug/layer', function(req, res)
+		{
+			Map.findOne({publicslug: req.params.publicslug})
+				.populate('layers.pointCollection')
+				.run(function(err, map) {
+					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
+
+					for (var i = 0; i < map.layers.length; i++) {
+						if (map.layers[i].pointCollection._id.toString() == req.body.pointCollectionId) {
+							res.send('collection already bound', 409);
+							return;
+						}
+					}
+
+				    PointCollection.findOne({_id: req.body.pointCollectionId, $or: [{active: true}, 
+				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
+				    	.populate('defaults')
+				    	.run(function(err, collection) {
+							if (handleDbOp(req, res, err, collection, 'collection')) return;
+
+						    var defaults = collection.defaults.toObject();
+						    delete defaults['_id'];
+						    var options = new LayerOptions(defaults);
+
+						    options.save(function(err) {
+							    if (err) {
+									res.send('server error', 500);
+									return;
+								}
+							    var layer = new MapLayer({
+							    	_id: new mongoose.Types.ObjectId(),
+							    	pointCollection: collection,
+							    	options: options._id
+							    });    
+							    console.log(layer);
+
+						      	map.layers.push(layer);
+						      	map.save(function(err, map) {
+						      		console.log(err);
+									if (err) {
+										res.send('server error', 500);
+										return;
+									}
+							        console.log("collection bound to map");
+									Map.findOne({_id: map._id})
+										.populate('layers.pointCollection')
+										.populate('layers.options')
+										.run(function(err, map) {
+										    if (!err) {
+										       	res.send(prepareMapResult(req, map));
+										    } else {
+												res.send('server error', 500);
+											}
+										});
+							  	});
+						    });
+					    });
+			    });
+		});
+
+		// Deletes a map layer from a map
+		app.delete('/api/map/:publicslug/layer/:layerId', function(req, res)
+		{
+			Map.findOne({publicslug: req.params.publicslug})
+				.populate('layers.pointCollection')
+				.populate('layers.options')
+				.run(function(err, map) {
+					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
+
+					for (var i = 0; i < map.layers.length; i++) {
+						if (map.layers[i]._id.toString() == req.params.layerId) {
+							map.layers[i].options.remove();
+							map.layers[i].remove();
+							break;
+						}
+					}
+					map.save(function(err) {
+						if (err) {
+							res.send('server error', 500);
+							return;
+						}
+						console.log('map layer deleted');
 						res.send('');
 					});
 			  	});

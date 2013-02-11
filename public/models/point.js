@@ -12,8 +12,8 @@ define([
 				datetime: Date,
 		        loc: [0,0],
 				val: null,
-		      };
-		    },
+		    };
+		},
 	});
 
 	return Point;
