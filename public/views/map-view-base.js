@@ -167,19 +167,15 @@ define([
 					break;
 			}
 
-			if (options.featureSizeAttr == false) {
-				size = 0;
-			} else {
-				switch (options.featureSizeAttr) {
-					default:
-					case 'count':
-						size = normCount;
-						break;
-					case 'val.avg':
-						size = normVal;
-						break;
-				};
-			}
+			switch (options.featureSizeAttr) {
+				default:
+				case 'count':
+					size = normCount;
+					break;
+				case 'val.avg':
+					size = normVal;
+					break;
+			};
 
 			this.addFeatureToLayer(model, {
 				pointCollectionId: collectionId,
