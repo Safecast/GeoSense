@@ -152,8 +152,18 @@ define([
 					break;
 				case ColorType.LINEAR_GRADIENT:
 				case ColorType.PALETTE:
+					var colorPos;
+					switch (options.featureColorAttr) {
+						case 'count':
+							colorPos = normCount;
+							break;
+						default:
+						case 'val.avg':
+							colorPos = normVal;
+							break;
+					}
 					color = this.layerOptions[collectionId].colorGradient
-						.colorAt(normVal, COLOR_GRADIENT_STEP);
+						.colorAt(colorPos, COLOR_GRADIENT_STEP);
 					break;
 			}
 
@@ -165,7 +175,7 @@ define([
 					case 'count':
 						size = normCount;
 						break;
-					case 'val':
+					case 'val.avg':
 						size = normVal;
 						break;
 				};

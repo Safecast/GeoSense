@@ -667,12 +667,12 @@ define([
 			}
 		},
 
-		updateMapLayer: function(updatedLayer)
+		updateMapLayer: function(updatedLayerAttributes)
 		{
-			console.log('updateMapLayer', updatedLayer);
-			var layer = this.getMapLayerDeprecated(updatedLayer.pointCollection._id);
-			for (var k in updatedLayer) {
-				layer[k] = updatedLayer[k];
+			console.log('updateMapLayer', updatedLayerAttributes);
+			var layer = this.getMapLayerDeprecated(updatedLayerAttributes.pointCollection._id);
+			for (var k in updatedLayerAttributes) {
+				layer[k] = updatedLayerAttributes[k];
 			}
 			this.vent.trigger('redrawMapLayer', layer);
 		},

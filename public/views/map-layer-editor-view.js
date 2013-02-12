@@ -16,12 +16,7 @@ define([
 			var self = this;
 			this.modelInputs = {};
 			this.$('.model-input').each(function() {
-				var name;
-				if ($(this).is('input, textarea')) {
-					name = $(this).attr('name');
-				} else {
-					name = $(this).attr('data-name');
-				}
+				var name = $(this).attr('data-name') || $(this).attr('name');
 				if (!self.modelInputs[name]) {
 					self.modelInputs[name] = [];
 				}
@@ -102,37 +97,44 @@ define([
 	    render: function() 
 	    {
 			MapLayerEditorView.__super__.render.call(this);
+
 	    	this.colorRowTemplate = this.$('.color-palette tr.element-template').remove()
 	    		.clone().removeClass('element-template');
 			this.initModelInputs();
 			this.initSliders();
 			this.populateFromModel();
-	    	console.log(this.colorRowTemplate);
+
 			return this;
 	    },
 
 	    initSliders: function() 
 	    {
 	    	var self = this;
-			this.$('.opacity-slider').slider({
-				min: 0,
-				max: 1,
-				range: "min",
-				step: .05,
-				slide: function( event, ui ) {
-					$(self.modelInputs['options.opacity'][0]).val(ui.value);
-					self.modelInputChanged();
-				}
-		    });
-		    $(self.modelInputs['options.opacity'][0]).change(function() {
-		    	self.updateSliders();
-		    });
+			this.$('.slider').each(function() {
+				var fieldName = $(this).attr('data-field');
+				$(this).slider({
+					min: 0,
+					max: 1,
+					range: "min",
+					step: .05,
+					slide: function( event, ui ) {
+						$(self.modelInputs[fieldName][0]).val(ui.value);
+						self.modelInputChanged();
+					}
+			    });
+			    $(self.modelInputs[fieldName][0]).change(function() {
+			    	self.updateSliders();
+			    });
+			});
 		},
 
 		updateSliders: function() 
 		{
 	    	var self = this;
-	    	self.$('.opacity-slider').slider('value', $(self.modelInputs['options.opacity'][0]).val());
+			this.$('.slider').each(function() {
+				var fieldName = $(this).attr('data-field');
+				$(this).slider('value', $(self.modelInputs[fieldName][0]).val());
+			});
 		},
 
 	    populateFromModel: function()
@@ -215,6 +217,15 @@ define([
 	    	} else {
 		    	this.$('.remove-color').attr('disabled', true);
 	    	}
+
+	    	var featureType = this.getCompleteModelInputValues().options.featureType;
+	    	this.$('.feature-settings').each(function() {
+	    		if (!$(this).hasClass(featureType)) {
+	    			$(this).hide();
+	    		} else {
+	    			$(this).show();
+	    		}
+	    	});
 	    },
 
 	    initColorPicker: function(input, val) 

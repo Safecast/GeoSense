@@ -71,6 +71,10 @@
 	width: 95%;
 }
 
+.map-layer-editor label.pull-left {
+	margin: 5px 1em 9px 0;
+}
+
 .map-layer-editor table.color-palette td {
 	white-space: nowrap;
 	padding-right: 5px;

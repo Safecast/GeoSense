@@ -10,7 +10,7 @@ var locale = {
 		'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
 	],
 	formats: {
-		DATE_SHORT: "%Y-%m-%d"
+		DATE_SHORT: "%Y/%m/%d"
 	},
 	strings: {
 		

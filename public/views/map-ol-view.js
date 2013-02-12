@@ -312,8 +312,8 @@ define([
 					    strokeColor: '${getDarkerColor}',
 					    pointRadius: DEFAULT_POINT_RADIUS,
 					    strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
-					    fillOpacity:  this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
-					    strokeOpacity: (this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY) * .8
+					    fillOpacity:  (this.layerOptions[pointCollectionId].opacity != null ? this.layerOptions[pointCollectionId].opacity : DEFAULT_FEATURE_OPACITY),
+					    strokeOpacity: ((this.layerOptions[pointCollectionId].opacity != null ? this.layerOptions[pointCollectionId].opacity : DEFAULT_FEATURE_OPACITY)) * .8
 					}, {context: context});
 
 					layer = new OpenLayers.Layer.Vector(null, {
@@ -335,7 +335,7 @@ define([
 				
 					var style = new OpenLayers.Style({
 					    fillColor: '${getColor}',
-					    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
+					    fillOpacity: (this.layerOptions[pointCollectionId].opacity != null ? this.layerOptions[pointCollectionId].opacity : DEFAULT_FEATURE_OPACITY),
 					    strokeOpacity: 0
 					}, {context: context});
 
@@ -357,8 +357,8 @@ define([
 				
 					var style = new OpenLayers.Style({
 					    fillColor: '${getColor}',
-					    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
-					    strokeOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY,
+					    fillOpacity: (this.layerOptions[pointCollectionId].opacity != null ? this.layerOptions[pointCollectionId].opacity : DEFAULT_FEATURE_OPACITY),
+					    strokeOpacity: (this.layerOptions[pointCollectionId].opacity != null ? this.layerOptions[pointCollectionId].opacity : DEFAULT_FEATURE_OPACITY),
 					    strokeColor: '${getColor}',
 					    strokeWidth: '${getStrokeWidth}',
 					}, {context: context});
@@ -388,7 +388,7 @@ define([
 					    pointRadius: '${getBubbleRadius}',
 					    strokeOpacity: 0,
 					    fillColor: '${getColor}',
-					    fillOpacity: this.layerOptions[pointCollectionId].opacity || DEFAULT_FEATURE_OPACITY
+					    fillOpacity: (this.layerOptions[pointCollectionId].opacity != null ? this.layerOptions[pointCollectionId].opacity : DEFAULT_FEATURE_OPACITY)
 					}, {context: context});
 
 					layer = new OpenLayers.Layer.Vector(null, {

@@ -54,7 +54,7 @@ var config = {
 		},
 		// toggles time-based reduction
 		OPTIONS: {
-			timebased: true, // create time-based reductions
+			timebased: false, // create time-based reductions
 			grid: true, // create grid-based reductions
 			unreduced: true, // create unreduced copies
 			histogram: true // create histogram reductions

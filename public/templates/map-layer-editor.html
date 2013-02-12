@@ -29,41 +29,79 @@
                             <button class="btn feature-type bubbles" value="B"></button>
                         </p>
                     </div>
-                    <p>
+                    <p class="clearfix">
                         <label for="">Opacity</label>  
                         <span class="pull-left">
                             <input class="number model-input" name="options.opacity" type="text" />
                         </span>
-                        <span class="slider opacity-slider pull-right"></span>
+                        <span class="slider pull-right" data-field="options.opacity"></span>
                     </p>
+                    <div class="feature-settings B">
+                        <!-- Solve with range slider
+                        <p class="clearfix">
+                            <label for="">Minimum Size</label>  
+                            <span class="pull-left">
+                                <input class="number model-input" name="options.minFeatureSize" type="text" />
+                            </span>
+                            <span class="slider pull-right" data-field="options.minFeatureSize"></span>
+                        </p>
+                        <p class="clearfix">
+                            <label for="">Maximum Size</label>  
+                            <span class="pull-left">
+                                <input class="number model-input" name="options.maxFeatureSize" type="text" />
+                            </span>
+                            <span class="slider pull-right" data-field="options.maxFeatureSize"></span>
+                        </p>
+                        -->
+                        <p class="clearfix">
+                            <label class="pull-left" for="map-size">Map size to</label>
+                            <select class="model-input pull-left" name="options.featureSizeAttr">
+                                <option value="">(default)</option>
+                                <option value="count">sample size</option>
+                                <option value="val.avg">average value</option>
+                            </select>
+                        </p>
+                    </div>
                 </div>
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-colors">
-                <table class="color-palette">
-                    <thead>
-                        <th><label>Color</label></th>
-                        <th><label>Value</label></th>
-                        <th><label>Interpolation</label></th>
-                    </thead>
-                    <tbody>
-                        <tr class="element-template">
-                            <td><input name="color" type="text" class="color-picker black" size="6" placeholder="hex color" /></td>
-                            <td><input name="position" type="text" class="number" size="3" placeholder="position" /></td>
-                            <td>
-                                <select name="interpolation" class="min-width">
-                                    <option value="">(default)</option>
-                                    <option value="threshold">threshold</option>
-                                    <option value="lerpRGB">linear</option>
-                                </select>
-                            </td>
-                            <td>
-                                <a class="btn muted remove-color" href="#"><span class="icon icon-remove"></span></a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <a href="#" class="btn add-color"><span class="icon icon-plus"></span></a>
+                <p>
+                    <table class="color-palette">
+                        <thead>
+                            <th><label>Color</label></th>
+                            <th><label>Value</label></th>
+                            <th><label>Interpolation</label></th>
+                        </thead>
+                        <tbody>
+                            <tr class="element-template">
+                                <td><input name="color" type="text" class="color-picker black" size="6" placeholder="hex color" /></td>
+                                <td><input name="position" type="text" class="number" size="3" placeholder="position" /></td>
+                                <td>
+                                    <select name="interpolation" class="min-width">
+                                        <option value="">(default)</option>
+                                        <option value="threshold">threshold</option>
+                                        <option value="lerpRGB">linear</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <a class="btn muted remove-color" href="#"><span class="icon icon-remove"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="btn add-color"><span class="icon icon-plus"></span></a>
+                </p>
+
+                <p class="clearfix">
+                    <label class="pull-left" for="map-size">Map color to</label>
+                    <select class="model-input pull-left" name="options.featureColorAttr">
+                        <option value="">(default)</option>
+                        <option value="count">sample size</option>
+                        <option value="val.avg">average value</option>
+                    </select>
+                </p>
+
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-info">

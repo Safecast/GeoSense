@@ -91,8 +91,10 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     }],
     reduction: String,
     opacity: {type: Number, required: true},
-    featureSizeAttr: mongoose.Schema.Types.Mixed,
-    featureColorAttr: mongoose.Schema.Types.Mixed,
+    featureSizeAttr: {type: String, enum: ['val.avg', 'count', ''], default: ''},
+    featureColorAttr: {type: String, enum: ['val.avg', 'count', ''], default: ''},
+    minFeatureSize: Number,
+    maxFeatureSize: Number,
     datetimeFormat: String,
     valFormat: [{
         unit: {type: String, required: true},
