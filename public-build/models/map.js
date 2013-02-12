@@ -1,0 +1,1 @@
+define(["jquery","underscore","backbone"],function(e,t,n){var r=n.Model.extend({idAttribute:"_id",urlRoot:"/api/map",url:function(){return this.urlRoot+"/"+this.attributes.publicslug}});return r});

@@ -73,6 +73,14 @@ define([
 	    	return routes;
 	    },
 
+	    setUIReady: function()
+	    {
+			// remove site loading indicator
+			$('#center-spinner').hide('fast', function() {
+				$(this).remove();
+			});
+	    },
+
 	    initialize: function() 
 	    {
 			var self = this;
@@ -95,10 +103,7 @@ define([
 
 			this.vent = _.extend({}, Backbone.Events);
 			this.vent.bind('mapViewReady', function() {
-				// remove site loading indicator
-				$('#center-spinner').hide('fast', function() {
-					$(this).remove();
-				});
+				self.setUIReady();
 				// init all map layers
 				if (!self.mapLayersInitialized) {
 					self.initMapLayers();

@@ -1,0 +1,140 @@
+.data-library
+{
+	display:none;
+	z-index:998;
+	position:absolute;
+	top:0px;
+	bottom:0px;
+	left:-300px;
+	width:300px;
+	background-color:white;
+	box-shadow:  2px 0px 3px rgba(0, 0, 0, .2);
+}
+.drop-zone
+{
+	z-index:996;
+	position:absolute;
+	top:0px;
+	bottom:0px;
+	left:300px;
+	right:0px;
+	background-color:red;
+	
+	background-color:rgba(0,0,0,.2);
+	box-shadow:inset 0px 0px 500px rgba(0, 0, 0, 1);
+	margin:auto;
+	
+	opacity:0;
+	pointer-events:none;
+}
+.drop-zone.visible
+{
+	opacity:1;
+	-webkit-transition: all .3s linear;
+    -moz-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    -ms-transition: all .3s linear;
+}
+.drop-zone .instruction
+{
+	position:absolute; 
+	top:50%;
+	left:50%;
+	font-size:40pt;
+	margin-left:-80px;
+	margin-top:-25px;
+	color:#FFF;
+	opacity:1;
+	text-shadow: 0px 1px 3px rgba(0, 0, 0, .2);
+}
+.data-library .instructions
+{
+	width:100%;
+	color:#888;
+	margin-top: 1em;
+	text-align:center;
+	font-style:italic;
+	
+}
+.data-library .data-search {
+	width:100%;
+	color:#888;
+	text-align:center;
+	font-style:italic;
+}
+.data-library .data-search input {
+	width:250px;
+}
+.data-library .well
+{
+	width:260px;
+	height:35px;
+	border-radius:0px;
+	-moz-border-radius:0px;
+	-webkit-border-radius:0px;
+}
+.data-library .well > button
+{
+	margin-bottom:10px;
+	height:34px;
+	width:255px;
+}
+.data-library .data-container {
+	background-color:rgba(0,0,0,.023);
+	box-shadow: inset 0px 0px 5px rgba(0, 0, 0, .05);
+	border:1px solid rgba(0,0,0,.05);
+	width: 255px;
+	
+	border-radius:7px;
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
+}
+.data-library .data-container .data-item {
+	
+	margin:10px;
+	border-radius:7px;
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
+	padding: 1em;	
+	background-color:white;
+	box-shadow: 0px 0px 5px rgba(0, 0, 0, .1);
+	border:1px solid rgba(0,0,0,.1);
+	cursor:pointer;
+}
+.data-library .data-container .data-item:hover {
+	
+	box-shadow: 0px 1px 3px rgba(0, 0, 0, .2);
+	border:1px solid rgba(0,0,0,.2);
+	
+}
+.data-library .data-container .data-item .data-icon
+{
+	float:left;
+	width:23px;
+	height:20px;
+	background-image:url('../assets/data-library-drag.png');
+}
+.data-library .data-container .data-item .data-count {
+	margin-left: 23px;
+}
+.data-library .data-container .data-item .data-title
+{
+	float:left;
+	margin-left:10px;
+	color:#888;
+	font-size: 20px;
+	color: black;
+}
+.data-library p, .data-library h5 {
+	margin: .5em 0 .5em 0;
+}
+.data-library p:last-child, .data-library h5:last-child {
+	margin-bottom: 0;
+}
+.data-library .drop-zone
+{
+}
+.data-library .data-container .data-item .ui-draggable.hidden
+{
+	background-color:red;
+}

@@ -1,0 +1,26 @@
+.modal 
+{
+}
+.modal input, .modal textarea
+{
+	width: 480px;
+}
+.modal .urls input {
+	font-size: 16pt;
+	height: 40px;
+	color: #999;
+}
+.modal .urls input, .modal .urls textarea {
+	cursor: text;
+}
+.modal .map-admin-url, .modal .error {
+	background-color: #FFDFDF;	
+}
+.modal .map-url {
+	background-color: #E3FBE9;
+}
+.modal .modal-footer .btn.delete
+{
+	position:absolute;
+	left:10px;
+}

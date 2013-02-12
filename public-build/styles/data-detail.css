@@ -1,0 +1,60 @@
+.panel .detail-data {
+	margin-top:15px;
+}
+.panel .value-label {
+	font-weight: normal;
+	line-height: 35px;
+	font-size: 24px;
+	text-align: left;
+	width: 50%;
+	line-height: 1em;
+	padding: 0 .25em 0 0;
+	white-space: auto;
+}
+.panel .value-label.single {
+	padding: 0 .0 .3em 0;
+	text-align: center;
+	font-weight: bold;
+	white-space: auto;
+	border-radius: 4px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+}
+.panel h5 {
+	color: #fff;
+	font-size: 18px;
+	margin: 0;
+	padding: .2em .25em .3em .25em;
+}
+.panel .value {
+	font-weight: bold;
+	line-height: 35px;
+	font-size: 35px;
+	text-align: right;
+	width: 50%;
+	padding: 0;
+	white-space: nowrap;
+}
+.data-info .caret {
+	border-top: 4px solid white !important;
+}
+.panel .detail-metadata .value-label, .panel .detail-metadata .value.single {
+	font-size: 12px;
+	line-height: 1.5em;
+	font-weight: normal;
+}
+.panel .detail-metadata .value {
+	font-size: 13px;
+	color: #bbb;
+	line-height: 1.5em;
+	font-weight: bold;
+}
+.panel .value.single {
+	text-align: left;
+}
+.panel .detail-metadata {
+	margin: 1em 0 1em 0;
+}
+.panel .value-label {
+	white-space: nowrap;
+}

@@ -1,0 +1,1 @@
+define(["jquery","underscore","backbone","config","utils","text!templates/data-info.html","views/panel-view-base"],function(e,t,n,r,i,s,o){var u=o.extend({className:"panel data-info",events:{},initialize:function(e){this.template=t.template(s),this.vent=e.vent}});return u});

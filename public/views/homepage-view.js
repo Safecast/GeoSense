@@ -25,7 +25,6 @@ define([
 		},
 
 	    render: function() {
-	    	console.log(this.el);
 			$(this.el).html(this.template());
 	        return this;
 	    },
@@ -40,9 +39,11 @@ define([
 						var url = genMapURL(data[i]);
 						self.featuredMaps.push('<tr><td>' + data[i].title + '</td><td><a target="_self" href="' + url + '">' + url + '</a></td><tr>');
 					}
+					app.setUIReady();
 					self.showRecentMaps();
 				},
 				error: function() {
+					app.setUIReady();
 					console.error('failed to fetch unique map');
 				}
 			});	
