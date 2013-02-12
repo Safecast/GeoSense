@@ -16,6 +16,9 @@ require.config({
   	},
 
     shim: {
+        'spin': {
+            exports: 'Spinner'
+        },
         'underscore': {
             exports: '_'
         },
@@ -35,7 +38,7 @@ require.config({
 
 require([
 	// Load our app module and pass it to our definition function
-	'jquery',
+    'jquery',
     'underscore',
     'backbone',
     'app',

@@ -75,6 +75,7 @@ define([
 					//$(this).css('right', 'auto');
 					$(this).css('bottom', 'auto');
 				},
+				handle: this.$('.panel-header'),
 				stop: function() {
 					var el = this,
 						right = $(this).position().left + $(this).outerWidth();

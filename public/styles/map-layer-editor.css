@@ -58,6 +58,13 @@
 }
 
 .map-layer-editor .slider {
+	margin: 3px 13px 3px 13px;
+	width: 60%;
+	margin-right: 13px;
+}
+
+.map-layer-editor td .map-layer-editor {
+	padding: inherit .5em inherit 0;
 }
 
 .map-layer-editor input.text, .map-layer-editor textarea.text {
@@ -66,19 +73,22 @@
 
 .map-layer-editor table.color-palette td {
 	white-space: nowrap;
+	padding-right: 5px;
 }
 
-.map-layer-editor table.color-palette td {
-	padding-right: .5em;
+.map-layer-editor table.color-palette .miniColors-trigger, .map-layer-editor table.color-palette .btn {
+	margin-bottom: 9px;
+	display: inline-block;
+}
+
+.map-layer-editor table.color-palette .btn {
+	padding: 1px 2px 0px 2px;
 }
 
 .map-layer-editor table.color-palette td:last-child {
 	padding-right: 0;
 	text-align: right;
-}
-
-.map-layer-editor .miniColors-trigger {
-	margin-bottom: 9px;
+	width: 20%;
 }
 
 .map-layer-editor table.color-palette td input {

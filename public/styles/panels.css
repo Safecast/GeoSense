@@ -6,7 +6,7 @@
 	top:15px;
 	right:15px;
 	padding: 33px 20px 0 20px;
-	box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, .2);
+	box-shadow: 0px 5px 20px 0px rgba(0, 0, 0, .4);
 	background-color:rgba(100,100,100,.8);
 	border-color:#222;
 	border-radius:8px;
@@ -15,9 +15,26 @@
 	-webkit-border-radius:8px;
 	width: 300px;
 	overflow: hidden;
-	/*
-	text-shadow:rgba(50,50,50,.8) 1px 1px 0px;
-	*/
+}
+
+.panel .panel-header, .panel .panel-body {
+	text-shadow: rgba(50,50,50,.9) 1px 1px 0px;
+}
+
+.panel .panel-body {
+	max-height: 600px;
+	overflow: visible;
+}
+
+.panel form {
+	margin: 0;
+}
+
+.panel .panel-body.well {
+	text-shadow: inherit;
+	margin-top: 18px;
+	max-height: 600px;
+	overflow: auto;
 }
 
 .panel .panel-body {
@@ -93,10 +110,6 @@
 	width: 222px;
 	margin: 0;
 	padding: 0px;
-}
-
-.panel .accordion-body-content {
-	padding-bottom: 20px;
 }
 
 .panel.extended, .panel.extended .accordion-group {

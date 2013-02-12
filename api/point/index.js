@@ -275,7 +275,7 @@ var PointAPI = function(app)
 								pointQuery[PointModel != Point ? 'value.loc' : 'loc'] = {$within: {$box : box}};
 							}
 
-							console.log('*** querying "' + collectionName + '" for '+pointCollection.get('title'), pointQuery, queryOptions);
+							console.log('*** querying "' + collectionName + '" for '+pointCollection.get('title'), pointQuery, queryOptions, box);
 
 							if (!reduceKey) {
 								PointModel.find(pointQuery, [], queryOptions, function(err, datasets) {
@@ -286,22 +286,20 @@ var PointAPI = function(app)
 											var reduced = datasets[i].get('value');
 											var p = {
 												val: reduced.val,
-												altVal: reduced.altVal,
 												count: reduced.count,
 												datetime: reduced.datetime,
 												loc: [reduced.loc[0], reduced.loc[1]],
 												label: reduced.label,
-												extra: reduced.extra
+												description: reduced.description
 											};
 										} else {
 											var p = {
 												val: datasets[i].get('val'),
-												altVal: datasets[i].get('altVal'),
 												count: 1,
 												datetime: datasets[i].get('datetime'),
 												loc: datasets[i].get('loc'),
 												label: datasets[i].get('label'),
-												extra: datasets[i].get('extra')
+												description: datasets[i].get('description')
 											};
 										}
 										points.push(p);
@@ -312,7 +310,6 @@ var PointAPI = function(app)
 									dequeueBoxQuery();
 								});
 							} else {
-								console.log('----------->', reduceKey, collectionName);
 								var command = {
 									mapreduce: collectionName,
 									query: pointQuery,
@@ -399,242 +396,3 @@ var PointAPI = function(app)
 };
 
 module.exports = PointAPI;
-
-
-
-///////////////
-// POINTS 
-///////////////
-
-// broken and currently unused
-
-
-/*
-app.get('/api/points', function(req, res){
-  Point.find(function(err, datasets) {
-     res.send(datasets);
-  });
-});
-
-app.get('/api/point/:id', function(req, res){
-  Point.findById(req.params.id, function(err, data) {
-    if (!err) {
-       res.send(data);
-    } else
-	{point
-		res.send("oops",500);
-	}
-  });
-});
-
-app.put('/api/point/:id', function(req, res){
-  Point.findById(req.params.id, function(err, point) {
-	
-	point.collectionid 	= req.body.collectionid;
-    point.name 			= req.body.name;
-    point.location 		= req.body.location;
-	point.lat 			= req.body.lat;
-	point.lon 			= req.body.lon;
-	point.val		 	= req.body.val;
-	point.color		 	= req.body.color;
-
-    point.save(function(err) {
-		if (!err) {
-      		res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-    });
-  });
-});
-
-app.post('/api/point', function(req, res){
-  var point;
-  point = new Point({
-	collectionid: 		req.body.collectionid,
-    name: 		req.body.name,
-	location: 	req.body.location,
-	lat: 		req.body.lat,
-	lon: 		req.body.lon,
-	val: 		req.body.val,
-	color:      req.body.color 
-  });
-  point.save(function(err) {
-    if (!err) {
-	 	res.send(point);
-    } else
-	{
-		res.send('oops', 500);
-	}
-  });
-});
-
-app.delete('/api/point/:id', function(req, res){
-  return Point.findById(req.params.id, function(err, point) {
-    return point.remove(function(err) {
-		if (!err) {
-        	console.log("removed");
-        	res.send('')
-      	} else
-		{
-			res.send('oops', 500);
-		}
-    });
-  });
-});
-*/
-
-/*
-app.get('/api/collection/distinct' , function(req, res){
-		
-	Point.collection.distinct("collectionid", function(err, data){
-		if (!err) {
-			res.send(data);
-		} else
-		{
-			res.send("oops",500);
-		}
-	  });
-});
-
-app.get('/api/collection/:id', function(req, res){
-	
-	Point.find({collectionid:req.params.id}, function(err, point) {
-		if (!err) {
-			res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-  }).sort('date', 1);
-});
-
-app.get('/api/collection/', function(req, res){
-	
-	Point.find({collectionid:req.params.id}, function(err, point) {
-		if (!err) {
-			res.send(point);
-		}
-		else
-		{
-			res.send('ooops', 500);
-		}
-  });
-});
-*/
-
-/*
-app.post('/api/collection/:id', function(req, res){
-		
-	var point;
-	  point = new Point({
-		collectionid:  req.params.id,
-	    name: 		req.body.name,
-		location: 	req.body.location,
-		lat: 		req.body.lat,
-		lon: 		req.body.lon,
-		val: 		req.body.val,
-		color:      req.body.color 
-	  });
-	  point.save(function(err) {
-	    if (!err) {
-		 	res.send(point);
-	    } else
-		{
-			res.send('oops', 500);
-		}
-	  });
-});
-
-*/
-
-/*
-app.post('/api/addpoints/:id', function(req, res){
-		
-	jsonObject = req.body.jsonpost;
-	for(var i = 0; i < jsonObject.length; ++i)
-	{	
-		var point;	
-		point = new Point({
-			collectionid:  req.params.id,
-		    label: 		jsonObject[i].label,
-			loc: 		jsonObject[i].loc,
-			val: 		jsonObject[i].val,
-			datetime: 	jsonObject[i].datetime,
-			created: 	jsonObject[i].created,
-			modified: 	jsonObject[i].modified,
-		  });	
-				
-		  point.save();
-	}	
-	res.send('');
-});
-*/
-
-/*
-app.delete('/api/collection/:id', function(req, res){
-   Point.remove({collectionid:req.params.id}, function(err) {
-      if (!err) {
-        console.log("removed");
-        res.send('')
-      }
-      else {
-		res.send('oops error', 500);
-	  }
-  });
-});
-*/
-
-
-
-/*
-//Post a Point Collection
-app.post('/api/pointcollection/:id/:name/:mapid/:maxval/:minval', function(req, res){
-	
-	var defaults = [{
-		visible 	: 	req.body.jsonpost[0],
-		featureType : 	req.body.jsonpost[1],
-		colorHigh 	: 	req.body.jsonpost[2],
-		colorLow 	: 	req.body.jsonpost[3],
-		color 		: 	req.body.jsonpost[4],
-		colorType 	: 	req.body.jsonpost[5],
-	}];
-	
-	var collection;
-	  collection = new PointCollection({
-		collectionid: req.params.id,
-	    name: req.params.name,
-		mapid: req.params.mapid,
-		maxval: req.params.maxval,
-		minval: req.params.minval,
-		defaults: defaults,
-	  });
-	  collection.save(function(err) {
-	    if (!err) {
-		 	res.send(collection);
-	    } else
-		{
-			res.send('oops', 500);
-		}
-	  });
-});
-*/
-
-
-//Delete a Post Collection
-/*app.delete('/api/pointcollection/:id', function(req, res){
-	
-	PointCollection.remove({collectionid:req.params.id}, function(err) {
-	      if (!err) {
-	        console.log("removed pointcollection");
-	        res.send('')
-	      }
-	      else {
-			res.send('server error', 500);
-		  }
-	  });
-});
-*/

@@ -51,19 +51,13 @@ define([
 					this.showLegend(true);
 			}
 
-			var stateIndicator = this.$('.state-indicator');
-			if (stateIndicator.length) {
+			if (this.spinner) {
 				switch (type) {
 					default:
-						stateIndicator.stop().fadeIn(0);
-						stateIndicator.addClass('loading');
-						this.$('.visibility.toggle').stop().fadeTo(0, 0);
+						this.spinner.stop().fadeIn(0);
 						break;
 					case 'complete':
-						stateIndicator.stop().fadeOut(300, function() {
-							stateIndicator.removeClass('loading');
-						});
-						this.$('.visibility.toggle').stop().fadeTo(300, 1.0);
+						this.spinner.stop().fadeOut(300);
 						break;
 				}
 			}
@@ -163,6 +157,11 @@ define([
 				dataTitle = this.title;
 			} else {
 				dataTitle = "Untitled Data";
+			}
+
+			var stateIndicator = this.$('.state-indicator');
+			if (stateIndicator.length) {
+				this.spinner = stateIndicator.html(new Spinner({radius:4,length:0,width:4,color:'#eee',lines:7,speed:1.5}).spin().el).hide();
 			}
 
 			this.updateStatus();

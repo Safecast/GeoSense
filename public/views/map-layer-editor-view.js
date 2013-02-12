@@ -88,7 +88,7 @@ define([
 	    	'change .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	// does not work well with live preview since val is unchanged
 	    	// 'keydown .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
-	    	'click .preview': 'modelInputChanged',
+	    	'click .preview': 'updateMapLayer',
 	    	'click .remove-color': 'removeColorClicked',
 	    	'click .add-color': 'addColorClicked'
 	    },
@@ -153,8 +153,8 @@ define([
 
 	    undoButtonClicked: function(event) {
 	    	this.populateFromModel();
-	    	this.modelInputChanged(event, true);
-	    	this.setButtonState(false);
+			this.updateMapLayer(null, true);
+	    	return false;
 	    },
 
 	    saveButtonClicked: function(event) {
@@ -192,21 +192,28 @@ define([
 	    	return false;
 	    },
 
-	    modelInputChanged: function(event, forcePreview) {
+	    modelInputChanged: function(event) {
 	    	this.isChanged = true;
 	    	this.setButtonState(this.isChanged);
+	    	this.updateMapLayer();
+	    },
+
+	    updateMapLayer: function(event, forcePreview) {
 	    	if (forcePreview || this.$('.preview').is(':checked')) {
 				this.vent.trigger('updateMapLayer', this.getCompleteModelInputValues());
 	    	}
 	    },
 
 	    setButtonState: function(state) {
-	    	this.$('.btn.undo').attr('disabled', !state);
-	    	this.$('.btn.save').attr('disabled', !state);
+	    	if (state != undefined) {
+		    	this.$('.btn.undo').attr('disabled', !state);
+		    	this.$('.btn.save').attr('disabled', !state);
+	    	}
+
 	    	if (this.$('.color-palette tbody tr').length > 1) {
-		    	this.$('.remove-color').show();
+		    	this.$('.remove-color').attr('disabled', false);
 	    	} else {
-		    	this.$('.remove-color').hide();
+		    	this.$('.remove-color').attr('disabled', true);
 	    	}
 	    },
 
@@ -273,6 +280,7 @@ define([
 
 	    removeColorClicked: function(event) 
 	    {
+	    	if ($(event.currentTarget).attr('disabled')) return false;
 			$(event.currentTarget).closest('tr').remove();
 			this.modelInputChanged();
 			return false;

@@ -88,6 +88,10 @@ a {
 	-moz-opacity:.50 !important; filter:alpha(opacity=50) !important; opacity:.50 !important; 
 }
 
+.btn.muted .icon {
+	-moz-opacity:.80 !important; filter:alpha(opacity=80) !important; opacity:.80 !important; 
+}
+
 .micro {
 	font-size: 11px;
 }
@@ -111,16 +115,17 @@ h1 {
 }
 
 .state-indicator {
-	display: none;
+	display: relative;
+	margin-right: 2px;
+	width: 16px;
+	height: 16px;
 }
 
-.state-indicator.loading {
-	background: url('../assets/loader.gif') no-repeat 50% 50%;
-	display: inline-block;
+.state-indicator .spinner {
+	position:absolute;
+	top:50%;
+	left:50%;
 }
-
-
-
 
 h2,
 h3, 
@@ -173,19 +178,6 @@ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
 
 input:-moz-placeholder, textarea:-moz-placeholder {
 	color: #AAA;
-}
-
-.loading-indicator
-{
-	overflow: hidden;
-	position: absolute;
-	top:0;
-	bottom:0;
-	left:0;
-	right:0;
-	background-image:url('../assets/homepage/loader.gif');
-	background-position:center center;	
-	background-repeat:no-repeat;
 }
 
 .snap {
