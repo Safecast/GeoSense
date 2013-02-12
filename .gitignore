@@ -37,3 +37,5 @@ Thumbs.db
 node_modules/*
 node_modules/.bin/express
 config-prod.js
+
+prod-scripts
