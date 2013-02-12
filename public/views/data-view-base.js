@@ -77,16 +77,6 @@ define([
 								number: formatLargeNumber(this.collection.originalCount),
 								total: formatLargeNumber(this.collection.fullCount)
 							});
-			    			if (this.mapLayer.pointCollection.sync) {
-								status += ' <span class="updated micro">' + __('updated %(date)s', {
-									date: new Date(
-										this.mapLayer.pointCollection.reduce ? 
-										(this.mapLayer.pointCollection.updatedAt < this.mapLayer.pointCollection.lastReducedAt || !this.mapLayer.pointCollection.lastReducedAt ?
-											this.mapLayer.pointCollection.updatedAt : this.mapLayer.pointCollection.lastReducedAt) 
-										: this.mapLayer.pointCollection.updatedAt)
-											.format(locale.formats.DATE_SHORT)
-								}) + '</span>';
-			    			}
 							var url = this.collection.url();
 							status += ' <a target="_blank" class="download-collection ' + this.mapLayer.pointCollection._id +'" href="' 
 								+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
@@ -390,9 +380,25 @@ define([
 				this.$('.description').hide();
 			}
 
-			if (this.mapLayer.pointCollection.source) {
+			if (this.mapLayer.pointCollection.source || this.mapLayer.pointCollection.sync) {
 				this.$('.source').show();
-				this.$('.source').html(__('Source: %(source)s', this.mapLayer.pointCollection));
+				var source
+					sourceLink = this.mapLayer.pointCollection.sourceUrl && this.mapLayer.pointCollection.sourceUrl != '' ?
+						'<a href="%(sourceUrl)s">%(source)s</a>'.format(this.mapLayer.pointCollection) : this.mapLayer.pointCollection.source;
+				if (this.mapLayer.pointCollection.source) {
+					source = __('Source: %(source)s', {source: sourceLink});
+				}
+    			if (this.mapLayer.pointCollection.sync) {
+					source += ' <span class="updated micro">(' + __('updated %(date)s', {
+						date: new Date(
+							this.mapLayer.pointCollection.reduce ? 
+							(this.mapLayer.pointCollection.updatedAt < this.mapLayer.pointCollection.lastReducedAt || !this.mapLayer.pointCollection.lastReducedAt ?
+								this.mapLayer.pointCollection.updatedAt : this.mapLayer.pointCollection.lastReducedAt) 
+							: this.mapLayer.pointCollection.updatedAt)
+								.format(locale.formats.DATE_SHORT)
+					}) + ')</span>';
+    			}
+				this.$('.source').html(source);
 			} else {
 				this.$('.source').hide();
 			}

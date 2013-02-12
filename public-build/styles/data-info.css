@@ -8,18 +8,14 @@
 .data-info .legend .unit, .data-info h5 {
 	font-weight: bold;
 }
-.data-info .updated {
-	display: inline-block;
-	float: right;
-	color: #666;
-}
 .data-info .meta {
 	font-size: 11px;
 	padding: .2em .75em .4em .75em;
 	color: #eee;
 }
-.data-info .meta.source {
+.data-info .meta.source, .data-info .meta.source a {
 	color: #aaa;
+	line-height: 1.5em;
 }
 .data-legend .histogram {
 	display: none;
