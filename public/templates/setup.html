@@ -7,7 +7,8 @@
 
   <ul class="nav nav-tabs">
     <li class="active"><a href="#setup-urls" data-toggle="tab">Map URLs</a></li>
-    <li><a id="tab-setup-metadata" href="#setup-metadata" data-toggle="tab">Edit map info</a></li>
+    <li><a id="tab-setup-metadata" href="#setup-metadata" data-toggle="tab">Edit Map Info</a></li>
+    <li><a id="tab-setup-metadata" href="#setup-settings" data-toggle="tab">Map Settings</a></li>
     <li><a id="tab-setup-metadata" href="#setup-custom-domain" data-toggle="tab">Custom domain</a></li>
   </ul>
 
@@ -16,7 +17,7 @@
       <div class="tab-pane active" id="setup-urls">
         <p>You'll be able to access this map from the following URLs. We will email you this information if you <a href="#" class="enter-email">enter your email address</a> on the next tab.</p>
         <fieldset class="urls">
-          <label class="title"><i class="icon-pencil"></i> ADMIN URL – keep this link private:</label>
+          <label class="title"><i class="icon-wrench"></i> ADMIN URL – keep this link private:</label>
           <input class="map-admin-url" readonly="readonly"></input>
           <label class="title"><i class="icon-eye-open"></i> PUBLIC URL – share this link with others:</label>
           <input class="map-url" readonly="readonly"></input>
@@ -45,7 +46,7 @@
             <input name="linkURL"></input>
           </div>
           <div>
-            <label class="title">Link Title</label>
+            <label class="title">Link Text</label>
             <input name="linkTitle"></input>
           </div>
           <div>
@@ -54,6 +55,7 @@
           </div>
         </fieldset>
       </div>
+
       <div class="tab-pane" id="setup-custom-domain">
         <fieldset>
           <label class="title">Your custom domain name</label>
@@ -61,6 +63,18 @@
           <p>If you would like to have your custom domain point to this map, you can enter the domain name here. Please notice that you will have to set up your domain and point it to this application for this setting to have any effect.</p>
         </fieldset>
       </div>
+
+      <div class="tab-pane" id="setup-settings">
+        <fieldset>
+          <p>
+            <button class="btn" id="savePosition" disabled="disabled">Save current map position as default</button>
+          </p>
+          <p>
+            <button class="btn" id="saveStyle" disabled="disabled">Save current map style as default</button>
+          </p>
+        </fieldset>
+      </div>
+
     </div>
   </form>
 

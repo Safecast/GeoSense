@@ -12,6 +12,7 @@ define([
 	'views/map-layer-editor-view',
 	'views/data-legend-view',
 	'views/data-library-view',
+	'views/data-import-view',
 	'views/modal-view',
 	'views/share-view',
 	'collections/map-point-collection',
@@ -21,7 +22,8 @@ define([
 ], function($, _, Backbone, HomepageView, HeaderView, 
 	SetupView, MapOLView, LayerPanelView, DataDetailView,
 	MapInfoView, MapLayerEditorView,
-	DataLegendView, DataLibraryView, ModalView, ShareView,
+	DataLegendView, DataLibraryView, DataImportView,
+	ModalView, ShareView,
 	MapPointCollection, Map, Point, MapLayer) {
 	
 	var AppRouter = Backbone.Router.extend({
@@ -653,6 +655,14 @@ define([
 					}});
 				}
 			}*/
+		},
+
+		toggleDataImport: function() 
+		{
+			if (!this.dataImportView) {
+				this.dataImportView = new DataImportView({vent: this.vent}).render();
+			}
+	        this.dataImportView.show();
 		},
 
 		updateVisibleDate: function(fromDate, toDate) 
