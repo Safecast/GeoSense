@@ -507,12 +507,15 @@ define([
 			this.mapInfoView.show();
 	    },
 
-	    showDataLibrary: function() 
+	    toggleDataLibrary: function() 
 	    {
 			if (!this.dataLibraryVisible) {
 				this.dataLibraryView = new DataLibraryView();
 			    this.$mainEl.append(this.dataLibraryView.render().el);
 				this.dataLibraryVisible = true;
+			} else {
+				this.dataLibraryView.remove();
+				this.dataLibraryVisible = false;
 			}		
 	    },
 

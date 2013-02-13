@@ -18,8 +18,10 @@ define([
 			'click #postFacebook' : 'postFacebookClicked',
 			'click #postTwitter' : 'postTwitterClicked',
 			'click #addDataButton' : 'addDataButtonClicked',
-			'click #setupButton' : 'setupButtonClicked',
-			'click #graphButton' : 'graphButtonClicked',
+			'click .map-tool.setup' : 'setupButtonClicked',
+			'click .map-tool.add-data' : 'addDataButtonClicked',
+			'click .map-tool.upload' : 'uploadButtonClicked',
+			'click .map-tool.timeline' : 'timelineButtonClicked',
 			'click #mapView a' : 'mapViewToggleClicked',
 			'click #viewBase .dropdown-menu a' : 'viewBaseToggleClicked',
 			'click #viewStyle .dropdown-menu a' : 'viewStyleToggleClicked',
@@ -45,12 +47,10 @@ define([
 			$(this.el).html(this.template());
 			this.updateMapInfo();
 			
-			if (!app.isMapAdmin())
-			{
-				this.$('#setupButton').remove();
-				this.$('#graphButton').css("right",270);
-			}
-			
+			if (!app.isMapAdmin()) {
+				this.$('.admin-tool').remove();
+			} 
+
 	        return this;
 	    },
 
@@ -113,23 +113,8 @@ define([
 			evt.preventDefault();
 		},
 		
-		graphButtonClicked: function(evt) 
+		timelineButtonClicked: function(evt) 
 		{
-			if(app.graphVisible == true)
-			{
-				app.graphVisible = false;
-				
-				$('.graph-view').removeClass('visible');
-				$('.header-view .graph').removeClass('active');
-			}
-			else
-			{
-				app.graphVisible = true;
-				
-				$('.graph-view').addClass('visible');
-				$('.header-view .graph').addClass('active');
-				this.vent.trigger("drawGraph"); 
-			}
 			evt.preventDefault();
 		},
 		
@@ -141,10 +126,15 @@ define([
 
 		addDataButtonClicked: function(evt)
 		{
-			app.showDataLibrary();
+			app.toggleDataLibrary();
 			evt.preventDefault();
 		},
-		
+
+		uploadButtonClicked: function(evt)
+		{
+			evt.preventDefault();
+		},
+
 		aboutGeoSenseClicked: function(evt) 
 		{	
 			app.showAbout();
