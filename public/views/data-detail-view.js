@@ -46,9 +46,9 @@ define([
 			var minDate = isAggregate ? datetime.min : datetime;
 
 			var maxDateFormatted = maxDate ? 
-				new Date(maxDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
+				new Date(maxDate).format(mapLayer.layerOptions.datetimeFormat || locale.formats.DATE_SHORT) : null;
 			var minDateFormatted = minDate ? 
-				new Date(minDate).format(mapLayer.options.datetimeFormat || locale.formats.DATE_SHORT) : null;
+				new Date(minDate).format(mapLayer.layerOptions.datetimeFormat || locale.formats.DATE_SHORT) : null;
 			var valFormatter = mapLayer.sessionOptions.valFormatter;
 
 			var data = [];
@@ -81,8 +81,8 @@ define([
 			TODO: Fix with formatters
 			if (altVal) {
 				for (var i = 0; i < altVal.length; i++) {
-					var altValFormat = mapLayer.options.altValFormat.length > i ?
-						mapLayer.options.altValFormat[i] : null;
+					var altValFormat = mapLayer.layerOptions.altValFormat.length > i ?
+						mapLayer.layerOptions.altValFormat[i] : null;
 					data.push({
 						label: altValFormat && altValFormat.unit ? altValFormat.unit : pointCollection.altUnit[i], 
 						value: formatVal(altVal[i], altValFormat)
@@ -93,7 +93,7 @@ define([
 
 			var metadata = pointCollection.reduce ? [
 				{
-					label: __('no. of ') + (mapLayer.options.itemTitlePlural || 'samples'),
+					label: __('no. of ') + (mapLayer.layerOptions.itemTitlePlural || 'samples'),
 					value: formatLargeNumber(count)
 				}
 			] : [];

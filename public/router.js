@@ -6,11 +6,12 @@ define([
 	'views/header-view',
 	'views/setup-view',
 	'views/map-ol-view',
-	'views/data-info-view',
+	'views/layer-panel-view',
 	'views/data-detail-view',
 	'views/map-info-view',
 	'views/map-layer-editor-view',
 	'views/data-legend-view',
+	'views/data-library-view',
 	'views/modal-view',
 	'views/share-view',
 	'collections/map-point-collection',
@@ -18,9 +19,9 @@ define([
 	'models/point',
 	'models/map_layer'
 ], function($, _, Backbone, HomepageView, HeaderView, 
-	SetupView, MapOLView, DataInfoView, DataDetailView,
+	SetupView, MapOLView, LayerPanelView, DataDetailView,
 	MapInfoView, MapLayerEditorView,
-	DataLegendView, ModalView, ShareView,
+	DataLegendView, DataLibraryView, ModalView, ShareView,
 	MapPointCollection, Map, Point, MapLayer) {
 	
 	var AppRouter = Backbone.Router.extend({
@@ -318,15 +319,15 @@ define([
 
 				var mapLayer = this.mapInfo.layers[i];
 				mapLayer.sessionOptions = {
-					visible: mapLayer.options.visible
+					visible: mapLayer.layerOptions.visible
 				};
 
-				if (mapLayer.options.valFormat) {
+				if (mapLayer.layerOptions.valFormat) {
 					mapLayer.sessionOptions.valFormatters = [];
-					for (var j = 0; j == 0 || j < mapLayer.options.valFormat.length; j++) {
+					for (var j = 0; j == 0 || j < mapLayer.layerOptions.valFormat.length; j++) {
 						var valFormat = null;
-						if (j < mapLayer.options.valFormat.length) {
-							valFormat = mapLayer.options.valFormat[j];
+						if (j < mapLayer.layerOptions.valFormat.length) {
+							valFormat = mapLayer.layerOptions.valFormat[j];
 						}
 						if (!valFormat) {
 							valFormat = {};
@@ -426,8 +427,8 @@ define([
 	        var snap = $('<div class="snap top" /><div class="snap right" />');
 			this.$mainEl.append(snap);
 
-	        this.dataInfoView = new DataInfoView({vent: this.vent}).render();
-	        this.attachPanelView(this.dataInfoView);
+	        this.layerPanelView = new LayerPanelView({vent: this.vent}).render();
+	        this.attachPanelView(this.layerPanelView);
 
 	        /*this.timelineView = new TimelineView({vent: this.vent});
 			$(mapEl).append(this.timelineView.render().el);*/
@@ -504,6 +505,15 @@ define([
 	    {
 			//$(this.mapInfoView.el).show();
 			this.mapInfoView.show();
+	    },
+
+	    showDataLibrary: function() 
+	    {
+			if (!this.dataLibraryVisible) {
+				this.dataLibraryView = new DataLibraryView();
+			    this.$mainEl.append(this.dataLibraryView.render().el);
+				this.dataLibraryVisible = true;
+			}		
 	    },
 
 	    showShareLink: function()
@@ -625,7 +635,7 @@ define([
 			//	app.pollForNewPointCollection(pointCollectionId, INITIAL_POLL_INTERVAL);
 			//}
 
-			$('.data-info').show();
+			$('.layer-panel').show();
 
 			//Fetch time based point collections for graph
 			/*if (1||data.timeBased) {
@@ -660,7 +670,7 @@ define([
 		        this.dataDetailView = new DataDetailView({vent: this.vent}).render();
 			}
 	        this.attachPanelView(this.dataDetailView);
-			this.dataDetailView.snapToView(this.dataInfoView, 'left', true)
+			this.dataDetailView.snapToView(this.layerPanelView, 'left', true)
 				.hide().show('fast');
 			this.dataDetailView.showDetailData(pointCollectionId, model);
 		},
@@ -698,7 +708,7 @@ define([
 				} else {
 					if (!this.mapLayerEditorViews[k].$el.is(':visible')) {
 						this.attachPanelView(this.mapLayerEditorViews[k]);
-						this.mapLayerEditorViews[k].snapToView(this.dataInfoView, 'left', true)
+						this.mapLayerEditorViews[k].snapToView(this.layerPanelView, 'left', true)
 							.hide().show('fast');
 					} else {
 						this.mapLayerEditorViews[k].hide('fast', function() {
@@ -811,6 +821,7 @@ define([
 
 		getMapLayer: function(layerId)
 		{
+			console.log(this.mapLayersById);
 			return this.mapLayersById[layerId];
 		},
 		
@@ -835,7 +846,7 @@ define([
 
 			var dataLegendView = new DataLegendView(viewOpts);
 			var el = dataLegendView.render().el;
-			$('#data-info-view .accordion').append(el);
+			$('#layer-panel-view .accordion').append(el);
 			//$('.collapse', el).collapse('show');
 		},
 

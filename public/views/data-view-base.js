@@ -142,6 +142,7 @@ define([
 			$(this.el).html(this.template());
 			this.$(".status").hide();
 			$(this.el).addClass(this.mapLayer.pointCollection._id);
+			$(this.el).attr('data-id', this.mapLayer._id);
 					
 			if (this.title != '') {
 				dataTitle = this.title;
@@ -226,7 +227,7 @@ define([
 			var yRatio = minY0 / maxY;
 
 			var maxYRatio;
-			if (self.mapLayer.options.cropDistribution) {
+			if (self.mapLayer.layerOptions.cropDistribution) {
 				maxYRatio = 1 / graphH * CROP_DISTRIBUTION_RATIO;
 			}
 
@@ -323,7 +324,7 @@ define([
 		setParameters: function()
 		{
 			var self = this;
-			var options = this.mapLayer.options;
+			var options = this.mapLayer.layerOptions;
 
 			this.colors = app.getMapLayer(this.mapLayer._id).getNormalizedColors();
 			this.colorType = options.colorType;
@@ -373,9 +374,9 @@ define([
 				$(this.el).addClass('hidden');
 			}
 
-			if (this.mapLayer.options.description) {
+			if (this.mapLayer.layerOptions.description) {
 				this.$('.description').show();
-				this.$('.description').html(this.mapLayer.options.description);
+				this.$('.description').html(this.mapLayer.layerOptions.description);
 			} else {
 				this.$('.description').hide();
 			}
@@ -460,7 +461,7 @@ define([
 			}
 
 			if (rebuildColorBar && this.$('.color-bar').length) {
-				if (this.mapLayer.options.histogram) {
+				if (this.mapLayer.layerOptions.histogram) {
 					this.initHistogram();
 				}
 				var items = [];
@@ -562,6 +563,8 @@ define([
 				}
 			});
 
+			this.updateStatus();
+
 			if (self.visible) {
 				this.$('.icon.visibility.toggle').addClass('icon-eye-open');
 				this.$('.icon.visibility.toggle').removeClass('icon-eye-close');
@@ -574,7 +577,6 @@ define([
 				}
 			}
 
-			this.updateStatus();
 			this.updateToggleState();
 		},
 
@@ -591,8 +593,8 @@ define([
 					this.visible = !this.visible;
 				}
 			}
-			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
 			this.updateLegend();
+			this.vent.trigger("toggleLayerVisibility", this.mapLayer.pointCollection._id, this.visible);
 			if (evt) evt.preventDefault();
 		}
 

@@ -10,7 +10,6 @@ var config = require('../../config.js'),
 var Point = models.Point,
 	PointCollection = models.PointCollection,
 	Map = models.Map,
-	MapLayer = models.MapLayer,
 	LayerOptions = models.LayerOptions,
 	User = models.User,
 	handleDbOp = utils.handleDbOp;
@@ -35,7 +34,7 @@ var MapAPI = function(app)
 					break;
 			}
 			Map.find(query, null, options)
-				.run(function(err, maps) {
+				.exec(function(err, maps) {
 					if (handleDbOp(req, res, err, maps)) return;
 					var preparedMaps = [];
 					for (var i = 0; i < maps.length; i++) {
@@ -45,20 +44,9 @@ var MapAPI = function(app)
 				});
 		});
 
-		//Returns the collections associated with a unique map by map _id
-		/*
-		app.get('/api/maps/:mapid' , function(req, res){
-			
-			PointCollection.find({_id : req.params.mapid}, function(err, data){
-				if (!err) {
-					res.send(data);
-				} else
-				{
-					res.send("oops",500);
-				}
-			});
-		});
-		*/
+		function sortByPosition(arr) {
+			return arr.sort(function(a, b) { return a.position - b.position });
+		}
 
 		function prepareMapResult(req, map) {
 			map.adjustScales();
@@ -71,16 +59,9 @@ var MapAPI = function(app)
 					m[k] = obj[k];
 				}
 				if (k == 'layers') {
+					m[k] = sortByPosition(m[k]);
 					for (var i = 0; i < m[k].length; i++) {
 						delete m[k][i].pointCollection.importParams;
-					}
-					// TODO: Deprecated conversion to 'collections'
-					m['collections'] = [];
-					for (var i = 0; i < obj[k].length; i++) {
-						m['collections'].push({
-							options: obj[k][i].options,
-							collectionid: obj[k][i].pointCollection._id
-						});
 					}
 				}
 			}
@@ -91,13 +72,14 @@ var MapAPI = function(app)
 		app.get('/api/map/:publicslug', function(req, res){
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
+				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
-				.run(function(err, map) {
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
-					console.log(map);
-			       	res.send(prepareMapResult(req, map));
+					var preparedMap = prepareMapResult(req, map);
+					console.log(preparedMap);
+			       	res.send(preparedMap);
 				});
 		});
 
@@ -106,10 +88,10 @@ var MapAPI = function(app)
 		app.get('/api/map/admin/:adminslug', function(req, res) {	
 			Map.findOne({adminslug: req.params.adminslug})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
+				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
-				.run(function(err, map) {
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map')) return;
 					permissions.canAdminMap(req, map, true);
 					req.session.user = map.createdBy;
@@ -172,10 +154,10 @@ var MapAPI = function(app)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
+				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
-				.run(function(err, map) {
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					var fields = ['title', 'description', 'author', 
@@ -228,10 +210,10 @@ var MapAPI = function(app)
 								// find again since createdBy and modifiedBy won't be populated after map.save()
 								Map.findOne({_id: req.params.mapid})
 									.populate('layers.pointCollection')
-									.populate('layers.options')
+									.populate('layers.layerOptions')
 									.populate('createdBy')
 									.populate('modifiedBy')
-									.run(function(err, map) {
+									.exec(function(err, map) {
 										if (handleDbOp(req, res, err, map, 'map')) return;
 									 	res.send(prepareMapResult(req, map));
 									 	if (prevEmail != user.email && config.SMTP_HOST) {
@@ -262,12 +244,12 @@ var MapAPI = function(app)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
-				.run(function(err, map) {
+				.populate('layers.layerOptions')
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					while (map.layers.length > 0) {
-						map.layers[0].options.remove();
+						map.layers[0].layerOptions.remove();
 						map.layers[0].remove();
 					}
 
@@ -287,54 +269,49 @@ var MapAPI = function(app)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
-				.run(function(err, map) {
+				.populate('layers.layerOptions')
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-
 					console.log('updating layer ' + req.body._id + ' for map '+map.publicslug);
-
-					var options = req.body.options;
-
-					var colors = req.body.options.colors;
-					if (!Array.isArray(colors)) {
-						colors = [];
-					}
-
-					for (var i = 0; i < colors.length; i++) {
-						var c = colors[i];
-						c.position = c.position.match(/^[0-9]+(\.[0-9]+)?%?$/) ?
-							c.position : '0%';
-						c.color = c.color.match(/^#([a-fA-F0-9]{2}){3}$/) ?
-							c.color : '#000000';
-					}
-					// sort by position
-					colors.sort(function(a, b) { return (a.position - b.position) });
-					options.colors = colors;
-
-					for (var i = 0; i < map.layers.length; i++) {
-						if (map.layers[i]._id.toString() == req.params.layerId) {
-							for (var k in options) {
-								map.layers[i].options[k] = options[k];
+					var mapLayer = map.layers.id(req.params.layerId);
+					if (mapLayer) {
+						for (var k in req.body.layerOptions) {
+							if (k[0] != '_') {
+								mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
 							}
-							map.layers[i].options.save(function(err) {
-								// prefix validation errors from 'options' field
-								if (err && err.name == 'ValidationError') {
-									var patchedErrors = {};
-									for (var k in err.errors) {
-										patchedErrors['options.' + k] = _.cloneextend(err.errors[k], {
-											path: 'options.' + err.errors[k].path
-										});
-									}
-									err.errors = patchedErrors;
-								}
-								// if no error, return layer
-								if (!handleDbOp(req, res, err, true)) {
-									console.log('layer options updated', options);
-									res.send(map.layers[i]);
-								}
-							});
-							return;
 						}
+						mapLayer.layerOptions.save(function(err, opts) {
+							if (!handleDbOp(req, res, err, true)) {
+								console.log('layer options updated');
+								
+								if (req.body.position != undefined) {
+									var newPosition = parseInt(req.body.position);
+									if (!isNaN(newPosition)) {
+										var newIndex = newPosition < 0 ? 0 : newPosition >= map.layers.length ? map.map.layers.length : newPosition,
+											sortedLayers = sortByPosition(map.layers),
+											oldIndex = sortedLayers.indexOf(mapLayer),
+											layerIds = sortedLayers.map(function(obj) { return obj._id });
+										var setIndex = function(arr, oldIndex, newIndex) { arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]); };
+										setIndex(layerIds, oldIndex, newIndex);
+										for (var j = 0; j < layerIds.length; j++) {
+											map.layers.id(layerIds[j]).set('position', j);
+											console.log(map.layers.id(layerIds[j]).pointCollection.title, map.layers.id(layerIds[j]).position);
+										}
+										// TODO: for some reason this is not saved
+										map.save(function(err, map) {
+											if (!handleDbOp(req, res, err, true)) {
+												console.log('layer position changed to ' + newPosition);
+												res.send(mapLayer);
+											}
+										});
+										return;
+									}
+								}
+
+								res.send(mapLayer);
+							}
+						});
+						return;
 					}
 
 					res.send('collection not bound', 409);
@@ -347,7 +324,7 @@ var MapAPI = function(app)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
-				.run(function(err, map) {
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					for (var i = 0; i < map.layers.length; i++) {
@@ -360,7 +337,7 @@ var MapAPI = function(app)
 				    PointCollection.findOne({_id: req.body.pointCollectionId, $or: [{active: true}, 
 				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 				    	.populate('defaults')
-				    	.run(function(err, collection) {
+				    	.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
 						    var defaults = collection.defaults.toObject();
@@ -368,15 +345,14 @@ var MapAPI = function(app)
 						    var options = new LayerOptions(defaults);
 
 						    options.save(function(err) {
-							    if (err) {
-									res.send('server error', 500);
-									return;
-								}
-							    var layer = new MapLayer({
-							    	_id: new mongoose.Types.ObjectId(),
+								if (handleDbOp(req, res, err, true)) return;
+								var sortedLayers = sortByPosition(map.layers);
+							    var layer = {
 							    	pointCollection: collection,
-							    	options: options._id
-							    });    
+							    	layerOptions: options._id,
+							    	position: (sortedLayers.length ? 
+							    		sortedLayers[sortedLayers.length - 1].position + 1 : 0)
+							    };    
 							    console.log(layer);
 
 						      	map.layers.push(layer);
@@ -389,8 +365,8 @@ var MapAPI = function(app)
 							        console.log("collection bound to map");
 									Map.findOne({_id: map._id})
 										.populate('layers.pointCollection')
-										.populate('layers.options')
-										.run(function(err, map) {
+										.populate('layers.layerOptions')
+										.exec(function(err, map) {
 										    if (!err) {
 										       	res.send(prepareMapResult(req, map));
 										    } else {
@@ -408,22 +384,12 @@ var MapAPI = function(app)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
-				.run(function(err, map) {
+				.populate('layers.layerOptions')
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-
-					for (var i = 0; i < map.layers.length; i++) {
-						if (map.layers[i]._id.toString() == req.params.layerId) {
-							map.layers[i].options.remove();
-							map.layers[i].remove();
-							break;
-						}
-					}
+					map.layers.id(req.params.layerId).remove();
 					map.save(function(err) {
-						if (err) {
-							res.send('server error', 500);
-							return;
-						}
+						if (handleDbOp(req, res, err, true)) return;
 						console.log('map layer deleted');
 						res.send('');
 					});

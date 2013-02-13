@@ -9,31 +9,30 @@ define([
 		
 		idAttribute: "_id",
 		
-		urlRoot: function() {
+		urlRoot: function() 
+		{
 			return this.map.url() + '/layer';
 		},
 
-	    initialize: function(attributes, options) {
+	    initialize: function(attributes, options) 
+	    {
 	        this.map = options.map;
 	        this.pointCollection = options.pointCollection;
 	    },
 
-	    getNormalizedColors: function(originalColors) {
-	    	var colors = [],
-	    		originalColors = originalColors || this.attributes.options.colors;
-	    	for (var i = 0; i < originalColors.length; i++) {
-	    		var c = originalColors[i],
-	    			p = parseFloat(c.position),
+	    getNormalizedColors: function(originalColors) 
+	    {
+	    	var self = this,
+	    		originalColors = originalColors || this.attributes.layerOptions.colors;
+	    	return originalColors.map(function(c) {
+	    		var p = parseFloat(c.position),
+	    			p = isNaN(p) ? 1 : p,
 	    			sc = (c.position || '') + '';
-	    		if (isNaN(p)) {
-	    			p = 1;
-	    		}
-	    		colors[i] = _.extend({}, c, {
+	    		return _.extend({}, c, {
 	    			position: sc[sc.length - 1] == '%' ?
-	    				p / 100 : (p - this.attributes.pointCollection.minVal) / (this.attributes.pointCollection.maxVal - this.attributes.pointCollection.minVal)
+	    				p / 100 : (p - self.attributes.pointCollection.minVal) / (self.attributes.pointCollection.maxVal - self.attributes.pointCollection.minVal)
 	    		});
-	    	}
-	    	return colors;
+	    	});
 	    }
 	});
 

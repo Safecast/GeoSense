@@ -21,8 +21,8 @@ define([
 		    this.template = _.template(templateHtml);
 
 			this.vent = options.vent;
-			_.bindAll(this, "dataInfoViewResized");
-		 	options.vent.bind("dataInfoViewResized", this.dataInfoViewResized);
+			_.bindAll(this, "layerPanelViewResized");
+		 	options.vent.bind("layerPanelViewResized", this.layerPanelViewResized);
 		},
 
 	    updateStatus: function() 
@@ -30,8 +30,8 @@ define([
 			DataLegendView.__super__.updateStatus.call(this);
 	    },
 
-		dataInfoViewResized: function(options) {
-			if (this.mapLayer.options.histogram) {
+		layerPanelViewResized: function(options) {
+			if (this.mapLayer.layerOptions.histogram) {
 				this.initHistogram();
 			}
 		},

@@ -25,6 +25,9 @@ define([
 
 			_.bindAll(this, "updateViewBase");
 		 	options.vent.bind("updateViewBase", this.updateViewBase);
+
+			_.bindAll(this, "mapLayerMoved");
+		 	options.vent.bind("mapLayerMoved", this.mapLayerMoved);
 		
 			Feature = OpenLayers.Feature.Vector;
 			Geometry = OpenLayers.Geometry;
@@ -304,7 +307,7 @@ define([
 	        };
 	        var temporaryStyle = {};
 
-			switch (collection.mapLayer.options.featureType) {
+			switch (collection.mapLayer.layerOptions.featureType) {
 				case FeatureType.POINTS:
 				
 					var style = new OpenLayers.Style({
@@ -436,7 +439,13 @@ define([
 			);
 			this.map.addControl(selectControl);
 			selectControl.activate();
-			
+		},
+
+		mapLayerMoved: function(layer) 
+		{
+			console.log('setLayerIndex', this.featureLayers[layer.attributes.pointCollection._id], layer.attributes.position);
+			this.map.setLayerIndex(this.featureLayers[layer.attributes.pointCollection._id], layer.attributes.position);
+			console.log(this.map.getLayerIndex(this.featureLayers[layer.attributes.pointCollection._id]));
 		},
 
 		add30kmtemp: function()
@@ -495,7 +504,7 @@ define([
 			var pts;
 			var geometry;
 
-			switch(collection.mapLayer.options.featureType) {
+			switch(collection.mapLayer.layerOptions.featureType) {
 				
 				default:
 					pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));

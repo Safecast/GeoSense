@@ -18,7 +18,7 @@ var PointAPI = function(app)
 			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 				if (!err && pointCollection) {
 					collectionName = 'r_points_hist-' + config.HISTOGRAM_SIZES[0];
-					var Model = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+					var Model = models.onTheFlyModel(collectionName);
 					var query = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 					console.log(query);
 					Model.find(query, function(err, datasets) {
@@ -51,7 +51,7 @@ var PointAPI = function(app)
 		app.get('/api/pointcollection/:id', function(req, res){
 			PointCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: config.DataStatus.IMPORTING}]})
 				.populate('defaults')
-				.run(function(err, pointCollection) {
+				.exec(function(err, pointCollection) {
 					if (!err && pointCollection) {
 						res.send(pointCollection);
 					} else {
@@ -77,10 +77,10 @@ var PointAPI = function(app)
 //			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 			Map.findOne({_id: req.params.mapid})
 				.populate('layers.pointCollection')
-				.populate('layers.options')
+				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
-				.run(function(err, map) {
+				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 					var pointCollection, mapLayer;
 					for (var i = map.layers.length - 1; i >= 0; i--) {
@@ -206,8 +206,8 @@ var PointAPI = function(app)
 						var originalCount = 0;
 						var maxReducedCount = 0;
 						var fullCount;
-						var reducedCollectionName = mapLayer.options.reduction ?
-							'r_points_' + mapLayer.options.reduction
+						var reducedCollectionName = mapLayer.layerOptions.reduction ?
+							'r_points_' + mapLayer.layerOptions.reduction
 							: 'r_points_loc-%(gridSize)s' + (timeGrid ? '_%(timeGrid)s' : '');
 						
 						var adjustKeys = function(obj, prefix, prefixLevel, level) {
@@ -239,14 +239,14 @@ var PointAPI = function(app)
 						}
 
 
-						if (mapLayer.options.queryOptions) {
+						if (mapLayer.layerOptions.queryOptions) {
 							queryOptions = _.extend(_.clone(config.API_RESULT_QUERY_OPTIONS), 
-								adjustKeys(mapLayer.options.queryOptions, reduce ? 'value' : null, 1));
+								adjustKeys(mapLayer.layerOptions.queryOptions, reduce ? 'value' : null, 1));
 						}
 
-						if (mapLayer.options.filterQuery) {
+						if (mapLayer.layerOptions.filterQuery) {
 							filterQuery = _.extend(filterQuery, 
-								adjustKeys(mapLayer.options.filterQuery, reduce ? 'value' : null));
+								adjustKeys(mapLayer.layerOptions.filterQuery, reduce ? 'value' : null));
 						}
 						
 						var dequeueBoxQuery = function() {
@@ -278,7 +278,7 @@ var PointAPI = function(app)
 							console.log('*** querying "' + collectionName + '" for '+pointCollection.get('title'), pointQuery, queryOptions, box);
 
 							if (!reduceKey) {
-								PointModel.find(pointQuery, [], queryOptions, function(err, datasets) {
+								PointModel.find(pointQuery, null, queryOptions, function(err, datasets) {
 									if (handleDbOp(req, res, err, datasets)) return;
 
 									for (var i = 0; i < datasets.length; i++) {
@@ -366,7 +366,7 @@ var PointAPI = function(app)
 									timeGrid: timeGrid,
 									gridSize: gridSize
 								});
-								PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+								PointModel = models.onTheFlyModel(collectionName);
 								//pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 								pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 								pointQuery = _.extend(pointQuery, filterQuery);
@@ -379,7 +379,7 @@ var PointAPI = function(app)
 									pointQuery = {'pointCollection': req.params.pointcollectionid};
 								} else {
 									collectionName = 'r_points_loc-0';
-									PointModel = mongoose.model(collectionName, new mongoose.Schema(), collectionName);
+									PointModel = models.onTheFlyModel(collectionName);
 									pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 								}
 								dequeueBoxQuery();

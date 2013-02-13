@@ -80,7 +80,7 @@
 	bottom: 40px;
 }
 
-.panel.data-info, .panel.data-detail {
+.panel.layer-panel, .panel.data-detail {
 	display: none;
 	width: 222px;
 }
@@ -133,14 +133,17 @@
 	-moz-border-radius:6px;
 	-webkit-border-radius:6px;
 	margin: 3px;
+}
+
+.panel .panel-header .frame, .panel .drag-handle {
 	cursor: move;
 }
 
 .panel .panel-header h3 {
 	float: left;
-	margin: 0px;
-	color: #ccc;
-	font-size: 13px;
+	margin-top: -2px;
+	color: #999;
+	font-size: 16px;
 	font-weight: normal;
 	padding: 0 15px 0 16px;
 }
@@ -164,7 +167,7 @@
 }
 
 .panel .panel-header .panel-controls {
-	margin: 1px 8px 0 0;
+	margin: 0 8px 0 0;
 }
 
 .panel .panel-header .panel-controls .icon {
@@ -184,7 +187,7 @@
 	background: #666;
 }
 
-.panel .panel-controls a, .data-info .data-legend .layer-controls .state-indicator {
+.panel .panel-controls a, .layer-panel .data-legend .layer-controls .state-indicator {
 	padding: 2px 2px 1px 2px;
 	display: inline-block;
 }

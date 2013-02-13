@@ -17,6 +17,7 @@ define([
 			'click #shareLink' : 'shareLinkClicked',
 			'click #postFacebook' : 'postFacebookClicked',
 			'click #postTwitter' : 'postTwitterClicked',
+			'click #addDataButton' : 'addDataButtonClicked',
 			'click #setupButton' : 'setupButtonClicked',
 			'click #graphButton' : 'graphButtonClicked',
 			'click #mapView a' : 'mapViewToggleClicked',
@@ -135,6 +136,12 @@ define([
 		setupButtonClicked: function(evt) 
 		{
 			app.showSetupView();
+			evt.preventDefault();
+		},
+
+		addDataButtonClicked: function(evt)
+		{
+			app.showDataLibrary();
 			evt.preventDefault();
 		},
 		

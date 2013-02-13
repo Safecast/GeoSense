@@ -686,7 +686,7 @@ ImportAPI.prototype.cli = {
 	'list-collections': function(params, callback, showHelp) 
 	{
 		if (utils.connectDB()) {
-			models.PointCollection.find({}).run(function(err, docs) {
+			models.PointCollection.find({}).exec(function(err, docs) {
 				if (!err) {
 					console.success('Existing collections:', docs.length);
 					docs.forEach(function(doc) {

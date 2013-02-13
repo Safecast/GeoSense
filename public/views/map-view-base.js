@@ -132,7 +132,7 @@ define([
 	    addOne: function(model, collectionId) 
 	    {
 			var c = this.collections[collectionId];
-			var options = this.collections[collectionId].mapLayer.options;
+			var options = this.collections[collectionId].mapLayer.layerOptions;
 			var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
 			var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
 			var val = model.get('val');
@@ -225,12 +225,12 @@ define([
 			var pointCollectionId = collection.pointCollectionId;
 			this.layerOptions[pointCollectionId] = {};
 			var opts = this.layerOptions[pointCollectionId];
-			opts.opacity = collection.mapLayer.options.opacity;
+			opts.opacity = collection.mapLayer.layerOptions.opacity;
 			var mapLayer = app.getMapLayer(collection.mapLayer._id);
-			switch (collection.mapLayer.options.colorType) {
+			switch (collection.mapLayer.layerOptions.colorType) {
 				case ColorType.PALETTE:
 				case ColorType.LINEAR_GRADIENT:
-					opts.colorGradient = new ColorGradient(mapLayer.getNormalizedColors(collection.mapLayer.options.colors));
+					opts.colorGradient = new ColorGradient(mapLayer.getNormalizedColors(collection.mapLayer.layerOptions.colors));
 					break;
 			}
 		},

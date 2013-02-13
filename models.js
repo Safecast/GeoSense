@@ -64,7 +64,7 @@ this.Shape = mongoose.model('Shape', new mongoose.Schema({
 this.Shape.schema.plugin(useTimestamps);
 this.Shape.schema.index({ws: '2d', en: '2d', shapeCollection: 1})
 
-this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
+/*this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
     color: {type: String, required: true},
     position: Number,
     interpolation: String,
@@ -77,6 +77,7 @@ this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
 this.ColorPalette = mongoose.model('ColorPalette', new mongoose.Schema({
     colors: {type: [this.ColorDefinition.schema]}
 }));
+*/
 
 this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     visible: {type: Boolean, required: true},
@@ -84,10 +85,11 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     colorType: {type: String, required: true, default: config.ColorType.LINEAR_GRADIENT},
     //colorPalettes: {type: [ColorPalette.schema], index: 1},
     colors: [{
-        color: {type: String, required: true},
-        position: String,
-        interpolation: {type: String, enum: ['linear', 'threshold']},
-        label: String
+        color: {type: String, required: true, match: /^#([a-fA-F0-9]{2}){3}$/},
+        position: {type: String, match: /^[0-9]+(\.[0-9]+)?%?$/},
+        interpolation: {type: String, enum: ['lerpRGB', 'threshold', ''], required: false},
+        label: String,
+        description: String
     }],
     reduction: String,
     opacity: {type: Number, required: true},
@@ -171,13 +173,14 @@ this.ShapeCollection = mongoose.model('ShapeCollection', new mongoose.Schema({
 
 this.ShapeCollection.schema.plugin(useTimestamps);
 
-this.MapLayer = mongoose.model('MapLayer', new mongoose.Schema({
-    _id: { type: mongoose.Schema.ObjectId },
+var MapLayerSchema = new mongoose.Schema({
+ //   _id: { type: mongoose.Schema.ObjectId },
     pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', index: 1 },
     shapeCollection: { type: mongoose.Schema.ObjectId, ref: 'ShapeCollection', index: 1 },
-    options: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
+    layerOptions: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
     type: {type: String, enum: [config.MapLayerType.POINTS, config.MapLayerType.SHAPES], required: true, default: config.MapLayerType.POINTS},
-}));
+    position: Number
+});
 
 this.Map = mongoose.model('Map', new mongoose.Schema({
     active: {type: Boolean, default: true},
@@ -198,7 +201,7 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
     },
     // TODO: Enforce privacy (currently unused because no user login required)
     status: {type: String, enum: [config.MapStatus.PRIVATE, config.MapStatus.PUBLIC], required: true, default: config.MapStatus.PUBLIC},
-    layers: {type: [this.MapLayer.schema], index: 1},
+    layers: [MapLayerSchema],
     createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
     modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
     createdAt: Date,
@@ -225,7 +228,7 @@ maxVal may have to be adjusted if the absolute position is lower or greater.
 this.Map.prototype.adjustScales = function() {
     var map = this;
     for (var i = 0; i < map.layers.length; i++) {
-        var colors = map.layers[i].options.colors;
+        var colors = map.layers[i].layerOptions.colors;
         var pointCollection = map.layers[i].pointCollection;
         // adjust minVal and maxVal so that abs position fits between them
         if (colors) {
@@ -279,6 +282,16 @@ this.Comment = mongoose.model('Comment', new mongoose.Schema({
     date: Date,
 }));
 
+
+var onTheFlyModels = {};
+
+this.onTheFlyModel = function(collectionName) {
+    if (!onTheFlyModels[collectionName]) {
+        onTheFlyModels[collectionName] = mongoose.model(
+            new mongoose.Types.ObjectId().toString(), new mongoose.Schema({}, {strict: false}), collectionName);
+    }
+    return onTheFlyModels[collectionName];
+}
 
 /*
 

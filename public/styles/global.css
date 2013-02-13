@@ -129,7 +129,7 @@ h1 {
 
 h2,
 h3, 
-fieldset label {
+fieldset label.title {
 /*	font-family: OswaldLight,sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
 	
@@ -138,9 +138,13 @@ fieldset label {
 	color: #353535;
 }
 
-fieldset label {
+fieldset label.title {
 	font-size:12pt;
-	color:#555;
+	color:#999;
+}
+
+fieldset p {
+	margin-bottom: .5em;
 }
 
 h4, h5, .condensed {

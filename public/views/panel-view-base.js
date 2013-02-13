@@ -97,7 +97,7 @@ define([
 				if ($(self.el).is('.extended')) {
 					self.setPanelState(true);
 				}
-				self.vent.trigger('dataInfoViewResized');
+				self.vent.trigger('layerPanelViewResized');
 				return false;
 			});
 

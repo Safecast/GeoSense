@@ -43,6 +43,9 @@ define([
 					    	$(this).addClass('active');
 				    	}
 			    	});
+				} else if ($(this).is('input[type=checkbox], input[type=radio]')) {
+					console.log('CHECKBOX', val, name);
+					$(this).attr('checked', val == true);
 				} else {
 					$(this).val(val);
 				}
@@ -53,7 +56,14 @@ define([
 		{
 			var values = {};
 			for (var name in this.modelInputs) {
-				values[name] = $(this.modelInputs[name]).val();
+				var from = $(this.modelInputs[name][0]),
+					val;
+				if ($(from).is('input[type=checkbox], input[type=radio]')) {
+					val = from.is(':checked');
+				} else {
+					val = from.val();
+				}
+				values[name] = val;
 			}
 			// utilizes model class and DeepModel if applicable to return expanded attrs
 			var model = new this.model.__proto__.constructor(this.model.attributes, {});
@@ -85,7 +95,8 @@ define([
 	    	// 'keydown .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	'click .preview': 'updateMapLayer',
 	    	'click .remove-color': 'removeColorClicked',
-	    	'click .add-color': 'addColorClicked'
+	    	'click .add-color': 'addColorClicked',
+	    	'change .model-input.visibility': 'visibilityChanged'
 	    },
 
 	    initialize: function(options) 
@@ -103,6 +114,8 @@ define([
 			this.initModelInputs();
 			this.initSliders();
 			this.populateFromModel();
+
+			this.$('.layer-title').text(this.model.attributes.pointCollection.title);
 
 			return this;
 	    },
@@ -140,7 +153,7 @@ define([
 	    populateFromModel: function()
 	    {
 			this.populateModelInputs();
-			this.$('.panel-header .title').text(this.model.get('options.title'));
+			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
 			this.populateColorTable();
 			this.setButtonState(false);
 			this.updateSliders();
@@ -149,7 +162,7 @@ define([
 	    getCompleteModelInputValues: function()
 	    {
 	    	var values = ModelEditorMixin.getModelInputValues.apply(this);
-	    	values.options.colors = this.getColorsFromTable();
+	    	values.layerOptions.colors = this.getColorsFromTable();
 	    	return values;
 	    },
 
@@ -166,13 +179,13 @@ define([
 	    	this.setButtonState(false);
 	    	this.model.save(this.getCompleteModelInputValues(), {
 	    		success: function(model, response, options) {
-	    			console.log('saved layer options');
+	    			console.log('saved layer');
 	    			self.populateFromModel();
 					self.vent.trigger('updateMapLayer', model.attributes);
 	    		},
 	    		error: function(model, xhr, options) {
 			    	self.setButtonState(true);
-	    			console.log('error saving layer options');
+	    			console.log('error saving layer');
 	    			self.handleValidationErrors(xhr);
 	    		}
 	    	});
@@ -189,7 +202,7 @@ define([
 		},
 
 	    featureTypeClicked: function(event) {
-	    	this.populateModelInput('options.featureType', $(event.currentTarget).val());
+	    	this.populateModelInput('layerOptions.featureType', $(event.currentTarget).val());
 	    	this.modelInputChanged(event);
 	    	return false;
 	    },
@@ -218,7 +231,7 @@ define([
 		    	this.$('.remove-color').attr('disabled', true);
 	    	}
 
-	    	var featureType = this.getCompleteModelInputValues().options.featureType;
+	    	var featureType = this.getCompleteModelInputValues().layerOptions.featureType;
 	    	this.$('.feature-settings').each(function() {
 	    		if (!$(this).hasClass(featureType)) {
 	    			$(this).hide();
@@ -246,8 +259,8 @@ define([
 	    {
 	    	var c = c || {};
 			var row = this.colorRowTemplate.clone();
-			$('[name=position]', row).val(c.position || '');
-			this.initColorPicker($('.color-picker', row), c.color);
+			$('[name=position]', row).val(c.position || '0%');
+			this.initColorPicker($('.color-picker', row), c.color || '#000000');
 			$('[name=interpolation] option', row).each(function() {
 				$(this).attr('selected', $(this).val() == c.interpolation || 
 					(c.interpolation == '' && $(this).val() == ColorGradient.prototype.interpolation.default));
@@ -262,7 +275,7 @@ define([
 	    	var self = this;
 	    	this.$('.color-palette tbody').empty();
 
-	    	var colors = this.model.get('options.colors');
+	    	var colors = this.model.get('layerOptions.colors');
 
 	    	for (var i = 0; i < colors.length; i++) {
 				var c = {
@@ -302,7 +315,13 @@ define([
 	    	this.addColorRow();
 			this.modelInputChanged();
 			return false;
-	    }
+	    },
+
+		visibilityChanged: function(event)
+		{
+			this.vent.trigger('toggleLayerVisibility', this.model.attributes.pointCollection._id, 
+				$(event.currentTarget).is(':checked'));
+		},
 
 
 	});
