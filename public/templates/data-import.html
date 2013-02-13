@@ -53,7 +53,7 @@
 	    			<span class="well clearfix">
 			    		<span class="from-field label" data-from="">
 			    			<a href="" class="remove"><span class="icon icon-white icon-remove-sign"></span></a>
-			    			<span class="name"></span> 
+			    			<span class="field-name"></span> 
 			    		</span>
 			    	</span>
 
@@ -80,11 +80,17 @@
 		<thead>
 	    	<tr>
 			    <th class="element-template">
-			    	<label class="title"><span class="name"></span>&nbsp;<a class="show-column-settings" href="#"><span class="icon icon-wrench half-opacity"></span></a></label>
-			    	<span class="well column-settings">
-			    		<label class="title field-type">Number</label>
-			    	</span>
+			    	<label class="title"><span class="field-title"></span>&nbsp;<a class="show-field-settings" href="#"><span class="icon icon-wrench half-opacity"></span></a></label>
 			    	<span class="well to-field clearfix" data-to=""></span>
+			    	<span class="field-settings">
+			    		<span class="title field-type">Number</span>
+						<label class="checkbox">
+						   	<input type="checkbox"> Skip empty
+						</label>
+						<label class="checkbox">
+						   	<input type="checkbox"> Skip zero
+						</label>
+    			    	</span>
 			    </th>
 	    	</tr>
 	    </thead>

@@ -65,18 +65,27 @@ define([
 			for (var k in this.fromFields) {
 				var f = this.fromFieldTemplate.clone();
 				f.removeClass('element-template');
-				$('.name', f).text(this.fromFields[k]);
+				$('.field-name', f).text(k);
 				$('.label', f).css('background-color', this.fromFieldColors[i % this.fromFieldColors.length]);
 				$('.from-field', f).attr('data-from', k);
 				this.$('.from-data thead').append(f).show();
 				i++;
 			}
 
+			var initClickHandler = function(f) {
+				$('.show-field-settings', f).click(function() {
+					$('.field-settings', f).toggle();
+					return false;
+				});
+			};
+
 			for (var k in this.toFields) {
 				var f = this.toFieldTemplate.clone();
 				f.removeClass('element-template');
-				$('.name', f).text(this.toFields[k]);
+				$('.field-title', f).text(this.toFields[k]);
 				$('.to-field', f).attr('data-to', k);
+				$('.field-settings', f).hide();
+				initClickHandler(f);
 				this.$('.to-data thead').append(f).show();
 			}
 

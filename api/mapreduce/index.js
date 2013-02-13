@@ -221,11 +221,12 @@ var runMapReduce = function(collection, reduced_collection, valueFields, mapRedu
 						console.log('* building index for '+field_name+' ...');
 						var index = {};
 						index[field_name] = indexes[k];
-						db.collection(reduced_collection).ensureIndex(index);
-						if (!utils.collectionHasIndex(db.collection(reduced_collection), index)) {
-							console.error('ERROR: could not build index');
-							return false;
-						}
+						db.collection(reduced_collection).ensureIndex(index, function() {
+							if (!utils.collectionHasIndex(db.collection(reduced_collection), index)) {
+								console.error('ERROR: could not build index');
+								return false;
+							}
+						});
 					}
 				}
 
