@@ -109,7 +109,8 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     description: String,
     histogram: {type: mongoose.Schema.Types.Mixed, default: true},
     itemTitle: String,
-    itemTitlePlural: String
+    itemTitlePlural: String,
+    cropDistribution: Boolean
 
     /*altValFormat: [{
         unit: {type: String, required: true},
