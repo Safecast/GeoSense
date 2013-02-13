@@ -14,7 +14,8 @@ require.config({
         deepextend: 'lib/backbone-deep-model/lib/underscore.mixin.deepExtend',
         deepmodel: 'lib/backbone-deep-model/src/deep-model',
         openlayers: 'lib/openlayers/OpenLayers-2.12/OpenLayers',
-        cloudmade: 'lib/openlayers/cloudmade'
+        cloudmade: 'lib/openlayers/cloudmade',
+        stamen: 'lib/openlayers/stamen'
   	},
 
     shim: {
@@ -34,13 +35,15 @@ require.config({
         'deepextend': {
             deps: ['underscore']
         },
+        'openlayers': {
+            exports: 'OpenLayers'
+        },
         'cloudmade': {
             deps: ['openlayers']
         },
-        'openlayers': {
-            exports: 'OpenLayers'
+        'stamen': {
+            deps: ['openlayers']
         }
-
     }
 
 });

@@ -7,7 +7,8 @@ define([
 	'text!templates/map-ol.html',
 	'views/map-view-base',
 	'openlayers',
-	'cloudmade'
+	'cloudmade',
+	'stamen'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase, OpenLayers) {
 	var MapOLView = MapViewBase.extend({
 
@@ -442,11 +443,23 @@ define([
 			selectControl.activate();
 		},
 
-		mapLayerMoved: function(layer) 
+		mapLayerMoved: function(layer, position, previousPosition) 
 		{
+			/*
 			console.log('setLayerIndex', this.featureLayers[layer.attributes.pointCollection._id], layer.attributes.position);
-			this.map.setLayerIndex(this.featureLayers[layer.attributes.pointCollection._id], layer.attributes.position);
-			console.log(this.map.getLayerIndex(this.featureLayers[layer.attributes.pointCollection._id]));
+			// has no effect
+			this.map.setLayerIndex(this.featureLayers[layer.attributes.pointCollection._id], layer.attributes.position + 1);
+
+			// TODO: all layers must have been added first
+			var setIndex = function(arr, oldIndex, newIndex) { arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]); };
+			var layers = [];
+			for (var i = 1; i < this.map.layers.length; i++) {
+				layers.push(this.map.layers[i]);
+				this.map.removeLayer(this.map.layers[i]);
+			}
+			setIndex(layers, previousPosition, position);
+			this.map.addLayers(layers);	
+			*/
 		},
 
 		add30kmtemp: function()

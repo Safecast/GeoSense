@@ -53,12 +53,13 @@ define([
 
 		layerMoved: function(event, ui)
 		{
-			var layer = app.getMapLayer($(ui.item).attr('data-id'));
+			var layer = app.getMapLayer($(ui.item).attr('data-id'))
+				previousPosition = layer.get('position');
 			layer.set({position: this.getSortableItemIndex(ui.item)}, {});
 			if (app.isMapAdmin()) {
 				layer.save();
 			}
-			this.vent.trigger('mapLayerMoved', layer);
+			this.vent.trigger('mapLayerMoved', layer, layer.get('position'), previousPosition);
 		}
 
 
