@@ -427,7 +427,16 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							doc.sourceId = doc.id;
 						}
 
-						var model = new Model(doc);
+						//var model = new Model(doc);
+						var PseudoModel = function(doc) {
+							this.doc = doc;
+							this.get = function(key) {
+								return this.doc[key];
+							}
+						}
+						// "emulate" a Mongoose Model instance
+						var model = new PseudoModel(doc);
+
 						var point = converter.convertModel(model, ToModel);
 						point.importJob = job;
 						var loc = point ? point.get('loc') : null;

@@ -157,7 +157,11 @@
 	display:none;
 }
 
-.data-import .show-column-settings {
+.data-import-view .show-field-settings {
 	display: inline-block;
-	margin-top: 8px;
+}
+
+.data-import-view .field-settings {
+	font-size: 12px;
+	line-height: 100%;
 }

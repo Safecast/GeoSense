@@ -74,8 +74,9 @@ var MapReduceKey = {
 		this.index = function(collection, field_name) {
 			var index = {};
 			index[field_name] = 1;
-			collection.ensureIndex(index);
-			return (utils.collectionHasIndex(collection, index));
+			collection.ensureIndex(index, function() {});
+			//return (utils.collectionHasIndex(collection, index));
+			return true;
 		};
 		return this;
 	},
@@ -94,8 +95,9 @@ var MapReduceKey = {
 		this.index = function(collection, field_name) {
 			var index = {};
 			index[field_name] = 1;
-			collection.ensureIndex(index);
-			return (utils.collectionHasIndex(collection, index));
+			collection.ensureIndex(index, function() {});
+			//return (utils.collectionHasIndex(collection, index));
+			return true;
 		};
 		return this;
 	},
@@ -110,8 +112,9 @@ var MapReduceKey = {
 		this.index = function(collection, field_name) {
 			var index = {};
 			index[field_name] = 1;
-			collection.ensureIndex(index);
-			return (utils.collectionHasIndex(collection, index));
+			collection.ensureIndex(index, function() {});
+			//return (utils.collectionHasIndex(collection, index));
+			return true;
 		};
 		return this;
 	},
@@ -145,8 +148,9 @@ var MapReduceKey = {
 		this.index = function(collection, field_name) {
 			var index = {};
 			index[field_name] = '2d';
-			collection.ensureIndex(index);
-			return (utils.collectionHasIndex(collection, index));
+			collection.ensureIndex(index, function() {});
+			//return (utils.collectionHasIndex(collection, index));
+			return true;
 		};
 		return this;
 	},
