@@ -1,0 +1,163 @@
+.data-import-view.modal {
+	width: 720px;
+}
+
+.data-import-view .modal-body .add .tab-content .input-large
+{
+	width:440px;
+	height:40px;
+	font-size:15pt;
+	line-height:28px;
+}
+
+.data-import-view .modal-body .add .tab-content .btn.large
+{
+	width:50px;
+	height:40px;
+}
+
+.data-import-view .modal-body .add .tab-content .btn.large p
+{
+	padding-top:10px;
+	font-size:10pt;
+	font-weight:bold;
+	color:#666;
+}
+
+.data-import-view .modal-body .add .well.form-inline .input-small
+{
+	width:180px;
+}
+
+.data-import-view .modal-body .add .well.form-inline .color-picker
+{
+	width:100px;
+}
+
+.data-import-view .modal-body table
+{
+	max-height: 100px;
+	height: 100px;
+	overflow: scroll;
+	width: 100%;
+}
+
+.data-import-view th {
+	border: none !important;
+}
+
+.data-import-view td.conversion-error {
+	color: #ff3333;
+}
+
+.data-import-view .modal-body table th, .data-import-view .modal-body table td {
+	padding: .4em;
+	width: 20%;
+	max-width: 200px;
+	overflow: hidden;
+}
+
+.data-import-view th {
+	vertical-align: top !important;
+}
+
+.data-import-view .from-field {
+	cursor: move;
+	display: block;
+	margin: 2px;	
+	float: left;
+	white-space: nowrap;
+	max-width: 120px;
+	overflow: hidden;
+	height: 18px;
+	text-align: right;
+}
+
+.data-import-view .from-field .remove:hover, .data-import-view .from-field .remove:active {
+	opacity: 1;
+}
+
+.data-import-view td {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12px;
+}
+
+.data-import-view .to-field {
+	-webkit-transition: background-color 300ms ease-out;
+	-moz-transition: background-color 300ms ease-out;
+	transition: background-color 300ms ease-out;
+}
+
+.data-import-view .to-field.highlight {
+	background-color: #ccefff;
+}
+
+.data-import-view .from-field .remove {
+	opacity: .75;
+	display: none;
+}
+
+.data-import-view .to-field .from-field {
+}
+
+.data-import-view .to-field .from-field .remove {
+	display: inline-block;
+}
+
+.data-import-view table .well {
+	display: block;
+	min-height: 28px;
+	margin: 0 0 .5em 0;
+	padding: 2px;
+}
+
+.data-import-view .to-field .from-field {
+}
+
+.drop-field.sortable .drag-field:last-child {
+	margin-right: .25em;
+}
+
+.data-import-view .modal-body .alert
+{
+	display:none;
+}
+
+.data-import-view label.title {
+    font-size: 18px;
+}
+
+.data-import-view .label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+    padding: .25em .5em .25em .5em;
+}
+
+.data-import-view .modal.large
+{
+
+}
+
+.data-import-view select
+{
+	width:523px;
+	opacity:.3;
+}
+
+.data-import-view .modal-body .add .nav.nav-tabs .label
+{
+	position:relative;
+	top:7px;
+	margin-right:10px;
+}
+
+.data-import-view .modal-footer .btn.btn-success
+{
+	display:none;
+}
+
+.data-import .show-column-settings {
+	display: inline-block;
+	margin-top: 8px;
+}

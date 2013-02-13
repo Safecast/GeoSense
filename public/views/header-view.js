@@ -132,6 +132,7 @@ define([
 
 		uploadButtonClicked: function(evt)
 		{
+			app.toggleDataImport();
 			evt.preventDefault();
 		},
 

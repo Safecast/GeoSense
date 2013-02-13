@@ -4,12 +4,13 @@ define([
 	'backbone',
 	'config',
 	'utils',
-	'text!templates/add-data.html',
-], function($, _, Backbone, config, utils, templateHtml) {
-	var AddDataView = Backbone.View.extend({
+	'text!templates/data-import.html',
+	'views/modal-view'
+], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+	var DataImportView = ModalView.extend({
 
 	    tagName: 'div',
-		className: 'add-data-view',
+		className: 'data-import-view modal fade',
 		
 	    events: {
 			'click #importButton': 'importButtonClicked',
@@ -25,6 +26,8 @@ define([
 	    },
 
 	    render: function() {
+	    	var self = this;
+
 			$(this.el).html(this.template());
 			var self = this;
 			this.$('.modal').addClass('large');
@@ -33,19 +36,29 @@ define([
 			this.toFieldTemplate = this.$('.to-data thead .element-template');
 			this.$('.element-template').remove();
 			
-			this.fromFieldColors = ['#c43c35', '#f89406', '#46a546', '#62cffc'];
+			this.fromFieldColors = ['#A52A2A', '#f89406', '#46a546', '#62cffc', '#87CEEB', '#FF7F50', '#DAA520', '#B8860B', '#c43c35', '#556B2F'];
 			this.fromFields = {
 				'location': 'location',
 				'Facility': 'Facility',
 				'val': 'val',
-				'year': 'year'
+				'year': 'year',
+				'bla': 'bla',
+				'foooo': 'asdasd',
+				'Long fucking field oh yeahhhhhh': 'Long',
+				'locasdation': 'location',
+				'Facsility': 'Facility',
+				'vadl': 'val',
+				'yesar': 'year',
+				'blsa': 'bla',
+				'fodooo': 'asdasd'
 			};
 
 			this.toFields = {
 				'loc': 'Point X,Y',
 				'val': 'Point Value',
 				'datetime':'Date',
-				'label': 'Point Label'
+				'label': 'Point Label',
+				'attributes': 'Attributes'
 			};
 
 			var i = 0;
@@ -75,7 +88,17 @@ define([
 				revert: "invalid",
 				helper: "clone",
 				connectToSortable: '.to-field',
-				stack: '.drag.label'
+				stack: '.drag.label',
+				start: function(event, ui) {
+					$(ui.helper).removeClass('half-opacity');
+					self.$('.to-field').addClass('highlight');
+				},
+				stop: function(event, ui) {
+					self.$('.to-field').removeClass('highlight');
+					$(ui).addClass('mapped');
+					self.$('.to-data .from-field').removeClass('half-opacity');
+					self.updateHandleStates();
+				}
 			});
 					
 			/*this.$('.drop-field').droppable( {
@@ -87,8 +110,24 @@ define([
 	        return this;
 	    },
 
+	    updateHandleStates: function()
+	    {
+	    	var self = this,
+	    		mapped = this.$('.to-data .from-field');
+	    	this.$('.from-data .from-field').each(function() {
+	    		for (var i = 0; i < mapped.length; i++) {
+	    			if ($(mapped[i]).attr('data-from') == $(this).attr('data-from')) {
+		    			$(this).addClass('half-opacity');
+		    			return;
+	    			}
+	    		}
+    			$(this).removeClass('half-opacity');
+	    	});
+	    },
+
 	    fromFieldRemoveClicked: function(event) {
 			$(event.currentTarget).closest('.from-field').remove();
+			this.updateHandleStates();
 			return false;
 	    },
 
@@ -163,7 +202,7 @@ define([
 			this.$('.modal-body .add').fadeOut(function(){
 				self.$('.modal-body .review').fadeIn(function(){
 					
-					$('.add-data-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
+					$('.data-import-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
 
 					var table;
 					for(var i = 0; i < 50; ++i) // 50 or data.length
@@ -177,7 +216,7 @@ define([
 						table += "</tr>";				
 					}
 
-					$('.add-data-view .modal-body .review .data-table .table').append(table);
+					$('.data-import-view .modal-body .review .data-table .table').append(table);
 						
 				});	
 			});
@@ -185,5 +224,5 @@ define([
 
 	});
 
-	return AddDataView;
+	return DataImportView;
 });
