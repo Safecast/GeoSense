@@ -12,7 +12,9 @@ require.config({
     	text: 'lib/require/text',
         locale: 'locale/locale.en',
         deepextend: 'lib/backbone-deep-model/lib/underscore.mixin.deepExtend',
-        deepmodel: 'lib/backbone-deep-model/src/deep-model'
+        deepmodel: 'lib/backbone-deep-model/src/deep-model',
+        openlayers: 'lib/openlayers/OpenLayers-2.12/OpenLayers',
+        cloudmade: 'lib/openlayers/cloudmade'
   	},
 
     shim: {
@@ -31,7 +33,14 @@ require.config({
         },
         'deepextend': {
             deps: ['underscore']
+        },
+        'cloudmade': {
+            deps: ['openlayers']
+        },
+        'openlayers': {
+            exports: 'OpenLayers'
         }
+
     }
 
 });
@@ -48,7 +57,7 @@ require([
     'lib/jquery/jquery.miniColors.min',
     'lib/colorpicker/js/colorpicker',
     'bootstrap',
-    'locale'
+    'locale',
 ], function($, _, Backbone, App, ui) {
 	// The "app" dependency is passed in as "App"
 	App.initialize();
