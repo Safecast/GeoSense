@@ -1,3 +1,5 @@
+// TODO: runImport should not handle req and res
+
 var config = require('../../config.js'),
 	models = require("../../models.js"),
 	permissions = require("../../permissions.js"),
@@ -23,12 +25,24 @@ var ImportAPI = function(app) {
 	            res.send('', 403);
 	            return;
 			}
+			var params = {};
+
+			var numberOrNull = function(val) {
+				var n = Number(val);
+				if (isNaN(n)) return null;
+				return n;
+			}
+
+			params.max = numberOrNull(req.body.max);
+			params.dry = req.body.preview || false;
+
 			// prevent arbitrary script inclusion
 			if (req.body.converter) {
-				req.body.converter = path.basename('' + req.body.converter);				
+				// TODO: check if exists
+				params.converter = path.basename('' + req.body.converter);				
 			}
 			if (req.body.format) {
-				req.body.format = path.basename('' + req.body.format);				
+				params.format = path.basename('' + req.body.format);				
 			}
 			// prevent arbitrary file import
 			req.body.path = null;
@@ -40,23 +54,69 @@ var ImportAPI = function(app) {
 				errors.url = {
 					message: 'URL is missing'
 				};
+			} else {
+				params.url = req.body.url;
 			}
 
-			var converter = conversion.PointConverterFactory(req.body.fields);
-			if (converter instanceof ValidationError) {
+			var converter = conversion.PointConverterFactory(req.body.fields, {
+				strict: !params.dry
+			});
+
+			if (!converter) {
+				valid = false;
+				errors['fields'] = {
+					message: 'No fields specified'
+				};
+			} else if (converter instanceof ValidationError) {
 				valid = false;
 				errors = _.cloneextend(errors, converter.errors);
 			} else {
-				req.body.converter = converter;
+				// TODO: pass in converter directly
+				params.fields = req.body.fields;
 			}
 
-			req.body.mapreduce = true;
+			if (req.body.mapreduce == null || req.body.mapreduce) {
+				params.mapreduce = !params.dry;
+			}
 
 			if (!valid) {
 				var err = new ValidationError(errors);
+				console.error(err);
 	            res.send(err, 403);
 			} else {
-				self.import(req.body, req, res);
+				var sendItems = req.body.preview ? [] : null;
+				self.import(params, req, res, function(err, collection) {
+					if (err) {
+						res.send(err, 403);
+						console.error(err);
+						return;
+					}
+					console.success('*** import request completed');
+					if (!req.body.background) {
+						res.send({
+							collection: collection,
+							items: sendItems
+						});
+					}
+				}, {
+					save: function(err, obj) {
+						//console.log('****', 'save', obj);
+					},
+					convert: function(err, result) {
+						//console.log('****', 'convert', result);
+						if (req.body.preview) {
+							sendItems.push(result.converted);
+						}
+					},
+					start: function(err, collection) {
+						if (req.body.background) {
+							console.success('import request started, performing in background and responding immediately');
+							res.send({
+								collection: collection,
+							});
+						}
+					}
+				});
 			}
 		});
 	}
@@ -75,12 +135,11 @@ optional params:
 	append
 	incremental
 */
-ImportAPI.prototype.import = function(params, req, res, callback)
+ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 {
 	var self = this;
-	if (!params) {
-		params = {};
-	}
+		params = params || {},
+		dataCallbacks = dataCallbacks || {};
 
 	var defaults = {
 		url: null, path: null, stream: null,
@@ -199,11 +258,10 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 	var importCount = 0;
 	var fieldNames;
 	var FIRST_ROW_IS_HEADER = params.format == 'csv';
-	var originalCollection = 'o_' + new mongoose.Types.ObjectId();
-	var Model = mongoose.model(originalCollection, new mongoose.Schema({ any: {} }), originalCollection);
-	
+
 	var runImport = function(collection) 
 	{
+		var sendItems;
 		if (!converter) {
 			converter = new Converter(params.fields);
 		}
@@ -228,7 +286,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 		if (req && req.session) {
 			collection.createdBy = collection.modifiedBy = req.session.user;
 		}
-		collection.save(function(err, collection) {
+
+		var collectionSave = !params.dry ?
+			collection.save : function(callback) { callback(false, collection) };
+
+		collectionSave.call(collection, function(err, collection) {
 			if (err) {
 				console.error(err.message);
 				if (res) {
@@ -241,7 +303,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 			}
 
 	    	var newCollectionId = collection.get('_id');
-	    	console.success('* saved '+collection.name+' "'+collection.get('title')+'" = '+newCollectionId);
+	    	if (!params.dry) {
+		    	console.success('*** running import for '+collection._id+' "'+collection.get('title'));
+	    	} else {
+		    	console.warn('*** dry run: data will not be saved');
+	    	}
 
 			var job = new models.Job({status: config.JobStatus.ACTIVE, type: config.JobType.IMPORT});
 			job.save(function(err, job) {
@@ -258,13 +324,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 
 		    	console.success('*** job started ***');
 
-				var response = {
-					'pointCollectionId': newCollectionId,
-				};
-			
-				if (res) {
-					res.send(response);
-				}
+				if (dataCallbacks.start) {
+					dataCallbacks.start(false, collection);
+				}			
 
 				var maxVal, 
 					minVal, 
@@ -296,7 +358,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					collection.numBusy = 0;
 					collection.reduce = collection.reduce || numSaved > 1000;
 					collection.status = !params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC;
-					collection.save(function(err) {
+
+					var collectionSave = !params.dry ?
+						collection.save : function(callback) { callback(false, collection) };
+
+					collectionSave.call(collection, function(err) {
 						if (err) {
 							console.error(err.message);
 							if (callback) {
@@ -327,7 +393,7 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 								new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
 							} else {
 								if (callback) {
-									callback(false);
+									callback(false, collection);
 								}
 							}
 						});
@@ -362,9 +428,9 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 					}
 				}
 
-				function makeSaveHandler(point, self) 
+				function makeSaveHandler(point, converted, self) 
 				{
-					return function(err, point) {
+					return function(err, result) {
 						if (err) {
 							console.error('Error saving point', err);
 						}
@@ -373,6 +439,10 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						numSaving--;
 						numSaved++;
 				    	postSave(self);
+
+				    	if (dataCallbacks.save) {
+							dataCallbacks.save(err, result);
+				    	}
 					}
 				}
 
@@ -437,8 +507,8 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						// "emulate" a Mongoose Model instance
 						var model = new PseudoModel(doc);
 
-						var point = converter.convertModel(model, ToModel);
-						point.importJob = job;
+						var conversionResult = converter.convertModel(model, ToModel, config),
+							point = conversionResult.model;
 						var loc = point ? point.get('loc') : null;
 						var doSave = point 
 							&& (!params.bounds || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
@@ -446,11 +516,16 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							&& (!params.to || point.get('datetime') <= params.to)
 							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
 
+						if (dataCallbacks.convert) {
+							dataCallbacks.convert(false, conversionResult);
+						}
+
 						if (doSave) {
 					    	if (self.readStream) {
 						    	self.readStream.pause();
 						    	paused = true;
 					    	}
+							point.importJob = job;
 							point.pointCollection = point.shapeCollection = collection;
 							point.created = new Date();
 							point.modified = new Date();
@@ -466,8 +541,12 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 							numSaving++;
 							importCount++;
 
-							var saveHandler = makeSaveHandler(point, self);
-							point.save(saveHandler);
+							var saveHandler = makeSaveHandler(point, conversionResult.converted, self);
+							if (!params.dry) {
+								point.save(saveHandler);
+							} else {
+								saveHandler(false, point);
+							}
 						} else {
 							if (point && params.break) {
 						    	debugStats('reached break point, ending', 'success', null, true);
@@ -482,23 +561,11 @@ ImportAPI.prototype.import = function(params, req, res, callback)
 						}
 
 						if (numRead == 1 || numRead % 5000 == 0) {
-					    	if (global.gc) {
-						    	// https://github.com/joyent/node/issues/2175
-						    	process.nextTick(function () {
-						    		var mem1 = process.memoryUsage();
-							    	debugStats('force garbage collection');
-									global.gc(true);
-									var mem2 = process.memoryUsage();
-							    	debugStats('memory usage: before ' + 
-							    		Math.round(mem1.rss / 1048576) + 'MiB, after: ' +
-							    		Math.round(mem2.rss / 1048576) + 'MiB, freed: ' +
-							    		Math.round((1 - mem2.rss / mem1.rss) * 100) + '%');
-								});
-					    	}
-
 					    	debugStats('update progress', 'info', (collection.numBusy ? Math.round(collection.progress / collection.numBusy * 100)+'%' : ''));
 					    	collection.progress = numSaved;
-					    	collection.save();
+					    	if (!params.dry) {
+						    	collection.save();
+					    	}
 						}
 					}
 			    }

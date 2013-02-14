@@ -204,6 +204,15 @@ Date.prototype.formatReplacements = {
   	},
   	b: function() { 
   		return locale.ABBR_MONTH_NAMES[this.getMonth()] 
+  	},
+  	H: function() {
+  		return lpad(this.getHours() + '', '0', 2);
+  	},
+  	i: function() {
+  		return lpad(this.getMinutes() + '', '0', 2);
+  	},
+  	s: function() {
+  		return lpad(this.getSeconds() + '', '0', 2);
   	}
 };
 

@@ -38,19 +38,23 @@ define([
 			
 			this.fromFieldColors = ['#A52A2A', '#f89406', '#46a546', '#62cffc', '#87CEEB', '#FF7F50', '#DAA520', '#B8860B', '#c43c35', '#556B2F'];
 			this.fromFields = {
-				'location': 'location',
 				'Facility': 'Facility',
-				'val': 'val',
-				'year': 'year',
-				'bla': 'bla',
-				'foooo': 'asdasd',
-				'Long fucking field oh yeahhhhhh': 'Long',
-				'locasdation': 'location',
-				'Facsility': 'Facility',
-				'vadl': 'val',
-				'yesar': 'year',
-				'blsa': 'bla',
-				'fodooo': 'asdasd'
+				'location':'location',
+				'blank': 'blank',
+				'month': 'month',
+				'Longitude': 'Longitude', 
+				'Latitude': 'Latitude',
+				'Captured Time': 'Captured Time',
+				'Value': 'Value',
+				'day': 'day',
+				'Process': 'Process',
+				'val':'val',
+				'Current Status':'Current Status',
+				'year':'year',
+				'Owner':'Owner',
+				'Country':'Country',
+				'ISO country code':'ISO country code'
+
 			};
 
 			this.toFields = {
@@ -73,10 +77,12 @@ define([
 			}
 
 			var initClickHandler = function(f) {
-				$('.show-field-settings', f).click(function() {
+				$('.show-field-settings', f).hide();
+				// solve with popover
+				/*$('.show-field-settings', f).click(function() {
 					$('.field-settings', f).toggle();
 					return false;
-				});
+				});*/
 			};
 
 			for (var k in this.toFields) {
@@ -90,7 +96,13 @@ define([
 			}
 
 			this.$('.to-field').sortable({
-				connectWith: '.to-field'
+				connectWith: '.to-field',
+				stop: function(event, ui) {
+					// prevent double loading since dropping from draggable into the sortable
+					// will also fire this event, but draggable.stop fires later than this one.
+					if (self.preventSortableEvents) return;
+					self.loadImportPreview();
+				}
 			});
 
 			this.$('.from-field').draggable({
@@ -99,16 +111,20 @@ define([
 				connectToSortable: '.to-field',
 				stack: '.drag.label',
 				start: function(event, ui) {
+					self.preventSortableEvents = true;
 					$(ui.helper).removeClass('half-opacity');
 					self.$('.to-field').addClass('highlight');
 				},
 				stop: function(event, ui) {
+					self.preventSortableEvents = false;
 					self.$('.to-field').removeClass('highlight');
-					$(ui).addClass('mapped');
 					self.$('.to-data .from-field').removeClass('half-opacity');
 					self.updateHandleStates();
+					self.loadImportPreview();
 				}
 			});
+
+			this.spinner = this.$('.spinner').html(new Spinner({radius:5,length:0,width:5,color:'#333',lines:7,speed:1.5}).spin().el).hide();
 					
 			/*this.$('.drop-field').droppable( {
 		      accept: '.drag-field',
@@ -137,10 +153,11 @@ define([
 	    fromFieldRemoveClicked: function(event) {
 			$(event.currentTarget).closest('.from-field').remove();
 			this.updateHandleStates();
+			this.loadImportPreview();
 			return false;
 	    },
 
-	    showAlert: function(html) {
+	    setAlert: function(html) {
 	    	if (!html) {
 				this.$('.modal-body .alert').hide();
 	    	} else {
@@ -149,42 +166,87 @@ define([
 	    	}
 	    },
 
-	    getFieldDefs: function() {
-			var defs = {};
+	    getFieldDefs: function() 
+	    {
+			var defs = {},
+				valid = false;
 			for (var k in this.toFields) {
-				console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
-				var fromFields = this.$('.to-field[data-to=' + k +'] .from-field');
-				defs[k] = {
-					fromFields: []
-				};
+				//console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
+				var fromFields = this.$('.to-field[data-to=' + k +'] .from-field'),
+					def = {
+						fromFields: []
+					};
 				for (var i = 0; i < fromFields.length; i++) {
-					defs[k].fromFields.push($(fromFields[i]).attr('data-from'));
+					def.fromFields.push($(fromFields[i]).attr('data-from'));
+				}
+				if (def.fromFields.length) {
+					defs[k] = def;
+					valid = true;
 				}
 			}
-			return defs;
+
+			var errors = [];
+			
+			// move validation to server
+			/*if (!defs.loc.fromFields.length) {
+				errors.push('Point X,Y is required');
+			}*/
+
+			return {fieldDefs: defs, errors: errors, valid: valid};
 	    },
 		
 		importButtonClicked: function() {
-			this.startImport();
+			if (this.isLoading) return false;
+			this.runImport({background: true});
+			return false;
 		},
 		
-		startImport: function()
+		runImport: function(params, options)
 		{
 			var self = this;
-			self.$('#importButton').attr('disabled', true);
+			var defs = this.getFieldDefs(),
+				fieldDefs = defs.fieldDefs || [],
+				options = options || {};
+
+			if (defs.errors.length) {
+				if (!options.silent) {
+					this.setAlert('<ul><li>' + defs.errors.join('</li></li>') + '</li></ul>');
+				}
+				if (!params.preview) {
+					return false;
+				}
+			}
+
+			if (!defs.valid && params.preview) {
+				self.updateImportPreview([]);
+				return;
+			}
+
+			console.log('Requesting import', params);
+			this.setAlert();
+			this.setLoading(true);
 			$.ajax({
 				type: 'POST',
 				url: '/api/import/',
-				data: {
+				data: _.extend({
 					url: 'https://dl.dropbox.com/s/03cqpv1camzz4a1/reactors.csv',
-					fields: this.getFieldDefs()
-				},
+					//url: 'https://dl.dropbox.com/s/rhggvuijnbbxk8r/earthquakes.csv',
+					//url: 'https://api.safecast.org/system/measurements.csv',
+					fields: fieldDefs,
+				}, params),
 				success: function(responseData) {
-					app.bindCollectionToMap(responseData.pointCollectionId);
-					$('#addDataModal').modal('hide');
-					self.close();
+					self.setLoading(false);
+					//app.bindCollectionToMap(responseData.pointCollectionId);
+					//$('#addDataModal').modal('hide');
+					if (params.preview) {
+						self.updateImportPreview(responseData.items);
+					} else {
+						app.saveNewMapLayer(responseData.collection._id);
+						self.close();
+					}
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
+					self.setLoading(false);
 					var data = $.parseJSON(jqXHR.responseText);
 					console.error('import failed', data.errors);
 					var lis = '';
@@ -192,13 +254,78 @@ define([
 						for (var k in data.errors) {
 							lis += '<li>' + data.errors[k].message + '</li>';
 						}
-						console.error('errors:', data.errors);
-						self.showAlert('<ul>' + lis + '</ul>');
+						if (!options.silent) {
+							self.setAlert('<ul>' + lis + '</ul>');
+						}
 					}
 					self.$('#importButton').attr('disabled', false);
+					if (params.preview) {
+						self.updateImportPreview([]);
+					}
 				}
 			});
 		},
+
+		setLoading: function(isLoading)
+		{
+			this.isLoading = isLoading;
+			this.$('#importButton').attr('disabled', isLoading);
+			if (isLoading) {
+				this.spinner.show();
+			} else {
+				this.spinner.hide();
+			}
+		},
+
+		loadImportPreview: function()
+		{
+			this.runImport({preview: true, max: 30}, {silent: true});
+		},
+
+		updateImportPreview: function(items)
+		{
+			var self = this;
+			var rows = items.reduce(function(rows, current) {
+				var row = ''
+				if (current) {
+					for (var k in self.toFields) {
+						var val = undefined, tdclass = undefined;
+						if (typeof current[k] == 'object' && current[k].error) {
+							tdclass = 'conversion-error';
+							switch (current[k].name){
+								case 'ValueSkippedError':
+									val = 'skipped';
+									break;
+								default:
+									val = 'error';
+							}
+						} else {
+							switch (k) {
+								default:
+									val = current[k];
+									break;
+								case 'datetime':
+									if (current[k]) {
+										val = new Date(current[k]);
+										if (val) {
+											val = val.format(locale.formats.DATE_TIME);
+										}
+									}
+							}
+							if (val == undefined || 
+								((typeof val == 'string' || Array.isArray(val)) && !val.length)) {
+									tdclass = 'conversion-blank';
+									val = 'blank';
+							}
+						}
+						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + val + '</td>';
+					}
+				}
+				rows.push('<tr>' + row + '</tr>');
+				return rows;
+			}, []);
+			this.$('.to-data tbody').html(rows.join(''));
+		}
 		
 /*		showDataReview: function(data)
 		{

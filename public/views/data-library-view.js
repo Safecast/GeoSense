@@ -97,7 +97,7 @@ define([
 		dataDrop: function (event, ui ) {
 		  	var draggable = ui.draggable;
 			var pointCollectionId = draggable.attr('data');
-			app.createMapLayer(pointCollectionId);
+			app.saveNewMapLayer(pointCollectionId);
 			$(ui.draggable).css("display","none");
 		},
 		
