@@ -72,7 +72,7 @@ define([
 					});
 
 					$('#dropZone').droppable( {
-				      accept: '.library-layer',
+				      accept: '.data-item',
 				      hoverClass: '',
 				      drop: self.dataDrop
 				    } );	
