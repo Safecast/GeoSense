@@ -380,8 +380,6 @@ define([
 
 	    initMapView: function(mapViewName, center, zoom, viewBase, viewStyle) 
 	    {
-	    	this.toggleDataImport();
-
 			var self = this;
 
 			if (!self.isRendered) {
