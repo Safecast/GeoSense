@@ -58,7 +58,7 @@ define([
 						}
 					});
 					
-					self.$('#dragLabel').draggable({
+					self.$('.data-item').draggable({
 						revert: true,
 						stack: '#dragLabel',
 						start: function(event, ui) { 
@@ -72,7 +72,7 @@ define([
 					});
 
 					$('#dropZone').droppable( {
-				      accept: '#dragLabel',
+				      accept: '.library-layer',
 				      hoverClass: '',
 				      drop: self.dataDrop
 				    } );	
@@ -85,7 +85,7 @@ define([
 		
 		drawDataSource: function(data)
 		{
-			dataDiv = '<div class="data-item" id="dragLabel" data="'+data._id+'">'
+			dataDiv = '<div class="data-item" data-id="'+data._id+'">'
 				+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
 				+(data.fullCount ? '<p class="data-count micro">'+formatLargeNumber(data.fullCount)+'</p>' : '')
 				+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')
@@ -96,7 +96,7 @@ define([
 		
 		dataDrop: function (event, ui ) {
 		  	var draggable = ui.draggable;
-			var pointCollectionId = draggable.attr('data');
+			var pointCollectionId = draggable.attr('data-id');
 			app.saveNewMapLayer(pointCollectionId);
 			$(ui.draggable).css("display","none");
 		},
