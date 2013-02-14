@@ -387,7 +387,10 @@ var MapAPI = function(app)
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-					map.layers.id(req.params.layerId).remove();
+					var mapLayer = map.layers.id(req.params.layerId);
+					if (mapLayer) {
+						mapLayer.remove();
+					}
 					map.save(function(err) {
 						if (handleDbOp(req, res, err, true)) return;
 						console.log('map layer deleted');

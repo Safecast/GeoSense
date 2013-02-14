@@ -6,8 +6,24 @@ var utils = require('../../../utils.js'),
 var ARRAY_SEPARATORS = /[,;]/;
 
 var ConversionError = function(msg) {
+	this.error = true;
 	this.message = msg;
+	this.name = 'ConversionError';
 };
+
+var ValueSkippedError = function(msg) {
+	this.error = true;
+	this.message = msg;
+	this.name = 'ValueSkippedError';
+};
+
+function isErr(val) {
+	return val instanceof ConversionError || val instanceof ValueSkippedError;
+}
+
+function isEmpty(val) {
+	return val == '' || val == undefined || val == null;
+}
 
 function isValidDate(d) {
   if ( Object.prototype.toString.call(d) !== "[object Date]" )
@@ -36,8 +52,14 @@ var clamp180 = this.clamp180 = function(deg)
 var Cast = {
 
 	Number: function(value, options) {
+		if (options.skipEmpty && isEmpty(value)) {
+			return;
+		}
 		var num = Number(value);
-		if (!isNaN(num) && (!options.skipZero || num != 0)) {
+		if (isNaN(num)) {
+			return new ConversionError('Cast to Number failed');
+		}
+		if (!options.skipZero || num != 0) {
 			return num;
 		}
 	},
@@ -80,11 +102,12 @@ var FieldType = {
 		return function() {
 			for (var i = 0; i < l; i++) {
 				var num = Cast.Number(this.get(fromFields[i]), options);
+				return num;
 				if (num != undefined) {
 					if (options.min != undefined && num < options.min) {
-						return new ConversionError('Skipping low number: ' + num);
+						return new ValueSkippedError('Skipping low number: ' + num);
 					} else if (options.max != undefined && num > options.max) {
-						return new ConversionError('Skipping high number:' + num);
+						return new ValueSkippedError('Skipping high number:' + num);
 					} else {
 						return num;
 					}
@@ -111,13 +134,21 @@ var FieldType = {
 						if (arr) {
 							var al = arr.length;
 							for (j = 0; j < al; j++) {
-								arr[j] = cast(arr[j], options);
+								var casted = !cast ? arr[j] : cast(arr[j], options);
+								if (isErr(casted)) return casted;
+								if (!options.skipEmpty || !isEmpty(casted)) {
+									arr[j] = casted;
+								}
 							}
 							return arr;
 						}
 					}
-				} else {				
-					arr.push(!cast ? v : cast(v, options));
+				} else {	
+					var casted = !cast ? v : cast(v, options);
+					if (isErr(casted)) return casted;
+					if (!options.skipEmpty || !isEmpty(casted)) {
+						arr.push(casted);
+					}
 				}
 			}
 			return arr;
@@ -132,18 +163,24 @@ var FieldType = {
 			var date;
 			if (l == 1) {
 				date = Cast.Date(this.get(fromFields[0]), options);
+				if (!date) {
+					return new ConversionError('Cast to Date failed');
+				}
 			} else {
 				var numbers = [];
 				for (var i = 0; i < l; i++) {
 					numbers[i] = Cast.Number(this.get(fromFields[i]), options);
 				}
 				date = Cast.Date(numbers);
+				if (!date) {
+					return new ConversionError('Cast to Date failed');
+				}
 			}
 			if (date) {
 				if (!options.skipFuture || date <= new Date()) {
 					return date;			
 				} else {
-					return new ConversionError('Skipping future date: ' + date);
+					return new ValueSkippedError('Skipping future date: ' + date);
 				}
 			}
 		};
@@ -153,24 +190,36 @@ var FieldType = {
 		var fromFields = Cast.Array(fromFields);
 		var l = fromFields.length;
 		var options = options || {};
-		return function() {
-			var strings = {};
-			for (var i = 0; i < l; i++) {
-				var str = Cast.String(this.get(fromFields[i]), options);
-				if (str != undefined) {
-					if (!options.format) {
-						return str;
-					} else if (options.skipEmpty && str == '') {
-						return new ConversionError('Skipping empty string');
-					} else {
-						strings[fromFields[i]] = str;
+
+		if (!options.format) {
+			var arrayOptions = _.cloneextend(options, {
+					'cast': 'String'
+				}),
+				toArray = FieldType.Array(fromFields, arrayOptions);
+			return function() {
+				var arr = toArray.call(this);
+				if (arr) {
+					var joined = arr.join(options.join || ', ');
+					if (!options.skipEmpty || !isEmpty(joined)) {
+						return joined;
 					}
 				}
 			}
-			if (options.format) {
-				return options.format.format(strings); 
-			}
-		};
+		} else {
+			return function() {
+				var strings = {};
+				for (var i = 0; i < l; i++) {
+					var str = Cast.String(this.get(fromFields[i]), options);
+					if (str != undefined) {
+						strings[fromFields[i]] = str;
+					}
+				}
+				var formatted = options.format.format(strings); 
+				if (!options.skipEmpty || !isEmpty(joined)) {
+					return formatted;
+				}
+			};
+		}
 	},
 
 	LngLat: function(fromFields, options) {
@@ -182,7 +231,11 @@ var FieldType = {
 		var toArray = FieldType.Array(fromFields, arrayOptions);
 		return function() {
 			var arr = toArray.call(this);
-			if (arr && arr.length == 2) {
+			if (isErr(arr)) return arr;
+			if (arr) {
+				if (arr.length != 2) {
+					return new ConversionError('Array is not 2d');
+				}
 				arr = [clamp180(arr[0]), clamp180(arr[1])];
 				if (!options.skipZero || (arr[0] != 0 && arr[1] != 0)) {
 					return arr;
@@ -198,6 +251,7 @@ var FieldType = {
 		return function() {
 			var arr = toLngLat.call(this);
 			if (arr) {
+				if (isErr(arr)) return arr;
 				return [arr[1], arr[0]];
 			}
 		}
@@ -241,7 +295,7 @@ fieldDefs = {
 }
 */
 
-var Converter = function(fieldDefs) {
+var Converter = function(fieldDefs, options) {
 	var fields = {};
 	if (typeof fieldDefs != 'object') {
 		fieldDefs = {};
@@ -254,43 +308,59 @@ var Converter = function(fieldDefs) {
 
 	this.fields = fields;
 	this.fieldDefs = fieldDefs;
+	this.options = _.cloneextend({
+		strict: true
+	}, options || {});
 };
 
-Converter.prototype.convertModel = function(fromModel, toModel) {
-	var doc = {};
+Converter.prototype.convertModel = function(fromModel, toModel, config) {
+	var doc = {}
+		errors = 0;
 	for (var destField in this.fields) {
 		var f = this.fields[destField];
 		doc[destField] = f.apply(fromModel, [doc]);
-		if (doc[destField] instanceof ConversionError) {
-			console.error('ConversionError on field ' + destField + ':', doc[destField].message);
-			return false;
-		} 
+		if (isErr(doc[destField])) {
+			console.error('Error on field ' + destField + ':', doc[destField].message);
+			errors++;
+		}
 	}
+
 	var m = new toModel(doc);
-	return m;
+
+	if (config.DEBUG) {
+		console.log('converted:', doc);
+	}
+	
+	return {
+		model: (!this.options.strict || !errors ? m : null),
+		converted: doc
+	};
 };
 
 module.exports = {
 	Converter: Converter,
 	ConversionError: ConversionError,
-	PointConverterFactory: function(fieldDefs) {
-		var errors = {},
-			valid = true;
-		if (typeof fieldDefs != 'object') {
-			fieldDefs = {
-				loc: {
-					type: 'LngLat',
-					fromFields: 'loc'
-				},
-				val: {
-					type: 'Number',
-					fromFields: 'val'
-				}
-			};
+	basicPointFieldDefs: {
+		loc: {
+			type: 'LngLat',
+			fromFields: 'loc'
+		},
+		val: {
+			type: 'Number',
+			fromFields: 'val'
 		}
+	},
+
+	PointConverterFactory: function(fieldDefs, options) {
+		var errors = {},
+			valid = true
+			options = options || {},
+			validFieldDefs = {};
+
+		if (typeof fieldDefs != 'object') return false;
 
 		for (var toField in fieldDefs) {
-			var d = fieldDefs[toField],
+			var d = _.clone(fieldDefs[toField]),
 				t;			
 			switch (toField) {
 				default:
@@ -315,7 +385,8 @@ module.exports = {
 			}
 
 			if (d.fromFields && (typeof d.fromFields == 'string' || (Array.isArray(d.fromFields) && d.fromFields.length > 0))) {
-				console.log('validated converter field definition', toField, d);
+				console.log('validated converter field definition:', toField, d);
+				validFieldDefs[toField]= d;
 			} else {
 				console.error('invalid converter field definition', toField, d);
 				valid = false;
@@ -325,7 +396,7 @@ module.exports = {
 			}
 		}
 
-		if (!fieldDefs.loc) {
+		if (!fieldDefs.loc && options.strict) {
 			valid = false;
 			errors[toField] = {
 				message: 'Point X,Y is required'
@@ -333,7 +404,7 @@ module.exports = {
 		}
 
 		if (valid) {
-			return new Converter(fieldDefs);
+			return new Converter(validFieldDefs, options);
 		} else {
 			return new ValidationError(errors);
 		}

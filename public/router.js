@@ -380,6 +380,8 @@ define([
 
 	    initMapView: function(mapViewName, center, zoom, viewBase, viewStyle) 
 	    {
+	    	this.toggleDataImport();
+
 			var self = this;
 
 			if (!self.isRendered) {
@@ -812,7 +814,7 @@ define([
 
 		},
 		
-		createMapLayer: function(pointCollectionId)
+		saveNewMapLayer: function(pointCollectionId)
 		{	
 			var self = this;
 			var layer = new MapLayer({

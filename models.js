@@ -39,7 +39,7 @@ this.Job.schema.plugin(useTimestamps);
 this.Point = mongoose.model('Point', new mongoose.Schema({
     pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
     importJob: { type: mongoose.Schema.ObjectId, ref: 'Job', required: false, index: 1 },
-    loc: {type: [Number], index: '2d', required: true},
+    loc: {type: [Number], index: '2d', required: true },
     val: {type: Number, index: 1},
     label: String,
     description: String,
