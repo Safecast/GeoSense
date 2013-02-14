@@ -351,7 +351,8 @@ var MapAPI = function(app)
 							    	pointCollection: collection,
 							    	layerOptions: options._id,
 							    	position: (sortedLayers.length ? 
-							    		sortedLayers[sortedLayers.length - 1].position + 1 : 0)
+							    		(sortedLayers[sortedLayers.length - 1].position != null ?
+							    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
 							    };    
 							    console.log(layer);
 
