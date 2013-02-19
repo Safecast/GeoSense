@@ -2,7 +2,8 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-], function($, _, Backbone) {
+	'models/map_layer',
+], function($, _, Backbone, MapLayer) {
 	var Map = Backbone.Model.extend({
 		
 		idAttribute: "_id",
@@ -10,6 +11,12 @@ define([
 
 		url: function() {
 			return this.urlRoot + '/' + this.attributes.publicslug;
+		},
+
+		newLayerInstance: function(attributes, options) {
+			var options = options || {};
+			options.parentMap = this;
+			return new MapLayer(attributes, options);
 		}
 
 	});

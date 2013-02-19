@@ -8,8 +8,6 @@ var VIRTUAL_PHYSICAL_FACTOR = 1;
 var CAMERA_FOV = 50;
 var SMOOTH_TWEEN_DURATION = 50;
 var CAMERA;
-var INITIAL_POLL_INTERVAL = 3000;
-var POLL_INTERVAL = 6000;
 
 var lensTag = getURLParameter('lens_tag') || false;
 var globeTag = getURLParameter('globe_tag') || false;

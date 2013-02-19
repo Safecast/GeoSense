@@ -39,6 +39,7 @@
 	color:white;
 	font-size:21pt;
 	margin-top: -2px;
+	white-space: nowrap;
 }
 
 #viewBase .view-base-thumb {

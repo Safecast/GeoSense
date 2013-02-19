@@ -1,20 +1,40 @@
-.panel .detail-data {
+.panel.data-detail .detail {
 	margin-top:15px;
 }
 
-.panel .value-label {
+.panel.data-detail .value-label {
+	color: #fff;
 	font-weight: normal;
-	line-height: 35px;
-	font-size: 24px;
 	text-align: left;
 	width: 50%;
 	line-height: 1em;
-	padding: 0 .25em 0 0;
 	white-space: auto;
+
+	font-size: 35px;
+	font-size: 24px;
 }
 
-.panel .value-label.single {
-	padding: 0 .0 .3em 0;
+.panel.data-detail .value {
+	color: #fff;
+	width: 50%;
+	padding: 0;
+	white-space: nowrap;
+
+	font-weight: bold;
+	text-align: right;
+	line-height: 35px;
+	font-size: 35px;
+}
+
+.panel.data-detail .value-label, .panel.data-detail .value-label.single {
+	padding: 0 .0 .1em 0;
+}
+
+.panel .detail-data .body {
+	padding-top: .4em;
+}
+
+.panel.data-detail .value-label.single {
 	text-align: center;
 	font-weight: bold;
 	white-space: auto;
@@ -23,41 +43,29 @@
 	-webkit-border-radius:4px;
 }
 
-.panel h5 {
+.panel.data-detail h5 {
 	color: #fff;
 	font-size: 18px;
 	margin: 0;
 	padding: .2em .25em .3em .25em;
 }
 
-.panel .value {
-	font-weight: bold;
-	line-height: 35px;
-	font-size: 35px;
-	text-align: right;
-	width: 50%;
-	padding: 0;
-	white-space: nowrap;
-}
-
-.layer-panel .caret {
-	border-top: 4px solid white !important;
-}
-
-.panel .detail-metadata .value-label, .panel .detail-metadata .value.single {
+.panel.data-detail .detail-metadata .value-label, .panel .detail-metadata .value.single, 
+.panel.data-detail .detail-metadata .value {
+	color: #bbb;
 	font-size: 12px;
 	line-height: 1.5em;
 	font-weight: normal;
 }
 
-.panel .detail-metadata .value {
-	font-size: 13px;
+.panel.data-detail .detail-metadata .value {
 	color: #bbb;
+	font-size: 13px;
 	line-height: 1.5em;
 	font-weight: bold;
 }
 
-.panel .value.single {
+.panel.data-detail .value.single {
 	text-align: left;
 }
 

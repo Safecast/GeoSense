@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'config',
 	'utils',
-	'text!templates/layer-panel.html',
+	'text!templates/layers-panel.html',
 	'views/panel-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
-	var LayerPanelView = PanelViewBase.extend({
+	var LayersPanelView = PanelViewBase.extend({
 
 		className: 'panel layer-panel',
 		
@@ -16,14 +16,15 @@ define([
 
 	    initialize: function(options) 
 	    {
+	    	LayersPanelView.__super__.initialize.call(this, options);
 		    this.template = _.template(templateHtml);	
-			this.vent = options.vent;
-			this.sortableItemsSelector = '.data-legend';
+			this.sortableItemsSelector = '.map-layer';
+			this.sortableHandleSelector = '.drag-handle';
 	    },
 
 		render: function()
 		{
-			LayerPanelView.__super__.render.call(this);
+			LayersPanelView.__super__.render.call(this);
 			this.initSortable();
 
 			return this;
@@ -39,7 +40,7 @@ define([
 			var self = this;
 			this.layerSortable = this.$('.panel-body').sortable({
 				items: this.sortableItemsSelector,
-				handle: '.move-map-layer',
+				handle: this.sortableHandleSelector,
 				start: function(event, ui) {
 					$(ui.item).data('previousIndex', self.getSortableItemIndex(ui.item));
 				},
@@ -55,15 +56,16 @@ define([
 		{
 			var layer = app.getMapLayer($(ui.item).attr('data-id'))
 				previousPosition = layer.get('position');
-			layer.set({position: this.getSortableItemIndex(ui.item)}, {});
+			layer.set({position: this.getSortableItemIndex(ui.item)}, {
+				silent: false
+			});
 			if (app.isMapAdmin()) {
 				layer.save();
 			}
-			this.vent.trigger('mapLayerMoved', layer, layer.get('position'), previousPosition);
 		}
 
 
 	});
 
-	return LayerPanelView;
+	return LayersPanelView;
 });

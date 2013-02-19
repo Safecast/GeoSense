@@ -4,6 +4,7 @@ var config = require('../../config.js'),
 	utils = require("../../utils.js"),
 	uuid = require('node-uuid'),
 	md5 = require('MD5'),
+	url = require('url'),
 	mongoose = require('mongoose'),
 	_ = require('cloneextend');
 
@@ -44,12 +45,13 @@ var MapAPI = function(app)
 				});
 		});
 
-		function sortByPosition(arr) {
+		function sortByPosition(arr) 
+		{
 			return arr.sort(function(a, b) { return a.position - b.position });
 		}
 
-		function prepareMapResult(req, map) {
-			map.adjustScales();
+		function prepareMapResult(req, map) 
+		{
 			var m = {
 				admin: permissions.canAdminMap(req, map)
 			};
@@ -59,13 +61,26 @@ var MapAPI = function(app)
 					m[k] = obj[k];
 				}
 				if (k == 'layers') {
-					m[k] = sortByPosition(m[k]);
 					for (var i = 0; i < m[k].length; i++) {
-						delete m[k][i].pointCollection.importParams;
+						m[k][i] = prepareLayerResult(req, m[k][i]);
 					}
+					m[k] = sortByPosition(m[k]);
 				}
 			}
 			return m;
+		}
+
+		function prepareLayerResult(req, layer) {
+			// if this is called by prepareMapResult, the layer's toObject() 
+			// was already called.
+			var layer = layer.toObject ?
+				layer.toObject() : layer;
+			layer.featureCollection = layer.pointCollection;
+			delete layer.featureCollection.importParams;
+
+			// sending deprecated pointCollection -- TODO: delete layer.pointCollection
+
+			return layer;
 		}
 
 		// Returns a specific map by publicslug
@@ -103,7 +118,7 @@ var MapAPI = function(app)
 		app.post('/api/map', function(req, res)
 		{
 			if (!permissions.canCreateMap(req)) {
-	            res.send('', 403);
+	            res.send('Cannot create map', 403);
 	            return;
 			}
 
@@ -254,14 +269,32 @@ var MapAPI = function(app)
 					}
 
 					map.remove(function(err) {
-						if (err) {
-							res.send('server error', 500);
-							return;
-						}
+					    if (handleDbOp(req, res, err, true)) return;
 						console.log('map removed');
-						res.send('');
+						res.send({_id: map._id});
 					});
 			  	});
+		});
+
+		// Returns map layer
+		app.get('/api/map/:publicslug/layer/:layerId', function(req, res)
+		{
+			Map.findOne({publicslug: req.params.publicslug})
+				.populate('layers.pointCollection')
+				.populate('layers.layerOptions')
+				.exec(function(err, map) {
+					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
+					var mapLayer = map.layers.id(req.params.layerId);
+					// check if found
+					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
+					// only send if complete; or incomplete was requested 
+					if (mapLayer.pointCollection.status == DataStatus.COMPLETE ||
+						url.parse(req.url, true).query.incomplete) {
+							res.send(prepareLayerResult(req, mapLayer));
+					} else {
+						res.send('map layer is incomplete', 403);
+					}
+				});
 		});
 
 		// Updates options for a map layer
@@ -274,47 +307,48 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 					console.log('updating layer ' + req.body._id + ' for map '+map.publicslug);
 					var mapLayer = map.layers.id(req.params.layerId);
-					if (mapLayer) {
-						for (var k in req.body.layerOptions) {
-							if (k[0] != '_') {
-								mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
-							}
-						}
-						mapLayer.layerOptions.save(function(err, opts) {
-							if (!handleDbOp(req, res, err, true)) {
-								console.log('layer options updated');
-								
-								if (req.body.position != undefined) {
-									var newPosition = parseInt(req.body.position);
-									if (!isNaN(newPosition)) {
-										var newIndex = newPosition < 0 ? 0 : newPosition >= map.layers.length ? map.map.layers.length : newPosition,
-											sortedLayers = sortByPosition(map.layers),
-											oldIndex = sortedLayers.indexOf(mapLayer),
-											layerIds = sortedLayers.map(function(obj) { return obj._id });
-										var setIndex = function(arr, oldIndex, newIndex) { arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]); };
-										setIndex(layerIds, oldIndex, newIndex);
-										for (var j = 0; j < layerIds.length; j++) {
-											map.layers.id(layerIds[j]).set('position', j);
-											console.log(map.layers.id(layerIds[j]).pointCollection.title, map.layers.id(layerIds[j]).position);
-										}
-										// TODO: for some reason this is not saved
-										map.save(function(err, map) {
-											if (!handleDbOp(req, res, err, true)) {
-												console.log('layer position changed to ' + newPosition);
-												res.send(mapLayer);
-											}
-										});
-										return;
-									}
-								}
+					// check if found
+					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 
-								res.send(mapLayer);
-							}
-						});
-						return;
+					// set all public elements of layerOptions
+					for (var k in req.body.layerOptions) {
+						if (k[0] != '_') {
+							console.log(k, req.body.layerOptions[k]);
+							mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
+						}
 					}
 
-					res.send('collection not bound', 409);
+					mapLayer.layerOptions.save(function(err, opts) {
+						if (!handleDbOp(req, res, err, true)) {
+							console.log('layer options updated');
+							
+							if (req.body.position != undefined) {
+								var newPosition = parseInt(req.body.position);
+								if (!isNaN(newPosition)) {
+									var newIndex = newPosition < 0 ? 0 : newPosition >= map.layers.length ? map.layers.length : newPosition,
+										sortedLayers = sortByPosition(map.layers),
+										oldIndex = sortedLayers.indexOf(mapLayer),
+										layerIds = sortedLayers.map(function(obj) { return obj._id });
+									var setIndex = function(arr, oldIndex, newIndex) { arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]); };
+									setIndex(layerIds, oldIndex, newIndex);
+									for (var j = 0; j < layerIds.length; j++) {
+										map.layers.id(layerIds[j]).set('position', j);
+										console.log(map.layers.id(layerIds[j]).pointCollection.title, map.layers.id(layerIds[j]).position);
+									}
+									map.save(function(err, map) {
+										if (!handleDbOp(req, res, err, true)) {
+											console.log('layer position changed to ' + newPosition);
+											res.send(prepareLayerResult(req, mapLayer));
+										}
+									});
+									return;
+								}
+							}
+
+							res.send(prepareLayerResult(req, mapLayer));
+						}
+					});
+
 					return;
 			  	});
 		});
@@ -326,15 +360,7 @@ var MapAPI = function(app)
 				.populate('layers.pointCollection')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-
-					for (var i = 0; i < map.layers.length; i++) {
-						if (map.layers[i].pointCollection._id.toString() == req.body.pointCollectionId) {
-							res.send('collection already bound', 409);
-							return;
-						}
-					}
-
-				    PointCollection.findOne({_id: req.body.pointCollectionId, $or: [{active: true}, 
+				    PointCollection.findOne({_id: req.body.pointCollection._id, $or: [{active: true}, 
 				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 				    	.populate('defaults')
 				    	.exec(function(err, collection) {
@@ -348,31 +374,27 @@ var MapAPI = function(app)
 								if (handleDbOp(req, res, err, true)) return;
 								var sortedLayers = sortByPosition(map.layers);
 							    var layer = {
+							    	// set _id so it can be referenced below
+							    	_id: new mongoose.Types.ObjectId(),
 							    	pointCollection: collection,
 							    	layerOptions: options._id,
 							    	position: (sortedLayers.length ? 
 							    		(sortedLayers[sortedLayers.length - 1].position != null ?
 							    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
 							    };    
-							    console.log(layer);
 
 						      	map.layers.push(layer);
 						      	map.save(function(err, map) {
-						      		console.log(err);
-									if (err) {
-										res.send('server error', 500);
-										return;
-									}
-							        console.log("collection bound to map");
+								    if (handleDbOp(req, res, err, map)) return;
+							        console.log("map layer created");
 									Map.findOne({_id: map._id})
 										.populate('layers.pointCollection')
 										.populate('layers.layerOptions')
 										.exec(function(err, map) {
-										    if (!err) {
-										       	res.send(prepareMapResult(req, map));
-										    } else {
-												res.send('server error', 500);
-											}
+										    if (handleDbOp(req, res, err, map)) return;
+										    console.log('1', map.layers.id(layer._id));
+										    console.log('2', prepareLayerResult(req, map.layers.id(layer._id)));
+									       	res.send(prepareLayerResult(req, map.layers.id(layer._id)));
 										});
 							  	});
 						    });
@@ -395,7 +417,7 @@ var MapAPI = function(app)
 					map.save(function(err) {
 						if (handleDbOp(req, res, err, true)) return;
 						console.log('map layer deleted');
-						res.send('');
+						res.send({_id: mapLayer._id});
 					});
 			  	});
 		});

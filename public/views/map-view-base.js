@@ -1,269 +1,149 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'config',
-	'utils',
-	'text!templates/homepage.html',
-	'lib/color-gradient/color-gradient'
+    'jquery',
+    'underscore',
+    'backbone',
+    'config',
+    'utils',
+    'text!templates/homepage.html',
+    'lib/color-gradient/color-gradient'
 ], function($, _, Backbone, config, utils, templateHtml, ColorGradient) {
-	var MapViewBase = Backbone.View.extend({
+    var MapViewBase = Backbone.View.extend({
 
-	    initialize: function(options) {
-			var self = this;
-			this.collections = {};
-			this.featureLayers = {};
-			this.vent = options.vent;
-			this.layerOptions = {};
-			_.bindAll(this, "geocodeAndSetMapLocation");
-			options.vent.bind("geocodeAndSetMapLocation", this.geocodeAndSetMapLocation);
-			
-			_.bindAll(this, "redrawMapLayer");
-			options.vent.bind("redrawMapLayer", this.redrawMapLayer);  
+        initialize: function(options) 
+        {
+            this.layers = [];
+            this.vent = options.vent;
 
-			if (options.visibleMapArea) {
-				this.initialVisibleMapArea = options.visibleMapArea;
-			}
+            _.bindAll(this, "geocodeAndSetMapLocation");
+            options.vent.bind("geocodeAndSetMapLocation", this.geocodeAndSetMapLocation);
+            
+            if (options.visibleMapArea) {
+                this.initialVisibleMapArea = options.visibleMapArea;
+            }
+        },
 
-			_.bindAll(this, "toggleLayerVisibility");
-			options.vent.bind("toggleLayerVisibility", this.toggleLayerVisibility);
+        geocodeAndSetMapLocation: function(addr)
+        {               
+            // TODO move to app
+            var self = this;
+            
+            geocoder = new google.maps.Geocoder();
+            geocoder.geocode( {'address': addr}, function (results, status) {
+                console.log(results);
+                if (status == google.maps.GeocoderStatus.OK) {
+                    results.type = 'google';
+                    self.setVisibleMapArea(results);
+                } else {    
+                    alert ("Cannot find " + addr + "! Status: " + status);
+                }
+            });
+        },
 
-			/*
-			options.vent.bind("setVisibleMapArea", function(params) {
-				self.setVisibleMapArea(params);  
-			});
-			options.vent.bind("broadcastMessageReceived", function(message) {
-				var match = new String(message).match(/^@([a-zA-Z0-9_]+)( (.*))?$/);
-				if (match) {
-					switch (match[1]) {
-						case 'setVisibleMapArea':
-							if (!IS_REMOTE_CONTROLLED) return;
-							var obj = $.parseJSON(match[3]);
-							if (obj) {
-								self.vent.trigger('setVisibleMapArea', obj);
-							}
-							return;
-					}
-				}
-			});
-	*/
-		},
+        renderMap: function(viewBase, viewStyle) 
+        {
+            if (this.initialVisibleMapArea) {
+                this.visibleAreaChangedInitially = true;
+                this.setVisibleMapArea(this.initialVisibleMapArea);
+            }
+            return this;
+        },
 
-		geocodeAndSetMapLocation: function(addr)
-		{				
-			var self = this;
-			
-			geocoder = new google.maps.Geocoder();
-			geocoder.geocode( {'address': addr}, function (results, status) {
-				console.log(results);
-				if (status == google.maps.GeocoderStatus.OK) {
-					results.type = 'google';
-					self.setVisibleMapArea(results);
-				} else { 	
-					alert ("Cannot find " + addr + "! Status: " + status);
-				}
-			});
-		},
+        /**
+        * Required to be implemented by descendants.
+        */
+        getVisibleMapArea: function()
+        {
+            return {
+                bounds: null,
+                zoom: null
+            };
+        },
+        
+        /**
+        * Required to be implemented by descendants.
+        */
+        setVisibleMapArea: function(to) {
+        },
 
-		/**
-		* Required to be implemented by descendants.
-		*/
-		getVisibleMapArea: function()
-		{
-			return {
-				bounds: null,
-				zoom: null
-			};
-		},
-		
-		/**
-		* Required to be implemented by descendants.
-		*/
-		setVisibleMapArea: function(to) {
-		},
+        visibleAreaChanged: function(visibleMapArea)
+        {
+            var self = this;
+            if (!this.visibleAreaChangedInitially) {
+                // TODO move to app
+                app.navigate(app.genMapURIForVisibleArea(visibleMapArea));
+            }
+            this.visibleAreaChangedInitially = false;
+            console.log('visibleAreaChanged');
+            this.trigger('visibleAreaChanged');
+        },
 
-		start: function(viewBase, viewStyle) 
-		{
-			if (this.initialVisibleMapArea) {
-				this.MapAreaChangedInitially = true;
-				this.setVisibleMapArea(this.initialVisibleMapArea);
-			}
-		},
+        /**
+        * Map layer management
+        */
 
-		mapAreaChanged: function(visibleMapArea)
-		{
-			var self = this;
+        attachLayer: function(model)
+        {
+            this.layers.push(model);
+            this.listenTo(model, 'toggle:enabled', this.layerToggled);
+            this.listenTo(model, 'change', this.layerChanged);
+            var c = model.featureCollection;
+            this.listenTo(c, {
+                reset: this.featureReset
+            });
+            this.listenTo(c, 'add', this.featureAdd);
+            this.listenTo(c, 'remove', this.featureRemove);
+            this.listenTo(c, 'change', this.featureChange);
+            this.listenTo(model, 'destroy', this.destroyLayer);
 
-			$.each(this.collections, function(key, collection) { 
-				var mapLayer = app.getMapLayerDeprecated(collection.pointCollectionId);
-				app.fetchMapLayer(collection.pointCollectionId);
-				self.vent.trigger("hideDetailData", collection.pointCollectionId);
-			});
+            this.featureReset(model.featureCollection);
+        },
 
-			if (!this.MapAreaChangedInitially) {
-				app.navigate(app.genMapURIForVisibleArea(visibleMapArea));
-			}
+        layerToggled: function(model)
+        {
+        },
 
-			this.MapAreaChangedInitially = false;
-			this.vent.trigger("updateGraphCollections", visibleMapArea);
-			this.vent.trigger("mapAreaChanged", visibleMapArea);
-		},
+        layerChanged: function(model)
+        {
+        },
 
-		/**
-		* Required to be implemented by descendants.
-		*/
-		redrawMapLayer: function(layer)
-		{
-			this.initFeatureLayerOptions(this.collections[layer.pointCollection._id]);
-			if (layer.sessionOptions.visible) {
-				this.vent.trigger("setStateType", 'drawing', layer.pointCollectionId);
-			}
-		},
+        drawLayer: function(model)
+        {
+        },
 
-		addCollection: function(collection)
-		{	
-			console.log('addCollection '+collection.pointCollectionId);
-			this.collections[collection.pointCollectionId] = collection;
-			collection.bind('reset', this.reset, this);
-			collection.bind('add', this.addOne, this);
-			this.addCollectionToMap(collection);
-		},
-		
-	    addOne: function(model, collectionId) 
-	    {
-			var c = this.collections[collectionId];
-			var options = this.collections[collectionId].mapLayer.layerOptions;
-			var min = this.collections[collectionId].mapLayer.pointCollection.minVal;
-			var max = this.collections[collectionId].mapLayer.pointCollection.maxVal;
-			var val = model.get('val');
-			if (val && val.avg != null) {
-				val = val.avg;
-			}
-			var count = model.get('count'),
-				normVal = (val - min) / (max - min),
-				normCount = count / this.collections[collectionId].maxReducedCount,
-				color,
-				colorType = val != null ? options.colorType : ColorType.SOLID,
-				size;
+        destroyLayer: function(model)
+        {
+            console.log(this, this.layers);
+            this.layers.splice(this.layers.indexOf(model), 1);
+            this.stopListening(model);
+            this.stopListening(model.featureCollection);
+        },
 
-			switch (colorType) {
-				case ColorType.SOLID: 
-					color = options.colors[0].color;
-					break;
-				case ColorType.LINEAR_GRADIENT:
-				case ColorType.PALETTE:
-					var colorPos;
-					switch (options.featureColorAttr) {
-						case 'count':
-							colorPos = normCount;
-							break;
-						default:
-						case 'val.avg':
-							colorPos = normVal;
-							break;
-					}
-					color = this.layerOptions[collectionId].colorGradient
-						.colorAt(colorPos, COLOR_GRADIENT_STEP);
-					break;
-			}
+        /**
+        * Map feature collection events
+        */
 
-			switch (options.featureSizeAttr) {
-				default:
-				case 'count':
-					size = normCount;
-					break;
-				case 'val.avg':
-					size = normVal;
-					break;
-			};
+        featureReset: function(collection, options) 
+        {   
+            var self = this;
+            collection.each(function(model) {
+                self.featureAdd(model);
+            });
+            self.drawLayer(collection.mapLayer);
+        },
 
-			this.addFeatureToLayer(model, {
-				pointCollectionId: collectionId,
-				color: color,
-				darkerColor: multRGB(color, .75),
-				min: min,
-				max: max,
-				model: model,
-				data: {
-					val: val,
-					normVal: normVal,
-					count: count,
-				},
-				size: size
-			}, collectionId);
-	    },
+        featureAdd: function(model, collection, options)  
+        {
+        },
 
-	    addAll: function(collection) {	
-			//this.addCollectionToMap(this.collection);
-			var self = this;
-			var pointCollectionId = collection.pointCollectionId;
-			collection.each(function(model) {
-				self.addOne(model, pointCollectionId);
-			});
-			self.drawLayerForCollection(collection);
-	    },
+        featureRemove: function(model, collection, options) 
+        {
+        },
 
-		reset: function(collection) {
-			var pointCollectionId = collection.pointCollectionId;
-			this.addAll(collection);
-		},
+        featureChange: function(model, options)
+        {
+        },
 
-		addCollectionToMap: function(collection)
-		{
-			var self = this;
-			var pointCollectionId = collection.pointCollectionId;
-			self.initFeatureLayerOptions(collection);
-			self.initFeatureLayer(collection);
-			self.addAll(collection);
-		},
+    });
 
-		/**
-		* Required to be implemented by descendants.
-		*/
-		initFeatureLayerOptions: function(collection)
-		{ 
-			var pointCollectionId = collection.pointCollectionId;
-			this.layerOptions[pointCollectionId] = {};
-			var opts = this.layerOptions[pointCollectionId];
-			opts.opacity = collection.mapLayer.layerOptions.opacity;
-			var mapLayer = app.getMapLayer(collection.mapLayer._id);
-			switch (collection.mapLayer.layerOptions.colorType) {
-				case ColorType.PALETTE:
-				case ColorType.LINEAR_GRADIENT:
-					opts.colorGradient = new ColorGradient(mapLayer.getNormalizedColors(collection.mapLayer.layerOptions.colors));
-					break;
-			}
-		},
-
-		/**
-		* Required to be implemented by descendants.
-		*/
-		initFeatureLayer: function(collection)
-		{
-		},
-
-		/**
-		* Required to be implemented by descendants.
-		*/
-	    addFeatureToLayer: function(model, opts, collectionId) 
-	    {
-	    },
-
-		/**
-		* Required to be implemented by descendants.
-		*/
-		drawLayerForCollection: function(collection) 
-		{
-		},
-
-		/**
-		* Required to be implemented by descendants.
-		*/
-		toggleLayerVisibility: function(pointCollectionId, state)
-		{	
-		}
-
-	});
-
-	return MapViewBase;
+    return MapViewBase;
 });

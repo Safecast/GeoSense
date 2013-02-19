@@ -17,7 +17,6 @@ define([
 			'click #shareLink' : 'shareLinkClicked',
 			'click #postFacebook' : 'postFacebookClicked',
 			'click #postTwitter' : 'postTwitterClicked',
-			'click #addDataButton' : 'addDataButtonClicked',
 			'click .map-tool.setup' : 'setupButtonClicked',
 			'click .map-tool.add-data' : 'addDataButtonClicked',
 			'click .map-tool.upload' : 'uploadButtonClicked',
@@ -33,19 +32,13 @@ define([
 	    {
 		    this.template = _.template(templateHtml);
 			this.vent = options.vent;	
-			this.mapInfo = options.mapInfo;
-			
-			_.bindAll(this, "setStateType");
-			this.vent.bind("setStateType", this.setStateType);
-
-			_.bindAll(this, "updateMapInfo");
-		 	options.vent.bind("updateMapInfo", this.updateMapInfo);
+			this.listenTo(this.model, 'sync', this.populateFromModel);
 	    },
 
 	    render: function() 
 	    {
 			$(this.el).html(this.template());
-			this.updateMapInfo();
+			this.populateFromModel();
 			
 			if (!app.isMapAdmin()) {
 				this.$('.admin-tool').remove();
@@ -67,24 +60,23 @@ define([
 			}
 		},
 		
-		updateMapInfo: function(mapInfo) 
-		{
-			if (mapInfo) {
-				this.mapInfo = mapInfo;
-			}
+	    populateFromModel: function()
+	    {
+			var mapInfo = this.model.attributes;
+
 			this.$('.brand').attr('href', app.genPublicURL());
 			this.$('.brand').click(function() {
 				app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
 				return false;
 			});
-			if (this.mapInfo.linkURL) {
+			if (mapInfo.linkURL) {
 				this.$('#authorLink').show();
-				this.$('#authorLink a').attr('href', this.mapInfo.linkURL);
-				this.$('#authorLink .text').text(this.mapInfo.linkTitle || this.mapInfo.title);
+				this.$('#authorLink a').attr('href', mapInfo.linkURL);
+				this.$('#authorLink .text').text(mapInfo.linkTitle || mapInfo.title);
 			} else {
 				this.$('#authorLink').hide();
 			}
-			this.$('.brand').html('<h1>GeoSense</h1><h3>' + this.mapInfo.title + '</h3>');
+			this.$('.brand').html('<h1>GeoSense</h1><h3>' + mapInfo.title + '</h3>');
 		},
 
 		mapViewToggleClicked: function(evt)
@@ -156,15 +148,16 @@ define([
 
 		postTwitterClicked: function(evt) 
 		{
-			var tweet = {};
-			var url = app.genPublicURL(true);
+			var mapInfo = this.model.attributes,
+				tweet = {},
+				url = app.genPublicURL(true);
 			tweet.url = url;
 			tweet.text = __('Check out the %(title)s map:', {
 				url: url,
-				title: this.mapInfo.title
+				title: mapInfo.title
 			});
-			if (this.mapInfo.twitter) {
-				tweet.via = this.mapInfo.twitter;
+			if (mapInfo.twitter) {
+				tweet.via = mapInfo.twitter;
 			}
 
 			var url = 'https://twitter.com/share?' + $.param(tweet);
@@ -174,10 +167,11 @@ define([
 		
 		postFacebookClicked: function(evt) 
 		{
-			var url = 'http://www.facebook.com/sharer.php?u='
+			var mapInfo = this.model.attributes;
+				url = 'http://www.facebook.com/sharer.php?u='
 			url += encodeURIComponent(app.genPublicURL(true));
 			url += '&t=' +encodeURIComponent(__('Check out the %(title)s map', {
-				title: this.mapInfo.title
+				title: mapInfo.title
 			}));
 			window.open('' + url, __('Share it on Facebook'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 			evt.preventDefault();

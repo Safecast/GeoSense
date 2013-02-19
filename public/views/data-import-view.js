@@ -13,7 +13,10 @@ define([
 		className: 'data-import-view modal fade',
 		
 	    events: {
-			'click #importButton': 'importButtonClicked',
+	    	'change .step.source input': 'sourceInputChanged',
+			'click .import-run': 'importButtonClicked',
+			'click .source-submit': 'sourceSubmitButtonClicked',
+			'click .back': 'backButtonClicked',
 			'click .from-field .remove' : 'fromFieldRemoveClicked',
 	    },
 
@@ -23,39 +26,9 @@ define([
 			this.responseData = null;
 			this.dataTitle = '';
 			this.dataDescription = '';
-	    },
-
-	    render: function() {
-	    	var self = this;
-
-			$(this.el).html(this.template());
-			var self = this;
-			this.$('.modal').addClass('large');
-
-			this.fromFieldTemplate = this.$('.from-data thead .element-template');
-			this.toFieldTemplate = this.$('.to-data thead .element-template');
-			this.$('.element-template').remove();
-			
-			this.fromFieldColors = ['#A52A2A', '#f89406', '#46a546', '#62cffc', '#87CEEB', '#FF7F50', '#DAA520', '#B8860B', '#c43c35', '#556B2F'];
-			this.fromFields = {
-				'Facility': 'Facility',
-				'location':'location',
-				'blank': 'blank',
-				'month': 'month',
-				'Longitude': 'Longitude', 
-				'Latitude': 'Latitude',
-				'Captured Time': 'Captured Time',
-				'Value': 'Value',
-				'day': 'day',
-				'Process': 'Process',
-				'val':'val',
-				'Current Status':'Current Status',
-				'year':'year',
-				'Owner':'Owner',
-				'Country':'Country',
-				'ISO country code':'ISO country code'
-
-			};
+			this.maxPreview = 30;
+			this.inspectedSource;
+			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
 
 			this.toFields = {
 				'loc': 'Point X,Y',
@@ -64,6 +37,75 @@ define([
 				'label': 'Point Label',
 				'attributes': 'Attributes'
 			};
+	    },
+
+	    canImport: function()
+	    {
+	    	return !this.isLoading 
+	    		&& this.$('input[name=url]').val().length;
+	    },
+
+	    sourceSubmitButtonClicked: function() 
+	    {
+	    	var self = this;
+	    	if (!this.canImport()) return false;
+	    	console.log('sourceSubmit');
+			this.runImport({inspect: true, max: this.maxPreview}, {
+				success: function(responseData) {
+					if (responseData.items && responseData.items.length) {
+						self.initSourceForMapping(responseData);
+						self.setStep('mapping');
+					}
+				}
+			});
+			return false;
+	    },
+
+	    backButtonClicked: function() 
+	    {
+	    	this.setStep('source');
+	    },
+
+	    sourceInputChanged: function() 
+	    {
+	    	var prev = this.$('input[name=url]').data('prevVal'),
+	    		cur = this.$('input[name=url]').val();
+	    	this.$('input[name=url]').data('prevVal', cur);
+	    	if (1/*!prev || !prev.length*/) { // TODO detect a 100% change
+	    		cur = cur.replace(/^https:\/\/www.dropbox.com\//, 
+	    			'https://dl.dropbox.com/');
+	    		this.$('input[name=url]').val(cur);
+	    	}
+	    	this.$('.btn.source-submit').attr('disabled', !this.canImport());
+	    },
+
+		importButtonClicked: function() 
+		{
+			var self = this;
+			if (!this.canImport()) return false;
+			this.runImport({background: true}, {
+				success: function(responseData) {
+					app.saveNewMapLayer(responseData.collection._id);
+					self.setStep('source');
+					self.close();
+				}
+			});
+			return false;
+		},
+
+		initSourceForMapping: function(data) 
+		{
+			var self = this;
+			this.inspectedSource = data;
+			this.fromFields = {};
+			_.each(this.inspectedSource.items[0], function(value, key) {
+				self.fromFields[key] = key;
+			});
+
+			this.$('.from-data thead').empty();
+			this.$('.from-data tbody').empty();
+			this.$('.to-data thead').empty();
+			this.$('.to-data tbody').empty();
 
 			var i = 0;
 			for (var k in this.fromFields) {
@@ -76,6 +118,15 @@ define([
 				i++;
 			}
 
+			// add source row preview
+			_.each(this.inspectedSource.items, function(row) {
+				var tds = '';
+				_.each(self.fromFields, function(tmp, key) {
+					tds += '<td>' + row[key] + '</td>';
+				});
+				self.$('.from-data tbody').append('<tr>' + tds + '</tr>');
+			});
+
 			var initClickHandler = function(f) {
 				$('.show-field-settings', f).hide();
 				// solve with popover
@@ -84,6 +135,8 @@ define([
 					return false;
 				});*/
 			};
+
+			this.updateHandleStates();
 
 			for (var k in this.toFields) {
 				var f = this.toFieldTemplate.clone();
@@ -94,7 +147,6 @@ define([
 				initClickHandler(f);
 				this.$('.to-data thead').append(f).show();
 			}
-
 			this.$('.to-field').sortable({
 				connectWith: '.to-field',
 				stop: function(event, ui) {
@@ -124,15 +176,42 @@ define([
 				}
 			});
 
-			this.spinner = this.$('.spinner').html(new Spinner({radius:5,length:0,width:5,color:'#333',lines:7,speed:1.5}).spin().el).hide();
-					
-			/*this.$('.drop-field').droppable( {
-		      accept: '.drag-field',
-		      hoverClass: '',
-		      drop: self.handleCardDrop
-		    } );*/
-				
+		},
+
+	    render: function() 
+	    {
+	    	var self = this;
+
+			$(this.el).html(this.template());
+			var self = this;
+
+			this.spinner = this.$('.spinner').html(new Spinner({radius:6,length:0,width:6,color:'#333',lines:7,speed:1.5}).spin().el).hide();
+
+			this.setStep('source');					
+
+			if (DEV) {
+				this.$('[name=url]').val('https://dl.dropbox.com/s/03cqpv1camzz4a1/reactors.csv');
+				self.sourceSubmitButtonClicked();
+			}
+
+			this.sourceInputChanged();
+
+			this.fromFieldTemplate = this.$('.from-data thead .element-template');
+			this.toFieldTemplate = this.$('.to-data thead .element-template');
+			this.$('.element-template').remove();
+
+			this.$("input.text").click(function() {
+			   $(this).select();
+			});
+
 	        return this;
+	    },
+
+	    setStep: function(step)
+	    {
+	    	this.$('.step').each(function() {
+	    		$(this).toggle($(this).is('.' + step));
+	    	});
 	    },
 
 	    updateHandleStates: function()
@@ -148,6 +227,7 @@ define([
 	    		}
     			$(this).removeClass('half-opacity');
 	    	});
+	    	this.$('.target').toggleClass('mapped', mapped.length > 0);
 	    },
 
 	    fromFieldRemoveClicked: function(event) {
@@ -194,55 +274,50 @@ define([
 
 			return {fieldDefs: defs, errors: errors, valid: valid};
 	    },
-		
-		importButtonClicked: function() {
-			if (this.isLoading) return false;
-			this.runImport({background: true});
-			return false;
-		},
-		
+	
 		runImport: function(params, options)
 		{
-			var self = this;
-			var defs = this.getFieldDefs(),
-				fieldDefs = defs.fieldDefs || [],
+			var self = this,
+				defs, fieldDefs,
 				options = options || {};
 
-			if (defs.errors.length) {
-				if (!options.silent) {
-					this.setAlert('<ul><li>' + defs.errors.join('</li></li>') + '</li></ul>');
+			if (!params.inspect) {
+				defs = this.getFieldDefs();
+				fieldDefs = defs.fieldDefs || [];
+
+				if (defs.errors.length) {
+					if (!options.silent) {
+						this.setAlert('<ul><li>' + defs.errors.join('</li></li>') + '</li></ul>');
+					}
+					if (!params.preview) {
+						return false;
+					}
 				}
-				if (!params.preview) {
-					return false;
+
+				if (!defs.valid && params.preview) {
+					self.updateImportPreview([]);
+					return;
 				}
 			}
 
-			if (!defs.valid && params.preview) {
-				self.updateImportPreview([]);
-				return;
-			}
-
+			var params = _.extend({
+				url: this.$('input[name=url]').val(),
+				fields: fieldDefs,
+			}, params);
 			console.log('Requesting import', params);
 			this.setAlert();
 			this.setLoading(true);
 			$.ajax({
 				type: 'POST',
 				url: '/api/import/',
-				data: _.extend({
-					url: 'https://dl.dropbox.com/s/03cqpv1camzz4a1/reactors.csv',
-					//url: 'https://dl.dropbox.com/s/rhggvuijnbbxk8r/earthquakes.csv',
-					//url: 'https://api.safecast.org/system/measurements.csv',
-					fields: fieldDefs,
-				}, params),
+				data: params,
 				success: function(responseData) {
 					self.setLoading(false);
-					//app.bindCollectionToMap(responseData.pointCollectionId);
-					//$('#addDataModal').modal('hide');
 					if (params.preview) {
 						self.updateImportPreview(responseData.items);
-					} else {
-						app.saveNewMapLayer(responseData.collection._id);
-						self.close();
+					}
+					if (options.success) {
+						options.success(responseData);
 					}
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
@@ -258,9 +333,11 @@ define([
 							self.setAlert('<ul>' + lis + '</ul>');
 						}
 					}
-					self.$('#importButton').attr('disabled', false);
 					if (params.preview) {
 						self.updateImportPreview([]);
+					}
+					if (options.error) {
+						options.error(responseData);
 					}
 				}
 			});
@@ -269,7 +346,8 @@ define([
 		setLoading: function(isLoading)
 		{
 			this.isLoading = isLoading;
-			this.$('#importButton').attr('disabled', isLoading);
+			this.$('.import-run').attr('disabled', isLoading);
+			this.$('.source-submit').attr('disabled', isLoading);
 			if (isLoading) {
 				this.spinner.show();
 			} else {
@@ -279,7 +357,7 @@ define([
 
 		loadImportPreview: function()
 		{
-			this.runImport({preview: true, max: 30}, {silent: true});
+			this.runImport({preview: true, max: this.maxPreview}, {silent: true});
 		},
 
 		updateImportPreview: function(items)
@@ -327,37 +405,6 @@ define([
 			this.$('.to-data tbody').html(rows.join(''));
 		}
 		
-/*		showDataReview: function(data)
-		{
-			var self = this;
-			
-			this.$('#dataButton').hide();
-			this.$('#dataConfirmButton').show();
-			
-			this.$('.modal').addClass('large');
-			this.$('.modal-body .add').fadeOut(function(){
-				self.$('.modal-body .review').fadeIn(function(){
-					
-					$('.data-import-view .modal-body .review .data-table').append('<table class="table table-striped table-bordered table-condensed"></table>');
-
-					var table;
-					for(var i = 0; i < 50; ++i) // 50 or data.length
-					{
-						table += "<tr>";
-
-						$.each(data[i], function(key, val) { 
-							table += '<td rel="tooltip" title="'+key+'" class="tooltip-test">' + val + '</td>';
-						});
-
-						table += "</tr>";				
-					}
-
-					$('.data-import-view .modal-body .review .data-table .table').append(table);
-						
-				});	
-			});
-		},*/
-
 	});
 
 	return DataImportView;

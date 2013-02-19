@@ -19,33 +19,28 @@ define([
 			
 	    },
 
-	    initialize: function(options) {
+	    initialize: function(options) 
+	    {
 		    this.template = _.template(templateHtml);	
-			this.vent = options.vent;
-			this.mapInfo = options.mapInfo;
 			this.mapInfoChanged = false;
-
-			_.bindAll(this, "updateMapInfo");
-		 	options.vent.bind("updateMapInfo", this.updateMapInfo);
+			this.listenTo(this.model, 'sync', this.populateFromModel);
 	    },
 
-	    updateMapInfo: function(mapInfo)
+	    populateFromModel: function()
 	    {
-	    	var self = this;
-			if (mapInfo) {
-				this.mapInfo = mapInfo;
-			}
+	    	var self = this,
+	    		mapInfo = this.model.attributes;
 
-			this.$('.map-name').html(this.mapInfo.title + ' Setup');
+			this.$('.map-name').html(mapInfo.title + ' Setup');
 			this.modelFieldInputs.each(function() {
 				$(this).removeClass('error');
 				var split = this.name.split('.');
 				if (split.length == 2) {
-					if (self.mapInfo[split[0]]) {
-						$(this).val(self.mapInfo[split[0]][split[1]]);
+					if (mapInfo[split[0]]) {
+						$(this).val(mapInfo[split[0]][split[1]]);
 					}
 				} else {
-					$(this).val(self.mapInfo[this.name]);
+					$(this).val(mapInfo[this.name]);
 				}
 			});
 
@@ -83,12 +78,12 @@ define([
 				app.navigate(app.genMapURI(null));
 			});
 
-			this.updateMapInfo();
+			this.populateFromModel();
 			
 	        return this;
 	    },
 
-		saveClicked: function() 
+		saveClicked: function(event) 
 		{
 			console.log('saveClicked', this.mapInfoChanged);
 			if (!this.mapInfoChanged) {
@@ -103,19 +98,16 @@ define([
 
 			var self = this;
 			this.$('#saveCloseButton').attr('disabled', true);
-			$.ajax({
-				type: 'PUT',
-				url: '/api/map/' + self.mapInfo.publicslug,
-				data: postData,
-				success: function(data) {
+
+			this.model.save(postData, {
+				success: function(model, response, options) {
 					self.close();
-					self.vent.trigger('updateMapInfo', data);
 					self.$('#saveCloseButton').attr('disabled', false);
 					self.mapInfoChanged = false;
 				},
-				error: function(jqXHR, textStatus, errorThrown) {
-					var data = $.parseJSON(jqXHR.responseText);
-					console.error('failed to update map: ' + self.mapInfo._id);
+				error: function(model, xhr, options) {
+					var data = $.parseJSON(xhr.responseText);
+					console.error('failed to update map: ' + self.model.id);
 					if (data && data.errors) {
 						self.modelFieldInputs.removeClass('error');
 						for (var k in data.errors) {
@@ -130,25 +122,25 @@ define([
 			return false;
 		},
 
-		cancelClicked: function() 
+		cancelClicked: function(event) 
 		{
-			this.updateMapInfo(this.mapInfo);
+			this.populateFromModel();
 			this.close();
 			return false;
 		},
 
-		deleteMapClicked: function(e) {
-			var self = this;
+		deleteMapClicked: function(event) 
+		{
+			var self = this,
+				id = this.model.id;
 			if (window.confirm(__('Are you sure you want to delete this map? This action cannot be reversed!'))) {
-				$.ajax({
-					type: 'DELETE',
-					url: '/api/map/' + self.mapInfo.publicslug,
-					success: function() {
-						console.log('deleted map: ' + self.mapInfo._id);
+				this.model.destroy({
+					success: function(model, response, options) {
+						console.log('deleted map: ' + id);
 						window.location = '/';
 					},
-					error: function(data) {
-						console.error('failed to delete map: ' + self.mapInfo._id);
+					error: function(model, xhr, options) {
+						console.error('failed to delete map: ' + id, xhr);
 					}
 				});
 			}

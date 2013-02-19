@@ -72,8 +72,32 @@ function nl2p(str)
 	return str;
 }
 
+$.fn.uiToggle = function(opts) {
+	var opts = opts || {},
+		inactive = true;
+
+	if (opts.duration == undefined) {
+		opts.duration = 'fast';
+	}
+
+	var ret = this.each(function() {
+		var visible = this;
+		$(this).slideToggle(opts);
+		inactive = inactive && $._data(this, 'fxshow').hidden;					
+	});
+	if (!inactive && opts.show) {
+		opts.show();
+	}
+	if (opts.activate) {
+		$(opts.activate).toggleClass(
+			opts.activeClass || 'active', !inactive);
+	}
+	return ret;
+}
+
+/*
 $.fn.updateFeedback = function() {
-	this.each(function() {
+	return this.each(function() {
 		$(this).tempGlow({
 			textColor: '#00C9FF',
 			haloColor: '#008cbf',
@@ -91,6 +115,7 @@ $.fn.blink = function() {
 	        .animate({opacity: .2}, 'slow', cycle);
 	})();
 };
+*/
 
 var lpad = function(str, padString, length) {
 	var s = new String(str);
@@ -220,13 +245,19 @@ function zeroPad(str, len) {
 	return new Array(str.length < len ? len + 1 - str.length : 0).join('0') + str;
 }
 
-function multRGB(color, factor) {
-	var intColor = parseInt(color.replace('#', '0x'));
-	var channels = [
+function getRGBChannels(color)
+{
+	var intColor = typeof color == 'string' ? parseInt(color.replace('#', '0x')) : color;
+	return channels = [
 		(intColor &  0xff0000) >> 16,
 		(intColor &  0x00ff00) >> 8,
 		(intColor &  0x0000ff)
 	];
+}
+
+function multRGB(color, factor) {
+	var intColor = parseInt(color.replace('#', '0x')),
+		channels = getRGBChannels(intColor);
 	for (var i = channels.length - 1; i >= 0; i--) {
 		channels[i] = Math.min(255, Math.round(channels[i] * factor));
 	}
