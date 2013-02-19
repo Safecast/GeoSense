@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Format.WMTSCapabilities=OpenLayers.Class(OpenLayers.Format.XML.VersionedOGC,{defaultVersion:"1.0.0",yx:{"urn:ogc:def:crs:EPSG::4326":!0},createLayer:function(e,t){var n,r={layer:!0,matrixSet:!0};for(var i in r)if(!(i in t))throw new Error("Missing property '"+i+"' in layer configuration.");var s=e.contents,o=s.tileMatrixSets[t.matrixSet],u=s.layers,a;for(var f=0,l=s.layers.length;f<l;++f)if(s.layers[f].identifier===t.layer){a=s.layers[f];break}if(a&&o){var c;for(var f=0,l=a.styles.length;f<l;++f){c=a.styles[f];if(c.isDefault)break}n=new OpenLayers.Layer.WMTS(OpenLayers.Util.applyDefaults(t,{url:t.requestEncoding==="REST"&&a.resourceUrl?a.resourceUrl.tile.template:e.operationsMetadata.GetTile.dcp.http.get[0].url,name:a.title,style:c.identifier,matrixIds:o.matrixIds,tileFullExtent:o.bounds}))}return n},CLASS_NAME:"OpenLayers.Format.WMTSCapabilities"});

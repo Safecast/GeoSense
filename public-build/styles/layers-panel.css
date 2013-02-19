@@ -1,0 +1,134 @@
+.layer-panel .legend .unit, .layer-panel h5, .layer-panel .source {
+	text-align: center;
+	padding: .1em .25em .4em .25em;
+}
+.layer-panel .panel-body {
+	margin-top: 10px;
+}
+.layer-panel .legend .unit, .layer-panel h5 {
+	font-weight: bold;
+}
+.layer-panel .meta.source, .layer-panel .meta.source a {
+	color: #aaa;
+	font-size: 11px;
+}
+.layer-panel .meta.source {
+	padding: .2em .75em .4em .75em;
+}
+.layer-panel .legend .unit {
+	font-size: 12px;
+}
+.layer-panel .legend .unit .nav-pills {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: inline-block !important;
+    height: 13px !important;
+} 
+.layer-panel .legend .unit .nav-pills a, .unit .nav-pills span {
+	color: #aaa !important;
+	margin: 1px !important;
+	padding: 3px 8px 3px 8px !important;
+	line-height: 14px;
+	display: block;
+	white-space: nowrap;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+.layer-panel .legend .unit .nav-pills a:hover {
+	color: white !important;
+	background-color: #333;
+}
+.layer-panel .legend .unit .nav-pills .active a, .layer-panel .legend .unit .nav-pills .active a:hover, .unit .nav-pills .active span {
+	color: white !important;
+	background-color: #666;
+}
+.layer-panel .legend .value
+{
+	color:white;
+	font-size:20pt;
+	font-weight:bold;
+}
+.layer-panel h4, .layer-panel h4 a {
+	font-size: 24px !important;
+	color: white !important;
+}
+.layer-panel .map-layer .status {
+	position: relative;
+	padding: 3px 0 3px 0;
+}
+.layer-panel .map-layer.disabled {
+	-moz-opacity:.40 !important; filter:alpha(opacity=40) !important; opacity:.40 !important; 
+}
+.layer-panel .status .state-indicator {
+	height: 16px;
+	position: absolute;
+	right: 0px;
+	top: 3px;
+}
+.layer-panel .model-title {
+	display: inline-block;
+	max-width: 65%;
+	 
+}
+.layer-panel.extended .model-title {
+	max-width: 80%;
+}
+.layer-panel .color-bar {
+	list-style: none;
+	padding: 0;
+	margin: 3px 0 0 0;
+	white-space: nowrap;
+}
+.layer-panel .color-bar li {
+	overflow: hidden;
+	display: inline-block;
+}
+.layer-panel .color-bar li .segment {
+	font-weight: bold;
+	padding: .2em 0 .25em 0;
+	text-align: center;
+	font-weight: bold;
+	color: #111;
+	text-shadow:rgba(255,255,255,.8) 1px 1px 1px;
+	border-right: 1px rgba(0,0,0,.25) solid;
+	border-bottom: 1px rgba(0,0,0,.25) solid;
+}
+.layer-panel .color-bar li .segment.inverted {
+	color: #eee;
+	text-shadow:rgba(20,20,20,.8) -1px -1px 1px;
+}
+.layer-panel .color-bar.condensed li .segment {
+	font-size: 14px;
+}
+.layer-panel .color-bar li:first-child .segment {
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+	margin-left: 0;
+}
+.layer-panel .color-bar li:last-child .segment {
+	border-top-right-radius: 4px;
+	border-bottom-right-radius: 4px;
+	margin-right: 0;
+}
+.layer-panel .histogram {
+	position: relative;
+	width: 222px;
+	height: 30px;
+}
+.layer-panel .histogram .graph-max-y {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	font-size: 10px;
+	display: none;
+}
+.layer-panel .histogram rect {
+	opacity: 0.8;
+	-moz-opacity: 0.8;
+	filter:alpha(opacity=8);
+}
+.layer-panel.extended .histogram {
+	width: 444px;
+	height: 60px;
+}
