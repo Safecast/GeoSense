@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Control.EditingToolbar=OpenLayers.Class(OpenLayers.Control.Panel,{citeCompliant:!1,initialize:function(e,t){OpenLayers.Control.Panel.prototype.initialize.apply(this,[t]),this.addControls([new OpenLayers.Control.Navigation]);var n=[new OpenLayers.Control.DrawFeature(e,OpenLayers.Handler.Point,{displayClass:"olControlDrawFeaturePoint",handlerOptions:{citeCompliant:this.citeCompliant}}),new OpenLayers.Control.DrawFeature(e,OpenLayers.Handler.Path,{displayClass:"olControlDrawFeaturePath",handlerOptions:{citeCompliant:this.citeCompliant}}),new OpenLayers.Control.DrawFeature(e,OpenLayers.Handler.Polygon,{displayClass:"olControlDrawFeaturePolygon",handlerOptions:{citeCompliant:this.citeCompliant}})];this.addControls(n)},draw:function(){var e=OpenLayers.Control.Panel.prototype.draw.apply(this,arguments);return this.defaultControl===null&&(this.defaultControl=this.controls[0]),e},CLASS_NAME:"OpenLayers.Control.EditingToolbar"});
