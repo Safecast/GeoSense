@@ -454,7 +454,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (!func) {
 						func = 'log';
 					}
-					if ((force || config.DEBUG) || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
+					if ((force /*|| config.DEBUG*/) || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
 						console[func].apply(console, ['* '+collection.get('_id')+' '+pos, (info ? info : ''), '-- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numSaved: '+numSaved+(headerValues.totalCount ? ' of '+headerValues.totalCount : '')+', numSkipped: '+numSkipped]);
 					}
 				};
