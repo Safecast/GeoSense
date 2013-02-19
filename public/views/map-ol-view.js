@@ -88,7 +88,7 @@ define([
             //this.map.setOptions({restrictedExtent: extent});
 
             this.map.addControls([new OpenLayers.Control.PanZoomBar(),
-                new OpenLayers.Control.Navigation(), new OpenLayers.Control.KeyboardDefaults()]);
+                new OpenLayers.Control.Navigation() /*, new OpenLayers.Control.KeyboardDefaults()*/]);
 
             this.updateViewBase(viewBase, viewStyle);
                     

@@ -675,9 +675,14 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				}
 				return;
 			}
+			var filename = params.url || params.path;
+				titlefy = function(s) {
+					var s = s.replace(/_/, ' ');
+      				return s.substr(0, 1).toUpperCase() + s.substring(1);
+    			};
 			runImport(new ToCollectionModel({
 				defaults: defaults._id,
-				title: params.title || path.basename(params.url || params.path),
+				title: params.title || titlefy(path.basename(filename, path.extname(filename))),
 				description: params.description,
 				unit: "",
 				progress: 0,
