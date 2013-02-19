@@ -136,8 +136,8 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
     if (err) {
-        console.log('error', err);
-        console.log(err);
+        console.log(err.name, err);
+
         switch (err.name) {
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 
@@ -147,7 +147,6 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
                 res.send(sendErr, 500);
                 break;
             case 'ValidationError':
-                console.log(err);
                 // certain error messages should be available to client:
                 res.send(err, 403);
                 break;

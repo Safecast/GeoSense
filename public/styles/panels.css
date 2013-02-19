@@ -13,7 +13,7 @@
 	color: #ddd;
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
-	width: 300px;
+	width: 320px;
 	overflow: hidden;
 }
 
@@ -22,8 +22,9 @@
 }
 
 .panel .panel-body {
-	max-height: 600px;
+	max-height: 700px;
 	overflow: visible;
+	margin-bottom: 20px;
 }
 
 .panel form {
@@ -35,10 +36,6 @@
 	margin-top: 18px;
 	max-height: 600px;
 	overflow: auto;
-}
-
-.panel .panel-body {
-	margin-bottom: 20px;
 }
 
 .map-style-dark .panel {
@@ -55,7 +52,7 @@
 }
 
 .panel-buttons {
-	margin-top: 2em;
+	margin-top: 10px;
 }
 
 .panel.timeline {
@@ -97,19 +94,29 @@
 	margin-bottom: 1em;
 }
 
+.panel .accordion-body {
+	width: 100%;
+}
+
+.panel .accordion-body .accordion-body-content {
+	padding: 5px 0 10px 0;
+}
+
 .panel .accordion-heading {
 	position: relative;
+	white-space: nowrap;
 }
 
 .panel .accordion-heading .accordion-toggle {
-	padding: 0 0 .25em 0;
+	padding: 3px 0 3px 0;
 }
 
 .panel .accordion-group {
 	border: none;
 	width: 222px;
+	padding: 0 0 5px 0;
 	margin: 0;
-	padding: 0px;
+
 }
 
 .panel.extended, .panel.extended .accordion-group {
@@ -122,9 +129,6 @@
 	top: 0px;
 	right: 0px;
 	left: 0px;
-}
-
-.panel .panel-body {
 }
 
 .panel .panel-header .frame {
@@ -147,28 +151,20 @@
 	line-height: 29px;
 	font-weight: normal;
 	padding: 0 15px 0 16px;
-}
-
-.panel a .in-out {
-	font-weight: bold;
-	color: white;
-	width: 16px;
-	height: 16px;
-	display: inline-block;
-	background-image: url(../assets/panel-buttons.png);
+	white-space: nowrap;
 }
 
 .panel .panel-controls {
 	list-style: none;
 	padding: 0;
-	margin: 0;
+	margin: 2px 0 0 0;
 	position: absolute;
 	right: 0px;
-	top: 5px;
+	top: 0px;
 }
 
 .panel .panel-header .panel-controls {
-	margin: 0 8px 0 0;
+	margin: 6px 8px 0 0;
 }
 
 .panel .panel-header .panel-controls .icon {
@@ -176,19 +172,31 @@
 }
 
 .panel .panel-controls li {
-	display: inline-block;
-	margin: 0px;
+	display: block;
+	margin: 0 0 0 1px;
+	padding: 0;
+	float: right;
+}
+
+.panel .panel-controls a {
 	border-radius: 3px;
 	-moz-border-radius:3px;
 	-webkit-border-radius:3px;
+
+	/*-webkit-transition: background 100ms ease-out;
+	-moz-transition: background 100ms ease-out;
+	transition: background 100ms ease-out;*/
 }
 
+.panel .panel-controls a:hover, .panel .panel-controls a.active {
+	background: #505050;
+}
 
-.panel .panel-controls li:hover {
+.panel .panel-controls a:hover, .panel .panel-controls a.active:hover {
 	background: #666;
 }
 
-.panel .panel-controls a, .layer-panel .data-legend .layer-controls .state-indicator {
+.panel .panel-controls a, .layer-panel .map-layer .layer-controls .state-indicator {
 	padding: 2px 2px 1px 2px;
 	display: inline-block;
 }
@@ -215,12 +223,22 @@
 	background-position: -48px top;
 }
 
-.panel a .in-out.in {
-	background-position: -64px top;
+.panel .accordion-toggle .in-out {
+	margin: 0 0 0 -16px;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background-image: url(../assets/collapse-in-out.png);
+	background-position: 0% top;
+	-moz-opacity:.75; filter:alpha(opacity=50); opacity:.50; 
 }
 
-.panel a .in-out.out {
-	background-position: -80px top;
+.panel .accordion-toggle:hover .in-out {
+	-moz-opacity:1; filter:alpha(opacity=100); opacity:1; 
+}
+
+.panel .accordion-toggle.collapsed .in-out {
+	background-position: 100% top;
 }
 
 .panel .panel-header .buttons a:hover, .panel a:hover .in-out {
@@ -239,4 +257,11 @@
 	border-radius: 4px;
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
+}
+
+.panel .box.meta  {
+	font-size: 12px;
+	color: #ccc;
+	padding: 5px 10px 8px 10px;
+	line-height: 1.5em;
 }

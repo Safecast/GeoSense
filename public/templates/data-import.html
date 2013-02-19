@@ -1,6 +1,6 @@
 <div class="modal-header">
 <a class="close" data-dismiss="modal">×</a>
-<h3 class="title">Add Your Awesome Data</h3>
+<h3 class="title">Data Import</h3>
 </div>
 <div class="modal-body">
 
@@ -42,55 +42,76 @@
 </div>
 -->
 
+<form class="step source well">
+    <fieldset>
+        <p>
+        	Please begin by entering the URL of the data file you would like to import.
+        </p>
+        <label class="title">Source URL</label>
+        <input name="url" class="text large" placeholder="http://" value="" />
+		<a href="#" class="source-start btn btn-success source-submit">Next <i class="icon icon-white icon-arrow-right half-opacity"></i></a>
+
+		<ul class="nav nav-pills">
+			<li class="active"><a href="#" data-toggle="tab">CSV</a></li>
+		 	<li><a href="#" data-toggle="tab">GeoJSON</a></li>
+			<li><a href="#" data-toggle="tab">Esri Grid</a></li>
+		</ul>
+    </fieldset>
+</form>
+
 <!-- Review data -->
-<div class="review">
+<form class="step mapping">
 
-	<div class="table-container">
-		<table class="from-data table table-striped">
-			<thead>
-		    	<tr>
-		    		<th class="element-template">
+	<div class="source">
+		<div class="table-container">
+			<table class="from-data table table-striped">
+				<thead>
+			    	<tr>
+			    		<th class="element-template">
 
-		    			<span class="well clearfix">
-				    		<span class="from-field label" data-from="">
-				    			<a href="" class="remove"><span class="icon icon-white icon-remove-sign"></span></a>
-				    			<span class="field-name"></span> 
-				    		</span>
-				    	</span>
+			    			<span class="well clearfix">
+					    		<span class="from-field label" data-from="">
+					    			<a href="" class="remove"><span class="icon icon-white icon-remove-sign"></span></a>
+					    			<span class="field-name"></span> 
+					    		</span>
+					    	</span>
 
-				    </th>
-		    	</tr>
-		    </thead>
-		    <tbody>
-		    </tbody>
-		</table>
+					    </th>
+			    	</tr>
+			    </thead>
+			    <tbody>
+			    </tbody>
+			</table>
+		</div>
 	</div>
 
-	<div class="table-container">
-		<table class="to-data table table-striped">
-			<thead>
-		    	<tr>
-				    <th class="element-template">
-				    	<label class="title"><span class="field-title"></span>&nbsp;<a class="show-field-settings" href="#"><span class="icon icon-wrench half-opacity"></span></a></label>
-				    	<span class="well to-field clearfix" data-to=""></span>
-				    	<span class="field-settings">
-				    		<span class="title field-type">Number</span>
-							<label class="checkbox">
-							   	<input type="checkbox"> Skip empty
-							</label>
-							<label class="checkbox">
-							   	<input type="checkbox"> Skip zero
-							</label>
-	    			    	</span>
-				    </th>
-		    	</tr>
-		    </thead>
-		    <tbody>
-		    </tbody>
-		</table>
+	<div class="target">
+		<div class="table-container">
+			<table class="to-data table table-striped">
+				<thead>
+			    	<tr>
+					    <th class="element-template">
+					    	<label class="title"><span class="field-title"></span>&nbsp;<a class="show-field-settings" href="#"><span class="icon icon-wrench half-opacity"></span></a></label>
+					    	<span class="well to-field clearfix" data-to=""></span>
+					    	<span class="field-settings">
+					    		<span class="title field-type">Number</span>
+								<label class="checkbox">
+								   	<input type="checkbox"> Skip empty
+								</label>
+								<label class="checkbox">
+								   	<input type="checkbox"> Skip zero
+								</label>
+		    			    	</span>
+					    </th>
+			    	</tr>
+			    </thead>
+			    <tbody>
+			    </tbody>
+			</table>
+		</div>
 	</div>
 
-</div>
+</form>
 
 <!-- Alerts -->
 <div class="alert alert-conversion-error">
@@ -99,8 +120,9 @@
    </div>
 </div>
 <div class="modal-footer">
-	<a href="#" data-dismiss="modal" class="btn cancel pull-left">Close</a>
-	<a href="#" id="importButton" class="btn btn-primary pull-right">Import Data</a>
-	<div class="state-indicator pull-right"><div class="spinner">asasdasdsdd</div></div>
+	<a href="#" class="step mapping btn back"><i class="icon-arrow-left half-opacity"></i> </span> Use another source</a>
+	<a href="#" data-dismiss="modal" class="btn cancel">Cancel</a>
+	<a href="#" class="step mapping import-run btn btn-primary">Import Data</a>
+	<div class="state-indicator pull-right"><div class="spinner"></div></div>
 </div>
 

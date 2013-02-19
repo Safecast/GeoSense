@@ -18,7 +18,6 @@ define([
 	    initialize: function(options) 
 	    {    	
 	    	MapTourView.__super__.initialize.call(this, options);
-			this.vent = options.vent;
 		    this.template = _.template(templateHtml);	
 
 			_.bindAll(this, "updateMapInfo");

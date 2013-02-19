@@ -221,7 +221,8 @@ define([
 			delete this.widgets[id];
 		},
 
-	    render: function() {
+	    render: function() 
+	    {
 			$(this.el).html(this.template());
 			if (IS_IPAD) {
 				$('body').addClass('ipad');

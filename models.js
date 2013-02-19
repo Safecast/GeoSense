@@ -54,43 +54,22 @@ this.Point = mongoose.model('Point', new mongoose.Schema({
 this.Point.schema.plugin(useTimestamps);
 this.Point.schema.index({loc: '2d', pointCollection: 1})
 
-this.Shape = mongoose.model('Shape', new mongoose.Schema({
-    shapeCollection: { type: mongoose.Schema.ObjectId, ref: 'ShapeCollection', required: true, index: 1 },
-    type: {type: String, required: true},
-    geometry: mongoose.Schema.Types.Mixed,
-    properties: mongoose.Schema.Types.Mixed
-}));
-
-this.Shape.schema.plugin(useTimestamps);
-this.Shape.schema.index({ws: '2d', en: '2d', shapeCollection: 1})
-
-/*this.ColorDefinition = mongoose.model('ColorDefinition', new mongoose.Schema({
-    color: {type: String, required: true},
-    position: Number,
-    interpolation: String,
-    title: String,
-    description: String
-}));
-
-// TODO: implement color palette storage -- erasing old palettes
-
-this.ColorPalette = mongoose.model('ColorPalette', new mongoose.Schema({
-    colors: {type: [this.ColorDefinition.schema]}
-}));
-*/
+var colorMatch = /^#([a-fA-F0-9]{2}){3}$/;
 
 this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
-    visible: {type: Boolean, required: true},
+    enabled: {type: Boolean, required: true, default: true},
+    public: {type: Boolean, required: true, default: true},
     featureType: {type: String, required: true},
     colorType: {type: String, required: true, default: config.ColorType.LINEAR_GRADIENT},
     //colorPalettes: {type: [ColorPalette.schema], index: 1},
     colors: [{
-        color: {type: String, required: true, match: /^#([a-fA-F0-9]{2}){3}$/},
+        color: {type: String, required: true, match: colorMatch},
         position: {type: String, match: /^[0-9]+(\.[0-9]+)?%?$/},
         interpolation: {type: String, enum: ['lerpRGB', 'threshold', ''], required: false},
         label: String,
         description: String
     }],
+    colorLabelColor: {type: String, match: colorMatch},
     reduction: String,
     opacity: {type: Number, required: true},
     featureSizeAttr: {type: String, enum: ['val.avg', 'count', ''], default: ''},
@@ -106,29 +85,24 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     filterQuery: mongoose.Schema.Types.Mixed,
     queryOptions: mongoose.Schema.Types.Mixed,
     title: String,
+    unit: String,
     description: String,
-    histogram: {type: mongoose.Schema.Types.Mixed, default: true},
+    histogram: {type: Boolean, default: true},
     itemTitle: String,
     itemTitlePlural: String,
     cropDistribution: Boolean
-
-    /*altValFormat: [{
-        unit: {type: String, required: true},
-        eq: {type: String, required: true},
-        formatString: String
-    }],*/
 }));
 
 this.LayerOptions.schema.path('colors').validate(function (value) {
     return value.length > 0;
-}, 'At least one color is required');
+}, 'At least one color is required.');
 
 this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     title: String,
     description: String,
     source: String,
     unit: String,
-    altUnit: [String],  
+    isNumeric: {type: Boolean, default: true},
     maxVal: Number,
     minVal: Number,
     maxIncField: { type: mongoose.Schema.Types.Mixed, index: 1 },
@@ -153,26 +127,6 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
 }));
 
 this.PointCollection.schema.plugin(useTimestamps);
-
-this.ShapeCollection = mongoose.model('ShapeCollection', new mongoose.Schema({
-    title: String,
-    description: String,
-    source: String,
-    timeBased: Boolean,
-    defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
-    active: Boolean,
-    status: String,
-    progress: Number,
-    numBusy: Number,
-    reduce: Boolean,
-    cropDistribution: Boolean,
-    createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
-    modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
-    createdAt: Date,
-    updatedAt: Date,
-}));
-
-this.ShapeCollection.schema.plugin(useTimestamps);
 
 var MapLayerSchema = new mongoose.Schema({
  //   _id: { type: mongoose.Schema.ObjectId },
@@ -218,72 +172,6 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
 
 this.Map.schema.plugin(useTimestamps);
 
-/*
-Adjusts minVal, maxVal and color positions for all layers if 
-isAbsolute is true for any color.
-
-This allows us to have colors with relative (normalized) positions between
-0 and 1, as well as colors with absolute positions, for which minVal and 
-maxVal may have to be adjusted if the absolute position is lower or greater. 
-*/
-this.Map.prototype.adjustScales = function() {
-    var map = this;
-    for (var i = 0; i < map.layers.length; i++) {
-        var colors = map.layers[i].layerOptions.colors;
-        var pointCollection = map.layers[i].pointCollection;
-        // adjust minVal and maxVal so that abs position fits between them
-        if (colors) {
-            for (var j = 0; j < colors.length; j++) {
-                if (colors[j][colors[j].length - 1] != '%') {
-                    map.layers[i].pointCollection.minVal = Math.min(
-                        map.layers[i].pointCollection.minVal, parseFloat(colors[j].position));
-                    map.layers[i].pointCollection.maxVal = Math.max(
-                        map.layers[i].pointCollection.maxVal, parseFloat(colors[j].position));
-                }
-            }
-            // for each color, calculate new position if isAbsolute
-/*            for (var j = 0; j < colors.length; j++) {
-                if (colors[j][colors[j].length - 1] != '%') {
-                    var p = (parseFloat(colors[j].position) - pointCollection.minVal) / (pointCollection.maxVal - pointCollection.minVal);
-                    //colors[j].position = Math.max(0, Math.min(p, 1)); // not necessary since minVal and maxVal are adjusted
-                    colors[j].position = p;
-                } else {
-                    colors[j].position = parseFloat(colors[j].position);
-                }
-            }
-            // sort by position
-            colors.sort(function(a, b) { return (a.position - b.position) });
-            */
-        }
-    }
-}
-
-this.Tweet = mongoose.model('Tweet', new mongoose.Schema({
-    pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
-    mapid: String,
-}));
-
-this.TweetCollection = mongoose.model('TweetCollection', new mongoose.Schema({
-    pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
-    mapid: String,
-    name: String,
-}));
-
-this.Chat = mongoose.model('Chat', new mongoose.Schema({
-    map: { type: mongoose.Schema.ObjectId, ref: 'Map', required: true, index: 1 },
-    name: String,
-    text: String,
-    date: Date,
-}));
-
-this.Comment = mongoose.model('Comment', new mongoose.Schema({
-    map: { type: mongoose.Schema.ObjectId, ref: 'Map', required: true, index: 1 },
-    name: String,
-    text: String,
-    date: Date,
-}));
-
-
 var onTheFlyModels = {};
 
 this.onTheFlyModel = function(collectionName) {
@@ -294,34 +182,73 @@ this.onTheFlyModel = function(collectionName) {
     return onTheFlyModels[collectionName];
 }
 
-/*
 
-this.Feature = mongoose.model('Feature', new mongoose.Schema({
-    FeatureCollection: { type: mongoose.Schema.ObjectId, ref: 'FeatureCollection', required: true, index: 1 },
+
+function toGeoJSON() {
+    obj = this.toObject();
+    if (obj.bbox && obj.bbox.length) {
+        obj.bbox = obj.bbox.reduce(function(a, b) {
+            return a.concat(b);
+        });
+    } else {
+        delete obj.bbox;
+    }
+    return obj;
+}
+
+function getBounds(coordinates) {
+    if (coordinates.length && !Array.isArray(coordinates[0])) {
+        return getBounds([coordinates]);
+    }
+    return coordinates.reduce(function(a, b) {
+        if (!Array.isArray(b) || b.length < 2) return a;
+        var bmax, bmin;
+        if (Array.isArray(b[0])) {
+            b = getBounds(b);
+            bmin = b[0];
+            bmax = b[1];
+        } else {
+            bmax = bmin = b;
+        }
+        return [
+            [Math.min(bmin[0], a[0][0]), Math.min(bmin[1], a[0][1])],
+            [Math.max(bmax[0], a[1][0]), Math.max(bmax[1], a[1][1])]
+        ];
+    }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
+}
+
+var GeoFeatureCollectionSchema = new mongoose.Schema({
+    type: {type: String, required: true, enum: ["FeatureCollection"], default: 'FeatureCollection'},
+    bbox: {type: Array, index: '2d'},
+    properties: mongoose.Schema.Types.Mixed
+});
+GeoFeatureCollectionSchema.methods.toGeoJSON = toGeoJSON;
+GeoFeatureCollectionSchema.plugin(useTimestamps);
+
+this.GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCollectionSchema);
+
+
+var GeoFeatureSchema = new mongoose.Schema({
+    featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', required: true, index: 1 },
+    type: {type: String, required: true, enum: ['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon', 'Feature']},
     bbox: {type: Array, index: '2d'},
     geometry: {
-        type: {type: String, enum: ['Point', 'Polygon']},
-        coordinates: {type: Array, index: '2d'},
-        properties: mongoose.Schema.Types.Mixed
-    }
-}));
+        type: {type: String, required: true},
+        coordinates: {type: Array, required: true}
+    },
+    properties: mongoose.Schema.Types.Mixed
+});
+GeoFeatureSchema.methods.toGeoJSON = toGeoJSON;
+GeoFeatureSchema.methods.getBounds = function() {
+    return getBounds(this.geometry.coordinates);
+};
+GeoFeatureSchema.plugin(useTimestamps);
+GeoFeatureSchema.index({bbox: '2d', featureCollection: 1});
+GeoFeatureSchema.pre('save', function (next) {
+    this.bbox = this.getBounds();
+    next();
+});
 
-// problem: can only index one- [] or two-dimensional [[]] arrays.
-
-> db.features.ensureIndex({"geometry.coordinate": "2d"})
-> db.features.save({geometry: {type: "Point", coordinate: [[1,1], [1,1]]}})
-> db.features.save({geometry: {type: "Point", coordinate: [[[1,1], [1,1]]]}})
-geo values have to be numbers: { 0: [ 1.0, 1.0 ], 1: [ 1.0, 1.0 ] }
-
-
-/*
-
-
-FeatureCollection,
-  "features": []
-
-
-*/
-
+this.GeoFeature = mongoose.model('GeoFeature', GeoFeatureSchema);
 
 

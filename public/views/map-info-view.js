@@ -16,22 +16,16 @@ define([
 
 	    initialize: function(options) 
 	    {    	
+	    	MapInfoView.__super__.initialize.call(this, options);
 		    this.template = _.template(templateHtml);
-			this.vent = options.vent;
-
-			_.bindAll(this, "updateMapInfo");
-		 	options.vent.bind("updateMapInfo", this.updateMapInfo);
-
-			this.mapInfo = options.mapInfo;
+		    this.listenTo(this.model, 'sync', this.populateFromModel);
 		},
 
-		updateMapInfo: function(mapInfo)
+		populateFromModel: function()
 		{
-			if (mapInfo) {
-				this.mapInfo = mapInfo;
-			}
-
-			this.setTitle(this.mapInfo.title);
+			console.log('----------');
+			var mapInfo = this.model.attributes;
+			this.setTitle(mapInfo.title);
 			var fields = [/*'title',*/ 'description', 'author', 'linkURL', 'twitter'];
 			for (var i = fields.length - 1; i >= 0; i--) {
 				var el = this.$('.' + fields[i]);
@@ -39,7 +33,7 @@ define([
 				if (!contentEl.length) {
 					contentEl = el;
 				}			
-				var f = this.mapInfo[fields[i]];
+				var f = mapInfo[fields[i]];
 
 				if (f && f != '') {
 					if (fields[i] == 'description') {
@@ -62,12 +56,11 @@ define([
 		render: function()
 		{
 			MapInfoView.__super__.render.call(this);
-			this.updateMapInfo();
+			this.populateFromModel();
 
 			return this;
 		}
 	});
-	MapInfoView.templateHtml = templateHtml;
 
 	return MapInfoView;
 });

@@ -6,80 +6,9 @@ define([
 	'utils',
 	'text!templates/map-layer-editor.html',
 	'views/panel-view-base',
+	'mixins/model-editor-mixin',
 	'lib/color-gradient/color-gradient',
-	'deepextend'
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, ColorGradient) {
-
-	var ModelEditorMixin = {
-
-		initModelInputs: function() {
-			var self = this;
-			this.modelInputs = {};
-			this.$('.model-input').each(function() {
-				var name = $(this).attr('data-name') || $(this).attr('name');
-				if (!self.modelInputs[name]) {
-					self.modelInputs[name] = [];
-				}
-				self.modelInputs[name].push(this);
-			});
-		},
-
-		populateModelInputs: function() {
-			for (var name in this.modelInputs) {
-				var val = this.model.get(name);
-				this.populateModelInput(name, val);
-			}
-			this.isChanged = false;
-		},
-
-		populateModelInput: function(name, val) {
-			var self = this;
-			$(self.modelInputs[name]).each(function() {
-				if ($(this).is('.btn-group')) {
-			    	self.$('.btn', this).each(function() {
-				    	if ($(this).val() != val) {
-					    	$(this).removeClass('active');
-				    	} else {
-					    	$(this).addClass('active');
-				    	}
-			    	});
-				} else if ($(this).is('input[type=checkbox], input[type=radio]')) {
-					console.log('CHECKBOX', val, name);
-					$(this).attr('checked', val == true);
-				} else {
-					$(this).val(val);
-				}
-			})
-		},
-
-		getModelInputValues: function()
-		{
-			var values = {};
-			for (var name in this.modelInputs) {
-				var from = $(this.modelInputs[name][0]),
-					val;
-				if ($(from).is('input[type=checkbox], input[type=radio]')) {
-					val = from.is(':checked');
-				} else {
-					val = from.val();
-				}
-				values[name] = val;
-			}
-			// utilizes model class and DeepModel if applicable to return expanded attrs
-			var model = new this.model.__proto__.constructor(this.model.attributes, {});
-			model.set(values, {});
-			return model.attributes;
-		},
-
-		handleValidationErrors: function(xhr) 
-		{
-			var data = $.parseJSON(xhr.responseText);
-			if (data && data.errors) {
-				console.error('errors:', data.errors);
-			}
-		},
-
-	};
+], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, ModelEditorMixin, ColorGradient) {
 
 	var MapLayerEditorView = PanelViewBase.extend({
 
@@ -93,20 +22,31 @@ define([
 	    	'change .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	// does not work well with live preview since val is unchanged
 	    	// 'keydown .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
-	    	'click .preview': 'updateMapLayer',
+	    	'change .preview': 'previewChanged',
 	    	'click .remove-color': 'removeColorClicked',
 	    	'click .add-color': 'addColorClicked',
-	    	'change .model-input.visibility': 'visibilityChanged'
+	    	'change .model-input.layer-toggle': 'layerToggled'
 	    },
 
 	    initialize: function(options) 
 	    {
+	    	MapLayerEditorView.__super__.initialize.call(this, options);
 		    this.template = _.template(templateHtml);	
-			this.vent = options.vent;
+		    this.listenTo(this.model, 'change', this.updateFromModel);
+		    this.listenTo(this.model, 'sync', this.modelSynced);
+		    this.listenTo(this.model, 'destroy', this.remove);
+	    },
+
+	    modelSynced: function(model)
+	    {
+			if (this.model.hasChanged('layerOptions')) {
+				//this.populateFromModel();	
+			} 
 	    },
 
 	    render: function() 
 	    {
+	    	var self = this;
 			MapLayerEditorView.__super__.render.call(this);
 
 	    	this.colorRowTemplate = this.$('.color-palette tr.element-template').remove()
@@ -114,10 +54,28 @@ define([
 			this.initModelInputs();
 			this.initSliders();
 			this.populateFromModel();
+			this.initColorPicker(this.$('.model-input.color-picker'));
 
-			this.$('.layer-title').text(this.model.attributes.pointCollection.title);
+			this.$('.color-palette tbody').sortable({
+				handle: '.drag-handle',
+				stop: function(event, ui) {
+					self.modelInputChanged(event);
+				}
+			});
 
 			return this;
+	    },
+
+	    updateFromModel: function()
+	    {
+	    	// do not populate form on model change since that breaks
+	    	// things like the colorpicker 
+			this.$('.model-title').text(
+				this.model.attributes.layerOptions.title 
+				&& this.model.attributes.layerOptions.title.length ?
+					this.model.attributes.layerOptions.title
+				: this.model.attributes.pointCollection.title);
+			this.$('.model-numeric').toggle(this.model.isNumeric());
 	    },
 
 	    initSliders: function() 
@@ -152,6 +110,7 @@ define([
 
 	    populateFromModel: function()
 	    {
+			this.updateFromModel();
 			this.populateModelInputs();
 			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
 			this.populateColorTable();
@@ -159,29 +118,30 @@ define([
 			this.updateSliders();
 	    },
 
-	    getCompleteModelInputValues: function()
+	    getModelInputValues: function(values)
 	    {
-	    	var values = ModelEditorMixin.getModelInputValues.apply(this);
-	    	values.layerOptions.colors = this.getColorsFromTable();
+	    	values['layerOptions.colors'] = this.getColorsFromTable();
 	    	return values;
 	    },
 
-	    undoButtonClicked: function(event) {
+	    undoButtonClicked: function(event) 
+	    {
+	    	this.model.set(this.originalModel.attributes, {});
 	    	this.populateFromModel();
-			this.updateMapLayer(null, true);
 	    	return false;
 	    },
 
-	    saveButtonClicked: function(event) {
+	    saveButtonClicked: function(event) 
+	    {
 	    	var self = this;
 	    	if (!this.isChanged) return false;
 
 	    	this.setButtonState(false);
-	    	this.model.save(this.getCompleteModelInputValues(), {
+	    	this.updateModelFromInputs();
+	    	this.model.save({}, {
 	    		success: function(model, response, options) {
 	    			console.log('saved layer');
 	    			self.populateFromModel();
-					self.vent.trigger('updateMapLayer', model.attributes);
 	    		},
 	    		error: function(model, xhr, options) {
 			    	self.setButtonState(true);
@@ -192,34 +152,48 @@ define([
 	    	return false;
 	    },
 
-		destroyButtonClicked: function(e) {
+		destroyButtonClicked: function(e) 
+		{
 			var self = this;
 			if (window.confirm(__('Are you sure you want to delete this layer? This action cannot be reversed!'))) {
-				console.log('delete');
-				this.model.destroy();
+				this.model.destroy({
+					success: function(model, response, options) {
+					},
+					error: function(model, xhr, options) {
+					}
+				});
 			}
 			return false;
 		},
 
-	    featureTypeClicked: function(event) {
+	    featureTypeClicked: function(event) 
+	    {
 	    	this.populateModelInput('layerOptions.featureType', $(event.currentTarget).val());
 	    	this.modelInputChanged(event);
 	    	return false;
 	    },
 
-	    modelInputChanged: function(event) {
+	    modelInputChanged: function(event) 
+	    {
 	    	this.isChanged = true;
 	    	this.setButtonState(this.isChanged);
-	    	this.updateMapLayer();
+	    	this.updateModelFromInputs({silent: !this.isPreviewEnabled()});
 	    },
 
-	    updateMapLayer: function(event, forcePreview) {
-	    	if (forcePreview || this.$('.preview').is(':checked')) {
-				this.vent.trigger('updateMapLayer', this.getCompleteModelInputValues());
+	    previewChanged: function(event) 
+	    {
+	    	if (this.isPreviewEnabled()) {
+		    	this.updateModelFromInputs();
 	    	}
 	    },
 
-	    setButtonState: function(state) {
+	    isPreviewEnabled: function()
+	    {
+			return this.$('.preview').is(':checked');
+	    },
+
+	    setButtonState: function(state) 
+	    {
 	    	if (state != undefined) {
 		    	this.$('.btn.undo').attr('disabled', !state);
 		    	this.$('.btn.save').attr('disabled', !state);
@@ -231,8 +205,9 @@ define([
 		    	this.$('.remove-color').attr('disabled', true);
 	    	}
 
-	    	var featureType = this.getCompleteModelInputValues().layerOptions.featureType;
+	    	var featureType = this.getValueFromModelInput('layerOptions.featureType');
 	    	this.$('.feature-settings').each(function() {
+	    		console.log('setButtonState')
 	    		if (!$(this).hasClass(featureType)) {
 	    			$(this).hide();
 	    		} else {
@@ -244,7 +219,9 @@ define([
 	    initColorPicker: function(input, val) 
 	    {
 	    	var self = this;
-			$(input).miniColors('value', val);	
+	    	if (val != undefined) {
+				$(input).miniColors('value', val);	
+	    	}
 			$(input).miniColors({
 			    change: function(hex, rgb) { 
 					self.modelInputChanged()
@@ -259,8 +236,9 @@ define([
 	    {
 	    	var c = c || {};
 			var row = this.colorRowTemplate.clone();
-			$('[name=position]', row).val(c.position || '0%');
-			this.initColorPicker($('.color-picker', row), c.color || '#000000');
+			row.attr('data-id', c._id);
+			$('[name=position]', row).val(c.position || DEFAULT_COLOR_EDITOR_POSITION);
+			this.initColorPicker($('.color-picker', row), c.color || DEFAULT_COLOR_EDITOR_COLOR);
 			$('[name=interpolation] option', row).each(function() {
 				$(this).attr('selected', $(this).val() == c.interpolation || 
 					(c.interpolation == '' && $(this).val() == ColorGradient.prototype.interpolation.default));
@@ -274,16 +252,9 @@ define([
 	    	var colors = [];
 	    	var self = this;
 	    	this.$('.color-palette tbody').empty();
-
 	    	var colors = this.model.get('layerOptions.colors');
-
 	    	for (var i = 0; i < colors.length; i++) {
-				var c = {
-					color: colors[i].color,
-					position: colors[i].position || '100%',
-					interpolation: colors[i].interpolation || ''
-				};
-				var row = this.addColorRow(c);
+				var row = this.addColorRow(colors[i]);
 	    	}
 	    },
 
@@ -293,10 +264,12 @@ define([
 	    	this.$('.color-palette tbody tr').each(function() {
 	    		if ($(this).is('.element-template')) return;
 				var c = {
+					_id: $(this).attr('data-id'),
 					color: $('.color-picker', this).val(),
 					position: $('[name=position]', this).val(),
 					interpolation: $('[name=interpolation]', this).val()
 				};
+				if (!c._id.length) delete c._id;
 				colors.push(c);
 	    	});
 	    	return colors;
@@ -317,10 +290,9 @@ define([
 			return false;
 	    },
 
-		visibilityChanged: function(event)
+		layerToggled: function(event)
 		{
-			this.vent.trigger('toggleLayerVisibility', this.model.attributes.pointCollection._id, 
-				$(event.currentTarget).is(':checked'));
+			this.model.toggleEnabled($(event.currentTarget).is(':checked'));
 		},
 
 

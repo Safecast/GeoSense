@@ -33,8 +33,15 @@ var ImportAPI = function(app) {
 				return n;
 			}
 
+			params.dry = req.body.preview || req.body.inspect;
 			params.max = numberOrNull(req.body.max);
-			params.dry = req.body.preview || false;
+			if (!req.body.background) {
+				if (!params.max || params.max < 0) {
+					params.max = 1000;
+				} else {
+					params.max = Math.min(1000, params.max);
+				}
+			}
 
 			// prevent arbitrary script inclusion
 			if (req.body.converter) {
@@ -47,8 +54,10 @@ var ImportAPI = function(app) {
 			// prevent arbitrary file import
 			req.body.path = null;
 
-			var errors = {};
-			var valid = true;
+			var errors = {},
+				valid = true,
+				converter;
+
 			if (!req.body.url) {
 				valid = false;
 				errors.url = {
@@ -58,21 +67,25 @@ var ImportAPI = function(app) {
 				params.url = req.body.url;
 			}
 
-			var converter = conversion.PointConverterFactory(req.body.fields, {
-				strict: !params.dry
-			});
+			if (!req.body.inspect) {
+				converter = conversion.PointConverterFactory(req.body.fields, {
+					strict: !params.dry
+				});
 
-			if (!converter) {
-				valid = false;
-				errors['fields'] = {
-					message: 'No fields specified'
-				};
-			} else if (converter instanceof ValidationError) {
-				valid = false;
-				errors = _.cloneextend(errors, converter.errors);
+				if (!converter) {
+					valid = false;
+					errors['fields'] = {
+						message: 'No fields specified'
+					};
+				} else if (converter instanceof ValidationError) {
+					valid = false;
+					errors = _.cloneextend(errors, converter.errors);
+				} else {
+					// TODO: pass in converter directly
+					params.fields = req.body.fields;
+				}
 			} else {
-				// TODO: pass in converter directly
-				params.fields = req.body.fields;
+				params.converter = false;
 			}
 
 			if (req.body.mapreduce == null || req.body.mapreduce) {
@@ -84,7 +97,7 @@ var ImportAPI = function(app) {
 				console.error(err);
 	            res.send(err, 403);
 			} else {
-				var sendItems = req.body.preview ? [] : null;
+				var sendItems = req.body.preview || req.body.inspect ? [] : null;
 				self.import(params, req, res, function(err, collection) {
 					if (err) {
 						res.send(err, 403);
@@ -102,8 +115,13 @@ var ImportAPI = function(app) {
 					save: function(err, obj) {
 						//console.log('****', 'save', obj);
 					},
+					data: function(err, result) {
+						console.log(result.toObject());
+						if (req.body.inspect) {
+							sendItems.push(result.toObject());
+						}
+					},
 					convert: function(err, result) {
-						//console.log('****', 'convert', result);
 						if (req.body.preview) {
 							sendItems.push(result.converted);
 						}
@@ -215,27 +233,29 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	console.log('import params', params);
 	var Converter, converter, format, parser;
 
-	if (params.fields || params.converter == undefined) {
-		console.log('Initializing converter with fieldDefs');
-		Converter = function() { return conversion.PointConverterFactory(params.fields) };
-	} else {
-		if ((typeof params.converter != 'string' && typeof params.converter != 'object') 
-			|| (typeof params.converter == 'object' && !params.converter.fields)) {
-				var err = new Error('invalid converter: ' + params.converter);
-				if (callback) {
-					callback(err);
-					return;
-				}
-				throw err;
-		} else if (typeof params.converter == 'string') {
-			if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
-				Converter = require('./conversion/' + params.converter);
-			} else {
-				console.log('Loading custom converter: '+params.converter);
-				Converter = require(params.converter);
-			}
+	if (params.converter !== false) {
+		if (params.fields || params.converter == undefined) {
+			console.log('Initializing converter with fieldDefs');
+			Converter = function() { return conversion.PointConverterFactory(params.fields) };
 		} else {
-			converter = params.converter;
+			if ((typeof params.converter != 'string' && typeof params.converter != 'object') 
+				|| (typeof params.converter == 'object' && !params.converter.fields)) {
+					var err = new Error('invalid converter: ' + params.converter);
+					if (callback) {
+						callback(err);
+						return;
+					}
+					throw err;
+			} else if (typeof params.converter == 'string') {
+				if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
+					Converter = require('./conversion/' + params.converter);
+				} else {
+					console.log('Loading custom converter: '+params.converter);
+					Converter = require(params.converter);
+				}
+			} else {
+				converter = params.converter;
+			}
 		}
 	}
 
@@ -262,23 +282,26 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	var runImport = function(collection) 
 	{
 		var sendItems;
-		if (!converter) {
-			converter = new Converter(params.fields);
-		}
-		if (!converter.convertModel) {
-			var err = new Error('converter module does not export `convertModel`');
-			if (callback) {
-				callback(err);
-				return;
+		console.log(params);
+		if (params.converter !== false) {
+			if (!converter) {
+				converter = new Converter(params.fields);
 			}
-			throw err;
+			if (!converter.convertModel) {
+				var err = new Error('converter module does not export `convertModel`');
+				if (callback) {
+					callback(err);
+					return;
+				}
+				throw err;
+			}
 		}
 
 		var headerValues = {};
 		
 		collection.active = false;
 		collection.status = config.DataStatus.IMPORTING;
-		if (params.saveParams == undefined || params.saveParams) {
+		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
 			collection.importParams = _.cloneextend(params, {
 				fields: converter.fieldDefs
 			});
@@ -348,6 +371,10 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (minVal != undefined) {
 						collection.minVal = collection.minVal ? Math.min(minVal, collection.minVal) : minVal;
 					}
+			    	collection.isNumeric = !isNaN(maxVal) && !isNaN(minVal);
+					if (!collection.isNumeric) {
+						collection.defaults.histogram = false;
+					}
 					if (maxIncField != undefined) {
 						if (!collection.maxIncField || collection.maxIncField < maxIncField) {
 							collection.maxIncField = maxIncField;
@@ -405,7 +432,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (!func) {
 						func = 'log';
 					}
-					if (force || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
+					if ((force || config.DEBUG) || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
 						console[func].apply(console, ['* '+collection.get('_id')+' '+pos, (info ? info : ''), '-- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numSaved: '+numSaved+(headerValues.totalCount ? ' of '+headerValues.totalCount : '')+', numSkipped: '+numSkipped]);
 					}
 				};
@@ -502,22 +529,34 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							this.doc = doc;
 							this.get = function(key) {
 								return this.doc[key];
-							}
+							};
+							this.toObject = function() {
+								return this.doc;
+							};
 						}
 						// "emulate" a Mongoose Model instance
-						var model = new PseudoModel(doc);
+						var model = new PseudoModel(doc),
+							doSave = false,
+							point;
 
-						var conversionResult = converter.convertModel(model, ToModel, config),
+						if (dataCallbacks.data) {
+							dataCallbacks.data(false, model);
+						}
+
+						if (converter) {
+							var conversionResult = converter.convertModel(model, ToModel, config);
 							point = conversionResult.model;
-						var loc = point ? point.get('loc') : null;
-						var doSave = point 
-							&& (!params.bounds || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
-							&& (!params.from || point.get('datetime') >= params.from)
-							&& (!params.to || point.get('datetime') <= params.to)
-							&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
 
-						if (dataCallbacks.convert) {
-							dataCallbacks.convert(false, conversionResult);
+							var loc = point ? point.get('loc') : null;
+							doSave = point 
+								&& (!params.bounds || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
+								&& (!params.from || point.get('datetime') >= params.from)
+								&& (!params.to || point.get('datetime') <= params.to)
+								&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
+	
+							if (dataCallbacks.convert) {
+								dataCallbacks.convert(false, conversionResult);
+							}
 						}
 
 						if (doSave) {
@@ -617,21 +656,22 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		ToCollectionModel = models.PointCollection;
 
 	if (!params.append) {
-		console.info('*** Creating new collection ***');
+		if (!params.dry) {
+			console.info('*** Creating new collection ***');
+		}
 		var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
 		for (var key in config.COLLECTION_DEFAULTS) {
 			if (params[key]) {
 				defaults[key] = params[key];
 			}
 		}
-		defaults.save(function(err, res) {
+		var defaultsSave = !params.dry ?
+			defaults.save : function(callback) { callback(false, defaults) };
+		defaultsSave.call(defaults, function(err, defaults) {
 			if (err) {
 				console.error(err.message);
-				if (res) {
-					res.send('server error', 500);
-					if (callback) {
-						callback(err);
-					}
+				if (callback) {
+					callback(err);
 				}
 				return;
 			}
@@ -716,11 +756,11 @@ function getImportParams(params)
 		to: params.to,
 		max: params.max,
 		skip: params.skip,
-		incremental: params.incremental,
-		break: params.break, 
+		incremental: (params.incremental ? params.incremental && params.incremental != 'off' : null),
+		break: (params.break ? params.break && params.break != 'off' : null), 
 		interval: params.interval,
 		bounds: params.bounds,
-		mapreduce: params.mapreduce,
+		mapreduce: (params.mapreduce ? params.mapreduce && params.mapreduce != 'off' : null),
 		fields: (params.fields ? JSON.parse(params.fields) : undefined) // precedence over converter
 	});
 }

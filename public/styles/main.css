@@ -14,7 +14,7 @@
 @import url("chat.css");
 @import url("data-library.css");
 @import url("graph.css");
-@import url("layer-panel.css");
+@import url("layers-panel.css");
 @import url("data-detail.css");
 @import url("map-layer-editor.css");
 /*@import url("timeline.css");*/
@@ -30,6 +30,10 @@
 
 @import url("../lib/gradient-editor/gradient-editor.css");
 @import url("../lib/colorpicker/css/colorpicker.css");
+
+body, select, textarea, p, input, button {
+	font-family: "Oxygen", sans-serif;
+}
 
 #home 
 {

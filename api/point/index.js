@@ -72,28 +72,22 @@ var PointAPI = function(app)
 			});
 		});
 
-		app.get('/api/mappoints/:mapid/:pointcollectionid', function(req, res) {
-
-//			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
-			Map.findOne({_id: req.params.mapid})
+		app.get('/api/map/:publicslug/layer/:layerId/features', function(req, res) 
+		{
+			Map.findOne({publicslug: req.params.publicslug})
 				.populate('layers.pointCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
-					var pointCollection, mapLayer;
-					for (var i = map.layers.length - 1; i >= 0; i--) {
-						if (map.layers[i].pointCollection._id == req.params.pointcollectionid) {
-							mapLayer = map.layers[i];
-							pointCollection = mapLayer.pointCollection;
-							break;
-						}
-					}
-
-					if (!err && pointCollection) {
-						var urlObj = url.parse(req.url, true);
-						var queryOptions = {},
+					var mapLayer = map.layers.id(req.params.layerId);
+					if (!mapLayer) {
+						res.send('map layer not found', 404);
+					} else {
+						var pointCollection = mapLayer.pointCollection,
+							urlObj = url.parse(req.url, true),
+							queryOptions = {},
 							filterQuery = {};
 
 						var zoom = parseInt(urlObj.query.z) || 0;
@@ -385,11 +379,8 @@ var PointAPI = function(app)
 								dequeueBoxQuery();
 							}
 						});
-
-
-					} else {
-						res.send('collection not found', 404);
 					}
+
 				});
 		});
 	}

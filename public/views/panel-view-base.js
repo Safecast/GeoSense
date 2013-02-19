@@ -10,6 +10,12 @@ define([
 
 	    tagName: 'div',
 
+	    initialize: function(options) 
+	    {
+	    	var options = options || {};
+		    this.vent = options.vent;
+		},
+
 		setPanelState: function(expand) {
 			var self = this;
 			if (expand == null) {
@@ -55,14 +61,21 @@ define([
 			return this;
 		},
 
-		show: function(speed) 
+		isVisible: function()
 		{
-			return this.$el.show(speed);
+			return this.$el.is(':visible');
 		},
 
-		hide: function(speed)
+		show: function(duration, complete) 
 		{
-			return this.$el.hide(speed);
+			this.$el.show(duration, complete);
+			return this;
+		},
+
+		hide: function(duration, complete)
+		{
+			this.$el.hide(duration, complete);
+			return this;
 		},
 
 	    render: function() 
@@ -97,7 +110,7 @@ define([
 				if ($(self.el).is('.extended')) {
 					self.setPanelState(true);
 				}
-				self.vent.trigger('layerPanelViewResized');
+				self.vent.trigger('panel:resize', self);
 				return false;
 			});
 
@@ -117,7 +130,13 @@ define([
 		detach: function() 
 		{
 			this.$el.detach();
-		}
+		},
+
+		appendSubView: function(view)
+		{
+			this.$('.accordion').append(view.el);
+			view.superView = this;
+		}		
 
 	});	
 
