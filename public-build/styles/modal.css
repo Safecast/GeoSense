@@ -6,9 +6,7 @@
 	width: 480px;
 }
 .modal .urls input {
-	font-size: 16pt;
-	height: 40px;
-	color: #999;
+	color: #aaa;
 }
 .modal .urls input, .modal .urls textarea {
 	cursor: text;

@@ -9,54 +9,23 @@
     font-style: normal;
 }
 @font-face {
-    font-family: 'OswaldLight';
-    src: url('../assets/type/Oswald-Light-webfont.eot');
-    src: url('../assets/type/Oswald-Light-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../assets/type/Oswald-Light-webfont.woff') format('woff'),
-         url('../assets/type/Oswald-Light-webfont.ttf') format('truetype'),
-         url('../assets/type/Oswald-Light-webfont.svg#OswaldLight') format('svg');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'Oxygen';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Oxygen'), local('Oxygen-Regular'), url(http://themes.googleusercontent.com/static/fonts/oxygen/v2/wtnQihq4aKLdY8pCM6qpG-vvDin1pK8aKteLpeZ5c0A.woff) format('woff');
 }
 @font-face {
-    font-family: 'OswaldBook';
-    src: url('../assets/type/Oswald-Regular-webfont.eot');
-    src: url('../assets/type/Oswald-Regular-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../assets/type/Oswald-Regular-webfont.woff') format('woff'),
-         url('../assets/type/Oswald-Regular-webfont.ttf') format('truetype'),
-         url('../assets/type/Oswald-Regular-webfont.svg#OswaldBook') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-@font-face {
-    font-family: 'OswaldBold';
-    src: url('../assets/type/Oswald-Bold-webfont.eot');
-    src: url('../assets/type/Oswald-Bold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../assets/type/Oswald-Bold-webfont.woff') format('woff'),
-         url('../assets/type/Oswald-Bold-webfont.ttf') format('truetype'),
-         url('../assets/type/Oswald-Bold-webfont.svg#OswaldBold') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-@font-face {
-    font-family: 'OswaldStencilRegular';
-    src: url('../assets/type/Oswald-Stencil-webfont.eot');
-    src: url('../assets/type/Oswald-Stencil-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../assets/type/Oswald-Stencil-webfont.woff') format('woff'),
-         url('../assets/type/Oswald-Stencil-webfont.ttf') format('truetype'),
-         url('../assets/type/Oswald-Stencil-webfont.svg#OswaldStencilRegular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-html {
-	
+  font-family: 'Oxygen';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Oxygen Bold'), local('Oxygen-Bold'), url(http://themes.googleusercontent.com/static/fonts/oxygen/v2/fSUtikcZd7PHZK0t2hzTebO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
 }
 .element-template {
 	display: none;
 }
 body {
 	background-color:#edeeee;
-	font-family: Helvetica, Helvetica Neue, Arial, sans-serif;
+	
 	text-align: left;
 	
 	-webkit-user-select: none;
@@ -88,7 +57,7 @@ p {
   line-height: 18px;
 }
 h1 {
-	font-family: Vit ,sans-serif;
+	font-family: Vit, sans-serif;
 	font-style: normal;
 	font-weight: 700;
 	line-height:38px;
@@ -106,16 +75,19 @@ h1 {
 }
 h2,
 h3, 
-fieldset label {
+label.title {
 	font-family: "AlternateGothicFSNo3", sans-serif;
 	
 	font-size:15pt;
 	font-weight: bold;
 	color: #353535;
 }
-fieldset label {
+label.title {
 	font-size:12pt;
-	color:#555;
+	color:#999;
+}
+fieldset p {
+	margin-bottom: .5em;
 }
 h4, h5, .condensed {
 	font-family: "AlternateGothicFSNo3", sans-serif;
@@ -188,4 +160,9 @@ fieldset.two-column input {
 #map_canvas img {
 	
 	max-width: none !important;
+}
+input.text.large {
+	font-size: 18px;
+	height: 40px;
+	color: #999;
 }
