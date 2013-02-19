@@ -234,6 +234,7 @@ define([
 	    fromFieldRemoveClicked: function(event) {
 			$(event.currentTarget).closest('.from-field').remove();
 			this.updateHandleStates();
+			this.previousFieldDefs = null;
 			this.loadImportPreview();
 			return false;
 	    },
