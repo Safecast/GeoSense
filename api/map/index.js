@@ -392,8 +392,6 @@ var MapAPI = function(app)
 										.populate('layers.layerOptions')
 										.exec(function(err, map) {
 										    if (handleDbOp(req, res, err, map)) return;
-										    console.log('1', map.layers.id(layer._id));
-										    console.log('2', prepareLayerResult(req, map.layers.id(layer._id)));
 									       	res.send(prepareLayerResult(req, map.layers.id(layer._id)));
 										});
 							  	});

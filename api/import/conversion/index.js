@@ -330,7 +330,7 @@ Converter.prototype.convertModel = function(fromModel, toModel, config) {
 
 	var m = new toModel(doc);
 
-	if (config.DEBUG) {
+	if (0&&config.DEBUG) {
 		console.log('converted:', doc);
 	}
 	

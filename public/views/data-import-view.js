@@ -311,7 +311,10 @@ define([
 			console.log('Requesting import', params);
 			this.setAlert();
 			this.setLoading(true);
-			$.ajax({
+			if (this.request) {
+//				this.request.abort();
+			}
+			this.request = $.ajax({
 				type: 'POST',
 				url: '/api/import/',
 				data: params,
@@ -364,7 +367,6 @@ define([
 		loadImportPreview: function()
 		{
 			if (this.previousFieldDefs && _.isEqual(this.previousFieldDefs, this.getFieldDefs().fieldDefs)) return;
-			console.log(this.previousFieldDefs, this.getFieldDefs().fieldDefs);
 			this.runImport({preview: true, max: this.maxPreview}, {silent: true});
 		},
 
