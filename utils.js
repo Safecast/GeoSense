@@ -25,11 +25,6 @@ exports.connectDB = function(callback, exitProcessOnError)
     return mongoose.connect(config.DB_PATH).connection;
 };
 
-exports.ValidationError = function(errors) {
-    Error.call(this);
-    this.errors = errors;
-}
-
 /**
 * Simple Python-style string formatting.
 *

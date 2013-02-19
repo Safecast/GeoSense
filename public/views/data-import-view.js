@@ -190,7 +190,7 @@ define([
 			this.setStep('source');					
 
 			if (DEV) {
-				this.$('[name=url]').val('https://dl.dropbox.com/s/03cqpv1camzz4a1/reactors.csv');
+				this.$('[name=url]').val('https://dl.dropbox.com/s/cb4blktkkelwg1n/nuclear_reactors.csv');
 				self.sourceSubmitButtonClicked();
 			}
 
@@ -209,6 +209,7 @@ define([
 
 	    setStep: function(step)
 	    {
+	    	this.setAlert();
 	    	this.$('.step').each(function() {
 	    		$(this).toggle($(this).is('.' + step));
 	    	});
@@ -300,6 +301,8 @@ define([
 				}
 			}
 
+			this.previousFieldDefs = fieldDefs;
+
 			var params = _.extend({
 				url: this.$('input[name=url]').val(),
 				fields: fieldDefs,
@@ -312,6 +315,7 @@ define([
 				url: '/api/import/',
 				data: params,
 				success: function(responseData) {
+					console.log('import response', responseData);
 					self.setLoading(false);
 					if (params.preview) {
 						self.updateImportPreview(responseData.items);
@@ -322,12 +326,13 @@ define([
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
 					self.setLoading(false);
-					var data = $.parseJSON(jqXHR.responseText);
-					console.error('import failed', data.errors);
+					var data = $.parseJSON(jqXHR.responseText),
+						errors = data && data.errors ? data.errors : data.error ? {'': data} : null;
+					console.error('import failed', errors);
 					var lis = '';
-					if (data && data.errors) {
-						for (var k in data.errors) {
-							lis += '<li>' + data.errors[k].message + '</li>';
+					if (errors) {
+						for (var k in errors) {
+							lis += '<li><i class="icon icon-ban-circle"></i> ' + errors[k].message + '</li>';
 						}
 						if (!options.silent) {
 							self.setAlert('<ul>' + lis + '</ul>');
@@ -357,6 +362,8 @@ define([
 
 		loadImportPreview: function()
 		{
+			if (this.previousFieldDefs && _.isEqual(this.previousFieldDefs, this.getFieldDefs().fieldDefs)) return;
+			console.log(this.previousFieldDefs, this.getFieldDefs().fieldDefs);
 			this.runImport({preview: true, max: this.maxPreview}, {silent: true});
 		},
 
@@ -372,10 +379,11 @@ define([
 							tdclass = 'conversion-error';
 							switch (current[k].name){
 								case 'ValueSkippedError':
-									val = 'skipped';
+									//val = 'skipped';
+									val = current[k].message;
 									break;
 								default:
-									val = 'error';
+									val = current[k].message;
 							}
 						} else {
 							switch (k) {

@@ -1,21 +1,25 @@
-var utils = require('../../../utils.js'),
-	ValidationError = utils.ValidationError,
+var errors = require('../../../errors'),
+	ValidationError = errors.ValidationError,
 	console = require('../../../ext-console.js'),
+	util = require('util'),
 	_ = require('cloneextend');
 
 var ARRAY_SEPARATORS = /[,;]/;
 
-var ConversionError = function(msg) {
-	this.error = true;
-	this.message = msg;
-	this.name = 'ConversionError';
-};
+var ConversionError = function(msg, errors) {
+	ConversionError.super_.call(this, msg, this.constructor);
+    this.errors = errors;
+}
+util.inherits(ConversionError, errors.BasicError)
+ConversionError.prototype.name = 'ValidationError';
+ConversionError.prototype.message = 'Conversion Error';
 
-var ValueSkippedError = function(msg) {
-	this.error = true;
-	this.message = msg;
-	this.name = 'ValueSkippedError';
-};
+var ValueSkippedError = function(msg, errors) {
+	ValueSkippedError.super_.call(this, msg, this.constructor);
+}
+util.inherits(ValueSkippedError, errors.BasicError)
+ValueSkippedError.prototype.name = 'ValueSkippedError';
+ValueSkippedError.prototype.message = 'Value Skipped';
 
 function isErr(val) {
 	return val instanceof ConversionError || val instanceof ValueSkippedError;
@@ -57,7 +61,7 @@ var Cast = {
 		}
 		var num = Number(value);
 		if (isNaN(num)) {
-			return new ConversionError('Cast to Number failed');
+			return new ConversionError('Not a number');
 		}
 		if (!options.skipZero || num != 0) {
 			return num;
@@ -102,7 +106,6 @@ var FieldType = {
 		return function() {
 			for (var i = 0; i < l; i++) {
 				var num = Cast.Number(this.get(fromFields[i]), options);
-				return num;
 				if (num != undefined) {
 					if (options.min != undefined && num < options.min) {
 						return new ValueSkippedError('Skipping low number: ' + num);
@@ -164,7 +167,7 @@ var FieldType = {
 			if (l == 1) {
 				date = Cast.Date(this.get(fromFields[0]), options);
 				if (!date) {
-					return new ConversionError('Cast to Date failed');
+					return new ConversionError('No date recognized');
 				}
 			} else {
 				var numbers = [];
@@ -173,7 +176,7 @@ var FieldType = {
 				}
 				date = Cast.Date(numbers);
 				if (!date) {
-					return new ConversionError('Cast to Date failed');
+					return new ConversionError('No date recognized');
 				}
 			}
 			if (date) {
@@ -234,13 +237,13 @@ var FieldType = {
 			if (isErr(arr)) return arr;
 			if (arr) {
 				if (arr.length != 2) {
-					return new ConversionError('Array is not 2d');
+					return new ConversionError('Needs 2D');
 				}
 				arr = [clamp180(arr[0]), clamp180(arr[1])];
 				if (!options.skipZero || (arr[0] != 0 && arr[1] != 0)) {
 					return arr;
 				} else {
-					return new ConversionError('Skipping LngLat [0,0]');
+					return new ConversionError('Skipping 0,0');
 				}
 			}
 		}
@@ -406,7 +409,7 @@ module.exports = {
 		if (valid) {
 			return new Converter(validFieldDefs, options);
 		} else {
-			return new ValidationError(errors);
+			return new ValidationError(null, errors);
 		}
 	}
 }
