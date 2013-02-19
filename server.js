@@ -167,7 +167,7 @@ utils.connectDB(function() {
 			console.success('Web server running at http://0.0.0.0:' + port + "/");
 	    }
 	});
-});
+}, false);
 
 process.on('uncaughtException', function(err) {
 	// TODO: notify admin
