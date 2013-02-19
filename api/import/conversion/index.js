@@ -22,7 +22,7 @@ ValueSkippedError.prototype.name = 'ValueSkippedError';
 ValueSkippedError.prototype.message = 'Value Skipped';
 
 function isErr(val) {
-	return val instanceof ConversionError || val instanceof ValueSkippedError;
+	return val instanceof Error;
 }
 
 function isEmpty(val) {
@@ -323,7 +323,7 @@ Converter.prototype.convertModel = function(fromModel, toModel, config) {
 		var f = this.fields[destField];
 		doc[destField] = f.apply(fromModel, [doc]);
 		if (isErr(doc[destField])) {
-			console.error('Error on field ' + destField + ':', doc[destField].message);
+			console.error(doc[destField].name + ' on field ' + destField + ':', doc[destField].message);
 			errors++;
 		}
 	}
