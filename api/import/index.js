@@ -379,7 +379,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					numSkipped = 0,
 					ended = false,
 					finalized = false,
-					paused = false;
+					PseudoModel = models.onTheFlyModel('');
 
 				var finalize = function(parserErr) 
 				{
@@ -470,10 +470,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							return;
 						}
 
-				    	if (self.readStream && paused) {
+				    	if (self.readStream) {
 					    	debugStats('resume');
 					    	self.readStream.resume();
-					    	paused = false;
 					    }
 					}
 				}
@@ -485,7 +484,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							console.error('Error saving point', err);
 						}
 				    	debugStats('on save', 'success', (point ? point.get('_id') : ''));
-						point = null;
 						numSaving--;
 						numSaved++;
 				    	postSave(self);
@@ -558,17 +556,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							doc.sourceId = doc.id;
 						}
 
-						//var model = new Model(doc);
-						var PseudoModel = function(doc) {
-							this.doc = doc;
-							this.get = function(key) {
-								return this.doc[key];
-							};
-							this.toObject = function() {
-								return this.doc;
-							};
-						}
-						// "emulate" a Mongoose Model instance
 						var model = new PseudoModel(doc),
 							doSave = false,
 							point;
@@ -595,8 +582,10 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 						if (doSave) {
 					    	if (self.readStream) {
+					    		// unless paused, incoming data will pile up since saving
+					    		// is slow. pausing the readStream until all are saved keeps 
+					    		// memory consumption low.
 						    	self.readStream.pause();
-						    	paused = true;
 					    	}
 							point.importJob = job;
 							point.pointCollection = point.shapeCollection = collection;
@@ -687,6 +676,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					try {
 						parser.fromStream(format.Request({url: url}));
 					} catch(err) {
+						console.error(err);
 						if (callback) {
 							callback(err);
 							return;
