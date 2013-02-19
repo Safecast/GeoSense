@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
     config = require('./config.js');
-    mongooseTypes = require("mongoose-types");
+    mongooseTypes = require("mongoose-types"),
+    _ = require('cloneextend');
 
 var useTimestamps = function (schema, options) {
     schema.add({
@@ -197,8 +198,10 @@ function toGeoJSON() {
 }
 
 function getBounds(coordinates) {
-    if (coordinates.length && !Array.isArray(coordinates[0])) {
-        return getBounds([coordinates]);
+    if (!Array.isArray(coordinates) || !coordinates.length) {
+        return;
+    } else if (!Array.isArray(coordinates[0])) {
+        coordinates = [coordinates];
     }
     return coordinates.reduce(function(a, b) {
         if (!Array.isArray(b) || b.length < 2) return a;
@@ -249,6 +252,32 @@ GeoFeatureSchema.pre('save', function (next) {
     next();
 });
 
-this.GeoFeature = mongoose.model('GeoFeature', GeoFeatureSchema);
+GeoFeature = mongoose.model('GeoFeature', GeoFeatureSchema);
+GeoFeature.findWithin = function(bbox, conditions, fields, options, callback) {
+    if ('function' == typeof options) {
+        callback = options;
+        options = null;
+    } else if ('function' == typeof fields) {
+        callback = fields;
+        fields = null;
+        options = null;
+    } else if ('function' == typeof conditions) {
+        callback = conditions;
+        conditions = {};
+        fields = null;
+        options = null;
+    }
 
+    var conditions = _.cloneextend(conditions, {
+        bbox: {
+            $within: {
+                $box: getBounds(bbox)
+            }
+        }
+    });
 
+    return GeoFeature.find(conditions, fields, options, callback);
+}
+
+this.GeoFeature = GeoFeature;
+this.getBounds = getBounds;

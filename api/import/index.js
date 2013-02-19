@@ -1,10 +1,12 @@
 // TODO: runImport should not handle req and res
 
-var config = require('../../config.js'),
-	models = require("../../models.js"),
-	permissions = require("../../permissions.js"),
-	utils = require("../../utils.js"),
-	ValidationError = utils.ValidationError,
+var config = require('../../config'),
+	models = require("../../models"),
+	permissions = require("../../permissions"),
+	utils = require("../../utils"),
+	errors = require('../../errors'),
+	BasicError = errors.BasicError,
+	ValidationError = errors.ValidationError,
 	conversion = require("./conversion"),
   	mongoose = require('mongoose'),
 	date = require('datejs'),
@@ -77,7 +79,7 @@ var ImportAPI = function(app) {
 					errors['fields'] = {
 						message: 'No fields specified'
 					};
-				} else if (converter instanceof ValidationError) {
+				} else if (converter.name =='ValidationError') {
 					valid = false;
 					errors = _.cloneextend(errors, converter.errors);
 				} else {
@@ -93,17 +95,18 @@ var ImportAPI = function(app) {
 			}
 
 			if (!valid) {
-				var err = new ValidationError(errors);
+				var err = new ValidationError(null, errors);
 				console.error(err);
 	            res.send(err, 403);
 			} else {
 				var sendItems = req.body.preview || req.body.inspect ? [] : null;
 				self.import(params, req, res, function(err, collection) {
 					if (err) {
-						res.send(err, 403);
+						res.send(new BasicError(err.message), 403);
 						console.error(err);
 						return;
 					}
+					var err = false;
 					console.success('*** import request completed');
 					if (!req.body.background) {
 						res.send({
@@ -234,6 +237,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	var Converter, converter, format, parser;
 
 	if (params.converter !== false) {
+		// TODO: try/catch like below
 		if (params.fields || params.converter == undefined) {
 			console.log('Initializing converter with fieldDefs');
 			Converter = function() { return conversion.PointConverterFactory(params.fields) };
@@ -260,11 +264,25 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	}
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
-		format = require('./formats/' + params.format);
+		format = './formats/' + params.format;
 	} else {
-		console.log('Loading custom format: '+params.format);
-		format = require(params.format);
+		format = params.format;
 	}
+
+	console.log('Loading format: '+params.format);
+	try {
+		format = require(format);
+	} catch(err) {
+		if (callback) {
+			if (err.code == 'MODULE_NOT_FOUND') {
+				err = new Error('Unknown format: ' + params.format);
+			}
+			callback(err);
+			return;
+		}
+		throw err;
+	}
+
 	if (!format.Parser) {
 		var err = new Error('format module does not export `Parser`');
 		if (callback) {
@@ -363,7 +381,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					finalized = false,
 					paused = false;
 
-				var finalize = function(parserErr) {
+				var finalize = function(parserErr) 
+				{
+					ended = true;
 					finalized = true;
 					if (maxVal != undefined) {
 				    	collection.maxVal = collection.maxVal ? Math.max(maxVal, collection.maxVal) : maxVal;
@@ -407,20 +427,23 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								}
 								return;
 							}
-							if (!parserErr) {
-						    	debugStats('*** job completed ***', 'success', null, true);
-							} else {
+							if (parserErr) {
 						    	debugStats('*** job failed ***', 'error', null, true);
-							}
-							if (params.mapreduce) {
-								console.log('**** starting mapreduce');
-								var mapReduceParams = {
-									pointCollectionId: collection._id.toString()
-								};
-								new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
-							} else {
 								if (callback) {
-									callback(false, collection);
+									callback(parserErr, collection);
+								}
+							} else {
+						    	debugStats('*** job completed ***', 'success', null, true);
+								if (params.mapreduce) {
+									console.log('**** starting mapreduce');
+									var mapReduceParams = {
+										pointCollectionId: collection._id.toString()
+									};
+									new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
+								} else {
+									if (callback) {
+										callback(false, collection);
+									}
 								}
 							}
 						});
@@ -489,10 +512,21 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 				function onData(data, index) 
 				{
+			    	var self = this;
 					if (ended) return;
+
+					if (parser.readStream && parser.readStream.response && parser.readStream.response.statusCode != 200) {
+						var err = new errors.HTTPError(null, parser.readStream.response.statusCode);
+						console.error('* HTTP error', err);
+						finalize(err);
+						if (dataCallbacks.error) {
+							dataCallbacks.error(err);
+						}
+						return;
+					}
+
 					numRead++;
 			    	debugStats('on data', 'info');
-			    	var self = this;
 
 					if (FIRST_ROW_IS_HEADER && !fieldNames) {
 						fieldNames = data;
@@ -620,8 +654,16 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 			    function onError(err) 
 			    {
-			        console.error(err.message);
+			    	console.error(err);
+			    	if (err.code == 'ENOTFOUND') {
+			    		// wrap network error in friendlyer error
+			    		err = new errors.HTTPError(null, 404);
+			    	}
+			    	console.error(err);
 			        finalize(err);
+					if (dataCallbacks.error) {
+						dataCallbacks.error(err);
+					}
 			    }
 
 				parser.on('header', onHeader)								
@@ -642,7 +684,15 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				} else if (params.url) {
 					var url = formatSource(params.url, collection);
 					console.info('*** Importing from URL ***', url, '[converter=' + params.converter + ']');
-					parser.fromStream(format.Request({url: url}));
+					try {
+						parser.fromStream(format.Request({url: url}));
+					} catch(err) {
+						if (callback) {
+							callback(err);
+							return;
+						}
+						throw err;
+					}
 				} else {
 					var path = formatSource(params.path, collection);
 					console.info('*** Importing from path ***', path, '[converter=' + params.converter + ']');

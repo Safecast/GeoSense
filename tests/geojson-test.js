@@ -1,13 +1,13 @@
 var application_root = __dirname,
-	config = require("./config.js"),
+	config = require("../config.js"),
 	path = require("path"),
 	express = require("express"),
   	mongoose = require('mongoose'),
-  	models = require('./models.js'),
-  	utils = require('./utils.js'),
-  	permissions = require('./permissions.js'),
+  	models = require('../models.js'),
+  	utils = require('../utils.js'),
+  	permissions = require('../permissions.js'),
   	ejs = require('ejs'),
-    console = require('./ext-console'),
+    console = require('../ext-console'),
 	assert = require("assert");
 
 utils.connectDB(function() {
@@ -18,17 +18,14 @@ utils.connectDB(function() {
 			if (!coordinates.length) {
 				var within = [[-1, -1], [100, 1.1]];
 				console.log('find features with bbox within', within);
-				models.GeoFeature.find({
-					bbox: {$within: {
-						$box: within
-					}}
-				}, function(err, result) {
-					assert.equal(result.length, 2);
-					result.forEach(function(model) {
-						console.log(model.toGeoJSON());
+				models.GeoFeature.findWithin(within,
+					function(err, result) {
+						assert.equal(result.length, 2);
+						result.forEach(function(model) {
+							console.log(model.toGeoJSON());
+						});
+						process.exit();
 					});
-					process.exit();
-				});
 
 				return;
 			}
