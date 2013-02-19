@@ -44,13 +44,13 @@ lib/gradient-editor/gradient-editor.css
 ----------------
 lib/gradient-editor/gradient-editor.css
 
-lib/jquery-ui/css/smoothness/jquery-ui-1.10.0.custom.css
+lib/jquery-ui/css/no-theme/jquery-ui-1.10.0.custom.css
 ----------------
-lib/jquery-ui/css/smoothness/jquery-ui-1.10.0.custom.css
+lib/jquery-ui/css/no-theme/jquery-ui-1.10.0.custom.css
 
-lib/jquery-ui/css/smoothness/jquery-ui-1.10.0.custom.min.css
+lib/jquery-ui/css/no-theme/jquery-ui-1.10.0.custom.min.css
 ----------------
-lib/jquery-ui/css/smoothness/jquery-ui-1.10.0.custom.min.css
+lib/jquery-ui/css/no-theme/jquery-ui-1.10.0.custom.min.css
 
 lib/jquery-ui/development-bundle/demos/demos.css
 ----------------
@@ -64,50 +64,26 @@ lib/jquery-ui/development-bundle/themes/base/jquery-ui.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery-ui.css
 
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.accordion.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.accordion.css
-
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.all.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.core.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.accordion.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.autocomplete.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.button.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.datepicker.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.dialog.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.menu.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.progressbar.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.resizable.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.selectable.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.slider.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.spinner.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tabs.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tooltip.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.base.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.theme.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.all.css
 
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.autocomplete.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.autocomplete.css
-
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.base.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.core.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.accordion.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.autocomplete.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.button.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.datepicker.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.dialog.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.menu.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.progressbar.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.resizable.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.selectable.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.slider.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.spinner.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tabs.css
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tooltip.css
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.base.css
 
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.button.css
@@ -118,22 +94,6 @@ lib/jquery-ui/development-bundle/themes/base/jquery.ui.core.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.core.css
 
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.datepicker.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.datepicker.css
-
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.dialog.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.dialog.css
-
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.menu.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.menu.css
-
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.progressbar.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.progressbar.css
-
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.resizable.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.resizable.css
@@ -150,29 +110,13 @@ lib/jquery-ui/development-bundle/themes/base/jquery.ui.spinner.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.spinner.css
 
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tabs.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tabs.css
-
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.theme.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/jquery.ui.theme.css
 
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tooltip.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/jquery.ui.tooltip.css
-
 lib/jquery-ui/development-bundle/themes/base/minified/jquery-ui.min.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/minified/jquery-ui.min.css
-
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.accordion.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.accordion.min.css
-
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.autocomplete.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.autocomplete.min.css
 
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.button.min.css
 ----------------
@@ -181,22 +125,6 @@ lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.button.min.css
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.core.min.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.core.min.css
-
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.datepicker.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.datepicker.min.css
-
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.dialog.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.dialog.min.css
-
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.menu.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.menu.min.css
-
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.progressbar.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.progressbar.min.css
 
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.resizable.min.css
 ----------------
@@ -214,187 +142,170 @@ lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.spinner.min.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.spinner.min.css
 
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.tabs.min.css
-----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.tabs.min.css
-
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.theme.min.css
 ----------------
 lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.theme.min.css
 
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.tooltip.min.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery-ui.css
 ----------------
-lib/jquery-ui/development-bundle/themes/base/minified/jquery.ui.tooltip.min.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery-ui.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery-ui.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.all.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery-ui.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.core.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.button.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.resizable.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.selectable.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.slider.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.spinner.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.base.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.all.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.accordion.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.base.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.accordion.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.core.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.button.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.resizable.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.selectable.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.slider.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.spinner.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.base.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.all.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.button.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.core.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.accordion.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.autocomplete.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.button.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.datepicker.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.dialog.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.menu.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.progressbar.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.resizable.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.selectable.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.slider.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.spinner.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tabs.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tooltip.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.base.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.theme.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.all.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.button.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.autocomplete.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.core.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.autocomplete.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.core.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.base.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.resizable.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.core.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.accordion.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.autocomplete.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.button.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.datepicker.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.dialog.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.menu.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.progressbar.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.resizable.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.selectable.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.slider.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.spinner.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tabs.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tooltip.css
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.base.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.resizable.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.button.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.selectable.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.button.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.selectable.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.core.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.slider.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.core.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.slider.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.datepicker.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.spinner.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.datepicker.css
+lib/jquery-ui/development-bundle/themes/no-theme/jquery.ui.spinner.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.dialog.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery-ui.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.dialog.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery-ui.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.menu.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.button.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.menu.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.button.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.progressbar.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.core.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.progressbar.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.core.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.resizable.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.resizable.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.resizable.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.resizable.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.selectable.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.selectable.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.selectable.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.selectable.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.slider.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.slider.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.slider.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.slider.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.spinner.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.spinner.min.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.spinner.css
+lib/jquery-ui/development-bundle/themes/no-theme/minified/jquery.ui.spinner.min.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tabs.css
+lib/openlayers/OpenLayers-2.12/apidoc_config/OL.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tabs.css
+lib/openlayers/OpenLayers-2.12/apidoc_config/OL.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.theme.css
+lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/1.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.theme.css
+lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/1.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tooltip.css
+lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/2.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/jquery.ui.tooltip.css
+lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/2.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery-ui.min.css
+lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/main.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery-ui.min.css
+lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/main.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.accordion.min.css
+lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/1.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.accordion.min.css
+lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/1.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.autocomplete.min.css
+lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/2.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.autocomplete.min.css
+lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/2.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.button.min.css
+lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/main.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.button.min.css
+lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/main.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.core.min.css
+lib/openlayers/OpenLayers-2.12/doc_config/OL.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.core.min.css
+lib/openlayers/OpenLayers-2.12/doc_config/OL.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.datepicker.min.css
+lib/openlayers/OpenLayers-2.12/examples/mobile-wmts-vienna.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.datepicker.min.css
+lib/openlayers/OpenLayers-2.12/examples/mobile-wmts-vienna.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.dialog.min.css
+lib/openlayers/OpenLayers-2.12/examples/style.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.dialog.min.css
+lib/openlayers/OpenLayers-2.12/examples/style.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.menu.min.css
+lib/openlayers/OpenLayers-2.12/examples/style.mobile-jq.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.menu.min.css
+lib/openlayers/OpenLayers-2.12/examples/style.mobile-jq.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.progressbar.min.css
+lib/openlayers/OpenLayers-2.12/lib/Firebug/firebug.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.progressbar.min.css
+lib/openlayers/OpenLayers-2.12/lib/Firebug/firebug.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.resizable.min.css
+lib/openlayers/OpenLayers-2.12/tests/Test.AnotherWay.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.resizable.min.css
+lib/openlayers/OpenLayers-2.12/tests/Test.AnotherWay.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.selectable.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/google.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.selectable.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/google.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.slider.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/google.tidy.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.slider.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/google.tidy.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.spinner.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.spinner.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.tabs.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.tidy.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.tabs.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.tidy.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.theme.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/style.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.theme.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/style.css
 
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.tooltip.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.css
 ----------------
-lib/jquery-ui/development-bundle/themes/smoothness/minified/jquery.ui.tooltip.min.css
+lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.css
 
-styles/add-data.css
+lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.tidy.css
 ----------------
-styles/add-data.css
+lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.tidy.css
+
+lib/openlayers/OpenLayers-2.12/theme/default/style.tidy.css
+----------------
+lib/openlayers/OpenLayers-2.12/theme/default/style.tidy.css
 
 styles/bootstrap.css
 ----------------
@@ -408,9 +319,9 @@ styles/data-detail.css
 ----------------
 styles/data-detail.css
 
-styles/data-info.css
+styles/data-import.css
 ----------------
-styles/data-info.css
+styles/data-import.css
 
 styles/data-inspector.css
 ----------------
@@ -459,6 +370,10 @@ styles/jquery.miniColors.css
 styles/jquery.ui.1.8.16.ie.css
 ----------------
 styles/jquery.ui.1.8.16.ie.css
+
+styles/layers-panel.css
+----------------
+styles/layers-panel.css
 
 styles/main.css
 ----------------
@@ -471,12 +386,12 @@ styles/header.css
 styles/map.css
 styles/map-gl.css
 styles/modal.css
-styles/add-data.css
+styles/data-import.css
 styles/sidebar.css
 styles/chat.css
 styles/data-library.css
 styles/graph.css
-styles/data-info.css
+styles/layers-panel.css
 styles/data-detail.css
 styles/map-layer-editor.css
 styles/jquery.miniColors.css
@@ -583,29 +498,39 @@ views/setup-view.js
 text!templates/map-ol.html
 lib/color-gradient/color-gradient.js
 views/map-view-base.js
+lib/openlayers/OpenLayers-2.12/OpenLayers.js
 lib/openlayers/cloudmade.js
+lib/openlayers/stamen.js
 views/map-ol-view.js
-text!templates/data-info.html
+text!templates/layers-panel.html
 views/panel-view-base.js
-views/data-info-view.js
+views/layers-panel-view.js
 text!templates/data-detail.html
 views/data-detail-view.js
 text!templates/map-info-modal.html
 views/map-info-view.js
 text!templates/map-layer-editor.html
-lib/backbone-deep-model/lib/underscore.mixin.deepExtend.js
+mixins/model-editor-mixin.js
 views/map-layer-editor-view.js
-text!templates/data-legend.html
+text!templates/map-layer.html
+text!templates/histogram.html
 lib/d3/d3.v2.min.js
-views/data-view-base.js
-views/data-legend-view.js
+views/histogram-view.js
+text!templates/legend.html
+views/legend-view.js
+views/map-layer-view.js
+text!templates/data-library.html
+views/data-library-view.js
+text!templates/data-import.html
+views/data-import-view.js
 text!templates/share.html
 views/share-view.js
 models/point.js
 collections/map-point-collection.js
-models/map.js
+lib/backbone-deep-model/lib/underscore.mixin.deepExtend.js
 lib/backbone-deep-model/src/deep-model.js
 models/map_layer.js
+models/map.js
 router.js
 app.js
 lib/jquery-ui/js/jquery-ui-1.10.0.custom.min.js

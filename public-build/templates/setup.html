@@ -1,73 +1,87 @@
 <div class="modal-header">
-  <a class="close" data-dismiss="modal">×</a>
-  <h2 class="map-name"></h2>
+    <a class="close" data-dismiss="modal">×</a>
+    <h2 class="map-name"></h2>
 </div>
 
 <div class="modal-body">
 
-  <ul class="nav nav-tabs">
-    <li class="active"><a href="#setup-urls" data-toggle="tab">Map URLs</a></li>
-    <li><a id="tab-setup-metadata" href="#setup-metadata" data-toggle="tab">Edit map info</a></li>
-    <li><a id="tab-setup-metadata" href="#setup-custom-domain" data-toggle="tab">Custom domain</a></li>
-  </ul>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#setup-urls" data-toggle="tab">Map URLs</a></li>
+        <li><a id="tab-setup-metadata" href="#setup-metadata" data-toggle="tab">Edit Map Info</a></li>
+        <li><a id="tab-setup-metadata" href="#setup-settings" data-toggle="tab">Map Settings</a></li>
+        <li><a id="tab-setup-metadata" href="#setup-custom-domain" data-toggle="tab">Custom domain</a></li>
+    </ul>
 
-  <form class="well">
-    <div class="tab-content">
-      <div class="tab-pane active" id="setup-urls">
-        <p>You'll be able to access this map from the following URLs. We will email you this information if you <a href="#" class="enter-email">enter your email address</a> on the next tab.</p>
-        <fieldset class="urls">
-          <label><i class="icon-pencil"></i> ADMIN URL – keep this link private:</label>
-          <input class="map-admin-url" readonly="readonly"></input>
-          <label><i class="icon-eye-open"></i> PUBLIC URL – share this link with others:</label>
-          <input class="map-url" readonly="readonly"></input>
-        </fieldset>
-      </div>
-      <div class="tab-pane" id="setup-metadata">
-        <fieldset>
-          <label>Map Title</label>
-          <input name="title"></input>
-          <label>Description</label>
-          <textarea name="description"></textarea>
-        </fieldset>
-        <fieldset class="two-column">
-          <div>
-            <label>Author Info</label>
-            <input name="author"></input>
-          </div>
-          <div>
-            <label>Your email adress (won't be displayed)</label>
-            <input name="createdBy.email"></input>
-          </div>
-        </fieldset>
-        <fieldset class="two-column">
-          <div>
-            <label>Link URL</label>
-            <input name="linkURL"></input>
-          </div>
-          <div>
-            <label>Link Title</label>
-            <input name="linkTitle"></input>
-          </div>
-          <div>
-            <label>Twitter handle</label>
-            <input name="twitter"></input>
-          </div>
-        </fieldset>
-      </div>
-      <div class="tab-pane" id="setup-custom-domain">
-        <fieldset>
-          <label>Your custom domain name</label>
-          <input name="host" placeholder="Example: your-domain.com"></input>
-          <p>If you would like to have your custom domain point to this map, you can enter the domain name here. Please notice that you will have to set up your domain and point it to this application for this setting to have any effect.</p>
-        </fieldset>
-      </div>
-    </div>
-  </form>
+    <form class="well">
+        <div class="tab-content">
+            <div class="tab-pane active" id="setup-urls">
+                <p>You'll be able to access this map from the following URLs. We will email you this information if you <a href="#" class="enter-email">enter your email address</a> on the next tab.</p>
+                <fieldset class="urls">
+                    <label class="title"><span class="icon-wrench"></span> ADMIN URL – keep this link private:</label>
+                    <input class="text large map-admin-url" readonly="readonly"></input>
+                    <label class="title"><span class="icon-eye-open"></span> PUBLIC URL – share this link with others:</label>
+                    <input class="text large map-url" readonly="readonly"></input>
+                </fieldset>
+            </div>
+            <div class="tab-pane" id="setup-metadata">
+                <fieldset>
+                    <label class="title">Map Title</label>
+                    <input name="title"></input>
+                    <label class="title">Description</label>
+                    <textarea name="description"></textarea>
+                </fieldset>
+                <fieldset class="two-column">
+                    <div>
+                        <label class="title">Author Info</label>
+                        <input name="author"></input>
+                    </div>
+                    <div>
+                        <label class="title">Your email adress (won't be displayed)</label>
+                        <input name="createdBy.email"></input>
+                    </div>
+                </fieldset>
+                <fieldset class="two-column">
+                    <div>
+                        <label class="title">Link URL</label>
+                        <input name="linkURL"></input>
+                    </div>
+                    <div>
+                        <label class="title">Link Text</label>
+                        <input name="linkTitle"></input>
+                    </div>
+                    <div>
+                        <label class="title">Twitter handle</label>
+                        <input name="twitter"></input>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="tab-pane" id="setup-custom-domain">
+                <fieldset>
+                    <label class="title">Your custom domain name</label>
+                    <input name="host" placeholder="Example: your-domain.com"></input>
+                    <p>If you would like to have your custom domain point to this map, you can enter the domain name here. Please notice that you will have to set up your domain and point it to this application for this setting to have any effect.</p>
+                </fieldset>
+            </div>
+
+            <div class="tab-pane" id="setup-settings">
+                <fieldset>
+                    <p>
+                        <button class="btn" id="savePosition" disabled="disabled">Save current map position as default</button>
+                    </p>
+                    <p>
+                        <button class="btn" id="saveStyle" disabled="disabled">Save current map style as default</button>
+                    </p>
+                </fieldset>
+            </div>
+
+        </div>
+    </form>
 
 </div>
 
 <div class="modal-footer">
 <a href="#" id="deleteMapButton" class="btn btn-danger delete">Delete Map</a>
-  <a href="#" id="saveCloseButton" class="btn btn-success">Start Mapping!</a>
-  <a href="#" id="cancelButton" class="btn btn-cancel">Cancel</a>
+    <a href="#" id="saveCloseButton" class="btn btn-success">Start Mapping!</a>
+    <a href="#" id="cancelButton" class="btn btn-cancel">Cancel</a>
 </div>
