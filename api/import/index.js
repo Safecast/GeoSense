@@ -119,7 +119,6 @@ var ImportAPI = function(app) {
 						//console.log('****', 'save', obj);
 					},
 					data: function(err, result) {
-						console.log(result.toObject());
 						if (req.body.inspect) {
 							sendItems.push(result.toObject());
 						}
