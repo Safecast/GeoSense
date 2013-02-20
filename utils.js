@@ -57,6 +57,8 @@ function __(str, replacements) {
 */
 Date.prototype.format = function(format) {
   var self = this;
+  console.log('format', self);
+
   return format.replace(/\%([a-z0-9_]+)/ig, function(match, name, type) { 
     return typeof self.formatReplacements[name] != 'undefined'
       ? self.formatReplacements[name].call(self)

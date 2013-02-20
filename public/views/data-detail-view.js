@@ -75,21 +75,20 @@ define([
 				layerOptions = mapLayer.getLayerOptions(),
 				valFormatter = mapLayer.getValFormatter(),
 				val = model.get('val'),
-				isAggregate = val && val.avg != null,
 				altVal = model.get('altVal'),
 				label = model.get('label'),
 				datetime = model.get('datetime'),
 				count = model.get('count'),
 				description = model.get('description'),
 				description = description ?
-					isAggregate ? description.min : description : null,
+					typeof(description) == 'object' ? description.min : description : null,
 				maxDateFormatted, minDateFormatted;
 
 			this.$('.model-title').text(mapLayer.getDisplay('title'));
 
 			if (datetime) {
-				var maxDate = isAggregate ? datetime.max : datetime;
-				var minDate = isAggregate ? datetime.min : datetime;
+				var maxDate = typeof(datetime) == 'object' ? datetime.max : datetime;
+				var minDate = typeof(datetime) == 'object' ? datetime.min : datetime;
 
 				maxDateFormatted = maxDate ? 
 					new Date(maxDate).format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT) : null;
@@ -121,7 +120,7 @@ define([
 			if (mapLayer.isNumeric()) {
 				data.push({
 					label: valFormatter.unit, 
-					value: valFormatter.format(isAggregate ? val.avg : val)
+					value: valFormatter.format(typeof(val) == 'object' ? val.avg : val)
 				});
 			}
 

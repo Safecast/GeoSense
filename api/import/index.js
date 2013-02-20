@@ -17,7 +17,18 @@ var config = require('../../config'),
 	MapReduceAPI = require('../mapreduce');
 
 var LayerOptions = models.LayerOptions,
-	handleDbOp = utils.handleDbOp;
+	handleDbOp = utils.handleDbOp,
+	PseudoModel = function(doc) {
+		for (var k in doc) {
+			this[k] = doc[k];
+		}
+		this.get = function(key) {
+			return doc[key];
+		}
+		this.toObject = function() {
+			return doc;
+		}
+	};
 
 var ImportAPI = function(app) {
 	var self = this;
@@ -233,44 +244,46 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	}
 
 	console.log('import params', params);
-	var Converter, converter, format, parser;
+	var Converter, converterModule, converter, 
+		formatModule, Format, parser;
 
-	if (params.converter !== false) {
-		// TODO: try/catch like below
-		if (params.fields || params.converter == undefined) {
-			console.log('Initializing converter with fieldDefs');
-			Converter = function() { return conversion.PointConverterFactory(params.fields) };
-		} else {
-			if ((typeof params.converter != 'string' && typeof params.converter != 'object') 
-				|| (typeof params.converter == 'object' && !params.converter.fields)) {
-					var err = new Error('invalid converter: ' + params.converter);
-					if (callback) {
-						callback(err);
-						return;
-					}
-					throw err;
-			} else if (typeof params.converter == 'string') {
-				if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
-					Converter = require('./conversion/' + params.converter);
-				} else {
-					console.log('Loading custom converter: '+params.converter);
-					Converter = require(params.converter);
-				}
+	if (!params.fields && params.converter) {
+		if (typeof params.converter == 'object') {
+			converter = params.converter;
+		} else if (typeof params.converter == 'string') {
+			if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
+				converterModule = './conversion/' + params.converter;
 			} else {
-				converter = params.converter;
+				converterModule = params.converter;
 			}
+			console.log('Loading converter: '+params.converter);
+			try {
+				Converter = require(converterModule);
+			} catch(err) {
+				if (callback) {
+					if (err.code == 'MODULE_NOT_FOUND') {
+						err = new Error('Unknown converter: ' + params.converter);
+					}
+					callback(err);
+					return;
+				}
+				throw err;
+			}
+		}
+	} else {
+		Converter = function(fieldDefs) {
+			return conversion.PointConverterFactory(fieldDefs);
 		}
 	}
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
-		format = './formats/' + params.format;
+		formatModule = './formats/' + params.format;
 	} else {
-		format = params.format;
+		formatModule = params.format;
 	}
-
 	console.log('Loading format: '+params.format);
 	try {
-		format = require(format);
+		format = require(formatModule);
 	} catch(err) {
 		if (callback) {
 			if (err.code == 'MODULE_NOT_FOUND') {
@@ -299,13 +312,34 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	var runImport = function(collection) 
 	{
 		var sendItems;
-		console.log(params);
-		if (params.converter !== false) {
-			if (!converter) {
-				converter = new Converter(params.fields);
+		if (!converter) {
+			var fields = params.fields ?
+				params.fields : collection.importParams && collection.importParams.fields ? 
+				collection.importParams.fields : null;
+			if (fields) {
+				converter = Converter(fields);
+			} else {
+				converter = Converter({
+					'loc': {
+						'type': 'LngLat',
+						'fromFields': ['loc']
+					},
+					'val': {
+						'type': 'Number',
+						'fromFields': ['val']
+					}
+				});
 			}
 			if (!converter.convertModel) {
 				var err = new Error('converter module does not export `convertModel`');
+				if (callback) {
+					callback(err);
+					return;
+				}
+				throw err;
+			}
+			if (!converter) {
+				var err = new Error('could not create converter');
 				if (callback) {
 					callback(err);
 					return;
@@ -377,8 +411,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					numSaved = 0,
 					numSkipped = 0,
 					ended = false,
-					finalized = false,
-					PseudoModel = models.onTheFlyModel('');
+					finalized = false;
 
 				var finalize = function(parserErr) 
 				{
