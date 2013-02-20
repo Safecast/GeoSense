@@ -21,7 +21,7 @@
 		"mailer": "0.6.7",
 		"ejs": "0.7.2",
 		"optimist": "0.3.4",
-		"JSONStream": "0.3.1",
+		"JSONStream": "0.4.3",
 		"request": "2.9.203",
 		"cron": "1.0.1",
 		"node-compress": "0.1.0",

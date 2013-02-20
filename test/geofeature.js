@@ -14,15 +14,13 @@ describe('GeoFeature', function() {
 
 	before(function(done) {
 		utils.connectDB(function() {
-		    GeoFeature.remove(function(err){
-		    	if (err) return done(err);
-		    	done();
+		    GeoFeature.remove(function(err) {
+		    	return done(err);
 		    });
 		}, function(err) {
 			return done(err);
 		});
-
-	})	
+	});
 
 	it('should create three GeoFeatures', function(done) {
 		var dequeueSave = function(coordinates) {
@@ -52,7 +50,7 @@ describe('GeoFeature', function() {
 
 	var found;
 	it('should find a subset using a 2D index on bbox', function(done) {
-		var within = [[-1, -1000], [100, 1.1]];
+		var within = [[-1, -100], [100, 1.1]];
 		models.GeoFeature.findWithin(within, {}, null, {sort: {'createdAt': -1}},
 			function(err, result) {
 				if (err) throw err;
@@ -65,6 +63,10 @@ describe('GeoFeature', function() {
 	it('should return the correct flat representation of bbox when converted to GeoJSON', function() {
 		assert.deepEqual(found[0].toGeoJSON().bbox, [99, -1, 101, 90]);
 		assert.deepEqual(found[1].toGeoJSON().bbox, [0, 1, 0, 1]);
+	});
+
+	after(function() {
+		mongoose.disconnect();
 	});
 
 });
