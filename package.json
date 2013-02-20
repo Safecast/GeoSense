@@ -24,6 +24,7 @@
 		"JSONStream": "0.3.1",
 		"request": "2.9.203",
 		"cron": "1.0.1",
-		"node-compress": "0.1.0"
+		"node-compress": "0.1.0",
+		"time": "0.8.4"
   }
 }

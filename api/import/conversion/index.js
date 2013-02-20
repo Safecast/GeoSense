@@ -29,12 +29,6 @@ function isEmpty(val) {
 	return val == '' || val == undefined || val == null;
 }
 
-function isValidDate(d) {
-  if ( Object.prototype.toString.call(d) !== "[object Date]" )
-    return false;
-  return !isNaN(d.getTime());
-}
-
 var clamp180 = this.clamp180 = function(deg) 
 {
 	if (deg < -360 || deg > 360) {
@@ -44,7 +38,7 @@ var clamp180 = this.clamp180 = function(deg)
 		deg = 180 + deg % 180;
 	}
 	if (deg > 180) {
-		deg = 180 - deg % 180;
+		deg = -180 + deg % 180;
 	}
 	if (deg == 180) {
 		deg = -180;
@@ -90,7 +84,7 @@ var Cast = {
 	Date: function(value, options) {
 		if ((Array.isArray(value) && value.length == 3) || typeof(value) == 'string') {
 			date = new Date(value);
-			if (isValidDate(date)) {
+			if (util.isDate(date)) {
 				return date;
 			}
 		}
@@ -183,6 +177,7 @@ var FieldType = {
 				if (!options.skipFuture || date <= new Date()) {
 					return date;			
 				} else {
+					console.log(date, date <= new Date());
 					return new ValueSkippedError('Skipping future date: ' + date);
 				}
 			}

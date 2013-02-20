@@ -200,9 +200,16 @@ function __(str, replacements) {
 * Example:
 *
 *	new Date().format('%d %m %y')
+*
+* The second parameter is the offset to the timezone you want to 
+* display in. It is assumed to be the difference between local time and UTC,
+* i.e. the formatted time will be UTC. If you want to display your local
+* time, pass as second parameter 0.
 */
-Date.prototype.format = function(format) {
-  var self = this;
+Date.prototype.format = function(format, displayTimezoneOffset) {
+  var displayTimezoneOffset = displayTimezoneOffset == undefined ?
+  	new Date().getTimezoneOffset() : displayTimezoneOffset;
+  var self = new Date(this.getTime() + displayTimezoneOffset * 60000);
   return format.replace(/\%([a-z0-9_]+)/ig, function(match, name, type) { 
     return typeof self.formatReplacements[name] != 'undefined'
       ? self.formatReplacements[name].call(self)

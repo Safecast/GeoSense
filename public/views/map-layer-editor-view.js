@@ -126,7 +126,7 @@ define([
 
 	    undoButtonClicked: function(event) 
 	    {
-	    	this.model.set(this.originalModel.attributes, {});
+	    	this.model.set(_.extend(this.model.attributes, this.unchangedModelAttributes), {});
 	    	this.populateFromModel();
 	    	return false;
 	    },
@@ -207,7 +207,6 @@ define([
 
 	    	var featureType = this.getValueFromModelInput('layerOptions.featureType');
 	    	this.$('.feature-settings').each(function() {
-	    		console.log('setButtonState')
 	    		if (!$(this).hasClass(featureType)) {
 	    			$(this).hide();
 	    		} else {

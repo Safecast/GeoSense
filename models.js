@@ -183,8 +183,6 @@ this.onTheFlyModel = function(collectionName) {
     return onTheFlyModels[collectionName];
 }
 
-
-
 function toGeoJSON() {
     var obj = this.toObject();
     if (obj.bbox && obj.bbox.length) {

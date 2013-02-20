@@ -363,7 +363,6 @@ define([
 
 		getMapLayer: function(layerId)
 		{
-			console.log(this.mapLayersById);
 			return this.mapLayersById[layerId];
 		},
 
@@ -421,7 +420,7 @@ define([
 
 		attachSubViewsForMapLayer: function(model, animate)
 		{
-			console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'), model);
+			console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'));
 			var mapLayerView = new MapLayerView({model: model, vent: this.vent}).render();
 			this.layersPanelView.appendSubView(mapLayerView);
 			if (animate) {
