@@ -202,7 +202,7 @@ function getBounds(coordinates) {
         coordinates = [coordinates];
     }
     return coordinates.reduce(function(a, b) {
-        if (!Array.isArray(b) || b.length < 2) return a;
+        if (!Array.isArray(b)) return a;
         var bmax, bmin;
         if (Array.isArray(b[0])) {
             b = getBounds(b);
@@ -211,12 +211,32 @@ function getBounds(coordinates) {
         } else {
             bmax = bmin = b;
         }
+        if (bmin.length < 2 || bmax.length < 2) return a;
+        bmin = bmin.map(clamp180); bmax = bmax.map(clamp180);
         return [
             [Math.min(bmin[0], a[0][0]), Math.min(bmin[1], a[0][1])],
             [Math.max(bmax[0], a[1][0]), Math.max(bmax[1], a[1][1])]
         ];
     }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
 }
+
+var clamp180 = function(deg) 
+{
+    if (deg < -360 || deg > 360) {
+        deg = deg % 360;    
+    } 
+    if (deg < -180) {
+        deg = 180 + deg % 180;
+    }
+    if (deg > 180) {
+        deg = -180 + deg % 180;
+    }
+    if (deg == 180) {
+        deg = -180;
+    }
+
+    return deg;
+};
 
 var GeoFeatureCollectionSchema = new mongoose.Schema({
     type: {type: String, required: true, enum: ["FeatureCollection"], default: 'FeatureCollection'},
@@ -231,10 +251,10 @@ this.GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCol
 
 var GeoFeatureSchema = new mongoose.Schema({
     featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', required: true, index: 1 },
-    type: {type: String, required: true, enum: ['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon', 'Feature']},
+    type: {type: String, required: true, enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection", "Feature", "FeatureCollection"]},
     bbox: {type: Array, index: '2d'},
     geometry: {
-        type: {type: String, required: true},
+        type: {type: String, required: true, enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"]},
         coordinates: {type: Array, required: true}
     },
     properties: mongoose.Schema.Types.Mixed
@@ -245,6 +265,8 @@ GeoFeatureSchema.methods.getBounds = function() {
 };
 GeoFeatureSchema.plugin(useTimestamps);
 GeoFeatureSchema.index({bbox: '2d', featureCollection: 1});
+GeoFeatureSchema.index({'properties.val': 1});
+GeoFeatureSchema.index({'properties.label': 1});
 GeoFeatureSchema.pre('save', function (next) {
     this.bbox = this.getBounds();
     next();
@@ -266,7 +288,7 @@ GeoFeature.findWithin = function(bbox, conditions, fields, options, callback) {
         options = null;
     }
 
-    var conditions = _.cloneextend(conditions, {
+    var conditions = _.cloneextend(conditions || {}, {
         bbox: {
             $within: {
                 $box: getBounds(bbox)

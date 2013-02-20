@@ -1,10 +1,11 @@
 JSONStream = require('JSONStream'),
-	request = require('request');
+	request = require('request'),
+	fs = require('fs');
 
 module.exports = {
 	Parser: function() 
 	{
-		var parser = JSONStream.parse([true]);
+		var parser = JSONStream.parse(['features', true]);
 		parser.fromStream = function(stream) {
 			stream.pipe(this);
 		}
