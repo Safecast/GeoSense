@@ -1,7 +1,8 @@
 var mongoose = require('mongoose'),
     config = require('./config.js');
     mongooseTypes = require("mongoose-types"),
-    _ = require('cloneextend');
+    _ = require('cloneextend'),
+    util = require('util');
 
 var useTimestamps = function (schema, options) {
     schema.add({
@@ -184,7 +185,7 @@ this.onTheFlyModel = function(collectionName) {
 }
 
 function toGeoJSON() {
-    var obj = this.toObject();
+    var obj = this.toJSON();
     if (obj.bbox && obj.bbox.length) {
         obj.bbox = obj.bbox.reduce(function(a, b) {
             return a.concat(b);
@@ -257,7 +258,16 @@ var GeoFeatureSchema = new mongoose.Schema({
         type: {type: String, required: true, enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"]},
         coordinates: {type: Array, required: true}
     },
-    properties: mongoose.Schema.Types.Mixed
+    properties: {
+        type: mongoose.Schema.Types.Mixed,
+        validate: function(val) {
+            return typeof(val) == 'object'
+                && (!val.val || !isNaN(val.val))
+                && (!val.label || typeof val.label == 'string')
+                && (!val.datetime || util.isDate(val.datetime))
+                && (!val.color || typeof val.color == 'string' && val.color.match(colorMatch));
+        }
+    }
 });
 GeoFeatureSchema.methods.toGeoJSON = toGeoJSON;
 GeoFeatureSchema.methods.getBounds = function() {

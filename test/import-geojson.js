@@ -1,27 +1,28 @@
 var	models = require('../models'),
 	GeoFeature = models.GeoFeature,
 	GeoFeatureCollection = models.GeoFeatureCollection,
+	config = require('../config'),
 	utils = require('../utils'),
 	converter = require('../api/import/conversion/shp'),
 	format = require('../api/import/formats/json'),
 	assert = require('assert'),
 	mongoose = require('mongoose');
 
-
 describe('GeoJSON', function() {
 	var featureCollection;
 
 	before(function(done) {
-		utils.connectDB(function() {
-			GeoFeature.remove(function(err) {
-				if (err) return done(err);
-				featureCollection = new GeoFeatureCollection();
-				featureCollection.save(function(err) {
-					return done(err);
-				});
-			})
-		}, function(err) {
-			return done(err);
+		mongoose.connect(config.DB_PATH);
+		GeoFeature.remove(function(err) {
+			if (err) {
+				console.log('done');
+				return done(err);
+			}
+			featureCollection = new GeoFeatureCollection();
+			featureCollection.save(function(err) {
+			console.log('done');
+				return done(err);
+			});
 		});
 	});
 
@@ -31,8 +32,9 @@ describe('GeoJSON', function() {
 			totalCount, saved = 0;
 
 		var onData = function(data) {
-			var f = new GeoFeature(data);
+			var f = new GeoFeature(data, false);
 			f.featureCollection = featureCollection;
+			f.set('properties.foo', 'foo1', null);
 			f.save(function(err, result) {
 				if (err) throw err;
 				saved++;
@@ -58,6 +60,7 @@ describe('GeoJSON', function() {
 
 		GeoFeature.findOne({'properties.name': 'Switzerland'}, function(err, result) {
 			if (err) throw err;
+			assert(result);
 			assert.deepEqual(result.toGeoJSON().bbox, [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
 			done();
 		});
@@ -68,6 +71,7 @@ describe('GeoJSON', function() {
 
 		GeoFeature.findWithin([[1,40],[11,48]], null, null, {sort: {'properties.name': 1}}, function(err, result) {
 			if (err) throw err;
+			assert(result.length);
 			var countries = result.map(function(val) { return val.properties.name; });
 			assert.deepEqual(countries, [ 
 				'Andorra',
