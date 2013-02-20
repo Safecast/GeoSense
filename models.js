@@ -186,7 +186,7 @@ this.onTheFlyModel = function(collectionName) {
 
 
 function toGeoJSON() {
-    obj = this.toObject();
+    var obj = this.toObject();
     if (obj.bbox && obj.bbox.length) {
         obj.bbox = obj.bbox.reduce(function(a, b) {
             return a.concat(b);
