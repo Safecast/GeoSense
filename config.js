@@ -101,7 +101,7 @@ if (typeof require == 'function') {
 
 if (DEV) {
 	// use local db
-	config.DB_PATH = 'mongodb://localhost/geo';
+	config.DB_PATH = 'mongodb://localhost/geosense';
 } else if (PROD) {
 	// import production settings
 	if (utils) {

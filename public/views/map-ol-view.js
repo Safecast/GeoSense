@@ -262,9 +262,11 @@ define([
                 
                 case FeatureType.BUBBLES:
                     defaultStyle = _.extend(defaultStyle, {
-                        pointRadius: '${getBubbleRadius}',
-                        strokeOpacity: 0,
                         fillColor: '${getColor}',
+                        pointRadius: '${getBubbleRadius}',
+                        strokeColor: '${getDarkerColor}',
+                        strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
+                        strokeOpacity: opacity * .5
                     });
                     break;
             }
