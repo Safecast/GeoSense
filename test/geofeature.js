@@ -4,6 +4,7 @@ var application_root = __dirname,
 	express = require("express"),
   	mongoose = require('mongoose'),
   	models = require('../models.js'),
+	config = require('../config'),
   	utils = require('../utils.js'),
   	permissions = require('../permissions.js'),
   	ejs = require('ejs'),
@@ -13,13 +14,10 @@ var application_root = __dirname,
 describe('GeoFeature', function() {
 
 	before(function(done) {
-		utils.connectDB(function() {
-		    GeoFeature.remove(function(err) {
-		    	return done(err);
-		    });
-		}, function(err) {
-			return done(err);
-		});
+		mongoose.connect(config.DB_PATH);
+	    GeoFeature.remove(function(err) {
+	    	return done(err);
+	    });
 	});
 
 	it('should create three GeoFeatures', function(done) {
