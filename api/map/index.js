@@ -9,7 +9,7 @@ var config = require('../../config.js'),
 	_ = require('cloneextend');
 
 var Point = models.Point,
-	PointCollection = models.PointCollection,
+	GeoFeatureCollection = models.GeoFeatureCollection,
 	Map = models.Map,
 	LayerOptions = models.LayerOptions,
 	User = models.User,
@@ -77,10 +77,10 @@ var MapAPI = function(app)
 			// was already called.
 			var layer = layer.toObject ?
 				layer.toObject() : layer;
-			layer.featureCollection = layer.pointCollection;
+			layer.pointCollection = layer.featureCollection;
 			delete layer.featureCollection.importParams;
 
-			// sending deprecated pointCollection -- TODO: delete layer.pointCollection
+			// sending deprecated featureCollection -- TODO: delete layer.featureCollection
 
 			return layer;
 		}
@@ -88,7 +88,7 @@ var MapAPI = function(app)
 		// Returns a specific map by publicslug
 		app.get('/api/map/:publicslug', function(req, res){
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -104,7 +104,7 @@ var MapAPI = function(app)
 		// session
 		app.get('/api/map/admin/:adminslug', function(req, res) {	
 			Map.findOne({adminslug: req.params.adminslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -170,7 +170,7 @@ var MapAPI = function(app)
 		app.put('/api/map/:publicslug', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -226,7 +226,7 @@ var MapAPI = function(app)
 
 								// find again since createdBy and modifiedBy won't be populated after map.save()
 								Map.findOne({_id: req.params.mapid})
-									.populate('layers.pointCollection')
+									.populate('layers.featureCollection')
 									.populate('layers.layerOptions')
 									.populate('createdBy')
 									.populate('modifiedBy')
@@ -260,7 +260,7 @@ var MapAPI = function(app)
 		app.delete('/api/map/:publicslug', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
@@ -282,7 +282,7 @@ var MapAPI = function(app)
 		app.get('/api/map/:publicslug/layer/:layerId', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
@@ -290,7 +290,7 @@ var MapAPI = function(app)
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 					// only send if complete; or incomplete was requested 
-					if (mapLayer.pointCollection.status == config.DataStatus.COMPLETE ||
+					if (mapLayer.featureCollection.status == config.DataStatus.COMPLETE ||
 						url.parse(req.url, true).query.incomplete) {
 							res.send(prepareLayerResult(req, mapLayer));
 					} else {
@@ -303,7 +303,7 @@ var MapAPI = function(app)
 		app.put('/api/map/:publicslug/layer/:layerId', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
@@ -335,7 +335,7 @@ var MapAPI = function(app)
 									setIndex(layerIds, oldIndex, newIndex);
 									for (var j = 0; j < layerIds.length; j++) {
 										map.layers.id(layerIds[j]).set('position', j);
-										console.log(map.layers.id(layerIds[j]).pointCollection.title, map.layers.id(layerIds[j]).position);
+										console.log(map.layers.id(layerIds[j]).featureCollection.title, map.layers.id(layerIds[j]).position);
 									}
 									map.save(function(err, map) {
 										if (!handleDbOp(req, res, err, true)) {
@@ -358,11 +358,14 @@ var MapAPI = function(app)
 		// Creates a new map layer from a point collection
 		app.post('/api/map/:publicslug/layer', function(req, res)
 		{
+			if (!req.body.featureCollection) {
+				res.send('no feature collection specified', 403);
+			}
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-				    PointCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
+				    GeoFeatureCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
 				    	// TODO: check ownership instead of (unreliably) checking for status
 				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 				    	.populate('defaults')
@@ -379,7 +382,7 @@ var MapAPI = function(app)
 							    var layer = {
 							    	// set _id so it can be referenced below
 							    	_id: new mongoose.Types.ObjectId(),
-							    	pointCollection: collection,
+							    	featureCollection: collection,
 							    	layerOptions: options._id,
 							    	position: (sortedLayers.length ? 
 							    		(sortedLayers[sortedLayers.length - 1].position != null ?
@@ -391,7 +394,7 @@ var MapAPI = function(app)
 								    if (handleDbOp(req, res, err, map)) return;
 							        console.log("map layer created");
 									Map.findOne({_id: map._id})
-										.populate('layers.pointCollection')
+										.populate('layers.featureCollection')
 										.populate('layers.layerOptions')
 										.exec(function(err, map) {
 										    if (handleDbOp(req, res, err, map)) return;
@@ -407,7 +410,7 @@ var MapAPI = function(app)
 		app.delete('/api/map/:publicslug/layer/:layerId', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;

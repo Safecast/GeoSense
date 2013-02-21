@@ -6,6 +6,31 @@ define([
 	var GeoFeature = Backbone.Model.extend({
 		
 		idAttribute: "_id",
+
+        initialize: function() 
+        {
+            // TODO: deprecated
+            this.attributes.loc = this.getCenter();
+            this.attributes.val = this.attributes.properties.val;
+            console.log(this.attributes);
+        },
+        
+        getCenter: function() 
+        {
+            var size = this.getSize();
+            return [
+                this.attributes.bbox[0] + size[0] / 2, 
+                this.attributes.bbox[1] + size[1] / 2
+            ];
+        },
+
+        getSize: function() 
+        {
+            return [
+                this.attributes.bbox[2] - this.attributes.bbox[0],
+                this.attributes.bbox[3] - this.attributes.bbox[1]
+            ];
+        },
 		
 		getRenderAttributes: function()
 		{

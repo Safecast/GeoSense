@@ -8,6 +8,7 @@ var config = require('../../config.js'),
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
+	GeoFeatureCollection = models.GeoFeatureCollection,
 	Map = models.Map,
 	handleDbOp = utils.handleDbOp;
 
@@ -61,21 +62,15 @@ var PointAPI = function(app)
 		});
 
 		app.get('/api/pointcollections', function(req, res){
-		  	PointCollection.find({active: true}, null, {sort: {'title': 1}}, function(err, datasets) {
-		  		var sources = [];
-		  		for (var i = 0; i < datasets.length; i++) {
-		  			sources.push(datasets[i].toObject());
-		  			// TODO: count
-		  			//sources[i].fullCount = ;
-		  		}
-		    	res.send(sources);
+		  	GeoFeatureCollection.find({active: true}, null, {sort: {'title': 1}}, function(err, documents) {
+		    	res.send(documents);
 			});
 		});
 
 		app.get('/api/map/:publicslug/layer/:layerId/features', function(req, res) 
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -85,7 +80,15 @@ var PointAPI = function(app)
 					if (!mapLayer) {
 						res.send('map layer not found', 404);
 					} else {
-						var pointCollection = mapLayer.pointCollection,
+
+						models.GeoFeature.find({featureCollection: mapLayer.featureCollection}, function(err, documents) {
+							mapLayer.featureCollection.features = documents;
+							res.send(mapLayer.featureCollection.toGeoJSON());
+						});
+
+						return;
+
+						var pointCollection = mapLayer.featureCollection,
 							urlObj = url.parse(req.url, true),
 							queryOptions = {},
 							filterQuery = {};

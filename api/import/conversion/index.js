@@ -323,10 +323,17 @@ Converter.prototype.convertModel = function(fromModel, toModel, config) {
 		}
 	}
 
-	var m = new toModel(doc);
+	var m = new toModel({}, false);
+	for (var key in doc) {
+		m.set(key, doc[key]);
+	}
 
-	if (0&&config.DEBUG) {
+	m.type = 'Point';
+	m.geometry.type = 'Point';
+
+	if (config.DEBUG) {
 		console.log('converted:', doc);
+		console.log('model:', m);
 	}
 	
 	return {

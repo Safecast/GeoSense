@@ -343,10 +343,8 @@ define([
             */
 
             var opts = model.getRenderAttributes(),
-                loc = model.get('loc'),
-                lng = loc[0],
-                lat = loc[1],
-                pt = new OpenLayers.Geometry.Point(lng, lat),
+                center = model.getCenter(),
+                pt = new OpenLayers.Geometry.Point(center[0], center[1]),
                 pts,
                 geometry;
 
