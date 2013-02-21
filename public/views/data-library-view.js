@@ -52,10 +52,8 @@ define([
 				url: '/api/pointcollections',
 				success: function(data) {
 
-					$.each(data, function(key, pointCollection) { 
-						if (!app.pointCollections[pointCollection._id]) {
-							self.drawDataSource(pointCollection);
-						}
+					$.each(data, function(key, featureCollection) { 
+						self.drawDataSource(featureCollection);
 					});
 					
 					self.$('.data-item').draggable({

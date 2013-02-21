@@ -3,7 +3,7 @@ define([
 	'underscore',
 	'backbone',
 ], function($, _, Backbone) {
-	var Point = Backbone.Model.extend({
+	var GeoFeature = Backbone.Model.extend({
 		
 		idAttribute: "_id",
 		
@@ -74,5 +74,5 @@ define([
 		}
 	});
 
-	return Point;
+	return GeoFeature;
 });

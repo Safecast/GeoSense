@@ -362,7 +362,7 @@ var MapAPI = function(app)
 				.populate('layers.pointCollection')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-				    PointCollection.findOne({_id: req.body.pointCollection._id, $or: [{active: true}, 
+				    PointCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
 				    	// TODO: check ownership instead of (unreliably) checking for status
 				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 				    	.populate('defaults')

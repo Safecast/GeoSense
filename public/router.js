@@ -15,16 +15,15 @@ define([
 	'views/data-import-view',
 	'views/modal-view',
 	'views/share-view',
-	'collections/map-point-collection',
+	'collections/geo-feature-collection',
 	'models/map',
-	'models/point',
 	'models/map_layer'
 ], function($, _, Backbone, HomepageView, HeaderView, 
 	SetupView, MapOLView, LayersPanelView, DataDetailView,
 	MapInfoView, MapLayerEditorView,
 	MapLayerView, DataLibraryView, DataImportView,
 	ModalView, ShareView,
-	MapPointCollection, Map, Point, MapLayer) {
+	GeoFeatureCollection, Map, MapLayer) {
 	
 	var AppRouter = Backbone.Router.extend({
 
@@ -93,8 +92,6 @@ define([
 
 		    this.map = null;
 			this.firstLoad = true;
-			this.pointCollections = {};
-			this.timeBasedPointCollections = {};
 			this.isRendered = false;
 			this.mapLayerSubViewsAttached = false;
 			this.mapLayerEditorViews = {};
@@ -635,18 +632,6 @@ define([
 	        this.dataImportView.show();
 		},
 
-		updateVisibleDate: function(fromDate, toDate) 
-		{
-			var self = this;
-			$.each(this.pointCollections, function(key, collection) {
-				collection.urlParams.t = 'w';
-				collection.urlParams.from = fromDate.format('%Y-%m-%d');
-				collection.urlParams.to = toDate.format('%Y-%m-%d');
-				self.fetchMapLayer(collection.pointCollectionId);
-				console.log(collection.urlParams);
-			});
-		},
-
 	    showDetailData: function(model, panelAnimation)    
 		{
 			if (!this.dataDetailView) {
@@ -699,12 +684,12 @@ define([
 			this.$mainEl.append(panelView.el);
 		},
 
-		saveNewMapLayer: function(pointCollectionId)
+		saveNewMapLayer: function(featureCollectionId)
 		{	
 			var self = this;
 			var layer = this.map.newLayerInstance({
-				pointCollection: {
-					_id: pointCollectionId
+				featureCollection: {
+					_id: featureCollectionId
 				}
 			});
 			console.log('saving new map layer', layer);

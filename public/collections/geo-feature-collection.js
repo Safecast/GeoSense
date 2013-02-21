@@ -2,11 +2,11 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'models/point',
-], function($, _, Backbone, Point) {
-	var MapPointCollection = Backbone.Collection.extend({
+	'models/geo-feature',
+], function($, _, Backbone, GeoFeature) {
+	var GeoFeatureCollection = Backbone.Collection.extend({
 
-		model: Point,
+		model: GeoFeature,
 		
 		comparator: function(point) 
 		{
@@ -26,13 +26,25 @@ define([
 
 		url: function() 
 		{
+			/* Example urlParams for time-based:
+
+				urlParams.t = 'w';
+				urlParams.from = fromDate.format('%Y-%m-%d');
+				urlParams.to = toDate.format('%Y-%m-%d');
+
+			for a bounding box with zoom:
+
+				urlParams.b = [W, S, N, E]
+				urlParams.z = 1..20
+
+			*/
 			return this.mapLayer.url() + '/features' 
 				+ '?' + genQueryString(this.urlParams);
 		},
 
 		setVisibleMapArea: function(visibleMapArea) 
 		{
-			console.log('MapPointCollection.setVisibleMapArea '+this.mapLayer.id);	
+			console.log('GeoFeatureCollection.setVisibleMapArea '+this.mapLayer.id);	
 			this.urlParams.b = [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]];
 			this.urlParams.z = visibleMapArea.zoom;
 			this.visibleMapAreaFetched = false;
@@ -54,10 +66,10 @@ define([
 	    		resp = resp['items'];
 	    	}
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
-			return MapPointCollection.__super__.parse.call(this, resp, xhr);
+			return GeoFeatureCollection.__super__.parse.call(this, resp, xhr);
 	    },
 				
 	});
 
-	return MapPointCollection;
+	return GeoFeatureCollection;
 });

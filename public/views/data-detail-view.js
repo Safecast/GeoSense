@@ -71,7 +71,6 @@ define([
 	    {
 	    	if (!model.collection) return;
 	    	var mapLayer = model.collection.mapLayer,
-				pointCollection = mapLayer.pointCollection,
 				layerOptions = mapLayer.getLayerOptions(),
 				valFormatter = mapLayer.getValFormatter(),
 				val = model.get('val'),
@@ -130,7 +129,7 @@ define([
 				});
 			}
 
-			var metadata = mapLayer.attributes.pointCollection.reduce ? [
+			var metadata = mapLayer.attributes.featureCollection.reduce ? [
 				{
 					label: __('no. of ') + (layerOptions.itemTitlePlural || 'samples'),
 					value: formatLargeNumber(count)
