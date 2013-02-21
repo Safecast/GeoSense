@@ -346,11 +346,10 @@ module.exports = {
 	Converter: Converter,
 	ConversionError: ConversionError,
 	basicPointFieldDefs: {
-		loc: {
+		'geometry.coordinates': {
 			type: 'LngLat',
-			fromFields: 'loc'
 		},
-		val: {
+		'properties.val': {
 			type: 'Number',
 			fromFields: 'val'
 		}
@@ -373,18 +372,18 @@ module.exports = {
  						d.type = 'String';
  					}
  					break;
-				case 'loc':
+				case 'geometry.coordinates':
  					if (d.type != 'LatLng') {
 						d.type = 'LngLat';
  					}
 					break;
-				case 'val':
+				case 'properties.val':
 					d.type = 'Number';
 					break;
-				case 'datetime':
+				case 'properties.datetime':
 					d.type = 'Date';
 					break;
-				case 'label':
+				case 'properties.label':
 					d.type = 'String';
 					break;
 			}
@@ -401,7 +400,7 @@ module.exports = {
 			}
 		}
 
-		if (!fieldDefs.loc && options.strict) {
+		if (!fieldDefs['geometry.coordinates'] && options.strict) {
 			valid = false;
 			errors[toField] = {
 				message: 'Point X,Y is required'

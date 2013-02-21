@@ -35,7 +35,7 @@ var FeatureType = {
 	POINTS: 'P',
 	CELLS: 'C',
 	BUBBLES: 'B',
-	POLYGONS: 'Y' 
+	SHAPES: 'S' 
 };
 
 FeatureType.DEFAULT = FeatureType.CELLS;

@@ -110,6 +110,13 @@ define([
 
             this.add30kmtemp();
 
+            this.formats = {
+                geoJSON: new OpenLayers.Format.GeoJSON({
+                    'internalProjection': this.map.baseLayer.projection,
+                    'externalProjection': new OpenLayers.Projection("EPSG:4326")
+                })
+            };
+
             MapOLView.__super__.renderMap.call(this, viewBase, viewStyle);
             return this;
         },
@@ -333,37 +340,26 @@ define([
             // to this event handler -- check Backbone docs
             var collection = model.collection;
 
-            // TODO: should add features directly with GeoJSON to streamline
-            // the handling of shapes vs. points
-            /*var format = new OpenLayers.Format.GeoJSON({
-                'internalProjection': this.map.baseLayer.projection,
-                'externalProjection': new OpenLayers.Projection("EPSG:4326")
-            });
-            this.featureLayers[model.id].addFeatures(format.read(model.attributes));
-            */
+//            this.featureLayers[model.id].addFeatures(format.read(model.attributes));
 
-            var opts = model.getRenderAttributes(),
+            var attrs = model.getRenderAttributes(),
                 center = model.getCenter(),
                 pt = new OpenLayers.Geometry.Point(center[0], center[1]),
                 pts,
                 geometry;
 
-            switch(collection.mapLayer.attributes.layerOptions.featureType) {
+            switch (collection.mapLayer.attributes.layerOptions.featureType) {
+
+                case FeatureType.SHAPES:
+                    console.log('geometry', model.attributes);
+                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
+                    break;
                 
                 case FeatureType.POINTS:
                 default:
                     pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
                     geometry = pt;
                     break;
-
-                case FeatureType.POLYGONS:
-                    // tmp
-                    /*if (extra && extra.min && extra.min.endLoc) {
-                        pts = [
-                            pt,
-                            new OpenLayers.Geometry.Point(extra.min.endLoc[0], extra.min.endLoc[1])
-                        ];
-                    }*/
 
                 case FeatureType.CELLS:
                     if (!pts) {
@@ -386,8 +382,9 @@ define([
                     var geometry = OpenLayers.Geometry.fromWKT(wkt);
                     break;
             }
+
+            var feature = new OpenLayers.Feature.Vector(geometry, attrs);
             
-            var feature = new OpenLayers.Feature.Vector(geometry, opts);
             
             if (!this._addFeatures[collection.mapLayer.id]) {
                 this._addFeatures[collection.mapLayer.id] = [];

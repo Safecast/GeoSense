@@ -357,11 +357,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			collection.status = config.DataStatus.IMPORTING_INC;
 		}
 
-		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
+		// TODO: can't save import params with keys that contain dots -- use Array instead
+		/*if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
 			collection.importParams = _.cloneextend(utils.deleteUndefined(params), {
 				fields: converter.fieldDefs
 			});
-		}
+		}*/
 		if (req && req.session) {
 			collection.createdBy = collection.modifiedBy = req.session.user;
 		}

@@ -6,7 +6,8 @@ var	models = require('../models'),
 	converter = require('../api/import/conversion/shp'),
 	format = require('../api/import/formats/json'),
 	assert = require('assert'),
-	mongoose = require('mongoose');
+	mongoose = require('mongoose'),
+	_ = require('cloneextend');
 
 describe('GeoJSON', function() {
 	var featureCollection;
@@ -18,7 +19,11 @@ describe('GeoJSON', function() {
 				console.log('done');
 				return done(err);
 			}
-			featureCollection = new GeoFeatureCollection();
+			featureCollection = new GeoFeatureCollection({
+				active: true, 
+				status: config.DataStatus.COMPLETE, 
+				title: 'GeoJSON test'
+			});
 			featureCollection.save(function(err) {
 			console.log('done');
 				return done(err);
@@ -34,7 +39,7 @@ describe('GeoJSON', function() {
 		var onData = function(data) {
 			var f = new GeoFeature(data, false);
 			f.featureCollection = featureCollection;
-			f.set('properties.foo', 'foo1', null);
+			f.set('properties.original', _.cloneextend(data));
 			f.save(function(err, result) {
 				if (err) throw err;
 				saved++;
