@@ -358,7 +358,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		}
 
 		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
-			collection.importParams = _.cloneextend(params, {
+			collection.importParams = _.cloneextend(utils.deleteUndefined(params), {
 				fields: converter.fieldDefs
 			});
 		}
