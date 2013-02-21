@@ -838,11 +838,11 @@ function getImportParams(params)
 		to: params.to,
 		max: params.max,
 		skip: params.skip,
-		incremental: (params.incremental ? params.incremental && params.incremental != 'off' : null),
-		break: (params.break ? params.break && params.break != 'off' : null), 
+		incremental: (params.incremental ? params.incremental && params.incremental != 'off' : undefined),
+		break: (params.break ? params.break && params.break != 'off' : undefined), 
 		interval: params.interval,
 		bounds: params.bounds,
-		mapreduce: (params.mapreduce ? params.mapreduce && params.mapreduce != 'off' : null),
+		mapreduce: (params.mapreduce ? params.mapreduce && params.mapreduce != 'off' : undefined),
 		fields: (params.fields ? JSON.parse(params.fields) : undefined) // precedence over converter
 	});
 }
