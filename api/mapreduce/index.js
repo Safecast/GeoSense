@@ -352,7 +352,8 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 				//opts.stats = {total: statsTotal, collectionId: collection._id};
 				//db.pointcollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
 				
-				collection.status = config.DataStatus.REDUCING;
+				collection.status = !incremental ? 
+					config.DataStatus.REDUCING : config.DataStatus.REDUCING_INC;
 				//collection.progress = 0;
 				//collection.numBusy: statsTotal;
 

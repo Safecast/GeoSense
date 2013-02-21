@@ -38,14 +38,17 @@ define([
 
 	    showSpinner: function()
 	    {
-			this.spinner.stop().fadeIn(50);
+	    	if (!this.spinner.is(':visible')) {
+	    		this.spinner.css({opacity: 0}).show();	
+	    	}
+			this.spinner.stop().animate({opacity: 1}, 50);
 	    },
 
 	    hideSpinner: function()
 	    {
 	    	var self = this;
 			this.spinner.stop().fadeOut(300, function() {
-				self.spinner.hide();
+				//self.spinner.hide();
 			});
 	    },
 
@@ -74,6 +77,7 @@ define([
 				progress = this.model.attributes.featureCollection.progress,
 				featureCollection = this.model.featureCollection;
 
+
 			if (this.isLoading || this.model.getDataStatus() != DataStatus.COMPLETE) {
 		    	this.showSpinner();
 			} else {
@@ -100,6 +104,7 @@ define([
 		    			}
 						break;
 		    		case DataStatus.IMPORTING:
+		    		case DataStatus.IMPORTING_INC:
 		    			status = __(progress ? 'importing… %(count)s' : 'importing…', {
 		    				count: formatLargeNumber(this.model.attributes.featureCollection.progress)
 		    			});
@@ -109,6 +114,7 @@ define([
 		    			status = __('queued for crunching…');
 						break;
 		    		case DataStatus.REDUCING:
+		    		case DataStatus.REDUCING_INC:
 		    			if (this.model.attributes.featureCollection.numBusy) {
 			    			var percent = Math.floor(progress / this.model.attributes.featureCollection.numBusy * 100);
 			    			status = __(progress ? 'crunching… %(percent)s%' : 'crunching…', {
