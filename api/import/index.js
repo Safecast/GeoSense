@@ -423,7 +423,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (minVal != undefined) {
 						collection.minVal = collection.minVal ? Math.min(minVal, collection.minVal) : minVal;
 					}
-			    	collection.isNumeric = !isNaN(maxVal) && !isNaN(minVal);
+			    	collection.isNumeric = !isNaN(collection.maxVal) && !isNaN(collection.minVal);
 					if (!collection.isNumeric) {
 						collection.defaults.histogram = false;
 					}

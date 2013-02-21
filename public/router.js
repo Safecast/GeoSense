@@ -407,9 +407,9 @@ define([
 			}
 			model.once('sync', function() {
 				// if now complete, fetch features
-				if (model.getDataStatus() == DataStatus.COMPLETE) {
+				if (model.canDisplayValues()) {
 					self.fetchMapFeatures();
-					return;
+					if (model.getDataStatus() == DataStatus.COMPLETE) return;
 				}
 				// otherwise, retry in a bit
 				self.pollForMapLayerStatus(model, POLL_INTERVAL);
@@ -456,7 +456,7 @@ define([
 		{
 			_.each(this.mapLayersById, function(mapLayer) {
 				// only fetch features for enabled and non-current layers
-				if (mapLayer.isEnabled() && mapLayer.getDataStatus() == DataStatus.COMPLETE
+				if (mapLayer.isEnabled() && mapLayer.canDisplayValues()
 					&& !mapLayer.featureCollection.isCurrent()) {
 						console.log('Fetching features for', mapLayer.id, mapLayer.getDisplay('title'));
 						mapLayer.featureCollection.fetch();

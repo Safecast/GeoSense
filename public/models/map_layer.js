@@ -166,7 +166,8 @@ define([
             var s = this.getDataStatus();
             return s == DataStatus.COMPLETE
                 || s == DataStatus.UNREDUCED_INC
-                || s == DataStatus.REDUCING_INC;
+                || s == DataStatus.REDUCING_INC
+                || s == DataStatus.IMPORTING_INC;
         },
 
         hasChangedColors: function()

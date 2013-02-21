@@ -63,9 +63,11 @@ var config = {
 
 	DataStatus: {
 		IMPORTING: 'I',
+		IMPORTING_INC: 'II',
 		UNREDUCED: 'U',
 		UNREDUCED_INC: 'UI',
 		REDUCING: 'R',
+		REDUCING_INC: 'RI',
 		COMPLETE: 'C'
 	},
 
