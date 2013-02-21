@@ -372,7 +372,8 @@ var MapAPI = function(app)
 				    	.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
-						    var defaults = collection.defaults.toObject();
+						    var defaults = collection.defaults ?
+						    	collection.defaults.toObject() : config.COLLECTION_DEFAULTS;
 						    delete defaults['_id'];
 						    var options = new LayerOptions(defaults);
 

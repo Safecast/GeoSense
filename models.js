@@ -61,7 +61,8 @@ var colorMatch = /^#([a-fA-F0-9]{2}){3}$/;
 this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     enabled: {type: Boolean, required: true, default: true},
     public: {type: Boolean, required: true, default: true},
-    featureType: {type: String, required: true},
+    featureType: {type: String, required: true, enum: [
+        config.FeatureType.POINTS, config.FeatureType.CELLS, config.FeatureType.BUBBLES, config.FeatureType.SHAPES]},
     colorType: {type: String, required: true, default: config.ColorType.LINEAR_GRADIENT},
     //colorPalettes: {type: [ColorPalette.schema], index: 1},
     colors: [{
