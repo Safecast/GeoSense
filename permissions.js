@@ -1,6 +1,6 @@
 var config = require("./config.js")
 
-exports.canAdminMap = function(req, map, status) {
+var canAdminMap = function(req, map, status) {
 	if (!req.session.admin) {
 		req.session.admin = {};
 	}
@@ -19,14 +19,21 @@ exports.canAdminMap = function(req, map, status) {
 	return status;
 }
 
-exports.canViewMap = function(req, map) {
-	return map.status == config.MapStatus.PUBLIC || canAdminMap(req, map);
+var canViewMap = function(req, map) {
+	return map.status == config.MapStatus.PUBLIC || canAdminMap(req, map);
 }
 
-exports.canCreateMap = function(req) {
+var canCreateMap = function(req) {
 	return !config.LIMITED_PROD_ACCESS;
 }
 
-exports.canImportData = function(req) {
+var canImportData = function(req) {
 	return !config.LIMITED_PROD_ACCESS;
 }
+
+module.exports = {
+	canAdminMap: canAdminMap,
+	canViewMap: canViewMap,
+	canCreateMap: canCreateMap,
+	canImportData: canImportData
+};

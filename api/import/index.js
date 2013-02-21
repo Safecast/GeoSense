@@ -35,7 +35,7 @@ var ImportAPI = function(app) {
 	if (app) {
 		app.post('/api/import/', function(req, res) {
 			if (!permissions.canImportData(req)) {
-	            res.send('', 403);
+	            res.send('import not allowed', 403);
 	            return;
 			}
 			var params = {};
