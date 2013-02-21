@@ -84,6 +84,7 @@ define([
 		    	this.hideSpinner();
 			}
 
+
 			if (!status) {
 		    	switch (this.model.getDataStatus()) {
 		    		case DataStatus.COMPLETE:

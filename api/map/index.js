@@ -288,7 +288,7 @@ var MapAPI = function(app)
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 					// only send if complete; or incomplete was requested 
-					if (mapLayer.pointCollection.status == DataStatus.COMPLETE ||
+					if (mapLayer.pointCollection.status == config.DataStatus.COMPLETE ||
 						url.parse(req.url, true).query.incomplete) {
 							res.send(prepareLayerResult(req, mapLayer));
 					} else {
@@ -361,6 +361,7 @@ var MapAPI = function(app)
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 				    PointCollection.findOne({_id: req.body.pointCollection._id, $or: [{active: true}, 
+				    	// TODO: check ownership instead of (unreliably) checking for status
 				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 				    	.populate('defaults')
 				    	.exec(function(err, collection) {
