@@ -212,7 +212,7 @@ define([
 		},
 
 		destroyFeatureLayer: function(model) {
-			var id = model.pointCollectionId;
+			var id = model.featureCollectionId;
 			if (!this.widgets[id]) return;
 			var w = this.widgets[id];
 			for (var i = 0; i < w.length; i++) {
@@ -280,7 +280,7 @@ define([
 		initFeatureLayer: function(collection)
 		{
 			MapGLView.__super__.initFeatureLayer.call(this, collection);
-			this.featureLayers[collection.pointCollectionId] = {
+			this.featureLayers[collection.featureCollectionId] = {
 				data: [],
 				colors: []
 			}; 
@@ -308,13 +308,13 @@ define([
 		{
 			var colorIndex = 0;
 			var self = this;
-			this.globe.addData(this.featureLayers[collection.pointCollectionId].data, {
+			this.globe.addData(this.featureLayers[collection.featureCollectionId].data, {
 				format: 'magnitude', 
 				name: collection.get('_id'), 
 				animated: false,
 				colorFn: function(val) {
 					var c = new THREE.Color();
-					c.setHex(self.featureLayers[collection.pointCollectionId].colors[colorIndex]);
+					c.setHex(self.featureLayers[collection.featureCollectionId].colors[colorIndex]);
 					colorIndex++;
 					return c;
 				}

@@ -177,57 +177,6 @@ define([
 			evt.preventDefault();
 		},
 		
-		setStateType: function(type, pointCollectionId) 
-		{	
-			var stateIndicator = this.$('#stateIndicator');
-			var message = this.$('#stateIndicatorMessage');
-			
-			/*switch(type)
-			{
-				case 'drawing':
-				  	stateIndicator.stop(true, true).fadeIn('fast');
-					message.html('DRAWING DATA SET');
-				  	break;
-				case 'parsing':
-				  	stateIndicator.stop(true, true).fadeIn('fast');
-					var progress;
-					if (obj && obj.status == DataStatus.IMPORTING && obj.progress) {
-						//progress = obj.progress - obj.progress % 1000;
-						progress = formatLargeNumber(obj.progress);
-					}
-					if (progress) {
-						var progressElement = $('.importProgress', message);
-						if (!progressElement.length) {
-							message.html('CRUNCHING DATA <span class="importProgress">' + progress + '</span>');
-							progressElement = $('.importProgress', message);
-						} else {
-							progressElement.html(progress);
-						}
-						progressElement.updateFeedback();
-					} else {
-						message.html('CRUNCHING DATA');
-					}
-				  	break;
-				case 'complete':
-				  	stateIndicator.delay(1000).fadeOut('fast');
-				  	break;
-				case 'loading':
-			  		stateIndicator.stop(true, true).fadeIn('fast');
-					stateIndicator.fadeIn('fast');
-					message.html('LOADING DATA SET');
-					break
-				case 'loadingcomplete':
-					break;
-				case 'post':
-					stateIndicator.stop(true, true).fadeIn('fast');
-					stateIndicator.fadeIn('fast');
-					message.html('UPLOADING NEW DATA');
-					break;
-				default:
-			  		//
-			}*/
-		},
-		
 		remove: function() 
 		{
 			$(window).unbind();

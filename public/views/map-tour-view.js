@@ -6,6 +6,9 @@ define([
 	'utils',
 	'text!templates/map-tour.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+	/*
+	TODO: currently not functional
+	*/
 	var MapTourView = window.PanelViewBase.extend({
 
 		className: 'panel map-tour',
@@ -49,10 +52,10 @@ define([
 			this.setTitle(stepInfo.title || this.mapInfo.title);
 
 	    	for (var i = app.mapInfo.layers.length - 1; i >= 0; i--) {
-	    		var pointCollectionId = app.mapInfo.layers[i].pointCollection._id;
-	    		var el = this.$('.data-legend.' + pointCollectionId);
+	    		var featureCollectionId = app.mapInfo.layers[i].featureCollection._id;
+	    		var el = this.$('.data-legend.' + featureCollectionId);
 	    		var visible = (stepInfo.layers.indexOf(i) != -1);
-	    		this.vent.trigger('toggleLayerVisibility', pointCollectionId, visible, true);
+	    		this.vent.trigger('toggleLayerVisibility', featureCollectionId, visible, true);
 	    	}
 		},
 

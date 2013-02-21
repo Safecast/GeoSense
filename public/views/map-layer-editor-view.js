@@ -74,7 +74,7 @@ define([
 				this.model.attributes.layerOptions.title 
 				&& this.model.attributes.layerOptions.title.length ?
 					this.model.attributes.layerOptions.title
-				: this.model.attributes.pointCollection.title);
+				: this.model.attributes.featureCollection.title);
 			this.$('.model-numeric').toggle(this.model.isNumeric());
 	    },
 

@@ -2,11 +2,11 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'collections/map-point-collection',
+    'collections/geo-feature-collection',
     'lib/color-gradient/color-gradient',
     'deepextend',
     'deepmodel',
-], function($, _, Backbone, MapPointCollection, ColorGradient) {
+], function($, _, Backbone, GeoFeatureCollection, ColorGradient) {
     var MapLayer = Backbone.DeepModel.extend({
         
         idAttribute: "_id",
@@ -44,7 +44,7 @@ define([
                 options = options || {};
                 
             this.parentMap = options.parentMap;
-            this.featureCollection = new MapPointCollection([], {mapLayer: this});
+            this.featureCollection = new GeoFeatureCollection([], {mapLayer: this});
             this.valFormatters = [];
 
             this.sessionOptions = _.extend(options.sessionOptions || {}, {
@@ -108,8 +108,8 @@ define([
         getExtremes: function()
         {
             return {
-                minVal: this.attributes.pointCollection.minVal, 
-                maxVal: this.attributes.pointCollection.maxVal,
+                minVal: this.attributes.featureCollection.minVal, 
+                maxVal: this.attributes.featureCollection.maxVal,
                 maxCount: this.featureCollection.maxReducedCount
             };
         },
@@ -156,9 +156,9 @@ define([
 
         isNumeric: function()
         {
-            return this.attributes.pointCollection.isNumeric 
-                && this.attributes.pointCollection.maxVal != undefined 
-                && this.attributes.pointCollection.minVal != undefined;
+            return this.attributes.featureCollection.isNumeric 
+                && this.attributes.featureCollection.maxVal != undefined 
+                && this.attributes.featureCollection.minVal != undefined;
         },
 
         canDisplayValues: function()
