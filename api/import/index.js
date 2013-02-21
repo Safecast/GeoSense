@@ -802,7 +802,7 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
 	if (!params) {
 		params = {};
 	}
-	models.PointCollection.find({sync: true, status: DataStatus.COMPLETE}, function(err, collections) {
+	models.PointCollection.find({sync: true, status: config.DataStatus.COMPLETE}, function(err, collections) {
 		console.info('*** Collections to sync: ' + collections.length);
 		if (err) {
 			if (callback) {

@@ -406,11 +406,11 @@ define([
 				return;
 			}
 			model.once('sync', function() {
-				// if now complete, fetch features
 				if (model.canDisplayValues()) {
+					// if now complete, fetch features
 					self.fetchMapFeatures();
-					if (model.getDataStatus() == DataStatus.COMPLETE) return;
 				}
+				if (model.getDataStatus() == DataStatus.COMPLETE) return;
 				// otherwise, retry in a bit
 				self.pollForMapLayerStatus(model, POLL_INTERVAL);
 			});
