@@ -350,8 +350,13 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 		var headerValues = {};
 		
-		collection.active = false;
-		collection.status = config.DataStatus.IMPORTING;
+		if (!params.append) {
+			collection.active = false;
+			collection.status = config.DataStatus.IMPORTING;
+		} else {
+			collection.status = config.DataStatus.IMPORTING_INC;
+		}
+
 		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
 			collection.importParams = _.cloneextend(params, {
 				fields: converter.fieldDefs
