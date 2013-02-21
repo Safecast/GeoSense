@@ -31,11 +31,11 @@ define([
 			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
 
 			this.toFields = {
-				'loc': 'Point X,Y',
-				'val': 'Point Value',
-				'datetime':'Date',
-				'label': 'Point Label',
-				'attributes': 'Attributes'
+				'geometry.coordinates': 'Point X,Y',
+				'properties.val': 'Point Value',
+				'properties.datetime':'Date',
+				'properties.label': 'Point Label',
+				//'properties.mixed': 'Mixed'
 			};
 	    },
 
@@ -254,7 +254,7 @@ define([
 				valid = false;
 			for (var k in this.toFields) {
 				//console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
-				var fromFields = this.$('.to-field[data-to=' + k +'] .from-field'),
+				var fromFields = this.$('.to-field[data-to="' + k +'"] .from-field'),
 					def = {
 						fromFields: []
 					};
