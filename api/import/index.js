@@ -320,11 +320,11 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				converter = Converter(fields);
 			} else {
 				converter = Converter({
-					'loc': {
+					'geometry.coordinates': {
 						'type': 'LngLat',
 						'fromFields': ['loc']
 					},
-					'val': {
+					'properties.val': {
 						'type': 'Number',
 						'fromFields': ['val']
 					}
@@ -625,7 +625,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						    	self.readStream.pause();
 					    	}
 							point.importJob = job;
-							point.pointCollection = point.shapeCollection = collection;
+							point.set(toCollectionField, collection);
 							point.created = new Date();
 							point.modified = new Date();
 							if (maxVal == undefined || maxVal < point.get('val')) {
@@ -729,8 +729,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		});
 	};
 
-	var ToModel = models.Point,
-		ToCollectionModel = models.PointCollection;
+	var ToModel = models.GeoFeature,
+		ToCollectionModel = models.GeoFeatureCollection,
+		toCollectionField = 'featureCollection';
 
 	if (!params.append) {
 		if (!params.dry) {

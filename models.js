@@ -132,8 +132,7 @@ this.PointCollection.schema.plugin(useTimestamps);
 
 var MapLayerSchema = new mongoose.Schema({
  //   _id: { type: mongoose.Schema.ObjectId },
-    pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', index: 1 },
-    shapeCollection: { type: mongoose.Schema.ObjectId, ref: 'ShapeCollection', index: 1 },
+    featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', index: 1 },
     layerOptions: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
     type: {type: String, enum: [config.MapLayerType.POINTS, config.MapLayerType.SHAPES], required: true, default: config.MapLayerType.POINTS},
     position: Number
@@ -184,8 +183,11 @@ this.onTheFlyModel = function(collectionName) {
     return onTheFlyModels[collectionName];
 }
 
-function toGeoJSON() {
-    var obj = this.toJSON();
+function toGeoJSON(self) {
+    if (!self) {
+        self = this;
+    }
+    var obj = self.toJSON();
     if (obj.bbox && obj.bbox.length) {
         obj.bbox = obj.bbox.reduce(function(a, b) {
             return a.concat(b);
@@ -242,9 +244,49 @@ var clamp180 = function(deg)
 var GeoFeatureCollectionSchema = new mongoose.Schema({
     type: {type: String, required: true, enum: ["FeatureCollection"], default: 'FeatureCollection'},
     bbox: {type: Array, index: '2d'},
-    properties: mongoose.Schema.Types.Mixed
+    properties: mongoose.Schema.Types.Mixed,
+
+
+    title: String,
+    description: String,
+    source: String,
+    unit: String,
+    isNumeric: {type: Boolean, default: true},
+    maxVal: Number,
+    minVal: Number,
+    maxIncField: { type: mongoose.Schema.Types.Mixed, index: 1 },
+    importParams: mongoose.Schema.Types.Mixed,
+    timeBased: Boolean,
+    gridSize: Number,
+    defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
+    active: Boolean,
+    status: String,
+    progress: Number,
+    numBusy: Number,
+    reduce: Boolean,
+    maxReduceZoom: Number,
+    sync: Boolean,
+    cropDistribution: Boolean,
+    createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
+    modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
+    createdAt: Date,
+    updatedAt: Date,
+    lastReducedAt: Date,
+
+
 });
-GeoFeatureCollectionSchema.methods.toGeoJSON = toGeoJSON;
+GeoFeatureCollectionSchema.methods.toGeoJSON = function()
+{
+    var obj = toGeoJSON.call(this);
+    if (this.features) {
+        obj.features = this.features.map(toGeoJSON);
+    }
+    return obj;
+};
+GeoFeatureCollectionSchema.methods.findFeatures = function()
+{
+};
+
 GeoFeatureCollectionSchema.plugin(useTimestamps);
 
 this.GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCollectionSchema);

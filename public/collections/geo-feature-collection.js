@@ -57,13 +57,13 @@ define([
 
 	    parse: function(resp, xhr) 
 	    {
-	    	if (resp['items']) {
+	    	if (resp['features']) {
 	    		this.fullCount = resp.fullCount;
 	    		this.maxReducedCount = resp.maxReducedCount;
 	    		this.resultCount = resp.resultCount;
 	    		this.originalCount = resp.originalCount;
 	    		this.gridSize = resp.gridSize;
-	    		resp = resp['items'];
+	    		resp = resp['features'];
 	    	}
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
 			return GeoFeatureCollection.__super__.parse.call(this, resp, xhr);
