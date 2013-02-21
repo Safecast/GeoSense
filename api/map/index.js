@@ -39,7 +39,9 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, err, maps)) return;
 					var preparedMaps = [];
 					for (var i = 0; i < maps.length; i++) {
-						preparedMaps[i] = prepareMapResult(req, maps[i]);			
+						if (permissions.canViewMap(req, res, maps[i])) {
+							preparedMaps.push(prepareMapResult(req, maps[i]));
+						}
 					}
 					res.send(preparedMaps);
 				});
@@ -283,7 +285,7 @@ var MapAPI = function(app)
 				.populate('layers.pointCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
-					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
+					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 					var mapLayer = map.layers.id(req.params.layerId);
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
