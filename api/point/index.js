@@ -19,7 +19,7 @@ var PointAPI = function(app)
 			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 				if (!err && pointCollection) {
 					collectionName = 'r_points_hist-' + config.HISTOGRAM_SIZES[0];
-					var Model = models.onTheFlyModel(collectionName);
+					var Model = models.adHocModel(collectionName);
 					var query = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 					console.log(query);
 					Model.find(query, function(err, datasets) {
@@ -81,9 +81,8 @@ var PointAPI = function(app)
 						res.send('map layer not found', 404);
 					} else {
 
-						models.GeoFeature.find({featureCollection: mapLayer.featureCollection}, function(err, documents) {
-							mapLayer.featureCollection.features = documents;
-							res.send(mapLayer.featureCollection.toGeoJSON());
+						mapLayer.featureCollection.findFeatures(function(err, collection) {
+							res.send(collection.toGeoJSON());
 						});
 
 						return;
@@ -363,7 +362,7 @@ var PointAPI = function(app)
 									timeGrid: timeGrid,
 									gridSize: gridSize
 								});
-								PointModel = models.onTheFlyModel(collectionName);
+								PointModel = models.adHocModel(collectionName);
 								//pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 								pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 								pointQuery = _.extend(pointQuery, filterQuery);
@@ -376,7 +375,7 @@ var PointAPI = function(app)
 									pointQuery = {'pointCollection': req.params.pointcollectionid};
 								} else {
 									collectionName = 'r_points_loc-0';
-									PointModel = models.onTheFlyModel(collectionName);
+									PointModel = models.adHocModel(collectionName);
 									pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 								}
 								dequeueBoxQuery();

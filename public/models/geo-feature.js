@@ -11,7 +11,8 @@ define([
         {
             // TODO: deprecated
             this.attributes.loc = this.getCenter();
-            this.attributes.val = this.attributes.properties.val;
+            this.attributes.val = this.attributes.properties ?
+                this.attributes.properties.val : undefined;
         },
         
         getCenter: function() 

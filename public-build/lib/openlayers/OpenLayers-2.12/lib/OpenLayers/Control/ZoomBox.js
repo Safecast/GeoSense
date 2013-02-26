@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Control.ZoomBox=OpenLayers.Class(OpenLayers.Control,{type:OpenLayers.Control.TYPE_TOOL,out:!1,keyMask:null,alwaysZoom:!1,draw:function(){this.handler=new OpenLayers.Handler.Box(this,{done:this.zoomBox},{keyMask:this.keyMask})},zoomBox:function(e){if(e instanceof OpenLayers.Bounds){var t;if(!this.out){var n=this.map.getLonLatFromPixel({x:e.left,y:e.bottom}),r=this.map.getLonLatFromPixel({x:e.right,y:e.top});t=new OpenLayers.Bounds(n.lon,n.lat,r.lon,r.lat)}else{var i=Math.abs(e.right-e.left),s=Math.abs(e.top-e.bottom),o=Math.min(this.map.size.h/s,this.map.size.w/i),u=this.map.getExtent(),a=this.map.getLonLatFromPixel(e.getCenterPixel()),f=a.lon-u.getWidth()/2*o,l=a.lon+u.getWidth()/2*o,c=a.lat-u.getHeight()/2*o,h=a.lat+u.getHeight()/2*o;t=new OpenLayers.Bounds(f,c,l,h)}var p=this.map.getZoom();this.map.zoomToExtent(t),p==this.map.getZoom()&&this.alwaysZoom==1&&this.map.zoomTo(p+(this.out?-1:1))}else this.out?this.map.setCenter(this.map.getLonLatFromPixel(e),this.map.getZoom()-1):this.map.setCenter(this.map.getLonLatFromPixel(e),this.map.getZoom()+1)},CLASS_NAME:"OpenLayers.Control.ZoomBox"});

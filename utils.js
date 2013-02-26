@@ -190,7 +190,7 @@ exports.validateExistingCollection = function(err, collection, callback)
 {
     if (err || !collection) {
         if (!err) {
-            err = new Error('PointCollection not found');
+            err = new Error('feature collection not found');
         }
         if (callback) {
             callback(err);
@@ -421,3 +421,25 @@ exports.deleteUndefined = function(obj)
 
     return obj;
 }
+
+exports.findExtremes = function(value, previous) {
+    var map = function(el) {
+            if (typeof el == 'object' && el.sum != undefined 
+                && el.min != undefined && el.max != undefined && el.count != undefined) return el;
+            return {
+                sum: el,
+                min: el,
+                max: el,
+                count: 1
+            }
+        },
+        arr = Array.isArray(value) ? value : [value],
+        reduce = function(a, b) {
+            a.sum = typeof b.sum != 'number' ? NaN : isNaN(a.sum) ? b.sum : a.sum + b.sum;
+            a.min = a.min == undefined || b.min < a.min ? b.min : a.min;
+            a.max = a.max == undefined || b.max > a.max ? b.max : a.max;
+            a.count = isNaN(a.count) ? b.count : a.count + b.count;
+            return a;
+        };
+    return arr.map(map).reduce(reduce, previous || {});
+};

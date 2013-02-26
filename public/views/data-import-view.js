@@ -381,8 +381,7 @@ define([
 						if (typeof current[k] == 'object' && current[k].error) {
 							tdclass = 'conversion-error';
 							switch (current[k].name){
-								case 'ValueSkippedError':
-									//val = 'skipped';
+								case 'ValueSkippedWarning':
 									val = current[k].message;
 									break;
 								default:

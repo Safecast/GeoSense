@@ -107,9 +107,10 @@ define([
 
         getExtremes: function()
         {
+            var ex = this.attributes.featureCollection.extremes;
             return {
-                minVal: this.attributes.featureCollection.minVal, 
-                maxVal: this.attributes.featureCollection.maxVal,
+                minVal: ex && ex.val ? ex.val.min : NaN, 
+                maxVal: ex && ex.val ? ex.val.max : NaN,
                 maxCount: this.featureCollection.maxReducedCount
             };
         },

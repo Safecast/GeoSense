@@ -22,23 +22,23 @@ var useTimestamps = function (schema, options) {
 mongooseTypes.loadTypes(mongoose);
 //useTimestamps = mongooseTypes.useTimestamps;
 
-this.User = mongoose.model('User', new mongoose.Schema({
+var User = mongoose.model('User', new mongoose.Schema({
     name: String,
     email: {type: mongoose.SchemaTypes.Email, required: true}   
 }));
 
-this.User.schema.plugin(useTimestamps);
+User.schema.plugin(useTimestamps);
 
-this.Job = mongoose.model('Job', new mongoose.Schema({
+var Job = mongoose.model('Job', new mongoose.Schema({
     createdAt: Date,
     updatedAt: Date,
     type: {type: String, enum: [config.JobType.IMPORT, config.JobType.REDUCE], required: true},
     status: {type: String, enum: [config.JobStatus.ACTIVE, config.JobStatus.IDLE], required: true, default: config.MapLayerType.POINTS},
 }));
 
-this.Job.schema.plugin(useTimestamps);
+Job.schema.plugin(useTimestamps);
 
-this.Point = mongoose.model('Point', new mongoose.Schema({
+var Point = mongoose.model('Point', new mongoose.Schema({
     pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
     importJob: { type: mongoose.Schema.ObjectId, ref: 'Job', required: false, index: 1 },
     loc: {type: [Number], index: '2d', required: true },
@@ -53,12 +53,12 @@ this.Point = mongoose.model('Point', new mongoose.Schema({
     updatedAt: Date
 }));
 
-this.Point.schema.plugin(useTimestamps);
-this.Point.schema.index({loc: '2d', pointCollection: 1})
+Point.schema.plugin(useTimestamps);
+Point.schema.index({loc: '2d', pointCollection: 1})
 
 var colorMatch = /^#([a-fA-F0-9]{2}){3}$/;
 
-this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
+var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     enabled: {type: Boolean, required: true, default: true},
     public: {type: Boolean, required: true, default: true},
     featureType: {type: String, required: true, enum: [
@@ -96,11 +96,11 @@ this.LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     cropDistribution: Boolean
 }));
 
-this.LayerOptions.schema.path('colors').validate(function (value) {
+LayerOptions.schema.path('colors').validate(function (value) {
     return value.length > 0;
 }, 'At least one color is required.');
 
-this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
+PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     title: String,
     description: String,
     source: String,
@@ -129,7 +129,7 @@ this.PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
     linkedPointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: false, index: 1 },
 }));
 
-this.PointCollection.schema.plugin(useTimestamps);
+PointCollection.schema.plugin(useTimestamps);
 
 var MapLayerSchema = new mongoose.Schema({
  //   _id: { type: mongoose.Schema.ObjectId },
@@ -139,7 +139,8 @@ var MapLayerSchema = new mongoose.Schema({
     position: Number
 });
 
-this.Map = mongoose.model('Map', new mongoose.Schema({
+
+var Map = mongoose.model('Map', new mongoose.Schema({
     active: {type: Boolean, default: true},
     title: {type: String, required: true},
     description: String,
@@ -172,23 +173,22 @@ this.Map = mongoose.model('Map', new mongoose.Schema({
     }
 }));
 
-this.Map.schema.plugin(useTimestamps);
+Map.schema.plugin(useTimestamps);
 
-var onTheFlyModels = {};
+var adHocModels = {};
 
-this.onTheFlyModel = function(collectionName) {
-    if (!onTheFlyModels[collectionName]) {
-        onTheFlyModels[collectionName] = mongoose.model(
-            new mongoose.Types.ObjectId().toString(), new mongoose.Schema({}, {strict: false}), collectionName);
+var adHocModel = function(collectionName, Schema) {
+    if (!adHocModels[collectionName]) {
+        var Schema = Schema || new mongoose.Schema({}, {strict: false});
+        adHocModels[collectionName] = mongoose.model(
+            new mongoose.Types.ObjectId().toString(), Schema, collectionName);
     }
-    return onTheFlyModels[collectionName];
+    return adHocModels[collectionName];
 }
 
-function toGeoJSON(self) {
-    if (!self) {
-        self = this;
-    }
-    var obj = self.toJSON();
+function toGeoJSON() 
+{
+    var obj = this.toJSON();
     if (obj.bbox && obj.bbox.length) {
         obj.bbox = obj.bbox.reduce(function(a, b) {
             return a.concat(b);
@@ -253,9 +253,7 @@ var GeoFeatureCollectionSchema = new mongoose.Schema({
     source: String,
     unit: String,
     isNumeric: {type: Boolean, default: true},
-    maxVal: Number,
-    minVal: Number,
-    maxIncField: { type: mongoose.Schema.Types.Mixed, index: 1 },
+    extremes: { type: mongoose.Schema.Types.Mixed, index: 1 },
     importParams: mongoose.Schema.Types.Mixed,
     timeBased: Boolean,
     gridSize: Number,
@@ -273,60 +271,25 @@ var GeoFeatureCollectionSchema = new mongoose.Schema({
     createdAt: Date,
     updatedAt: Date,
     lastReducedAt: Date,
-
-
 });
-GeoFeatureCollectionSchema.methods.toGeoJSON = function()
-{
-    var obj = toGeoJSON.call(this);
-    if (this.features) {
-        obj.features = this.features.map(toGeoJSON);
-    }
-    return obj;
-};
-GeoFeatureCollectionSchema.methods.findFeatures = function()
-{
-};
 
 GeoFeatureCollectionSchema.plugin(useTimestamps);
 
-this.GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCollectionSchema);
-
-
-var GeoFeatureSchema = new mongoose.Schema({
-    featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', required: true, index: 1 },
-    type: {type: String, required: true, enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection", "Feature", "FeatureCollection"]},
-    bbox: {type: Array, index: '2d'},
-    geometry: {
-        type: {type: String, required: true, enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"]},
-        coordinates: {type: Array, required: true}
-    },
-    properties: {
-        type: mongoose.Schema.Types.Mixed,
-        validate: function(val) {
-            return typeof(val) == 'object'
-                && (!val.val || !isNaN(val.val))
-                && (!val.label || typeof val.label == 'string')
-                && (!val.datetime || util.isDate(val.datetime))
-                && (!val.color || typeof val.color == 'string' && val.color.match(colorMatch));
-        }
+GeoFeatureCollectionSchema.methods.toGeoJSON = function()
+{
+    var obj = toGeoJSON.call(this);
+    delete obj.importParams;
+    if (this.features) {
+        obj.features = this.features.map(function(feature) {
+            return feature.toGeoJSON();
+        });
     }
-});
-GeoFeatureSchema.methods.toGeoJSON = toGeoJSON;
-GeoFeatureSchema.methods.getBounds = function() {
-    return getBounds(this.geometry.coordinates);
+    return obj;
 };
-GeoFeatureSchema.plugin(useTimestamps);
-GeoFeatureSchema.index({bbox: '2d', featureCollection: 1});
-GeoFeatureSchema.index({'properties.val': 1});
-GeoFeatureSchema.index({'properties.label': 1});
-GeoFeatureSchema.pre('save', function (next) {
-    this.bbox = this.getBounds();
-    next();
-});
 
-GeoFeature = mongoose.model('GeoFeature', GeoFeatureSchema);
-GeoFeature.findWithin = function(bbox, conditions, fields, options, callback) {
+GeoFeatureCollectionSchema.methods.findFeaturesWithin = function(bbox, conditions, fields, options, callback)
+{
+    // from Mongoose find()
     if ('function' == typeof options) {
         callback = options;
         options = null;
@@ -341,16 +304,108 @@ GeoFeature.findWithin = function(bbox, conditions, fields, options, callback) {
         options = null;
     }
 
-    var conditions = _.cloneextend(conditions || {}, {
-        bbox: {
-            $within: {
-                $box: getBounds(bbox)
-            }
+    var conditions = conditions || {};
+    if (conditions.geocoded == undefined) {
+        conditions.geocoded = true;
+    }
+    conditions.featureCollection = this;
+
+    var self = this;
+    this.getFeatureModel().findWithin(bbox, conditions, fields, options, function(err, documents) {
+        self.features = documents;
+        if (callback) {
+            callback(err, self);
         }
     });
-
-    return GeoFeature.find(conditions, fields, options, callback);
 }
 
-this.GeoFeature = GeoFeature;
-this.getBounds = getBounds;
+GeoFeatureCollectionSchema.methods.findFeatures = function(conditions, fields, options, callback)
+{
+    this.findFeaturesWithin(null, conditions, fields, options, callback);
+};
+
+GeoFeatureCollectionSchema.methods.getFeatureModel = function()
+{
+    return adHocModel('features_' + this._id, GeoFeatureSchema);
+}
+
+var GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCollectionSchema);
+
+var GeoFeatureSchema = new mongoose.Schema({
+    featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', required: true, index: 1 },
+    type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection", "Feature", "FeatureCollection"], index: 1},
+    bbox: {type: Array, index: '2d'},
+    geocoded: {type: Boolean, default: false, required: true},
+    geometry: {
+        type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"], index: 1},
+        coordinates: {type: Array, /*required: true*/ index: 1}
+    },
+    properties: mongoose.Schema.Types.Mixed,
+    incrementor: mongoose.Schema.Types.Mixed,
+    source: mongoose.Schema.Types.Mixed
+/*        validate: function(val) {
+            return typeof(val) == 'object'
+                && (!val.val || !isNaN(val.val))
+                && (!val.label || typeof val.label == 'string')
+                && (!val.datetime || util.isDate(val.datetime))
+                && (!val.color || typeof val.color == 'string' && val.color.match(colorMatch));
+        }
+    }*/
+});
+GeoFeatureSchema.methods.toGeoJSON = toGeoJSON;
+GeoFeatureSchema.methods.getBounds = function() {
+    return getBounds(this.geometry.coordinates);
+};
+GeoFeatureSchema.plugin(useTimestamps);
+GeoFeatureSchema.index({bbox: '2d', featureCollection: 1});
+GeoFeatureSchema.index({'properties.val': 1});
+GeoFeatureSchema.index({'properties.label': 1});
+GeoFeatureSchema.pre('save', function (next) {
+    this.bbox = this.getBounds();
+    this.geocoded = this.bbox && this.bbox.length;
+    next();
+});
+
+GeoFeatureSchema.statics.findWithin = function(bbox, conditions, fields, options, callback) 
+{
+    // from Mongoose find()
+    if ('function' == typeof options) {
+        callback = options;
+        options = null;
+    } else if ('function' == typeof fields) {
+        callback = fields;
+        fields = null;
+        options = null;
+    } else if ('function' == typeof conditions) {
+        callback = conditions;
+        conditions = {};
+        fields = null;
+        options = null;
+    }
+
+    if (bbox) {
+        var conditions = _.cloneextend(conditions || {}, {
+            bbox: {
+                $within: {
+                    $box: getBounds(bbox)
+                }
+            }
+        });
+    }
+
+    return this.find(conditions, fields, options, callback);
+}
+
+//var GeoFeature = mongoose.model('GeoFeature', GeoFeatureSchema);
+
+module.exports = {
+    User: User, 
+    Job: Job, 
+    Point: Point, 
+    LayerOptions: LayerOptions, 
+    PointCollection: PointCollection, 
+    Map: Map,
+    GeoFeatureCollection: GeoFeatureCollection,
+    //GeoFeature: GeoFeature,
+    getBounds: getBounds
+};
