@@ -11,10 +11,11 @@
 <div class="panel-body well">
     <form class="tabbable"> 
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#layer-features" data-toggle="tab">Features</a></li>
-            <li><a href="#layer-colors" data-toggle="tab">Colors</a></li>
-            <li><a href="#layer-data" data-toggle="tab">Stroke</a></li>
-            <li><a href="#layer-info" data-toggle="tab">Info</a></li>
+            <li class="active"><a href="#layer-features" data-toggle="tab"><span class="icon-large icon-map-marker half-opacity"></span></a></li>
+            <li><a href="#layer-colors" data-toggle="tab"><span class="icon-large icon-brush half-opacity"></span></a></li>
+            <li><a href="#layer-stroke" data-toggle="tab"><span class="icon-large icon-vector-path-curve half-opacity"></span></a></li>
+            <li><a href="#layer-info" data-toggle="tab"><span class="icon-large icon-info-sign half-opacity"></span></a></li>
+            <li><a href="#layer-data" data-toggle="tab"><span class="icon-large icon-table half-opacity"></span></a></li>
         </ul>
 
         <div class="tab-content">
@@ -36,10 +37,10 @@
                         </p>
                         <label class="title">Feature Type</label>
                         <p class="btn-group model-input" data-name="layerOptions.featureType" data-toggle="buttons-radio">
-                            <button class="btn feature-type points" value="P"></button>
-                            <button class="btn feature-type cells" value="C"></button>
-                            <button class="btn feature-type bubbles" value="B"></button>
-                            <button class="btn feature-type shapes" value="S"></button>
+                            <button class="btn feature-type points" value="P"><i class="icon icon-feature-type"></i></button>
+                            <button class="btn feature-type cells" value="C"><i class="icon icon-feature-type"></i></button>
+                            <button class="btn feature-type bubbles" value="B"><i class="icon icon-feature-type"></i></button>
+                            <button class="btn feature-type shapes" value="S"><i class="icon icon-feature-type"></i></button>
                         </p>
                     </div>
                     <p class="clearfix">
@@ -130,7 +131,9 @@
                     </select>
                 </p>
                 -->
+            </fieldset>
 
+            <fieldset class="tab-pane" id="layer-stroke">
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-info">
