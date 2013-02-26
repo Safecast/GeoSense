@@ -7,7 +7,7 @@ var config = require('../../config'),
 	errors = require('../../errors'),
 	BasicError = errors.BasicError,
 	ValidationError = errors.ValidationError,
-	conversion = require("./conversion"),
+	transform = require("./data_transform"),
   	mongoose = require('mongoose'),
 	date = require('datejs'),
 	url = require('url'),
@@ -30,7 +30,8 @@ var LayerOptions = models.LayerOptions,
 		}
 	};
 
-var ImportAPI = function(app) {
+var ImportAPI = function(app) 
+{
 	var self = this;
 	if (app) {
 		app.post('/api/import/', function(req, res) {
@@ -57,19 +58,19 @@ var ImportAPI = function(app) {
 			}
 
 			// prevent arbitrary script inclusion
-			if (req.body.converter) {
-				// TODO: check if exists
-				params.converter = path.basename('' + req.body.converter);				
+			if (req.body.transform) {
+				params.transform = path.basename('' + req.body.transform);				
 			}
 			if (req.body.format) {
 				params.format = path.basename('' + req.body.format);				
 			}
+
 			// prevent arbitrary file import
 			req.body.path = null;
 
 			var errors = {},
 				valid = true,
-				converter;
+				transform;
 
 			if (!req.body.url) {
 				valid = false;
@@ -78,27 +79,6 @@ var ImportAPI = function(app) {
 				};
 			} else {
 				params.url = req.body.url;
-			}
-
-			if (!req.body.inspect) {
-				converter = conversion.PointConverterFactory(req.body.fields, {
-					strict: !params.dry
-				});
-
-				if (!converter) {
-					valid = false;
-					errors['fields'] = {
-						message: 'No fields specified'
-					};
-				} else if (converter.name =='ValidationError') {
-					valid = false;
-					errors = _.cloneextend(errors, converter.errors);
-				} else {
-					// TODO: pass in converter directly
-					params.fields = req.body.fields;
-				}
-			} else {
-				params.converter = false;
 			}
 
 			if (req.body.mapreduce == null || req.body.mapreduce) {
@@ -134,9 +114,9 @@ var ImportAPI = function(app) {
 							sendItems.push(result.toObject());
 						}
 					},
-					convert: function(err, result) {
+					transform: function(err, result) {
 						if (req.body.preview) {
-							sendItems.push(result.converted);
+							sendItems.push(result.transformed);
 						}
 					},
 					start: function(err, collection) {
@@ -155,17 +135,6 @@ var ImportAPI = function(app) {
 
 var REGEX_IS_REGULAR_MODULE = /^[a-z][a-z0-9_\/\.]*$/;
 
-/**
-required params:
-	url | file | stream
-	format
-optional params:
-	converter
-	max
-	skip
-	append
-	incremental
-*/
 ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 {
 	var self = this;
@@ -243,45 +212,15 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		} 
 	}
 
-	console.log('import params', params);
-	var Converter, converterModule, converter, 
-		formatModule, Format, parser;
-
-	if (!params.fields && params.converter) {
-		if (typeof params.converter == 'object') {
-			converter = params.converter;
-		} else if (typeof params.converter == 'string') {
-			if (params.converter.match(REGEX_IS_REGULAR_MODULE)) {
-				converterModule = './conversion/' + params.converter;
-			} else {
-				converterModule = params.converter;
-			}
-			console.log('Loading converter: '+params.converter);
-			try {
-				Converter = require(converterModule);
-			} catch(err) {
-				if (callback) {
-					if (err.code == 'MODULE_NOT_FOUND') {
-						err = new Error('Unknown converter: ' + params.converter);
-					}
-					callback(err);
-					return;
-				}
-				throw err;
-			}
-		}
-	} else {
-		Converter = function(fieldDefs) {
-			return conversion.PointConverterFactory(fieldDefs);
-		}
-	}
+	//console.log('import params', params);
+	var formatModule, format, parser, dataTransform;
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
 		formatModule = './formats/' + params.format;
 	} else {
 		formatModule = params.format;
 	}
-	console.log('Loading format: '+params.format);
+	console.log('*** Loading format: '+params.format, formatModule);
 	try {
 		format = require(formatModule);
 	} catch(err) {
@@ -305,50 +244,42 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	}
     parser = format.Parser();
 
-	var importCount = 0;
-	var fieldNames;
-	var FIRST_ROW_IS_HEADER = params.format == 'csv';
+    dataTransform = new transform.DataTransform(format.transform, {strict: !params.dry});
+    if (params.transform) {
+    	var customTransform;
+    	if (typeof params.transform != 'object') {
+			var transformModule = params.transform;
+			console.log('Loading transform: '+params.transform);
+			try {
+				customTransform = require(transformModule);
+			} catch(err) {
+				if (callback) {
+					if (err.code == 'MODULE_NOT_FOUND') {
+						err = new Error('Unknown transform: ' + params.transform);
+					}
+					callback(err);
+					return;
+				}
+				throw err;
+			}
+    	} else {
+    		customTransform = params.transform;
+    	}
+    	console.log('custom transform', customTransform);
+    	var customTransform = new transform.DataTransform(customTransform);
+    	dataTransform.fields = _.cloneextend(dataTransform.fields, 
+    		customTransform.fields);
+    }
+
+	var importCount = 0,
+		fieldNames,
+		FIRST_ROW_IS_HEADER = params.format == 'csv';
 
 	var runImport = function(collection) 
 	{
-		var sendItems;
-		if (!converter) {
-			var fields = params.fields ?
-				params.fields : collection.importParams && collection.importParams.fields ? 
-				collection.importParams.fields : null;
-			if (fields) {
-				converter = Converter(fields);
-			} else {
-				converter = Converter({
-					'geometry.coordinates': {
-						'type': 'LngLat',
-						'fromFields': ['loc']
-					},
-					'properties.val': {
-						'type': 'Number',
-						'fromFields': ['val']
-					}
-				});
-			}
-			if (!converter.convertModel) {
-				var err = new Error('converter module does not export `convertModel`');
-				if (callback) {
-					callback(err);
-					return;
-				}
-				throw err;
-			}
-			if (!converter) {
-				var err = new Error('could not create converter');
-				if (callback) {
-					callback(err);
-					return;
-				}
-				throw err;
-			}
-		}
-
-		var headerValues = {};
+		var sendItems,
+			ToSaveModel = collection.getFeatureModel(),
+			headerValues = {};
 		
 		if (!params.append) {
 			collection.active = false;
@@ -357,12 +288,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			collection.status = config.DataStatus.IMPORTING_INC;
 		}
 
-		// TODO: can't save import params with keys that contain dots -- use Array instead
-		/*if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
-			collection.importParams = _.cloneextend(utils.deleteUndefined(params), {
-				fields: converter.fieldDefs
+		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
+			collection.importParams = _.cloneextend(params, {
+				transform: params.transform
 			});
-		}*/
+		}
+
 		if (req && req.session) {
 			collection.createdBy = collection.modifiedBy = req.session.user;
 		}
@@ -384,7 +315,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 	    	var newCollectionId = collection.get('_id');
 	    	if (!params.dry) {
-		    	console.success('*** running import for '+collection._id+' "'+collection.get('title'));
+		    	console.success('*** running import for '+collection._id+' ('+collection.get('title')+')');
 	    	} else {
 		    	console.warn('*** dry run: data will not be saved');
 	    	}
@@ -408,9 +339,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					dataCallbacks.start(false, collection);
 				}			
 
-				var maxVal, 
-					minVal, 
-					maxIncField,
+				var extremes = _.clone(collection.extremes || {}),
 					numRead = 0,
 					numImport = 0,
 					numSaving = 0,
@@ -423,31 +352,24 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				{
 					ended = true;
 					finalized = true;
-					if (maxVal != undefined) {
-				    	collection.maxVal = collection.maxVal ? Math.max(maxVal, collection.maxVal) : maxVal;
-					}
-					if (minVal != undefined) {
-						collection.minVal = collection.minVal ? Math.min(minVal, collection.minVal) : minVal;
-					}
-			    	collection.isNumeric = !isNaN(collection.maxVal) && !isNaN(collection.minVal);
+					collection.extremes = extremes;
+					collection.markModified('extremes');
+
+			    	collection.isNumeric = collection.extremes.val && !isNaN(collection.extremes.val.min);
 					if (!collection.isNumeric) {
 						collection.defaults.histogram = false;
-					}
-					if (maxIncField != undefined) {
-						if (!collection.maxIncField || collection.maxIncField < maxIncField) {
-							collection.maxIncField = maxIncField;
-						}
 					}
  					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
 					collection.numBusy = 0;
 					collection.reduce = collection.reduce || numSaved > 1000;
-					collection.status = !params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC;
+					collection.status = collection.reduce ? 
+						(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
 
 					var collectionSave = !params.dry ?
-						collection.save : function(callback) { callback(false, collection) };
+						collection.save : function(callback) {  console.log('not saving'); callback(false, collection); };
 
-					collectionSave.call(collection, function(err) {
+					collectionSave.call(collection, function(err, collection) {
 						if (err) {
 							console.error(err.message);
 							if (callback) {
@@ -455,7 +377,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 							return;
 						}
-				    	debugStats('*** finalized and activated collection ***', 'success');
+					
+				    	debugStats('*** finalized and activated collection ***', 'success', null, true);
 						job.status = config.JobStatus.IDLE;
 						job.save(function(err) {
 							if (err) {
@@ -475,7 +398,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								if (params.mapreduce) {
 									console.log('**** starting mapreduce');
 									var mapReduceParams = {
-										pointCollectionId: collection._id.toString()
+										featureCollectionId: collection._id.toString()
 									};
 									new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
 								} else {
@@ -515,13 +438,13 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					}
 				}
 
-				function makeSaveHandler(point, converted, self) 
+				function makeSaveHandler(model, self) 
 				{
 					return function(err, result) {
 						if (err) {
-							console.error('Error saving point', err);
+							console.error('Error saving model', err, model);
 						}
-				    	debugStats('on save', 'success', (point ? point.get('_id') : ''));
+				    	debugStats('on save', 'success', (model ? model.get('_id') : ''));
 						numSaving--;
 						numSaved++;
 				    	postSave(self);
@@ -594,28 +517,35 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							doc.sourceId = doc.id;
 						}
 
-						var model = new PseudoModel(doc),
-							doSave = false,
-							point;
+						var model = new PseudoModel(doc);
 
 						if (dataCallbacks.data) {
 							dataCallbacks.data(false, model);
 						}
 
-						if (converter) {
-							var conversionResult = converter.convertModel(model, ToModel, config);
-							point = conversionResult.model;
+						var transformResult = dataTransform.transformModel(model, ToSaveModel, {
+							DEBUG: config.DEBUG && 0
+						});
 
-							var loc = point ? point.get('loc') : null;
-							doSave = point 
-								&& (!params.bounds || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
-								&& (!params.from || point.get('datetime') >= params.from)
-								&& (!params.to || point.get('datetime') <= params.to)
-								&& (!params.incremental || collection.get('maxIncField') == undefined || !point.get('incField') || point.get('incField') > collection.get('maxIncField'));
-	
-							if (dataCallbacks.convert) {
-								dataCallbacks.convert(false, conversionResult);
-							}
+						if (dataCallbacks.transform) {
+							dataCallbacks.transform(false, transformResult);
+						}
+
+						var saveModel = transformResult.model,
+							doSave;
+
+						if (saveModel) {
+							var loc = saveModel.geometry.coordinates,
+								datetime = saveModel.properties ? saveModel.properties.datetime : undefined,
+								incrementor = saveModel.incrementor;
+
+							doSave = saveModel
+								&& (!loc || !loc.length || !params.bounds 
+									|| (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
+								&& (!datetime || !params.from || datetime >= params.from)
+								&& (!datetime || !params.to || datetime <= params.to)
+								&& (!params.incremental || !collection.extremes || collection.extremes.incrementor == undefined 
+									|| incrementor == undefined || incrementor > collection.extremes.incrementor.max);
 						}
 
 						if (doSave) {
@@ -625,30 +555,29 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					    		// memory consumption low.
 						    	self.readStream.pause();
 					    	}
-							point.importJob = job;
-							point.set(toCollectionField, collection);
-							point.created = new Date();
-							point.modified = new Date();
-							if (maxVal == undefined || maxVal < point.get('val')) {
-								maxVal = point.get('val');
+							saveModel.importJob = job;
+							saveModel.set(toCollectionField, collection);
+
+							// determine extremes of all properties
+							for (var key in saveModel.properties) {
+								extremes[key] = utils.findExtremes(saveModel.properties[key], extremes[key]);
 							}
-							if (minVal == undefined || minVal > point.get('val')) {
-								minVal = point.get('val');
+							if (incrementor) {
+								extremes.incrementor = utils.findExtremes(incrementor, extremes.incrementor);
 							}
-							if (maxIncField == undefined || maxIncField < point.get('incField')) {
-								maxIncField = point.get('incField');
-							}
+
 							numSaving++;
 							importCount++;
 
-							var saveHandler = makeSaveHandler(point, conversionResult.converted, self);
+							var saveHandler = makeSaveHandler(saveModel, self);
+							//console.log('SAVE', saveModel);
 							if (!params.dry) {
-								point.save(saveHandler);
+								saveModel.save(saveHandler);
 							} else {
-								saveHandler(false, point);
+								saveHandler(false, saveModel);
 							}
 						} else {
-							if (point && params.break) {
+							if (saveModel && params.break) {
 						    	debugStats('reached break point, ending', 'success', null, true);
 								ended = true;
 								self.end();
@@ -698,19 +627,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				    .on('end', onEnd)
 				    .on('error', onError);
 
-				var formatSource = function(str, pointCollection) {
-					if (params.incremental && pointCollection.maxIncField instanceof Date) {
-						return pointCollection.maxIncField.format(str);
-					}
-					return str;
-				};
-
 				if (params.stream) {
 					console.info('*** Importing from stream ***', params.stream, '[converter=' + params.converter + ']');
 					parser.fromStream(params.stream);
 				} else if (params.url) {
-					var url = formatSource(params.url, collection);
-					console.info('*** Importing from URL ***', url, '[converter=' + params.converter + ']');
+					var url = params.url;
+					console.info('*** Importing from URL:', url, '[format=' + params.format + '] into ' + ToSaveModel.collection.name);
 					try {
 						parser.fromStream(format.Request({url: url}));
 					} catch(err) {
@@ -722,15 +644,15 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						throw err;
 					}
 				} else {
-					var path = formatSource(params.path, collection);
-					console.info('*** Importing from path ***', path, '[converter=' + params.converter + ']');
+					var path = params.path;
+					console.info('*** Importing from path:', path, '[format=' + params.format + '] into ' + ToSaveModel.collection.name);
 					parser.fromPath(path);
 				}
 			});
 		});
 	};
 
-	var ToModel = models.GeoFeature,
+	var ToSaveModel, // created on the fly when collection _id known
 		ToCollectionModel = models.GeoFeatureCollection,
 		toCollectionField = 'featureCollection';
 
@@ -754,7 +676,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				}
 				return;
 			}
-			var filename = params.url || params.path;
+			var filename = params.url || params.path,
 				titlefy = function(s) {
 					var s = s.replace(/_/, ' ');
       				return s.substr(0, 1).toUpperCase() + s.substring(1);
@@ -785,7 +707,7 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 	}
 	var pointCollectionId = params.append;
 	console.info('*** Synchronizing collection ***', pointCollectionId);
-	models.PointCollection.findOne({_id: pointCollectionId}, function(err, collection) {
+	models.GeoFeatureCollection.findOne({_id: pointCollectionId}, function(err, collection) {
 		if (!utils.validateExistingCollection(err, collection, callback)) return;
 		var originalParams = collection.get('importParams');
 		if (params.url || params.path) {
@@ -804,14 +726,14 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
 	if (!params) {
 		params = {};
 	}
-	models.PointCollection.find({sync: true, status: config.DataStatus.COMPLETE}, function(err, collections) {
+	models.GeoFeatureCollection.find({sync: true, status: config.DataStatus.COMPLETE}, function(err, collections) {
 		console.info('*** Collections to sync: ' + collections.length);
 		if (err) {
 			if (callback) {
 				callback(err);
 			}
 		}
-		var dequeuePointCollection = function(err) {
+		var dequeueCollection = function(err) {
 			if (err || !collections.length) {
 				if (callback) {
 					callback(err);
@@ -821,10 +743,10 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
 				params.append = collection._id.toString();
 				params.saveParams = false;
 				console.warn('*** params will not be saved since multiple collections are synced')
-				self.sync(params, req, res, dequeuePointCollection);
+				self.sync(params, req, res, dequeueCollection);
 			}
 		}
-		dequeuePointCollection();
+		dequeueCollection();
 	});
 }
 
@@ -834,7 +756,7 @@ function getImportParams(params)
 		url: params.u || params.url,
 		path: params.p || params.path,
 		format: params.f || params.format,
-		converter: params.c || params.converter, 
+		transform: params.t || params.transform, 
 		append: params.append,
 		from: params.from,
 		to: params.to,
@@ -886,7 +808,7 @@ ImportAPI.prototype.cli = {
 	'list-collections': function(params, callback, showHelp) 
 	{
 		if (utils.connectDB()) {
-			models.PointCollection.find({}).exec(function(err, docs) {
+			models.GeoFeatureCollection.find({}).exec(function(err, docs) {
 				if (!err) {
 					console.success('Existing collections:', docs.length);
 					docs.forEach(function(doc) {

@@ -23,7 +23,7 @@ var config = {
 		visible: true,
 		featureType: 'C',
 		colorType: 'L',
-		colors: [{position: '0%', color: '#00c9ff'}, {position: '100%', color: '#81ffff'}],
+		colors: [{position: '0%', color: '#00c9ff'}/*, {position: '100%', color: '#81ffff'}*/],
 		opacity: .5
 	},
 

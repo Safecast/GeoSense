@@ -19,15 +19,15 @@ var MapAPI = function(app)
 {
 	if (app) {
 		// Returns a list of maps
-		app.get('/api/maps(\/latest|\/featured)' , function(req, res){
+		app.get('/api/maps/(latest|featured)' , function(req, res){
 			var query = {status: config.MapStatus.PUBLIC};
 			var options = {};
 			switch (req.params[0]) {
-				case '/latest':
+				case 'latest':
 					options.sort = {'createdAt': -1};
 					options.limit = 20;		
 					break;
-				case '/featured':
+				case 'featured':
 					if (!config.DEBUG) {
 						query.featured = {$gt: 0};
 					}
@@ -47,12 +47,12 @@ var MapAPI = function(app)
 				});
 		});
 
-		function sortByPosition(arr) 
+		var sortByPosition = function(arr) 
 		{
 			return arr.sort(function(a, b) { return a.position - b.position });
 		}
 
-		function prepareMapResult(req, map) 
+		var prepareMapResult = function(req, map) 
 		{
 			var m = {
 				admin: permissions.canAdminMap(req, map)
@@ -72,11 +72,14 @@ var MapAPI = function(app)
 			return m;
 		}
 
-		function prepareLayerResult(req, layer) {
+		var prepareLayerResult = function (req, layer) {
 			// if this is called by prepareMapResult, the layer's toObject() 
 			// was already called.
 			var layer = layer.toObject ?
 				layer.toObject() : layer;
+
+				console.log(layer);
+
 			layer.pointCollection = layer.featureCollection;
 			delete layer.featureCollection.importParams;
 

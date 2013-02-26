@@ -112,8 +112,9 @@ define([
 
             this.formats = {
                 geoJSON: new OpenLayers.Format.GeoJSON({
-                    'internalProjection': this.map.baseLayer.projection,
-                    'externalProjection': new OpenLayers.Projection("EPSG:4326")
+                    internalProjection: this.map.baseLayer.projection,
+                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
+                    ignoreExtraDims: true
                 })
             };
 
@@ -205,6 +206,9 @@ define([
                     return feature.attributes.darkerColor;
                 },
                 getBubbleRadius: function(feature) {
+                    if (isNaN(feature.attributes.size)) {
+                        return MIN_BUBBLE_SIZE;
+                    }
                     return MIN_BUBBLE_SIZE + feature.attributes.size * (MAX_BUBBLE_SIZE - MIN_BUBBLE_SIZE) / 2;
                 },
                 getStrokeWidth: function(feature) {
@@ -260,6 +264,7 @@ define([
                         strokeOpacity: opacity,
                         strokeColor: '${getColor}',
                         strokeWidth: '${getStrokeWidth}',
+                        pointRadius: DEFAULT_POINT_RADIUS,
                     });
                     selectStyle = _.extend(selectStyle, {
                         strokeColor: '${getColor}',
@@ -340,8 +345,6 @@ define([
             // to this event handler -- check Backbone docs
             var collection = model.collection;
 
-//            this.featureLayers[model.id].addFeatures(format.read(model.attributes));
-
             var attrs = model.getRenderAttributes(),
                 center = model.getCenter(),
                 pt = new OpenLayers.Geometry.Point(center[0], center[1]),
@@ -351,14 +354,9 @@ define([
             switch (collection.mapLayer.attributes.layerOptions.featureType) {
 
                 case FeatureType.SHAPES:
-                    console.log('geometry', model.attributes);
-                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
-                    break;
-                
                 case FeatureType.POINTS:
-                default:
-                    pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-                    geometry = pt;
+                case FeatureType.BUBBLES:
+                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
                     break;
 
                 case FeatureType.CELLS:

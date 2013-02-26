@@ -1,1 +1,0 @@
-define(["jquery","underscore","backbone","models/map_layer"],function(e,t,n,r){var i=n.Model.extend({idAttribute:"_id",urlRoot:"/api/map",url:function(){return this.urlRoot+"/"+this.attributes.publicslug},newLayerInstance:function(e,t){var t=t||{};return t.parentMap=this,new r(e,t)}});return i});

@@ -6,15 +6,15 @@ var	models = require('../models'),
 	mongoose = require('mongoose'),
 	_ = require('cloneextend');
 
-describe('GeoJSON', function() {
-	var featureCollection;
+describe('KML', function() {
+	var featureCollection, GeoFeature;
 
 	before(function(done) {
 		mongoose.connect(config.DB_PATH);
 		featureCollection = new GeoFeatureCollection({
 			active: true, 
 			status: config.DataStatus.COMPLETE, 
-			title: 'GeoJSON test'
+			title: 'KML test'
 		});
 		featureCollection.save(function(err, collection) {
 			return done(err);
@@ -23,11 +23,10 @@ describe('GeoJSON', function() {
 
 	var ImportedModel;
 
-	it('should import a GeoJSON file and save each Feature in the DB', function(done) {
+	it('should import a KML file and save each Feature in the DB', function(done) {
 
 		api.import.import({
-			path: 'test/data/internet_users_2005_choropleth_lowres.json',
-			format: 'geojson'
+			path: 'test/data/gz_2010_us_outline_500k.kml',
 		}, null, null, function(err, collection) {
 			if (err) throw err;
 			ImportedModel = collection.getFeatureModel();
@@ -36,6 +35,7 @@ describe('GeoJSON', function() {
 
 	});
 
+/*
 	it('should find Switzerland by name', function(done) {
 
 		ImportedModel.findOne({'properties.name': 'Switzerland'}, function(err, result) {
@@ -65,13 +65,10 @@ describe('GeoJSON', function() {
 			done();
 		});
 
-	});
+	});*/
 
 	after(function() {
 		mongoose.disconnect();
 	});
 
 });
-
-
-

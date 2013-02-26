@@ -13,6 +13,9 @@ var application_root = __dirname,
 
 describe('GeoFeature', function() {
 
+	var featureCollection = new models.GeoFeatureCollection({_id: new mongoose.Types.ObjectId()}),
+		GeoFeature = featureCollection.getFeatureModel();
+
 	before(function(done) {
 		mongoose.connect(config.DB_PATH);
 	    GeoFeature.remove(function(err) {
@@ -25,9 +28,9 @@ describe('GeoFeature', function() {
 			if (!coordinates.length) {
 				done();
 			} else {
-				new models.GeoFeature({
+				new GeoFeature({
 					type: "Point",
-				    featureCollection: new models.GeoFeatureCollection(),
+				    featureCollection: featureCollection,
 				    geometry: {
 				        type: "Point", 
 				        coordinates: coordinates.shift()
@@ -49,7 +52,7 @@ describe('GeoFeature', function() {
 	var found;
 	it('should find a subset using a 2D index on bbox', function(done) {
 		var within = [[-1, -100], [100, 1.1]];
-		models.GeoFeature.findWithin(within, {}, null, {sort: {'createdAt': -1}},
+		GeoFeature.findWithin(within, {}, null, {sort: {'createdAt': -1}},
 			function(err, result) {
 				if (err) throw err;
 				assert.equal(result.length, 2);
