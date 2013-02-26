@@ -28,6 +28,8 @@
 /*@import url("../lib/bootstrap/css/bootstrap.css");
 @import url("../lib/bootstrap/css/bootstrap-responsive.css");*/
 
+@import url("../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css");
+
 @import url("../lib/gradient-editor/gradient-editor.css");
 @import url("../lib/colorpicker/css/colorpicker.css");
 
