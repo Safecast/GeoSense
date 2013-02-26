@@ -11,10 +11,10 @@
 <div class="panel-body well">
     <form class="tabbable"> 
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#layer-features" data-toggle="tab">Features</a></li>
-          <li><a href="#layer-colors" data-toggle="tab">Colors</a></li>
-          <li><a href="#layer-info" data-toggle="tab">Info</a></li>
-          <li><a href="#layer-info" data-toggle="tab">Data</a></li>
+            <li class="active"><a href="#layer-features" data-toggle="tab">Features</a></li>
+            <li><a href="#layer-colors" data-toggle="tab">Colors</a></li>
+            <li><a href="#layer-data" data-toggle="tab">Stroke</a></li>
+            <li><a href="#layer-info" data-toggle="tab">Info</a></li>
         </ul>
 
         <div class="tab-content">
@@ -49,6 +49,13 @@
                         </span>
                         <span class="slider pull-right" data-field="layerOptions.opacity"></span>
                     </p>
+                    <div class="feature-settings C">
+                        <p>
+                            <label class="checkbox">
+                                <input class="model-input" name="layerOptions.cellFallbackPoints" type="checkbox" checked="checked"> Fall back to points if zoomed in far enough
+                            </label>
+                        </p>
+                    </div>
                     <div class="feature-settings B">
                         <!-- TODO: Solve with range slider
                         <p class="clearfix">
@@ -135,8 +142,8 @@
                     <label class="title" for="description">Description</label> 
                     <textarea class="text model-input" name="layerOptions.description" rows="8"></textarea>
                 </p>
-                <p>
-                    <label class="checkbox model-numeric">
+                <p class="model-numeric">
+                    <label class="checkbox">
                         <input class="model-input" name="layerOptions.histogram" type="checkbox" checked="checked"> Display histogram for this layer
                     </label>
                 </p>
@@ -145,6 +152,10 @@
                     <a href="#" class="btn btn-danger destroy">Remove Layer</a>
                 </p>
             </fieldset>
+
+            <fieldset class="tab-pane" id="layer-data">
+            </fieldset>
+
         </div>
         <div class="panel-buttons clearfix">
             <label class="checkbox inline">
