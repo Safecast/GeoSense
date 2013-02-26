@@ -67,9 +67,7 @@ function genQueryString(params, name) {
 
 function nl2p(str)
 {
-	str = '<p>' + str.replace(/(\s*\n\s*){2}/, '</p><p>') + '</p>';
-	str = str.replace(/(\s*\n\s*){1}/, '<br />');
-	return str;
+	return ('<p>' + str.split(/(\s*\n\s*){2,}/).join('</p><p>') + '</p>');
 }
 
 $.fn.uiToggle = function(opts) {
