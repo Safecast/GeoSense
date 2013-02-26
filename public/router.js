@@ -568,7 +568,7 @@ define([
 			modalView.setBody(
 					'<p class="well">Designed and engineered by <strong>Anthony DeVincenzi & Samuel Luescher</strong> at the <a href="http://www.mit.edu">Massachusetts Institute of Technology</a> / <a href="http://media.mit.edu/">MIT Media Lab</a>, with the friendly support of <a href="http://tangible.media.mit.edu/">Hiroshi Ishii</a> and <a href="http://safecast.org/">Safecast</a>.</p>'
 					+ '<p>GeoSense is an open publishing platform for visualization, social sharing, and data analysis of geospatial data. It explores the power of data analysis through robust layering and highly customizable data visualization. GeoSense supports the simultaneous comparison and individual styling for multiple massive data sources ranging from 10 thousand to 10 million geolocated points.</p>'
-					+ '<p>Powered by <a href="http://nodejs.org/">Node.js</a>, head start thanks to <a href="http://backbonejs.org/">Backbone</a> and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>. Some interface elements courtesy of <a href="http://glyphicons.com/">glyphicons.com</a>.</p>');
+					+ '<p>Powered by <a href="http://nodejs.org/">Node.js</a> and <a href="http://www.mongodb.org/">MongoDB</a>, head start thanks to <a href="http://backbonejs.org/">Backbone</a> and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>. Some interface elements courtesy of <a href="http://glyphicons.com/">glyphicons.com</a>.</p>');
 			modalView.show();
 	    },
 
