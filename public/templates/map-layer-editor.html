@@ -24,17 +24,6 @@
                 <input class="model-input" name="layerOptions.featureType" type="hidden" />
                 <div class="features">
                     <div>
-                        <label class="title">Visibility</label>
-                        <p>
-                            <label class="checkbox">
-                                <input class="model-input layer-toggle" name="layerOptions.enabled" type="checkbox" checked="checked"> This layer is switched on by default.
-                            </label>
-                            <!-- TODO:
-                            <label class="checkbox">
-                                <input class="model-input" name="layerOptions.public" type="checkbox" checked="checked"> This layer is public.
-                            </label>
-                            -->
-                        </p>
                         <label class="title">Feature Type</label>
                         <p class="btn-group model-input" data-name="layerOptions.featureType" data-toggle="buttons-radio">
                             <button class="btn feature-type points" value="P"><i class="icon icon-feature-type"></i></button>
@@ -137,6 +126,17 @@
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-info">
+                <label class="title">Visibility</label>
+                <p>
+                    <label class="checkbox">
+                        <input class="model-input layer-toggle" name="layerOptions.enabled" type="checkbox" checked="checked"> This layer is switched on by default.
+                    </label>
+                    <!-- TODO:
+                    <label class="checkbox">
+                        <input class="model-input" name="layerOptions.public" type="checkbox" checked="checked"> This layer is public.
+                    </label>
+                    -->
+                </p>
                 <p>
                     <label class="title" for="title">Title</label> 
                     <input class="text model-input" name="layerOptions.title" type="text" />
