@@ -525,8 +525,8 @@ text!templates/data-import.html
 views/data-import-view.js
 text!templates/share.html
 views/share-view.js
-models/point.js
-collections/map-point-collection.js
+models/geo-feature.js
+collections/geo-feature-collection.js
 lib/backbone-deep-model/lib/underscore.mixin.deepExtend.js
 lib/backbone-deep-model/src/deep-model.js
 models/map_layer.js
