@@ -218,9 +218,9 @@ define([
 		
 	  	show: function() 
 	  	{
-			this.initialAreaChanged = !_.isEqual(this.model.attributes.initialArea, 
+			this.initialAreaChanged = app.mapView && !_.isEqual(this.model.attributes.initialArea, 
 				this.getInitialMapArea());
-			this.viewOptionsChanged = !_.isEqual(this.model.attributes.viewOptions, 
+			this.viewOptionsChanged = app.mapView && !_.isEqual(this.model.attributes.viewOptions, 
 				this.getCurrentViewOptions());
 			this.$('#savePositionButton').attr('disabled', !this.initialAreaChanged);
 			this.$('#saveViewOptionsButton').attr('disabled', !this.viewOptionsChanged);
