@@ -30,7 +30,7 @@ define([
 				$(self.el).css('display','block');	
 				$(self.el).animate({
 				    left: 0,
-				  }, 400, 'easeOutQuad', function() {
+				  }, 'fast', 'easeOutCubic', function() {
 				  });
 			});	
 			
@@ -60,7 +60,6 @@ define([
 						revert: true,
 						stack: '#dragLabel',
 						start: function(event, ui) { 
-							var test = 'blah';
 							$('#dropZone').addClass('visible');
 							$(this).css("opacity",".9");
 						},
@@ -106,7 +105,7 @@ define([
 			var self = this;
 			$(self.el).animate({
 			    left: -350,
-			  }, 400, 'easeOutQuad', function() {
+			  }, 'fast', 'easeInCubic', function() {
 					$('#dropZone').remove();
 					app.dataLibraryVisible = false;
 					$(window).unbind();

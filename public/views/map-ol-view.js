@@ -108,8 +108,6 @@ define([
                 this.map.addControl(new OpenLayers.Control.MousePosition());
             }
 
-            this.add30kmtemp();
-
             this.formats = {
                 geoJSON: new OpenLayers.Format.GeoJSON({
                     internalProjection: this.map.baseLayer.projection,
@@ -117,6 +115,8 @@ define([
                     ignoreExtraDims: true
                 })
             };
+
+            this.add30kmtemp();
 
             MapOLView.__super__.renderMap.call(this, viewBase, viewStyle);
             return this;
@@ -421,14 +421,18 @@ define([
 
             this.map.addLayers([layer]);
 
-            var ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
-            ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-            var geometry;
+            var radius = 1, numSegments = 40,
+                ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
+            
+            // radius = 30000
+            //ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 
-            var radius = 30000, numSegments = 50;
+            var poly = polyCircle(ctr, radius, radius, numSegments);
 
-            var wkt = wktCircle(ctr, radius, radius, numSegments);
-            var geometry = OpenLayers.Geometry.fromWKT(wkt);
+            geometry = this.formats.geoJSON.parseGeometry({
+                type: 'Polygon',
+                coordinates: poly
+            });
 
             var feature = new OpenLayers.Feature.Vector(geometry, {});
             layer.addFeatures([feature]);

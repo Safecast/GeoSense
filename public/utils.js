@@ -312,14 +312,15 @@ function multRGB(color, factor) {
 	return '#' + zeroPad(intColor.toString(16), 6);
 }
 
-function wktCircle(ctr, xRadius, yRadius, numSegments)
+function polyCircle(ctr, xRadius, yRadius, numSegments)
 {
 	var corners = [];
     var step = 2 * Math.PI / numSegments;
     for (var i = 0; i < Math.PI * 2; i += step) {
-        corners.push((ctr.x + Math.cos(i) * xRadius) + ' ' + (ctr.y + Math.sin(i) * yRadius));
+        corners.push([ctr.x + Math.cos(i) * xRadius,
+        	ctr.y + Math.sin(i) * yRadius]);
     }
-    return 'POLYGON((' + corners.join(', ') + '))';
+    return [corners];
 }
 
 function genMapURI(mapInfo, mapViewName, opts, admin, slugField)
