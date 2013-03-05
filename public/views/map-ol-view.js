@@ -427,7 +427,7 @@ define([
 
             this.map.addLayers([layer]);
 
-            var ctr = new OpenLayers.Geometry.Point(141.021111, 37.319444);
+            var ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
             ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
             var geometry;
 
