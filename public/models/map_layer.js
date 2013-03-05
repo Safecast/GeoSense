@@ -111,7 +111,8 @@ define([
             return {
                 minVal: ex && ex.val ? ex.val.min : NaN, 
                 maxVal: ex && ex.val ? ex.val.max : NaN,
-                maxCount: this.featureCollection.maxReducedCount
+                maxCount: this.featureCollection.counts ? 
+                    this.featureCollection.counts.max : 0
             };
         },
 

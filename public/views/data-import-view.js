@@ -250,19 +250,36 @@ define([
 
 	    getFieldDefs: function() 
 	    {
-			var defs = {},
+			var defs = [],
 				valid = false;
 			for (var k in this.toFields) {
 				//console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
 				var fromFields = this.$('.to-field[data-to="' + k +'"] .from-field'),
 					def = {
-						fromFields: []
+						to: k,
+						from: []
 					};
-				for (var i = 0; i < fromFields.length; i++) {
-					def.fromFields.push($(fromFields[i]).attr('data-from'));
+				switch (k) {
+					case 'geometry.coordinates':
+						def['type'] = 'LatLng';
+						break;
+					case 'label':
+						def['type'] = 'String';
+						break;
+					case 'properties.datetime':
+						def['type'] = 'Date';
+						break;
+					case 'properties.val':
+						def['type'] = 'Number';
+						break;
+					default:
+						def['type'] = 'String';
 				}
-				if (def.fromFields.length) {
-					defs[k] = def;
+				for (var i = 0; i < fromFields.length; i++) {
+					def.from.push($(fromFields[i]).attr('data-from'));
+				}
+				if (def.from.length) {
+					defs.push(def);
 					valid = true;
 				}
 			}
@@ -306,7 +323,7 @@ define([
 
 			var params = _.extend({
 				url: this.$('input[name=url]').val(),
-				fields: fieldDefs,
+				transform: fieldDefs,
 			}, params);
 			console.log('Requesting import', params);
 			this.setAlert();
@@ -377,36 +394,39 @@ define([
 				var row = ''
 				if (current) {
 					for (var k in self.toFields) {
-						var val = undefined, tdclass = undefined;
-						if (typeof current[k] == 'object' && current[k].error) {
+						var val = getAttr(current, k),
+							out = undefined, 
+							tdclass = undefined;
+						console.log(k, val, current);
+						if (typeof val == 'object' && val.error) {
 							tdclass = 'conversion-error';
-							switch (current[k].name){
+							switch (val.name){
 								case 'ValueSkippedWarning':
-									val = current[k].message;
+									out = val.message;
 									break;
 								default:
-									val = current[k].message;
+									out = val.message;
 							}
 						} else {
 							switch (k) {
 								default:
-									val = current[k];
+									out = val;
 									break;
 								case 'datetime':
-									if (current[k]) {
-										val = new Date(current[k]);
-										if (val) {
-											val = val.format(locale.formats.DATE_TIME);
+									if (val) {
+										out = new Date(val);
+										if (out) {
+											out = out.format(locale.formats.DATE_TIME);
 										}
 									}
 							}
-							if (val == undefined || 
-								((typeof val == 'string' || Array.isArray(val)) && !val.length)) {
+							if (out == undefined || 
+								((typeof out == 'string' || Array.isArray(out)) && !out.length)) {
 									tdclass = 'conversion-blank';
-									val = 'blank';
+									out = 'blank';
 							}
 						}
-						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + val + '</td>';
+						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + out + '</td>';
 					}
 				}
 				rows.push('<tr>' + row + '</tr>');

@@ -21,7 +21,7 @@ var config = {
 
 	COLLECTION_DEFAULTS: {
 		visible: true,
-		featureType: 'C',
+		featureType: 'P',
 		colorType: 'L',
 		colors: [{position: '0%', color: '#00c9ff'}/*, {position: '100%', color: '#81ffff'}*/],
 		opacity: .5
@@ -33,6 +33,11 @@ var config = {
 
 	GRID_SIZES: {
 	},
+
+	MIN_FEATURE_SIZE: 1,
+	MAX_FEATURE_SIZE: 500,
+	MIN_STROKE_WIDTH: .1,
+	MAX_STROKE_WIDTH: 200,
 
 	GRID_SIZE_PIXELS: 15,
 
@@ -52,13 +57,7 @@ var config = {
 		// could be used to pass options to reduce script, such as limit: n
 		DB_OPTIONS: {
 		},
-		// toggles time-based reduction
-		OPTIONS: {
-			timebased: false, // create time-based reductions
-			grid: true, // create grid-based reductions
-			unreduced: true, // create unreduced copies
-			histogram: true // create histogram reductions
-		}
+		DEFAULT_ENABLED_TYPES: ['tile', 'weekly', 'histogram']
 	},
 
 	DataStatus: {

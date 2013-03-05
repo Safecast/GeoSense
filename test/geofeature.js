@@ -16,11 +16,8 @@ describe('GeoFeature', function() {
 	var featureCollection = new models.GeoFeatureCollection({_id: new mongoose.Types.ObjectId()}),
 		GeoFeature = featureCollection.getFeatureModel();
 
-	before(function(done) {
+	before(function() {
 		mongoose.connect(config.DB_PATH);
-	    GeoFeature.remove(function(err) {
-	    	return done(err);
-	    });
 	});
 
 	it('should create three GeoFeatures', function(done) {

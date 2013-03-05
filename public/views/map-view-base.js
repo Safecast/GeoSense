@@ -112,7 +112,6 @@ define([
 
         destroyLayer: function(model)
         {
-            console.log(this, this.layers);
             this.layers.splice(this.layers.indexOf(model), 1);
             this.stopListening(model);
             this.stopListening(model.featureCollection);

@@ -1,4 +1,5 @@
-var errors = require('../../../errors'),
+var coordinates2d = require('../../../coordinates2d').coordinates2d,
+	errors = require('../../../errors'),
 	ValidationError = errors.ValidationError,
 	console = require('../../../ext-console.js'),
 	util = require('util'),
@@ -34,24 +35,6 @@ function isValidDate(d) {
     	return false;
 	return !isNaN(d.getTime());
 }
-
-var clamp180 = this.clamp180 = function(deg) 
-{
-	if (deg < -360 || deg > 360) {
-		deg = deg % 360;	
-	} 
-	if (deg < -180) {
-		deg = 180 + deg % 180;
-	}
-	if (deg > 180) {
-		deg = -180 + deg % 180;
-	}
-	if (deg == 180) {
-		deg = -180;
-	}
-
-	return deg;
-};
 
 var Cast = {
 
@@ -256,7 +239,7 @@ var FieldType = {
 				if (arr.length != 2) {
 					return new DataTransformError('Needs 2D');
 				}
-				arr = [clamp180(arr[0]), clamp180(arr[1])];
+				arr = coordinates2d(arr[0], arr[1]);
 				if (!options.skipZero || (arr[0] != 0 && arr[1] != 0)) {
 					return arr;
 				} else {

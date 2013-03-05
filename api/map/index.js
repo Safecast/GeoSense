@@ -19,15 +19,15 @@ var MapAPI = function(app)
 {
 	if (app) {
 		// Returns a list of maps
-		app.get('/api/maps/(latest|featured)' , function(req, res){
+		app.get('/api/maps(\/latest|\/featured)' , function(req, res){
 			var query = {status: config.MapStatus.PUBLIC};
 			var options = {};
 			switch (req.params[0]) {
-				case 'latest':
+				case '/latest':
 					options.sort = {'createdAt': -1};
 					options.limit = 20;		
 					break;
-				case 'featured':
+				case '/featured':
 					if (!config.DEBUG) {
 						query.featured = {$gt: 0};
 					}
@@ -181,12 +181,14 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					var fields = ['title', 'description', 'author', 
-						'linkURL', 'twitter', 'initialArea', 'displayInfo', 'host'];
+						'linkURL', 'twitter', 'initialArea', 'viewOptions', 
+						'displayInfo', 'host'];
 
 					for (var i = fields.length - 1; i >= 0; i--) {
 						var f = req.body[fields[i]];
 						if (f != undefined) {
 							map[fields[i]] = f;
+							console.log(fields[i], f);
 						}
 					}
 

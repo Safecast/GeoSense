@@ -14,11 +14,12 @@ var config = require('../../config'),
 	_ = require('cloneextend'),
 	path = require('path'),
 	console = require('../../ext-console.js'),
-	MapReduceAPI = require('../mapreduce');
+	MapReduceAPI = require('../mapreduce'),
+	scopeFunctions = require('../mapreduce/mapreduce_abstraction/keys').scopeFunctions;
 
 var LayerOptions = models.LayerOptions,
 	handleDbOp = utils.handleDbOp,
-	PseudoModel = function(doc) {
+	FlatModel = function(doc) {
 		for (var k in doc) {
 			this[k] = doc[k];
 		}
@@ -59,7 +60,8 @@ var ImportAPI = function(app)
 
 			// prevent arbitrary script inclusion
 			if (req.body.transform) {
-				params.transform = path.basename('' + req.body.transform);				
+				params.transform = (typeof req.body.transform != 'object') ? 
+					path.basename('' + req.body.transform) : req.body.transform;
 			}
 			if (req.body.format) {
 				params.format = path.basename('' + req.body.format);				
@@ -116,7 +118,11 @@ var ImportAPI = function(app)
 					},
 					transform: function(err, result) {
 						if (req.body.preview) {
-							sendItems.push(result.transformed);
+							var expanded = {};
+							for (var k in result.transformed) {
+								scopeFunctions.setAttr(expanded, k, result.transformed[k]);
+							}
+							sendItems.push(expanded);
 						}
 					},
 					start: function(err, collection) {
@@ -266,7 +272,15 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     		customTransform = params.transform;
     	}
     	console.log('custom transform', customTransform);
-    	var customTransform = new transform.DataTransform(customTransform);
+    	try {
+    		var customTransform = new transform.DataTransform(customTransform);
+    	} catch (err) {
+			if (callback) {
+				callback(err);
+				return;
+			}
+			throw err;
+    	}
     	dataTransform.fields = _.cloneextend(dataTransform.fields, 
     		customTransform.fields);
     }
@@ -355,7 +369,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					collection.extremes = extremes;
 					collection.markModified('extremes');
 
-			    	collection.isNumeric = collection.extremes.val && !isNaN(collection.extremes.val.min);
+			    	collection.isNumeric = collection.extremes.properties 
+			    		&& collection.extremes.properties.val 
+			    		&& !isNaN(collection.extremes.properties.val.min);
 					if (!collection.isNumeric) {
 						collection.defaults.histogram = false;
 					}
@@ -367,7 +383,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
 
 					var collectionSave = !params.dry ?
-						collection.save : function(callback) {  console.log('not saving'); callback(false, collection); };
+						collection.save : function(callback) { callback(false, collection); };
 
 					collectionSave.call(collection, function(err, collection) {
 						if (err) {
@@ -378,7 +394,11 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							return;
 						}
 					
-				    	debugStats('*** finalized and activated collection ***', 'success', null, true);
+						if (!params.dry) {
+					    	debugStats('*** finalized and activated collection ***', 'success', null, true);
+						} else {
+					    	debugStats('*** finalized dry run ***', 'warn', null, true);
+						}
 						job.status = config.JobStatus.IDLE;
 						job.save(function(err) {
 							if (err) {
@@ -517,7 +537,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							doc.sourceId = doc.id;
 						}
 
-						var model = new PseudoModel(doc);
+						var model = new FlatModel(doc);
 
 						if (dataCallbacks.data) {
 							dataCallbacks.data(false, model);
@@ -559,9 +579,13 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							saveModel.set(toCollectionField, collection);
 
 							// determine extremes of all properties
-							for (var key in saveModel.properties) {
-								extremes[key] = utils.findExtremes(saveModel.properties[key], extremes[key]);
+							if (!extremes.properties) {
+								extremes.properties = {};
 							}
+							for (var key in saveModel.properties) {
+								extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
+							}
+							// determine extremes of all incrementor
 							if (incrementor) {
 								extremes.incrementor = utils.findExtremes(incrementor, extremes.incrementor);
 							}

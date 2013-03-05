@@ -144,13 +144,152 @@ define([
 
         attachLayer: function(model)
         {
+            this.initRenderLayer(model);
+            MapOLView.__super__.attachLayer.call(this, model);
+        },
+
+        getStyleMapForLayer: function(model)
+        { 
+            var self = this,
+                layerOptions = model.attributes.layerOptions;
+                or = function(val1, val2) {
+                    return (val1 || val1 == 0) && val1 != '' 
+                        && (typeof val1 == 'string' || val1 >= 0) ? val1 : val2;
+                },
+                opacity = layerOptions.opacity,
+                maxBubbleSize = or(layerOptions.featureSize, MAX_BUBBLE_SIZE),
+                minBubbleSize = Math.min(maxBubbleSize, or(layerOptions.minFeatureSize, MIN_BUBBLE_SIZE));
+
+            var context = {
+                getColor: function(feature) {
+                    return feature.attributes.color;
+                },
+                getDarkerColor: function(feature) {
+                    return feature.attributes.darkerColor;
+                },
+                getBubbleRadius: function(feature) {
+                    if (isNaN(feature.attributes.size)) {
+                        return minBubbleSize * .5;
+                    }
+                    return (minBubbleSize + feature.attributes.size * 
+                        (maxBubbleSize - minBubbleSize)) * .5;
+                }            
+            };
+
+            var defaultStyle = {
+                    fillColor: '${getColor}',
+                    fillOpacity: opacity,
+                    strokeDashstyle: layerOptions.strokeDashstyle,
+                    strokeLinecap: layerOptions.strokeLinecap,
+                    graphicZIndex: 0
+                };
+
+            switch (layerOptions.featureType) {
+
+                case FeatureType.GRAPHIC:
+                    defaultStyle = _.extend(defaultStyle, {
+                        externalGraphic: layerOptions.externalGraphic,
+                        graphicWidth: layerOptions.graphicWidth,
+                        graphicHeight: layerOptions.graphicHeight
+                    });                        
+
+                default:
+                case FeatureType.POINTS:
+                    defaultStyle = _.extend(defaultStyle, {
+                        pointRadius: or(layerOptions.featureSize * .5, DEFAULT_POINT_RADIUS),
+                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
+                    });
+                    break;
+
+                case FeatureType.SQUARE_TILES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
+                    });
+                    break;
+
+                case FeatureType.SHAPES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity),
+                    });
+                    break;
+                
+                case FeatureType.BUBBLES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        pointRadius: '${getBubbleRadius}',
+                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .5)
+                    });
+                    break;
+            }
+
+            var selectStyle = {
+                    fillOpacity: (defaultStyle.fillOpacity == 1 ? .8 : Math.min(1, defaultStyle.fillOpacity * 1.5)),
+                    strokeOpacity: (defaultStyle.strokeOpacity == 1 ? .1 : Math.min(1, defaultStyle.strokeOpacity * 1.5)),
+                    //TODO: this is not having any effect
+                    graphicZIndex: 100
+                };
+
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style(defaultStyle, {context: context}),
+                'select': new OpenLayers.Style(selectStyle, {context: context})
+            });
+
+            return styleMap;
+        },
+
+
+        layerToggled: function(model)
+        {
+            this.featureLayers[model.id].setVisibility(model.isEnabled());
+        },
+
+        layerChanged: function(model)
+        {
+            var layer = this.featureLayers[model.id];
+            if (model.hasChanged('layerOptions.htmlRenderer')) {
+                this.destroyRenderLayer(model);
+                this.initRenderLayer(model);
+                this.featureReset(model.featureCollection);
+                return;
+            }
+            layer.styleMap = this.getStyleMapForLayer(model);
+            if (model.hasChangedColors() 
+                || model.hasChanged('layerOptions.featureType')
+                || model.hasChanged('layerOptions.featureSizeAttr')
+                || model.hasChanged('layerOptions.featureColorAttr')) {
+                    this.featureReset(model.featureCollection);
+            } else {
+                layer.redraw();
+            }
+        },
+
+        drawLayer: function(model)
+        {
+            // add all buffered features at once
+            if (this._addFeatures[model.id] && this._addFeatures[model.id].length) {
+                this.featureLayers[model.id].addFeatures(this._addFeatures[model.id]);
+                delete this._addFeatures[model.id];
+            }
+        },
+
+        initRenderLayer: function(model)
+        {
             var self = this;
-            var layer = new OpenLayers.Layer.Vector(model.id, {
+                opts = model.attributes.layerOptions,
+                layer = new OpenLayers.Layer.Vector(model.id, {
                 styleMap: this.getStyleMapForLayer(model),
-                renderers: ["Canvas"],
+                renderers: [(opts.htmlRenderer && opts.htmlRenderer != '' ?
+                    opts.htmlRenderer : 'Canvas'), 'Canvas', 'SVG'],
                 wrapDateLine: true,
                 rendererOptions: { 
-                    zIndexing: true
+                    //zIndexing: true
                 }, 
             });
 
@@ -188,142 +327,18 @@ define([
             selectControl.activate();
             // make sure the SelectControl does not disable map panning when clicked on feature
             selectControl.handlers.feature.stopDown = false;
-
-            MapOLView.__super__.attachLayer.call(this, model);
         },
 
-        getStyleMapForLayer: function(model)
-        { 
-            var self = this,
-                opacity = model.getDisplay('opacity'),
-                layerOptions = model.attributes.layerOptions;
-
-            var context = {
-                getColor: function(feature) {
-                    return feature.attributes.color;
-                },
-                getDarkerColor: function(feature) {
-                    return feature.attributes.darkerColor;
-                },
-                getBubbleRadius: function(feature) {
-                    if (isNaN(feature.attributes.size)) {
-                        return MIN_BUBBLE_SIZE;
-                    }
-                    return MIN_BUBBLE_SIZE + feature.attributes.size * (MAX_BUBBLE_SIZE - MIN_BUBBLE_SIZE) / 2;
-                },
-                getStrokeWidth: function(feature) {
-                    return MIN_POLYGON_STROKE_WIDTH + feature.attributes.size * (MAX_POLYGON_STROKE_WIDTH - MIN_POLYGON_STROKE_WIDTH);
-                }
-            };
-
-            var defaultStyle = {
-                    fillOpacity: opacity,
-                    graphicZIndex: 0,
-                },
-                selectStyle = {
-                    fillOpacity: DEFAULT_SELECTED_FEATURE_OPACITY,
-                    strokeColor: DEFAULT_SELECTED_STROKE_COLOR,
-                    strokeOpacity: DEFAULT_SELECTED_STROKE_OPACITY,
-                    strokeWidth: DEFAULT_SELECTED_STROKE_WIDTH,
-                    //TODO: this is not having any effect
-                    graphicZIndex: 100
-                },
-                temporaryStyle = {};
-
-            switch (layerOptions.featureType) {
-
-                case FeatureType.GRAPHIC:
-                    defaultStyle = _.extend(defaultStyle, {
-                        externalGraphic: layerOptions.externalGraphic,
-                        graphicWidth: layerOptions.graphicWidth,
-                        graphicHeight: layerOptions.graphicHeight
-                    });                        
-
-                default:
-                case FeatureType.POINTS:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        strokeColor: '${getDarkerColor}',
-                        pointRadius: DEFAULT_POINT_RADIUS,
-                        strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
-                        strokeOpacity: opacity * .8
-                    });
-                    break;
-
-                case FeatureType.CELLS:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        strokeOpacity: 0,
-                    });
-                    break;
-
-                case FeatureType.SHAPES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        fillOpacity: opacity,
-                        strokeOpacity: opacity,
-                        strokeColor: '${getColor}',
-                        strokeWidth: '${getStrokeWidth}',
-                        pointRadius: DEFAULT_POINT_RADIUS,
-                    });
-                    selectStyle = _.extend(selectStyle, {
-                        strokeColor: '${getColor}',
-                        strokeWidth: '${getStrokeWidth}'
-                    });
-                    break;
-                
-                case FeatureType.BUBBLES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        pointRadius: '${getBubbleRadius}',
-                        strokeColor: '${getDarkerColor}',
-                        strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
-                        strokeOpacity: opacity * .5
-                    });
-                    break;
-            }
-
-            return new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style(defaultStyle, {context: context}),
-                //'temporary': new OpenLayers.Style(temporaryStyle, {context: context}),
-                'select': new OpenLayers.Style(selectStyle, {context: context})
-            });
-        },
-
-
-        layerToggled: function(model)
-        {
-            this.featureLayers[model.id].setVisibility(model.isEnabled());
-        },
-
-        layerChanged: function(model)
-        {
-            var layer = this.featureLayers[model.id];
-            layer.styleMap = this.getStyleMapForLayer(model);
-            if (model.hasChangedColors() 
-                || model.hasChanged('layerOptions.featureType')
-                || model.hasChanged('layerOptions.featureSizeAttr')
-                || model.hasChanged('layerOptions.featureColorAttr')) {
-                    this.featureReset(model.featureCollection);
-            } else {
-                layer.redraw();
-            }
-        },
-
-        drawLayer: function(model)
-        {
-            // add all buffered features at once
-            if (this._addFeatures[model.id] && this._addFeatures[model.id].length) {
-                this.featureLayers[model.id].addFeatures(this._addFeatures[model.id]);
-                delete this._addFeatures[model.id];
-            }
-        },
-
-        destroyLayer: function(model) 
+        destroyRenderLayer: function(model) 
         {
             this.featureLayers[model.id].destroyFeatures();
             this.map.removeLayer(this.featureLayers[model.id]);
             delete this.featureLayers[model.id];
+        },
+
+        destroyLayer: function(model) 
+        {
+            this.destroyRenderLayer(model);
             MapOLView.__super__.destroyLayer.call(this, model);
             // TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
             /*this.featureLayers[model.id].destroy();*/
@@ -346,43 +361,29 @@ define([
             var collection = model.collection;
 
             var attrs = model.getRenderAttributes(),
-                center = model.getCenter(),
-                pt = new OpenLayers.Geometry.Point(center[0], center[1]),
-                pts,
                 geometry;
 
             switch (collection.mapLayer.attributes.layerOptions.featureType) {
 
-                case FeatureType.SHAPES:
                 case FeatureType.POINTS:
                 case FeatureType.BUBBLES:
-                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
+                    geometry = this.formats.geoJSON.parseGeometry({
+                        type: 'Point',
+                        coordinates: model.getCenter()
+                    });
                     break;
-
-                case FeatureType.CELLS:
-                    if (!pts) {
-                        var gw = collection.gridSize / 2;
-                        pts = [
-                            new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
-                            new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),
-                            new OpenLayers.Geometry.Point(pt.x + gw, pt.y + gw),
-                            new OpenLayers.Geometry.Point(pt.x + gw, pt.y - gw)
-                        ];
-                    }
-
-                    var strPts = [];
-                    for (var i = 0; i < pts.length; i++) {
-                        var pt = pts[i];
-                        pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-                        strPts.push(pt.x+' '+pt.y);
-                    }
-                    var wkt = 'POLYGON(' + strPts.join(', ') + ')';
-                    var geometry = OpenLayers.Geometry.fromWKT(wkt);
+                case FeatureType.SQUARE_TILES:
+                    geometry = this.formats.geoJSON.parseGeometry({
+                        type: 'Polygon',
+                        coordinates: [model.getBox()]
+                    });
+                    break;
+                case FeatureType.SHAPES:
+                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
                     break;
             }
 
             var feature = new OpenLayers.Feature.Vector(geometry, attrs);
-            
             
             if (!this._addFeatures[collection.mapLayer.id]) {
                 this._addFeatures[collection.mapLayer.id] = [];
@@ -420,7 +421,7 @@ define([
 
             this.map.addLayers([layer]);
 
-            var ctr = new OpenLayers.Geometry.Point(141.021111, 37.319444);
+            var ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
             ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
             var geometry;
 
@@ -729,10 +730,10 @@ define([
     ViewBase.osm = OpenLayers.Class(Baselayer,
     {
         providerName: 'OpenStreetMap',
-        initMapLayer: function(change)
+        initMapLayer: function(change, tileRoot)
         {
             var self = this;
-            this.mapLayer = this.mapLayer = new OpenLayers.Layer.OSM(null, null, {
+            this.mapLayer = this.mapLayer = new OpenLayers.Layer.OSM(null, tileRoot, {
                 baselayer: true,
                 numZoomLevels: MAP_NUM_ZOOM_LEVELS,
                 eventListeners: {
@@ -779,6 +780,21 @@ define([
             'light': 'toner-lite',
             'watercolor': 'watercolor'
         }
+    });
+
+    ViewBase.blank = OpenLayers.Class(Baselayer,
+    {
+        providerName: 'Blank',
+        initMapLayer: function(change)
+        {
+            ViewBase.osm.prototype.initMapLayer.call(this, false, "/assets/blank.gif");
+        },
+
+        mapStyles: {
+            'dark': 'Dark',
+            'light': 'Light'
+        }
+
     });
 
     return MapOLView;

@@ -1,5 +1,5 @@
 var MapAPI = require('./map'),
-	PointAPI = require('./point'),
+	FeatureAPI = require('./feature'),
 	ImportAPI = require('./import'),
 	MapReduceAPI = require('./mapreduce');
 
@@ -7,7 +7,7 @@ var API = function(app)
 {
 	return {
 		map: new MapAPI(app),
-		point: new PointAPI(app),
+		feature: new FeatureAPI(app),
 		import: new ImportAPI(app),
 		mapReduce: new MapReduceAPI(app)
 	};
