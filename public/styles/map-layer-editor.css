@@ -3,6 +3,15 @@
 	overflow: hidden;
 }
 
+.map-layer-editor .tab-content {
+	overflow: visible;
+}
+
+.map-layer-editor .radio.inline {
+	white-space: nowrap;
+	margin-right: 1em;
+}
+
 .map-layer-editor button.feature-type {
 	width:70px;
 	height:60px;
@@ -30,11 +39,11 @@
 	background-position: 0px 100%;
 }
 
-.map-layer-editor .btn.feature-type.cells .icon-feature-type {
+.map-layer-editor .btn.feature-type.square-tiles .icon-feature-type {
 	background-position: -50px 0%;
 }
 
-.map-layer-editor .btn.feature-type.cells:hover .icon-feature-type, .btn.feature-type.cells.active .icon-feature-type {
+.map-layer-editor .btn.feature-type.square-tiles:hover .icon-feature-type, .btn.feature-type.square-tiles.active .icon-feature-type {
 	background-position: -50px 100%;
 }
 
@@ -69,7 +78,7 @@
 
 .map-layer-editor .slider {
 	margin: 3px 13px 3px 13px;
-	width: 60%;
+	width: 165px;
 	margin-right: 13px;
 }
 

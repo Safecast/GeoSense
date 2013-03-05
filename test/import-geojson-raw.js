@@ -30,7 +30,7 @@ describe('GeoJSON raw', function() {
 		var onData = function(data) {
 			var f = new GeoFeature(data, false);
 			f.featureCollection = featureCollection;
-			f.set('properties.original', _.cloneextend(data));
+			f.set('properties.original', _.clone(data));
 			f.save(function(err, result) {
 				if (err) throw err;
 				saved++;

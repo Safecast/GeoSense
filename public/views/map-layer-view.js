@@ -91,8 +91,8 @@ define([
 		    			if (this.model.isEnabled()) {
 		    				if (featureCollection.initiallyFetched) {
 								status = __('%(number)i of %(total)i', {
-									number: formatLargeNumber(featureCollection.originalCount),
-									total: formatLargeNumber(featureCollection.fullCount)
+									number: formatLargeNumber(featureCollection.counts.original),
+									total: formatLargeNumber(featureCollection.counts.full)
 								});
 								var url = featureCollection.url();
 								status += ' <a target="_blank" class="download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
@@ -137,6 +137,7 @@ define([
 
 	    render: function() 
 	    {
+	    	var self = this;
 			this.$el.html(this.template());
 			this.$el.attr('data-id', this.model.id);
 
@@ -157,6 +158,11 @@ define([
 			} else {
 				this.toggleEl.addClass('collapsed');
 			}
+			this.collapseEl.on('show', function() {
+				if (!self.model.isEnabled()) {
+					self.model.toggleEnabled(true);
+				}
+			});
 
 			this.$('.status').toggle(enabled);
 			this.$('.admin-control').toggle(app.isMapAdmin());

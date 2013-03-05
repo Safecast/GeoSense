@@ -9,13 +9,14 @@
     </div>
 </div>
 <div class="panel-body well">
+
     <form class="tabbable"> 
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#layer-features" data-toggle="tab"><span class="icon-large icon-map-marker half-opacity"></span></a></li>
-            <li><a href="#layer-colors" data-toggle="tab"><span class="icon-large icon-brush half-opacity"></span></a></li>
-            <li><a href="#layer-stroke" data-toggle="tab"><span class="icon-large icon-vector-path-curve half-opacity"></span></a></li>
-            <li><a href="#layer-info" data-toggle="tab"><span class="icon-large icon-info-sign half-opacity"></span></a></li>
-            <li><a href="#layer-data" data-toggle="tab"><span class="icon-large icon-table half-opacity"></span></a></li>
+            <li class="active"><a href="#layer-features" data-toggle="tab" class="has-tooltip" data-original-title="Map Features"><span class="icon-large icon-map-marker half-opacity"></span></a></li>
+            <li><a href="#layer-colors" data-toggle="tab" class="has-tooltip" data-original-title="Colors"><span class="icon-large icon-brush half-opacity"></span></a></li>
+            <li><a href="#layer-stroke" data-toggle="tab" class="has-tooltip" data-original-title="Stroke"><span class="icon-large icon-vector-path-curve half-opacity"></span></a></li>
+            <li><a href="#layer-info" data-toggle="tab" class="has-tooltip" data-original-title="Layer Info"><span class="icon-large icon-info-sign half-opacity"></span></a></li>
+            <li><a href="#layer-data" data-toggle="tab" class="has-tooltip" data-original-title="Data"><span class="icon-large icon-table half-opacity"></span></a></li>
         </ul>
 
         <div class="tab-content">
@@ -26,10 +27,10 @@
                     <div>
                         <label class="title">Feature Type</label>
                         <p class="btn-group model-input" data-name="layerOptions.featureType" data-toggle="buttons-radio">
-                            <button class="btn feature-type points" value="P"><i class="icon icon-feature-type"></i></button>
-                            <button class="btn feature-type cells" value="C"><i class="icon icon-feature-type"></i></button>
-                            <button class="btn feature-type bubbles" value="B"><i class="icon icon-feature-type"></i></button>
-                            <button class="btn feature-type shapes" value="S"><i class="icon icon-feature-type"></i></button>
+                            <button class="btn feature-type points" value="P"><i class="icon icon-feature-type has-tooltip" data-original-title="Points" data-placement="bottom"></i></button>
+                            <button class="btn feature-type square-tiles" value="ST"><i class="icon icon-feature-type has-tooltip" data-original-title="Tiles" data-placement="bottom"></i></button>
+                            <button class="btn feature-type bubbles" value="B"><i class="icon icon-feature-type has-tooltip" data-original-title="Bubbles" data-placement="bottom"></i></button>
+                            <button class="btn feature-type shapes" value="S"><i class="icon icon-feature-type has-tooltip" data-original-title="Shapes" data-placement="bottom"></i></button>
                         </p>
                     </div>
                     <p class="clearfix">
@@ -37,7 +38,7 @@
                         <span class="pull-left">
                             <input class="number model-input" name="layerOptions.opacity" type="text" />
                         </span>
-                        <span class="slider pull-right" data-field="layerOptions.opacity"></span>
+                        <span class="slider pull-left" data-field="layerOptions.opacity"></span>
                     </p>
                     <div class="feature-settings C">
                         <p>
@@ -47,25 +48,27 @@
                         </p>
                     </div>
                     <div class="feature-settings B">
-                        <!-- TODO: Solve with range slider
                         <p class="clearfix">
-                            <label class="title" for="">Minimum Size</label>  
+                            <label class="title" for="">Minimum feature size</label>  
                             <span class="pull-left">
-                                <input class="number model-input" name="layerOptions.minFeatureSize" type="text" />
+                                <input class="number model-input" name="layerOptions.minFeatureSize" type="text" placeholder="default" />
                             </span>
-                            <span class="slider pull-right" data-field="layerOptions.minFeatureSize"></span>
+                            <span class="slider pull-left" data-field="layerOptions.minFeatureSize" data-min="1" data-max="300"></span>
                         </p>
+                    </div>
+                    <div class="feature-settings B P">
                         <p class="clearfix">
-                            <label class="title" for="">Maximum Size</label>  
+                            <label class="title" for="">Feature size</label>  
                             <span class="pull-left">
-                                <input class="number model-input" name="layerOptions.maxFeatureSize" type="text" />
+                                <input class="number model-input" name="layerOptions.featureSize" type="text" placeholder="default" />
                             </span>
-                            <span class="slider pull-right" data-field="layerOptions.maxFeatureSize"></span>
+                            <span class="slider pull-left" data-field="layerOptions.featureSize" data-min="1" data-max="300"></span>
                         </p>
-                        -->
-                        <p class="clearfix">
-                            <label class="title pull-left" for="map-size">Map feature size to</label>
-                            <select class="model-input pull-left" name="layerOptions.featureSizeAttr">
+                    </div>
+                    <div class="feature-settings B">
+                        <p>
+                            <label class="title" for="map-size">Size relative to</label>
+                            <select class="model-input" name="layerOptions.featureSizeAttr">
                                 <option value="">(default)</option>
                                 <option value="count">sample size</option>
                                 <option value="val.avg">average value</option>
@@ -73,6 +76,13 @@
                         </p>
                     </div>
                 </div>
+                <p class="clearfix">
+                    <label class="title" for="map-size">Renderer</label>
+                    <select class="model-input" name="layerOptions.htmlRenderer">
+                        <option value="Canvas">Canvas (faster)</option>
+                        <option value="SVG">SVG (more options)</option>
+                    </select>
+                </p>
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-colors">
@@ -111,9 +121,9 @@
                 </p>
 
                 <!-- TODO: this needs to be reflected in the legend
-                <p class="clearfix">
-                    <label class="title pull-left" for="map-size">Map color to</label>
-                    <select class="model-input pull-left" name="layerOptions.featureColorAttr">
+                <p>
+                    <label class="title" for="map-size">Map color to</label>
+                    <select class="model-input" name="layerOptions.featureColorAttr">
                         <option value="">(default)</option>
                         <option value="count">sample size</option>
                         <option value="val.avg">average value</option>
@@ -123,6 +133,43 @@
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-stroke">
+                <p>
+                    <label class="title">Stroke color</label>
+                    <input class="color-picker model-input" name="layerOptions.strokeColor" type="text" placeholder="auto" />
+                </p>
+                <p class="clearfix">
+                    <label class="title" for="">Stroke width</label>  
+                    <span class="pull-left">
+                        <input class="number model-input" name="layerOptions.strokeWidth" type="text" placeholder="auto" />
+                    </span>
+                    <span class="slider pull-left" data-field="layerOptions.strokeWidth" data-min="1" data-max="30"></span>
+                </p>
+                <p class="clearfix">
+                    <label class="title" for="">Stroke opacity</label>  
+                    <span class="pull-left">
+                        <input class="number model-input" name="layerOptions.strokeOpacity" type="text" placeholder="auto" />
+                    </span>
+                    <span class="slider pull-left" data-field="layerOptions.strokeOpacity"></span>
+                </p>
+                <p class="clearfix">
+                    <label class="title" for="map-size">Line cap (requires SVG)</label>
+                    <select class="model-input" name="layerOptions.strokeLinecap">
+                        <option value="round">round</option>
+                        <option value="square">square</option>
+                        <option value="butt">butt</option>
+                    </select>
+                </p>
+                <p class="clearfix">
+                    <label class="title" for="map-size">Dash style (requires SVG)</label>
+                    <select class="model-input" name="layerOptions.strokeDashstyle">
+                        <option value="solid">solid</option>
+                        <option value="dot">dot</option>
+                        <option value="dash">dash</option>
+                        <option value="dashdot">dashdot</option>
+                        <option value="longdash">longdash</option>
+                        <option value="longdashdot">longdashdot</option>
+                    </select>
+                </p>
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-info">
@@ -157,9 +204,21 @@
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-data">
+                <p>
+                    <label class="title" for="map-size">Use numeric values from</label>
+                    <select class="model-input" name="layerOptions.numericAttr">
+                        <option value="">(pick a number field)</option>
+                    </select>
+                </p>
+                <p class="clearfix">
+                    <label class="title" for="map-size">Use date/time values from</label>
+                    <select class="model-input" name="layerOptions.datetimeAttr">
+                        <option value="">(pick a date field)</option>
+                    </select>
+                </p>
             </fieldset>
-
         </div>
+        <div class="divider"></div>
         <div class="panel-buttons clearfix">
             <label class="checkbox inline">
                 <input class="preview" type="checkbox" checked="checked"> Preview

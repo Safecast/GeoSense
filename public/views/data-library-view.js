@@ -49,7 +49,7 @@ define([
 			var self = this;	
 			$.ajax({
 				type: 'GET',
-				url: '/api/pointcollections',
+				url: '/api/featurecollections',
 				success: function(data) {
 
 					$.each(data, function(key, featureCollection) { 
@@ -85,7 +85,7 @@ define([
 		{
 			dataDiv = '<div class="data-item" data-id="'+data._id+'">'
 				+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
-				+(data.fullCount ? '<p class="data-count micro">'+formatLargeNumber(data.fullCount)+'</p>' : '')
+				+(data.count ? '<p class="data-count micro">'+formatLargeNumber(data.count)+'</p>' : '')
 				+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')
 				+(data.source ? '<h5 class="data-source micro">Source: '+data.source+'</p>' : '')
 				+'</div>'

@@ -57,15 +57,8 @@ define([
 
 	    parse: function(resp, xhr) 
 	    {
-	    	// TODO: bring back these properties.
-    		this.fullCount = resp.fullCount;
-    		this.maxReducedCount = resp.maxReducedCount;
-    		this.resultCount = resp.resultCount;
-    		this.originalCount = resp.originalCount;
-    		this.gridSize = resp.gridSize;
-
+	    	this.counts = resp.counts;
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
-
 			return GeoFeatureCollection.__super__.parse.call(this, resp.features, xhr);
 	    },
 				

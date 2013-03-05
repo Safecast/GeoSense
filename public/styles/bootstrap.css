@@ -3027,6 +3027,7 @@ button.btn.small, input[type="submit"].btn.small {
   width: 0;
   height: 0;
 }
+
 .popover {
   position: absolute;
   top: 0;

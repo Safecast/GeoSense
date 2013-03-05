@@ -109,16 +109,19 @@ function staticRoute(req, res, slug, admin)
 			serveMap(err, map);
 		});
 	} else {
+		// Serve the home page
 		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) != -1) {
 			serveHome(req, res);
 			return;
 		}
-		// Try to find map by host, or serve home page
+		// Try to find map by host
 		models.Map.findOne({host: req.headers.host, active: true}, function(err, map) {
+			// Serve the home page if there is no map with that host
 			if (!err && !map) {
 				serveHome(req, res);
 				return;
 			}
+			// Otherwise serve the map
 			serveMap(err, map, true);
 		});
 	}

@@ -3,8 +3,7 @@ var	models = require('../models'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	config = require('../config'),
 	assert = require('assert'),
-	mongoose = require('mongoose'),
-	_ = require('cloneextend');
+	mongoose = require('mongoose');
 
 describe('KML', function() {
 	var featureCollection, GeoFeature;

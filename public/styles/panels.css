@@ -265,3 +265,20 @@
 	padding: 7px 10px 8px 10px;
 	line-height: 1.5em;
 }
+
+.panel .tooltip-inner {
+  background-color: #666;
+} 
+
+.panel .tooltip.top .tooltip-arrow {
+  border-top-color: #666;  
+}
+
+.panel .tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #666;  
+}
+
+.panel .tooltip.in {
+  opacity: 1.0;
+  filter: alpha(opacity=100);
+}

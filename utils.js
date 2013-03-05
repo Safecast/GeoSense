@@ -5,6 +5,12 @@ var config = require('./config.js'),
     mongoose = require('mongoose'),
     console = require('./ext-console');
 
+// These Array methods do not exist under MongoDB, under which some of the utility
+// functions below will be used while supplementing the Array methods.
+var isArray = Array.isArray,
+    arrayMap = Array.prototype.map,
+    arrayReduce = Array.prototype.reduce;
+
 exports.connectDB = function(callback, exitProcessOnError) 
 {
     mongoose.connection.on('open', function (ref) {
@@ -193,17 +199,20 @@ exports.validateExistingCollection = function(err, collection, callback)
             err = new Error('feature collection not found');
         }
         if (callback) {
+            console.error(err.message);
             callback(err);
         } else {
-            console.error(err.message);
+            throw err;
         }
         return false;
     }
     if (collection.status == config.DataStatus.IMPORTING || collection.status == config.DataStatus.REDUCING) {
         var err = new Error('Collection is currently busy');
-        console.error(err.message);
         if (callback) {
+            console.error(err.message);
             callback(err);
+        } else {
+            throw err;
         }
         return false;
     }
@@ -433,7 +442,7 @@ exports.findExtremes = function(value, previous) {
                 count: 1
             }
         },
-        arr = Array.isArray(value) ? value : [value],
+        arr = isArray(value) ? value : [value],
         reduce = function(a, b) {
             a.sum = typeof b.sum != 'number' ? NaN : isNaN(a.sum) ? b.sum : a.sum + b.sum;
             a.min = a.min == undefined || b.min < a.min ? b.min : a.min;
@@ -441,5 +450,19 @@ exports.findExtremes = function(value, previous) {
             a.count = isNaN(a.count) ? b.count : a.count + b.count;
             return a;
         };
-    return arr.map(map).reduce(reduce, previous || {});
+
+    //return arr.map(map).reduce(reduce, previous || {});
+    return arrayReduce.call(arrayMap.call(arr, map), reduce, previous || {});
+};
+
+exports.callbackOrThrow = function(err, callback)
+{
+    if (err) {
+        if (callback) {
+            console.log(err);
+            callback(err);
+            return true;
+        }
+        throw err;
+    }
 };

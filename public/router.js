@@ -195,6 +195,14 @@ define([
 	    	return mapViewName;
 		},
 
+		getCurrentViewOptions: function() {
+			return {
+				viewName: this.mapViewName,
+				viewBase: this.mapView.viewBase,
+				viewStyle: this.mapView.viewStyle
+			};
+		},
+
 	    genMapURI: function(mapViewName, opts, admin)
 	    {
 	    	var admin = (admin || admin == undefined) && this.adminRoute;
@@ -246,23 +254,17 @@ define([
 		loadAndInitMap: function(slug, mapViewName, center, zoom, viewBase, viewStyle)
 		{
 			var self = this;
-			switch (mapViewName) {
-				default:
-					mapViewName = 'map';
-					break;
-				case 'map':
-					break;
-				case 'globe':						
-					break;
-			}
-
 			if (!this.map) {
 				this.map = new Map({publicslug: slug});
 				this.map.fetch({
 					success: function(model, response, options) {
 						console.log('initMapInfo');
 						self.initMap();
-						self.initMapView(mapViewName, center, zoom, viewBase, viewStyle);
+						var opts = self.map.attributes.viewOptions || {};
+						var or = function(a, b) { return a && a != '' ? a : b };
+						self.initMapView(or(mapViewName, opts.viewName), 
+							center, zoom, 
+							or(viewBase, opts.viewBase), or(viewStyle, opts.viewStyle));
 					},
 					error: function(model, xhr, options) {
 						console.error('failed to load map', slug);
@@ -300,17 +302,19 @@ define([
 			}
 
 			switch (this.mapViewName) {
+				default:
 				case 'map':
 					var viewClass = MapOLView;
-					$('#navMap').addClass('active');
-					$('#navGlobe').removeClass('active');
+					this.mapViewName = 'map';
 					break;
 				case 'globe':
 					var viewClass = MapGLView;
-					$('#navMap').removeClass('active');
-					$('#navGlobe').addClass('active');
 					break;
 			}		
+			$('.map-view-toggle').each(function() {
+				$(this).toggleClass('active', $(this).hasClass(self.mapViewName));
+			});
+
 			var visibleMapArea = this.getDefaultVisibleMapArea();
 			if (center) {
 				visibleMapArea.center = center;
@@ -507,7 +511,7 @@ define([
 						var cls = this.mapView.ViewBase[key].prototype;
 						li.push('<li' + (key == self.mapView.viewBase ? ' class="inactive"' : '') + '>'
 							+ '<a href="#' + key + '">' 
-							+ '<span class="view-base-thumb" style="background: url(/assets/baselayer-thumbs/' + key + '.png)"></span>'
+							+ '<span class="view-base-thumb"' + (key != 'blank' ? ' style="background: url(/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
 							+ '<span class="view-base-caption">' + cls.providerName + '</span>'
 							+ '</a></li>');
 					}

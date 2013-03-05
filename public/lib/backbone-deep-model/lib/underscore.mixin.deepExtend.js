@@ -1,10 +1,15 @@
+/**
+ * Underscore mixins for deep objects
+ *
+ * Based on https://gist.github.com/echong/3861963
+ */
 (function() {
   var arrays, basicObjects, deepClone, deepExtend, deepExtendCouple, isBasicObject,
     __slice = [].slice;
 
   deepClone = function(obj) {
     var func, isArr;
-    if (!_.isObject(obj || _.isFunction(obj))) {
+    if (!_.isObject(obj) || _.isFunction(obj)) {
       return obj;
     }
     if (_.isDate(obj)) {
@@ -26,6 +31,7 @@
   };
 
   isBasicObject = function(object) {
+    if (object == null) return false;
     return (object.prototype === {}.prototype || object.prototype === Object.prototype) && _.isObject(object) && !_.isArray(object) && !_.isFunction(object) && !_.isDate(object) && !_.isRegExp(object) && !_.isArguments(object);
   };
 

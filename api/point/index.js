@@ -81,25 +81,34 @@ var PointAPI = function(app)
 						res.send('map layer not found', 404);
 					} else {
 
-						mapLayer.featureCollection.findFeatures(function(err, collection) {
-							res.send(collection.toGeoJSON());
-						});
-
-						return;
-
-						var pointCollection = mapLayer.featureCollection,
+						var featureCollection = mapLayer.featureCollection,
 							urlObj = url.parse(req.url, true),
 							queryOptions = {},
-							filterQuery = {};
-
-						var zoom = parseInt(urlObj.query.z) || 0;
+							filterQuery = {},
+							zoom = parseInt(urlObj.query.z) || 0;
+						
 						if (isNaN(zoom) || zoom < 0) {
 							zoom = 0;
-						}
-						if (zoom >= config.GRID_SIZES.length) {
+						} else if (zoom >= config.GRID_SIZES.length) {
 							zoom = config.GRID_SIZES.length - 1;
 						}
-						var gridSize = config.GRID_SIZES[zoom];
+
+						// TODO
+						var bbox = null,
+							conditions = {},
+							fields = null,
+							gridSize = config.GRID_SIZES[zoom],
+							findOpts = {};
+
+						if (featureCollection.reduce) {
+							findOpts.gridSize = gridSize;
+						}
+						
+						featureCollection.findFeaturesWithin(bbox, conditions, fields, findOpts, function(err, collection) {
+							//collection.features = [collection.features[0]];
+							res.send(collection.toGeoJSON());
+						});
+						return;
 
 						var timeGrid = false,
 							reduceKey = false;
@@ -236,12 +245,12 @@ var PointAPI = function(app)
 
 
 						if (mapLayer.layerOptions.queryOptions) {
-							queryOptions = _.extend(_.clone(config.API_RESULT_QUERY_OPTIONS), 
+							queryOptions = _.cloneextend(_.clone(config.API_RESULT_QUERY_OPTIONS), 
 								adjustKeys(mapLayer.layerOptions.queryOptions, reduce ? 'value' : null, 1));
 						}
 
 						if (mapLayer.layerOptions.filterQuery) {
-							filterQuery = _.extend(filterQuery, 
+							filterQuery = _.cloneextend(filterQuery, 
 								adjustKeys(mapLayer.layerOptions.filterQuery, reduce ? 'value' : null));
 						}
 						
@@ -365,7 +374,7 @@ var PointAPI = function(app)
 								PointModel = models.adHocModel(collectionName);
 								//pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 								pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
-								pointQuery = _.extend(pointQuery, filterQuery);
+								pointQuery = _.cloneextend(pointQuery, filterQuery);
 
 								dequeueBoxQuery();
 							} else {

@@ -63,6 +63,8 @@ define([
 				}
 			});
 
+			this.$('.has-tooltip').tooltip({ delay: 0, animation: false });
+
 			return this;
 	    },
 
@@ -80,14 +82,19 @@ define([
 
 	    initSliders: function() 
 	    {
-	    	var self = this;
+	    	var self = this,
+	    		or = function(val1, val2) {
+	    			return !isNaN(val1) ? val1 : val2
+	    		};
 			this.$('.slider').each(function() {
-				var fieldName = $(this).attr('data-field');
+				var fieldName = $(this).attr('data-field'),
+					min = or(parseFloat($(this).attr('data-min')), 0),
+					max = or(parseFloat($(this).attr('data-max')), 1);
 				$(this).slider({
-					min: 0,
-					max: 1,
+					min: min,
+					max: max,
 					range: "min",
-					step: .05,
+					step: (max == 1 ? .05 : 1),
 					slide: function( event, ui ) {
 						$(self.modelInputs[fieldName][0]).val(ui.value);
 						self.modelInputChanged();

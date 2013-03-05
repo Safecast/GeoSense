@@ -4,10 +4,9 @@ var	models = require('../models'),
 	config = require('../config'),
 	errors = require('../errors'),
 	assert = require('assert'),
-	mongoose = require('mongoose'),
-	_ = require('cloneextend');
+	mongoose = require('mongoose');
 
-describe('CSV', function() {
+describe('Safecast', function() {
 	var featureCollection;
 
 	before(function(done) {
@@ -65,8 +64,8 @@ describe('CSV', function() {
 
 
 	it('should result in the collection extremes being consistent with the import file', function() {
-		assert.equal(importCollection.extremes.val.min, 31);
-		assert.equal(importCollection.extremes.val.max, 33);
+		assert.equal(importCollection.extremes.properties.val.min, 31);
+		assert.equal(importCollection.extremes.properties.val.max, 33);
 	});
 
 	it('should find an imported point and check internal consistency of its properties', function(done) {
@@ -102,15 +101,15 @@ describe('CSV', function() {
 			importCollection.findFeatures(function(err, collection) {
 				if (err) throw err;
 				assert.equal(4, collection.features.length);
-				assert.equal(collection.features.length, importCollection.extremes.val.count);
+				assert.equal(collection.features.length, importCollection.extremes.properties.val.count);
 				done();
 			});
 		});
 	});
 
 	it('should result in the collection extremes being consistent with the second import file', function() {
-		assert.equal(importCollection.extremes.val.min, 10);
-		assert.equal(importCollection.extremes.val.max, 10000);
+		assert.equal(importCollection.extremes.properties.val.min, 10);
+		assert.equal(importCollection.extremes.properties.val.max, 10000);
 	});
 
 	it('should fail gracefully when trying to sync with a corrupted file', function(done) {
@@ -121,7 +120,7 @@ describe('CSV', function() {
 			break: true
 		}, null, null, function(err, collection) {
 			if (err) throw err;
-			assert.equal(4, importCollection.extremes.val.count);
+			assert.equal(4, importCollection.extremes.properties.val.count);
 			done();
 		});
 	});
@@ -132,7 +131,7 @@ describe('CSV', function() {
 			url: 'http://0.0.0.0/foo.csv',
 		}, null, null, function(err, collection) {
 			if (!err instanceof errors.HTTPError) throw err;
-			assert.equal(4, importCollection.extremes.val.count);
+			assert.equal(4, importCollection.extremes.properties.val.count);
 			done();
 		});
 	});
@@ -154,6 +153,3 @@ describe('CSV', function() {
 	});
 
 });
-
-
-

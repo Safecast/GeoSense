@@ -2,8 +2,10 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
+    'deepextend',
+    'deepmodel',
 ], function($, _, Backbone) {
-	var GeoFeature = Backbone.Model.extend({
+	var GeoFeature = Backbone.DeepModel.extend({
 		
 		idAttribute: "_id",
 
@@ -11,8 +13,14 @@ define([
         {
             // TODO: deprecated
             this.attributes.loc = this.getCenter();
-            this.attributes.val = this.attributes.properties ?
-                this.attributes.properties.val : undefined;
+            this.numericAttr = 'properties.numVal';
+            this.attributes.val = this.getVal();
+        },
+
+        getVal: function()
+        {
+            return this.numericAttr ?
+                this.get(this.numericAttr) : undefined;
         },
         
         getCenter: function() 
@@ -30,6 +38,16 @@ define([
                 this.attributes.bbox[2] - this.attributes.bbox[0],
                 this.attributes.bbox[3] - this.attributes.bbox[1]
             ];
+        },
+
+        getBox: function()
+        {
+            var size = this.getSize(),
+                hw = size[0] / 2.0,
+                hh = size[1] / 2.0,
+                c = this.getCenter(),
+                e = c[0] - hw, s = c[1] - hh, w = c[0] + hw, n = c[1] + hh;
+            return [ [w,s], [e,s], [e,n], [w,n] ];
         },
 		
 		getRenderAttributes: function()
