@@ -1,3 +1,9 @@
+/*
+These methods may be used under MongoDB natively, for instance when 
+performing a MapReduce operation. Since MongoDB does not have these
+methods, you would need to emulate them and supply them as Code
+objects under the ``scope`` argument. 
+*/
 var isArray = Array.isArray,
     arrayReduce = Array.prototype.reduce;
 
@@ -15,7 +21,7 @@ var overflow = function(val, max) {
 
 /*
 Returns [x,y] so that both coordinates are >= -180 and < 180, 
-suitable for MongoDB 2D indexes.
+suitable for MongoDB 2d indexes.
 */
 var coordinates2d = function(x, y) {
     var c = isArray(x) ? x : [x,y];
@@ -26,6 +32,9 @@ var coordinates2d = function(x, y) {
 Gets bounding box [[west, south], [east, north]] for coordinates, which can
 be a n-dimensional array of coordinates, such as [11,12] or 
 [[[11,12],[13,14]]] etc.
+
+If the second parameter is true, the final coordinates will be overflown
+so that they are >= -180 and < 180, suitable for MongoDB 2d indexes.
 */
 var getBounds = function(coordinates, overflow180) {
     if (!isArray(coordinates) || !coordinates.length) {

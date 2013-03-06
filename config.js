@@ -111,6 +111,10 @@ if (DEV) {
 	}
 }
 
+if (process.env.DB_PATH) {
+	config.DB_PATH = process.env.DB_PATH;
+}
+
 if (utils) {
 	utils.import(config, require("./public/config.js"));
 }

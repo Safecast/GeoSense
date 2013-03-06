@@ -11,15 +11,16 @@ var basicGeoFeatureCollectionSchema = {
     },
     basicGeoFeatureSchema = {
         type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection", "Feature", "FeatureCollection"], index: 1},
-        bbox: {type: Array, index: '2d'},
+        bounds2d: {type: Array, index: '2d'},
+        bounds: {type: Array},
         geometry: {
             type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"], index: 1},
             coordinates: {type: Array, /*required: true*/ index: 1}
         },
         properties: mongoose.Schema.Types.Mixed,
     },
-    GeoFeatureCollectionSchemaMethods = {}, GeoFeatureCollectionSchemaStatics = {},
-    GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {}, GeoFeatureSchemaPre = {};
+    GeoFeatureCollectionSchemaMethods = {}, GeoFeatureCollectionSchemaStatics = {}, GeoFeatureCollectionSchemaMiddleware = {},
+    GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {}, GeoFeatureSchemaMiddleware = {};
 
 
 GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
@@ -35,7 +36,7 @@ GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
     return obj;
 };
 
-GeoFeatureCollectionSchemaMethods.findFeaturesWithin = function(bbox, conditions, fields, options, callback)
+GeoFeatureCollectionSchemaMethods.findFeaturesWithin = function(bounds2d, conditions, fields, options, callback)
 {
     // from Mongoose find()
     if ('function' == typeof options) {
@@ -66,16 +67,11 @@ GeoFeatureCollectionSchemaMethods.findFeaturesWithin = function(bbox, conditions
 
     var Model = this.getFeatureModel(modelOptions);
 
-    if (!options.mapReduce) {
-        if (conditions.geocoded == undefined) {
-        //    conditions.geocoded = true;
-        }
-        //conditions['featureCollection'] = this;
-    } else {
-        //conditions['value.featureCollection'] = this;
+    if (options.mapReduce) {
+        // TODO remap conditions.* to conditions.value.*?
     }
 
-    Model.findWithin(bbox, conditions, fields, options, function(err, docs) {
+    Model.findWithin(bounds2d, conditions, fields, options, function(err, docs) {
         if (err) {
             throw err;
         }
@@ -91,7 +87,7 @@ GeoFeatureCollectionSchemaMethods.findFeaturesWithin = function(bbox, conditions
         }
         self.features = docs;
         if (callback) {
-            callback(err, self);
+            callback(err, self, self.features);
         }
     });
 }
@@ -118,12 +114,19 @@ GeoFeatureCollectionSchemaMethods.getFeatureModel = function(options)
     return Model;
 }
 
-function GeoFeatureCollectionSchema(extraSchema, FeatureSchema)
+function GeoFeatureCollectionSchema(extraSchema, extraMethods, extraStatics, extraMiddleware)
 {
     var schema = new mongoose.Schema(_.cloneextend(basicGeoFeatureCollectionSchema, extraSchema || {}));
     schema.methods = _.clone(GeoFeatureCollectionSchemaMethods);
-    schema.methods.FeatureSchema = FeatureSchema;
+    _.add(schema.methods, extraMethods);
     schema.statics = _.clone(GeoFeatureCollectionSchemaStatics);
+    _.add(schema.statics, extraStatics);
+    var middleware = _.cloneextend(GeoFeatureCollectionSchemaMiddleware, extraMiddleware || {});
+    for (var method in middleware) {
+        for (var evt in middleware[method]) {
+            schema[method](evt, middleware[method][evt]);
+        }
+    }
     return schema;
 }
 
@@ -131,11 +134,12 @@ function GeoFeatureCollectionSchema(extraSchema, FeatureSchema)
 GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs) 
 {
     var obj = this.toJSON();
-    // problem: since bbox is now overflown, we have no way of telling
-    // whether the original coordinates crossed the dateline, hence re-calculate the bbox
-    if (obj.bbox[0][0] > obj.bbox[1][0]) {
-        obj.bbox = this.getBounds(false);
-    }
+    // problem: since bounds now may contain coordinates that are the result of arithmetic
+    // overflow, we have no way of telling how the original coordinates may be crossing 
+    // the international dateline, hence re-calculate bounds:
+    /*if (obj.bounds2d[0][0] > obj.bounds2d[1][0]) {
+        obj.bounds2d = this.getBounds(false);
+    }*/
 
 
     if (extraAttrs) obj = _.extend(obj, extraAttrs);
@@ -148,16 +152,18 @@ GeoFeatureSchemaMethods.getBounds = function(overflow180) {
 };
 
 GeoFeatureSchemaMethods.getCenter = function() {
-    return coordinates.getBounds(this.bbox);
+    return coordinates.getBounds(this.bounds);
 };
 
-GeoFeatureSchemaPre.save = function(next) {
-    this.bbox = this.getBounds(true);
-    this.geocoded = this.bbox && this.bbox.length;
-    next();
+GeoFeatureSchemaMiddleware.pre = {
+    save: function(next) {
+        this.bounds = this.getBounds();
+        this.bounds2d = coordinates.getBounds(this.bounds, true);
+        next();
+    }
 };
 
-GeoFeatureSchemaStatics.findWithin = function(bbox, conditions, fields, options, callback) 
+GeoFeatureSchemaStatics.findWithin = function(bounds2d, conditions, fields, options, callback) 
 {
     // from Mongoose find()
     if ('function' == typeof options) {
@@ -176,12 +182,12 @@ GeoFeatureSchemaStatics.findWithin = function(bbox, conditions, fields, options,
 
     var options = _.cloneextend(options || {}),
         conditions = _.cloneextend(conditions || {}),
-        bboxField = options.mapReduce ? 'value.bbox' : 'bbox';
+        boundsField = options.mapReduce ? 'value.bounds2d' : 'bounds2d';
 
-    if (bbox) {
-        conditions[bboxField] = {
+    if (bounds2d) {
+        conditions[boundsField] = {
             $within: {
-                $box: coordinates.getBounds(bbox)
+                $box: coordinates.getBounds(bounds2d)
             }
         };
     }
@@ -190,21 +196,26 @@ GeoFeatureSchemaStatics.findWithin = function(bbox, conditions, fields, options,
     console.info('Querying feature collection:', this.collection.name, 
         ' ( conditions:', conditions, ', fields:', fields, ', options:', options, ')');
 
-    if (bbox) {
-        console.warn('db["'+this.collection.name+'"].count({"'+bboxField+'":{$within:{$box:[['+
-            bbox[0].toString()+'],['+bbox[1].toString()+']]}}})');
+    if (bounds2d) {
+        console.warn('db["'+this.collection.name+'"].count({"'+boundsField+'":{$within:{$box:[['+
+            bounds2d[0].toString()+'],['+bounds2d[1].toString()+']]}}})');
     }
 
     return this.find(conditions, fields, options, callback);
 }
 
-function GeoFeatureSchema(extraSchema)
+function GeoFeatureSchema(extraSchema, extraMethods, extraStatics, extraMiddleware)
 {
     var schema = new mongoose.Schema(_.cloneextend(basicGeoFeatureSchema, extraSchema || {}));        
     schema.methods = _.clone(GeoFeatureSchemaMethods);
+    _.add(schema.methods, extraMethods);
     schema.statics = _.clone(GeoFeatureSchemaStatics);
-    for (var k in GeoFeatureSchemaPre) {
-        schema.pre(k, GeoFeatureSchemaPre[k]);
+    _.add(schema.statics, extraStatics);
+    var middleware = _.cloneextend(GeoFeatureSchemaMiddleware, extraMiddleware || {});
+    for (var method in middleware) {
+        for (var evt in middleware[method]) {
+            schema[method](evt, middleware[method][evt]);
+        }
     }
     return schema;
 }
