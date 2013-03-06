@@ -40,25 +40,6 @@ var Job = mongoose.model('Job', new mongoose.Schema({
 
 Job.schema.plugin(useTimestamps);
 
-/*
-var Point = mongoose.model('Point', new mongoose.Schema({
-    pointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: true, index: 1 },
-    importJob: { type: mongoose.Schema.ObjectId, ref: 'Job', required: false, index: 1 },
-    loc: {type: [Number], index: '2d', required: true },
-    val: {type: Number, index: 1},
-    label: String,
-    description: String,
-    url: String,
-    datetime: {type: Date, index: 1},
-    sourceId: {type: mongoose.Schema.Types.Mixed, index: 1},
-    incField: {type: mongoose.Schema.Types.Mixed, index: 1},
-    createdAt: Date,
-    updatedAt: Date
-}));
-
-Point.schema.plugin(useTimestamps);
-Point.schema.index({loc: '2d', pointCollection: 1})
-*/
 
 var colorMatch = /^#([a-fA-F0-9]{2}){3}$/;
 
@@ -112,41 +93,8 @@ LayerOptions.schema.path('colors').validate(function (value) {
     return value.length > 0;
 }, 'At least one color is required.');
 
-/*
-PointCollection = mongoose.model('PointCollection', new mongoose.Schema({
-    title: String,
-    description: String,
-    source: String,
-    unit: String,
-    isNumeric: {type: Boolean, default: true},
-    maxVal: Number,
-    minVal: Number,
-    maxIncField: { type: mongoose.Schema.Types.Mixed, index: 1 },
-    importParams: mongoose.Schema.Types.Mixed,
-    timebased: Boolean,
-    gridSize: Number,
-    defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
-    active: Boolean,
-    status: String,
-    progress: Number,
-    numBusy: Number,
-    reduce: Boolean,
-    maxReduceZoom: Number,
-    sync: Boolean,
-    cropDistribution: Boolean,
-    createdBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
-    modifiedBy: { type: mongoose.Schema.ObjectId, ref: 'User', index: 1 },
-    createdAt: Date,
-    updatedAt: Date,
-    lastReducedAt: Date,
-    linkedPointCollection: { type: mongoose.Schema.ObjectId, ref: 'PointCollection', required: false, index: 1 },
-}));
-
-PointCollection.schema.plugin(useTimestamps);
-*/
 
 var MapLayerSchema = new mongoose.Schema({
- //   _id: { type: mongoose.Schema.ObjectId },
     featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', index: 1 },
     layerOptions: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
     position: Number
@@ -271,6 +219,5 @@ module.exports = {
     Map: Map,
     GeoFeatureCollection: GeoFeatureCollection,
     adHocModel: geogoose.util.adHocModel
-    //GeoFeature: GeoFeature,
 };
 
