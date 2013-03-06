@@ -36,15 +36,17 @@ describe('GeoFeature', function() {
 		};
 
 		dequeueSave([
-			[0, 1],
+			[0, -359],
 			[[100, 100], [0, 90]],
 			[[100, 90], [101, 90], [99, -1]]
 		]);
 	});
 
-	it('should find 3 features', function(done) {
+	it('should find 3 features, and the coordinates should be correct', function(done) {
 		featureCollection.findFeatures(function(err, collection, features) {
 			assert.equal(features.length, 3);
+			assert.deepEqual(features[0].bounds.map(function(a){return a;}), [[0, -359], [0, -359]]);
+			assert.deepEqual(features[0].bounds2d.map(function(a){return a;}), [[0, 1], [0, 1]]);
 			done();
 		});
 	});
@@ -63,7 +65,7 @@ describe('GeoFeature', function() {
 
 	it('should return the correct flat bbox for two-dimensional bounds when converted to GeoJSON', function() {
 		assert.deepEqual(found[0].toGeoJSON().bbox, [99, -1, 101, 90]);
-		assert.deepEqual(found[1].toGeoJSON().bbox, [0, 1, 0, 1]);
+		assert.deepEqual(found[1].toGeoJSON().bbox, [0, -359, 0, -359]);
 	});
 
 	after(function() {

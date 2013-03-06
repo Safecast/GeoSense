@@ -9,7 +9,7 @@ var	models = require('../models'),
 
 describe('Dateline', function() {
 	var featureCollection, GeoFeature;
-	/*
+	
 
 	before(function(done) {
 		mongoose.connect(config.DB_PATH);
@@ -47,8 +47,7 @@ describe('Dateline', function() {
 		});
 
 		f.save(function(err, result) {
-			// todo why does this not equal??
-			assert.deepEqual(f.bbox, coordinates.getBounds(crossBox, true));
+			assert.deepEqual(f.bounds2d.map(function(a) { return a; }), coordinates.getBounds(crossBox, true));
 
 			if (err) throw err;
 			done();
@@ -68,8 +67,7 @@ describe('Dateline', function() {
 		});
 
 		f.save(function(err, result) {
-			// todo why does this not equal??
-			assert.deepEqual(f.bbox, [ [ 175, 0 ], [ -175, 1 ] ]);
+			assert.deepEqual(f.bounds2d.map(function(a) { return a; }), [ [ 175, 0 ], [ -175, 1 ] ]);
 
 			if (err) throw err;
 			done();
@@ -89,8 +87,7 @@ describe('Dateline', function() {
 		});
 
 		f.save(function(err, result) {
-			// todo why does this not equal??
-			assert.deepEqual(f.bbox, [ [ 175, 0 ], [ -175, 1 ] ]);
+			assert.deepEqual(f.bounds2d.map(function(a) { return a; }), [ [ 175, 0 ], [ -175, 1 ] ]);
 
 			if (err) throw err;
 			done();
@@ -100,7 +97,7 @@ describe('Dateline', function() {
 
 	after(function() {
 		mongoose.disconnect();
-	});*/
+	});
 
 });
 
