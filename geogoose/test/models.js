@@ -43,19 +43,20 @@ describe('GeoFeature', function() {
 	});
 
 	it('should find 3 features, and the coordinates should be correct', function(done) {
-		featureCollection.findFeatures(function(err, collection, features) {
+		GeoFeature.find(function(err, features) {
 			assert.equal(features.length, 3);
-			assert.deepEqual(features[0].bounds.map(function(a){return a;}), [[0, -359], [0, -359]]);
-			assert.deepEqual(features[0].bounds2d.map(function(a){return a;}), [[0, 1], [0, 1]]);
+			assert.deepEqual(features[0].bbox.toObject(), [0, -359, 0, -359]);
+			assert.deepEqual(features[0].bounds2d.toObject(), [[0, 1], [0, 1]]);
 			done();
 		});
 	});
 
 	var found;
 	it('should find a subset using a 2D index on bounds2d and sort them by createdAt', function(done) {
-		var within = [[-1, -100], [100, 1.1]];
-		GeoFeature.findWithin(within, {}, null, {sort: {'createdAt': -1}},
-			function(err, result) {
+		var box = [[-1, -100], [100, 1.1]];
+		GeoFeature.within(box)
+			.sort({'createdAt': -1})
+			.exec(function(err, result) {
 				if (err) throw err;
 				assert.equal(result.length, 2);
 				found = result;

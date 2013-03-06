@@ -34,38 +34,6 @@ describe('KML', function() {
 
 	});
 
-/*
-	it('should find Switzerland by name', function(done) {
-
-		ImportedModel.findOne({'properties.name': 'Switzerland'}, function(err, result) {
-				if (err) throw err;
-				assert(result);
-				assert.deepEqual(result.toGeoJSON().bbox, [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
-				done();
-		});
-
-	});
-
-	it('should find countries within a box', function(done) {
-
-		ImportedModel.findWithin([[1,40],[11,48]], null, null, {sort: {'properties.name': 1}}, function(err, result) {
-			if (err) throw err;
-			assert(result.length);
-			var countries = result.map(function(val) { return val.properties.name; });
-			assert.deepEqual(countries, [ 
-				'Andorra',
-				'Austria',
-				'Germany',
-				'Liechtenstein',
-				'Monaco',
-				'Spain',
-				'Switzerland' 
-			]);
-			done();
-		});
-
-	});*/
-
 	after(function() {
 		mongoose.disconnect();
 	});

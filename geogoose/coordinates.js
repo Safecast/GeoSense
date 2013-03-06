@@ -10,7 +10,8 @@ var isArray = Array.isArray,
 /*
 Arithmetic overflow for val so that -max <= val < max.
 */
-var overflow = function(val, max) { 
+var overflow = function(val, max) 
+{ 
     var dmax = 2 * max,
         mod = val % dmax; 
     return mod < -max ? 
@@ -23,7 +24,8 @@ var overflow = function(val, max) {
 Returns [x,y] so that both coordinates are >= -180 and < 180, 
 suitable for MongoDB 2d indexes.
 */
-var coordinates2d = function(x, y) {
+var coordinates2d = function(x, y) 
+{
     var c = isArray(x) ? x : [x,y];
     return [overflow(c[0], 180), overflow(c[1], 180)];
 };
@@ -36,7 +38,8 @@ be a n-dimensional array of coordinates, such as [11,12] or
 If the second parameter is true, the final coordinates will be overflown
 so that they are >= -180 and < 180, suitable for MongoDB 2d indexes.
 */
-var getBounds = function(coordinates, overflow180) {
+var getBounds = function(coordinates, overflow180) 
+{
     if (!isArray(coordinates) || !coordinates.length) {
         return;
     } else if (!isArray(coordinates[0])) {
@@ -61,6 +64,13 @@ var getBounds = function(coordinates, overflow180) {
             [Math.max(bmax[0], a[1][0]), Math.max(bmax[1], a[1][1])]
         ];
     }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
+};
+
+var getBbox = function(bounds)
+{
+    return arrayReduce.call(bounds, function(a, b) {
+        return a.concat(b);
+    }, []);
 };
 
 var getCenter = function(bounds)
@@ -105,6 +115,7 @@ module.exports = {
     overflow: overflow,
     coordinates2d: coordinates2d,
     getBounds: getBounds,
+    getBbox: getBbox,
     adjustBboxForQuery: adjustBboxForQuery
 };
 

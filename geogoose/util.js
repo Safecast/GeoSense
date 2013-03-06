@@ -17,12 +17,11 @@ var adHocModel = function(collectionName, Schema, options) {
 
 var toGeoJSON = function(obj) 
 {
-    if (!obj.bbox && obj.bounds && obj.bounds.length == 2) {
-        // GeoJSON specifies a one-dimensional array for the bbox
+    /*if (!obj.bbox && obj.bounds && obj.bounds.length == 2) {
         obj.bbox = obj.bounds.reduce(function(a, b) {
             return a.concat(b);
         });
-    } 
+    } */
     return obj;
 };
 

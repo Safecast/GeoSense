@@ -48,9 +48,9 @@ describe('GeoFeature', function() {
 
 	var found;
 	it('should find a subset using a 2D index on bbox', function(done) {
-		var within = [[-1, -100], [100, 1.1]];
-		GeoFeature.findWithin(within, {}, null, {sort: {'createdAt': -1}},
-			function(err, result) {
+		var box = [[-1, -100], [100, 1.1]];
+		GeoFeature.within(box).sort({'createdAt': -1})
+			.exec(function(err, result) {
 				if (err) throw err;
 				assert.equal(result.length, 2);
 				found = result;

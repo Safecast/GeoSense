@@ -8,6 +8,7 @@ var	models = require('../models'),
 	_ = require('cloneextend');
 
 describe('Dateline', function() {
+/*
 	var featureCollection, GeoFeature;
 	
 
@@ -97,7 +98,7 @@ describe('Dateline', function() {
 
 	after(function() {
 		mongoose.disconnect();
-	});
+	});*/
 
 });
 

@@ -67,10 +67,8 @@ var FeatureAPI = function(app)
 						zoom = config.GRID_SIZES.length - 1;
 					}
 
-                    var conditions = {},
-						fields = null,
-						gridSize = config.GRID_SIZES[zoom],
-						findOpts = {
+                    var gridSize = config.GRID_SIZES[zoom],
+						mapReduceOpts = {
 							gridSize: (featureCollection.reduce ? gridSize : undefined)
 						},
 						extraAttrs = { counts: {
@@ -87,7 +85,10 @@ var FeatureAPI = function(app)
                     		null : coordinates.adjustBboxForQuery(bbox);
                     }
                     var manyBoxes = boxes.length > 1,
-                    	isMapReduced = findOpts.gridSize || findOpts.timebased;
+                    	isMapReduced = mapReduceOpts.gridSize || mapReduceOpts.timebased,
+                    	FeatureModel = collection.getFeatureModel(),
+				        FindFeatureModel = isMapReduced ? collection.getMapReduceFeatureModel(mapReduceOpts) : FeatureModel;
+				        
 
                     console.log('zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes);
 
@@ -122,14 +123,15 @@ var FeatureAPI = function(app)
                     		res.send(featureCollection.toGeoJSON(extraAttrs));
                     		return;
                     	}
-						featureCollection.findFeaturesWithin(boxes.shift(), conditions, fields, findOpts, function(err, collection) {
-							if (handleDbOp(req, res, err, true)) return;
-							features = features.concat(collection.features);
-							dequeueBoxAndFind();
-						});
+						FindFeatureModel.within(boxes.shift())
+							.exec(function(err, features) {
+								if (handleDbOp(req, res, err, true)) return;
+								features = features.concat(features);
+								dequeueBoxAndFind();
+							});
                     };
 
-					utils.modelCount(featureCollection.getFeatureModel(), {}, function(err, count) {
+					utils.modelCount(featureModel, {}, function(err, count) {
 						if (handleDbOp(req, res, err, true)) return;
 						extraAttrs.counts.full = count;
 						console.info('full count: ', count);

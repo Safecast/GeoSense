@@ -210,6 +210,19 @@ GeoFeatureSchema.pre('save', function(next) {
 });
 
 
+var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: String}, null, null, null, {
+    value: geogoose.models.geoJSONFeatureDefinition
+});
+
+GeoFeatureMapReducedSchema.methods.toGeoJSON = function(extraAttrs)
+{
+    var obj = this.toJSON().value;
+    obj._id = this.get('_id').toString();
+    if (extraAttrs) obj = _.extend(obj, extraAttrs);
+    return geogoose.util.toGeoJSON(obj);
+};
+
+
 var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema({
     title: String,
     description: String,
@@ -239,6 +252,15 @@ var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema(
 }, {FeatureSchema: GeoFeatureSchema});
 
 GeoFeatureCollectionSchema.plugin(useTimestamps);
+
+GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
+    var collectionName = 
+        'r_'
+        + this.getFeatureModel().collection.name
+        + (opts.gridSize != undefined ? '_tile_rect_' + opts.gridSize : '')
+        + (opts.time != undefined ? '_' + opts.time : '');
+    return this.getFeatureModel({collectionName: collectionName, schema: GeoFeatureMapReducedSchema});
+};
 
 var GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCollectionSchema);
 

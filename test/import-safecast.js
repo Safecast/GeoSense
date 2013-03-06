@@ -69,9 +69,9 @@ describe('Safecast', function() {
 	});
 
 	it('should find an imported point and check internal consistency of its properties', function(done) {
-		importCollection.findFeatures(function(err, collection) {
+		importCollection.getFeatureModel().findOne(function(err, feature) {
 			if (err) throw err;
-			var f = collection.features[0];
+			var f = feature;
 			assert.equal(f.geometry.type, 'Point');
 			assert.equal(f.type, 'Point');
 			assert.equal(Number(f.source.Value), f.properties.val);
@@ -98,10 +98,10 @@ describe('Safecast', function() {
 		GeoFeatureCollection.findOne({_id: importCollection._id.toString()}, function(err, collection) {
 			if (err) throw err;
 			importCollection = collection;
-			importCollection.findFeatures(function(err, collection) {
+			importCollection.getFeatureModel().find(function(err, features) {
 				if (err) throw err;
-				assert.equal(4, collection.features.length);
-				assert.equal(collection.features.length, importCollection.extremes.properties.val.count);
+				assert.equal(4, features.length);
+				assert.equal(features.length, importCollection.extremes.properties.val.count);
 				done();
 			});
 		});

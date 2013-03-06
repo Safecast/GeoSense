@@ -96,18 +96,16 @@ describe('MapReduce', function() {
 		}, null, null, function(err) {
 			if (err) throw err;
 
-			featureCollection.findFeatures(null, null, {
-				timebased: 'daily'
-			}, function(err, collection) {
-				if (err) throw err;
-				assert.equal(collection.features.length, days);
-				assert.equal(collection.features[0].count, days);
-				done();
-			});
+			featureCollection.getMapReducedFeatureModel({time: 'daily'})
+				.find(function(err, features) {
+					if (err) throw err;
+					assert.equal(features.length, days);
+					assert.equal(features[0].get('value').count, days);
+					done();
+				});
 
 		});
 	});
-
 
 	it('should run MapReduce at the size of the area where features where generated, resulting in 1 single feature', function(done) {
 		api.mapReduce.mapReduce({
@@ -118,15 +116,14 @@ describe('MapReduce', function() {
 		}, null, null, function(err) {
 			if (err) throw err;
 
-			featureCollection.findFeatures(null, null, {
-				gridSize: config.GRID_SIZES[normalZoom]
-			}, function(err, collection) {
-				if (err) throw err;
-				assert.equal(collection.features.length, 1);
-				assert.equal(collection.features[0].count, generateCount);
-				console.log(collection.features[0].toGeoJSON());
-				done();
-			});
+			featureCollection.getMapReducedFeatureModel({gridSize: config.GRID_SIZES[normalZoom]})
+				.find(function(err, features) {
+					if (err) throw err;
+					assert.equal(features.length, 1);
+					assert.equal(features[0].get('value').count, generateCount);
+					console.log(features[0].toGeoJSON());
+					done();
+				});
 
 		});
 	});
@@ -140,17 +137,29 @@ describe('MapReduce', function() {
 		}, null, null, function(err) {
 			if (err) throw err;
 
-			featureCollection.findFeatures(null, null, {
-				gridSize: config.GRID_SIZES[normalZoom + 1]
-			}, function(err, collection) {
-				if (err) throw err;
-				assert.equal(collection.features.length, 4);
-				assert.equal(collection.features[0].count, generateCount / 4.0);
-				console.log(collection.features[0].toGeoJSON());
-				done();
-			});
+			featureCollection.getMapReducedFeatureModel({gridSize: config.GRID_SIZES[normalZoom + 1]})
+				.find(function(err, features) {
+					if (err) throw err;
+					assert.equal(features.length, 4);
+					assert.equal(features[0].get('value').count, generateCount / 4.0);
+					console.log(features[0].toGeoJSON());
+					done();
+				});
 		});
 	});
+
+	it('should find features at the next zoom level within one quarter of its area, resulting in one feature', function(done) {
+		featureCollection.getMapReducedFeatureModel({gridSize: config.GRID_SIZES[normalZoom + 1]})
+			// $within $box is inclusive -- hence subtract very small number from northeast of box
+			.within([[0, 0], [config.GRID_SIZES[normalZoom] / 2 - .00000001, config.GRID_SIZES[normalZoom] / 2 - .00000001]])
+			.exec(function(err, features) {
+				if (err) throw err;
+				assert.equal(features.length, 1);
+				assert.equal(features[0].get('value').count, generateCount / 4.0);
+				console.log(features[0].toGeoJSON());
+				done();
+			});
+	});	
 
 	after(function() {
 		mongoose.disconnect();
