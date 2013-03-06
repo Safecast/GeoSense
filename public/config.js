@@ -45,11 +45,6 @@ var LayerType = {
 	SHAPES: 'SL'
 };
 
-var MapLayerType = {
-	POINTS: 'P',
-	SHAPES: 'S'
-};
-
 var ColorType = {
 	SOLID: 'S',
 	LINEAR_GRADIENT: 'L',
@@ -93,7 +88,6 @@ if (!IS_BROWSER) {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
 		ColorType: ColorType,
-		MapLayerType: MapLayerType,
 	};
 } else {
 	// Browser: define console.log if undefined
