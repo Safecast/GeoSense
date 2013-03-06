@@ -181,12 +181,11 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 							var gridSize = config.GRID_SIZES[g],
 								tileEvents = {
 									finalize: function(key, doc) {
-										print('/////////////////////////finalize');
 										preSave.call(doc);
 									}
 								},
 								tileIndexes = {
-									'bbox': '2d'
+									'bounds2d': '2d'
 								};
 							if (numericAttr) {
 								tileIndexes[numericAttr] = 1;
