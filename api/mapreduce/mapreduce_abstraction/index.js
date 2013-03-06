@@ -122,10 +122,8 @@ var runMapReduce = function(collectionName, outputCollectionName, emitKeys, opti
 
 	// Pass all utility functions with the scope that is available to MongoDB
 	// during the MapReduce operation.
-	// Since we can't pass functions to MongoDB directly, we need to convert
-	// them to a Code object first.	
 	for (var scopeName in scopeFunctions) {
-		scope[scopeName] = new Code(scopeFunctions[scopeName]);
+		scope[scopeName] = scopeFunctions[scopeName];
 	}
 
 	// Pass all utility functions with the scope that is available to MongoDB
@@ -146,6 +144,14 @@ var runMapReduce = function(collectionName, outputCollectionName, emitKeys, opti
 	if (options.scope) {
 		for (var k in options.scope) {
 			scope[k] = options.scope[k];
+		}
+	}
+
+	// Since we can't pass functions to MongoDB directly, we need to convert
+	// them to a Code object first.	
+	for (var scopeName in scope) {
+		if (typeof scope[scopeName] == 'function') {
+			scope[scopeName] = new Code(scope[scopeName]);
 		}
 	}
 

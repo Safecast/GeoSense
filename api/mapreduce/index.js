@@ -1,6 +1,7 @@
 // TODO: max parameter should take into account skipped records
 
 var	models = require("../../models.js"),
+	geogoose = require("../../geogoose"),
 	Code = require('mongodb').Code,
 	mongoose = require('mongoose'),
 	config = require('../../config.js'),
@@ -40,6 +41,7 @@ var runMapReduceForFeatureCollection = function(collection, emitKeys, opts, call
 		opts.scope = {};
 	}
 	opts.scope.DEBUG = config.DEBUG_MAPREDUCE;
+	opts.scope.preSave = geogoose.models.GeoFeatureSchemaMiddleware.pre.save;
 
 	if (opts.stats) {
 		opts.scope.stats = {
@@ -179,8 +181,8 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 							var gridSize = config.GRID_SIZES[g],
 								tileEvents = {
 									finalize: function(key, doc) {
-										doc.type = 'Feature';
-										doc.bbox = getBounds(doc.geometry.coordinates, true);
+										print('/////////////////////////finalize');
+										preSave.call(doc);
 									}
 								},
 								tileIndexes = {
