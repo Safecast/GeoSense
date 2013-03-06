@@ -1,4 +1,4 @@
-var coordinates = require('../geogoose').coordinates,
+var coordinates = require('../').coordinates,
 	assert = require('assert');
 
 describe('coordinates', function() {

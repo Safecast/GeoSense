@@ -204,6 +204,11 @@ var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({
 
 GeoFeatureSchema.plugin(useTimestamps);
 
+GeoFeatureSchema.pre('save', function(next) {
+    this.geocoded = this.bounds2d && this.bounds2d.length;
+    next();
+});
+
 
 var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema({
     title: String,
@@ -231,7 +236,7 @@ var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema(
     lastReducedAt: Date,
     datetimeAttr: String,
     numericAttr: String
-}, GeoFeatureSchema);
+}, {FeatureSchema: GeoFeatureSchema});
 
 GeoFeatureCollectionSchema.plugin(useTimestamps);
 
