@@ -35,7 +35,7 @@ var Job = mongoose.model('Job', new mongoose.Schema({
     createdAt: Date,
     updatedAt: Date,
     type: {type: String, enum: [config.JobType.IMPORT, config.JobType.REDUCE], required: true},
-    status: {type: String, enum: [config.JobStatus.ACTIVE, config.JobStatus.IDLE], required: true, default: config.MapLayerType.POINTS},
+    status: {type: String, enum: [config.JobStatus.ACTIVE, config.JobStatus.IDLE], required: true},
 }));
 
 Job.schema.plugin(useTimestamps);
@@ -149,7 +149,6 @@ var MapLayerSchema = new mongoose.Schema({
  //   _id: { type: mongoose.Schema.ObjectId },
     featureCollection: { type: mongoose.Schema.ObjectId, ref: 'GeoFeatureCollection', index: 1 },
     layerOptions: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
-    type: {type: String, enum: [config.MapLayerType.POINTS, config.MapLayerType.SHAPES], required: true, default: config.MapLayerType.POINTS},
     position: Number
 });
 

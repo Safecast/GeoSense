@@ -77,16 +77,9 @@ var MapAPI = function(app)
 			// was already called.
 			var layer = layer.toObject ?
 				layer.toObject() : layer;
-
-				console.log(layer);
-
-			layer.pointCollection = layer.featureCollection;
 			delete layer.featureCollection.importParams;
-
-			// sending deprecated featureCollection -- TODO: delete layer.featureCollection
-
 			return layer;
-		}
+		};
 
 		// Returns a specific map by publicslug
 		app.get('/api/map/:publicslug', function(req, res){

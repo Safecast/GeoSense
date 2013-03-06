@@ -86,9 +86,8 @@ var FeatureAPI = function(app)
                     }
                     var manyBoxes = boxes.length > 1,
                     	isMapReduced = mapReduceOpts.gridSize || mapReduceOpts.timebased,
-                    	FeatureModel = collection.getFeatureModel(),
-				        FindFeatureModel = isMapReduced ? collection.getMapReduceFeatureModel(mapReduceOpts) : FeatureModel;
-				        
+                    	FeatureModel = featureCollection.getFeatureModel(),
+				        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel;
 
                     console.log('zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes);
 
@@ -108,8 +107,9 @@ var FeatureAPI = function(app)
                     		if (isMapReduced) {
                     			// this is the result of a MapReduce: determine counts
 	                    		features.reduce(function(a, b) {
-	                    			a.max = Math.max(a.max, b.count);
-	                    			a.original += b.count;
+	                    			v = b.get('value');
+	                    			a.max = Math.max(a.max, v.count);
+	                    			a.original += v.count;
 	                    			return a;
 	                    		}, extraAttrs.counts);
                     		} else {
@@ -118,20 +118,21 @@ var FeatureAPI = function(app)
 								extraAttrs.counts.original = extraAttrs.counts.result;                    			
                     		}
 
-                    		featureCollection.features = features;
-                    		console.success('Sending features:', featureCollection.features.length);
+                    		extraAttrs.features = features;
+                    		console.success('Sending features:', features.length);
                     		res.send(featureCollection.toGeoJSON(extraAttrs));
                     		return;
                     	}
 						FindFeatureModel.within(boxes.shift())
-							.exec(function(err, features) {
+							.exec(function(err, found) {
 								if (handleDbOp(req, res, err, true)) return;
-								features = features.concat(features);
+								console.log('Found features:', found.length);
+								features = features.concat(found);
 								dequeueBoxAndFind();
 							});
                     };
 
-					utils.modelCount(featureModel, {}, function(err, count) {
+					utils.modelCount(FeatureModel, {}, function(err, count) {
 						if (handleDbOp(req, res, err, true)) return;
 						extraAttrs.counts.full = count;
 						console.info('full count: ', count);
