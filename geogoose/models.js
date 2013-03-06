@@ -26,10 +26,15 @@ var geoJSONFeatureCollectionDefinition = {
 GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
 {
     var obj = util.toGeoJSON(this.toJSON());
-    if (extraAttrs) obj = _.extend(obj, extraAttrs);
     delete obj.importParams;
-    if (this.features) {
-        obj.features = this.features.map(function(feature) {
+    if (extraAttrs) {
+        for (var k in extraAttrs) {
+            obj[k] = extraAttrs[k];
+        }
+    }
+    if (obj.features) {
+        obj.features = obj.features.map(function(feature) {
+            console.log(feature.collection.name);
             return feature.toGeoJSON();
         });
     }
@@ -68,6 +73,7 @@ function GeoFeatureCollectionSchema(extraDefinition, extraMethods, extraStatics,
 GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs) 
 {
     var obj = this.toJSON();
+    delete obj.featureCollection;
     if (extraAttrs) obj = _.extend(obj, extraAttrs);
     return util.toGeoJSON(obj);
 };

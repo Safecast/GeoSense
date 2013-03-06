@@ -11,10 +11,6 @@ define([
 
         initialize: function() 
         {
-            // TODO: deprecated
-            this.attributes.loc = this.getCenter();
-            this.numericAttr = 'properties.numVal';
-            this.attributes.val = this.getVal();
         },
 
         getVal: function()
@@ -57,8 +53,10 @@ define([
                 extremes = l.getExtremes(),
                 min = extremes.minVal,
                 max = extremes.maxVal,
-                val = this.get('val'),
+                val = this.getVal(),
                 colors = l.getNormalizedColors();
+
+            console.log(val, extremes);
 
             if (val && val.avg != null) {
                 val = val.avg;
