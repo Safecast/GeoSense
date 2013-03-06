@@ -66,7 +66,7 @@ describe('GeoJSON raw', function() {
 
 	it('should find countries within a box', function(done) {
 
-		GeoFeature.findWithin([[1,40],[11,48]], null, null, {sort: {'properties.name': 1}}, function(err, result) {
+		GeoFeature.within([[1,40],[11,48]]).sort({'properties.name': 1}).exec(function(err, result) {
 			if (err) throw err;
 			assert(result.length);
 			var countries = result.map(function(val) { return val.properties.name; });

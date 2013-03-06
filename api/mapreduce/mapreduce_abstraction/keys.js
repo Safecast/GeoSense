@@ -356,6 +356,7 @@ module.exports = {
 		overflow: coordinates.overflow,
 		coordinates2d: coordinates.coordinates2d,
 		getBounds: coordinates.getBounds,
+		getBbox: coordinates.getBbox,
 		getWeek: getWeek,
 		getAttr: getAttr,
 		setAttr: setAttr,
