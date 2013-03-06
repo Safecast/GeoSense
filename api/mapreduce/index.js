@@ -35,10 +35,11 @@ var runMapReduceForFeatureCollection = function(collection, emitKeys, opts, call
 	if (!opts.query) {
 		opts.query = {};
 	}
-	opts.query.featureCollection = collection._id;
+	//opts.query.featureCollection = collection._id;
 	if (!opts.scope) {
 		opts.scope = {};
 	}
+	opts.scope.DEBUG = config.DEBUG_MAPREDUCE;
 
 	if (opts.stats) {
 		opts.scope.stats = {
@@ -196,7 +197,7 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 								&& (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
 
 								mr('*** MapReduce for tiles at zoom = ' + g + ' ***', makeObj(
-									'featureCollection', new EmitKey.Copy(), 
+									//'featureCollection', new EmitKey.Copy(), 
 									geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false})),
 									{ events: tileEvents, indexes: tileIndexes }
 								);
@@ -208,7 +209,7 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 											tileIndexes[datetimeAttr] = '1';
 
 											mr('*** MapReduce for ' + timebased.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
-												'featureCollection', new EmitKey.Copy(), 
+												//'featureCollection', new EmitKey.Copy(), 
 												geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false}), 
 												datetimeAttr, new EmitKey.Time[timebased]()),
 												{ events: tileEvents, indexes: tileIndexes }
@@ -225,7 +226,7 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 						for (var timebased in EmitKey.Time) {
 							if (params.types.indexOf(timebased.toLowerCase()) != -1) {
 								mr('*** MapReduce for ' + timebased.toLowerCase() + ' overall ***', makeObj(
-									'featureCollection', new EmitKey.Copy(), 
+									//'featureCollection', new EmitKey.Copy(), 
 									datetimeAttr, new EmitKey.Time[timebased]()),
 									{ events: null, indexes: null }
 								);
@@ -241,7 +242,7 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 								if (utils.callbackOrThrow(new Error('undefined extremes for ' + numericAttr), callback)) return;
 							}
 							mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
-									'featureCollection', new EmitKey.Copy(), 
+									//'featureCollection', new EmitKey.Copy(), 
 									numericAttr, new EmitKey.Histogram(
 										numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
 									{ events: null, indexes: null }

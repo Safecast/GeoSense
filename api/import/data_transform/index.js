@@ -1,4 +1,4 @@
-var coordinates2d = require('../../../coordinates2d').coordinates2d,
+var coordinates = require('../../../geogoose/').coordinates,
 	errors = require('../../../errors'),
 	ValidationError = errors.ValidationError,
 	console = require('../../../ext-console.js'),
@@ -239,7 +239,7 @@ var FieldType = {
 				if (arr.length != 2) {
 					return new DataTransformError('Needs 2D');
 				}
-				arr = coordinates2d(arr[0], arr[1]);
+				arr = coordinates.coordinates2d(arr[0], arr[1]);
 				if (!options.skipZero || (arr[0] != 0 && arr[1] != 0)) {
 					return arr;
 				} else {
