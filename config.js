@@ -5,6 +5,7 @@ var config = {
 
 	DEV: DEV,
 	DEBUG: DEV,	
+	DEBUG_MAPREDUCE: DEV && 0,
 	LIMITED_PROD_ACCESS: !DEV,
 
 	CLOCK_PROCESS_RUN_TIME: '0 10 * * * *',

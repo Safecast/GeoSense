@@ -1,6 +1,6 @@
-var c2d = require('../../../coordinates2d'),
-	coordinates2d = c2d.coordinates2d,
-	getBounds = c2d.getBounds,
+var coordinates = require('../../../geogoose/').coordinates,
+	coordinates2d = coordinates.coordinates2d,
+	getBounds = coordinates.getBounds,
 	findExtremes = require('../../../utils').findExtremes;
 
 /*
@@ -184,7 +184,7 @@ var EmitKey =
 		{
 			this.get = function(t) {
 				return [
-					t.getFullYear()+''+lpad(t.getMonth(), '0', 2)+''+lpad(t.getUTCDate(), '0', 2),
+					t.getFullYear()+'-'+lpad(t.getMonth(), '0', 2)+'-'+lpad(t.getUTCDate(), '0', 2),
 					new Date(t.getFullYear(), t.getMonth(), t.getUTCDate())
 				];	
 			};
@@ -207,7 +207,7 @@ var EmitKey =
 			      diff = t.getDate() - day + (day == 0 ? -6 : 1);
 				t.setDate(diff);
 				return [
-					t.getFullYear() + '' + lpad(week, '0', 2),
+					t.getFullYear() + '-' + lpad(week, '0', 2),
 					new Date(t.getFullYear(), t.getMonth(), t.getUTCDate())
 				];
 			};
@@ -353,9 +353,9 @@ module.exports = {
 	// apart from the EmitKey object itself, this.
 	scopeFunctions: {
 		lpad: lpad,
-		overflow: c2d.overflow,
-		coordinates2d: c2d.coordinates2d,
-		getBounds: c2d.getBounds,
+		overflow: coordinates.overflow,
+		coordinates2d: coordinates.coordinates2d,
+		getBounds: coordinates.getBounds,
 		getWeek: getWeek,
 		getAttr: getAttr,
 		setAttr: setAttr,

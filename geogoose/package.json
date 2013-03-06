@@ -1,0 +1,9 @@
+{
+  "name": "geogoose",
+  "version": "0.1.0",
+  "description": "Models and utilities for storing GeoJSON features and feature collections with Mongoose.",
+  "dependencies": {
+		"mongoose": "3.5.5",
+		"cloneextend": "0.0.3",
+  }
+}

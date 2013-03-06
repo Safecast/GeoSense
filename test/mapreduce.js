@@ -32,7 +32,7 @@ describe('MapReduce', function() {
 		});
 	});
 
-	it('should create an array of points', function(done) {
+	it('should save an array of features', function(done) {
 		var features = [];
 
 		// TODO: this should be handled better -- keeping track of extremes manually is not very nice
@@ -78,7 +78,7 @@ describe('MapReduce', function() {
 				});
 				return;
 			}
-			features.shift().save(function(err, point) {
+			features.shift().save(function(err, feature) {
 				if (err) throw err;
 				dequeueFeature();
 			});
@@ -107,6 +107,7 @@ describe('MapReduce', function() {
 
 		});
 	});
+
 
 	it('should run MapReduce at the size of the area where features where generated, resulting in 1 single feature', function(done) {
 		api.mapReduce.mapReduce({

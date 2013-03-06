@@ -11,6 +11,9 @@ var mongoMapReduceFunctions =
 {
 	map: function() 
 	{
+		if (DEBUG) {
+			print('map:_id = '+this._id);
+		}
 		var emitted = {count: 1};
 
 		// get the combined emit key 
@@ -45,6 +48,9 @@ var mongoMapReduceFunctions =
 			events.emit(fullKey, emitted);
 		}
 
+		if (DEBUG) {
+			print('emit:key = '+fullKey);
+		}
 		emit(fullKey, emitted);
 	},
 
@@ -110,7 +116,8 @@ var runMapReduce = function(collectionName, outputCollectionName, emitKeys, opti
 		emitKeys: emitKeys,
 		emitKeys_code: {},
 		events: {},
-		KEY_SEPARATOR: keys.KEY_SEPARATOR
+		KEY_SEPARATOR: keys.KEY_SEPARATOR,
+		DEBUG: false
 	};
 
 	// Pass all utility functions with the scope that is available to MongoDB
