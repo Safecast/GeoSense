@@ -2,7 +2,7 @@ var config = require('../../config'),
 	models = require('../../models'),
 	permissions = require('../../permissions'),
 	utils = require('../../utils'),
-	c2d = require('../../coordinates2d'),
+	coordinates = require('../../geogoose/').coordinates,
 	url = require('url'),
 	console = require('../../ext-console.js'),
 	mongoose = require('mongoose'),
@@ -84,7 +84,7 @@ var FeatureAPI = function(app)
                             return Number(c) + (i < 2 ? -gridSize / 2 : gridSize / 2);
                     	});
                     	boxes = bbox.some(isNaN) ? 
-                    		null : c2d.adjustBboxForQuery(bbox);
+                    		null : coordinates.adjustBboxForQuery(bbox);
                     }
                     var manyBoxes = boxes.length > 1,
                     	isMapReduced = findOpts.gridSize || findOpts.timebased;
