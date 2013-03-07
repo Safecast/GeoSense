@@ -9,7 +9,6 @@ module.exports = {
         {to: 'properties', type: 'Object'},
         {to: 'type', type: 'String'},
         {to: 'geometry', type: 'Object'},
-        {to: 'properties', type: 'Object'}
     ]
 
 };

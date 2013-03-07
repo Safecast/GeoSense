@@ -303,7 +303,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
 			collection.importParams = _.cloneextend(params, {
-				transform: customTransform.descripts
+				transform: customTransform ? customTransform.descripts : null
 			});
 		}
 
@@ -367,7 +367,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					finalized = true;
 					collection.extremes = extremes;
 					collection.markModified('extremes');
-					if (!defaults.attrMap.numeric) {
+					if (!defaults.attrMap || !defaults.attrMap.numeric) {
 						collection.defaults.histogram = false;
 					}
 					collection.sourceFieldNames = fieldNames;
@@ -529,7 +529,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 						} else {
 							if (!fieldNames) {
-								fieldNames = data.keys();
+								fieldNames = Object.keys(data);
 							}
 							doc = data;
 						}
