@@ -29,6 +29,7 @@ describe('GeoJSON', function() {
 			format: 'geojson'
 		}, null, null, function(err, collection) {
 			if (err) throw err;
+			console.log(collection);
 			ImportedModel = collection.getFeatureModel();
 			done();
 		});

@@ -335,10 +335,8 @@ following:
 */
 var DataTransform = function(descripts, options) 
 {
-	var fields = {}, setters = {};
-	if (typeof descript != 'object') {
-		descript = {};
-	}
+	var fields = {}, setters = {},
+		descripts = !Array.isArray(descripts) ? [] : descripts;
 	this.fields = [];
 	this.setters = {};
 	this.descripts = [];
@@ -357,6 +355,7 @@ DataTransform.prototype.addFields = function(descripts)
 
 DataTransform.prototype.addField = function(d)
 {
+	console.log(d);
 	if (d.set) {
 		this.setters[d.to] = FieldSetter(d.set);
 	} else if (!d.type || !FieldType[d.type]) {
@@ -367,7 +366,7 @@ DataTransform.prototype.addField = function(d)
 	this.fields.push({
 		name: d.to,
 		label: (d.from && d.from != '*' ?
-			(isArray(d.from) ? d.from.join(', ') : d.from) : d.to),
+			(Array.isArray(d.from) ? d.from.join(', ') : d.from) : d.to),
 		type: d.type
 	});
 	this.descripts.push(d);
@@ -411,4 +410,6 @@ DataTransform.prototype.transformModel = function(fromDoc, ToModel, config)
 module.exports = {
 	DataTransform: DataTransform,
 	DataTransformError: DataTransformError,
+	Cast: Cast,
+	FieldType: FieldType
 };
