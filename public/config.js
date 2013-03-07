@@ -60,7 +60,7 @@ var UnitFormat = {
 var COLOR_GRADIENT_STEP = null; // 1 / 500.0;
 
 var DEFAULT_FEATURE_OPACITY = .75,
-	MIN_BUBBLE_SIZE = 2,
+	MIN_BUBBLE_SIZE = 8,
 	MAX_BUBBLE_SIZE = 60,
 	DEFAULT_POINT_RADIUS = 7,
 	DEFAULT_FEATURE_STROKE_WIDTH = 1;
@@ -91,5 +91,5 @@ if (!IS_BROWSER) {
 	};
 } else {
 	// Browser: define console.log if undefined
-	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
+	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {}, error: function() {} }; 
 }

@@ -23,7 +23,6 @@ define([
 
 		populateFromModel: function()
 		{
-			console.log('----------');
 			var mapInfo = this.model.attributes;
 			this.setTitle(mapInfo.title);
 			var fields = [/*'title',*/ 'description', 'author', 'linkURL', 'twitter'];

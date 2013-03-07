@@ -109,17 +109,19 @@ define([
 			for (var i = 0; i < colors.length; i++) {
 				var val,
 					maxIndex,
-					extremes = this.model.getExtremes(),
-					isNumeric = this.model.isNumeric();
-				
+					isNumeric = this.model.isNumeric(),
+					extremes = this.model.getMappedExtremes(),
+					minVal = extremes.numeric ? extremes.numeric.min : NaN,
+					maxVal = extremes.numeric ? extremes.numeric.max : NaN,
+					numAttr = this.model.attrMap ? this.model.attrMap.numeric : null;
+
 				if (!isNumeric || (colors[i].title && colors[i].title.length)) {
 					val = colors[i].title || '&nbsp;';
 				} else {
 					hasNumbers = true;
 					if (isGradient) {
 						val = valFormatter.format(
-							extremes.minVal + colors[i].position * 
-							(extremes.maxVal - extremes.minVal));
+							minVal + colors[i].position * (maxVal - minVal));
 						if (maxIndex == undefined || colors[i].position > colors[maxIndex].position) {
 							maxIndex = i;
 						}

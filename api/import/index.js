@@ -251,8 +251,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     parser = format.Parser();
 
     dataTransform = new transform.DataTransform(format.transform, {strict: !params.dry});
+	var customTransform;
     if (params.transform) {
-    	var customTransform;
     	if (typeof params.transform != 'object') {
 			var transformModule = params.transform;
 			console.log('Loading transform: '+params.transform);
@@ -281,8 +281,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			}
 			throw err;
     	}
-    	dataTransform.fields = _.cloneextend(dataTransform.fields, 
-    		customTransform.fields);
+    	dataTransform.addFields(customTransform.descripts);
     }
 
 	var importCount = 0,
@@ -304,7 +303,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
 			collection.importParams = _.cloneextend(params, {
-				transform: params.transform
+				transform: customTransform.descripts
 			});
 		}
 
@@ -368,13 +367,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					finalized = true;
 					collection.extremes = extremes;
 					collection.markModified('extremes');
-
-			    	collection.isNumeric = collection.extremes.properties 
-			    		&& collection.extremes.properties.val 
-			    		&& !isNaN(collection.extremes.properties.val.min);
-					if (!collection.isNumeric) {
+					if (!defaults.attrMap.numeric) {
 						collection.defaults.histogram = false;
 					}
+					collection.sourceFieldNames = fieldNames;
+					collection.fields = dataTransform.fields;
+					// TODO:
  					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
 					collection.active = true;
 					collection.numBusy = 0;
@@ -530,6 +528,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								doc[fieldNames[i]] = data[i];
 							}
 						} else {
+							if (!fieldNames) {
+								fieldNames = data.keys();
+							}
 							doc = data;
 						}
 

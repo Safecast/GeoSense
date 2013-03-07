@@ -11,7 +11,6 @@ Example:
 */
 var getAttr = function(obj, path) {
 	var _get = function(obj, pathSegments) {
-		console.log(obj, pathSegments);
 		if (!obj) return undefined;
 		var el = obj[pathSegments.shift()];
 		if (!pathSegments.length) return el;
@@ -163,12 +162,12 @@ var lpad = function(str, padString, length) {
     return s;
 };
 
-function mathEval (exp) {
+function mathEval(exp) {
     var reg = /(?:[a-z$_][a-z0-9$_]*)|(?:[;={}\[\]"'!&<>^\\?:])/ig,
         valid = true;
 
     // Detect valid JS identifier names and replace them
-    exp = exp.replace(reg, function ($0) {
+    var evalExp = exp.replace(reg, function ($0) {
         // If the name is a direct member of Math, allow
         if (Math.hasOwnProperty($0))
             return "Math."+$0;
@@ -179,10 +178,19 @@ function mathEval (exp) {
 
     // Don't eval if our replace function flagged as invalid
     if (!valid) {
-        console.log("Invalid arithmetic expression");
+    	var msg = "Invalid arithmetic expression: "+exp;
+    	console.error(msg);
+    	if (DEV) throw new Error(msg);
     	return false;
     } else {
-        try { return(eval(exp)); } catch (e) { console.log("Invalid arithmetic expression"); return false; };
+        try { 
+        	return(eval(evalExp)); 
+        } catch (e) { 
+	    	var msg = "Eval error: " + evalExp;
+	    	console.error(msg);
+	    	if (DEV) throw e;
+	    	return false;
+        };
     }
 }
 
@@ -195,7 +203,7 @@ function ValFormatter(format)
 
 ValFormatter.prototype.format = function(val)
 {
-	if (this.eq) {
+	if (this.eq && this.eq != '') {
 		var eq = this.eq.format({
 			'val': val
 		});
