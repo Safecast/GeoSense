@@ -11,9 +11,11 @@ define([
 
         initialize: function() 
         {
+            var attrMap = this.collection.mapLayer.getLayerOptions().attrMap;
+            this.numericAttr = attrMap ? attrMap.numeric : null;
         },
 
-        getVal: function()
+        getNumericVal: function()
         {
             return this.numericAttr ?
                 this.get(this.numericAttr) : undefined;
@@ -50,21 +52,20 @@ define([
 		{
             var l = this.collection.mapLayer,
                 options = l.getLayerOptions(),
-                extremes = l.getExtremes(),
-                min = extremes.minVal,
-                max = extremes.maxVal,
-                val = this.getVal(),
+                extremes = l.getMappedExtremes(),
+                counts = l.getCounts(),
+                val = this.getNumericVal(),
+                maxVal = extremes.numeric ? extremes.numeric.max : NaN,
+                minVal = extremes.numeric ? extremes.numeric.min : NaN,
                 colors = l.getNormalizedColors();
-
-            console.log(val, extremes);
 
             if (val && val.avg != null) {
                 val = val.avg;
             }
 
-            var count = this.get('count'),
-                normVal = (val - min) / (max - min),
-                normCount = count / extremes.maxCount,
+            var count = this.attributes.count || 1,
+                normVal = (val - minVal) / (maxVal - minVal),
+                normCount = count / counts.max,
                 color,
                 colorType = val != null ? options.colorType : ColorType.SOLID,
                 size;
@@ -76,7 +77,7 @@ define([
                 case ColorType.LINEAR_GRADIENT:
                 case ColorType.PALETTE:
                     var colorPos;
-                    switch (options.featureColorAttr) {
+                    switch (options.attrMap.featureColor) {
                         case 'count':
                             color = l.colorAt(normCount);
                             break;
@@ -88,12 +89,12 @@ define([
                     break;
             }
 
-            switch (options.featureSizeAttr) {
+            switch (options.attrMap ? options.attrMap.featureSize : null) {
                 default:
                 case 'count':
                     size = normCount;
                     break;
-                case 'val.avg':
+                case '$numeric.avg':
                     size = normVal;
                     break;
             };
@@ -101,8 +102,6 @@ define([
             return {
                 color: color,
                 darkerColor: multRGB(color, .75),
-                min: min,
-                max: max,
                 model: this,
                 data: {
                     val: val,

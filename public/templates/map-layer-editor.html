@@ -40,10 +40,10 @@
                         </span>
                         <span class="slider pull-left" data-field="layerOptions.opacity"></span>
                     </p>
-                    <div class="feature-settings C">
+                    <div class="feature-settings ST advanced">
                         <p>
                             <label class="checkbox">
-                                <input class="model-input" name="layerOptions.cellFallbackPoints" type="checkbox" checked="checked"> Fall back to points if zoomed in far enough
+                                <input class="model-input" name="layerOptions.featureTypeFallback" type="checkbox" checked="checked"> Fall back to original shape if not tiled
                             </label>
                         </p>
                     </div>
@@ -68,15 +68,15 @@
                     <div class="feature-settings B">
                         <p>
                             <label class="title" for="map-size">Size relative to</label>
-                            <select class="model-input" name="layerOptions.featureSizeAttr">
+                            <select class="model-input" name="layerOptions.attrMap.featureSize">
                                 <option value="">(default)</option>
                                 <option value="count">sample size</option>
-                                <option value="val.avg">average value</option>
+                                <option value="$numeric.avg">average value</option>
                             </select>
                         </p>
                     </div>
                 </div>
-                <p class="clearfix">
+                <p class="clearfix advanced">
                     <label class="title" for="map-size">Renderer</label>
                     <select class="model-input" name="layerOptions.htmlRenderer">
                         <option value="Canvas">Canvas (faster)</option>
@@ -123,7 +123,7 @@
                 <!-- TODO: this needs to be reflected in the legend
                 <p>
                     <label class="title" for="map-size">Map color to</label>
-                    <select class="model-input" name="layerOptions.featureColorAttr">
+                    <select class="model-input" name="layerOptions.attrMap.featureColor">
                         <option value="">(default)</option>
                         <option value="count">sample size</option>
                         <option value="val.avg">average value</option>
@@ -151,7 +151,7 @@
                     </span>
                     <span class="slider pull-left" data-field="layerOptions.strokeOpacity"></span>
                 </p>
-                <p class="clearfix">
+                <p class="clearfix advanced">
                     <label class="title" for="map-size">Line cap (requires SVG)</label>
                     <select class="model-input" name="layerOptions.strokeLinecap">
                         <option value="round">round</option>
@@ -159,7 +159,7 @@
                         <option value="butt">butt</option>
                     </select>
                 </p>
-                <p class="clearfix">
+                <p class="clearfix advanced">
                     <label class="title" for="map-size">Dash style (requires SVG)</label>
                     <select class="model-input" name="layerOptions.strokeDashstyle">
                         <option value="solid">solid</option>
@@ -206,13 +206,13 @@
             <fieldset class="tab-pane" id="layer-data">
                 <p>
                     <label class="title" for="map-size">Use numeric values from</label>
-                    <select class="model-input" name="layerOptions.numericAttr">
+                    <select class="model-input field-names" name="layerOptions.attrMap.numeric" data-type="Number">
                         <option value="">(pick a number field)</option>
                     </select>
                 </p>
                 <p class="clearfix">
                     <label class="title" for="map-size">Use date/time values from</label>
-                    <select class="model-input" name="layerOptions.datetimeAttr">
+                    <select class="model-input field-names" name="layerOptions.attrMap.datetime" data-type="Date">
                         <option value="">(pick a date field)</option>
                     </select>
                 </p>
@@ -222,6 +222,9 @@
         <div class="panel-buttons clearfix">
             <label class="checkbox inline">
                 <input class="preview" type="checkbox" checked="checked"> Preview
+            </label>
+            <label class="checkbox inline">
+                <input class="show-advanced" type="checkbox"> <i class="icon icon-cog half-opacity has-tooltip" data-original-title="Advanced Settings"></i>
             </label>
             <a href="#" class="btn save btn-success">Save Layer</a>
             <a href="#" class="btn undo">Undo</a>

@@ -62,7 +62,6 @@ define([
 	    {
 	    	this.isLoading = false;
 	    	this.updateStatus(__('failed'));
-	    	console.log('layerFeaturesRequestError', xhr);
 	    },
 
 	    layerFeaturesSynced: function(model, resp, options)
@@ -83,7 +82,6 @@ define([
 			} else {
 		    	this.hideSpinner();
 			}
-
 
 			if (!status) {
 		    	switch (this.model.getDataStatus()) {

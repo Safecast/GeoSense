@@ -105,15 +105,29 @@ define([
             return this.attributes.layerOptions;
         },
 
-        getExtremes: function()
+        getCounts: function()
         {
-            var ex = this.attributes.featureCollection.extremes;
-            return {
-                minVal: ex && ex.val ? ex.val.min : NaN, 
-                maxVal: ex && ex.val ? ex.val.max : NaN,
-                maxCount: this.featureCollection.counts ? 
-                    this.featureCollection.counts.max : 0
-            };
+            return this.featureCollection.counts;
+        },
+
+        isNumeric: function()
+        {
+            var x = this.attributes.featureCollection.extremes,
+                numAttr = this.attributes.layerOptions.attrMap ? 
+                    this.attributes.layerOptions.attrMap.numeric : null;
+            return numAttr != undefined 
+                && getAttr(x, numAttr) != undefined;
+        },
+
+        getMappedExtremes: function()
+        {
+            var x = this.attributes.featureCollection.extremes,
+                attrMap = this.attributes.layerOptions.attrMap,
+                r = {};
+            for (var k in attrMap) {
+                r[k] = getAttr(x, attrMap[k]);
+            }
+            return r;
         },
 
         colorAt: function(pos)
@@ -128,7 +142,7 @@ define([
         {
             var self = this,
                 originalColors = originalColors || this.attributes.layerOptions.colors,
-                extremes = this.getExtremes();
+                extremes = this.getMappedExtremes();
             if (!this._normalizedColors) {
                 this._normalizedColors = originalColors.map(function(c) {
                     var p = parseFloat(c.position),
@@ -136,7 +150,10 @@ define([
                         sc = (c.position || '') + '';
                     return _.extend({}, c, {
                         position: sc[sc.length - 1] == '%' ?
-                            p / 100 : (p - extremes.minVal) / (extremes.maxVal - extremes.minVal)
+                            p / 100 
+                            : (extremes.numeric ?
+                                (p - extremes.numeric.min) / (extremes.numeric.max - extremes.numeric.min)
+                                : 0)
                     });
                 });
             }
@@ -154,13 +171,6 @@ define([
         isEnabled: function()
         {
             return this.sessionOptions.enabled;
-        },
-
-        isNumeric: function()
-        {
-            return this.attributes.featureCollection.isNumeric 
-                && this.attributes.featureCollection.maxVal != undefined 
-                && this.attributes.featureCollection.minVal != undefined;
         },
 
         canDisplayValues: function()
