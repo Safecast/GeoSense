@@ -22,7 +22,7 @@ define([
 		render: function()
 		{	
 			var self = this;
-			$(this.el).html(this.template());
+			$(this.el).hide().html(this.template());
 			var graphEl = self.$el;
 
 			if (!this.histogramData) {
@@ -42,9 +42,9 @@ define([
 
 			var data = this.histogramData,
 				len = data.length,
-				extremes = self.model.getExtremes(),
-				maxVal = extremes.maxVal,
-				minVal = extremes.minVal,
+				extremes = this.model.getMappedExtremes(),
+				minVal = extremes.numeric ? extremes.numeric.min : NaN,
+				maxVal = extremes.numeric ? extremes.numeric.max : NaN,
 				graphH = graphEl.innerHeight(),
 				graphW = graphEl.innerWidth();
 
@@ -150,6 +150,7 @@ define([
 				.text(function(d) { return d } );
 			*/
 
+			this.$el.show('fast');
 			return this;
 		}
 	});

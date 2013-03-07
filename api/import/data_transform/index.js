@@ -333,37 +333,52 @@ following:
 		// etc
 	]
 */
-var DataTransform = function(descript, options) 
+var DataTransform = function(descripts, options) 
 {
-	var fields = {};
+	var fields = {}, setters = {};
 	if (typeof descript != 'object') {
 		descript = {};
 	}
-
-	for (var i = 0; i < descript.length; i++) {
-		var d = descript[i];
-		if (d.set) {
-			fields[d.to] = FieldSetter(d.set);
-		} else if (!d.type || !FieldType[d.type]) {
-			throw new ValidationError('Invalid field type: ' + d.type);
-		} else {
-			fields[d.to] = FieldType[d.type](d.from || d.to, d.options);
-		}
-	}
-
-	this.fields = fields;
-	this.descript = descript;
+	this.fields = [];
+	this.setters = {};
+	this.descripts = [];
+	if (descripts) this.addFields(descripts);
 	this.options = _.cloneextend({
 		strict: true
 	}, options || {});
+};
+
+DataTransform.prototype.addFields = function(descripts)
+{
+	for (var i = 0; i < descripts.length; i++) {
+		this.addField(descripts[i]);
+	}
+};
+
+DataTransform.prototype.addField = function(d)
+{
+	if (d.set) {
+		this.setters[d.to] = FieldSetter(d.set);
+	} else if (!d.type || !FieldType[d.type]) {
+		throw new ValidationError('Invalid field type: ' + d.type);
+	} else {
+		this.setters[d.to] = FieldType[d.type](d.from || d.to, d.options);
+	}
+	this.fields.push({
+		name: d.to,
+		label: (d.from && d.from != '*' ?
+			(isArray(d.from) ? d.from.join(', ') : d.from) : d.to),
+		type: d.type
+	});
+	this.descripts.push(d);
 };
 
 DataTransform.prototype.transformModel = function(fromDoc, ToModel, config) 
 {
 	var transformed = {}
 		errors = 0;
-	for (var to in this.fields) {
-		var f = this.fields[to];
+	for (var to in this.setters) {
+		var f = this.setters[to];
 		transformed[to] = f.apply(fromDoc, [transformed]);
 		if (isErr(transformed[to])) {
 			var err = transformed[to],

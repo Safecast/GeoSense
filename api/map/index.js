@@ -64,7 +64,7 @@ var MapAPI = function(app)
 				}
 				if (k == 'layers') {
 					for (var i = 0; i < m[k].length; i++) {
-						m[k][i] = prepareLayerResult(req, m[k][i]);
+						m[k][i] = prepareLayerResult(req, m[k][i], map);
 					}
 					m[k] = sortByPosition(m[k]);
 				}
@@ -72,12 +72,17 @@ var MapAPI = function(app)
 			return m;
 		}
 
-		var prepareLayerResult = function (req, layer) {
+		var prepareLayerResult = function (req, layer, map) 
+		{
 			// if this is called by prepareMapResult, the layer's toObject() 
 			// was already called.
 			var layer = layer.toObject ?
 				layer.toObject() : layer;
-			delete layer.featureCollection.importParams;
+
+			if (!permissions.canAdminMap(req, map)) {
+				delete layer.featureCollection.importParams;
+			}
+
 			return layer;
 		};
 
@@ -290,7 +295,7 @@ var MapAPI = function(app)
 					// only send if complete; or incomplete was requested 
 					if (mapLayer.featureCollection.status == config.DataStatus.COMPLETE ||
 						url.parse(req.url, true).query.incomplete) {
-							res.send(prepareLayerResult(req, mapLayer));
+							res.send(prepareLayerResult(req, mapLayer, map));
 					} else {
 						res.send('map layer is incomplete', 403);
 					}
@@ -338,14 +343,14 @@ var MapAPI = function(app)
 									map.save(function(err, map) {
 										if (!handleDbOp(req, res, err, true)) {
 											console.log('layer position changed to ' + newPosition);
-											res.send(prepareLayerResult(req, mapLayer));
+											res.send(prepareLayerResult(req, mapLayer, map));
 										}
 									});
 									return;
 								}
 							}
 
-							res.send(prepareLayerResult(req, mapLayer));
+							res.send(prepareLayerResult(req, mapLayer, map));
 						}
 					});
 
@@ -397,7 +402,7 @@ var MapAPI = function(app)
 										.populate('layers.layerOptions')
 										.exec(function(err, map) {
 										    if (handleDbOp(req, res, err, map)) return;
-									       	res.send(prepareLayerResult(req, map.layers.id(layer._id)));
+									       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
 										});
 							  	});
 						    });

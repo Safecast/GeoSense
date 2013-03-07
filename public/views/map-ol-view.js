@@ -177,6 +177,7 @@ define([
             };
 
             var defaultStyle = {
+                    pointRadius: or(layerOptions.featureSize * .5, DEFAULT_POINT_RADIUS),
                     fillColor: '${getColor}',
                     fillOpacity: opacity,
                     strokeDashstyle: layerOptions.strokeDashstyle,
@@ -196,7 +197,6 @@ define([
                 default:
                 case FeatureType.POINTS:
                     defaultStyle = _.extend(defaultStyle, {
-                        pointRadius: or(layerOptions.featureSize * .5, DEFAULT_POINT_RADIUS),
                         strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
                         strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
                         strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
@@ -262,7 +262,8 @@ define([
             layer.styleMap = this.getStyleMapForLayer(model);
             if (model.hasChangedColors() 
                 || model.hasChanged('layerOptions.featureType')
-                || model.hasChanged('layerOptions.featureSizeAttr')
+                || model.hasChanged('layerOptions.featureTypeFallback')
+                || model.hasChanged('layerOptions.attrMap')
                 || model.hasChanged('layerOptions.featureColorAttr')) {
                     this.featureReset(model.featureCollection);
             } else {
@@ -361,9 +362,10 @@ define([
             var collection = model.collection;
 
             var attrs = model.getRenderAttributes(),
+                layerOptions = collection.mapLayer.attributes.layerOptions,
                 geometry;
 
-            switch (collection.mapLayer.attributes.layerOptions.featureType) {
+            switch (layerOptions.featureType) {
 
                 case FeatureType.POINTS:
                 case FeatureType.BUBBLES:
@@ -373,11 +375,13 @@ define([
                     });
                     break;
                 case FeatureType.SQUARE_TILES:
-                    geometry = this.formats.geoJSON.parseGeometry({
-                        type: 'Polygon',
-                        coordinates: [model.getBox()]
-                    });
-                    break;
+                    if (!layerOptions.featureTypeFallback || model.attributes.geometry.type != 'Point') {
+                        geometry = this.formats.geoJSON.parseGeometry({
+                            type: 'Polygon',
+                            coordinates: [model.getBox()]
+                        });
+                        break;
+                    }
                 case FeatureType.SHAPES:
                     geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
                     break;

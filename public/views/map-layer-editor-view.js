@@ -19,13 +19,14 @@ define([
 	    	'click .btn.undo': 'undoButtonClicked',
 	    	'click .btn.destroy': 'destroyButtonClicked',
 	    	'click .btn.feature-type': 'featureTypeClicked',
+	    	'change .model-input.layer-toggle': 'layerToggled',
 	    	'change .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	// does not work well with live preview since val is unchanged
 	    	// 'keydown .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	'change .preview': 'previewChanged',
+	    	'change .show-advanced': 'showAdvancedChanged',
 	    	'click .remove-color': 'removeColorClicked',
-	    	'click .add-color': 'addColorClicked',
-	    	'change .model-input.layer-toggle': 'layerToggled'
+	    	'click .add-color': 'addColorClicked'
 	    },
 
 	    initialize: function(options) 
@@ -46,13 +47,26 @@ define([
 
 	    render: function() 
 	    {
-	    	var self = this;
+	    	var self = this,
+	    		featureCollection = this.model.attributes.featureCollection;
 			MapLayerEditorView.__super__.render.call(this);
 
 	    	this.colorRowTemplate = this.$('.color-palette tr.element-template').remove()
 	    		.clone().removeClass('element-template');
 			this.initModelInputs();
 			this.initSliders();
+
+			this.$('select.field-names').each(function() {
+				var fieldType = $(this).attr('data-type'),
+					opts = [];
+				_.each(featureCollection.fields, function(field) {
+					if (field.name.match(/^properties\./) && (!fieldType || fieldType == field.type)) {
+						opts.push('<option value="%(name)s">%(label)s</option>'.format(field));
+					}
+				})
+				$(this).append(opts.join('\n'));
+			});
+
 			this.populateFromModel();
 			this.initColorPicker(this.$('.model-input.color-picker'));
 
@@ -62,6 +76,8 @@ define([
 					self.modelInputChanged(event);
 				}
 			});
+
+			this.initColorPicker(this.$('.model-input.color-picker'));
 
 			this.$('.has-tooltip').tooltip({ delay: 0, animation: false });
 
@@ -194,6 +210,11 @@ define([
 	    	}
 	    },
 
+		showAdvancedChanged: function(event)
+		{
+			this.setButtonState();
+		},
+
 	    isPreviewEnabled: function()
 	    {
 			return this.$('.preview').is(':checked');
@@ -212,13 +233,16 @@ define([
 		    	this.$('.remove-color').attr('disabled', true);
 	    	}
 
+	    	var showAdvanced = this.$('.show-advanced').is(':checked');
+			this.$('.advanced').each(function() {
+				if (!$(this).hasClass('feature-settings')) {
+					$(this).toggle(showAdvanced);
+				}
+			});
 	    	var featureType = this.getValueFromModelInput('layerOptions.featureType');
 	    	this.$('.feature-settings').each(function() {
-	    		if (!$(this).hasClass(featureType)) {
-	    			$(this).hide();
-	    		} else {
-	    			$(this).show();
-	    		}
+	    		$(this).toggle($(this).hasClass(featureType) && 
+	    			(showAdvanced || !$(this).hasClass('advanced')));
 	    	});
 	    },
 
