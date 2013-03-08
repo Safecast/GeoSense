@@ -300,7 +300,7 @@ function zeroPad(str, len) {
 
 function getRGBChannels(color)
 {
-	var intColor = typeof color == 'string' ? parseInt(color.replace('#', '0x')) : color;
+	var intColor = colorToInt(color);
 	return channels = [
 		(intColor &  0xff0000) >> 16,
 		(intColor &  0x00ff00) >> 8,
@@ -308,8 +308,22 @@ function getRGBChannels(color)
 	];
 }
 
+function rgb2int (rgb) {
+	return rgb[0] << 16 ^ rgb[1] << 8 ^ rgb[2];
+}
+
+function colorToInt(color)
+{
+	return typeof color == 'string' ? parseInt(color.replace('#', '0x')) : color;
+}
+
+function intToColor(intColor)
+{
+	return '#' + zeroPad(intColor.toString(16), 6);
+}
+
 function multRGB(color, factor) {
-	var intColor = parseInt(color.replace('#', '0x')),
+	var intColor = colorToInt(color),
 		channels = getRGBChannels(intColor);
 	for (var i = channels.length - 1; i >= 0; i--) {
 		channels[i] = Math.min(255, Math.round(channels[i] * factor));
@@ -317,7 +331,46 @@ function multRGB(color, factor) {
 	intColor = (channels[0] << 16)
 			+ (channels[1] << 8)
 			+ channels[2];	
-	return '#' + zeroPad(intColor.toString(16), 6);
+	return intToColor(intColor);
+}
+
+function rgb2hsb(_rgb) {
+	var x, f, i, hue, sat, val;
+	var rgb = [_rgb[0]/255, _rgb[1]/255, _rgb[2]/255];
+	x = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
+	val = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
+	if (x==val){
+	return(new Array(0,0,val));
+	}
+	f = (rgb[0] == x) ? rgb[1]-rgb[2] : ((rgb[1] == x) ? rgb[2]-rgb[0] : rgb[0]-rgb[1]);
+	i = (rgb[0] == x) ? 3 : ((rgb[1] == x) ? 5 : 1);
+	hue = Math.floor((i-f/(val-x))*60)%360;
+	sat = (val-x)/val;
+	val = val;
+	return(new Array(hue,sat,val));
+}
+
+function hsb2rgb(_hsb) {
+	var red, grn, blu, i, f, p, q, t;
+	var hsb = [_hsb[0], _hsb[1], _hsb[2]];
+	hsb[0]%=360;
+	if(hsb[2]==0) {return(new Array(0,0,0));}
+	hsb[0]/=60;
+	i = Math.floor(hsb[0]);
+	f = hsb[0]-i;
+	p = hsb[2]*(1-hsb[1]);
+	q = hsb[2]*(1-(hsb[1]*f));
+	t = hsb[2]*(1-(hsb[1]*(1-f)));
+	if (i==0) {red=hsb[2]; grn=t; blu=p;}
+	else if (i==1) {red=q; grn=hsb[2]; blu=p;}
+	else if (i==2) {red=p; grn=hsb[2]; blu=t;}
+	else if (i==3) {red=p; grn=q; blu=hsb[2];}
+	else if (i==4) {red=t; grn=p; blu=hsb[2];}
+	else if (i==5) {red=hsb[2]; grn=p; blu=q;}
+	red = Math.floor(red*255);
+	grn = Math.floor(grn*255);
+	blu = Math.floor(blu*255);
+	return (new Array(red,grn,blu));
 }
 
 function polyCircle(ctr, xRadius, yRadius, numSegments)
