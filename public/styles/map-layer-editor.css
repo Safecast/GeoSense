@@ -115,6 +115,10 @@
 	display: inline-block;
 }
 
+.map-layer-editor fieldset button {
+	margin-bottom: 9px;
+}
+
 .map-layer-editor table.color-palette .btn {
 	margin-left: 0;
 }
