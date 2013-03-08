@@ -32,7 +32,7 @@ define([
 			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
 
 			this.descripts = [
-				{to: 'geometry.coordinates', type: 'LngLat', label: 'coordinates', options: {}, allowedTypes: ['LatLng', 'LngLat']},
+				{to: 'geometry.coordinates', type: 'LatLng', label: 'coordinates', options: {}, allowedTypes: ['LatLng', 'LngLat']},
 				{toTemplate: 'properties.$field', type: 'Number', label: '', options: {}},
 				{toTemplate: 'properties.$field', type: 'String', label: '', options: {}},
 				{toTemplate: 'properties.$field', type: 'Date', label: '', options: {}},
