@@ -161,7 +161,7 @@ define([
 			this.populateModelInputs();
 			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
 			this.populateColorTable();
-			this.setButtonState(false);
+			this.setButtonState(false, false);
 			this.updateSliders();
 	    },
 
@@ -249,7 +249,7 @@ define([
 	    	return false;
 	    },
 
-	    setButtonState: function(state) 
+	    setButtonState: function(state, animated) 
 	    {
 	    	if (state != undefined) {
 		    	this.$('.btn.undo').attr('disabled', !state);
@@ -268,16 +268,28 @@ define([
 	    	}
 	    	this.hideColorGenerator();
 
-	    	var showAdvanced = this.$('.show-advanced').is(':checked');
+	    	var duration = animated || animated == undefined ? 
+	    		'fast' : null,
+	    		showAdvanced = this.$('.show-advanced').is(':checked');
+
 			this.$('.advanced').each(function() {
 				if (!$(this).hasClass('feature-settings')) {
-					$(this).toggle(showAdvanced);
+					if (showAdvanced) {
+						$(this).show(duration);
+					} else {
+						$(this).hide(duration);
+					}
 				}
 			});
 	    	var featureType = this.getValueFromModelInput('layerOptions.featureType');
 	    	this.$('.feature-settings').each(function() {
-	    		$(this).toggle($(this).hasClass(featureType) && 
-	    			(showAdvanced || !$(this).hasClass('advanced')));
+	    		var visible = $(this).hasClass(featureType) && 
+	    			(showAdvanced || !$(this).hasClass('advanced'));
+				if (visible) {
+					$(this).show(duration);
+				} else {
+					$(this).hide(duration);
+				}
 	    	});
 	    },
 
