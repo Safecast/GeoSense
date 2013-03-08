@@ -265,8 +265,8 @@ define([
 		    	this.$('.show-color-generator').attr('disabled', false);
 	    	} else {
 		    	this.$('.show-color-generator').attr('disabled', true);
-		    	this.hideColorGenerator();
 	    	}
+	    	this.hideColorGenerator();
 
 	    	var showAdvanced = this.$('.show-advanced').is(':checked');
 			this.$('.advanced').each(function() {
