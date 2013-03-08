@@ -51,7 +51,7 @@
 	background-position: -100px 0%;
 }
 
-.map-layer-editor .btn.feature-type.bubbles:hover, .btn.feature-type.bubbles.active .icon-feature-type {
+.map-layer-editor .btn.feature-type.bubbles:hover .icon-feature-type, .btn.feature-type.bubbles.active .icon-feature-type {
 	background-position: -100px 100%;
 }
 
@@ -59,12 +59,12 @@
 	background-position: -150px 0%;
 }
 
-.map-layer-editor .btn.feature-type.shapes:hover, .btn.feature-type.shapes.active .icon-feature-type {
+.map-layer-editor .btn.feature-type.shapes:hover .icon-feature-type, .btn.feature-type.shapes.active .icon-feature-type {
 	background-position: -150px 100%;
 }
 
 .map-layer-editor button.feature-type:hover, .map-layer-editor button.feature-type.active {
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .map-layer-editor button.feature-type.active {
@@ -113,10 +113,6 @@
 .map-layer-editor .miniColors-trigger, .map-layer-editor table.color-palette .btn {
 	margin: 0 0 9px 3px;
 	display: inline-block;
-}
-
-.map-layer-editor fieldset button, .map-layer-editor table {
-	margin-bottom: 9px;
 }
 
 .map-layer-editor table.color-palette .btn {
