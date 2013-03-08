@@ -123,170 +123,172 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 			if (utils.callbackOrThrow(new Error('params.featureCollectionId not specified'), callback)) return;
 		}
 
-		GeoFeatureCollection.findOne({_id: params.featureCollectionId}, function(err, collection) {
-			if (!utils.validateExistingCollection(err, collection, callback)) return;
-			job.save(function(err, job) {
+		GeoFeatureCollection.findOne({_id: params.featureCollectionId})
+			.populate('defaults')
+			.exec(function(err, collection) {
+				if (!utils.validateExistingCollection(err, collection, callback)) return;
+				job.save(function(err, job) {
 
-				var opts = {};
-				for (var k in config.MAPREDUCE_SETTINGS.DB_OPTIONS) {
-					opts[k] = config.MAPREDUCE_SETTINGS.DB_OPTIONS[k];
-				}
-
-				var numericAttr = params.numericAttr || collection.numericAttr,
-					datetimeAttr = params.datetimeAttr || collection.datetimeAttr,
-					geometryAttr = params.geometryAttr || collection.geometryAttr || 'geometry';
-
-				opts.query = {};
-				var incremental = collection.lastReducedAt && !params.rebuild;
-				opts.removeFirst = !incremental;
-
-				if (!opts.aggregates) {
-					opts.aggregates = ['properties.*'];
-				}
-
-				//var statsTotal = db.points.count(opts.query ... and GeoFeatureCollection) * (config.NUM_ZOOM_LEVELS + numHistograms);
-				//opts.stats = {total: statsTotal, collectionId: collection._id};
-				//db.GeoFeatureCollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
-				
-				collection.status = !incremental ? 
-					config.DataStatus.REDUCING : config.DataStatus.REDUCING_INC;
-				//collection.progress = 0;
-				//collection.numBusy: statsTotal;
-
-				collection.save(function(err, collection) {
-					if (utils.callbackOrThrow(err, callback)) return;
-					var reducedAt = new Date,
-						mapReduceArguments = [],
-						mr = function() {
-							mapReduceArguments.push(arguments);
-						},
-						makeObj = function() {
-							var obj = {};
-							// makes an object out of key, value pairs passed to this function
-							for (var i = 0; i < arguments.length; i += 2) {
-								obj[arguments[i]] = arguments[i + 1];
-							}
-							return obj;
-						};
-
-					console.info('*** collection = '+collection.title+' ('+collection._id+') ***');
-
-					if (incremental) {
-						opts.query.createdAt = {$gt: collection.lastReducedAt};
-						console.warn('*** incremental reduction of points created > '+collection.lastReducedAt);
+					var opts = {};
+					for (var k in config.MAPREDUCE_SETTINGS.DB_OPTIONS) {
+						opts[k] = config.MAPREDUCE_SETTINGS.DB_OPTIONS[k];
 					}
 
-					if (collection.reduce) {
-						for (var g in config.GRID_SIZES) {
-							var gridSize = config.GRID_SIZES[g],
-								tileEvents = {
-									finalize: function(key, doc) {
-										preSave.call(doc);
-									}
-								},
-								tileIndexes = {
-									'bounds2d': '2d'
-								};
-							if (numericAttr) {
-								tileIndexes[numericAttr] = 1;
-							}
+					var attrMap = params.attrMap || 
+						((collection.defaults && collection.defaults.attrMap) ? collection.defaults.attrMap : {}),
+						geometryAttr = attrMap.geometry || 'geometry';
 
-							// Initialize MapReduce for tiles
-							if (params.types.indexOf('tile') != -1 
-								&& (!params.zoom || params.zoom.indexOf(g) != -1) 
-								&& (!collection.gridSize || gridSize > collection.gridSize) 
-								&& (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
+					opts.query = {};
+					var incremental = collection.lastReducedAt && !params.rebuild;
+					opts.removeFirst = !incremental;
 
-								mr('*** MapReduce for tiles at zoom = ' + g + ' ***', makeObj(
-									//'featureCollection', new EmitKey.Copy(), 
-									geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false})),
-									{ events: tileEvents, indexes: tileIndexes }
-								);
+					if (!opts.aggregates) {
+						opts.aggregates = ['properties.*'];
+					}
 
-								// Initialize MapReduce for time-based tiles
-								if (collection.timebased) {
-									for (var timebased in EmitKey.Time) {
-										if (params.types.indexOf('tile-' + timebased.toLowerCase()) != -1) {
-											tileIndexes[datetimeAttr] = '1';
+					//var statsTotal = db.points.count(opts.query ... and GeoFeatureCollection) * (config.NUM_ZOOM_LEVELS + numHistograms);
+					//opts.stats = {total: statsTotal, collectionId: collection._id};
+					//db.GeoFeatureCollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
+					
+					collection.status = !incremental ? 
+						config.DataStatus.REDUCING : config.DataStatus.REDUCING_INC;
+					//collection.progress = 0;
+					//collection.numBusy: statsTotal;
 
-											mr('*** MapReduce for ' + timebased.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
-												//'featureCollection', new EmitKey.Copy(), 
-												geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false}), 
-												datetimeAttr, new EmitKey.Time[timebased]()),
-												{ events: tileEvents, indexes: tileIndexes }
-											);
+					collection.save(function(err, collection) {
+						if (utils.callbackOrThrow(err, callback)) return;
+						var reducedAt = new Date,
+							mapReduceArguments = [],
+							mr = function() {
+								mapReduceArguments.push(arguments);
+							},
+							makeObj = function() {
+								var obj = {};
+								// makes an object out of key, value pairs passed to this function
+								for (var i = 0; i < arguments.length; i += 2) {
+									obj[arguments[i]] = arguments[i + 1];
+								}
+								return obj;
+							};
+
+						console.info('*** collection = '+collection.title+' ('+collection._id+') ***');
+
+						if (incremental) {
+							opts.query.createdAt = {$gt: collection.lastReducedAt};
+							console.warn('*** incremental reduction of points created > '+collection.lastReducedAt);
+						}
+
+						if (collection.reduce) {
+							for (var g in config.GRID_SIZES) {
+								var gridSize = config.GRID_SIZES[g],
+									tileEvents = {
+										finalize: function(key, doc) {
+											preSave.call(doc);
+										}
+									},
+									tileIndexes = {
+										'bounds2d': '2d'
+									};
+								if (attrMap.numeric) {
+									tileIndexes[attrMap.numeric] = 1;
+								}
+
+								// Initialize MapReduce for tiles
+								if (params.types.indexOf('tile') != -1 
+									&& (!params.zoom || params.zoom.indexOf(g) != -1) 
+									&& (!collection.gridSize || gridSize > collection.gridSize) 
+									&& (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
+
+									mr('*** MapReduce for tiles at zoom = ' + g + ' ***', makeObj(
+										//'featureCollection', new EmitKey.Copy(), 
+										geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false})),
+										{ events: tileEvents, indexes: tileIndexes }
+									);
+
+									// Initialize MapReduce for time-based tiles
+									if (attrMap.datetime) {
+										for (var timebase in EmitKey.Time) {
+											if (params.types.indexOf('tile-' + timebase.toLowerCase()) != -1) {
+												tileIndexes[attrMap.datetime] = '1';
+
+												mr('*** MapReduce for ' + timebase.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
+													//'featureCollection', new EmitKey.Copy(), 
+													geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false}), 
+													attrMap.datetime, new EmitKey.Time[timebase]()),
+													{ events: tileEvents, indexes: tileIndexes }
+												);
+											}
 										}
 									}
 								}
 							}
 						}
-					}
 
-					// Initialize MapReduce for time-based overall
-					if (collection.timebased) {
-						for (var timebased in EmitKey.Time) {
-							if (params.types.indexOf(timebased.toLowerCase()) != -1) {
-								mr('*** MapReduce for ' + timebased.toLowerCase() + ' overall ***', makeObj(
-									//'featureCollection', new EmitKey.Copy(), 
-									datetimeAttr, new EmitKey.Time[timebased]()),
-									{ events: null, indexes: null }
-								);
+						// Initialize MapReduce for time-based overall
+						if (attrMap.datetime) {
+							for (var timebase in EmitKey.Time) {
+								if (params.types.indexOf(timebase.toLowerCase()) != -1) {
+									mr('*** MapReduce for ' + timebase.toLowerCase() + ' overall ***', makeObj(
+										//'featureCollection', new EmitKey.Copy(), 
+										attrMap.datetime, new EmitKey.Time[timebase]()),
+										{ events: null, indexes: null }
+									);
+								}
 							}
 						}
-					}
 
-					// Initialize MapReduce for histograms
-					for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
-						if (numericAttr && params.types.indexOf('histogram') != -1) {
-							var numericExtremes = getAttr(collection.extremes, numericAttr);
-							if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
-								if (utils.callbackOrThrow(new Error('undefined extremes for ' + numericAttr), callback)) return;
+						// Initialize MapReduce for histograms
+						for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
+							if (attrMap.numeric && params.types.indexOf('histogram') != -1) {
+								var numericExtremes = getAttr(collection.extremes, attrMap.numeric);
+								if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
+									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
+								}
+								mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
+										//'featureCollection', new EmitKey.Copy(), 
+										attrMap.numeric, new EmitKey.Histogram(
+											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
+										{ events: null, indexes: null }
+									);
 							}
-							mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
-									//'featureCollection', new EmitKey.Copy(), 
-									numericAttr, new EmitKey.Histogram(
-										numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
-									{ events: null, indexes: null }
-								);
 						}
-					}
 
 
-					var dequeueMapReduceCall = function() 
-					{
-						if (!mapReduceArguments.length) {
-							console.success('*** MapReduce completed ***');
-							collection.status = config.DataStatus.COMPLETE;
-							collection.lastReducedAt = reducedAt;
-							collection.save(function(err, collection) {
-								job.status = config.JobStatus.IDLE;
-								job.updatedAt = new Date;
-								job.save(function(err) {
-									if (callback) {
-										callback(err);
+						var dequeueMapReduceCall = function() 
+						{
+							if (!mapReduceArguments.length) {
+								console.success('*** MapReduce completed ***');
+								collection.status = config.DataStatus.COMPLETE;
+								collection.lastReducedAt = reducedAt;
+								collection.save(function(err, collection) {
+									job.status = config.JobStatus.IDLE;
+									job.updatedAt = new Date;
+									job.save(function(err) {
+										if (callback) {
+											callback(err);
+										}
+									});
+								});
+							} else {
+								var args = mapReduceArguments.shift(),
+									emitKeys = {};
+								// the first element is a comment
+								console.info(args[0]);
+								runMapReduceForFeatureCollection.call(this, collection, args[1], _.cloneextend(opts, args[2]), function(err, res) {
+									if (err) {
+										console.error('*** error during MapReduce ***')
+										callback(err);									
+									} else {
+										dequeueMapReduceCall();
 									}
 								});
-							});
-						} else {
-							var args = mapReduceArguments.shift(),
-								emitKeys = {};
-							// the first element is a comment
-							console.info(args[0]);
-							runMapReduceForFeatureCollection.call(this, collection, args[1], _.cloneextend(opts, args[2]), function(err, res) {
-								if (err) {
-									console.error('*** error during MapReduce ***')
-									callback(err);									
-								} else {
-									dequeueMapReduceCall();
-								}
-							});
-						}
-					};
-					
-					dequeueMapReduceCall();
+							}
+						};
+						
+						dequeueMapReduceCall();
 
+					});
 				});
-			});
 		});
 	});
 };
@@ -326,7 +328,7 @@ MapReduceAPI.prototype.cli = {
 		var help = "Usage: node manage.js mapreduce [params]\n"
 			+ "\nRuns MapReduce for currently unreduced collections.\n"
 			+ "\nOptional Parameters:\n"
-			+ '\n    --options "[grid],[timebased],[unreduced],[histogram]"\n'
+			+ '\n    --types "[tile],[tile-yearly],[tile-monthly],[tile-daily],[yearly],[monthly],[daily],[unreduced],[histogram]"\n'
 			+ '          Performs selective MapReduce only of the entered types.\n'
 			+ '\n    --rebuild\n'
 			+ '          Force complete rebuild even if MapReduce was already completed.\n'
