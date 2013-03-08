@@ -81,7 +81,7 @@ p {
   line-height: 18px;
 }
 
-h1 {
+h2 {
 	font-family: Vit, sans-serif;
 	font-style: normal;
 	font-weight: 700;
@@ -101,7 +101,7 @@ h1 {
 	left:50%;
 }
 
-h2,
+h1,
 h3, 
 label.title {
 /*	font-family: OswaldLight,sans-serif;*/
