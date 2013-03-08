@@ -29,7 +29,6 @@ define([
 		    this.listenTo(this.model, 'change', this.modelChanged);
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
 		    this.listenTo(this.model, 'destroy', this.remove);
-			this.listenTo(this.vent, 'panel:resize', this.panelViewResized);
 
 			this.listenTo(this.model.featureCollection, 'request', this.layerFeaturesRequest);
 			this.listenTo(this.model.featureCollection, 'error', this.layerFeaturesRequestError);
@@ -75,7 +74,6 @@ define([
 	    	var countStatus = '',
 				progress = this.model.attributes.featureCollection.progress,
 				featureCollection = this.model.featureCollection;
-
 
 			if (this.isLoading || this.model.getDataStatus() != DataStatus.COMPLETE) {
 		    	this.showSpinner();
@@ -229,9 +227,13 @@ define([
 			this.legendView.render().delegateEvents();
 	    },
 
+	    setSuperView: function(superView) {
+			this.listenTo(superView, 'panel:resize', this.panelViewResized);
+	    },
+
 		panelViewResized: function(panelView) 
 		{
-			if (panelView == this.superView && this.histogramView) {
+			if (this.histogramView) {
 				this.histogramView.render();
 			}
 		},
@@ -271,6 +273,9 @@ define([
 			this.renderLegend();
 			this.updateStatus();
 			this.$('.model-title').text(this.model.getDisplay('title'));
+
+			this.$('.show-layer-editor').toggle(app.isMapAdmin()
+				&& this.model.getDataStatus() == DataStatus.COMPLETE);
 
 			var collectionAttrs = this.model.attributes.featureCollection,
 				description = this.model.getDisplay('description'),

@@ -11,13 +11,14 @@
 	font-weight: bold;
 }
 
-.layer-panel .meta.source, .layer-panel .meta.source a {
-	color: #aaa;
-	font-size: 11px;
+.layer-panel .source, .layer-panel .source {
+	margin: 0;
+	padding-bottom: 0;
 }
 
-.layer-panel .meta.source {
-	padding: .2em .75em .4em .75em;
+.layer-panel .source, .layer-panel .source a {
+	color: #aaa;
+	font-size: 11px;
 }
 
 .layer-panel .legend .unit {
@@ -63,7 +64,7 @@
 
 .layer-panel .map-layer .status {
 	position: relative;
-	padding: 3px 0 3px 0;
+	padding: 2px 0 2px 0;
 }
 
 .layer-panel .map-layer.disabled {
@@ -74,7 +75,7 @@
 	height: 16px;
 	position: absolute;
 	right: 0px;
-	top: 3px;
+	top: 1px;
 }
 
 .layer-panel .model-title {

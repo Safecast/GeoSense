@@ -9,7 +9,7 @@ define([
 	var HomepageView = Backbone.View.extend({
 
 	    tagName: 'div',
-		className: 'homepage-view',
+		className: 'homepage',
 		
 	    events: {
 			'click #createMap': 'createMapButtonClicked',

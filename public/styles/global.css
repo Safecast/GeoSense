@@ -81,7 +81,7 @@ p {
   line-height: 18px;
 }
 
-h2 {
+h2, .homepage h1 {
 	font-family: Vit, sans-serif;
 	font-style: normal;
 	font-weight: 700;
@@ -101,10 +101,9 @@ h2 {
 	left:50%;
 }
 
-h1,
-h3, 
-.modal h2,
-label.title {
+h1, .homepage h2,
+h3, .modal h2,
+label.title, .box.title {
 /*	font-family: OswaldLight,sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
 	
