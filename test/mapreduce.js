@@ -12,7 +12,11 @@ describe('MapReduce', function() {
 		generateCount = 1024,
 		normalZoom = 1,
 		increment = config.GRID_SIZES[normalZoom] / Math.sqrt(generateCount),
-		days;
+		days,
+		attrMap = {
+			numeric: 'properties.numVal',
+			datetime: 'properties.date'
+		};
 
 	before(function(done) {
 		mongoose.connect(config.DB_PATH);
@@ -21,8 +25,6 @@ describe('MapReduce', function() {
 			active: true, 
 			title: 'MapReduce test',
 			reduce: true,
-			numericAttr: 'properties.numVal',
-			datetimeAttr: 'properties.date',
 			maxReduceZoom: 8,
 			timebased: true
 		});
@@ -92,7 +94,8 @@ describe('MapReduce', function() {
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom,
 			types: ['daily'],
-			rebuild: true
+			rebuild: true,
+			attrMap: attrMap
 		}, null, null, function(err) {
 			if (err) throw err;
 
@@ -112,7 +115,8 @@ describe('MapReduce', function() {
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom,
 			types: ['tile'],
-			rebuild: true
+			rebuild: true,
+			attrMap: attrMap
 		}, null, null, function(err) {
 			if (err) throw err;
 
@@ -121,7 +125,7 @@ describe('MapReduce', function() {
 					if (err) throw err;
 					assert.equal(features.length, 1);
 					assert.equal(features[0].get('value').count, generateCount);
-					console.log(features[0].toGeoJSON());
+					//console.log(features[0].toGeoJSON());
 					done();
 				});
 
@@ -133,7 +137,8 @@ describe('MapReduce', function() {
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom + 1,
 			types: ['tile'],
-			rebuild: true
+			rebuild: true,
+			attrMap: attrMap
 		}, null, null, function(err) {
 			if (err) throw err;
 
@@ -142,7 +147,7 @@ describe('MapReduce', function() {
 					if (err) throw err;
 					assert.equal(features.length, 4);
 					assert.equal(features[0].get('value').count, generateCount / 4.0);
-					console.log(features[0].toGeoJSON());
+					//console.log(features[0].toGeoJSON());
 					done();
 				});
 		});
@@ -156,7 +161,7 @@ describe('MapReduce', function() {
 				if (err) throw err;
 				assert.equal(features.length, 1);
 				assert.equal(features[0].get('value').count, generateCount / 4.0);
-				console.log(features[0].toGeoJSON());
+				//console.log(features[0].toGeoJSON());
 				done();
 			});
 	});	
