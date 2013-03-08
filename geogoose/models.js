@@ -34,7 +34,6 @@ GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
     }
     if (obj.features) {
         obj.features = obj.features.map(function(feature) {
-            console.log(feature.collection.name);
             return feature.toGeoJSON();
         });
     }
@@ -81,11 +80,13 @@ GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs)
 GeoFeatureSchemaMiddleware.pre = {
     save: function(next) {
         if (!this.type) this.type = 'Feature';
-        var bounds = getBounds(this.geometry.coordinates);
-        // GeoJSON specifies a one-dimensional array for the bbox
-        this.bbox = getBbox(bounds);
-        // Store 2d-indexable bounds >= -180 and < 180
-        this.bounds2d = getBounds(bounds, true);
+        if (this.geometry.coordinates && this.geometry.coordinates.length) {
+            var bounds = getBounds(this.geometry.coordinates);
+            // GeoJSON specifies a one-dimensional array for the bbox
+            this.bbox = getBbox(bounds);
+            // Store 2d-indexable bounds >= -180 and < 180
+            this.bounds2d = getBounds(bounds, true);
+        }
         if (next) next();
     }
 };

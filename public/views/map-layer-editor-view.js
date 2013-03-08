@@ -44,7 +44,8 @@ define([
 	    modelSynced: function(model)
 	    {
 			if (this.model.hasChanged('layerOptions')) {
-				//this.populateFromModel();	
+			    // TODO this will overwrite unsaved changes:
+				this.populateFromModel();	
 			} 
 	    },
 
@@ -58,17 +59,6 @@ define([
 	    		.clone().removeClass('element-template');
 			this.initModelInputs();
 			this.initSliders();
-
-			this.$('select.field-names').each(function() {
-				var fieldType = $(this).attr('data-type'),
-					opts = [];
-				_.each(featureCollection.fields, function(field) {
-					if (field.name.match(/^properties\./) && (!fieldType || fieldType == field.type)) {
-						opts.push('<option value="%(name)s">%(label)s</option>'.format(field));
-					}
-				})
-				$(this).append(opts.join('\n'));
-			});
 
 			this.$('.has-popover').each(function() {
 				var trigger = $(this),
@@ -155,9 +145,26 @@ define([
 			});
 		},
 
+		populateFieldInputs: function()
+		{
+	    	var self = this,
+	    		featureCollection = this.model.attributes.featureCollection;
+			this.$('select.field-names').each(function() {
+				var fieldType = $(this).attr('data-type'),
+					opts = ['<option>(' + __('none') + ')</option>'];
+				_.each(featureCollection.fields, function(field) {
+					if (field.name.match(/^properties\./) && (!fieldType || fieldType == field.type)) {
+						opts.push('<option value="%(name)s">%(label)s</option>'.format(field));
+					}
+				})
+				$(this).html(opts.join('\n'));
+			});
+		},
+
 	    populateFromModel: function()
 	    {
 			this.updateFromModel();
+			this.populateFieldInputs();
 			this.populateModelInputs();
 			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
 			this.populateColorTable();

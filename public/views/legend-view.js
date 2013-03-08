@@ -126,9 +126,10 @@ define([
 							maxIndex = i;
 						}
 					} else {
-						val = valFormatter.format(extremes.minVal) 
-							+ '–' 
-							+ valFormatter.format(extremes.maxVal);
+						val = '%(min)s – %(max)s'.format({
+							min: valFormatter.format(minVal),
+							max: valFormatter.format(maxVal)
+						});
 					}
 				}
 
