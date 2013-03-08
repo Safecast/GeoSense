@@ -61,11 +61,6 @@
 	font-weight:bold;
 }
 
-.layer-panel h4, .layer-panel h4 a {
-	font-size: 24px !important;
-	color: white !important;
-}
-
 .layer-panel .map-layer .status {
 	position: relative;
 	padding: 3px 0 3px 0;
@@ -84,11 +79,8 @@
 
 .layer-panel .model-title {
 	display: inline-block;
-	max-width: 65%;
-	 /*results in scrollbar for some reason
+	max-width: 66%;
 	overflow: hidden;
-	overflow-y: visible;
-	*/
 }
 
 .layer-panel.extended .model-title {

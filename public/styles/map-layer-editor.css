@@ -133,3 +133,7 @@
 	width: inherit;
 }
 
+.map-layer-editor .popover-content {
+	width: 200px;
+}
+

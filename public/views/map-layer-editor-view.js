@@ -25,8 +25,11 @@ define([
 	    	// 'keydown .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	'change .preview': 'previewChanged',
 	    	'change .show-advanced': 'showAdvancedChanged',
+	    	'click .generate-colors': 'generateColorsClicked',
+	    	'click .hide-color-generator': 'hideColorGenerator',
 	    	'click .remove-color': 'removeColorClicked',
-	    	'click .add-color': 'addColorClicked'
+	    	'click .add-color': 'addColorClicked',
+	    	'click .btn': function() { return false }
 	    },
 
 	    initialize: function(options) 
@@ -65,6 +68,27 @@ define([
 					}
 				})
 				$(this).append(opts.join('\n'));
+			});
+
+			this.$('.has-popover').each(function() {
+				var trigger = $(this),
+					sel = trigger.attr('data-content-selector');
+				if (sel) {
+					var el = self.$(sel).remove();
+					$(this).popover({
+						content: el,
+						html: true,
+					});
+					$(this).on('shown', function(event, item) {
+						trigger.addClass('active');
+					});
+					$(this).on('hidden', function(event, item) {
+						trigger.removeClass('active');
+
+					});
+				}  else {
+					$(this).popover({});
+				}
 			});
 
 			this.populateFromModel();
@@ -220,6 +244,11 @@ define([
 			return this.$('.preview').is(':checked');
 	    },
 
+	    hideColorGenerator: function(event) {
+	    	this.$('.show-color-generator').popover('hide');
+	    	return false;
+	    },
+
 	    setButtonState: function(state) 
 	    {
 	    	if (state != undefined) {
@@ -231,6 +260,12 @@ define([
 		    	this.$('.remove-color').attr('disabled', false);
 	    	} else {
 		    	this.$('.remove-color').attr('disabled', true);
+	    	}
+	    	if (this.$('.color-palette tbody tr').length <= 2) {
+		    	this.$('.show-color-generator').attr('disabled', false);
+	    	} else {
+		    	this.$('.show-color-generator').attr('disabled', true);
+		    	this.hideColorGenerator();
 	    	}
 
 	    	var showAdvanced = this.$('.show-advanced').is(':checked');
@@ -277,12 +312,11 @@ define([
 			return row;
 	    },
 
-	    populateColorTable: function() 
+	    populateColorTable: function(colors) 
 	    {
-	    	var colors = [];
 	    	var self = this;
 	    	this.$('.color-palette tbody').empty();
-	    	var colors = this.model.get('layerOptions.colors');
+	    	var colors = colors || this.model.get('layerOptions.colors');
 	    	for (var i = 0; i < colors.length; i++) {
 				var row = this.addColorRow(colors[i]);
 	    	}
@@ -318,6 +352,98 @@ define([
 	    	this.addColorRow();
 			this.modelInputChanged();
 			return false;
+	    },
+
+	    generateColorsClicked: function(event) 
+	    {
+	    	var type = $('input[name=colorSchemeType]:checked').val(),
+	    		steps = parseInt($('input[name=colorSchemeSteps]').val()),
+	    		colors = this.getColorsFromTable();
+	    	this.$('.show-color-generator').popover('hide');
+	    	if (steps && !isNaN(steps)) {
+	    		var baseRGB = getRGBChannels(colors[0].color),
+	    			baseHSB = rgb2hsb(baseRGB),
+	    			baseH = baseHSB[0], baseS = baseHSB[1], baseB = baseHSB[2],
+	    			minB = Math.min(.3, baseB),
+	    			maxB = 1.0,
+	    			minS = 0,
+	    			reduceS = .3,
+	    			increaseB = .1,
+	    			threshB = .75,
+	    			compHSB;
+
+    			switch (type) {
+    				case 'sequential':
+		    			compHSB = colors.length > 1 ? 
+		    				rgb2hsb(getRGBChannels(colors[colors.length - 1].color))
+		    				: [baseH, baseS, baseB < threshB ? maxB : minB];
+    					break;
+    				case 'qualitative':
+    				case 'diverging':
+		    			compHSB = colors.length > 1 ? 
+		    				rgb2hsb(getRGBChannels(colors[colors.length - 1].color)) 
+		    				: [(baseH + 180) % 360, baseS, baseB];
+		    			break;
+	    		}
+
+		    	var compH = compHSB[0], compS = compHSB[1], compB = compHSB[2],
+	    			compRGB = hsb2rgb(compHSB),
+	    			lerp = function(p, a, b) { return a + (b - a) * p; },
+					genColors = [],
+					increment = steps > 1 ? 1.0 / (steps - 1) : 0;
+
+	    		for (var i = 0; i < steps; i++) {
+	    			var perc = increment * i,
+	    				proxToCenter = 1 - Math.abs(.5 - perc) / .5,
+						rgb;
+
+	    			switch (type) {
+	    				case 'qualitative':
+	    					var altPerc = perc + (!i ? 0 : (i % 2 ? increment : -increment)),
+	    						hsb = [
+		    						(baseH + (compH - baseH) * altPerc) % 360,
+		    						lerp(perc, baseS, compS),
+		    						lerp(perc, baseB, compB)
+		    					];
+	    					rgb = hsb2rgb(hsb);
+	    					break;
+	    				case 'sequential':
+							rgb = [
+								lerp(perc, baseRGB[0], compRGB[0]),
+								lerp(perc, baseRGB[1], compRGB[1]),
+								lerp(perc, baseRGB[2], compRGB[2])
+							];
+			    			break;
+			    		case 'diverging':
+							rgb = [
+								lerp(perc, baseRGB[0], compRGB[0]),
+								lerp(perc, baseRGB[1], compRGB[1]),
+								lerp(perc, baseRGB[2], compRGB[2])
+							];
+							// make lighter towards midrange
+							var hsb = rgb2hsb(rgb);
+							hsb[2] = lerp(perc, baseB, compB);
+							hsb[2] = Math.min(maxB, hsb[2] * (1 + proxToCenter * increaseB));
+							// slightly reduce saturation towards midrange
+							hsb[1] = Math.max(minS, hsb[1] - proxToCenter * reduceS);
+							rgb = hsb2rgb(hsb); 
+							break;
+	    			}
+
+	    			var color = intToColor(rgb2int(rgb));
+	    			genColors.push({
+	    				color: color, 
+	    				position: Math.round(perc * 100) + '%',
+	    				interpolation: 'threshold'
+	    			});
+	    		}
+	    		for (var i = 0; i < genColors.length; i++) {
+	    			this.addColorRow(genColors[i]);
+	    		}
+	    		this.populateColorTable(genColors);
+	    		this.modelInputChanged();
+	    	}
+	    	return false;
 	    },
 
 		layerToggled: function(event)
