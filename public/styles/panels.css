@@ -98,7 +98,7 @@
 }
 
 .panel .accordion-body .accordion-body-content {
-	padding: 5px 0 15px 0;
+	padding: 2px 0 15px 0;
 }
 
 .panel .accordion-heading {
@@ -257,6 +257,7 @@
 }
 
 .panel .box {
+	padding: 5px 8px 6px 8px;
 	margin-top: 4px;
 	background-color:rgba(50,50,50,.6);
 	border-radius: 4px;
@@ -264,11 +265,10 @@
 	-webkit-border-radius:4px;
 }
 
-.panel .box.meta  {
-	font-size: 12px;
-	color: #ccc;
-	padding: 7px 10px 8px 10px;
-	line-height: 1.5em;
+.panel .box.text-body {
+	white-space: normal;
+	text-align: left;
+	line-height: 1.3em;
 }
 
 .panel .tooltip-inner {
