@@ -69,7 +69,6 @@
                         <p>
                             <label class="title" for="map-size">Size relative to</label>
                             <select class="model-input" name="layerOptions.attrMap.featureSize">
-                                <option value="">(default)</option>
                                 <option value="count">sample size</option>
                                 <option value="$numeric.avg">average value</option>
                             </select>
@@ -104,9 +103,8 @@
                             <td><input name="position" type="text" class="number" size="6" placeholder="position" value="" /></td>
                             <td>
                                 <select name="interpolation" class="min-width">
-                                    <option value="">(default)</option>
-                                    <option value="threshold">threshold</option>
                                     <option value="lerpRGB">linear</option>
+                                    <option value="threshold">threshold</option>
                                 </select>
                             </td>
                             <td class="controls">

@@ -20,7 +20,7 @@ var config = {
 	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,
 
-	COLLECTION_DEFAULTS: {
+	LAYER_OPTIONS_DEFAULTS: {
 		visible: true,
 		featureType: 'P',
 		colorType: 'L',

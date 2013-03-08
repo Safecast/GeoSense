@@ -299,9 +299,10 @@ var FieldSetter = function(value) {
 var	iterFields = function(fields, doc, callback) {
 	var fields = fields == '*' ?
 		Object.keys(doc) : Array.isArray(fields) ? fields : [fields];
-	fields.forEach(function(key) {
-		//console.log(key, '=', doc.get(key));
-		if (callback(doc.get(key), key) === false) return;
+	fields.every(function(key) {
+		var ret = callback(doc.get(key), key);
+		if (ret === false) return false;
+		return true;
 	});
 };
 
@@ -355,7 +356,6 @@ DataTransform.prototype.addFields = function(descripts)
 
 DataTransform.prototype.addField = function(d)
 {
-	console.log(d);
 	if (d.set) {
 		this.setters[d.to] = FieldSetter(d.set);
 	} else if (!d.type || !FieldType[d.type]) {

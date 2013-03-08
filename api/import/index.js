@@ -365,25 +365,29 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				{
 					ended = true;
 					finalized = true;
-					collection.extremes = extremes;
-					collection.markModified('extremes');
-					if (!defaults.attrMap || !defaults.attrMap.numeric) {
-						collection.defaults.histogram = false;
+
+					if (!defaults.attrMap) {
+						defaults.attrMap = {};
 					}
-					collection.sourceFieldNames = fieldNames;
-					collection.fields = dataTransform.fields;
-					// TODO:
- 					collection.cropDistribution = collection.minVal / collection.maxVal > config.MIN_CROP_DISTRIBUTION_RATIO;
-					collection.active = true;
-					collection.numBusy = 0;
-					collection.reduce = collection.reduce || numSaved > 1000;
-					collection.status = collection.reduce ? 
-						(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
+					// determine default field mappings by finding first Number and Date field
+					dataTransform.fields.every(function(field) {
+						if (field.type == 'Number') {
+							defaults.attrMap.numeric = field.name;
+							return false;
+						}
+						return true;
+					});
+					dataTransform.fields.every(function(field) {
+						if (field.type == 'Date') {
+							defaults.attrMap.datetime = field.name;
+							return false;
+						}
+						return true;
+					});
 
-					var collectionSave = !params.dry ?
-						collection.save : function(callback) { callback(false, collection); };
-
-					collectionSave.call(collection, function(err, collection) {
+					var defaultsSave = !params.dry ?
+						defaults.save : function(callback) { callback(false, defaults) };
+					defaultsSave.call(defaults, function(err, defaults) {
 						if (err) {
 							console.error(err.message);
 							if (callback) {
@@ -391,14 +395,24 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 							return;
 						}
-					
-						if (!params.dry) {
-					    	debugStats('*** finalized and activated collection ***', 'success', null, true);
-						} else {
-					    	debugStats('*** finalized dry run ***', 'warn', null, true);
+
+						collection.extremes = extremes;
+						collection.markModified('extremes');
+						if (!defaults.attrMap || !defaults.attrMap.numeric) {
+							collection.defaults.histogram = false;
 						}
-						job.status = config.JobStatus.IDLE;
-						job.save(function(err) {
+						collection.sourceFieldNames = fieldNames;
+						collection.fields = dataTransform.fields;
+						collection.active = true;
+						collection.numBusy = 0;
+						collection.reduce = collection.reduce || numSaved > 1000;
+						collection.status = collection.reduce ? 
+							(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
+
+						var collectionSave = !params.dry ?
+							collection.save : function(callback) { callback(false, collection); };
+
+						collectionSave.call(collection, function(err, collection) {
 							if (err) {
 								console.error(err.message);
 								if (callback) {
@@ -406,25 +420,41 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								}
 								return;
 							}
-							if (parserErr) {
-						    	debugStats('*** job failed ***', 'error', null, true);
-								if (callback) {
-									callback(parserErr, collection);
-								}
+						
+							if (!params.dry) {
+						    	debugStats('*** finalized and activated collection ***', 'success', null, true);
 							} else {
-						    	debugStats('*** job completed ***', 'success', null, true);
-								if (params.mapreduce) {
-									console.log('**** starting mapreduce');
-									var mapReduceParams = {
-										featureCollectionId: collection._id.toString()
-									};
-									new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
-								} else {
+						    	debugStats('*** finalized dry run ***', 'warn', null, true);
+							}
+							job.status = config.JobStatus.IDLE;
+							job.save(function(err) {
+								if (err) {
+									console.error(err.message);
 									if (callback) {
-										callback(false, collection);
+										callback(err);
+									}
+									return;
+								}
+								if (parserErr) {
+							    	debugStats('*** job failed ***', 'error', null, true);
+									if (callback) {
+										callback(parserErr, collection);
+									}
+								} else {
+							    	debugStats('*** job completed ***', 'success', null, true);
+									if (params.mapreduce) {
+										console.log('**** starting mapreduce');
+										var mapReduceParams = {
+											featureCollectionId: collection._id.toString()
+										};
+										new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
+									} else {
+										if (callback) {
+											callback(false, collection);
+										}
 									}
 								}
-							}
+							});
 						});
 					});
 				};
@@ -685,12 +715,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		if (!params.dry) {
 			console.info('*** Creating new collection ***');
 		}
-		var defaults = new LayerOptions(config.COLLECTION_DEFAULTS);
-		for (var key in config.COLLECTION_DEFAULTS) {
-			if (params[key]) {
-				defaults[key] = params[key];
-			}
-		}
+		var defaults = new LayerOptions(config.LAYER_OPTIONS_DEFAULTS);
 		var defaultsSave = !params.dry ?
 			defaults.save : function(callback) { callback(false, defaults) };
 		defaultsSave.call(defaults, function(err, defaults) {

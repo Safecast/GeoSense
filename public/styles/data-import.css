@@ -49,11 +49,11 @@
 
 .data-import-view .target {
 	padding-top: 40px;
-	background: url(../assets/large-brace.png) 50% 0px no-repeat;
+	background: url(../assets/large-brace.png) 50% -15px no-repeat;
 }
 
 .data-import-view .target .table-container {
-	background: url(../assets/field-map-howto.png) 30px 60px no-repeat;
+	background: url(../assets/field-map-howto.png) 30px 70px no-repeat;
 }
 
 .data-import-view .target.mapped .table-container {
@@ -80,7 +80,7 @@
 .data-import-view .modal-body table th, .data-import-view .modal-body table td {
 	padding: .4em;
 	width: 20%;
-	max-width: 200px;
+	max-width: 250px;
 	overflow: hidden;
 }
 
@@ -99,7 +99,11 @@
 	height: 18px;
 	text-align: right;
 	text-shadow:rgba(50,50,50,.5) 1px 1px 1px;
-	box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, .1);
+	box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, .2);
+	border-width: 1px;
+	border-color: #aaa;
+	border-style: solid;
+	z-index: 999;
 }
 
 .data-import-view .btn.back {
@@ -172,10 +176,14 @@
 
 }
 
-.data-import-view select
-{
-	width:523px;
-	opacity:.3;
+.data-import-view button.show-field-settings {
+	margin-bottom: 2px;
+	white-space: nowrap;
+	width: 100%;
+}
+
+.data-import-view .field-label {
+	font-weight: bold;
 }
 
 .data-import-view .modal-body .add .nav.nav-tabs .label
@@ -196,7 +204,7 @@
 
 .data-import-view .field-settings {
 	font-size: 12px;
-	line-height: 100%;
+	white-space: nowrap;
 }
 
 .data-import-view .state-indicator {

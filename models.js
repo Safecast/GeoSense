@@ -213,6 +213,23 @@ GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
     return this.getFeatureModel({collectionName: collectionName, schema: GeoFeatureMapReducedSchema});
 };
 
+GeoFeatureCollectionSchema.methods.cloneDefaults = function(callback)
+{
+    if (!this.defaults) {
+        return new LayerOptions(clone).save(callback);
+    }
+    LayerOptions.find({_id: this.defaults}, function(err, defaults) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        var clone = this.defaults ? this.defaults.toObject() : config.LAYER_OPTIONS_DEFAULTS;
+        delete clone['_id'];
+        return new LayerOptions(clone).save(callback);
+    })
+};
+
+
 var GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureCollectionSchema);
 
 

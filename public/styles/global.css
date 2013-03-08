@@ -225,3 +225,7 @@ input.text.large {
 	color: #999;
 }
 
+.popover {
+	/* for popover in modal dialogs */
+	z-index: 1100 !important;
+}

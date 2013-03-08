@@ -151,7 +151,7 @@ define([
         getStyleMapForLayer: function(model)
         { 
             var self = this,
-                layerOptions = model.attributes.layerOptions;
+                layerOptions = model.attributes.layerOptions,
                 or = function(val1, val2) {
                     return (val1 || val1 == 0) && val1 != '' 
                         && (typeof val1 == 'string' || val1 >= 0) ? val1 : val2;
