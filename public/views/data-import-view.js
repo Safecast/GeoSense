@@ -10,7 +10,7 @@ define([
 	var DataImportView = ModalView.extend({
 
 	    tagName: 'div',
-		className: 'data-import-view modal fade',
+		className: 'data-import-view modal large fade',
 		
 	    events: {
 	    	'change .step.source input': 'sourceInputChanged',
@@ -31,7 +31,7 @@ define([
 			this.inspectedSource;
 			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
 
-			this.descripts = [
+			this.defaultDescripts = [
 				{to: 'geometry.coordinates', type: 'LatLng', label: 'coordinates', options: {}, allowedTypes: ['LatLng', 'LngLat']},
 				{toTemplate: 'properties.$field', type: 'Number', label: '', options: {}},
 				{toTemplate: 'properties.$field', type: 'String', label: '', options: {}},
@@ -113,6 +113,7 @@ define([
 			_.each(this.inspectedSource.items[0], function(value, key) {
 				self.fromFields[key] = key;
 			});
+			this.descripts = _.clone(this.defaultDescripts);
 
 			this.$('.from-data thead').empty();
 			this.$('.from-data tbody').empty();
