@@ -33,6 +33,8 @@ define([
 			} else {
 				self.$('.panel-body').show('fast');
 			}
+
+			return this;
 		},
 
 		setTitle: function(string)
@@ -82,6 +84,7 @@ define([
 		{
 			$(parentElement).append(this.el);
 			this.$el.draggable('option', 'containment', parentElement);
+			this.isAttached = true;
 			return this;
 		},
 
@@ -112,16 +115,12 @@ define([
 			});
 			this.$el.css('position', 'absolute'); // draggable sets it to relative
 
-
-			console.log(this.el);
-
-
 			this.$('a.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			
 				if ($(self.el).is('.extended')) {
 					self.setPanelState(true);
 				}
-				self.vent.trigger('panel:resize', self);
+				self.trigger('panel:resize', self);
 				return false;
 			});
 
@@ -140,13 +139,16 @@ define([
 
 		detach: function() 
 		{
+			this.isAttached = false;
 			this.$el.detach();
 		},
 
 		appendSubView: function(view)
 		{
 			this.$('.accordion').append(view.el);
-			view.superView = this;
+			if (view.setSuperView) {
+				view.setSuperView(this);
+			}
 		}		
 
 	});	

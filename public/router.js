@@ -334,8 +334,6 @@ define([
 		 	this.listenTo(this.mapView, 'view:ready', this.mapViewReady);
 
 			var mapEl = this.mapView.render().el;
-			console.log('----',this.$mainEl);
-
 			this.$mainEl.append(mapEl);
 			this.mapView.renderMap(viewBase, viewStyle);
 
@@ -646,17 +644,21 @@ define([
 		{
 			if (!this.dataDetailView) {
 		        this.dataDetailView = new DataDetailView().render();
+		    }
+			if (!this.dataDetailView.isAttached) {
+		        this.attachPanelView(this.dataDetailView);
+				this.dataDetailView.snapToView(this.layersPanelView, 'left', true)
+					.hide().show('fast');
 			}
+			this.dataDetailView.setPanelState(true);
 			this.dataDetailView.setModel(model);
-	        this.attachPanelView(this.dataDetailView);
-			this.dataDetailView.snapToView(this.layersPanelView, 'left', true)
-				.hide().show('fast');
+			this.dataDetailView.show();
 		},
 
 	    hideDetailData: function(model)
 		{
 			if (this.dataDetailView) {
-				this.dataDetailView.detach();
+				this.dataDetailView.hide();
 			}
 		},
 

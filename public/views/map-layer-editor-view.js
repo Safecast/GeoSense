@@ -102,11 +102,7 @@ define([
 	    {
 	    	// do not populate form on model change since that breaks
 	    	// things like the colorpicker 
-			this.$('.model-title').text(
-				this.model.attributes.layerOptions.title 
-				&& this.model.attributes.layerOptions.title.length ?
-					this.model.attributes.layerOptions.title
-				: this.model.attributes.featureCollection.title);
+			this.$('.model-title').text(this.model.getDisplay('title'));
 			this.$('.model-numeric').toggle(this.model.isNumeric());
 	    },
 
