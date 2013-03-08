@@ -178,9 +178,6 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	height: 100%;
 }
 
-.modal {
-	max-height: 600px !important;
-}
 
 fieldset.two-column div {
 	width: 50%;

@@ -78,12 +78,19 @@ define([
 			return this;
 		},
 
+		attachTo: function(parentElement)
+		{
+			$(parentElement).append(this.el);
+			this.$el.draggable('option', 'containment', parentElement);
+			return this;
+		},
+
 	    render: function() 
 	    {
-			$(this.el).html(this.template());
+			this.$el.html(this.template());
 			var self = this;
 
-			$(this.el).draggable({
+			this.$el.draggable({
 				start: function() {
 					//$(this).css('right', 'auto');
 					$(this).css('bottom', 'auto');
@@ -94,7 +101,7 @@ define([
 						right = $(this).position().left + $(this).outerWidth();
 					$('.snap.right').each(function() {
 						if (right == $(this).position().left) {
-							console.log(this, $(this).position());
+							//console.log(this, $(this).position());
 							// re-dock to right edge
 							$(el).css('left', 'auto');
 						}
@@ -103,7 +110,11 @@ define([
 
 				snap: ".snap, .panel", snapMode: "outer"
 			});
-			$(this.el).css('position', 'absolute'); // draggable sets it to relative
+			this.$el.css('position', 'absolute'); // draggable sets it to relative
+
+
+			console.log(this.el);
+
 
 			this.$('a.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			

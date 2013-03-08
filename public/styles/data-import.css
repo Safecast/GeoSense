@@ -1,7 +1,3 @@
-.data-import-view.modal {
-	width: 720px;
-}
-
 .data-import-view .modal-body .add .tab-content .input-large
 {
 	width:440px;
@@ -40,16 +36,8 @@
 	width:100px;
 }
 
-.data-import-view .table-container
-{
-	height: 150px;
-	overflow: scroll;
-	width: 100%;
-}
-
 .data-import-view .target {
-	padding-top: 40px;
-	background: url(../assets/large-brace.png) 50% -15px no-repeat;
+	margin-top: 20px;
 }
 
 .data-import-view .target .table-container {
@@ -69,12 +57,21 @@
 }
 
 .data-import-view td.conversion-blank {
-	color: #ccc;
+	color: #ddd;
 }
 
 .data-import-view .table-container {
-	max-height: 220px;
 	overflow: auto;
+	height: 150px;
+	overflow: scroll;
+}
+
+.data-import-view h4 {
+	color: #ddd;
+	font-size: 18px;
+	margin: 0 auto 10px auto;
+	width: 100%;
+	text-align: center;
 }
 
 .data-import-view .modal-body table th, .data-import-view .modal-body table td {
@@ -146,6 +143,7 @@
 	min-height: 28px;
 	margin: 0 0 .5em 0;
 	padding: 2px;
+	border-color: #ddd;
 }
 
 .data-import-view .to-field .from-field {

@@ -334,9 +334,9 @@ define([
 		 	this.listenTo(this.mapView, 'view:ready', this.mapViewReady);
 
 			var mapEl = this.mapView.render().el;
-			$('#app').append(mapEl);
-			this.$mainEl = $(mapEl);
-			this.mainEl = this.$mainEl[0];
+			console.log('----',this.$mainEl);
+
+			this.$mainEl.append(mapEl);
 			this.mapView.renderMap(viewBase, viewStyle);
 
 			this.viewOptionsChanged(this.mapView);
@@ -600,6 +600,10 @@ define([
 	 		this.headerView = new HeaderView({vent: this.vent, model: this.map});
 	        $('#app').append(this.headerView.render().el);
 
+			this.$mainEl = $('<div id="main-viewport"></div>');
+			this.mainEl = this.$mainEl[0];
+			$('#app').append(this.mainEl);
+
 			//this.chatView = new ChatView({vent: this.vent});
 	        //$('#app').append(this.chatView.render().el);
 
@@ -687,7 +691,7 @@ define([
 
 		attachPanelView: function(panelView)
 		{
-			this.$mainEl.append(panelView.el);
+			panelView.attachTo(this.mainEl);
 		},
 
 		saveNewMapLayer: function(featureCollectionId)
