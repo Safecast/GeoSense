@@ -115,7 +115,7 @@
 	display: inline-block;
 }
 
-.map-layer-editor fieldset button {
+.map-layer-editor fieldset button, .map-layer-editor table {
 	margin-bottom: 9px;
 }
 
