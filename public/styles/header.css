@@ -20,26 +20,35 @@
 	background-color:black;
 }
 
-.header-view .navbar.navbar-fixed-top .navbar-inner .container-fluid .brand
+.header-view .brand
 {
 }
 
-.header-view .navbar.navbar-fixed-top .navbar-inner .container-fluid .brand h1
+.header-view .brand a {
+	text-decoration: none;
+}
+
+.header-view .brand h2
 {
 	float:left;
 	color:#555;
-	font-size:12pt;
-	line-height:20pt;
+	font-size:11pt;
+	line-height:21pt;
 }
 
-.header-view .navbar.navbar-fixed-top .navbar-inner .container-fluid .brand h3
+.header-view .brand h1, .header-view .brand a
 {
+	color:white;
+}
+
+.header-view .brand h1 {
 	padding-left:10px;
 	float:left;
-	color:white;
 	font-size:21pt;
-	margin-top: -2px;
+	margin-top: -6px;
 	white-space: nowrap;
+	overflow: hidden;
+	max-width: 280px;
 }
 
 #viewBase .view-base-thumb {
