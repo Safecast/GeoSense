@@ -35,14 +35,14 @@
 	background-image:url('../assets/feature-cells-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.cells.active {
 	background-image:url('../assets/feature-cells-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.points {
@@ -55,14 +55,14 @@
 	background-image:url('../assets/feature-points-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.points.active {
 	background-image:url('../assets/feature-points-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.bubbles {
@@ -75,14 +75,14 @@
 	background-image:url('../assets/feature-bubbles-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.bubbles.active {
 	background-image:url('../assets/feature-bubbles-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 
 .btn-group.colors {

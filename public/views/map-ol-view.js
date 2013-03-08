@@ -324,6 +324,7 @@ define([
                     // add code to remove feature from highlight layer
                 },
             });
+
             this.map.addControl(selectControl);
             selectControl.activate();
             // make sure the SelectControl does not disable map panning when clicked on feature
