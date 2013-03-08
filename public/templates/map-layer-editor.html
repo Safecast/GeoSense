@@ -47,8 +47,8 @@
                             </label>
                         </p>
                     </div>
-                    <div class="feature-settings B">
-                        <p class="clearfix">
+                    <div class="feature-settings B clearfix">
+                        <p>
                             <label class="title" for="">Minimum feature size</label>  
                             <span class="pull-left">
                                 <input class="number model-input" name="layerOptions.minFeatureSize" type="text" placeholder="default" />
@@ -56,8 +56,8 @@
                             <span class="slider pull-left" data-field="layerOptions.minFeatureSize" data-min="1" data-max="300"></span>
                         </p>
                     </div>
-                    <div class="feature-settings B P">
-                        <p class="clearfix">
+                    <div class="feature-settings B P clearfix">
+                        <p>
                             <label class="title" for="">Feature size</label>  
                             <span class="pull-left">
                                 <input class="number model-input" name="layerOptions.featureSize" type="text" placeholder="default" />
@@ -76,13 +76,17 @@
                         </p>
                     </div>
                 </div>
-                <p class="clearfix advanced">
-                    <label class="title" for="map-size">Renderer</label>
-                    <select class="model-input" name="layerOptions.htmlRenderer">
-                        <option value="Canvas">Canvas (faster)</option>
-                        <option value="SVG">SVG (more options)</option>
-                    </select>
-                </p>
+
+                <div class="advanced clearfix">
+                    <div class="divider"></div>
+                    <p>
+                        <label class="title" for="map-size">Renderer</label>
+                        <select class="model-input" name="layerOptions.htmlRenderer">
+                            <option value="Canvas">Canvas (faster)</option>
+                            <option value="SVG">SVG (more options)</option>
+                        </select>
+                    </p>
+                </div>
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-colors">
