@@ -112,8 +112,36 @@
                     </tbody>
                 </table>
                 <p>
-                    <a href="#" class="btn add-color"><span class="icon icon-plus"></span></a>
+                    <button href="#" class="btn add-color"><i class="icon icon-plus"></i> Add</button>
+                    <button data-content-selector=".color-generator" data-title="Color Scheme Generator" data-placement="right" href="#" class="btn show-color-generator has-popover pull-right">Generate color scheme…</button>
                 </p>
+
+                <div class="color-generator">
+                    <div class="clearfix">
+                        <div class="clearfix">
+                            <p class="pull-left">
+                                <label class="radio">
+                                    <input type="radio" name="colorSchemeType" value="diverging" checked> diverging
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="colorSchemeType" value="sequential"> sequential
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="colorSchemeType" value="qualitative"> qualitative
+                                </label>
+                            </p>
+                            <p class="pull-right">
+                                <label class="title" for="">Steps</label>  
+                                    <input class="number" name="colorSchemeSteps" type="text" value="5" />
+                                </span>
+                            </p>
+                        </div>
+                        <div class="divider" />
+                        <a href="#" class="btn hide-color-generator pull-left">Cancel</a>
+                        <a href="#" class="btn btn-warning generate-colors pull-right">Generate</a>
+                    </div>
+                </div>
+
                 <div class="divider"></div>
                 <p>
                     <label class="title">Label color</label>

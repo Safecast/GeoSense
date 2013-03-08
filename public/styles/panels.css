@@ -14,11 +14,12 @@
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
 	width: 320px;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .panel .panel-header, .panel .panel-body {
 	text-shadow: rgba(50,50,50,.9) 1px 1px 0px;
+	overflow: hidden;
 }
 
 .panel .panel-body {
@@ -102,19 +103,29 @@
 	padding: 5px 0 10px 0;
 }
 
+.panel .accordion-body .accordion-body-content:last-child {
+	padding-bottom: 0;
+}
+
 .panel .accordion-heading {
 	position: relative;
 	white-space: nowrap;
 }
 
-.panel .accordion-heading .accordion-toggle {
-	padding: 3px 0 3px 0;
+.panel .accordion-heading .accordion-toggle, .panel .accordion-heading .accordion-toggle a {
+	padding: 0;
+}
+
+.layer-panel h4, .layer-panel h4 a {
+	font-size: 24px !important;
+	line-height: 28px;
+	color: white !important;
 }
 
 .panel .accordion-group {
 	border: none;
 	width: 222px;
-	padding: 0 0 5px 0;
+	padding: 00;
 	margin: 0;
 
 }
@@ -132,7 +143,7 @@
 }
 
 .panel .panel-header .frame {
-	background-color:rgba(50, 50, 50, .5);
+	background-color:rgba(50, 50, 50, .6);
 	border-radius: 6px;
 	-moz-border-radius:6px;
 	-webkit-border-radius:6px;
@@ -157,7 +168,7 @@
 .panel .panel-controls {
 	list-style: none;
 	padding: 0;
-	margin: 2px 0 0 0;
+	margin: 4px 0 0 0;
 	position: absolute;
 	right: 0px;
 	top: 0px;
