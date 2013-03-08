@@ -366,26 +366,28 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					ended = true;
 					finalized = true;
 
-					if (!defaults.attrMap) {
-						defaults.attrMap = {};
+					if (!params.append) {
+						if (!defaults.attrMap) {
+							defaults.attrMap = {};
+						}
+						// determine default field mappings by finding first Number and Date field
+						dataTransform.fields.every(function(field) {
+							if (field.type == 'Number') {
+								defaults.attrMap.numeric = field.name;
+								return false;
+							}
+							return true;
+						});
+						dataTransform.fields.every(function(field) {
+							if (field.type == 'Date') {
+								defaults.attrMap.datetime = field.name;
+								return false;
+							}
+							return true;
+						});
 					}
-					// determine default field mappings by finding first Number and Date field
-					dataTransform.fields.every(function(field) {
-						if (field.type == 'Number') {
-							defaults.attrMap.numeric = field.name;
-							return false;
-						}
-						return true;
-					});
-					dataTransform.fields.every(function(field) {
-						if (field.type == 'Date') {
-							defaults.attrMap.datetime = field.name;
-							return false;
-						}
-						return true;
-					});
 
-					var defaultsSave = !params.dry ?
+					var defaultsSave = !params.dry && !params.append ?
 						defaults.save : function(callback) { callback(false, defaults) };
 					defaultsSave.call(defaults, function(err, defaults) {
 						if (err) {

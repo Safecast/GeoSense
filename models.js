@@ -197,8 +197,6 @@ var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema(
     createdAt: Date,
     updatedAt: Date,
     lastReducedAt: Date,
-    datetimeAttr: String,
-    numericAttr: String
 }, {FeatureSchema: GeoFeatureSchema});
 
 GeoFeatureCollectionSchema.plugin(useTimestamps);
