@@ -18,6 +18,7 @@ define([
 			'click .source-submit': 'sourceSubmitButtonClicked',
 			'click .back': 'backButtonClicked',
 			'click .from-field .remove' : 'fromFieldRemoveClicked',
+			'click .btn': function() { return false }
 	    },
 
 	    initialize: function(options) {
@@ -30,12 +31,23 @@ define([
 			this.inspectedSource;
 			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
 
-			this.toFields = {
-				'geometry.coordinates': 'Point X,Y',
-				'properties.val': 'Point Value',
-				'properties.datetime':'Date',
-				'properties.label': 'Point Label',
-				//'properties.mixed': 'Mixed'
+			this.descripts = [
+				{to: 'geometry.coordinates', type: 'LngLat', label: 'coordinates', options: {}, allowedTypes: ['LatLng', 'LngLat']},
+				{toTemplate: 'properties.$field', type: 'Number', label: '', options: {}},
+				{toTemplate: 'properties.$field', type: 'String', label: '', options: {}},
+				{toTemplate: 'properties.$field', type: 'Date', label: '', options: {}},
+			];
+
+			this.emptyDescript = {toTemplate: 'properties.$field', type: 'String', label: '', options: {}};
+
+			this.fieldTypes = {
+				"Number": "Number",
+				"String": "Text",
+				"Date": "Date",
+				"Array": "List",
+				"Object": "Object",
+				"LatLng": "Lat,Lng",
+				"LngLat": "Lng,Lat",
 			};
 	    },
 
@@ -53,7 +65,7 @@ define([
 			this.runImport({inspect: true, max: this.maxPreview}, {
 				success: function(responseData) {
 					if (responseData.items && responseData.items.length) {
-						self.initSourceForMapping(responseData);
+						self.initDataTransformForSource(responseData);
 						self.setStep('mapping');
 					}
 				}
@@ -93,7 +105,7 @@ define([
 			return false;
 		},
 
-		initSourceForMapping: function(data) 
+		initDataTransformForSource: function(data) 
 		{
 			var self = this;
 			this.inspectedSource = data;
@@ -127,34 +139,10 @@ define([
 				self.$('.from-data tbody').append('<tr>' + tds + '</tr>');
 			});
 
-			var initClickHandler = function(f) {
-				$('.show-field-settings', f).hide();
-				// solve with popover
-				/*$('.show-field-settings', f).click(function() {
-					$('.field-settings', f).toggle();
-					return false;
-				});*/
-			};
-
 			this.updateHandleStates();
 
-			for (var k in this.toFields) {
-				var f = this.toFieldTemplate.clone();
-				f.removeClass('element-template');
-				$('.field-title', f).text(this.toFields[k]);
-				$('.to-field', f).attr('data-to', k);
-				$('.field-settings', f).hide();
-				initClickHandler(f);
-				this.$('.to-data thead').append(f).show();
-			}
-			this.$('.to-field').sortable({
-				connectWith: '.to-field',
-				stop: function(event, ui) {
-					// prevent double loading since dropping from draggable into the sortable
-					// will also fire this event, but draggable.stop fires later than this one.
-					if (self.preventSortableEvents) return;
-					self.loadImportPreview();
-				}
+			_.each(this.descripts, function(descript) {
+				self.initDescript(descript);
 			});
 
 			this.$('.from-field').draggable({
@@ -168,14 +156,138 @@ define([
 					self.$('.to-field').addClass('highlight');
 				},
 				stop: function(event, ui) {
+					console.log('* draggable stop');
 					self.preventSortableEvents = false;
+
 					self.$('.to-field').removeClass('highlight');
 					self.$('.to-data .from-field').removeClass('half-opacity');
 					self.updateHandleStates();
+
+					self.updateDescripts();
 					self.loadImportPreview();
 				}
 			});
+		},
 
+		initDescript: function(descript)
+		{
+			var self = this,
+				container = self.toFieldTemplate.clone();
+			container.removeClass('element-template');
+			descript.updateContainer = function() {
+				$('.field-label', container).text(descript.label);
+				$('.field-type', container).text(self.fieldTypes[descript.type]);
+				$('.show-field-settings', container)
+					.attr('disabled', !descript.to)
+					.popover('hide');
+			};
+			descript.container = container;
+			self.initDescriptSettings(descript);
+			self.$('.to-data thead').append(container).show();
+			descript.updateContainer();
+			$('.to-field', container).sortable({
+				connectWith: '.to-field',
+				start: function(event, ui) {
+				},
+				stop: function(event, ui) {
+					if (self.preventSortableEvents) return;
+					console.log('* sortable stop');
+					// prevent double loading since dropping from draggable into the sortable
+					// will also fire this event, but draggable.stop fires later than this one.
+					self.updateDescripts();
+					self.loadImportPreview();
+				}
+			});
+		},
+
+		initDescriptSettings: function(descript) 
+		{
+			var self = this,
+				el = $('.field-settings', descript.container).remove();
+
+			$('select.field-type', el).each(function() {
+				var select = $(this),
+					allowedTypes = descript.allowedTypes || _.keys(self.fieldTypes);
+				_.each(allowedTypes, function(type) {
+					select.append('<option value="' + type + '">' + self.fieldTypes[type] + '</option>');
+				});
+			});
+
+			$('.show-field-settings', descript.container).popover({
+				title: 'Transform',
+				content: el,
+				html: true,
+				container: 'body'
+			}).on('shown', function(evt) {
+				$(this).addClass('active');
+				var trigger = this;
+
+				$('.field-setting', el).each(function() {
+					if ($(this).attr('type') == 'checkbox') {
+						$(this).attr('checked', getAttr(descript, $(this).attr('name')));
+					} else {
+						$(this).val(getAttr(descript, $(this).attr('name')));
+					}
+				});
+
+				$('.field-setting', el).change(function() {
+					setAttr(descript, $(this).attr('name'), 
+						$(this).attr('type') == 'checkbox' ? $(this).is(':checked') : $(this).val());
+					self.updateDescripts();
+					self.loadImportPreview();
+				});
+
+				self.$('.show-field-settings').each(function() {
+					if (this != trigger) {
+						$(this).popover('hide');
+					}
+				});
+
+			}).on('hidden', function(evt) {
+				$(this).removeClass('active');
+				return false;
+			}).click(function(evt) {
+				return false;
+			});
+		},
+
+		updateDescripts: function()
+		{
+			var validDescripts = [];
+			_.each(this.descripts, function(descript) {
+				descript.from = [];
+				var fromFields = $('.from-field', descript.container);
+				descript.from = [];
+				for (var j = 0; j < fromFields.length; j++) {
+					descript.from.push($(fromFields[j]).attr('data-from'));
+				}
+				if (!descript.from.length) {
+				 	if (descript.toTemplate) {
+						descript.to = null;
+						descript.label = '';					
+					}
+				} else {
+					if (!descript.to && descript.toTemplate) {
+						descript.to = descript.toTemplate.replace('$field', descript.from[0].replace(/\./g,' '));
+						descript.label = descript.to;
+					}
+					validDescripts.push({
+						to: _.clone(descript.to),
+						from: _.clone(descript.from),
+						options: _.clone(descript.options),
+						type: _.clone(descript.type)
+					});
+				}
+				descript.updateContainer();
+			});
+
+			if (validDescripts.length == this.descripts.length) {
+				var newDescript = _.clone(this.emptyDescript);
+				this.descripts.push(newDescript);
+				this.initDescript(newDescript)
+			}
+
+			return validDescripts;
 		},
 
 	    render: function() 
@@ -235,6 +347,7 @@ define([
 			$(event.currentTarget).closest('.from-field').remove();
 			this.updateHandleStates();
 			this.previousFieldDefs = null;
+			this.updateDescripts();
 			this.loadImportPreview();
 			return false;
 	    },
@@ -247,90 +360,38 @@ define([
 				this.$('.modal-body .alert').html(html);
 	    	}
 	    },
-
-	    getFieldDefs: function() 
-	    {
-			var defs = [],
-				valid = false;
-			for (var k in this.toFields) {
-				//console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
-				var fromFields = this.$('.to-field[data-to="' + k +'"] .from-field'),
-					def = {
-						to: k,
-						from: []
-					};
-				switch (k) {
-					case 'geometry.coordinates':
-						def['type'] = 'LatLng';
-						break;
-					case 'label':
-						def['type'] = 'String';
-						break;
-					case 'properties.datetime':
-						def['type'] = 'Date';
-						break;
-					case 'properties.val':
-						def['type'] = 'Number';
-						break;
-					default:
-						def['type'] = 'String';
-				}
-				for (var i = 0; i < fromFields.length; i++) {
-					def.from.push($(fromFields[i]).attr('data-from'));
-				}
-				if (def.from.length) {
-					defs.push(def);
-					valid = true;
-				}
-			}
-
-			var errors = [];
-			
-			// move validation to server
-			/*if (!defs.loc.fromFields.length) {
-				errors.push('Point X,Y is required');
-			}*/
-
-			return {fieldDefs: defs, errors: errors, valid: valid};
-	    },
 	
 		runImport: function(params, options)
 		{
 			var self = this,
-				defs, fieldDefs,
 				options = options || {};
 
 			if (!params.inspect) {
-				defs = this.getFieldDefs();
-				fieldDefs = defs.fieldDefs || [];
-
-				if (defs.errors.length) {
-					if (!options.silent) {
-						this.setAlert('<ul><li>' + defs.errors.join('</li></li>') + '</li></ul>');
-					}
-					if (!params.preview) {
-						return false;
-					}
-				}
-
-				if (!defs.valid && params.preview) {
+				var validDescripts = this.updateDescripts();				
+				if (!validDescripts.length && params.preview) {
 					self.updateImportPreview([]);
 					return;
 				}
 			}
 
-			this.previousFieldDefs = fieldDefs;
+			if (options.ifChanged && this.previousValidDescripts && _.isEqual(this.previousValidDescripts, validDescripts)) {
+				this.previousValidDescripts = validDescripts;
+				return;
+			}
 
 			var params = _.extend({
 				url: this.$('input[name=url]').val(),
-				transform: fieldDefs,
+				transform: validDescripts,
 			}, params);
+
 			console.log('Requesting import', params);
 			this.setAlert();
 			this.setLoading(true);
+
 			if (this.request) {
 //				this.request.abort();
 			}
+
 			this.request = $.ajax({
 				type: 'POST',
 				url: '/api/import/',
@@ -383,8 +444,7 @@ define([
 
 		loadImportPreview: function()
 		{
-			if (this.previousFieldDefs && _.isEqual(this.previousFieldDefs, this.getFieldDefs().fieldDefs)) return;
-			this.runImport({preview: true, max: this.maxPreview}, {silent: true});
+			this.runImport({preview: true, max: this.maxPreview}, {silent: true, ifChanged: true});
 		},
 
 		updateImportPreview: function(items)
@@ -393,41 +453,46 @@ define([
 			var rows = items.reduce(function(rows, current) {
 				var row = ''
 				if (current) {
-					for (var k in self.toFields) {
-						var val = getAttr(current, k),
-							out = undefined, 
-							tdclass = undefined;
-						console.log(k, val, current);
-						if (typeof val == 'object' && val.error) {
-							tdclass = 'conversion-error';
-							switch (val.name){
-								case 'ValueSkippedWarning':
-									out = val.message;
-									break;
-								default:
-									out = val.message;
-							}
-						} else {
-							switch (k) {
-								default:
-									out = val;
-									break;
-								case 'datetime':
-									if (val) {
-										out = new Date(val);
-										if (out) {
-											out = out.format(locale.formats.DATE_TIME);
+					_.each(self.descripts, function(descript) {
+						var out, tdclass, val, isError;
+						if (descript.to) {
+							val = getAttr(current, descript.to);
+							isError = typeof val == 'object' && val.error;
+							if (isError) {
+								tdclass = 'conversion-error';
+								switch (val.name){
+									case 'ValueSkippedWarning':
+										out = val.message;
+										break;
+									default:
+										out = val.message;
+								}
+							} else {
+								switch (descript.type) {
+									default:
+										out = val;
+										break;
+									case 'Date':
+										if (val) {
+											out = new Date(val);
+											if (out) {
+												out = out.format(locale.formats.DATE_TIME);
+											}
 										}
-									}
-							}
-							if (out == undefined || 
-								((typeof out == 'string' || Array.isArray(out)) && !out.length)) {
-									tdclass = 'conversion-blank';
-									out = 'blank';
+								}
 							}
 						}
+
+						if (out == undefined || 
+							((typeof out == 'string' || Array.isArray(out)) && !out.length)) {
+								tdclass = 'conversion-blank';
+								out = 'blank';
+						} else if (!isError) {
+							out = '<i class="icon icon-ok-circle half-opacity"></i> ' + out;
+						}
+
 						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + out + '</td>';
-					}
+					});
 				}
 				rows.push('<tr>' + row + '</tr>');
 				return rows;

@@ -315,16 +315,44 @@ var MapAPI = function(app)
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 
-					// set all public elements of layerOptions
-					for (var k in req.body.layerOptions) {
-						if (k[0] != '_') {
-							console.log(k, req.body.layerOptions[k]);
-							mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
-						}
+					var cloneDefaults;
+					if (mapLayer.layerOptions._id.toString() == mapLayer.featureCollection.defaults.toString()) {
+						console.warn('Cloning defaults for new layerOptions');
+						cloneDefaults = function(callback) {
+							mapLayer.featureCollection.cloneDefaults(function(err, clone) {
+								mapLayer.layerOptions = clone;
+								map.save(function(err, map) {
+									// TODO: Can this really not be simplified?
+									Map.findById(map._id)
+										.populate('layers.featureCollection')
+										.populate('layers.layerOptions')
+										.exec(function(err, map) {
+											if (handleDbOp(req, res, err, map)) return;
+											var mapLayer = map.layers.id(req.params.layerId);
+											callback(false, mapLayer);
+										});
+								});
+							});
+						};
+					} else {
+						console.warn('Updating existing layerOptions');
+						cloneDefaults = function(callback) { callback(false, mapLayer); }
 					}
 
-					mapLayer.layerOptions.save(function(err, opts) {
-						if (!handleDbOp(req, res, err, true)) {
+					cloneDefaults.call(mapLayer.featureCollection, function(err, mapLayer) {
+						if (handleDbOp(req, res, err, true)) return;
+
+						// set all public elements of layerOptions
+						for (var k in req.body.layerOptions) {
+							if (k[0] != '_') {
+								//console.log(k, req.body.layerOptions[k]);
+								mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
+							}
+						}
+
+						mapLayer.layerOptions.save(function(err, opts) {
+							if (handleDbOp(req, res, err, true)) return;
+
 							console.log('layer options updated');
 							
 							if (req.body.position != undefined) {
@@ -342,7 +370,7 @@ var MapAPI = function(app)
 									}
 									map.save(function(err, map) {
 										if (!handleDbOp(req, res, err, true)) {
-											console.log('layer position changed to ' + newPosition);
+											console.log('layer position set to ' + newPosition);
 											res.send(prepareLayerResult(req, mapLayer, map));
 										}
 									});
@@ -351,10 +379,8 @@ var MapAPI = function(app)
 							}
 
 							res.send(prepareLayerResult(req, mapLayer, map));
-						}
+						});
 					});
-
-					return;
 			  	});
 		});
 
@@ -375,37 +401,30 @@ var MapAPI = function(app)
 				    	.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
-						    var defaults = collection.defaults ?
-						    	collection.defaults.toObject() : config.COLLECTION_DEFAULTS;
-						    delete defaults['_id'];
-						    var options = new LayerOptions(defaults);
+							if (handleDbOp(req, res, err, true)) return;
+							var sortedLayers = sortByPosition(map.layers);
+						    var layer = {
+						    	// set _id so it can be referenced below
+						    	_id: new mongoose.Types.ObjectId(),
+						    	featureCollection: collection,
+						    	layerOptions: collection.defaults._id,
+						    	position: (sortedLayers.length ? 
+						    		(sortedLayers[sortedLayers.length - 1].position != null ?
+						    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
+						    };    
 
-						    options.save(function(err) {
-								if (handleDbOp(req, res, err, true)) return;
-								var sortedLayers = sortByPosition(map.layers);
-							    var layer = {
-							    	// set _id so it can be referenced below
-							    	_id: new mongoose.Types.ObjectId(),
-							    	featureCollection: collection,
-							    	layerOptions: options._id,
-							    	position: (sortedLayers.length ? 
-							    		(sortedLayers[sortedLayers.length - 1].position != null ?
-							    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
-							    };    
-
-						      	map.layers.push(layer);
-						      	map.save(function(err, map) {
-								    if (handleDbOp(req, res, err, map)) return;
-							        console.log("map layer created");
-									Map.findOne({_id: map._id})
-										.populate('layers.featureCollection')
-										.populate('layers.layerOptions')
-										.exec(function(err, map) {
-										    if (handleDbOp(req, res, err, map)) return;
-									       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
-										});
-							  	});
-						    });
+					      	map.layers.push(layer);
+					      	map.save(function(err, map) {
+							    if (handleDbOp(req, res, err, map)) return;
+						        console.log("map layer created");
+								Map.findOne({_id: map._id})
+									.populate('layers.featureCollection')
+									.populate('layers.layerOptions')
+									.exec(function(err, map) {
+									    if (handleDbOp(req, res, err, map)) return;
+								       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
+									});
+						  	});
 					    });
 			    });
 		});

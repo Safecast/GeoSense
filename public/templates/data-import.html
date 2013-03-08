@@ -91,17 +91,19 @@
 				<thead>
 			    	<tr>
 					    <th class="element-template">
-					    	<label class="title"><span class="field-title"></span>&nbsp;<a class="show-field-settings" href="#"><span class="icon icon-wrench half-opacity"></span></a></label>
+					    	<button class="btn show-field-settings" data-placement="top"> <span class="field-label"></span> <span class="icon icon-cog half-opacity"></span> <span class="field-type half-opacity micro"></span></button>
 					    	<span class="well to-field clearfix" data-to=""></span>
-					    	<span class="field-settings">
-					    		<span class="title field-type">Number</span>
+					    	<div class="field-settings">
+					    		<label class="title">Type</label>
+					    		<select class="field-type field-setting" name="type">
+					    		</select>
 								<label class="checkbox">
-								   	<input type="checkbox"> Skip empty
+								   	<input class="field-setting" name="options.skipEmpty" type="checkbox"> Skip empty
 								</label>
 								<label class="checkbox">
-								   	<input type="checkbox"> Skip zero
+								   	<input class="field-setting" name="options.skipZero" type="checkbox"> Skip zero
 								</label>
-		    			    	</span>
+	    			    	</span>
 					    </th>
 			    	</tr>
 			    </thead>
@@ -120,9 +122,9 @@
    </div>
 </div>
 <div class="modal-footer">
-	<a href="#" class="step mapping btn back"><i class="icon-arrow-left half-opacity"></i> </span> Use another source</a>
-	<a href="#" data-dismiss="modal" class="btn cancel">Cancel</a>
-	<a href="#" class="step mapping import-run btn btn-primary">Import Data</a>
+	<button class="step mapping btn back"><i class="icon-arrow-left half-opacity"></i> </span> Use another source</button>
+	<button data-dismiss="modal" class="btn cancel">Cancel</button>
+	<button class="step mapping import-run btn btn-primary">Import Data</button>
 	<div class="state-indicator pull-right"><div class="spinner"></div></div>
 </div>
 
