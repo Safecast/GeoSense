@@ -8,28 +8,60 @@ var	models = require('../models'),
 describe('KML', function() {
 	var featureCollection, GeoFeature;
 
-	before(function(done) {
+	before(function() {
 		mongoose.connect(config.DB_PATH);
-		featureCollection = new GeoFeatureCollection({
-			active: true, 
-			status: config.DataStatus.COMPLETE, 
-			title: 'KML test'
-		});
-		featureCollection.save(function(err, collection) {
-			return done(err);
-		});
 	});
 
-	var ImportedModel;
-
-	it('should import a KML file and save each Feature in the DB', function(done) {
+	it('should import a KML file and extract custom properties', function(done) {
 
 		api.import.import({
-			path: 'test/data/gz_2010_us_outline_500k.kml',
+			path: 'test/data/scenic_vista.kml',
 		}, null, null, function(err, collection) {
 			if (err) throw err;
-			ImportedModel = collection.getFeatureModel();
-			done();
+			collection.getFeatureModel().findOne({'properties.TrailHeadName': 'Mount Everest'}, function(err, feature) {
+				if (err) throw err;
+				assert(feature);
+				assert.equal(feature.geometry.type, 'Point');
+				assert.strictEqual(feature.properties.name, "Difficult trail");
+				assert.strictEqual(feature.properties.TrailLength, 347.45);
+				assert.strictEqual(feature.properties.ElevationGain, 10000);
+				done();
+			});
+		});
+
+	});
+
+	it('should import a KML file and save a LineString', function(done) {
+
+		api.import.import({
+			path: 'test/data/linestring.kml',
+		}, null, null, function(err, collection) {
+			if (err) throw err;
+			collection.getFeatureModel().findOne(function(err, feature) {
+				if (err) throw err;
+				assert(feature);
+				assert.equal(feature.geometry.type, 'LineString');
+				assert.equal(feature.geometry.coordinates.length, 11);
+				done();
+			});
+		});
+
+	});
+
+	it('should import a KML file and save a Polygon', function(done) {
+
+		api.import.import({
+			path: 'test/data/polygon.kml',
+		}, null, null, function(err, collection) {
+			if (err) throw err;
+			collection.getFeatureModel().findOne(function(err, feature) {
+				if (err) throw err;
+				assert(feature);
+				assert.equal(feature.geometry.type, 'Polygon');
+				assert.equal(feature.geometry.coordinates[0].length, 6);
+				assert.equal(feature.geometry.coordinates[1].length, 6);
+				done();
+			});
 		});
 
 	});

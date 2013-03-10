@@ -213,15 +213,15 @@ GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
 GeoFeatureCollectionSchema.methods.cloneDefaults = function(callback)
 {
     if (!this.defaults) {
-        return new LayerOptions(clone).save(callback);
+        return new LayerOptions(config.LAYER_OPTIONS_DEFAULTS).save(callback);
     }
-    LayerOptions.find({_id: this.defaults}, function(err, defaults) {
+    LayerOptions.findById(this.defaults, function(err, defaults) {
         if (err) {
             callback(err);
             return;
         }
-        var clone = this.defaults ? this.defaults.toObject() : config.LAYER_OPTIONS_DEFAULTS;
-        delete clone['_id'];
+        clone = defaults.toObject();
+        delete clone._id;
         return new LayerOptions(clone).save(callback);
     })
 };

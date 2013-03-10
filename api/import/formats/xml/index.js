@@ -11,14 +11,11 @@ module.exports = {
     Request: function(opts) 
     {
         if (!opts.headers) opts.headers = {};
-        if (!opts.headers.Accept) opts.headers.Accept = 'application/kml,text/kml';
+        if (!opts.headers.Accept) opts.headers.Accept = 'application/xml,text/xml';
         return request(opts);
     },
 
     transform: [
-        {to: 'properties', type: 'Object'},
-        {to: 'type', type: 'String'},
-        {to: 'geometry', type: 'Object'},
     ]
 
 };

@@ -21,7 +21,7 @@ define([
 	    	
 	    	this.defaultLayout = [
 	    		{fields: ['properties.label', '%(datetime)s'], label: false, class: "box title"},
-	    		{fields: ['%(numeric)s'], label: '%(unit)s', class: 'large'},
+	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
 	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
 
 	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), class: 'muted'},
@@ -96,13 +96,21 @@ define([
 				return new Date(value).format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
 			};
 
-			var fieldSubst = {
+			var fieldSubst = !layerOptions.attrMap ? {} : {
 				'numeric': layerOptions.attrMap.numeric,
 				'datetime': layerOptions.attrMap.datetime,
 				'label': layerOptions.attrMap.label
 			};
+
+			console.log(mapLayer.attributes);
+
 			var labelSubst = {
-				'unit': !isEmpty(valFormatter.unit) ? valFormatter.unit : __('Value'),
+				'numeric': !isEmpty(valFormatter.unit) ? valFormatter.unit : 
+					(fieldSubst.numeric ? mapLayer.attributes.featureCollection.fields.reduce(function(a, b) {
+						if (b.name == fieldSubst.numeric) return b.label;
+						return a;
+					}) : __('Value')),
+				'unit': valFormatter.unit,
 				'itemTitlePlural': mapLayer.getDisplay('itemTitlePlural') || __('samples')
 			};
 

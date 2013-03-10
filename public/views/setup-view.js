@@ -56,8 +56,8 @@ define([
 
 			$(this.el).html(this.template());	
 			
-			this.$(".map-url, .map-admin-url").click(function() {
-			   $(this).select();
+			this.$('.map-url, .map-admin-url').click(function() {
+				$(this).select();
 			});
 			
 			this.$(".enter-email").click(function() {

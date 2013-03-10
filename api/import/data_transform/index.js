@@ -1,26 +1,12 @@
-var coordinates = require('../../../geogoose/').coordinates,
-	errors = require('../../../errors'),
+var errors = require('./errors'),
+	DataTransformError = errors.DataTransformError, ValueSkippedWarning = errors.ValueSkippedWarning, 
+	Document = require('./document'),
+	coordinates = require('../../../geogoose/').coordinates,
 	ValidationError = errors.ValidationError,
 	console = require('../../../ext-console.js'),
-	util = require('util'),
 	_ = require('cloneextend');
 
 var ARRAY_SEPARATORS = /[,;]/;
-
-var DataTransformError = function(msg, errors) {
-	DataTransformError.super_.call(this, msg, this.constructor);
-    this.errors = errors;
-}
-util.inherits(DataTransformError, errors.BasicError)
-DataTransformError.prototype.name = 'DataTransformError';
-DataTransformError.prototype.message = 'Transform Error';
-
-var ValueSkippedWarning = function(msg, errors) {
-	ValueSkippedWarning.super_.call(this, msg, this.constructor);
-}
-util.inherits(ValueSkippedWarning, errors.BasicError)
-ValueSkippedWarning.prototype.name = 'ValueSkippedWarning';
-ValueSkippedWarning.prototype.message = 'Value Skipped';
 
 function isErr(val) {
 	return val instanceof Error;
@@ -40,6 +26,7 @@ var Cast = {
 
 	Number: function(value, options)
 	{
+		var options = options || {};
 		if (options.skipEmpty && isEmpty(value)) {
 			return;
 		}
@@ -54,6 +41,7 @@ var Cast = {
 
 	String: function(value, options) 
 	{
+		var options = options || {};
 		if (value != undefined) {
 			var str = '' + value;
 			if (!options.skipEmpty || value != '') {
@@ -64,6 +52,7 @@ var Cast = {
 
 	Array: function(value, options) 
 	{
+		var options = options || {};
 	    if (value != undefined) {
 		    if (!Array.isArray(value)) {
 		        return [value];
@@ -75,6 +64,7 @@ var Cast = {
 
 	Date: function(value, options) 
 	{
+		var options = options || {};
 		if ((Array.isArray(value) && value.length == 3) || typeof(value) == 'string') {
 			var date = new Date(value);
 			if (isValidDate(date)) {
@@ -307,7 +297,7 @@ var	iterFields = function(fields, doc, callback) {
 };
 
 /**
-Initializes a DataTransform object based on field definitions, which look like the
+Initializes a DataTransform object based on field descripts, which look like the
 following:
 
 	descript = [
@@ -330,8 +320,6 @@ following:
 			'to': '<to-field-name>',
 			'set': <constant-value>
 		}
-		
-		// etc
 	]
 */
 var DataTransform = function(descripts, options) 
@@ -376,8 +364,10 @@ DataTransform.prototype.transformModel = function(fromDoc, ToModel, config)
 {
 	var transformed = {}
 		errors = 0;
+
 	for (var to in this.setters) {
 		var f = this.setters[to];
+
 		transformed[to] = f.apply(fromDoc, [transformed]);
 		if (isErr(transformed[to])) {
 			var err = transformed[to],
@@ -410,6 +400,8 @@ DataTransform.prototype.transformModel = function(fromDoc, ToModel, config)
 module.exports = {
 	DataTransform: DataTransform,
 	DataTransformError: DataTransformError,
+	ValueSkippedWarning: ValueSkippedWarning,
 	Cast: Cast,
-	FieldType: FieldType
+	FieldType: FieldType,
+	Document: Document
 };
