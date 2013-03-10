@@ -1,12 +1,15 @@
 var mongoose = require('mongoose'),
     coordinates = require('./coordinates'),
     util = require('./util'),
-    getBounds = coordinates.getBounds, getBbox = coordinates.getBbox,
+    getBounds = coordinates.getBounds, 
+    bboxFromBounds = coordinates.bboxFromBounds,
+    boundsFromBbox = coordinates.boundsFromBbox,
     _ = require('cloneextend');
 
 var geoJSONFeatureCollectionDefinition = {
         type: {type: String, required: true, enum: ['FeatureCollection'], default: 'FeatureCollection'},
         bounds2d: {type: Array, index: '2d'},
+        bbox: {type: Array},
         properties: mongoose.Schema.Types.Mixed,
     },
     geoJSONFeatureDefinition = {
@@ -22,6 +25,16 @@ var geoJSONFeatureCollectionDefinition = {
     GeoFeatureCollectionSchemaMethods = {}, GeoFeatureCollectionSchemaStatics = {}, GeoFeatureCollectionSchemaMiddleware = {},
     GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {}, GeoFeatureSchemaMiddleware = {};
 
+
+GeoFeatureCollectionSchemaMiddleware.pre = {
+    save: function(next) {
+        if (this.bbox && this.bbox.length) {
+            // Store 2d-indexable bounds >= -180 and < 180
+            this.bounds2d = getBounds(boundsFromBbox(this.bbox), true);
+        }
+        if (next) next();
+    }
+};
 
 GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
 {
@@ -83,7 +96,7 @@ GeoFeatureSchemaMiddleware.pre = {
         if (this.geometry.coordinates && this.geometry.coordinates.length) {
             var bounds = getBounds(this.geometry.coordinates);
             // GeoJSON specifies a one-dimensional array for the bbox
-            this.bbox = getBbox(bounds);
+            this.bbox = bboxFromBounds(bounds);
             // Store 2d-indexable bounds >= -180 and < 180
             this.bounds2d = getBounds(bounds, true);
         }

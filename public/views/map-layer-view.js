@@ -19,7 +19,9 @@ define([
 			//'click .visibility' : 'visibilityChanged',
 			'click .panel-controls .toggle-layer': 'toggleLayerClicked',
 			'click .panel-controls .show-layer-editor': 'showLayerEditorClicked',
-			'click .panel-controls .show-layer-details': 'showLayerDetailsClicked'
+			'click .panel-controls .show-layer-details': 'showLayerDetailsClicked',
+			'click .panel-controls .show-layer-extents': 'showLayerExtentsClicked',
+			'click .panel-controls .move-layer ': function() { return false; }
 	    },
 
 	    initialize: function(options) 
@@ -254,6 +256,10 @@ define([
 			} else {
 				this.expand();
 			}
+
+			this.$('.layer-extents').toggle(enabled 
+				&& this.model.attributes.featureCollection.bbox
+				&& this.model.attributes.featureCollection.bbox.length > 0);
 		},
 
 		modelChanged: function(model)
@@ -274,7 +280,7 @@ define([
 			this.updateStatus();
 			this.$('.model-title').text(this.model.getDisplay('title'));
 
-			this.$('.show-layer-editor').toggle(app.isMapAdmin()
+			this.$('.admin-control.layer-editor').toggle(app.isMapAdmin()
 				&& this.model.getDataStatus() == DataStatus.COMPLETE);
 
 			var collectionAttrs = this.model.attributes.featureCollection,
@@ -322,6 +328,12 @@ define([
 		showLayerEditorClicked: function(event)
 		{
 			this.vent.trigger('showMapLayerEditor', this.model);
+			return false;
+		},
+
+		showLayerExtentsClicked: function(event)
+		{
+			app.mapView.zoomToExtent(this.model.attributes.featureCollection.bbox);
 			return false;
 		},
 

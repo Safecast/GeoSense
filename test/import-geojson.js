@@ -22,14 +22,16 @@ describe('GeoJSON', function() {
 
 	var ImportedModel;
 
-	it('should import a GeoJSON file and save each Feature in the DB', function(done) {
+	it('should import a GeoJSON file and save each Feature in the DB, determining the collection\'s bbox', function(done) {
 
 		api.import.import({
 			path: 'test/data/internet_users_2005_choropleth_lowres.json',
 			format: 'geojson'
 		}, null, null, function(err, collection) {
 			if (err) throw err;
-			console.log(collection);
+			//console.log(collection);
+			assert.deepEqual(collection.bbox.toObject(), [-180, -55.71, 179.96, 83.57 ]);
+			assert.deepEqual(collection.bounds2d.toObject(), [[-180, -55.71], [179.96, 83.57]]);
 			ImportedModel = collection.getFeatureModel();
 			done();
 		});

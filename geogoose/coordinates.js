@@ -66,11 +66,17 @@ var getBounds = function(coordinates, overflow180)
     }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
 };
 
-var getBbox = function(bounds)
+var bboxFromBounds = function(bounds)
 {
     return arrayReduce.call(bounds, function(a, b) {
         return a.concat(b);
     }, []);
+};
+
+var boundsFromBbox = function(bbox)
+{
+    var l = bbox.length;
+    return [bbox.slice(0, l / 2), bbox.slice(l / 2)];
 };
 
 var getCenter = function(bounds)
@@ -115,7 +121,8 @@ module.exports = {
     overflow: overflow,
     coordinates2d: coordinates2d,
     getBounds: getBounds,
-    getBbox: getBbox,
+    bboxFromBounds: bboxFromBounds,
+    boundsFromBbox: boundsFromBbox,
     adjustBboxForQuery: adjustBboxForQuery
 };
 

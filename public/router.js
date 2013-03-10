@@ -719,6 +719,31 @@ define([
 			});	
 		},
 
+        geocode: function(address, callback)
+        {               
+            // TODO move to app
+            var self = this;
+            
+            geocoder = new google.maps.Geocoder();
+            geocoder.geocode({'address': address}, callback);
+        },
+
+        zoomToAddress: function(address)
+        {
+        	var self = this;
+        	this.geocode(address, function(results, status) {
+                if (status != google.maps.GeocoderStatus.OK) {
+                    alert("Unable to find address: " + address);
+                    return;
+                }
+	            var viewport = results[0].geometry.viewport,
+	                sw = viewport.getSouthWest(),
+	                ne = viewport.getNorthEast();
+	            self.mapView.zoomToExtent([sw.lng(), sw.lat(), ne.lng(), ne.lat()]);
+	            $('.search-query').blur();
+        	});
+        }
+
 	});
 
 	var initialize = function() {

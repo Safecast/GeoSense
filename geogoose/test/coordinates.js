@@ -40,5 +40,12 @@ describe('coordinates', function() {
 		], true), [ [-179.5, -10], [179.9, 20] ]);
 	});
 
+	it('should convert bounds to bbox and vice versa', function() {
+		assert.deepEqual(coordinates.bboxFromBounds(
+			[[1, 2], [3, 4]]), [1, 2, 3, 4]);
+		assert.deepEqual(coordinates.boundsFromBbox(
+			[1, 2, 3, 4]), [[1, 2], [3, 4]]);
+	});
+
 });
 

@@ -316,11 +316,12 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 
 					var cloneDefaults;
-					if (mapLayer.layerOptions._id.toString() == mapLayer.featureCollection.defaults.toString()) {
+					if (mapLayer.featureCollection.defaults && mapLayer.layerOptions._id.toString() == mapLayer.featureCollection.defaults.toString()) {
 						console.warn('Cloning defaults for new layerOptions');
 						cloneDefaults = function(callback) {
 							mapLayer.featureCollection.cloneDefaults(function(err, clone) {
-								mapLayer.layerOptions = clone;
+							if (handleDbOp(req, res, err, clone)) return;
+								mapLayer.layerOptions = clone._id;
 								map.save(function(err, map) {
 									// TODO: Can this really not be simplified?
 									Map.findById(map._id)
@@ -366,7 +367,7 @@ var MapAPI = function(app)
 									setIndex(layerIds, oldIndex, newIndex);
 									for (var j = 0; j < layerIds.length; j++) {
 										map.layers.id(layerIds[j]).set('position', j);
-										console.log(map.layers.id(layerIds[j]).featureCollection.title, map.layers.id(layerIds[j]).position);
+										//console.log(map.layers.id(layerIds[j]).featureCollection.title, map.layers.id(layerIds[j]).position);
 									}
 									map.save(function(err, map) {
 										if (!handleDbOp(req, res, err, true)) {
@@ -401,30 +402,44 @@ var MapAPI = function(app)
 				    	.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
-							if (handleDbOp(req, res, err, true)) return;
-							var sortedLayers = sortByPosition(map.layers);
-						    var layer = {
-						    	// set _id so it can be referenced below
-						    	_id: new mongoose.Types.ObjectId(),
-						    	featureCollection: collection,
-						    	layerOptions: collection.defaults._id,
-						    	position: (sortedLayers.length ? 
-						    		(sortedLayers[sortedLayers.length - 1].position != null ?
-						    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
-						    };    
-
-					      	map.layers.push(layer);
-					      	map.save(function(err, map) {
-							    if (handleDbOp(req, res, err, map)) return;
-						        console.log("map layer created");
-								Map.findOne({_id: map._id})
-									.populate('layers.featureCollection')
-									.populate('layers.layerOptions')
-									.exec(function(err, map) {
-									    if (handleDbOp(req, res, err, map)) return;
-								       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
+							if (!collection.defaults) {
+								console.warn('Creating new layerOptions');
+								cloneDefaults = function(callback) {
+									this.cloneDefaults(function(err, clone) {
+										callback(err, clone);
 									});
-						  	});
+								};
+							} else {
+								console.warn('Using defaults for layerOptions');
+								cloneDefaults = function(callback) { callback(false, collection.defaults); }
+							}
+
+							cloneDefaults.call(collection, function(err, layerOptions) {
+								var sortedLayers = sortByPosition(map.layers);
+							    var layer = {
+							    	// set _id so it can be referenced below
+							    	_id: new mongoose.Types.ObjectId(),
+							    	featureCollection: collection,
+							    	layerOptions: layerOptions,
+							    	position: (sortedLayers.length ? 
+							    		(sortedLayers[sortedLayers.length - 1].position != null ?
+							    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
+							    };    
+
+						      	map.layers.push(layer);
+						      	map.save(function(err, map) {
+								    if (handleDbOp(req, res, err, map)) return;
+							        console.log("map layer created");
+									Map.findOne({_id: map._id})
+										.populate('layers.featureCollection')
+										.populate('layers.layerOptions')
+										.exec(function(err, map) {
+										    if (handleDbOp(req, res, err, map)) return;
+									       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
+										});
+							  	});
+							});
+
 					    });
 			    });
 		});
