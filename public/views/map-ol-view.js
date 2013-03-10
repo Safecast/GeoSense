@@ -30,6 +30,9 @@ define([
             _.bindAll(this, "updateViewBase");
             options.vent.bind("updateViewBase", this.updateViewBase);
 
+            this.externalProjection = new OpenLayers.Projection("EPSG:4326"); // aka WGS 84
+            this.internalProjection = null; // determined by baselayer -- usually EPSG:900913
+
             OpenLayers.ImgPath = "/assets/openlayers-light/";   
             this.featureLayers = {};
         },
@@ -40,14 +43,13 @@ define([
                 zoom = map.getZoom(),
                 extent = map.getExtent(),
                 center = map.getCenter();
-            center.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+            center.transform(this.internalProjection, this.externalProjection);
             var SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
-            SE.transform(new OpenLayers .Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+            SE.transform(this.internalProjection, this.externalProjection);
             var NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
-            NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+            NW.transform(this.internalProjection, this.externalProjection);
             var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
-            //console.log('zoom: '+zoom+', resolution '+this.selectedmap.getResolution()+' '+this.map.getUnits());
-            //console.log('bounds', bounds);
+
             return {
                 center: [center.lon, center.lat],
                 zoom: zoom,
@@ -66,10 +68,8 @@ define([
             var self = this;
             this.map = new OpenLayers.Map({
                 div: "map_canvas",
-                projection: new OpenLayers.Projection("EPSG:900913"),
-                displayProjection: new OpenLayers.Projection("EPSG:4326"),
+                displayProjection: this.externalProjection,
                 numZoomLevels: MAP_NUM_ZOOM_LEVELS,
-                //maxResolution: maxResolution,
                 scope: this,
                 controls: [],
                 eventListeners: {
@@ -96,22 +96,15 @@ define([
             this.map.addControl(scaleLine);
             this.map.addControl(new OpenLayers.Control.Attribution());
 
-            var r = this.baselayer.mapLayer.resolutions;
-            var res = [];
-            for (var i = 0; i < r.length; i++) {
-                var p = new OpenLayers.Geometry.Point(r[i], 0);
-                res.push(p.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).x);
-
-            }
-            
             if (DEBUG) {
                 this.map.addControl(new OpenLayers.Control.MousePosition());
             }
 
+            this.internalProjection = this.map.baseLayer.projection;
             this.formats = {
                 geoJSON: new OpenLayers.Format.GeoJSON({
-                    internalProjection: this.map.baseLayer.projection,
-                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
+                    internalProjection: this.internalProjection,
+                    externalProjection: this.externalProjection,
                     ignoreExtraDims: true
                 })
             };
@@ -120,26 +113,6 @@ define([
 
             MapOLView.__super__.renderMap.call(this, viewBase, viewStyle);
             return this;
-        },
-
-        addKMLLayer: function(url)
-        {
-            kml = new OpenLayers.Layer.Vector("KML", {
-                projection: new OpenLayers.Projection("EPSG:4326"),
-                strategies: [new OpenLayers.Strategy.Fixed()],
-                renderers: ["Canvas"],
-                opacity: 0.3,
-                protocol: new OpenLayers.Protocol.HTTP({
-                    url: url,
-                    format: new OpenLayers.Format.KML({
-                        extractStyles: true, 
-                        extractAttributes: true,
-                        maxDepth: 2
-                    })
-                })
-            })
-        
-            this.map.addLayers([kml]);
         },
 
         attachLayer: function(model)
@@ -483,69 +456,19 @@ define([
                 }
             }
         },
-        
-        toWebMercator: function (googLatLng) 
+           
+        setVisibleMapArea: function(area)
         {
-            // TODO streamline projection 
-
-            // Extract property names from Google response
-            // It seems the API changes the response from Za/Yz/$a
-            
-            props = []
-            for (prop in googLatLng) {
-                if (googLatLng.hasOwnProperty(prop)) {
-                    props.push(prop);
-                }
-            }
-
-            // Assign the property to lat/lng based on their object index
-            $.each(googLatLng, function(index, val) { 
-                if(index == props[0])
-                {
-                    lat=val;
-                } else if (index == props[1])
-                {
-                    lng=val;
-                }
-            });     
-            
-            translation = new Geometry.Point(lng, lat);
-            translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));    
-                    
-            return [translation.x, translation.y];
+            var center = new OpenLayers.LonLat(area.center[0], area.center[1]);
+            center.transform(this.externalProjection, this.internalProjection);    
+            this.map.setCenter(center, area.zoom);      
         },
-            
-        setVisibleMapArea: function(result)
+
+        zoomToExtent: function(bbox) 
         {
-            var center;
-            var zoom;
-            console.log('setVisibleMapArea', result);
-            
-            switch(result.type) {
-                case 'google':
-                    var first = result[0],          
-                    center = this.toWebMercator(first.geometry.location),
-                    viewport = first.geometry.viewport,
-                    viewportSW = viewport.getSouthWest(),
-                    viewportNE = viewport.getNorthEast(),
-                    min = this.toWebMercator(viewportSW),
-                    max = this.toWebMercator(viewportNE),
-                    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min[0], min[1], max[0], max[1]));
-                    break;
-
-                default:
-                    translation = new Geometry.Point(result.center[0], result.center[1]);
-                    translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));    
-                    center = [translation.x, translation.y]; 
-                    if (result.zoom != undefined) {
-                        zoom = result.zoom;
-                    }
-                    break;
-            }
-
-            if (center) {
-                this.map.setCenter(new OpenLayers.LonLat(center[0], center[1]), zoom);      
-            }       
+            var bounds = new OpenLayers.Bounds(bbox[0], bbox[1], bbox[2], bbox[3]);
+            bounds.transform(this.externalProjection, this.internalProjection);
+            this.map.zoomToExtent(bounds, true);
         },
 
     });

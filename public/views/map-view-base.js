@@ -14,29 +14,9 @@ define([
             this.layers = [];
             this.vent = options.vent;
 
-            _.bindAll(this, "geocodeAndSetMapLocation");
-            options.vent.bind("geocodeAndSetMapLocation", this.geocodeAndSetMapLocation);
-            
             if (options.visibleMapArea) {
                 this.initialVisibleMapArea = options.visibleMapArea;
             }
-        },
-
-        geocodeAndSetMapLocation: function(addr)
-        {               
-            // TODO move to app
-            var self = this;
-            
-            geocoder = new google.maps.Geocoder();
-            geocoder.geocode( {'address': addr}, function (results, status) {
-                console.log(results);
-                if (status == google.maps.GeocoderStatus.OK) {
-                    results.type = 'google';
-                    self.setVisibleMapArea(results);
-                } else {    
-                    alert ("Cannot find " + addr + "! Status: " + status);
-                }
-            });
         },
 
         renderMap: function(viewBase, viewStyle) 

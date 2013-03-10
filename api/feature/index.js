@@ -84,12 +84,15 @@ var FeatureAPI = function(app)
                     	boxes = bbox.some(isNaN) ? 
                     		null : coordinates.adjustBboxForQuery(bbox);
                     }
+
                     var manyBoxes = boxes.length > 1,
-                    	isMapReduced = mapReduceOpts.gridSize || mapReduceOpts.timebased,
+                    	isMapReduced = (mapReduceOpts.gridSize 
+                    		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
+                    		|| mapReduceOpts.timebased,
                     	FeatureModel = featureCollection.getFeatureModel(),
 				        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel;
 
-                    console.log('zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes);
+                    console.log('Querying '+FindFeatureModel.collection.name, 'zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes);
 
                     var dequeueBoxAndFind = function() {
                     	if (!boxes.length) {

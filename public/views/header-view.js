@@ -40,6 +40,10 @@ define([
 			$(this.el).html(this.template());
 			this.populateFromModel();
 			
+			this.$('.search-query').click(function() {
+				$(this).select();
+			});
+
 			if (!app.isMapAdmin()) {
 				this.$('.admin-tool').remove();
 			} 
@@ -51,10 +55,9 @@ define([
 		{		
 			if (event.keyCode == 13) {
 				if (this.$("#search").is(":focus")) {
-					this.$("#search").blur();
-					var addr = $('#search').val();
-					if (addr != '') {
-						this.vent.trigger("geocodeAndSetMapLocation", addr);
+					var address = $('#search').val();
+					if (address != '') {
+						app.zoomToAddress(address);
 					}
 				}
 			}

@@ -2,6 +2,7 @@
 
 var config = require('../../config'),
 	models = require("../../models"),
+	coordinates = require("../../geogoose").coordinates,
 	permissions = require("../../permissions"),
 	utils = require("../../utils"),
 	errors = require('../../errors'),
@@ -18,18 +19,7 @@ var config = require('../../config'),
 	scopeFunctions = require('../mapreduce/mapreduce_abstraction/keys').scopeFunctions;
 
 var LayerOptions = models.LayerOptions,
-	handleDbOp = utils.handleDbOp,
-	FlatModel = function(doc) {
-		for (var k in doc) {
-			this[k] = doc[k];
-		}
-		this.get = function(key) {
-			return doc[key];
-		}
-		this.toObject = function() {
-			return doc;
-		}
-	};
+	handleDbOp = utils.handleDbOp;
 
 var ImportAPI = function(app) 
 {
@@ -353,6 +343,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				}			
 
 				var extremes = _.clone(collection.extremes || {}),
+					bounds = collection.bbox && collection.bbox.length ? coordinates.boundsFromBbox(collection.bbox) : null,
+					propertyTypes = {},
 					numRead = 0,
 					numImport = 0,
 					numSaving = 0,
@@ -366,19 +358,54 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					ended = true;
 					finalized = true;
 
+					collection.extremes = extremes;
+					collection.markModified('extremes');
+					if (!defaults.attrMap || !defaults.attrMap.numeric) {
+						collection.defaults.histogram = false;
+					}
+
+					collection.sourceFieldNames = fieldNames;
+					collection.fields = _.cloneextend(dataTransform.fields);
+
+					// for constant property field types, add them to collection.fields
+					var transformFieldNames = dataTransform.fields.map(function(f) {
+						return f.name;
+					});
+					for (var key in propertyTypes) {
+						var t = propertyTypes[key],
+							n = 'properties.' + key;
+						if (t && transformFieldNames.indexOf(n) == -1) {
+							collection.fields.push({
+								type: t.substr(0, 1).toUpperCase() + t.substring(1),
+								name: n,
+								label: key
+							});
+						}
+					}
+
+					collection.active = true;
+					collection.numBusy = 0;
+					if (bounds) {
+						collection.bbox = coordinates.bboxFromBounds(bounds);
+					}
+					collection.reduce = collection.reduce || numSaved > 1000;
+					collection.status = collection.reduce ? 
+						(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
+
+					// determine default field mappings by finding first 
+					// Number and Date field and collection.fields
 					if (!params.append) {
 						if (!defaults.attrMap) {
 							defaults.attrMap = {};
 						}
-						// determine default field mappings by finding first Number and Date field
-						dataTransform.fields.every(function(field) {
+						collection.fields.every(function(field) {
 							if (field.type == 'Number') {
 								defaults.attrMap.numeric = field.name;
 								return false;
 							}
 							return true;
 						});
-						dataTransform.fields.every(function(field) {
+						collection.fields.every(function(field) {
 							if (field.type == 'Date') {
 								defaults.attrMap.datetime = field.name;
 								return false;
@@ -397,19 +424,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 							return;
 						}
-
-						collection.extremes = extremes;
-						collection.markModified('extremes');
-						if (!defaults.attrMap || !defaults.attrMap.numeric) {
-							collection.defaults.histogram = false;
-						}
-						collection.sourceFieldNames = fieldNames;
-						collection.fields = dataTransform.fields;
-						collection.active = true;
-						collection.numBusy = 0;
-						collection.reduce = collection.reduce || numSaved > 1000;
-						collection.status = collection.reduce ? 
-							(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
 
 						var collectionSave = !params.dry ?
 							collection.save : function(callback) { callback(false, collection); };
@@ -493,10 +507,15 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					return function(err, result) {
 						if (err) {
 							console.error('Error saving model', err, model);
+						} else {
+							numSaved++;
+							if (model.geometry.coordinates && model.geometry.coordinates.length) {
+								bounds = coordinates.getBounds([model.bounds2d, bounds]);
+							}
 						}
+
 				    	debugStats('on save', 'success', (model ? model.get('_id') : ''));
 						numSaving--;
-						numSaved++;
 				    	postSave(self);
 
 				    	if (dataCallbacks.save) {
@@ -570,13 +589,13 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							doc.sourceId = doc.id;
 						}
 
-						var model = new FlatModel(doc);
+						var doc = new transform.Document(doc);
 
 						if (dataCallbacks.data) {
-							dataCallbacks.data(false, model);
+							dataCallbacks.data(false, doc);
 						}
 
-						var transformResult = dataTransform.transformModel(model, ToSaveModel, {
+						var transformResult = dataTransform.transformModel(doc, ToSaveModel, {
 							DEBUG: config.DEBUG && 0
 						});
 
@@ -617,6 +636,16 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 							for (var key in saveModel.properties) {
 								extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
+								// determine type for each property as long as it remains constant
+								var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
+									: typeof saveModel.properties[key];
+								if (propertyTypes[key] == undefined) {
+									propertyTypes[key] = propertyType;
+								} else {
+									if (propertyTypes[key] != propertyType) {
+										propertyTypes[key] = false;
+									}
+								}
 							}
 							// determine extremes of all incrementor
 							if (incrementor) {
@@ -814,6 +843,7 @@ function getImportParams(params)
 		to: params.to,
 		max: params.max,
 		skip: params.skip,
+		dry: (params.dry ? params.dry && params.dry != 'off' : undefined),
 		incremental: (params.incremental ? params.incremental && params.incremental != 'off' : undefined),
 		break: (params.break ? params.break && params.break != 'off' : undefined), 
 		interval: params.interval,
