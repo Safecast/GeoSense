@@ -66,6 +66,8 @@ define([
 				layerOptions = this.model.attributes.layerOptions;
 			$(this.el).html(this.template());
 
+			this.removePopover();
+
 			var valFormatter = this.model.getValFormatter(),
 				unit = valFormatter.unit,
 				schemes = this.model.attributes.layerOptions.colorSchemes,
