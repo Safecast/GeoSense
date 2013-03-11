@@ -32,7 +32,9 @@ define([
 	    {
 			var li = this.$('.unit ul li');
 			li.removeClass('active');
-			$(li[this.model.sessionOptions.valFormatterIndex]).addClass('active');
+			if (this.model.getValFormatters().length > 1) {
+				$(li[this.model.sessionOptions.valFormatterIndex]).addClass('active');
+			}
 			this.updateColorBarLabels();
 	    },
 
@@ -72,6 +74,7 @@ define([
 			if (unit) {
 				var formatItems = [];
 				var formatters = this.model.getValFormatters();
+				console.log('----',formatters.length);
 				var ul = this.$('.unit ul');
 				ul.html('');
 				for (var i = 0; i < formatters.length; i++) {
@@ -84,6 +87,7 @@ define([
 						+ f.unit 
 						+ (formatters.length > 1 ? '</a>' : '</span>')
 						+ '</li>';
+					console.log(li);
 					var li = $(li);
 					ul.append(li);
 				}
