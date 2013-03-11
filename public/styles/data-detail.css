@@ -52,15 +52,21 @@
 	font-size: 19px;
 }
 
+.panel.data-detail .box.title {
+	margin-bottom: .5em;
+}
+
 .panel.data-detail .detail-label .large {
 	font-size: 30px;
-	line-height: 45px;
+	line-height: 32px;
 	font-weight: bold;
+	margin-bottom: .25em;
 }
 
 .panel.data-detail .detail-value .large {
 	font-size: 35px;
-	line-height: 45px;
+	line-height: 32px;
 	font-weight: bold;
+	margin-bottom: .25em;
 }
 

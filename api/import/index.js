@@ -399,14 +399,14 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							defaults.attrMap = {};
 						}
 						collection.fields.every(function(field) {
-							if (field.type == 'Number') {
+							if (field.type == 'Number' && extremes[field.name]) {
 								defaults.attrMap.numeric = field.name;
 								return false;
 							}
 							return true;
 						});
 						collection.fields.every(function(field) {
-							if (field.type == 'Date') {
+							if (field.type == 'Date' && extremes[field.name]) {
 								defaults.attrMap.datetime = field.name;
 								return false;
 							}

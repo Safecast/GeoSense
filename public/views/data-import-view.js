@@ -160,6 +160,7 @@ define([
 				stop: function(event, ui) {
 					console.log('* draggable stop');
 					self.preventSortableEvents = false;
+					self.removePopover();
 
 					self.$('.to-field').removeClass('highlight');
 					self.$('.to-data .from-field').removeClass('half-opacity');
@@ -196,6 +197,7 @@ define([
 				},
 				stop: function(event, ui) {
 					if (self.preventSortableEvents) return;
+					self.removePopover();
 					console.log('* sortable stop');
 					// prevent double loading since dropping from draggable into the sortable
 					// will also fire this event, but draggable.stop fires later than this one.
@@ -324,12 +326,16 @@ define([
 	        return this;
 	    },
 
-	    detach: function()
+	    removePopover: function() 
 	    {
-	    	var self = this;
 			_.each(this.descripts, function(descript) {
 				descript.dismiss();
 			});
+	    },
+
+	    detach: function()
+	    {
+	    	this.removePopover();
 			return DataImportView.__super__.detach.call(this);
 	    },
 

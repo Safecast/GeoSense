@@ -68,6 +68,8 @@ define([
 						}
 					});
 
+					console.log(self.$( ".data-item" ).draggable( "option", "appendTo" ));
+
 					$('#dropZone').droppable( {
 				      accept: '.data-item',
 				      hoverClass: '',
