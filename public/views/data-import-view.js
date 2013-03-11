@@ -113,7 +113,8 @@ define([
 			_.each(this.inspectedSource.items[0], function(value, key) {
 				self.fromFields[key] = key;
 			});
-			this.descripts = _.clone(this.defaultDescripts);
+			console.log('initDataTransformForSource');
+			this.descripts = _.deepClone(this.defaultDescripts);
 
 			this.$('.from-data thead').empty();
 			this.$('.from-data tbody').empty();
@@ -175,12 +176,15 @@ define([
 			var self = this,
 				container = self.toFieldTemplate.clone();
 			container.removeClass('element-template');
+			descript.dismiss = function()
+			{
+				$('.show-field-settings', container)
+					//.attr('disabled', !descript.to)
+					.popover('hide');
+			};
 			descript.updateContainer = function() {
 				$('.field-label', container).text(descript.label);
 				$('.field-type', container).text(self.fieldTypes[descript.type]);
-				$('.show-field-settings', container)
-					.attr('disabled', !descript.to)
-					.popover('hide');
 			};
 			descript.container = container;
 			self.initDescriptSettings(descript);
@@ -282,7 +286,7 @@ define([
 				descript.updateContainer();
 			});
 
-			if (validDescripts.length == this.descripts.length) {
+			if (validDescripts.length >= this.descripts.length - 1) {
 				var newDescript = _.clone(this.emptyDescript);
 				this.descripts.push(newDescript);
 				this.initDescript(newDescript)
@@ -320,6 +324,15 @@ define([
 	        return this;
 	    },
 
+	    detach: function()
+	    {
+	    	var self = this;
+			_.each(this.descripts, function(descript) {
+				descript.dismiss();
+			});
+			return DataImportView.__super__.detach.call(this);
+	    },
+
 	    setStep: function(step)
 	    {
 	    	this.setAlert();
@@ -347,7 +360,7 @@ define([
 	    fromFieldRemoveClicked: function(event) {
 			$(event.currentTarget).closest('.from-field').remove();
 			this.updateHandleStates();
-			this.previousFieldDefs = null;
+			this.previousValidDescripts = null;
 			this.updateDescripts();
 			this.loadImportPreview();
 			return false;
@@ -365,10 +378,11 @@ define([
 		runImport: function(params, options)
 		{
 			var self = this,
-				options = options || {};
+				options = options || {},
+				validDescripts;
 
 			if (!params.inspect) {
-				var validDescripts = this.updateDescripts();				
+				validDescripts = this.updateDescripts();				
 				if (!validDescripts.length && params.preview) {
 					self.updateImportPreview([]);
 					return;
@@ -376,9 +390,9 @@ define([
 			}
 
 			if (options.ifChanged && this.previousValidDescripts && _.isEqual(this.previousValidDescripts, validDescripts)) {
-				this.previousValidDescripts = validDescripts;
 				return;
 			}
+			this.previousValidDescripts = validDescripts;
 
 			var params = _.extend({
 				url: this.$('input[name=url]').val(),
@@ -484,12 +498,17 @@ define([
 							}
 						}
 
-						if (out == undefined || 
-							((typeof out == 'string' || Array.isArray(out)) && !out.length)) {
+						var isTransformed = descript.to && descript.to.length;
+						if (isTransformed && (out == undefined ||
+							((typeof out == 'string' || Array.isArray(out)) && !out.length))) {
 								tdclass = 'conversion-blank';
 								out = 'blank';
 						} else if (!isError) {
-							out = '<i class="icon icon-ok-circle half-opacity"></i> ' + out;
+							if (isTransformed) {
+								out = '<i class="icon icon-ok-circle half-opacity"></i> ' + out;
+							} else {
+								out = '&nbsp;';
+							}
 						}
 
 						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + out + '</td>';
@@ -502,6 +521,7 @@ define([
 		}
 		
 	});
+
 
 	return DataImportView;
 });
