@@ -69,7 +69,7 @@ define([
             this.map = new OpenLayers.Map({
                 div: "map_canvas",
                 displayProjection: this.externalProjection,
-                numZoomLevels: MAP_NUM_ZOOM_LEVELS,
+                //numZoomLevels: MAP_NUM_ZOOM_LEVELS,
                 scope: this,
                 controls: [],
                 eventListeners: {
@@ -468,7 +468,8 @@ define([
         {
             var bounds = new OpenLayers.Bounds(bbox[0], bbox[1], bbox[2], bbox[3]);
             bounds.transform(this.externalProjection, this.internalProjection);
-            this.map.zoomToExtent(bounds, true);
+            this.map.zoomToExtent(bounds, !this.map.isValidZoomLevel(
+                this.map.getZoomForExtent(bounds)));
         },
 
     });
