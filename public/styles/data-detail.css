@@ -57,15 +57,15 @@
 }
 
 .panel.data-detail .detail-label .large {
-	font-size: 30px;
-	line-height: 32px;
+	font-size: 28px;
+	line-height: 35px;
 	font-weight: bold;
 	margin-bottom: .25em;
 }
 
 .panel.data-detail .detail-value .large {
 	font-size: 35px;
-	line-height: 32px;
+	line-height: 35px;
 	font-weight: bold;
 	margin-bottom: .25em;
 }
