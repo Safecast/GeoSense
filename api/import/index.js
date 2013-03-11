@@ -9,6 +9,8 @@ var config = require('../../config'),
 	BasicError = errors.BasicError,
 	ValidationError = errors.ValidationError,
 	transform = require("./data_transform"),
+	getAttr = transform.util.getAttr,
+
   	mongoose = require('mongoose'),
 	date = require('datejs'),
 	url = require('url'),
@@ -399,14 +401,14 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							defaults.attrMap = {};
 						}
 						collection.fields.every(function(field) {
-							if (field.type == 'Number' && extremes[field.name]) {
+							if (field.type == 'Number' && getAttr(extremes, field.name)) {
 								defaults.attrMap.numeric = field.name;
 								return false;
 							}
 							return true;
 						});
 						collection.fields.every(function(field) {
-							if (field.type == 'Date' && extremes[field.name]) {
+							if (field.type == 'Date' && getAttr(extremes, field.name)) {
 								defaults.attrMap.datetime = field.name;
 								return false;
 							}
