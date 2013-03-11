@@ -85,7 +85,7 @@ var FeatureAPI = function(app)
                     		null : coordinates.adjustBboxForQuery(bbox);
                     }
 
-                    var manyBoxes = boxes.length > 1,
+                    var manyBoxes = boxes && boxes.length > 1,
                     	isMapReduced = (mapReduceOpts.gridSize 
                     		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
                     		|| mapReduceOpts.timebased,
