@@ -669,7 +669,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								self.end();
 								return;
 							} else {
-								debugStats('* skipping point' + (model && model.get('sourceId') ? ' [sourceId=' + model.get('sourceId') + ']' : ''));
+								debugStats('* skipping point' + (doc && doc.get('sourceId') ? ' [sourceId=' + doc.get('sourceId') + ']' : ''));
 								numSkipped++;
 						    	postSave(self);
 							}

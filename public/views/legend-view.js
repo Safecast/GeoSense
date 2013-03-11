@@ -11,19 +11,21 @@ define([
 
 		className: 'legend',
 	    events: {
-	    	'click .unit-toggle': 'unitToggleClicked'
+	    	'click .unit-toggle': 'unitToggleClicked',
+	    	'click .color-scheme-trigger': function(event) { event.preventDefault(); }
 	    },
 
 	    initialize: function(options) 
 	    {
 	    	this.template = _.template(templateHtml);
 		    this.listenTo(this.model, 'toggle:valFormatter', this.valFormatterChanged);
+		    this.listenTo(this.model, 'toggle:colorScheme', this.colorSchemeChanged);
 	    },
 
 	    unitToggleClicked: function(event)
 	    {
 			this.model.setValFormatter(parseInt($(event.currentTarget).attr('data-index')));
-			return false;
+			event.preventDefault();
 	    },
 
 	    valFormatterChanged: function(model)
@@ -34,6 +36,28 @@ define([
 			this.updateColorBarLabels();
 	    },
 
+	    colorSchemeToggleClicked: function(event)
+	    {
+			this.model.setColorScheme(parseInt($(event.currentTarget).attr('data-index')));
+			event.preventDefault();
+	    },
+
+	    colorSchemeChanged: function(model)
+	    {
+	    	this.render();
+	    },
+
+	    removePopover: function()
+	    {
+	    	$('.popover').remove();
+	    	/*
+	    	TODO: has no effect
+			if (this.colorSchemeTrigger) {
+		    	this.colorSchemeTrigger.popover('hide');
+			}
+			*/
+	    },
+
 		render: function()
 		{	
 			var self = this,
@@ -41,7 +65,9 @@ define([
 			$(this.el).html(this.template());
 
 			var valFormatter = this.model.getValFormatter(),
-				unit = valFormatter.unit;
+				unit = valFormatter.unit,
+				schemes = this.model.attributes.layerOptions.colorSchemes,
+				scheme = this.model.getColorScheme();
 
 			if (unit) {
 				var formatItems = [];
@@ -67,29 +93,63 @@ define([
 				this.$('.unit').hide();
 			}
 
+			var colorSchemePopover = this.$('.color-scheme-popover').remove();
+			if (schemes.length > 1) {
+				var ul = this.$('.unit ul');
+			    schemeItems = schemes.map(function(scheme, index) {
+			    	return '<li><a href="#" class="color-scheme-toggle" data-index="' + index + '">'
+			    		+ scheme.name + '</a></li>';
+			    });
+				ul.append('<li><a href="#" class="color-scheme-trigger has-popover" data-placement="bottom"><i class="icon icon-white icon-adjust half-opacity"></i> <span class="caret"></span></a>');
+				this.colorSchemeTrigger = this.$('.color-scheme-trigger');
+
+				$('.color-schemes', colorSchemePopover).append(schemeItems.join('\n'));
+				this.$('.unit').show();
+
+				$('.has-popover', ul).popover({
+					content: function() {
+						$('.color-scheme-toggle', colorSchemePopover).each(function(index) {
+							$(this).toggleClass('active', index == self.model.sessionOptions.colorSchemeIndex);
+						});
+						return colorSchemePopover.html();
+					},
+					html: true,
+					container: 'body',
+					title: __('Color Schemes') 
+				}).on('shown', function() {
+					$('.color-scheme-toggle').click(function(event) {
+						self.colorSchemeTrigger.popover('hide');
+						return self.colorSchemeToggleClicked(event);
+					});
+				});
+			}
+
 			if (this.$('.color-bar').length) {
 				var items = [],
 					colors = this.model.getNormalizedColors();
 				var labelColor = layerOptions.colorLabelColor && layerOptions.colorLabelColor.length ?
-					layerOptions.colorLabelColor : null;
+					layerOptions.colorLabelColor : null,
+					colorsW = 100; // %
+
 				for (var i = 0; i < colors.length; i++) {
 					var baseColor = colors[i].color,
 						darkerColor = multRGB(baseColor, .85),
 						channels = getRGBChannels(labelColor || baseColor),
-						invert = (channels[0] + channels[1] + channels[2]) < COLOR_BAR_INVERT_CUTOFF * 3,
+						invert = rgb2hsb(channels)[2] < .5,
 						invert = labelColor ? !invert : invert;
 					
 					items.push( 
-						'<li style="width: ' + Math.round(100 / colors.length * 100) / 100 + '%;">'
+						'<li style="width: ' + Math.round(colorsW / colors.length * 100) / 100 + '%;">'
 						+ '<div class="segment' + (invert ? ' inverted' : '') + '" style="background: '+baseColor+';'
 						+ 'background: linear-gradient(top, ' + baseColor + ' 40%, ' + darkerColor + ' 80%);'
 						+ 'background: -webkit-gradient(linear, left top, left bottom, color-stop(.4, '+baseColor+'), color-stop(.8, '+darkerColor+'));'
-						+ (labelColor ? ' color: '+labelColor+';' : '')
+						+ (labelColor ? ' color: ' + labelColor + ';' : '')
 						+ '">'
 						+ '</div>'
 						+ '</li>'
 					);
 				}
+
 				this.$('.color-bar').html(items.join(''));
 				this.updateColorBarLabels();
 			}

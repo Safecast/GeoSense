@@ -23,6 +23,7 @@ define([
 	    		{fields: ['properties.label', '%(datetime)s'], label: false, class: "box title"},
 	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
 	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
+	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
 
 	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), class: 'muted'},
 	    		{fields: ['%(numeric)s.max'], label: 'peak', class: 'muted'},
@@ -76,7 +77,8 @@ define([
 	    	var mapLayer = model.collection.mapLayer,
 				layerOptions = mapLayer.getLayerOptions(),
 				layout = mapLayer.getDisplay('detailLayout') || this.defaultLayout,
-				valFormatter = mapLayer.getValFormatter();
+				valFormatter = mapLayer.getValFormatter(),
+				displayedFields = {};
 
 			var isEmpty = function(value) {
 				return (typeof value == 'object' && _.isEmpty(value)) 
@@ -102,8 +104,6 @@ define([
 				'label': layerOptions.attrMap.label
 			};
 
-			console.log(mapLayer.attributes);
-
 			var labelSubst = {
 				'numeric': !isEmpty(valFormatter.unit) ? valFormatter.unit : 
 					(fieldSubst.numeric ? mapLayer.attributes.featureCollection.fields.reduce(function(a, b) {
@@ -118,9 +118,10 @@ define([
 
 			_.each(layout, function(row) {
 				var content = [];
-				_.each(row.fields, function(field) {
-					var value = model.get(field.format(fieldSubst)),
-						format = false;
+				var addToContent = function(content, fieldName, field) {
+					var value = model.get(fieldName),
+							format = false;
+					displayedFields[fieldName] = true;
 					if (!isEmpty(value)) {
 						switch (field.split('.')[0]) {
 							case '%(datetime)s': 
@@ -132,15 +133,37 @@ define([
 						};
 						content.push(getValue(value, format));
 					}
-				});
-				if (content.length) {
-					var out = content.join(row.join || '<br />');
-					if (row.label) {
-						rows.push({label: row.label.format(labelSubst), value: out, class: row.class});
-					} else {
-						rows.push({value: out, class: row.class});
+					return content;
+				};
+
+				var addRow = function(content, row)
+				{
+					if (content.length) {
+						var out = content.join(row.join || '<br />');
+						if (row.label) {
+							rows.push({label: row.label.format(labelSubst), value: out, class: row.class});
+						} else {
+							rows.push({value: out, class: row.class});
+						}
 					}
 				}
+
+				_.each(row.fields, function(field) {
+					var fieldName = field.format(fieldSubst);
+					if (fieldName == 'properties.$other') {
+						_.each(model.get('properties'), function(value, key) {
+							if (!displayedFields['properties.' + key]) {
+								addRow(addToContent([], 'properties.' + key, field), {
+									label: row.label ? row.label.format(_.extend(fieldSubst, {field: key})) : false,
+									class: row.class
+								});
+							}
+						});
+					} else {
+						addToContent(content, fieldName, field);
+					}
+				});
+				addRow(content, row);
 
 			});
 
