@@ -50,7 +50,9 @@ define([
             this.sessionOptions = _.extend(options.sessionOptions || {}, {
                 enabled: (this.attributes.layerOptions ?
                     this.attributes.layerOptions.enabled : true),
-                valFormatterIndex: 0
+                valFormatterIndex: 0,
+                colorSchemeIndex: attributes && attributes.layerOptions ? 
+                    attributes.layerOptions.colorSchemeIndex : 0
             });
 
             this.on('change', this.onChange, this);
@@ -100,6 +102,13 @@ define([
             this.trigger('toggle:valFormatter', this);
         },
 
+        setColorScheme: function(index)
+        {
+            this.sessionOptions.colorSchemeIndex = index;
+            delete this._normalizedColors;
+            this.trigger('toggle:colorScheme', this);
+        },
+
         getLayerOptions: function()
         {
             return this.attributes.layerOptions;
@@ -138,10 +147,18 @@ define([
             return this._colorGradient.colorAt(pos, COLOR_GRADIENT_STEP);
         },
 
+        getColorScheme: function(index)
+        {
+            var index = index || this.sessionOptions.colorSchemeIndex,
+                schemes = this.attributes.layerOptions.colorSchemes;
+            if (!index) return schemes[0];
+            return schemes[index];
+        },
+
         getNormalizedColors: function(originalColors) 
         {
             var self = this,
-                originalColors = originalColors || this.attributes.layerOptions.colors,
+                originalColors = originalColors || this.getColorScheme().colors,
                 extremes = this.getMappedExtremes();
             if (!this._normalizedColors) {
                 this._normalizedColors = originalColors.map(function(c) {
@@ -184,8 +201,11 @@ define([
 
         hasChangedColors: function()
         {
-            var c1 = this.previousAttributes().layerOptions.colors, 
-                c2 = this.attributes.layerOptions.colors;
+            var prev = this.previousAttributes();
+            if (!prev.layerOptions) return true;
+            var c1 = prev.layerOptions.colorSchemes, 
+                c2 = this.attributes.layerOptions.colorSchemes;
+
             return this.hasChanged('layerOptions.colorLabelColor') || (c1 && c2 && !_.isEqual(c1, c2));
         }
 

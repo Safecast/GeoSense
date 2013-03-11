@@ -346,7 +346,7 @@ var MapAPI = function(app)
 						// set all public elements of layerOptions
 						for (var k in req.body.layerOptions) {
 							if (k[0] != '_') {
-								//console.log(k, req.body.layerOptions[k]);
+								console.log(k, req.body.layerOptions[k]);
 								mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
 							}
 						}

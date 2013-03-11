@@ -29,6 +29,10 @@ define([
 	    	'click .hide-color-generator': 'hideColorGenerator',
 	    	'click .remove-color': 'removeColorClicked',
 	    	'click .add-color': 'addColorClicked',
+	    	'click .color-scheme a': 'toggleColorScheme',
+	    	'click .add-color-scheme a': 'addColorScheme',
+	    	'click .delete-color-scheme a': 'deleteColorScheme',
+	    	'change .color-scheme-name': 'colorSchemeNameChanged',
 	    	'click .btn': function() { return false }
 	    },
 
@@ -39,6 +43,7 @@ define([
 		    this.listenTo(this.model, 'change', this.updateFromModel);
 		    this.listenTo(this.model, 'sync', this.modelSynced);
 		    this.listenTo(this.model, 'destroy', this.remove);
+		    this.colorSchemeIndex = this.model.attributes.layerOptions.colorSchemeIndex;
 	    },
 
 	    modelSynced: function(model)
@@ -59,6 +64,8 @@ define([
 	    		.clone().removeClass('element-template');
 			this.initModelInputs();
 			this.initSliders();
+
+			this.$('.dropdown-toggle').dropdown();
 
 			this.$('.has-popover').each(function() {
 				var trigger = $(this),
@@ -163,20 +170,25 @@ define([
 			this.populateFieldInputs();
 			this.populateModelInputs();
 			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
-			this.populateColorTable();
+			this.populateColorSchemes();
 			this.setButtonState(false, false);
 			this.updateSliders();
 	    },
 
 	    getModelInputValues: function(values)
 	    {
-	    	values['layerOptions.colors'] = this.getColorsFromTable();
+	    	var self = this,
+	    		schemes = _.deepClone(this.model.get('layerOptions.colorSchemes'));
+	    	schemes[this.colorSchemeIndex].colors = this.getColorsFromTable();
+	    	values['layerOptions.colorSchemes'] = schemes;
+	    	values['layerOptions.colorSchemeIndex'] = this.colorSchemeIndex;
 	    	return values;
 	    },
 
 	    undoButtonClicked: function(event) 
 	    {
-	    	this.model.set(_.extend(this.model.attributes, this.unchangedModelAttributes), {});
+	    	this.model.set(this.savedModelAttributes);
+	    	this.colorSchemeIndex = this.model.attributes.layerOptions.colorSchemeIndex;
 	    	this.populateFromModel();
 	    	return false;
 	    },
@@ -226,14 +238,23 @@ define([
 	    modelInputChanged: function(event) 
 	    {
 	    	this.isChanged = true;
+	    	this.updateModel();
+	    },
+
+	    updateModel: function()
+	    {
 	    	this.setButtonState(this.isChanged);
 	    	this.updateModelFromInputs({silent: !this.isPreviewEnabled()});
+	    	if (this.isPreviewEnabled() 
+	    		&& this.colorSchemeIndex != this.model.sessionOptions.colorSchemeIndex) {
+	    			this.model.setColorScheme(this.colorSchemeIndex);
+	    	}
 	    },
 
 	    previewChanged: function(event) 
 	    {
 	    	if (this.isPreviewEnabled()) {
-		    	this.updateModelFromInputs();
+		    	this.updateModel();
 	    	}
 	    },
 
@@ -259,11 +280,8 @@ define([
 		    	this.$('.btn.save').attr('disabled', !state);
 	    	}
 
-	    	if (this.$('.color-palette tbody tr').length > 1) {
-		    	this.$('.remove-color').attr('disabled', false);
-	    	} else {
-		    	this.$('.remove-color').attr('disabled', true);
-	    	}
+	    	this.$('.remove-color').attr('disabled', this.$('.color-palette tbody tr').length < 2);
+
 	    	if (this.$('.color-palette tbody tr').length <= 2) {
 		    	this.$('.show-color-generator').attr('disabled', false);
 	    	} else {
@@ -307,9 +325,6 @@ define([
 					self.modelInputChanged()
 				}
 			});
-			if (!val) {
-				val = '#0aa5ff';
-			}
 	    },
 
 	    addColorRow: function(c)
@@ -327,13 +342,99 @@ define([
 			return row;
 	    },
 
+	    populateColorSchemes: function(toggle)
+	    {
+	    	var self = this,
+	    		schemes = this.model.get('layerOptions.colorSchemes');
+	    	this.$('.color-schemes .dropdown-menu .color-scheme').remove();
+	    	schemeItems = [];
+	    	_.map(schemes, function(scheme, index) {
+	    		schemeItems.push('<li class="color-scheme"><a class="toggle-color-scheme" data-index="' 
+	    			+ index + '" href="#">' + scheme.name + '</a></li>');
+	    	})
+	    	this.$('.color-schemes .dropdown-menu').append(schemeItems.join('\n'));
+	    	if (toggle || toggle == undefined) {
+		    	this.toggleColorScheme();
+	    	}
+	    	this.$('.delete-color-scheme').toggle(schemes.length > 1);
+	    },
+
+	    addColorScheme: function(event)
+	    {
+	    	event.preventDefault();
+	    	var self = this,
+	    		schemes = this.model.get('layerOptions.colorSchemes');
+	    	schemes.push({
+	    		name: __('color scheme %(i)s', {i: schemes.length + 1}),
+	    		colors: [{
+	    			color: DEFAULT_COLOR_EDITOR_COLOR,
+	    			position: DEFAULT_COLOR_EDITOR_POSITION
+	    		}]
+	    	});
+	    	this.colorSchemeIndex = schemes.length - 1;
+	    	this.populateColorSchemes();
+			this.modelInputChanged();
+	    	this.$('.color-scheme-name').select().focus();
+	    },
+
+	    deleteColorScheme: function()
+	    {
+	    	event.preventDefault();
+	    	var self = this,
+	    		schemes = this.model.get('layerOptions.colorSchemes');
+	    	if (schemes.length < 2) return;
+	    	console.log('remove '+this.colorSchemeIndex);
+	    	schemes.splice(this.colorSchemeIndex, 1);
+	    	this.colorSchemeIndex = 0;
+	    	this.populateColorSchemes();
+			this.modelInputChanged();
+	    },
+
+	    colorSchemeNameChanged: function(event) 
+	    {
+	    	var input = $(event.currentTarget),
+	    		scheme = this.getCurrentColorScheme();
+	    	if (input.val() == '') {
+	    		input.val(scheme.name);
+	    	} else {
+	    		scheme.name = input.val();
+	    		this.populateColorSchemes(false);
+	    	}
+	    },
+
+	    getCurrentColorScheme: function()
+	    {
+	    	return this.model.get('layerOptions.colorSchemes')[this.colorSchemeIndex];
+	    },
+
 	    populateColorTable: function(colors) 
 	    {
 	    	var self = this;
 	    	this.$('.color-palette tbody').empty();
-	    	var colors = colors || this.model.get('layerOptions.colors');
+	    	var colors = colors || 
+	    		this.getCurrentColorScheme().colors;
 	    	for (var i = 0; i < colors.length; i++) {
 				var row = this.addColorRow(colors[i]);
+	    	}
+	    },
+
+	    toggleColorScheme: function(event)
+	    {
+	    	var self = this,
+	    		schemes = this.model.get('layerOptions.colorSchemes');
+	    	if (event) {
+	    		this.getCurrentColorScheme().colors = this.getColorsFromTable();
+	    		this.colorSchemeIndex = $(event.currentTarget).attr('data-index');
+	    	}
+	    	var scheme = schemes[this.colorSchemeIndex],
+	    		schemeItems = this.$('.color-schemes .dropdown-menu .color-scheme');
+	    	schemeItems.removeClass('inactive');
+	    	$(schemeItems[this.colorSchemeIndex]).addClass('inactive');
+	    	this.$('.color-scheme-name').val(scheme.name);
+	    	this.populateColorTable(scheme.colors);
+	    	this.setButtonState();
+	    	if (event) {
+	    		this.modelInputChanged();
 	    	}
 	    },
 

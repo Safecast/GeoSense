@@ -1,6 +1,11 @@
 .layer-panel .legend .unit, .layer-panel h5, .layer-panel .source {
-	text-align: center;
 	padding: .1em .25em .4em .25em;
+	text-align: center;
+}
+
+.layer-panel .legend .dropdown-menu {
+	text-align: left;
+	min-width: 0px !important;
 }
 
 .layer-panel .panel-body {
@@ -32,14 +37,23 @@
     height: 13px !important;
 } 
 
-.layer-panel .legend .unit .nav-pills a, .unit .nav-pills span {
+.layer-panel .legend .caret {
+	padding: 0;
+	margin: 5px 0 0 0;
+	border-top-color: #fff !important;
+}
+
+.layer-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
+	padding: 3px 8px 3px 8px !important;
+}
+
+.layer-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
 	color: #aaa !important;
 	margin: 1px !important;
 	padding: 3px 8px 3px 8px !important;
 	line-height: 14px;
 	display: block;
 	white-space: nowrap;
-
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
@@ -156,5 +170,19 @@
 .layer-panel.extended .histogram {
 	width: 444px;
 	height: 60px;
+}
+
+
+.popover .nav a {
+	color: #666;
+}
+
+.popover .nav {
+	margin-bottom: 0;
+}
+
+.popover .nav a.active {
+	font-weight: bold;
+	color: #000;
 }
 

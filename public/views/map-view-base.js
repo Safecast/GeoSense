@@ -66,6 +66,7 @@ define([
             this.layers.push(model);
             this.listenTo(model, 'toggle:enabled', this.layerToggled);
             this.listenTo(model, 'change', this.layerChanged);
+            this.listenTo(model, 'toggle:colorScheme', this.layerChanged);
             var c = model.featureCollection;
             this.listenTo(c, {
                 reset: this.featureReset
