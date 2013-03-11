@@ -1,4 +1,5 @@
 var errors = require('./errors'),
+	util = require('./util'),
 	DataTransformError = errors.DataTransformError, ValueSkippedWarning = errors.ValueSkippedWarning, 
 	Document = require('./document'),
 	coordinates = require('../../../geogoose/').coordinates,
@@ -403,5 +404,6 @@ module.exports = {
 	ValueSkippedWarning: ValueSkippedWarning,
 	Cast: Cast,
 	FieldType: FieldType,
-	Document: Document
+	Document: Document,
+	util: util
 };
