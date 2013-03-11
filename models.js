@@ -52,13 +52,16 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     featureTypeFallback: {type: Boolean, default: true},
     colorType: {type: String, required: true, default: config.ColorType.LINEAR_GRADIENT},
     //colorPalettes: {type: [ColorPalette.schema], index: 1},
-    colors: [{
-        color: {type: String, required: true, match: colorMatch},
-        position: {type: String, match: /^[0-9]+(\.[0-9]+)?%?$/},
-        interpolation: {type: String, enum: ['lerpRGB', 'threshold', ''], required: false},
-        label: String,
-        description: String
-    }],
+    colorSchemes: [{
+        name: {type: String, required: true},
+        colors: [{
+            color: {type: String, required: true, match: colorMatch},
+            position: {type: String, match: /^[0-9]+(\.[0-9]+)?%?$/},
+            interpolation: {type: String, enum: ['lerpRGB', 'threshold', ''], required: false},
+            label: String,
+            description: String
+    }]}],
+    colorSchemeIndex: {type: Number, required: true, default: 0},
     colorLabelColor: {type: String, match: colorMatch},
     strokeColor: {type: String, match: colorMatch},
     reduction: String,
@@ -92,9 +95,9 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     cropDistribution: Boolean
 }));
 
-LayerOptions.schema.path('colors').validate(function (value) {
-    return value.length > 0;
-}, 'At least one color is required.');
+LayerOptions.schema.path('colorSchemes').validate(function (value) {
+    return value.length > 0 && value[0].colors && value[0].colors.length > 0;
+}, 'At least one color scheme is required.');
 
 
 var MapLayerSchema = new mongoose.Schema({

@@ -22,11 +22,10 @@ define([
 		populateModelInputs: function() 
 		{
 			this.savedAttributes = _.extend({}, this.model.attributes);
-			this.unchangedModelAttributes = {};
+			this.savedModelAttributes = _.deepClone(this.model.attributes);
 			for (var name in this.modelInputs) {
 				var val = this.model.get(name);
 				this.populateModelInput(name, val);
-				this.unchangedModelAttributes[name] = val;
 			}
 			this.isChanged = false;
 		},

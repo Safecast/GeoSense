@@ -24,7 +24,10 @@ var config = {
 		visible: true,
 		featureType: 'P',
 		colorType: 'L',
-		colors: [{position: '0%', color: '#44bbee'}/*, {position: '100%', color: '#81ffff'}*/],
+		colorSchemes: [{
+			name: 'default',
+			colors: [{position: '0%', color: '#44bbee'}/*, {position: '100%', color: '#81ffff'}*/],
+		}],
 		opacity: .5
 	},
 

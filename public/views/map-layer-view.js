@@ -238,10 +238,16 @@ define([
 			if (this.histogramView) {
 				this.histogramView.render();
 			}
+	    	if (this.legendView) {
+				this.legendView.removePopover();
+			}
 		},
 
 		updateEnabled: function(animate)
 		{
+	    	if (this.legendView) {
+				this.legendView.removePopover();
+			}
 			var enabled = this.model.isEnabled(),
 				d = animate || animate == undefined ? 'fast' : 0;
 			$(this.el).toggleClass('enabled', enabled);
@@ -264,19 +270,22 @@ define([
 
 		modelChanged: function(model)
 		{
+	    	if (this.legendView) {
+				this.legendView.removePopover();
+			}
 			this.populateFromModel(
 				this.model.hasChangedColors() 
 				|| this.model.hasChanged('featureCollection.status')
 				|| this.model.hasChanged('layerOptions.histogram'));
 		},
 
-	    populateFromModel: function(renderGraphs)
+	    populateFromModel: function(renderSubViews)
 	    {
 	    	this.updateEnabled(false);
-            if (renderGraphs) {
+            if (renderSubViews) {
 				this.renderHistogram();
+				this.renderLegend();
 			}
-			this.renderLegend();
 			this.updateStatus();
 			this.$('.model-title').text(this.model.getDisplay('title'));
 
