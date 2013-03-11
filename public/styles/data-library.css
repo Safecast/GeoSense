@@ -8,10 +8,10 @@
 	left:-300px;
 	width:300px;
 	box-shadow:  2px 0px 3px rgba(0, 0, 0, .2);
+	background-color: #fdfdfd;
 }
 
 .data-library .backdrop {
-	background-color: #fdfdfd;
 	width: 100%;
 	height: 100%;
 	position: absolute;

@@ -20,6 +20,7 @@ define([
 		    this.template = _.template(templateHtml);	
 	    	
 	    	this.defaultLayout = [
+	    		{fields: ['properties.name', 'properties.title'], label: false, class: "box title"},
 	    		{fields: ['properties.label', '%(datetime)s'], label: false, class: "box title"},
 	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
 	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
