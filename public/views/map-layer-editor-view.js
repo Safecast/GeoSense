@@ -187,8 +187,9 @@ define([
 
 	    undoButtonClicked: function(event) 
 	    {
-	    	this.model.set(this.savedModelAttributes);
 	    	this.colorSchemeIndex = this.model.attributes.layerOptions.colorSchemeIndex;
+	    	this.model.setColorScheme(this.colorSchemeIndex);
+	    	this.model.set(this.savedModelAttributes);
 	    	this.populateFromModel();
 	    	return false;
 	    },
@@ -244,11 +245,10 @@ define([
 	    updateModel: function()
 	    {
 	    	this.setButtonState(this.isChanged);
-	    	this.updateModelFromInputs({silent: !this.isPreviewEnabled()});
-	    	if (this.isPreviewEnabled() 
-	    		&& this.colorSchemeIndex != this.model.sessionOptions.colorSchemeIndex) {
-	    			this.model.setColorScheme(this.colorSchemeIndex);
+	    	if (this.isPreviewEnabled()) { 
+    			this.model.setColorScheme(this.colorSchemeIndex);
 	    	}
+	    	this.updateModelFromInputs({silent: !this.isPreviewEnabled()});
 	    },
 
 	    previewChanged: function(event) 
@@ -383,7 +383,6 @@ define([
 	    	var self = this,
 	    		schemes = this.model.get('layerOptions.colorSchemes');
 	    	if (schemes.length < 2) return;
-	    	console.log('remove '+this.colorSchemeIndex);
 	    	schemes.splice(this.colorSchemeIndex, 1);
 	    	this.colorSchemeIndex = 0;
 	    	this.populateColorSchemes();
@@ -425,6 +424,7 @@ define([
 	    	if (event) {
 	    		this.getCurrentColorScheme().colors = this.getColorsFromTable();
 	    		this.colorSchemeIndex = $(event.currentTarget).attr('data-index');
+	    		event.preventDefault();
 	    	}
 	    	var scheme = schemes[this.colorSchemeIndex],
 	    		schemeItems = this.$('.color-schemes .dropdown-menu .color-scheme');
