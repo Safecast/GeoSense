@@ -39,8 +39,13 @@ define([
 	        $('body').append(this.el);
 			$(this.el).modal('show');
 			$(this.el).on('hidden', function() {
-				$(self.el).detach();
+				self.detach();
 			});
+	  	},
+
+	  	detach: function()
+	  	{
+			$(self.el).detach();
 	  	},
 
 	    close: function()
