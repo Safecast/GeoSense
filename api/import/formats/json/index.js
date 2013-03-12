@@ -8,6 +8,7 @@ module.exports = {
     {
         var parser = JSONStream.parse(['features', true]);
         parser.fromStream = function(stream) {
+            this.readStream = stream;
             stream.pipe(this);
         }
         parser.fromPath = function(path) {

@@ -293,8 +293,8 @@ var MapAPI = function(app)
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 					// only send if complete; or incomplete was requested 
-					if (mapLayer.featureCollection.status == config.DataStatus.COMPLETE ||
-						url.parse(req.url, true).query.incomplete) {
+					if (mapLayer.featureCollection && (mapLayer.featureCollection.status == config.DataStatus.COMPLETE ||
+						url.parse(req.url, true).query.incomplete)) {
 							res.send(prepareLayerResult(req, mapLayer, map));
 					} else {
 						res.send('map layer is incomplete', 403);
