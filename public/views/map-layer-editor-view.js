@@ -88,7 +88,9 @@ define([
 					});
 					$(this).on('hidden', function(event, item) {
 						trigger.removeClass('active');
-
+					});
+					trigger.click(function(event) {
+						event.preventDefault();
 					});
 				}  else {
 					$(this).popover({});
@@ -490,6 +492,7 @@ define([
 	    	var type = $('input[name=colorSchemeType]:checked').val(),
 	    		steps = parseInt($('input[name=colorSchemeSteps]').val()),
 	    		colors = this.getColorsFromTable();
+
 	    	this.$('.show-color-generator').popover('hide');
 	    	if (steps && !isNaN(steps)) {
 	    		var baseRGB = getRGBChannels(colors[0].color),
