@@ -399,8 +399,8 @@ define([
 	    	if (schemes.length < 2) return;
 	    	schemes.splice(this.colorSchemeIndex, 1);
 	    	this.colorSchemeIndex = 0;
-	    	this.populateColorSchemes();
 			this.modelInputChanged();
+	    	this.populateColorSchemes();
 	    },
 
 	    colorSchemeNameChanged: function(event) 

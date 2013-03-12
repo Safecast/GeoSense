@@ -51,13 +51,12 @@ define([
 
 	    removePopover: function()
 	    {
-	    	$('.popover').remove();
-	    	/*
-	    	TODO: has no effect
 			if (this.colorSchemeTrigger) {
 		    	this.colorSchemeTrigger.popover('hide');
 			}
-			*/
+
+			// TODO the above has no effect when rerendering, hence
+	    	$('.popover').remove();
 	    },
 
 		render: function()
@@ -110,7 +109,8 @@ define([
 				$('.color-schemes', colorSchemePopover).append(schemeItems.join('\n'));
 				this.$('.unit').show();
 
-				$('.has-popover', ul).popover({
+				this.colorSchemeTrigger.popover({
+					animation: false,
 					content: function() {
 						$('.color-scheme-toggle', colorSchemePopover).each(function(index) {
 							$(this).toggleClass('active', index == self.model.sessionOptions.colorSchemeIndex);
