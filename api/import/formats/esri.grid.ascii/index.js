@@ -17,7 +17,7 @@ module.exports = {
 
 	transform: [
 		{ to: 'geometry.coordinates', from: 'coordinates', type: 'LngLat' },
-		{ to: 'geometry.type', set: 'Point' }
+		{ to: 'geometry.type', set: 'Point' },
 		{ to: 'properties.val', from: 'val', type: 'Number' },
 		{ to: 'type', set: 'Point' },
 	]

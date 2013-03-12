@@ -4,58 +4,28 @@
 </div>
 <div class="modal-body">
 
-<!-- Selecting Data Source/File -->
-<!--
-<div class="add">
-	<div class="well form-inline">
-		
-	  <input type="text" id="titleInput" class="input-small" placeholder="Enter a title for your dataset" value=""></input> 
-	  <textarea id="descriptionInput" class="input-small" placeholder="Enter a description of your dataset" value=""></textarea> 
-	</div>
-	<ul id="tab" class="nav nav-tabs">
-		<li><span class="label">Select a data type</span></li>
-		<li class="active"><a href="#JSON" data-toggle="tab">JSON</a></li>
-	 	<li><a href="#XML" data-toggle="tab">XML</a></li>
-	 	<li><a href="#CSV" data-toggle="tab">CSV</a></li>
-		<li><a href="#GoogleFusion" data-toggle="tab">Google Fusion</a></li>
-	</ul>
-	<div id="myTabContent" class="tab-content">
-		<div class="tab-pane fade" id="XML">
-		</div>
-		<div class="tab-pane fade" id="CSV">
-		</div>
-		<div class="tab-pane fade active in" id="JSON">
-			<div class="form-inline">
-				<input type="text" id="fileInput" class="input-large" placeholder="Select a file..." value=""></input>
-				<a href="#" class="btn large"><p>Browse</p></a>
-		    </div><br>
-			<select id="converter">
-				<option value="earthquakes">Earthquake Dataset</option>
-             	<option value="">Standard (loc, val, date)</option>            	
-             	<option value="reactors">Nuclear Reactors</option>
-             	<option value="safecast" selected="selected">Safecast Dataset</option>
-			 </select>
-		</div>
-		<div class="tab-pane fade" id="GoogleFusion">
-		</div>
-	</div>
-</div>
--->
-
 <form class="step source well">
     <fieldset>
         <p>
-        	Please begin by entering the URL of the data file you would like to import.
+        	Please enter the URL and type of the dataset you would like to import.
         </p>
-        <label class="title">Source URL</label>
-        <input name="url" class="text large" placeholder="http://" value="" />
-		<a href="#" class="source-start btn btn-success source-submit">Next <i class="icon icon-white icon-arrow-right half-opacity"></i></a>
+        <p>
+	        <label class="title">Source URL</label>
+    	    <input name="url" class="text large" placeholder="http://" value="" />
+    	</p>
 
-		<ul class="nav nav-pills">
-			<li class="active"><a href="#" data-toggle="tab">CSV</a></li>
-		 	<li><a href="#" data-toggle="tab">GeoJSON</a></li>
-			<li><a href="#" data-toggle="tab">Esri Grid</a></li>
-		</ul>
+		<p class="btn-group select-filetype" data-toggle="buttons-radio">
+			<button class="btn filetype csv" data-value="csv"><i class="icon icon-filetype csv"><span>CSV</span></i></button>
+			<button class="btn filetype geojson json" data-value="geojson"><i class="icon icon-filetype geojson"><span>GeoJSON</span></i></button>
+			<button class="btn filetype kml" data-value="kml"><i class="icon icon-filetype kml"><span>KML</span></i></button>
+			<button class="btn filetype rss" data-value="rss"><i class="icon icon-filetype rss"><span>RSS</span></i></button>
+			<button class="btn filetype asc ascii" data-value="esri.grid.ascii"><i class="icon icon-filetype esri-grid"><span>ESRI grid</span></i></button>
+		</p>
+
+		<p>
+			<button class="source-start btn btn-primary source-submit">Next <i class="icon icon-white icon-arrow-right half-opacity"></i></button>
+		</p>
+
     </fieldset>
 </form>
 
@@ -118,9 +88,9 @@
 </form>
 
 <!-- Alerts -->
-<div class="alert alert-conversion-error">
-        <a class="close" data-dismiss="alert">×</a>
-        <strong>Oops</strong> both a title and valid path are required to add a data set.
+<div class="alert alert-block alert-error">
+         <strong class="error-title"></strong>
+         <div class="errors"></div>
    </div>
 </div>
 <div class="modal-footer">
