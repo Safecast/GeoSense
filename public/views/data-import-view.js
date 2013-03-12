@@ -247,7 +247,8 @@ define([
 				title: 'Transform',
 				content: el,
 				html: true,
-				container: 'body'
+				container: 'body',
+				animation: false
 			}).on('shown', function(evt) {
 				$(this).addClass('active');
 				var trigger = this;
