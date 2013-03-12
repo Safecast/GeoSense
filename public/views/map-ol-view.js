@@ -43,17 +43,22 @@ define([
                 zoom = map.getZoom(),
                 extent = map.getExtent(),
                 center = map.getCenter();
+
+            var SW = new OpenLayers.Geometry.Point(extent.left, extent.bottom),
+                NE = new OpenLayers.Geometry.Point(extent.right, extent.top);
+            var radius = Math.sqrt(Math.pow((NE.x - SW.x) / 2, 2) + Math.pow((NE.y - SW.y) / 2, 2)) / 1000; // km
+            SW.transform(this.internalProjection, this.externalProjection);
+            NE.transform(this.internalProjection, this.externalProjection);
+            var bounds = [[SW.x, SW.y],[NE.x, NE.y]];
+
             center.transform(this.internalProjection, this.externalProjection);
-            var SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
-            SE.transform(this.internalProjection, this.externalProjection);
-            var NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
-            NW.transform(this.internalProjection, this.externalProjection);
-            var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
+            center = [center.lon, center.lat];
 
             return {
-                center: [center.lon, center.lat],
+                center: center,
                 zoom: zoom,
-                bounds: bounds
+                bounds: bounds,
+                radius: radius
             };
         },
 
