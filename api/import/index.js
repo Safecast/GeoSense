@@ -641,6 +641,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								// determine type for each property as long as it remains constant
 								var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
 									: typeof saveModel.properties[key];
+								if (propertyType == 'string' && transform.Cast.Date(saveModel.properties[key])) {
+									propertyType = 'Date';
+								}
 								if (propertyTypes[key] == undefined) {
 									propertyTypes[key] = propertyType;
 								} else {

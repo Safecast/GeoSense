@@ -74,7 +74,7 @@ define([
 	    updateStatus: function(status) 
 	    {
 	    	var countStatus = '',
-				progress = this.model.attributes.featureCollection.progress,
+				progress = this.model.getFeatureCollectionAttr('progress'),
 				featureCollection = this.model.featureCollection;
 
 			if (this.isLoading || this.model.getDataStatus() != DataStatus.COMPLETE) {
@@ -93,8 +93,10 @@ define([
 									total: formatLargeNumber(featureCollection.counts.full)
 								});
 								var url = featureCollection.url();
-								status += ' <a target="_blank" class="download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
-									+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+								if (this.model.attributes.featureCollection) {
+									status += ' <a target="_blank" class="download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
+										+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+								}
 							} else {
 			    				status = 'loading…';
 							}
@@ -211,7 +213,7 @@ define([
 	    	}
 			if (!this.model.canDisplayValues()
 				|| !this.model.isNumeric()
-				|| !this.model.attributes.layerOptions.histogram) return;
+				|| !this.model.getLayerOptions().histogram) return;
 			
 			this.$('.graphs').append(this.histogramView.el);
 			this.histogramView.render().delegateEvents();
@@ -264,8 +266,7 @@ define([
 			}
 
 			this.$('.layer-extents').toggle(enabled 
-				&& this.model.attributes.featureCollection.bbox
-				&& this.model.attributes.featureCollection.bbox.length > 0);
+				&& this.model.getBbox().length > 0);
 		},
 
 		modelChanged: function(model)
@@ -305,7 +306,7 @@ define([
 				this.$('.panel-controls .layer-details').hide();
 			}
 
-			if (source || collectionAttrs.sync) {
+			if (source || (collectionAttrs && collectionAttrs.sync)) {
 				this.$('.source').show();
 				var sourceLink = sourceUrl && sourceUrl.length ?
 						'<a href="%(sourceUrl)s">%(source)s</a>'.format({sourceUrl: sourceUrl, source: source}) : source;

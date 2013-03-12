@@ -373,15 +373,25 @@ function hsb2rgb(_hsb) {
 	return (new Array(red,grn,blu));
 }
 
-function polyCircle(ctr, xRadius, yRadius, numSegments)
+function circleToGeoJSON(ctr, xRadius, yRadius, numSegments, internalProjection, externalProjection)
 {
 	var corners = [];
     var step = 2 * Math.PI / numSegments;
     for (var i = 0; i < Math.PI * 2; i += step) {
-        corners.push([ctr.x + Math.cos(i) * xRadius,
-        	ctr.y + Math.sin(i) * yRadius]);
+        var x = ctr.x + Math.cos(i) * xRadius,
+        	y = ctr.y + Math.sin(i) * yRadius;
+        if (internalProjection && externalProjection) {
+        	var pt = new OpenLayers.Geometry.Point(x, y);
+        	pt.transform(internalProjection, externalProjection);
+        	x = pt.x; y = pt.y;
+        }
+        corners.push([x, y]);
     }
-    return [corners];
+    corners.push(corners[0]);
+    return {
+    	type: 'LineString',
+    	coordinates: corners
+    };
 }
 
 function genMapURI(mapInfo, mapViewName, opts, admin, slugField)

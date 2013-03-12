@@ -92,7 +92,12 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     histogram: {type: Boolean, default: true},
     itemTitle: String,
     itemTitlePlural: String,
-    cropDistribution: Boolean
+    cropDistribution: Boolean,
+    feed: {
+        url: String, // e.g. http://search.twitter.com/search.json?q=%(query)s&rpp=100&geocode=%(centerY)s,%(centerX)s,%(radius)s
+        refreshInterval: Number,
+        transform: []
+    }
 }));
 
 LayerOptions.schema.path('colorSchemes').validate(function (value) {
@@ -213,12 +218,12 @@ GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
     return this.getFeatureModel({collectionName: collectionName, schema: GeoFeatureMapReducedSchema});
 };
 
-GeoFeatureCollectionSchema.methods.cloneDefaults = function(callback)
+cloneLayerOptionsDefaults = function(featureCollection, callback)
 {
-    if (!this.defaults) {
+    if (!featureCollection || !featureCollection.defaults) {
         return new LayerOptions(config.LAYER_OPTIONS_DEFAULTS).save(callback);
     }
-    LayerOptions.findById(this.defaults, function(err, defaults) {
+    LayerOptions.findById(featureCollection.defaults, function(err, defaults) {
         if (err) {
             callback(err);
             return;
@@ -226,7 +231,7 @@ GeoFeatureCollectionSchema.methods.cloneDefaults = function(callback)
         clone = defaults.toObject();
         delete clone._id;
         return new LayerOptions(clone).save(callback);
-    })
+    });
 };
 
 
@@ -239,6 +244,7 @@ module.exports = {
     LayerOptions: LayerOptions, 
     Map: Map,
     GeoFeatureCollection: GeoFeatureCollection,
-    adHocModel: geogoose.util.adHocModel
+    adHocModel: geogoose.util.adHocModel,
+    cloneLayerOptionsDefaults: cloneLayerOptionsDefaults
 };
 

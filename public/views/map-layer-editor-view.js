@@ -43,7 +43,7 @@ define([
 		    this.listenTo(this.model, 'change', this.updateFromModel);
 		    this.listenTo(this.model, 'sync', this.modelSynced);
 		    this.listenTo(this.model, 'destroy', this.remove);
-		    this.colorSchemeIndex = this.model.attributes.layerOptions.colorSchemeIndex;
+		    this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex;
 	    },
 
 	    modelSynced: function(model)
@@ -151,11 +151,11 @@ define([
 		populateFieldInputs: function()
 		{
 	    	var self = this,
-	    		featureCollection = this.model.attributes.featureCollection;
+	    		fields = this.model.getFeatureCollectionAttr('fields', []);
 			this.$('select.field-names').each(function() {
 				var fieldType = $(this).attr('data-type'),
 					opts = ['<option>(' + __('none') + ')</option>'];
-				_.each(featureCollection.fields, function(field) {
+				_.each(fields, function(field) {
 					if (field.name.match(/^properties\./) && (!fieldType || fieldType == field.type)) {
 						opts.push('<option value="%(name)s">%(label)s</option>'.format(field));
 					}
@@ -178,7 +178,7 @@ define([
 	    getModelInputValues: function(values)
 	    {
 	    	var self = this,
-	    		schemes = _.deepClone(this.model.get('layerOptions.colorSchemes'));
+	    		schemes = _.deepClone(this.model.get('layerOptions.colorSchemes')) || [{}];
 	    	schemes[this.colorSchemeIndex].colors = this.getColorsFromTable();
 	    	values['layerOptions.colorSchemes'] = schemes;
 	    	values['layerOptions.colorSchemeIndex'] = this.colorSchemeIndex;
@@ -187,7 +187,7 @@ define([
 
 	    undoButtonClicked: function(event) 
 	    {
-	    	this.colorSchemeIndex = this.model.attributes.layerOptions.colorSchemeIndex;
+	    	this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex;
 	    	this.model.setColorScheme(this.colorSchemeIndex);
 	    	this.model.set(this.savedModelAttributes);
 	    	this.populateFromModel();
@@ -356,21 +356,30 @@ define([
 	    	if (toggle || toggle == undefined) {
 		    	this.toggleColorScheme();
 	    	}
-	    	this.$('.delete-color-scheme').toggle(schemes.length > 1);
+	    	this.$('.delete-color-scheme').toggle(
+	    		schemes != undefined && schemes.length > 1);
+	    	this.$('.color-scheme').toggle(
+	    		schemes != undefined && schemes.length > 0);
 	    },
 
 	    addColorScheme: function(event)
 	    {
 	    	event.preventDefault();
 	    	var self = this,
-	    		schemes = this.model.get('layerOptions.colorSchemes');
-	    	schemes.push({
-	    		name: __('color scheme %(i)s', {i: schemes.length + 1}),
-	    		colors: [{
-	    			color: DEFAULT_COLOR_EDITOR_COLOR,
-	    			position: DEFAULT_COLOR_EDITOR_POSITION
-	    		}]
-	    	});
+	    		schemes = this.model.get('layerOptions.colorSchemes'),
+	    		newScheme = {
+		    		name: __('color scheme %(i)s', {i: schemes ? schemes.length + 1 : 1}),
+		    		colors: [{
+		    			color: DEFAULT_COLOR_EDITOR_COLOR,
+		    			position: DEFAULT_COLOR_EDITOR_POSITION
+		    		}]
+		    	};
+	    	if (schemes) {
+		    	schemes.push(newScheme);
+	    	} else {
+	    		schemes = [newScheme];
+	    		this.model.set({'layerOptions.colorSchemes': schemes}, {silent: true});
+	    	}
 	    	this.colorSchemeIndex = schemes.length - 1;
 	    	this.populateColorSchemes();
 			this.modelInputChanged();
@@ -426,7 +435,7 @@ define([
 	    		this.colorSchemeIndex = $(event.currentTarget).attr('data-index');
 	    		event.preventDefault();
 	    	}
-	    	var scheme = schemes[this.colorSchemeIndex],
+	    	var scheme = this.model.getColorScheme(this.colorSchemeIndex),
 	    		schemeItems = this.$('.color-schemes .dropdown-menu .color-scheme');
 	    	schemeItems.removeClass('inactive');
 	    	$(schemeItems[this.colorSchemeIndex]).addClass('inactive');

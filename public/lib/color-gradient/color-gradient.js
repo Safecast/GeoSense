@@ -61,9 +61,9 @@ define([], function() {
 				+ (lerpInt(p, cA[1], cB[1]) << 8)
 				+ lerpInt(p, cA[2], cB[2]);
 		},
-		// returns lower color
+		// returns lower color, using positions as threshold values
 		threshold: function(p, a, b) {
-			return a.color;
+			return p < 1 ? a.color : b.color;
 		}
 	};
 
