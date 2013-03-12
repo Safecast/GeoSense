@@ -62,13 +62,13 @@ var ImportAPI = function(app)
 			// prevent arbitrary file import
 			req.body.path = null;
 
-			var errors = {},
+			var validationErrs = {},
 				valid = true,
 				transform;
 
 			if (!req.body.url) {
 				valid = false;
-				errors.url = {
+				validationErrs.url = {
 					message: 'URL is missing'
 				};
 			} else {
@@ -80,14 +80,22 @@ var ImportAPI = function(app)
 			}
 
 			if (!valid) {
-				var err = new ValidationError(null, errors);
+				var err = new ValidationError(null, validationErrs);
 				console.error(err);
 	            res.send(err, 403);
 			} else {
 				var sendItems = req.body.preview || req.body.inspect ? [] : null;
 				self.import(params, req, res, function(err, collection) {
+					var err = err;
+					if (err && !err.statusCode) {
+						// mask error with friendlier message
+						err = new BasicError('This file type could not be imported.');
+					}
+					if (!err && (sendItems && !sendItems.length)) {
+						err = new errors.BasicError('Found no items to be imported.');
+					}
 					if (err) {
-						res.send(new BasicError(err.message), 403);
+						res.send(new BasicError(err.message), err.statusCode || 403);
 						console.error(err);
 						return;
 					}
@@ -124,7 +132,7 @@ var ImportAPI = function(app)
 								collection: collection,
 							});
 						}
-					}
+					},
 				});
 			}
 		});
@@ -247,7 +255,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     if (params.transform) {
     	if (typeof params.transform != 'object') {
 			var transformModule = params.transform;
-			console.log('Loading transform: '+params.transform);
+			console.log('* Loading transform: '+params.transform);
 			try {
 				customTransform = require(transformModule);
 			} catch(err) {
@@ -263,7 +271,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     	} else {
     		customTransform = params.transform;
     	}
-    	console.log('custom transform', customTransform);
+    	console.log('* custom transform', customTransform);
     	try {
     		var customTransform = new transform.DataTransform(customTransform);
     	} catch (err) {
@@ -359,6 +367,19 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				{
 					ended = true;
 					finalized = true;
+					if (parserErr) {
+				    	debugStats('*** finalized with error ***', 'warn', null, true);
+						if (!params.dry && !params.append) {
+							defaults.remove(function(err) {
+								collection.remove(function(err) {
+									utils.callbackOrThrow(parserErr, callback);
+								});
+							});
+						} else {
+							utils.callbackOrThrow(parserErr, callback);
+						}
+						return;
+					}
 
 					collection.extremes = extremes;
 					collection.markModified('extremes');
@@ -701,16 +722,23 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 			    function onError(err) 
 			    {
-			    	console.error(err);
+			    	if (ended) return;
+
+			    	if (dataCallbacks.error) {
+			    		dataCallbacks.error(err);
+			    	}
+
 			    	if (err.code == 'ENOTFOUND') {
 			    		// wrap network error in friendlyer error
 			    		err = new errors.HTTPError(null, 404);
 			    	}
-			    	console.error(err);
+			    	if (this.readStream && this.readStream.destroy) {
+			    		console.warn('*** destroying readStream');
+				    	this.readStream.destroy();
+			    	}
+
+			    	console.error('Parser error during import, aborting...', err);
 			        finalize(err);
-					if (dataCallbacks.error) {
-						dataCallbacks.error(err);
-					}
 			    }
 
 				parser.on('header', onHeader)								

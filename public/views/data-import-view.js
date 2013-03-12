@@ -18,7 +18,7 @@ define([
 			'click .source-submit': 'sourceSubmitButtonClicked',
 			'click .back': 'backButtonClicked',
 			'click .from-field .remove' : 'fromFieldRemoveClicked',
-			'click .btn': function() { return false }
+			'click .btn.filetype': 'filetypeButtonClicked'
 	    },
 
 	    initialize: function(options) {
@@ -54,14 +54,20 @@ define([
 	    canImport: function()
 	    {
 	    	return !this.isLoading 
-	    		&& this.$('input[name=url]').val().length;
+	    		&& this.$('input[name=url]').val().length
+	    		&& this.$('.filetype.active').length;
+	    },
+
+	    setButtonState: function()
+	    {
+	    	this.$('.btn.source-submit').attr('disabled', !this.canImport());
+			this.$('.import-run').attr('disabled', !this.canImport());
 	    },
 
 	    sourceSubmitButtonClicked: function() 
 	    {
 	    	var self = this;
 	    	if (!this.canImport()) return false;
-	    	console.log('sourceSubmit');
 			this.runImport({inspect: true, max: this.maxPreview}, {
 				success: function(responseData) {
 					if (responseData.items && responseData.items.length) {
@@ -73,6 +79,15 @@ define([
 			return false;
 	    },
 
+	    filetypeButtonClicked: function(event) 
+	    {
+	    	this.$('.btn.filetype').each(function() {
+	    		$(this).toggleClass('active', event.currentTarget == this);
+	    	});
+	    	this.setButtonState();
+	    	return false;
+	    },
+
 	    backButtonClicked: function() 
 	    {
 	    	this.setStep('source');
@@ -80,15 +95,23 @@ define([
 
 	    sourceInputChanged: function() 
 	    {
-	    	var prev = this.$('input[name=url]').data('prevVal'),
+	    	var self = this,
+	    		prev = this.$('input[name=url]').data('prevVal'),
 	    		cur = this.$('input[name=url]').val();
+	    	
 	    	this.$('input[name=url]').data('prevVal', cur);
 	    	if (1/*!prev || !prev.length*/) { // TODO detect a 100% change
 	    		cur = cur.replace(/^https:\/\/www.dropbox.com\//, 
 	    			'https://dl.dropbox.com/');
 	    		this.$('input[name=url]').val(cur);
+	    		var extMatch = cur.match(/\.([^\.]+)$/),
+	    			ext = extMatch ? extMatch[1] : undefined;
+	    		self.$('.btn.filetype').each(function() {
+	    			$(this).toggleClass('active', ext != undefined && $(this).hasClass(ext));
+	    		});
 	    	}
-	    	this.$('.btn.source-submit').attr('disabled', !this.canImport());
+
+	    	this.setButtonState();
 	    },
 
 		importButtonClicked: function() 
@@ -305,12 +328,11 @@ define([
 			var self = this;
 
 			this.spinner = this.$('.spinner').html(new Spinner({radius:6,length:0,width:6,color:'#333',lines:7,speed:1.5}).spin().el).hide();
-
 			this.setStep('source');					
 
 			if (DEV) {
 				this.$('[name=url]').val('https://dl.dropbox.com/s/cb4blktkkelwg1n/nuclear_reactors.csv');
-				self.sourceSubmitButtonClicked();
+				//self.sourceSubmitButtonClicked();
 			}
 
 			this.sourceInputChanged();
@@ -372,12 +394,13 @@ define([
 			return false;
 	    },
 
-	    setAlert: function(html) {
+	    setAlert: function(html, title) {
 	    	if (!html) {
 				this.$('.modal-body .alert').hide();
 	    	} else {
-				this.$('.modal-body .alert').show();
-				this.$('.modal-body .alert').html(html);
+				this.$('.modal-body .alert').show('fast');
+				this.$('.modal-body .errors').html(html);
+				this.$('.modal-body .error-title').html(title);
 	    	}
 	    },
 	
@@ -402,6 +425,7 @@ define([
 
 			var params = _.extend({
 				url: this.$('input[name=url]').val(),
+				format: this.$('.filetype.active').attr('data-value'),
 				transform: validDescripts,
 			}, params);
 
@@ -435,10 +459,10 @@ define([
 					var lis = '';
 					if (errors) {
 						for (var k in errors) {
-							lis += '<li><i class="icon icon-ban-circle"></i> ' + errors[k].message + '</li>';
+							lis += '<li>' + errors[k].message + '</li>';
 						}
 						if (!options.silent) {
-							self.setAlert('<ul>' + lis + '</ul>');
+							self.setAlert('<ul>' + lis + '</ul>', 'Import failed with the following errors:');
 						}
 					}
 					if (params.preview) {
@@ -454,8 +478,7 @@ define([
 		setLoading: function(isLoading)
 		{
 			this.isLoading = isLoading;
-			this.$('.import-run').attr('disabled', isLoading);
-			this.$('.source-submit').attr('disabled', isLoading);
+			this.setButtonState();			
 			if (isLoading) {
 				this.spinner.show();
 			} else {

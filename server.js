@@ -19,7 +19,9 @@ app.configure(function() {
 	console.info('Serving static files from '+staticDir);
 	app.use(express.static(staticDir));
 	app.use(express.logger('dev'));
-  	app.use(express.compress());
+  	if (!config.DEV) {
+	  	app.use(express.compress());
+  	}
 	app.use(express.methodOverride());
  	app.use(express.bodyParser());
 	app.use(express.cookieParser());
