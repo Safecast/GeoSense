@@ -277,6 +277,7 @@ define([
 			this.populateFromModel(
 				this.model.hasChangedColors() 
 				|| this.model.hasChanged('featureCollection.status')
+				|| this.model.hasChanged('layerOptions.unit')
 				|| this.model.hasChanged('layerOptions.histogram'));
 		},
 
