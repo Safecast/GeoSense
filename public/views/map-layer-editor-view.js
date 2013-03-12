@@ -33,7 +33,13 @@ define([
 	    	'click .add-color-scheme a': 'addColorScheme',
 	    	'click .delete-color-scheme a': 'deleteColorScheme',
 	    	'change .color-scheme-name': 'colorSchemeNameChanged',
-	    	'click .btn': function() { return false }
+	    	'keydown input[type=text]': function(event) {
+	    		if (event.which == 13) {
+	    			$(event.currentTarget).select();
+					// prevent button click
+	    			return false;
+	    		}
+	    	}
 	    },
 
 	    initialize: function(options) 
