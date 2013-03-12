@@ -31,6 +31,10 @@
 	height: 50px;
 }
 
+.map-layer-editor .input-append.btn-group input {
+	width: 245px;
+}
+
 .map-layer-editor .btn.feature-type.points .icon-feature-type {
 	background-position: 0px 0%;
 }
