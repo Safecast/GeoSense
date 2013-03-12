@@ -63,20 +63,19 @@ define([
 		render: function()
 		{	
 			var self = this,
-				layerOptions = this.model.attributes.layerOptions;
+				layerOptions = this.model.getLayerOptions();
 			$(this.el).html(this.template());
 
 			this.removePopover();
 
 			var valFormatter = this.model.getValFormatter(),
 				unit = valFormatter.unit,
-				schemes = this.model.attributes.layerOptions.colorSchemes,
+				schemes = this.model.getLayerOptions().colorSchemes,
 				scheme = this.model.getColorScheme();
 
 			if (unit) {
 				var formatItems = [];
 				var formatters = this.model.getValFormatters();
-				console.log('----',formatters.length);
 				var ul = this.$('.unit ul');
 				ul.html('');
 				for (var i = 0; i < formatters.length; i++) {
@@ -89,7 +88,6 @@ define([
 						+ f.unit 
 						+ (formatters.length > 1 ? '</a>' : '</span>')
 						+ '</li>';
-					console.log(li);
 					var li = $(li);
 					ul.append(li);
 				}
@@ -100,7 +98,7 @@ define([
 			}
 
 			var colorSchemePopover = this.$('.color-scheme-popover').remove();
-			if (schemes.length > 1) {
+			if (schemes && schemes.length > 1) {
 				var ul = this.$('.unit ul');
 			    schemeItems = schemes.map(function(scheme, index) {
 			    	return '<li><a href="#" class="color-scheme-toggle" data-index="' + index + '">'

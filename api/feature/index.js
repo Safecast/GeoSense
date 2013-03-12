@@ -45,20 +45,22 @@ var FeatureAPI = function(app)
 				.populate('modifiedBy')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
-					var mapLayer = map.layers.id(req.params.layerId);
-					if (!mapLayer) {
+					var mapLayer = map.layers.id(req.params.layerId),
+						featureCollection = mapLayer ? mapLayer.featureCollection : null;
+
+					if (!mapLayer || !featureCollection) {
 						res.send('map layer not found', 404);
 						return;
 					} 
 
-					var featureCollection = mapLayer.featureCollection,
-						urlObj = url.parse(req.url, true),
+					var urlObj = url.parse(req.url, true),
 						queryOptions = {},
 						filterQuery = {},
 						zoom = parseInt(urlObj.query.z) || 0,
 						bbox = urlObj.query.b,
 						boxes,
 						features = [];
+
 
 					// adjust zoom						
 					if (isNaN(zoom) || zoom < 0) {

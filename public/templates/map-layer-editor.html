@@ -102,60 +102,62 @@
                     </ul>
                 </div>
 
-                <table class="color-palette">
-                    <thead>
-                        <td>&nbsp;</td>
-                        <th><label class="title">Color</label></th>
-                        <th><label class="title">Value</label></th>
-                        <th><label class="title">Interpolation</label></th>
-                    </thead>
-                    <tbody>
-                        <tr class="element-template" data-id="">
-                            <td><span class="drag-handle"></span></td>
-                            <td><input name="color" type="text" class="color-picker" size="7" placeholder="hex color" value="" /></td>
-                            <td><input name="position" type="text" class="number" size="6" placeholder="position" value="" /></td>
-                            <td>
-                                <select name="interpolation" class="min-width">
-                                    <option value="lerpRGB">linear</option>
-                                    <option value="threshold">threshold</option>
-                                </select>
-                            </td>
-                            <td class="controls">
-                                <a class="btn muted remove-color" href="#"><span class="icon icon-remove"></span></a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p>
-                    <button class="btn add-color"><i class="icon icon-plus"></i> Add</button>
-                    <button data-content-selector=".color-generator" data-title="Color Scheme Generator" data-placement="right" class="btn show-color-generator has-popover pull-right">Generate…</button>
-                </p>
+                <div class="color-scheme">
+                    <table class="color-palette">
+                        <thead>
+                            <td>&nbsp;</td>
+                            <th><label class="title">Color</label></th>
+                            <th><label class="title">Value</label></th>
+                            <th><label class="title">Interpolation</label></th>
+                        </thead>
+                        <tbody>
+                            <tr class="element-template" data-id="">
+                                <td><span class="drag-handle"></span></td>
+                                <td><input name="color" type="text" class="color-picker" size="7" placeholder="hex color" value="" /></td>
+                                <td><input name="position" type="text" class="number" size="6" placeholder="position" value="" /></td>
+                                <td>
+                                    <select name="interpolation" class="min-width">
+                                        <option value="lerpRGB">linear</option>
+                                        <option value="threshold">threshold</option>
+                                    </select>
+                                </td>
+                                <td class="controls">
+                                    <a class="btn muted remove-color" href="#"><span class="icon icon-remove"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        <button class="btn add-color"><i class="icon icon-plus"></i> Add</button>
+                        <button data-content-selector=".color-generator" data-title="Color Scheme Generator" data-placement="right" class="btn show-color-generator has-popover pull-right">Generate…</button>
+                    </p>
 
-                <div class="color-generator">
-                    <div class="clearfix">
+                    <div class="color-generator">
                         <div class="clearfix">
-                            <p class="pull-left">
-                                <label class="radio">
-                                    <input type="radio" name="colorSchemeType" value="sequential" checked> sequential
-                                </label>
-                                <label class="radio">
-                                    <input type="radio" name="colorSchemeType" value="diverging"> diverging
-                                </label>
-                                <label class="radio">
-                                    <input type="radio" name="colorSchemeType" value="qualitative"> qualitative
-                                </label>
-                            </p>
-                            <p class="pull-right">
-                                <label class="title" for="">Steps</label>  
-                                    <input class="number" name="colorSchemeSteps" type="text" value="5" />
-                                </span>
+                            <div class="clearfix">
+                                <p class="pull-left">
+                                    <label class="radio">
+                                        <input type="radio" name="colorSchemeType" value="sequential" checked> sequential
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" name="colorSchemeType" value="diverging"> diverging
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" name="colorSchemeType" value="qualitative"> qualitative
+                                    </label>
+                                </p>
+                                <p class="pull-right">
+                                    <label class="title" for="">Steps</label>  
+                                        <input class="number" name="colorSchemeSteps" type="text" value="5" />
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="divider" />
+                            <p>
+                                <button class="btn hide-color-generator pull-left">Cancel</button>
+                                <button class="btn btn-warning generate-colors pull-right">Generate</button>
                             </p>
                         </div>
-                        <div class="divider" />
-                        <p>
-                            <button class="btn hide-color-generator pull-left">Cancel</button>
-                            <button class="btn btn-warning generate-colors pull-right">Generate</button>
-                        </p>
                     </div>
                 </div>
 

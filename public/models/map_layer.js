@@ -16,9 +16,27 @@ define([
             return this.parentMap.url() + '/layer';
         },
 
+        getLayerOptions: function() 
+        {
+            return this.attributes.layerOptions ? 
+                this.attributes.layerOptions : {};
+        },
+
+        getFeatureCollectionAttr: function(name, def)
+        {
+            return this.attributes.featureCollection ?
+                this.attributes.featureCollection[name] 
+                : (def != undefined ? def : null);
+        },
+
         getDataStatus: function()
         {
-            return this.attributes.featureCollection.status;
+            return this.getFeatureCollectionAttr('status', DataStatus.COMPLETE);
+        },
+
+        getBbox: function()
+        {
+            return this.getFeatureCollectionAttr('bbox', []);
         },
 
         getDisplay: function(attrName)
@@ -44,7 +62,13 @@ define([
                 options = options || {};
                 
             this.parentMap = options.parentMap;
-            this.featureCollection = new GeoFeatureCollection([], {mapLayer: this});
+            if (this.attributes.featureCollection) {
+                this.featureCollection = new GeoFeatureCollection([], {mapLayer: this});
+            } else {
+                var feed = this.getLayerOptions().feed;
+                this.featureCollection = new GeoFeatureCollection([], {mapLayer: this, 
+                    urlFormat: feed ? feed.url : ''});
+            }
             this.valFormatters = [];
 
             this.sessionOptions = _.extend(options.sessionOptions || {}, {
@@ -109,11 +133,6 @@ define([
             this.trigger('toggle:colorScheme', this);
         },
 
-        getLayerOptions: function()
-        {
-            return this.attributes.layerOptions;
-        },
-
         getCounts: function()
         {
             return this.featureCollection.counts;
@@ -121,17 +140,17 @@ define([
 
         isNumeric: function()
         {
-            var x = this.attributes.featureCollection.extremes,
-                numAttr = this.attributes.layerOptions.attrMap ? 
-                    this.attributes.layerOptions.attrMap.numeric : null;
+            var x = this.getFeatureCollectionAttr('extremes', {}),
+                attrMap = this.getFeatureCollectionAttr('attrMap'),
+                numAttr = attrMap ? attrMap.numeric : null;
             return numAttr != undefined 
                 && getAttr(x, numAttr) != undefined;
         },
 
         getMappedExtremes: function()
         {
-            var x = this.attributes.featureCollection.extremes,
-                attrMap = this.attributes.layerOptions.attrMap,
+            var x = this.getFeatureCollectionAttr('extremes', {}),
+                attrMap = this.getFeatureCollectionAttr('attrMap', {}),
                 r = {};
             for (var k in attrMap) {
                 r[k] = getAttr(x, attrMap[k]);
@@ -150,7 +169,10 @@ define([
         getColorScheme: function(index)
         {
             var index = index || this.sessionOptions.colorSchemeIndex,
-                schemes = this.attributes.layerOptions.colorSchemes;
+                schemes = this.getLayerOptions().colorSchemes;
+            if (!schemes) {
+                return {colors: []};
+            }
             if (!index) return schemes[0];
             return schemes[index];
         },
