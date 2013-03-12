@@ -67,7 +67,7 @@
                     </div>
                     <div class="feature-settings B">
                         <p>
-                            <label class="title" for="map-size">Size relative to</label>
+                            <label class="title">Size relative to</label>
                             <select class="model-input" name="layerOptions.attrMap.featureSize">
                                 <option value="count">sample size</option>
                                 <option value="$numeric.avg">average value</option>
@@ -79,7 +79,7 @@
                 <div class="advanced">
                     <div class="divider"></div>
                     <p>
-                        <label class="title" for="map-size">Renderer</label>
+                        <label class="title">Renderer</label>
                         <select class="model-input" name="layerOptions.htmlRenderer">
                             <option value="Canvas">Canvas (faster)</option>
                             <option value="SVG">SVG (more options)</option>
@@ -171,7 +171,7 @@
 
                 <!-- TODO: this needs to be reflected in the legend
                 <p>
-                    <label class="title" for="map-size">Map color to</label>
+                    <label class="title">Map color to</label>
                     <select class="model-input" name="layerOptions.attrMap.featureColor">
                         <option value="">(default)</option>
                         <option value="count">sample size</option>
@@ -201,7 +201,7 @@
                     <span class="slider pull-left" data-field="layerOptions.strokeOpacity"></span>
                 </p>
                 <p class="clearfix advanced">
-                    <label class="title" for="map-size">Line cap (requires SVG)</label>
+                    <label class="title">Line cap (requires SVG)</label>
                     <select class="model-input" name="layerOptions.strokeLinecap">
                         <option value="round">round</option>
                         <option value="square">square</option>
@@ -209,7 +209,7 @@
                     </select>
                 </p>
                 <p class="clearfix advanced">
-                    <label class="title" for="map-size">Dash style (requires SVG)</label>
+                    <label class="title">Dash style (requires SVG)</label>
                     <select class="model-input" name="layerOptions.strokeDashstyle">
                         <option value="solid">solid</option>
                         <option value="dot">dot</option>
@@ -218,6 +218,26 @@
                         <option value="longdash">longdash</option>
                         <option value="longdashdot">longdashdot</option>
                     </select>
+                </p>
+            </fieldset>
+
+            <fieldset class="tab-pane" id="layer-data">
+                <p>
+                    <label class="title">Use numeric values from</label>
+                    <select class="model-input field-names" name="layerOptions.attrMap.numeric" data-type="Number">
+                        <option value="">(pick a number field)</option>
+                    </select>
+                </p>
+                <p class="clearfix">
+                    <label class="title">Use date/time values from</label>
+                    <select class="model-input field-names" name="layerOptions.attrMap.datetime" data-type="Date">
+                        <option value="">(pick a date field)</option>
+                    </select>
+                </p>
+
+                <p class="clearfix">
+                    <label class="title">Date/time format</label>
+                    <input class="text model-input" name="layerOptions.datetimeFormat" type="text" placeholder="auto" />
                 </p>
             </fieldset>
 
@@ -252,20 +272,6 @@
                 </p>
             </fieldset>
 
-            <fieldset class="tab-pane" id="layer-data">
-                <p>
-                    <label class="title" for="map-size">Use numeric values from</label>
-                    <select class="model-input field-names" name="layerOptions.attrMap.numeric" data-type="Number">
-                        <option value="">(pick a number field)</option>
-                    </select>
-                </p>
-                <p class="clearfix">
-                    <label class="title" for="map-size">Use date/time values from</label>
-                    <select class="model-input field-names" name="layerOptions.attrMap.datetime" data-type="Date">
-                        <option value="">(pick a date field)</option>
-                    </select>
-                </p>
-            </fieldset>
         </div>
         <div class="divider"></div>
         <div class="panel-buttons clearfix">

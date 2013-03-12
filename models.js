@@ -96,7 +96,7 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     feed: {
         url: String, // e.g. http://search.twitter.com/search.json?q=%(query)s&rpp=100&geocode=%(centerY)s,%(centerX)s,%(radius)s
         refreshInterval: Number,
-        transform: []
+        parser: String
     }
 }));
 

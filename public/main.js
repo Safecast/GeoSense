@@ -15,7 +15,8 @@ require.config({
         deepmodel: 'lib/backbone-deep-model/src/deep-model',
         openlayers: 'lib/openlayers/OpenLayers-2.12/OpenLayers',
         cloudmade: 'lib/openlayers/cloudmade',
-        stamen: 'lib/openlayers/stamen'
+        stamen: 'lib/openlayers/stamen',
+        backbone_super: 'lib/backbone_super/backbone_super'
   	},
 
     shim: {
@@ -43,6 +44,9 @@ require.config({
         },
         'stamen': {
             deps: ['openlayers']
+        },
+        'backbone_super': {
+            deps: ['backbone'],
         }
     }
 
@@ -55,6 +59,7 @@ require([
     'backbone',
     'app',
     'jqueryui',
+    'backbone_super',
     'lib/jquery/jquery.color',
     'lib/jquery/jquery.glowing',
     'lib/jquery/jquery.miniColors.min',

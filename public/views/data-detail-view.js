@@ -81,13 +81,18 @@ define([
 				valFormatter = mapLayer.getValFormatter(),
 				displayedFields = {};
 
+			var isDate = function(value) {
+				return value instanceof Date;
+			};
+
 			var isEmpty = function(value) {
-				return (typeof value == 'object' && _.isEmpty(value)) 
-					|| (!value && value != 0) || value === '';
+				return !isDate(value)
+					&& ((typeof value == 'object' && _.isEmpty(value)) 
+					|| (!value && value != 0) || value === '');
 			};
 
 			var getValue = function(value, format) {
-				if (typeof value != 'object') return format ? format(value) : value;
+				if (isDate(value) || typeof value != 'object') return format ? format(value) : value;
 				return value.avg ? getValue(value.avg, format) :
 					__('%(min)s – %(max)s').format({
 						min: getValue(value.min, format),
@@ -96,7 +101,8 @@ define([
 			};
 
 			var formatDate = function(value) {
-				return new Date(value).format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
+				var value = value instanceof Date ? value : new Date(value);
+				return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
 			};
 
 			var fieldSubst = !layerOptions.attrMap ? {} : {
@@ -105,9 +111,11 @@ define([
 				'label': layerOptions.attrMap.label
 			};
 
+			var fields = mapLayer.getFeatureCollectionAttr('fields');
+
 			var labelSubst = {
 				'numeric': !isEmpty(valFormatter.unit) ? valFormatter.unit : 
-					(fieldSubst.numeric ? mapLayer.attributes.featureCollection.fields.reduce(function(a, b) {
+					(fieldSubst.numeric && fields ? fields.reduce(function(a, b) {
 						if (b.name == fieldSubst.numeric) return b.label;
 						return a;
 					}) : __('Value')),
