@@ -316,25 +316,28 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 
 					var cloneDefaults;
-					if (mapLayer.featureCollection.defaults && mapLayer.layerOptions._id.toString() == mapLayer.featureCollection.defaults.toString()) {
-						console.warn('Cloning defaults for new layerOptions');
-						cloneDefaults = function(callback) {
-							mapLayer.featureCollection.cloneDefaults(function(err, clone) {
-							if (handleDbOp(req, res, err, clone)) return;
-								mapLayer.layerOptions = clone._id;
-								map.save(function(err, map) {
-									// TODO: Can this really not be simplified?
-									Map.findById(map._id)
-										.populate('layers.featureCollection')
-										.populate('layers.layerOptions')
-										.exec(function(err, map) {
-											if (handleDbOp(req, res, err, map)) return;
-											var mapLayer = map.layers.id(req.params.layerId);
-											callback(false, mapLayer);
-										});
+					if (!mapLayer.featureCollection || (mapLayer.featureCollection.defaults 
+						&& mapLayer.layerOptions._id.toString() == mapLayer.featureCollection.defaults.toString())) {
+							console.warn('Cloning defaults for new layerOptions');
+							
+							cloneDefaults = function(callback) {
+								models.cloneLayerOptionsDefaults(mapLayer, function(err, clone) {
+								if (handleDbOp(req, res, err, clone)) return;
+									mapLayer.layerOptions = clone._id;
+									map.save(function(err, map) {
+										// TODO: Can this really not be simplified?
+										Map.findById(map._id)
+											.populate('layers.featureCollection')
+											.populate('layers.layerOptions')
+											.exec(function(err, map) {
+												if (handleDbOp(req, res, err, map)) return;
+												var mapLayer = map.layers.id(req.params.layerId);
+												callback(false, mapLayer);
+											});
+									});
 								});
-							});
-						};
+							};
+
 					} else {
 						console.warn('Updating existing layerOptions');
 						cloneDefaults = function(callback) { callback(false, mapLayer); }

@@ -43,6 +43,12 @@ ParserBase.prototype.fromStream = function(readStream, options)
     return this;
 };
 
+ParserBase.prototype.copyFields = function(fields, from, to) {
+    fields.forEach(function(field) {
+        to[field] = from[field];
+    });
+};
+
 ParserBase.prototype.onReadStreamData = function(data) 
 {
     try {

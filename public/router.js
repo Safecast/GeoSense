@@ -456,6 +456,7 @@ define([
 			_.each(this.mapLayersById, function(mapLayer) {
 				// only fetch features for enabled and non-current layers
 				if (mapLayer.isEnabled() && mapLayer.canDisplayValues()
+					&& mapLayer.featureCollection.canFetch()
 					&& !mapLayer.featureCollection.isCurrent()) {
 						console.log('Fetching features for', mapLayer.id, mapLayer.getDisplay('title'));
 						mapLayer.featureCollection.fetch();

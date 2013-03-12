@@ -109,8 +109,6 @@ define([
                 })
             };
 
-            this.add30kmtemp();
-
             MapOLView.__super__.renderMap.call(this, viewBase, viewStyle);
             return this;
         },
@@ -124,7 +122,7 @@ define([
         getStyleMapForLayer: function(model)
         { 
             var self = this,
-                layerOptions = model.attributes.layerOptions,
+                layerOptions = model.getLayerOptions(),
                 or = function(val1, val2) {
                     return (val1 || val1 == 0) && val1 != '' 
                         && (typeof val1 == 'string' || val1 >= 0) ? val1 : val2;
@@ -256,7 +254,7 @@ define([
         initRenderLayer: function(model)
         {
             var self = this;
-                opts = model.attributes.layerOptions,
+                opts = model.getLayerOptions(),
                 layer = new OpenLayers.Layer.Vector(model.id, {
                 styleMap: this.getStyleMapForLayer(model),
                 renderers: [(opts.htmlRenderer && opts.htmlRenderer != '' ?
@@ -375,45 +373,6 @@ define([
 
         featureChange: function(model, options)
         {
-        },
-
-        add30kmtemp: function()
-        {
-            var style = new OpenLayers.Style({
-                strokeColor: '#999999',
-                pointRadius: 7,
-                fillOpacity: 0,
-                strokeOpacity: .8,
-                strokeWidth: 1
-            }, {context: {}});
-
-            layer = new OpenLayers.Layer.Vector(null, {
-                projection: new OpenLayers.Projection("EPSG:4326"),
-                sphericalMercator: true,
-                styleMap: new OpenLayers.StyleMap({
-                    "default": style,
-                }),
-                renderers: ["Canvas"],
-                wrapDateLine: true
-            });
-
-            this.map.addLayers([layer]);
-
-            var radius = 1, numSegments = 40,
-                ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
-            
-            // radius = 30000
-            //ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-
-            var poly = polyCircle(ctr, radius, radius, numSegments);
-
-            geometry = this.formats.geoJSON.parseGeometry({
-                type: 'Polygon',
-                coordinates: poly
-            });
-
-            var feature = new OpenLayers.Feature.Vector(geometry, {});
-            layer.addFeatures([feature]);
         },
 
         featureSelected: function(feature) 

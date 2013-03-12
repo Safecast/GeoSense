@@ -61,7 +61,7 @@ define([
 			var yRatio = minY0 / maxY;
 
 			var maxYRatio;
-			if (self.model.attributes.layerOptions.cropDistribution) {
+			if (self.model.getLayerOptions().cropDistribution) {
 				maxYRatio = 1 / graphH * CROP_DISTRIBUTION_RATIO;
 			}
 
