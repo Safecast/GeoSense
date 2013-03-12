@@ -29,13 +29,14 @@ define([
 	    	'click .hide-color-generator': 'hideColorGenerator',
 	    	'click .remove-color': 'removeColorClicked',
 	    	'click .add-color': 'addColorClicked',
-	    	'click .color-scheme a': 'toggleColorScheme',
+	    	'click .color-schemes .color-scheme a': 'toggleColorScheme',
 	    	'click .add-color-scheme a': 'addColorScheme',
 	    	'click .delete-color-scheme a': 'deleteColorScheme',
 	    	'change .color-scheme-name': 'colorSchemeNameChanged',
 	    	'keydown input[type=text]': function(event) {
 	    		if (event.which == 13) {
 	    			$(event.currentTarget).select();
+	    			$(event.currentTarget).trigger('change');
 					// prevent button click
 	    			return false;
 	    		}
@@ -49,7 +50,7 @@ define([
 		    this.listenTo(this.model, 'change', this.updateFromModel);
 		    this.listenTo(this.model, 'sync', this.modelSynced);
 		    this.listenTo(this.model, 'destroy', this.remove);
-		    this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex;
+		    this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex || 0;
 	    },
 
 	    modelSynced: function(model)
@@ -193,7 +194,7 @@ define([
 
 	    undoButtonClicked: function(event) 
 	    {
-	    	this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex;
+	    	this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex || 0;
 	    	this.model.setColorScheme(this.colorSchemeIndex);
 	    	this.model.set(this.savedModelAttributes);
 	    	this.populateFromModel();
@@ -209,12 +210,10 @@ define([
 	    	this.updateModelFromInputs();
 	    	this.model.save({}, {
 	    		success: function(model, response, options) {
-	    			console.log('saved layer');
 	    			self.populateFromModel();
 	    		},
 	    		error: function(model, xhr, options) {
 			    	self.setButtonState(true);
-	    			console.log('error saving layer');
 	    			self.handleValidationErrors(xhr);
 	    		}
 	    	});
@@ -412,6 +411,7 @@ define([
 	    		input.val(scheme.name);
 	    	} else {
 	    		scheme.name = input.val();
+	    		this.modelInputChanged();
 	    		this.populateColorSchemes(false);
 	    	}
 	    },
