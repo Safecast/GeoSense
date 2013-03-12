@@ -67,7 +67,9 @@ define([
             } else {
                 var feed = this.getLayerOptions().feed;
                 this.featureCollection = new GeoFeatureCollection([], {mapLayer: this, 
-                    urlFormat: feed ? feed.url : ''});
+                    urlFormat: feed ? feed.url : '',
+                    parser: feed ? feed.parser : ''
+                });
             }
             this.valFormatters = [];
 
