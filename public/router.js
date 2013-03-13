@@ -426,7 +426,9 @@ define([
 				mapLayerView.hide().show('fast');
 			}
 			this.mapView.attachLayer(model);
-			model.featureCollection.setVisibleMapArea(this.mapView.getVisibleMapArea());
+			if (model.limitFeatures()) {
+				model.featureCollection.setVisibleMapArea(this.mapView.getVisibleMapArea());
+			}
 		},
 
 		attachMapLayerSubViews: function()
@@ -445,8 +447,10 @@ define([
 		{
 			var area = this.mapView.getVisibleMapArea();
 			_.each(this.mapLayersById, function(mapLayer) {
-				// this will result in featureCollection.isCurrent() returning false
-				mapLayer.featureCollection.setVisibleMapArea(area);
+				if (mapLayer.limitFeatures()) {
+					// this will result in featureCollection.isCurrent() returning false
+					mapLayer.featureCollection.setVisibleMapArea(area);
+				}
 			});
 			this.fetchMapFeatures();
 		},
