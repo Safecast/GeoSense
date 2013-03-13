@@ -91,18 +91,20 @@ define([
 					|| (!value && value != 0) || value === '');
 			};
 
-			var getValue = function(value, format) {
-				if (isDate(value) || typeof value != 'object') return format ? format(value) : value;
-				return value.avg ? getValue(value.avg, format) :
+			var getValue = function(value, formatter) {
+				if (isDate(value) || typeof value != 'object') return formatter ? formatter.format(value) : value;
+				return value.avg ? getValue(value.avg, formatter) :
 					__('%(min)s – %(max)s').format({
-						min: getValue(value.min, format),
-						max: getValue(value.max, format)
+						min: getValue(value.min, formatter),
+						max: getValue(value.max, formatter)
 					});
 			};
 
-			var formatDate = function(value) {
-				var value = value instanceof Date ? value : new Date(value);
-				return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
+			var dateFormatter = {
+				format: function(value) {
+					var value = value instanceof Date ? value : new Date(value);
+					return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
+				}
 			};
 
 			var fieldSubst = !layerOptions.attrMap ? {} : {
@@ -129,18 +131,18 @@ define([
 				var content = [];
 				var addToContent = function(content, fieldName, field) {
 					var value = model.get(fieldName),
-							format = false;
+						formatter = false;
 					displayedFields[fieldName] = true;
 					if (!isEmpty(value)) {
 						switch (field.split('.')[0]) {
 							case '%(datetime)s': 
-								format = formatDate;
+								formatter = dateFormatter;
 								break;
 							case '%(numeric)s':
-								format = valFormatter.format;
+								formatter = valFormatter;
 								break; 
 						};
-						content.push(getValue(value, format));
+						content.push(getValue(value, formatter));
 					}
 					return content;
 				};
