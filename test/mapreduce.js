@@ -19,7 +19,7 @@ describe('MapReduce', function() {
 		};
 
 	before(function(done) {
-		mongoose.connect(config.DB_PATH);
+		mongoose.connect(config.DB_URI);
 		featureCollection = new GeoFeatureCollection({
 			_id: new mongoose.Types.ObjectId(),
 			active: true, 

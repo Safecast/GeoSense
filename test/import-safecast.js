@@ -10,7 +10,7 @@ describe('Safecast', function() {
 	var featureCollection;
 
 	before(function(done) {
-		mongoose.connect(config.DB_PATH);
+		mongoose.connect(config.DB_URI);
 		GeoFeatureCollection.remove(function(err) {
 			return done(err);
 		});

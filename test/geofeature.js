@@ -17,7 +17,7 @@ describe('GeoFeature', function() {
 		GeoFeature = featureCollection.getFeatureModel();
 
 	before(function() {
-		mongoose.connect(config.DB_PATH);
+		mongoose.connect(config.DB_URI);
 	});
 
 	it('should create three GeoFeatures', function(done) {
