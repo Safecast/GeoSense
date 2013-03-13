@@ -82,7 +82,9 @@ var config = {
 	JobStatus: {
 		ACTIVE: 'A',
 		IDLE: 'I'
-	}
+	},
+
+	DEFAULT_LABEL_FIELDS: ['title', 'Title', 'name', 'Name', 'label', 'Label'],
 };
 
 for (var zoom = 0; zoom < config.MAP_RESOLUTIONS.length; zoom++) {

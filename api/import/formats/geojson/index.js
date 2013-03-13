@@ -1,4 +1,5 @@
-var json = require('../json');
+var json = require('../json'),
+	config = require('../../../../config');
 
 module.exports = {
 
@@ -9,6 +10,10 @@ module.exports = {
         {to: 'properties', type: 'Object'},
         {to: 'type', type: 'String'},
         {to: 'geometry', type: 'Object'},
-    ]
+    ],
+
+    defaults: {
+    	featureType: config.FeatureType.SHAPES
+    }
 
 };

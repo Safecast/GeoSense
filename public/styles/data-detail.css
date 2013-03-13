@@ -52,13 +52,14 @@
 
 .panel.data-detail th span, .panel.data-detail td span {
 	display: block;
-	white-space: nowrap;
+	/*white-space: nowrap;*/
 }
 
 .panel.data-detail .box.title {
 	color: #fff;
 	line-height: 1.1em;
 	font-size: 19px;
+	padding-bottom: .25em;
 }
 
 .panel.data-detail .box.title {
