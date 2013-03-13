@@ -9,7 +9,7 @@ describe('GeoJSON', function() {
 	var featureCollection;
 
 	before(function(done) {
-		mongoose.connect(config.DB_PATH);
+		mongoose.connect(config.DB_URI);
 		featureCollection = new GeoFeatureCollection({
 			active: true, 
 			status: config.DataStatus.COMPLETE, 

@@ -9,7 +9,7 @@ describe('KML', function() {
 	var featureCollection, GeoFeature;
 
 	before(function() {
-		mongoose.connect(config.DB_PATH);
+		mongoose.connect(config.DB_URI);
 	});
 
 	it('should import a KML file and extract custom properties', function(done) {
