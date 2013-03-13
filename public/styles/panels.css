@@ -12,7 +12,7 @@
 	color: #ddd;
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
-	width: 320px;
+	width: 240px;
 	overflow: visible;
 }
 
@@ -76,11 +76,6 @@
 	bottom: 40px;
 }
 
-.panel.layer-panel, .panel.data-detail {
-	display: none;
-	width: 222px;
-}
-
 .panel.map-tour .btn.next {
 	float: right;
 }
@@ -118,7 +113,6 @@
 
 .panel .accordion-group {
 	border: none;
-	width: 222px;
 	padding: 00;
 	margin: 0;
 

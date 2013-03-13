@@ -97,12 +97,9 @@
 	-moz-transition: .2s; /* Firefox 4 */
 	-webkit-transition: .2s; /* Safari and Chrome */
 	-o-transition: .2s; /* Opera */
-}
-
-.search-query {
 	background-color: #333;
 	color: #eee;
-	width: 230px;
+	width: 150px;
 }
 
 .search-query:focus {
