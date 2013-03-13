@@ -178,7 +178,7 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 							console.warn('*** incremental reduction of points created > '+collection.lastReducedAt);
 						}
 
-						if (collection.reduce) {
+						if (collection.tile) {
 							for (var g in config.GRID_SIZES) {
 								var gridSize = config.GRID_SIZES[g],
 									tileEvents = {
@@ -201,7 +201,7 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 
 									mr('*** MapReduce for tiles at zoom = ' + g + ' ***', makeObj(
 										//'featureCollection', new EmitKey.Copy(), 
-										geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false})),
+										geometryAttr, new EmitKey.Tile[collection.tile](gridSize, gridSize, {index: false})),
 										{ events: tileEvents, indexes: tileIndexes }
 									);
 

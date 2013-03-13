@@ -24,7 +24,7 @@ describe('MapReduce', function() {
 			_id: new mongoose.Types.ObjectId(),
 			active: true, 
 			title: 'MapReduce test',
-			reduce: true,
+			tile: 'Rect',
 			maxReduceZoom: 8,
 			timebased: true
 		});
