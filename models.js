@@ -75,6 +75,7 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
         featureColor: {type: String},
         numeric: {type: String},
         datetime: {type: String},
+        label: {type: String},
     },
     featureSize: {type: Number, min: config.MIN_FEATURE_SIZE, max: config.MAX_FEATURE_SIZE},
     minFeatureSize: {type: Number, min: config.MIN_FEATURE_SIZE, max: config.MAX_FEATURE_SIZE},
