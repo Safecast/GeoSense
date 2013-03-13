@@ -235,14 +235,17 @@ define([
                 this.featureReset(model.featureCollection);
                 return;
             }
+
             layer.styleMap = this.getStyleMapForLayer(model);
-            if (model.hasChangedColors() 
+            if (model.hasChangedColors()
                 || model.hasChanged('layerOptions.featureType')
                 || model.hasChanged('layerOptions.featureTypeFallback')
-                || model.hasChanged('layerOptions.attrMap')
-                || model.hasChanged('layerOptions.featureColorAttr')) {
+                || model.hasChanged('layerOptions.attrMap.numeric') 
+                || model.hasChanged('layerOptions.attrMap.featureColor')) {
+                    // console.log('* featureReset '+collection.mapLayer.id);
                     this.featureReset(model.featureCollection);
             } else {
+                // console.log('* layer.redraw '+model.id);
                 layer.redraw();
             }
         },

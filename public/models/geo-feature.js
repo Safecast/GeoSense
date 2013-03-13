@@ -11,14 +11,13 @@ define([
 
         initialize: function() 
         {
-            var attrMap = this.collection.mapLayer.getLayerOptions().attrMap;
-            this.numericAttr = attrMap ? attrMap.numeric : null;
         },
 
         getNumericVal: function()
         {
-            return this.numericAttr ?
-                this.get(this.numericAttr) : undefined;
+            var attrMap = this.collection.mapLayer.getOption('attrMap', {});
+            return attrMap.numeric ?
+                this.get(attrMap.numeric) : undefined;
         },
         
         getCenter: function() 
@@ -56,8 +55,7 @@ define([
                 counts = l.getCounts(),
                 val = this.getNumericVal(),
                 maxVal = extremes.numeric ? extremes.numeric.max : NaN,
-                minVal = extremes.numeric ? extremes.numeric.min : NaN,
-                colors = l.getNormalizedColors();
+                minVal = extremes.numeric ? extremes.numeric.min : NaN;
 
             if (val && val.avg != null) {
                 val = val.avg;
@@ -67,12 +65,12 @@ define([
                 normVal = (val - minVal) / (maxVal - minVal),
                 normCount = count / counts.max,
                 color,
-                colorType = val != null ? options.colorType : ColorType.SOLID,
+                colorType = val != undefined ? options.colorType : ColorType.SOLID,
                 size;
 
             switch (colorType) {
                 case ColorType.SOLID: 
-                    color = colors[0].color;
+                    color = l.colorAt(0);
                     break;
                 case ColorType.LINEAR_GRADIENT:
                 case ColorType.PALETTE:
