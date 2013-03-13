@@ -34,6 +34,7 @@ define([
 						self.render();
 					},
 					error: function() {
+						self.histogramData = [];
 						console.error('failed to fetch histogram');
 					}
 				});
@@ -47,6 +48,8 @@ define([
 				maxVal = extremes.numeric ? extremes.numeric.max : NaN,
 				graphH = graphEl.innerHeight(),
 				graphW = graphEl.innerWidth();
+
+			if (!len) return this;
 
 			var maxY = data[0].y,
 				minY = data[0].y,

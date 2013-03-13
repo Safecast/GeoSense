@@ -29,6 +29,13 @@ define([
                 : (def != undefined ? def : null);
         },
 
+        getOption: function(name, def)
+        {
+            var opts = this.attributes.layerOptions;
+            if (!opts || opts[name] == undefined) return def;
+            return opts[name];
+        },
+
         getDataStatus: function()
         {
             return this.getFeatureCollectionAttr('status', DataStatus.COMPLETE);
@@ -130,8 +137,9 @@ define([
 
         setColorScheme: function(index)
         {
-            this.sessionOptions.colorSchemeIndex = index;
             delete this._normalizedColors;
+            delete this._colorGradient;
+            this.sessionOptions.colorSchemeIndex = index;
             this.trigger('toggle:colorScheme', this);
         },
 
@@ -143,8 +151,8 @@ define([
         isNumeric: function()
         {
             var x = this.getFeatureCollectionAttr('extremes', {}),
-                attrMap = this.getFeatureCollectionAttr('attrMap'),
-                numAttr = attrMap ? attrMap.numeric : null;
+                attrMap = this.getOption('attrMap', {}),
+                numAttr = attrMap.numeric;
             return numAttr != undefined 
                 && getAttr(x, numAttr) != undefined;
         },
@@ -152,8 +160,9 @@ define([
         getMappedExtremes: function()
         {
             var x = this.getFeatureCollectionAttr('extremes', {}),
-                attrMap = this.getFeatureCollectionAttr('attrMap', {}),
+                attrMap = this.getOption('attrMap', {}),
                 r = {};
+
             for (var k in attrMap) {
                 r[k] = getAttr(x, attrMap[k]);
             }

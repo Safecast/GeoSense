@@ -163,7 +163,7 @@ define([
 	    		fields = this.model.getFeatureCollectionAttr('fields', []);
 			this.$('select.field-names').each(function() {
 				var fieldType = $(this).attr('data-type'),
-					opts = ['<option>(' + __('none') + ')</option>'];
+					opts = ['<option value="">(' + __('none') + ')</option>'];
 				_.each(fields, function(field) {
 					if (field.name.match(/^properties\./) && (!fieldType || fieldType == field.type)) {
 						opts.push('<option value="%(name)s">%(label)s</option>'.format(field));

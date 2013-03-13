@@ -194,7 +194,7 @@
               //<custom code>: Using getNested, setNested and deleteNested
               if (!_.isEqual(getNested(current, attr), val)) changes.push(attr);
               if (!_.isEqual(getNested(prev, attr), val)) {
-                setNested(this.changed, attr, val);
+                setNested(this.changed, attr, _.deepClone(val));
               } else {
                 deleteNested(this.changed, attr);
               }
@@ -252,7 +252,8 @@
         // If you specify an attribute name, determine if that attribute has changed.
         hasChanged: function(attr) {
           if (attr == null) return !_.isEmpty(this.changed);
-          return getNested(this.changed, attr) !== undefined;
+          var c = getNested(this.changed, attr) !== undefined;
+          return c;
         },
 
         // Return an object containing all the attributes that have changed, or
