@@ -1,3 +1,7 @@
+.panel.map-layer-editor {
+	width: 320px;
+}
+
 .map-layer-editor .panel-header h3 {
 	max-width: 70%;
 	overflow: hidden;
