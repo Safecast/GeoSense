@@ -13,15 +13,89 @@ function isErr(val) {
 	return val instanceof Error;
 }
 
-function isEmpty(val) {
-	return val == '' || val == undefined || val == null;
-}
 
-function isValidDate(d) {
-	if ( Object.prototype.toString.call(d) !== "[object Date]" )
-    	return false;
-	return !isNaN(d.getTime());
-}
+var Filter = {
+
+	isEmpty: function(val) {
+		return val == '' || val == undefined || val == null;
+	},
+
+	isZero: function(val) {
+		return val === 0;
+	},
+
+	isFuture: function(val) {
+		return Filter.isValidDate(val) && val > new Date();
+	},
+
+	isOdd: function(val) {
+		return val % 2 != 0;
+	},
+
+	isEven: function(val) {
+		return val % 2 == 0;
+	},
+
+	isValidDate: function(d) {
+		if (Object.prototype.toString.call(d) !== "[object Date]")
+	    	return false;
+		return !isNaN(d.getTime());
+	},
+
+	notEmpty: function(val) {
+		return !Filter.isEmpty(val);
+	},
+
+	notZero: function(val) {
+		return !Filter.isZero(val);
+	},
+
+	notFuture: function(val) {
+		return !Filter.isFuture(val);
+	},
+
+	lt: function(val, l) {
+		return val < l;
+	},
+
+	lte: function(val, l) {
+		return val <= l;
+	},
+
+	gt: function(val, g) {
+		return val > g;
+	},
+
+	gte: function(val, g) {
+		return val >= g;
+	}
+
+};
+
+
+var filterValue = function(val, filters) {
+	var makeFilter = function(args) {
+		if (typeof(args) == 'function') return args;
+		var args = args.split(','),
+			f = Filter[args.shift()];
+		return function(val) {
+			return f.apply(null, [val].concat(args));
+		};
+	};
+	if (Array.isArray(val)) {
+		var filtered = val;
+		filters.forEach(function(filter) {
+			var f = makeFilter(filter);
+			filtered = filtered.filter(f);
+		});
+		return filtered;
+	}
+	if (filters.every(function(filter) {
+		var f = makeFilter(filter);
+		return f(val);
+	})) return val;
+};
+
 
 var Cast = {
 
@@ -68,7 +142,7 @@ var Cast = {
 		var options = options || {};
 		if ((Array.isArray(value) && value.length == 3) || typeof(value) == 'string') {
 			var date = new Date(value);
-			if (isValidDate(date)) {
+			if (Filter.isValidDate(date)) {
 				return date;
 			}
 		}
@@ -289,7 +363,8 @@ var FieldSetter = function(value) {
 */
 var	iterFields = function(fields, doc, callback) {
 	var fields = fields == '*' ?
-		Object.keys(doc) : Array.isArray(fields) ? fields : [fields];
+		(typeof doc.keys == 'function' ? doc.keys() : Object.keys(doc))
+		: Array.isArray(fields) ? fields : [fields];
 	fields.every(function(key) {
 		var ret = callback(doc.get(key), key);
 		if (ret === false) return false;
@@ -405,5 +480,7 @@ module.exports = {
 	Cast: Cast,
 	FieldType: FieldType,
 	Document: Document,
+	Filter: Filter,
+	filterValue: filterValue,
 	util: util
 };

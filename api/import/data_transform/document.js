@@ -16,4 +16,8 @@ Document.prototype.set = function(attr, value) {
 	util.setAttr(this.doc, attr, value);
 };
 
+Document.prototype.keys = function() {
+	return Object.keys(this.doc);
+};
+
 module.exports = Document;

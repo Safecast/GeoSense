@@ -18,6 +18,11 @@ describe('Safecast', function() {
 
 	var importCollection,
 		transform = [
+			/*{
+				'to': 'source',
+				'from': ['*'],
+				'type': 'Object'
+			},*/
 			{
 				'to': 'geometry.coordinates',
 				'from': ['Longitude', 'Latitude'],
@@ -72,6 +77,7 @@ describe('Safecast', function() {
 		importCollection.getFeatureModel().findOne(function(err, feature) {
 			if (err) throw err;
 			var f = feature;
+			console.log('====================================>', f);
 			assert.equal(f.geometry.type, 'Point');
 			assert.equal(f.type, 'Point');
 			assert.equal(Number(f.source.Value), f.properties.val);
