@@ -1,3 +1,12 @@
+.panel.data-detail {
+	width: 240px;
+}
+
+.panel.data-detail.extended, .panel.extended .accordion-group {
+	width: 444px;
+}
+
+
 .panel.data-detail .panel-body {
 	padding-top: 10px;
 }
