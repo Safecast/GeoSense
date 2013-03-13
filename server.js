@@ -85,10 +85,10 @@ function staticRoute(req, res, slug, admin)
 {
 	var serveMap = function(err, map, routingByHost) {
 		if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
-		console.log('serving map: '+map.publicslug+', admin: '+admin);
+		console.success('serving map: '+map.publicslug+', admin: '+admin);
 		if (admin) {
 			req.session.user = map.createdBy;
-			console.log('Implicitly authenticated user:', req.session.user);
+			console.warn('Implicitly authenticated user:', req.session.user);
 		}
 		res.end(ejs.render(templates['public/base.html'], {
 			nodeEnv: process.env.NODE_ENV,
@@ -96,7 +96,7 @@ function staticRoute(req, res, slug, admin)
 		}));
 	}
 
-	console.log('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
+	console.info('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
 
 	if (slug) {
 		// For any hosts other than the default hosts, passing a slug is not allowed

@@ -104,18 +104,14 @@ if (typeof require == 'function') {
 	};
 } 
 
-if (DEV) {
-	// use local db
-	config.DB_PATH = 'mongodb://localhost/geosense';
-} else if (PROD) {
-	// import production settings
-	if (utils) {
-		utils.import(config, require('./config-prod.js'));
-	}
+// import custom settings
+if (utils) {
+	utils.import(config, require('./config-custom.js'));
 }
 
-if (process.env.DB_PATH) {
-	config.DB_PATH = process.env.DB_PATH;
+if (DEV && !config.DB_URI) {
+	// use default test db -- this is disabled for now because requiring a DB setting is better
+	// config.DB_URI = 'mongodb://localhost/geosense';
 }
 
 if (utils) {

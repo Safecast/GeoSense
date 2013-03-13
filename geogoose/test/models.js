@@ -4,10 +4,10 @@ var geogoose = require('../'),
 
 describe('GeoFeature', function() {
 
-	assert(process.env.DB_PATH, 'process.env.DB_PATH is not defined');
+	assert(process.env.DB_URI, 'process.env.DB_URI is not defined');
 
 	before(function() {
-		mongoose.connect(process.env.DB_PATH);
+		mongoose.connect(process.env.DB_URI);
 	});
 
 	var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({createdAt: {type: Date, default: Date.now}}),

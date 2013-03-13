@@ -27,8 +27,15 @@ exports.connectDB = function(callback, exitProcessOnError)
         }
     });
 
-    console.info('Connecting to database', config.DB_PATH);
-    return mongoose.connect(config.DB_PATH).connection;
+    if (!config.DB_URI) {
+        console.error('config.DB_URI is not defined');
+        if (exitProcessOnError == undefined || exitProcessOnError) {
+            process.exit(1);
+        }
+    } else {
+        console.info('Connecting to database', config.DB_URI);
+        return mongoose.connect(config.DB_URI).connection;
+    }
 };
 
 /**
