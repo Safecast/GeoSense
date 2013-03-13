@@ -170,7 +170,7 @@ define([
 
         getColorScheme: function(index)
         {
-            var index = index || this.sessionOptions.colorSchemeIndex,
+            var index = index != undefined ? index : this.sessionOptions.colorSchemeIndex,
                 schemes = this.getLayerOptions().colorSchemes;
             if (!schemes) {
                 return {colors: []};
