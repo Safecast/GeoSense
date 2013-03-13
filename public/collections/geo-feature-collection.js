@@ -18,6 +18,7 @@ define([
 		{
 			this.mapLayer = options.mapLayer;
 			this.queryParams = options.queryParams ? $.extend({}, options.queryParams) : {};
+			this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 			this.urlFormat = options.urlFormat;
 			if (!options.parser) {
 				this.parser = new Parser.GeoJSON(this);

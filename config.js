@@ -38,6 +38,8 @@ var config = {
 	GRID_SIZES: {
 	},
 
+	MAX_RESULT_COUNT: 2000,
+
 	MIN_FEATURE_SIZE: 1,
 	MAX_FEATURE_SIZE: 500,
 	MIN_STROKE_WIDTH: .1,
@@ -63,6 +65,10 @@ var config = {
 		},
 		DEFAULT_ENABLED_TYPES: ['tile', 'weekly', 'histogram']
 	},
+
+	TILE_DEFAULT: 'Rect',
+	MIN_FEATURES_LIMIT: 300,
+	MIN_FEATURES_TILE: 1000,
 
 	DataStatus: {
 		IMPORTING: 'I',
@@ -112,8 +118,8 @@ if (utils) {
 }
 
 if (DEV && !config.DB_URI) {
-	// use default test db -- this is disabled for now because requiring a DB setting is better
-	// config.DB_URI = 'mongodb://localhost/geosense';
+	// use default test db
+	config.DB_URI = 'mongodb://localhost/geosense';
 }
 
 if (utils) {

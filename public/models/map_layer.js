@@ -24,7 +24,8 @@ define([
 
         getFeatureCollectionAttr: function(name, def)
         {
-            return this.attributes.featureCollection ?
+            return this.attributes.featureCollection 
+                && this.attributes.featureCollection[name] != undefined ?
                 this.attributes.featureCollection[name] 
                 : (def != undefined ? def : null);
         },
@@ -34,6 +35,11 @@ define([
             var opts = this.attributes.layerOptions;
             if (!opts || opts[name] == undefined) return def;
             return opts[name];
+        },
+
+        limitFeatures: function()
+        {
+            return this.getFeatureCollectionAttr('limitFeatures', true);
         },
 
         getDataStatus: function()

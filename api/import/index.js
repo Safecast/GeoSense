@@ -411,8 +411,14 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (bounds) {
 						collection.bbox = coordinates.bboxFromBounds(bounds);
 					}
-					collection.reduce = collection.reduce || numSaved > 1000;
-					collection.status = collection.reduce ? 
+					if (numSaved >= config.MIN_FEATURES_TILE && !collection.tile) {
+						collection.tile = config.TILE_DEFAULT;
+						defaults.featureType = config.FeatureType.SQUARE_TILES;
+					}
+					if (collection.limitFeatures == undefined) {
+						collection.limitFeatures = numSaved >= config.MIN_FEATURES_LIMIT;
+					}
+					collection.status = collection.tile ? 
 						(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
 
 					// determine default field mappings by finding first 

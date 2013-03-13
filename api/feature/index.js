@@ -54,8 +54,9 @@ var FeatureAPI = function(app)
 					} 
 
 					var urlObj = url.parse(req.url, true),
-						queryOptions = {},
 						filterQuery = {},
+						queryFields = null,
+						queryOptions = {'limit': config.MAX_RESULT_COUNT},
 						zoom = parseInt(urlObj.query.z) || 0,
 						bbox = urlObj.query.b,
 						boxes,
@@ -71,7 +72,7 @@ var FeatureAPI = function(app)
 
                     var gridSize = config.GRID_SIZES[zoom],
 						mapReduceOpts = {
-							gridSize: (featureCollection.reduce ? gridSize : undefined)
+							gridSize: (featureCollection.tile ? gridSize : undefined)
 						},
 						extraAttrs = { counts: {
 							full: 0, original: 0, max: 0, result: 0
@@ -96,52 +97,78 @@ var FeatureAPI = function(app)
 
                     console.log('Querying '+FindFeatureModel.collection.name, 'zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes);
 
+                    var sendFeatures = function(features) {
+                		extraAttrs.counts.result = features.length;
+                		if (isMapReduced) {
+                			// this is the result of a MapReduce: determine counts
+                    		features.reduce(function(a, b) {
+                    			v = b.get('value');
+                    			a.max = Math.max(a.max, v.count);
+                    			a.original += v.count;
+                    			return a;
+                    		}, extraAttrs.counts);
+                		} else {
+                			// this is the original collection
+							extraAttrs.counts.max = extraAttrs.counts.result;
+							extraAttrs.counts.original = extraAttrs.counts.result;                    			
+                		}
+
+                		extraAttrs.features = features;
+                		console.success('Sending features:', features.length);
+                		res.send(featureCollection.toGeoJSON(extraAttrs));
+                	};
+
                     var dequeueBoxAndFind = function() {
-                    	if (!boxes.length) {
-
-                    		if (manyBoxes) {
-                    			var ids = {};
-                    			features = features.filter(function(feature) {
-                    				var exists = ids[feature._id];
-                    				ids[feature._id] = true;
-                    				return !exists;
-                    			});
-                    		}
-
-                    		extraAttrs.counts.result = features.length;
-                    		if (isMapReduced) {
-                    			// this is the result of a MapReduce: determine counts
-	                    		features.reduce(function(a, b) {
-	                    			v = b.get('value');
-	                    			a.max = Math.max(a.max, v.count);
-	                    			a.original += v.count;
-	                    			return a;
-	                    		}, extraAttrs.counts);
-                    		} else {
-                    			// this is the original collection
-								extraAttrs.counts.max = extraAttrs.counts.result;
-								extraAttrs.counts.original = extraAttrs.counts.result;                    			
-                    		}
-
-                    		extraAttrs.features = features;
-                    		console.success('Sending features:', features.length);
-                    		res.send(featureCollection.toGeoJSON(extraAttrs));
-                    		return;
+                    	if (!boxes.length 
+                    		|| (queryOptions.limit != undefined && queryOptions.limit <= 0)) {
+		                		if (manyBoxes) {
+		                			var ids = {};
+		                			features = features.filter(function(feature) {
+		                				var exists = ids[feature._id];
+		                				ids[feature._id] = true;
+		                				return !exists;
+		                			});
+		                		}
+	                    		sendFeatures(features);
+	                    		return;
                     	}
-						FindFeatureModel.within(boxes.shift())
+						FindFeatureModel
+							.within(boxes.shift())
+							.find(filterQuery)
+							.setOptions(queryOptions)
+							.select(queryFields)
 							.exec(function(err, found) {
 								if (handleDbOp(req, res, err, true)) return;
 								console.log('Found features:', found.length);
 								features = features.concat(found);
+								if (queryOptions.limit) {
+									queryOptions.limit -= found.length;
+								}
 								dequeueBoxAndFind();
 							});
                     };
 
-					utils.modelCount(FeatureModel, {}, function(err, count) {
+                    var findWithoutBox = function() {
+						FindFeatureModel
+							.find(filterQuery)
+							.setOptions(queryOptions)
+							.select(queryFields)
+							.exec(function(err, found) {
+								if (handleDbOp(req, res, err, true)) return;
+								console.log('Found features:', found.length);
+								sendFeatures(found);
+							});
+                    };
+
+					utils.modelCount(FeatureModel, filterQuery, function(err, count) {
 						if (handleDbOp(req, res, err, true)) return;
 						extraAttrs.counts.full = count;
 						console.info('full count: ', count);
-	                    dequeueBoxAndFind();
+	                    if (boxes){
+		                    dequeueBoxAndFind();
+	                    } else {
+	                    	findWithoutBox();
+	                    }
 					});
 
 				});
