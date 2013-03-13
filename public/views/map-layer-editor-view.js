@@ -196,7 +196,7 @@ define([
 
 	    undoButtonClicked: function(event) 
 	    {
-	    	this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex || 0;
+	    	this.colorSchemeIndex = this.savedModelAttributes.layerOptions.colorSchemeIndex || 0;
 	    	this.model.setColorScheme(this.colorSchemeIndex);
 	    	this.model.set(this.savedModelAttributes);
 	    	this.populateFromModel();
