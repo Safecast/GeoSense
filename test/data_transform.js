@@ -59,7 +59,6 @@ describe('DataTransform', function() {
 
 	var result = dataTransform.transformModel(PseudoModel(source), PseudoModel);
 
-
 	it('should convert [Lat,Lng] to [Lng,Lat]', function() {
 		assert.deepEqual(result.model.get('xy'), [11, 10]);
 	});
@@ -78,6 +77,18 @@ describe('DataTransform', function() {
 
 	it('should return an array of all items', function() {
 		assert.deepEqual(result.model.get('array2'), [source.coordinates]);
+	});
+
+	it('should correctly apply filters', function() {
+		var arr = [1, 2, 3, 0, 4, 5, 0, 6];
+		assert.deepEqual(
+			transform.filterValue(arr, ['notZero', 'isEven', 'lte,4']),
+			[2, 4]
+		);
+		assert.equal(
+			transform.filterValue(1, ['isEven']),
+			undefined
+		);
 	});
 
 });
