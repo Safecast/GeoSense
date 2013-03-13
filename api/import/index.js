@@ -421,6 +421,28 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						if (!defaults.attrMap) {
 							defaults.attrMap = {};
 						}
+						var fieldNames = collection.fields.map(function(field) { return field.name });
+						// check if default label fields exist and use first
+						console.log(fieldNames);
+						config.DEFAULT_LABEL_FIELDS.every(function(fieldName) {
+							var f = 'properties.' + fieldName;
+							if (fieldNames.indexOf(f) != -1) {
+								defaults.attrMap.label = f;
+								return false;
+							}
+							return true;
+						});
+						// otherwise use first String field
+						if (!defaults.attrMap.label) {
+							collection.fields.every(function(field) {
+								if (field.type == 'String') {
+									defaults.attrMap.label = field.name;
+									return false;
+								}
+								return true;
+							});
+						}
+						// use first Numeric field
 						collection.fields.every(function(field) {
 							if (field.type == 'Number' && getAttr(extremes, field.name)) {
 								defaults.attrMap.numeric = field.name;
@@ -428,6 +450,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 							return true;
 						});
+						// use first Date field
 						collection.fields.every(function(field) {
 							if (field.type == 'Date' && getAttr(extremes, field.name)) {
 								defaults.attrMap.datetime = field.name;
@@ -779,7 +802,10 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		if (!params.dry) {
 			console.info('*** Creating new collection ***');
 		}
-		var defaults = new LayerOptions(config.LAYER_OPTIONS_DEFAULTS);
+		var defaults = new LayerOptions(
+			_.cloneextend(config.LAYER_OPTIONS_DEFAULTS,
+				format.defaults || {}));
+
 		var defaultsSave = !params.dry ?
 			defaults.save : function(callback) { callback(false, defaults) };
 		defaultsSave.call(defaults, function(err, defaults) {

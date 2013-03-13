@@ -20,8 +20,7 @@ define([
 		    this.template = _.template(templateHtml);	
 	    	
 	    	this.defaultLayout = [
-	    		{fields: ['properties.name', 'properties.title'], label: false, class: "box title"},
-	    		{fields: ['properties.label', '%(datetime)s'], label: false, class: "box title"},
+	    		{fields: ['%(label)s', '%(datetime)s'], label: false, class: "box title"},
 	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
 	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
@@ -37,9 +36,13 @@ define([
 	    {
 	    	if (this.model) {
 	    		this.stopListening(this.model);
+	    		if (this.model.collection && this.model.collection.mapLayer)
+	    			this.stopListening(this.model.collection.mapLayer);
 	    	}
 	    	this.model = model;
 	    	this.populateFromModel();
+	    	this.listenTo(model.collection.mapLayer, 
+	    		'change', this.populateFromModel);
 	    	this.listenTo(model.collection.mapLayer, 
 	    		'toggle:valFormatter', this.populateFromModel);
 	    },
@@ -69,12 +72,14 @@ define([
 			} 	
 
 			table.html(tableRows.join('\n'));
-			this.$('.model-title').text(this.model.collection.mapLayer.getDisplay('title'));
+			if (this.model.collection && this.model.collection.mapLayer) {
+				this.$('.model-title').text(this.model.collection.mapLayer.getDisplay('title'));
+			}
 		},
 
 	    compileDetailDataForModel: function(model)
 	    {
-	    	if (!model.collection) return;
+	    	if (!model.collection) return [];
 	    	var mapLayer = model.collection.mapLayer,
 				layerOptions = mapLayer.getLayerOptions(),
 				layout = mapLayer.getDisplay('detailLayout') || this.defaultLayout,
