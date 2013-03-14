@@ -16,6 +16,10 @@ KML.prototype.fromStream = function(readStream, options)
 	this.fieldTypes = {};
 
 	this.readStream.collect('SimpleField');
+	this.readStream.collect('Point');
+	this.readStream.collect('LineString');
+	this.readStream.collect('Polygon');
+	this.readStream.collect('MultiGeometry');
 	this.readStream.on('updateElement: Schema', function(element) {
 		if (element.SimpleField) {
 			for (var i = 0; i < element.SimpleField.length; i++) {
@@ -48,13 +52,108 @@ KML.prototype.fromStream = function(readStream, options)
     return this;
 }
 
+KML.prototype.parseGeometry = function(element, emitData) 
+{
+	var self = this,
+		data = emitData;
+
+	if (element.Point) {
+		data.geometry = {
+			coordinates: []
+		};
+		element.Point.forEach(function(item) {
+			var coordinates = item.coordinates.split(',').map(
+				function(c) { return Number(c); }
+			);
+			data.geometry.coordinates.push(coordinates);
+		});
+
+		if (data.geometry.coordinates.length == 1) {
+			data.geometry.type = 'Point';
+			data.geometry.coordinates = data.geometry.coordinates[0];
+		} else {
+			data.geometry.type = 'MultiPoint';
+		}
+	} else
+
+	if (element.LineString) {
+		data.geometry = {
+			coordinates: []
+		};
+		element.LineString.forEach(function(item) {
+			var coordinates = item.coordinates.split(/\s+/).map(function(c) {
+				return c.split(',').map(
+					function(c) { return Number(c); }
+				);
+			});
+			data.geometry.coordinates.push(coordinates);
+		});
+
+		if (data.geometry.coordinates.length == 1) {
+			data.geometry.type = 'LineString';
+			data.geometry.coordinates = data.geometry.coordinates[0];
+		} else {
+			data.geometry.type = 'MultiLineString';
+		}
+	} else
+
+	if (element.Polygon) {
+		data.geometry = {
+			coordinates: []
+		};
+		element.Polygon.forEach(function(item) {
+			var coordinates = [];
+			if (item.outerBoundaryIs) {
+				coordinates.push(item.outerBoundaryIs.LinearRing.coordinates
+					.split(/\s+/).map(function(c) {
+						return c.split(',').map(
+							function(c) { return Number(c); }
+						);
+					})
+				);
+			}
+			if (element.Polygon.innerBoundaryIs) {
+				coordinates.push(item.innerBoundaryIs.LinearRing.coordinates
+					.split(/\s+/).map(function(c) {
+						return c.split(',').map(
+							function(c) { return Number(c); }
+						);
+					})
+				);
+			}
+			data.geometry.coordinates.push(coordinates);
+		});
+
+		if (data.geometry.coordinates.length == 1) {
+			data.geometry.type = 'Polygon';
+			data.geometry.coordinates = data.geometry.coordinates[0];
+		} else {
+			data.geometry.type = 'MultiPolygon';
+		}
+	} else
+
+	if (element.MultiGeometry) {
+
+		element.MultiGeometry.forEach(function(element) {
+			self.parse(element, data);
+		});
+
+	} else {
+		console.warn('unhandled geometry in ' + element.$name);
+	}
+
+};
+
 KML.prototype.parse = function(element)
 {
+	var self = this;
+
 	switch (element.$name) {
 		case 'Placemark':
+		case 'MultiGeometry':
 			var data = {
 				type: 'Feature',
-				properties: {}
+				properties: {},
 			};
 
 			if (element.name) {
@@ -65,54 +164,6 @@ KML.prototype.parse = function(element)
 				data.properties.description = element.description;
 			}
 
-			if (element.Point) {
-				var coordinates = element.Point.coordinates.split(',').map(
-					function(c) { return Number(c); }
-				);
-				data.geometry = {
-					type: 'Point',
-					coordinates: coordinates
-				};
-			}
-
-			if (element.LineString) {
-				var coordinates = element.LineString.coordinates.split(/\s+/).map(function(c) {
-					return c.split(',').map(
-						function(c) { return Number(c); }
-					);
-				});
-				data.geometry = {
-					type: 'LineString',
-					coordinates: coordinates
-				};
-			}
-
-			if (element.Polygon) {
-				var coordinates = [];
-				if (element.Polygon.outerBoundaryIs) {
-					coordinates.push(element.Polygon.outerBoundaryIs.LinearRing.coordinates
-						.split(/\s+/).map(function(c) {
-							return c.split(',').map(
-								function(c) { return Number(c); }
-							);
-						})
-					);
-				}
-				if (element.Polygon.innerBoundaryIs) {
-					coordinates.push(element.Polygon.innerBoundaryIs.LinearRing.coordinates
-						.split(/\s+/).map(function(c) {
-							return c.split(',').map(
-								function(c) { return Number(c); }
-							);
-						})
-					);
-				}
-				data.geometry = {
-					type: 'Polygon',
-					coordinates: coordinates
-				};
-			}
-
 			if (element.ExtendedData && element.ExtendedData.SchemaData && element.ExtendedData.SchemaData.SimpleData) {
 				var d = element.ExtendedData.SchemaData.SimpleData;
 				for (var i = 0; i < d.length; i++) {
@@ -120,6 +171,7 @@ KML.prototype.parse = function(element)
 				}
 			}
 
+			this.parseGeometry(element, data);
 			if (data.geometry) {
 				this.emit('data', data);
 			}
