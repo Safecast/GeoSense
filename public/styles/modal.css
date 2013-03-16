@@ -1,6 +1,7 @@
 .modal 
 {
-	max-height: 550px !important;
+	max-height: 580px !important;
+	width: 560px;
 }
 
 .modal.large {

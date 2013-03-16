@@ -7,7 +7,6 @@
 @import url("header.css");
 @import url("map.css");
 @import url("map-gl.css");
-@import url("modal.css");
 @import url("data-import.css");
 @import url("sidebar.css");
 /*@import url("data-inspector.css");*/
@@ -31,6 +30,8 @@
 @import url("../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css");
 
 @import url("../lib/colorpicker/css/colorpicker.css");
+
+@import url("modal.css");
 
 body, select, textarea, p, input, button {
 	font-family: "Oxygen", sans-serif;

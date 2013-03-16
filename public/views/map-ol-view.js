@@ -241,6 +241,7 @@ define([
                 || model.hasChanged('layerOptions.featureType')
                 || model.hasChanged('layerOptions.featureTypeFallback')
                 || model.hasChanged('layerOptions.attrMap.numeric') 
+                || model.hasChanged('layerOptions.attrMap.featureSize') 
                 || model.hasChanged('layerOptions.attrMap.featureColor')) {
                     // console.log('* featureReset '+collection.mapLayer.id);
                     this.featureReset(model.featureCollection);

@@ -99,7 +99,7 @@
 	-o-transition: .2s; /* Opera */
 	background-color: #333;
 	color: #eee;
-	width: 150px;
+	width: 250px;
 }
 
 .search-query:focus {
