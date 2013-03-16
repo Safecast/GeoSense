@@ -70,6 +70,7 @@ define([
 			title.text(mapInfo.title);
 			title.attr('href', app.genPublicURL());
 			title.click(function() {
+				console.log(app.getDefaultVisibleMapArea());
 				app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
 				return false;
 			});
