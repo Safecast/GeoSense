@@ -10,6 +10,7 @@ define([
 	'views/legend-view',
 	'lib/color-gradient/color-gradient',
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, ColorGradient) {
+    "use strict";
 
 	var MapLayerView = Backbone.View.extend({
 

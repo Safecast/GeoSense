@@ -7,6 +7,8 @@ define([
 	'text!templates/data-import.html',
 	'views/modal-view'
 ], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+    "use strict";
+
 	var DataImportView = ModalView.extend({
 
 	    tagName: 'div',

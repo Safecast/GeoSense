@@ -7,6 +7,8 @@ define([
 	'text!templates/setup.html',
 	'views/modal-view'
 ], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+    "use strict";
+
 	var SetupView = ModalView.extend({
 
 	    tagName: 'div',
