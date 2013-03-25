@@ -7,6 +7,8 @@ define([
 	'text!templates/map-ge.html',
 	'views/map-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase) {
+    "use strict";
+
 	var MapGEView = MapViewBase.extend({
 
 	    tagName: 'div',

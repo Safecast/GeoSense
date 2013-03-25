@@ -9,6 +9,7 @@ define([
 	'mixins/model-editor-mixin',
 	'lib/color-gradient/color-gradient',
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, ModelEditorMixin, ColorGradient) {
+    "use strict";
 
 	var MapLayerEditorView = PanelViewBase.extend({
 

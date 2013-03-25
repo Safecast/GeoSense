@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/header.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var HeaderView = Backbone.View.extend({
 
 	    tagName: 'div',

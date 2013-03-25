@@ -10,6 +10,8 @@ define([
     'cloudmade',
     'stamen'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase, OpenLayers) {
+    "use strict";
+
     var Geometry = OpenLayers.Geometry;
     var MapOLView = MapViewBase.extend({
 
@@ -39,7 +41,7 @@ define([
 
         getVisibleMapArea: function() 
         {
-            var map = this.map;
+            var map = this.map,
                 zoom = map.getZoom(),
                 extent = map.getExtent(),
                 center = map.getCenter();
@@ -262,7 +264,7 @@ define([
 
         initRenderLayer: function(model)
         {
-            var self = this;
+            var self = this,
                 opts = model.getLayerOptions(),
                 layer = new OpenLayers.Layer.Vector(model.id, {
                 styleMap: this.getStyleMapForLayer(model),

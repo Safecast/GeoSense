@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/data-library.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var DataLibraryView = Backbone.View.extend({
 
 	    tagName: 'div',
@@ -68,8 +70,6 @@ define([
 						}
 					});
 
-					console.log(self.$( ".data-item" ).draggable( "option", "appendTo" ));
-
 					$('#dropZone').droppable( {
 				      accept: '.data-item',
 				      hoverClass: '',
@@ -84,7 +84,7 @@ define([
 		
 		drawDataSource: function(data)
 		{
-			dataDiv = '<div class="data-item" data-id="'+data._id+'">'
+			var dataDiv = '<div class="data-item" data-id="'+data._id+'">'
 				+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
 				+(data.count ? '<p class="data-count micro">'+formatLargeNumber(data.count)+'</p>' : '')
 				+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')

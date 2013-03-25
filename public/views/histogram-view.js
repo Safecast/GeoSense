@@ -7,6 +7,7 @@ define([
 	'text!templates/histogram.html',
 	'd3',
 ], function($, _, Backbone, config, utils, templateHtml, d3) {
+    "use strict";
 
 	var HistogramView = Backbone.View.extend({
 

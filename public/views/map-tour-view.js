@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/map-tour.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	/*
 	TODO: currently not functional
 	*/
