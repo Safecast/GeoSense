@@ -7,6 +7,8 @@ define([
 	'text!templates/map-info-modal.html',
 	'views/modal-view'
 ], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+    "use strict";
+
 	//var MapInfoView = PanelViewBase.extend({
 	var MapInfoView = ModalView.extend({
 

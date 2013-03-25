@@ -6,6 +6,7 @@ define([
 	'utils',
 	'text!templates/legend.html'
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
 
 	var LegendView = Backbone.View.extend({
 

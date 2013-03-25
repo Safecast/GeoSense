@@ -7,6 +7,8 @@ define([
 	'text!templates/layers-panel.html',
 	'views/panel-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
+    "use strict";
+
 	var LayersPanelView = PanelViewBase.extend({
 
 		className: 'panel layer-panel',

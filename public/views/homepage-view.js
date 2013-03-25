@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/homepage.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var HomepageView = Backbone.View.extend({
 
 	    tagName: 'div',

@@ -7,6 +7,8 @@ define([
 	'text!templates/data-detail.html',
 	'views/panel-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
+    "use strict";
+
 	var DataDetailView = PanelViewBase.extend({
 
 		className: 'panel data-detail',

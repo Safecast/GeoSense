@@ -1,7 +1,3 @@
-// Filename: main.js
-
-// Require.js allows us to configure shortcut alias
-// There usage will become more apparent further along in the tutorial.
 require.config({
 	paths: {
         jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
@@ -67,6 +63,7 @@ require([
     'bootstrap',
     'locale',
 ], function($, _, Backbone, App, ui) {
+    var app;
 	// The "app" dependency is passed in as "App"
 	App.initialize();
 });
