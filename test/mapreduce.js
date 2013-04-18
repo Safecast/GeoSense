@@ -103,6 +103,7 @@ describe('MapReduce', function() {
 				.find(function(err, features) {
 					if (err) throw err;
 					assert.equal(features.length, days);
+					console.log(features[0]);
 					assert.equal(features[0].get('value').count, days);
 					done();
 				});

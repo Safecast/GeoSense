@@ -355,7 +355,7 @@ define([
 	    	var self = this,
 	    		schemes = this.model.get('layerOptions.colorSchemes');
 	    	this.$('.color-schemes .dropdown-menu .color-scheme').remove();
-	    	schemeItems = [];
+	    	var schemeItems = [];
 	    	_.map(schemes, function(scheme, index) {
 	    		schemeItems.push('<li class="color-scheme"><a class="toggle-color-scheme" data-index="' 
 	    			+ index + '" href="#">' + scheme.name + '</a></li>');

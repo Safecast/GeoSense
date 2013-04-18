@@ -112,7 +112,7 @@ KML.prototype.parseGeometry = function(element, emitData)
 					})
 				);
 			}
-			if (element.Polygon.innerBoundaryIs) {
+			if (item.innerBoundaryIs) {
 				coordinates.push(item.innerBoundaryIs.LinearRing.coordinates
 					.split(/\s+/).map(function(c) {
 						return c.split(',').map(

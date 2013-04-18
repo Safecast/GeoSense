@@ -58,6 +58,8 @@ describe('KML', function() {
 				if (err) throw err;
 				assert(feature);
 				assert.equal(feature.geometry.type, 'Polygon');
+				console.log('--------');
+				console.log(feature.geometry.coordinates.length);
 				assert.equal(feature.geometry.coordinates[0].length, 6);
 				assert.equal(feature.geometry.coordinates[1].length, 6);
 				done();
