@@ -3,10 +3,11 @@ var config = require('../../config'),
 	permissions = require('../../permissions'),
 	utils = require('../../utils'),
 	coordinates = require('../../geogoose/').coordinates,
+	errors = require('../../errors'),
 	url = require('url'),
 	console = require('../../ext-console.js'),
 	mongoose = require('mongoose'),
-	_ = require('cloneextend'),
+	_ = require('cloneextend');
 
 	Map = models.Map,
 	GeoFeatureCollection = models.GeoFeatureCollection,
@@ -59,9 +60,12 @@ var FeatureAPI = function(app)
 						queryOptions = {'limit': config.MAX_RESULT_COUNT},
 						zoom = parseInt(urlObj.query.z) || 0,
 						bbox = urlObj.query.b,
+						timeGrid = urlObj.query.t,
+						strDate = urlObj.query.d,
+						date,
 						boxes,
-						features = [];
-
+						features = [],
+						datetimeAttr = mapLayer.layerOptions.attrMap.datetime;
 
 					// adjust zoom						
 					if (isNaN(zoom) || zoom < 0) {
@@ -70,32 +74,53 @@ var FeatureAPI = function(app)
 						zoom = config.GRID_SIZES.length - 1;
 					}
 
-                    var gridSize = config.GRID_SIZES[zoom],
+                    var tileSize = config.GRID_SIZES[zoom],
 						mapReduceOpts = {
-							gridSize: (featureCollection.tile ? gridSize : undefined)
+							tileSize: (featureCollection.tile ? tileSize : undefined)
 						},
 						extraAttrs = { counts: {
 							full: 0, original: 0, max: 0, result: 0
 						}};
 
+					if (['yearly', 'weekly', 'hourly'].indexOf(timeGrid) != -1) {
+						mapReduceOpts.timeGrid = timeGrid;
+					}
+
 					// adjust bbox and split into boxes if it wraps the dateline 
 					// since MongoDB can't currently handle that
                     if (bbox && bbox.length == 4) {
                     	bbox = bbox.map(function(c, i) {
-                            return Number(c) + (i < 2 ? -gridSize / 2 : gridSize / 2);
+                            return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
                     	});
                     	boxes = bbox.some(isNaN) ? 
                     		null : coordinates.adjustBboxForQuery(bbox);
                     }
 
                     var manyBoxes = boxes && boxes.length > 1,
-                    	isMapReduced = (mapReduceOpts.gridSize 
+                    	isMapReduced = (mapReduceOpts.tileSize 
                     		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
-                    		|| mapReduceOpts.timebased,
+                    		|| (featureCollection.timebased && datetimeAttr),
                     	FeatureModel = featureCollection.getFeatureModel(),
 				        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel;
 
-                    console.log('Querying '+FindFeatureModel.collection.name, 'zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes);
+				    if (isMapReduced && mapReduceOpts.timeGrid) {
+				    	switch (mapReduceOpts.timeGrid) {
+				    		case 'yearly':
+						    	date = new Date(strDate, 0, 1, 0, 0, 0);
+						    	break;
+						    // TODO treat other cases
+				    	}
+				    	var err;
+				    	if (!strDate) {
+				    		err = new errors.ValidationError("required parameter: d");
+				    	} else if (!utils.isValidDate(date)) {
+				    		err = new errors.ValidationError("invalid date: " + strDate);
+				    	}
+			    		if (handleDbOp(req, res, err, true)) return;
+			    		filterQuery['value.' + datetimeAttr + '.min'] = date;
+				    }
+
+                    console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes, ', mapReduceOpts: ', mapReduceOpts);
 
                     var sendFeatures = function(features) {
                 		extraAttrs.counts.result = features.length;

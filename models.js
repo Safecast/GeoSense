@@ -215,8 +215,8 @@ GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
     var collectionName = 
         'r_'
         + this.getFeatureModel().collection.name
-        + (opts.gridSize != undefined ? '_tile_rect_' + opts.gridSize : '')
-        + (opts.time != undefined ? '_' + opts.time : '');
+        + (opts.tileSize != undefined ? '_tile_rect_' + opts.tileSize : '')
+        + (opts.timeGrid != undefined ? '_' + opts.timeGrid : '');
     return this.getFeatureModel({collectionName: collectionName, schema: GeoFeatureMapReducedSchema});
 };
 

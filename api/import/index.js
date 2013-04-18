@@ -648,7 +648,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						}
 
 						var transformResult = dataTransform.transformModel(doc, ToSaveModel, {
-							DEBUG: config.DEBUG && 0
+							DEBUG: config.DEBUG && config.VERBOSE
 						});
 
 						if (dataCallbacks.transform) {
