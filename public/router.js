@@ -729,7 +729,7 @@ define([
                 // TODO move to app
                 var self = this;
                 
-                geocoder = new google.maps.Geocoder();
+                var geocoder = new google.maps.Geocoder();
                 geocoder.geocode({'address': address}, callback);
             },
 
