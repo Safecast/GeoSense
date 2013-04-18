@@ -204,20 +204,20 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 										geometryAttr, new EmitKey.Tile[collection.tile](gridSize, gridSize, {index: false})),
 										{ events: tileEvents, indexes: tileIndexes }
 									);
+								}
 
-									// Initialize MapReduce for time-based tiles
-									if (attrMap.datetime) {
-										for (var timebase in EmitKey.Time) {
-											if (params.types.indexOf('tile-' + timebase.toLowerCase()) != -1) {
-												tileIndexes[attrMap.datetime] = '1';
+								// Initialize MapReduce for time-based tiles
+								if (attrMap.datetime) {
+									for (var timebase in EmitKey.Time) {
+										if (params.types.indexOf('tile-' + timebase.toLowerCase()) != -1) {
+											tileIndexes[attrMap.datetime] = '1';
 
-												mr('*** MapReduce for ' + timebase.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
-													//'featureCollection', new EmitKey.Copy(), 
-													geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false}), 
-													attrMap.datetime, new EmitKey.Time[timebase]()),
-													{ events: tileEvents, indexes: tileIndexes }
-												);
-											}
+											mr('*** MapReduce for ' + timebase.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
+												//'featureCollection', new EmitKey.Copy(), 
+												geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false}), 
+												attrMap.datetime, new EmitKey.Time[timebase]()),
+												{ events: tileEvents, indexes: tileIndexes }
+											);
 										}
 									}
 								}
@@ -338,11 +338,7 @@ MapReduceAPI.prototype.cli = {
 				params.featureCollectionId = params._[1];
 			}
 			if (params.types) {
-				var split = (params.types + '').split(',');
-				params.types = {};
-				for (var i = 0; i < split.length; i++) {
-					params.types[split[i]] = true; 
-				}
+				params.types = (params.types + '').split(',');
 			}
 			if (params.featureCollectionId) {
 				this.mapReduce(params, null, null, callback);

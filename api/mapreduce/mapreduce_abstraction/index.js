@@ -23,6 +23,8 @@ var mongoMapReduceFunctions =
 			// var f = emitKeys[k].get;
 			var f = emitKeys_code[k]; 
 				keyContent = f.call(emitKeys[k], getAttr(this, k), this);
+			
+			// if no key is returned, do not emit.
 			if (!keyContent) return;
 
 			if (isArray(keyContent)) {
@@ -41,7 +43,13 @@ var mongoMapReduceFunctions =
 
 		// call findExtremes to initialize each aggregate field 
 		iterFields(aggregates, this, function(fieldName, doc) {
-			setAttr(emitted, fieldName, findExtremes(getAttr(doc, fieldName)));
+			// if field is already in emitted values (see above), is that value for extremes
+			var value = getAttr(emitted, fieldName);
+			if (value == undefined) {
+				// otherwise use original value for extremes
+				vaue = getAttr(doc, fieldName)
+			}
+			setAttr(emitted, fieldName, findExtremes(value));
 		});
 
 		if (events.emit) {

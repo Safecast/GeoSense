@@ -1,4 +1,6 @@
 var config = require('./config.js'),
+    errors = require('./errors.js'),
+    HTTPError = errors.HTTPError,
     mailer = require('mailer'),
     fs = require('fs'),
     _ = require('cloneextend'),
@@ -143,6 +145,10 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
     });
 }
 
+function sendError(res, err) {
+    res.send(err, err.statusCode || 500);
+}
+
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
     if (err) {
@@ -151,22 +157,24 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
         switch (err.name) {
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 
-                sendErr = config.DEBUG ? err : {
-                    message: 'Server error'
-                };          
-                res.send(sendErr, 500);
+                if (!config.DEBUG) {
+                    err = new HTTPError('Internal Server Error', 500);
+                }
+                sendError(res, err);
                 break;
             case 'ValidationError':
+                err = new HTTPError(err.message, 403);
+            case 'HTTPError':
                 // certain error messages should be available to client:
-                res.send(err, 403);
+                sendError(res, err);
                 break;
         }
         return true;
     } else if (!op) {
-        res.send((name ? name + ' ' : '') + 'not found', 404);
+        sendError(res, new HTTPError((name ? name + ' ' : '') + 'not found', 404));
         return true;
     } else if (permissionCallback && !permissionCallback(req, op)) {
-        res.send('permission denied', 403);
+        sendError(res, new HTTPError('permission denied', 403));
         return true;
     }
 
@@ -472,4 +480,10 @@ exports.callbackOrThrow = function(err, callback)
         }
         throw err;
     }
+};
+
+exports.isValidDate = function(d) {
+    if (Object.prototype.toString.call(d) !== "[object Date]")
+        return false;
+    return !isNaN(d.getTime());
 };

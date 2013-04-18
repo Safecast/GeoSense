@@ -253,8 +253,9 @@ var EmitKey =
 
 				if (geometry.coordinates) {
 					// geometry is GeoJSON 
-					var bounds = getBounds(geometry.coordinates),
-						l = _getTile.call(this, bounds[0]),
+					var bounds = getBounds(geometry.coordinates);
+					if (!bounds) return;
+					var l = _getTile.call(this, bounds[0]),
 						h = _getTile.call(this, bounds[1]),
 						w = l[1][0][0], s = l[1][0][1], e = h[1][1][0], n = h[1][1][1];
 					return [this.prefix + l[0] + ',' + h[0], { 
@@ -263,14 +264,17 @@ var EmitKey =
 					}];
 				} else if (isArray(geometry[0]) && isArray(geometry[1])) {
 					// geometry is a bbox [[w,s],[e,n]]
-					var bounds = getBounds(geometry),
-						l = _getTile.call(this, bounds[0]),
+					var bounds = getBounds(geometry);
+					if (!bounds) return;
+					var l = _getTile.call(this, bounds[0]),
 						h = _getTile.call(this, bounds[1]);
 					return [this.prefix + l[0] + ',' + h[0], [l[1][0], h[1][1]]];
-				} else {
+				} else if (isArray(geometry) && geometry.length > 1) {
 					// geometry is [x,y] 
 					var t = _getTile.call(this, geometry);
 					return [this.prefix + t[0], t[1]];
+				} else {
+					return;
 				}
 			};
 
