@@ -47,7 +47,7 @@ var mongoMapReduceFunctions =
 			var value = getAttr(emitted, fieldName);
 			if (value == undefined) {
 				// otherwise use original value for extremes
-				vaue = getAttr(doc, fieldName)
+				value = getAttr(doc, fieldName)
 			}
 			setAttr(emitted, fieldName, findExtremes(value));
 		});
