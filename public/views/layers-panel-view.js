@@ -56,8 +56,7 @@ define([
 
 		layerMoved: function(event, ui)
 		{
-			var layer = app.getMapLayer($(ui.item).attr('data-id'))
-				previousPosition = layer.get('position');
+			var layer = app.getMapLayer($(ui.item).attr('data-id'));
 			layer.set({position: this.getSortableItemIndex(ui.item)}, {
 				silent: false
 			});
