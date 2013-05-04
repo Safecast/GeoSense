@@ -100,7 +100,7 @@ define([
 			var colorSchemePopover = this.$('.color-scheme-popover').remove();
 			if (schemes && schemes.length > 1) {
 				var ul = this.$('.unit ul');
-			    schemeItems = schemes.map(function(scheme, index) {
+			    var schemeItems = schemes.map(function(scheme, index) {
 			    	return '<li><a href="#" class="color-scheme-toggle" data-index="' + index + '">'
 			    		+ scheme.name + '</a></li>';
 			    });
