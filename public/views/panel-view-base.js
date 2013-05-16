@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/homepage.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var PanelViewBase = Backbone.View.extend({
 
 	    tagName: 'div',
@@ -33,6 +35,8 @@ define([
 			} else {
 				self.$('.panel-body').show('fast');
 			}
+
+			return this;
 		},
 
 		setTitle: function(string)
@@ -78,12 +82,20 @@ define([
 			return this;
 		},
 
+		attachTo: function(parentElement)
+		{
+			$(parentElement).append(this.el);
+			this.$el.draggable('option', 'containment', parentElement);
+			this.isAttached = true;
+			return this;
+		},
+
 	    render: function() 
 	    {
-			$(this.el).html(this.template());
+			this.$el.html(this.template());
 			var self = this;
 
-			$(this.el).draggable({
+			this.$el.draggable({
 				start: function() {
 					//$(this).css('right', 'auto');
 					$(this).css('bottom', 'auto');
@@ -94,7 +106,7 @@ define([
 						right = $(this).position().left + $(this).outerWidth();
 					$('.snap.right').each(function() {
 						if (right == $(this).position().left) {
-							console.log(this, $(this).position());
+							//console.log(this, $(this).position());
 							// re-dock to right edge
 							$(el).css('left', 'auto');
 						}
@@ -103,14 +115,14 @@ define([
 
 				snap: ".snap, .panel", snapMode: "outer"
 			});
-			$(this.el).css('position', 'absolute'); // draggable sets it to relative
+			this.$el.css('position', 'absolute'); // draggable sets it to relative
 
 			this.$('a.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			
 				if ($(self.el).is('.extended')) {
 					self.setPanelState(true);
 				}
-				self.vent.trigger('panel:resize', self);
+				self.trigger('panel:resize', self);
 				return false;
 			});
 
@@ -129,13 +141,16 @@ define([
 
 		detach: function() 
 		{
+			this.isAttached = false;
 			this.$el.detach();
 		},
 
 		appendSubView: function(view)
 		{
 			this.$('.accordion').append(view.el);
-			view.superView = this;
+			if (view.setSuperView) {
+				view.setSuperView(this);
+			}
 		}		
 
 	});	

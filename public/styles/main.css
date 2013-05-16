@@ -7,7 +7,6 @@
 @import url("header.css");
 @import url("map.css");
 @import url("map-gl.css");
-@import url("modal.css");
 @import url("data-import.css");
 @import url("sidebar.css");
 /*@import url("data-inspector.css");*/
@@ -28,8 +27,11 @@
 /*@import url("../lib/bootstrap/css/bootstrap.css");
 @import url("../lib/bootstrap/css/bootstrap-responsive.css");*/
 
-@import url("../lib/gradient-editor/gradient-editor.css");
+@import url("../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css");
+
 @import url("../lib/colorpicker/css/colorpicker.css");
+
+@import url("modal.css");
 
 body, select, textarea, p, input, button {
 	font-family: "Oxygen", sans-serif;
@@ -95,94 +97,21 @@ body, select, textarea, p, input, button {
     -ms-transition: all .3s linear;
 }
 
-.chat-view
+#main-viewport
 {
-	z-index:999;
-	position:absolute;
-	top:50px;
-	right:-300px;
-	width:270px;
-	bottom:0px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
+	position: absolute;
+	top: 50px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;	
+	overflow: hidden;
 }
 
-.chat-view.visible
-{
-	right:0px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
+#main-viewport .map-view {
+	z-index: 900;
 }
 
-.map-view
-{
-	z-index:996;
-	position:absolute;
-	top:50px;
-	left:0px;
-	right:0px;
-	bottom:0px;	
-	
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
-}
-
-.map-view.full
-{
-	left:0px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
-}
-
-.map-gl-view
-{
-	z-index:996;
-	
-	position:absolute;
-	top:50px;
-	left:0px;
-	right:0px;
-	bottom:0px;	
-	
-	width:100%;
-	height:100%;
-	
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
-}
-
-.map-gl-view.full
-{
-	left:0px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
-}
-
-.gest-cursor {
-	z-index: 9999999;
-	width: 100px;
-	height: 100px;
-	position: fixed;
-	border: 5px #999 dashed;
-	-webkit-transform: scale(0.5);
-	-webkit-transition: width .2s ease-out, height .2s ease-out;
-}
-
-.gest-cursor.active {
-	border-color: #aaa;
-	width: 120px;
-	height: 120px;
+#main-viewport .panel {
+	z-index: 1000;
 }
 

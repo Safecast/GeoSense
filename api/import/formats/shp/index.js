@@ -2,6 +2,9 @@ var Parser = require('./parser'),
 	Shp = require('shp'),
 	request = require('request');
 
+/*
+// TODO: Currently not functional
+
 module.exports = {
 	Parser: function() 
 	{
@@ -13,3 +16,4 @@ module.exports = {
 	}
 };
 
+*/

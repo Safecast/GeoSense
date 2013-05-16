@@ -7,6 +7,8 @@ define([
 	'text!templates/share.html',
 	'views/modal-view'
 ], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+    "use strict";
+
 	var ShareView = ModalView.extend({
 
 		/*className: 'panel map-info',*/

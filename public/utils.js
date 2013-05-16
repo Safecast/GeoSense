@@ -2,6 +2,45 @@ define([], function() {
 	return {};
 });
 
+/*
+Returns an attribute of an object by path in dot notation.
+Example:
+	
+	getAttr({hello: {world: 'Hello World!'}}, 'hello.world') // ==> 'Hello World!'
+
+*/
+var getAttr = function(obj, path) {
+	var _get = function(obj, pathSegments) {
+		if (!obj) return undefined;
+		var el = obj[pathSegments.shift()];
+		if (!pathSegments.length) return el;
+		return _get(el, pathSegments);
+	};
+	return _get(obj, path.split('.'));
+};
+
+/*
+Sets an attribute of an object by path in dot notation.
+Example:
+	
+	setAttr(obj, 'some.path', 'value') // ==> {some: {path: 'value'}}
+
+*/
+var setAttr = function(obj, path, value) {
+	var _set = function(obj, pathSegments) {
+		if (pathSegments.length == 1) {
+			obj[pathSegments[0]] = value;
+			return;
+		}
+		var seg = pathSegments.shift();
+		if (obj[seg] == undefined) {
+			obj[seg] = {};
+		}
+		_set(obj[seg], pathSegments);
+	};
+	_set(obj, path.split('.'));
+};
+
 function formatLargeNumber(c) {
 	if (c > 1000000) {
 		c = Math.round(c / 1000000 * 10) / 10 + 'M';
@@ -67,9 +106,7 @@ function genQueryString(params, name) {
 
 function nl2p(str)
 {
-	str = '<p>' + str.replace(/(\s*\n\s*){2}/, '</p><p>') + '</p>';
-	str = str.replace(/(\s*\n\s*){1}/, '<br />');
-	return str;
+	return ('<p>' + str.split(/(\s*\n\s*){2,}/).join('</p><p>') + '</p>');
 }
 
 $.fn.uiToggle = function(opts) {
@@ -125,12 +162,12 @@ var lpad = function(str, padString, length) {
     return s;
 };
 
-function mathEval (exp) {
+function mathEval(exp) {
     var reg = /(?:[a-z$_][a-z0-9$_]*)|(?:[;={}\[\]"'!&<>^\\?:])/ig,
         valid = true;
 
     // Detect valid JS identifier names and replace them
-    exp = exp.replace(reg, function ($0) {
+    var evalExp = exp.replace(reg, function ($0) {
         // If the name is a direct member of Math, allow
         if (Math.hasOwnProperty($0))
             return "Math."+$0;
@@ -141,10 +178,19 @@ function mathEval (exp) {
 
     // Don't eval if our replace function flagged as invalid
     if (!valid) {
-        console.log("Invalid arithmetic expression");
+    	var msg = "Invalid arithmetic expression: "+exp;
+    	console.error(msg);
+    	if (DEV) throw new Error(msg);
     	return false;
     } else {
-        try { return(eval(exp)); } catch (e) { console.log("Invalid arithmetic expression"); return false; };
+        try { 
+        	return(eval(evalExp)); 
+        } catch (e) { 
+	    	var msg = "Eval error: " + evalExp;
+	    	console.error(msg);
+	    	if (DEV) throw e;
+	    	return false;
+        };
     }
 }
 
@@ -157,7 +203,7 @@ function ValFormatter(format)
 
 ValFormatter.prototype.format = function(val)
 {
-	if (this.eq) {
+	if (this.eq && this.eq != '') {
 		var eq = this.eq.format({
 			'val': val
 		});
@@ -254,7 +300,7 @@ function zeroPad(str, len) {
 
 function getRGBChannels(color)
 {
-	var intColor = typeof color == 'string' ? parseInt(color.replace('#', '0x')) : color;
+	var intColor = colorToInt(color);
 	return channels = [
 		(intColor &  0xff0000) >> 16,
 		(intColor &  0x00ff00) >> 8,
@@ -262,8 +308,22 @@ function getRGBChannels(color)
 	];
 }
 
+function rgb2int (rgb) {
+	return rgb[0] << 16 ^ rgb[1] << 8 ^ rgb[2];
+}
+
+function colorToInt(color)
+{
+	return typeof color == 'string' ? parseInt(color.replace('#', '0x')) : color;
+}
+
+function intToColor(intColor)
+{
+	return '#' + zeroPad(intColor.toString(16), 6);
+}
+
 function multRGB(color, factor) {
-	var intColor = parseInt(color.replace('#', '0x')),
+	var intColor = colorToInt(color),
 		channels = getRGBChannels(intColor);
 	for (var i = channels.length - 1; i >= 0; i--) {
 		channels[i] = Math.min(255, Math.round(channels[i] * factor));
@@ -271,17 +331,67 @@ function multRGB(color, factor) {
 	intColor = (channels[0] << 16)
 			+ (channels[1] << 8)
 			+ channels[2];	
-	return '#' + zeroPad(intColor.toString(16), 6);
+	return intToColor(intColor);
 }
 
-function wktCircle(ctr, xRadius, yRadius, numSegments)
+function rgb2hsb(_rgb) {
+	var x, f, i, hue, sat, val;
+	var rgb = [_rgb[0]/255, _rgb[1]/255, _rgb[2]/255];
+	x = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
+	val = Math.max(Math.max(rgb[0], rgb[1]), rgb[2]);
+	if (x==val){
+	return(new Array(0,0,val));
+	}
+	f = (rgb[0] == x) ? rgb[1]-rgb[2] : ((rgb[1] == x) ? rgb[2]-rgb[0] : rgb[0]-rgb[1]);
+	i = (rgb[0] == x) ? 3 : ((rgb[1] == x) ? 5 : 1);
+	hue = Math.floor((i-f/(val-x))*60)%360;
+	sat = (val-x)/val;
+	val = val;
+	return(new Array(hue,sat,val));
+}
+
+function hsb2rgb(_hsb) {
+	var red, grn, blu, i, f, p, q, t;
+	var hsb = [_hsb[0], _hsb[1], _hsb[2]];
+	hsb[0]%=360;
+	if(hsb[2]==0) {return(new Array(0,0,0));}
+	hsb[0]/=60;
+	i = Math.floor(hsb[0]);
+	f = hsb[0]-i;
+	p = hsb[2]*(1-hsb[1]);
+	q = hsb[2]*(1-(hsb[1]*f));
+	t = hsb[2]*(1-(hsb[1]*(1-f)));
+	if (i==0) {red=hsb[2]; grn=t; blu=p;}
+	else if (i==1) {red=q; grn=hsb[2]; blu=p;}
+	else if (i==2) {red=p; grn=hsb[2]; blu=t;}
+	else if (i==3) {red=p; grn=q; blu=hsb[2];}
+	else if (i==4) {red=t; grn=p; blu=hsb[2];}
+	else if (i==5) {red=hsb[2]; grn=p; blu=q;}
+	red = Math.floor(red*255);
+	grn = Math.floor(grn*255);
+	blu = Math.floor(blu*255);
+	return (new Array(red,grn,blu));
+}
+
+function circleToGeoJSON(ctr, xRadius, yRadius, numSegments, internalProjection, externalProjection)
 {
 	var corners = [];
     var step = 2 * Math.PI / numSegments;
     for (var i = 0; i < Math.PI * 2; i += step) {
-        corners.push((ctr.x + Math.cos(i) * xRadius) + ' ' + (ctr.y + Math.sin(i) * yRadius));
+        var x = ctr.x + Math.cos(i) * xRadius,
+        	y = ctr.y + Math.sin(i) * yRadius;
+        if (internalProjection && externalProjection) {
+        	var pt = new OpenLayers.Geometry.Point(x, y);
+        	pt.transform(internalProjection, externalProjection);
+        	x = pt.x; y = pt.y;
+        }
+        corners.push([x, y]);
     }
-    return 'POLYGON((' + corners.join(', ') + '))';
+    corners.push(corners[0]);
+    return {
+    	type: 'LineString',
+    	coordinates: corners
+    };
 }
 
 function genMapURI(mapInfo, mapViewName, opts, admin, slugField)

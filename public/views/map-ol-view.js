@@ -10,6 +10,8 @@ define([
     'cloudmade',
     'stamen'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase, OpenLayers) {
+    "use strict";
+
     var Geometry = OpenLayers.Geometry;
     var MapOLView = MapViewBase.extend({
 
@@ -30,28 +32,35 @@ define([
             _.bindAll(this, "updateViewBase");
             options.vent.bind("updateViewBase", this.updateViewBase);
 
+            this.externalProjection = new OpenLayers.Projection("EPSG:4326"); // aka WGS 84
+            this.internalProjection = null; // determined by baselayer -- usually EPSG:900913
+
             OpenLayers.ImgPath = "/assets/openlayers-light/";   
             this.featureLayers = {};
         },
 
         getVisibleMapArea: function() 
         {
-            var map = this.map;
+            var map = this.map,
                 zoom = map.getZoom(),
                 extent = map.getExtent(),
                 center = map.getCenter();
-            center.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-            var SE = new OpenLayers.Geometry.Point(extent.left, extent.bottom);
-            SE.transform(new OpenLayers .Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-            var NW = new OpenLayers.Geometry.Point(extent.right, extent.top);
-            NW.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-            var bounds = [[SE.x, SE.y],[NW.x, NW.y]];
-            //console.log('zoom: '+zoom+', resolution '+this.selectedmap.getResolution()+' '+this.map.getUnits());
-            //console.log('bounds', bounds);
+
+            var SW = new OpenLayers.Geometry.Point(extent.left, extent.bottom),
+                NE = new OpenLayers.Geometry.Point(extent.right, extent.top);
+            var radius = Math.sqrt(Math.pow((NE.x - SW.x) / 2, 2) + Math.pow((NE.y - SW.y) / 2, 2)) / 1000; // km
+            SW.transform(this.internalProjection, this.externalProjection);
+            NE.transform(this.internalProjection, this.externalProjection);
+            var bounds = [[SW.x, SW.y],[NE.x, NE.y]];
+
+            center.transform(this.internalProjection, this.externalProjection);
+            center = [center.lon, center.lat];
+
             return {
-                center: [center.lon, center.lat],
+                center: center,
                 zoom: zoom,
-                bounds: bounds
+                bounds: bounds,
+                radius: radius
             };
         },
 
@@ -66,10 +75,8 @@ define([
             var self = this;
             this.map = new OpenLayers.Map({
                 div: "map_canvas",
-                projection: new OpenLayers.Projection("EPSG:900913"),
-                displayProjection: new OpenLayers.Projection("EPSG:4326"),
-                numZoomLevels: MAP_NUM_ZOOM_LEVELS,
-                //maxResolution: maxResolution,
+                displayProjection: this.externalProjection,
+                //numZoomLevels: MAP_NUM_ZOOM_LEVELS,
                 scope: this,
                 controls: [],
                 eventListeners: {
@@ -96,53 +103,176 @@ define([
             this.map.addControl(scaleLine);
             this.map.addControl(new OpenLayers.Control.Attribution());
 
-            var r = this.baselayer.mapLayer.resolutions;
-            var res = [];
-            for (var i = 0; i < r.length; i++) {
-                var p = new OpenLayers.Geometry.Point(r[i], 0);
-                res.push(p.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).x);
-
-            }
-            
             if (DEBUG) {
                 this.map.addControl(new OpenLayers.Control.MousePosition());
             }
 
-            this.add30kmtemp();
+            this.internalProjection = this.map.baseLayer.projection;
+            this.formats = {
+                geoJSON: new OpenLayers.Format.GeoJSON({
+                    internalProjection: this.internalProjection,
+                    externalProjection: this.externalProjection,
+                    ignoreExtraDims: true
+                })
+            };
 
             MapOLView.__super__.renderMap.call(this, viewBase, viewStyle);
             return this;
         },
 
-        addKMLLayer: function(url)
-        {
-            kml = new OpenLayers.Layer.Vector("KML", {
-                projection: new OpenLayers.Projection("EPSG:4326"),
-                strategies: [new OpenLayers.Strategy.Fixed()],
-                renderers: ["Canvas"],
-                opacity: 0.3,
-                protocol: new OpenLayers.Protocol.HTTP({
-                    url: url,
-                    format: new OpenLayers.Format.KML({
-                        extractStyles: true, 
-                        extractAttributes: true,
-                        maxDepth: 2
-                    })
-                })
-            })
-        
-            this.map.addLayers([kml]);
-        },
-
         attachLayer: function(model)
         {
-            var self = this;
-            var layer = new OpenLayers.Layer.Vector(model.id, {
+            this.initRenderLayer(model);
+            MapOLView.__super__.attachLayer.call(this, model);
+        },
+
+        getStyleMapForLayer: function(model)
+        { 
+            var self = this,
+                layerOptions = model.getLayerOptions(),
+                or = function(val1, val2) {
+                    return (val1 || val1 == 0) && val1 != '' 
+                        && (typeof val1 == 'string' || val1 >= 0) ? val1 : val2;
+                },
+                opacity = layerOptions.opacity,
+                maxBubbleSize = or(layerOptions.featureSize, MAX_BUBBLE_SIZE),
+                minBubbleSize = Math.min(maxBubbleSize, or(layerOptions.minFeatureSize, MIN_BUBBLE_SIZE));
+
+            var context = {
+                getColor: function(feature) {
+                    return feature.attributes.color;
+                },
+                getDarkerColor: function(feature) {
+                    return feature.attributes.darkerColor;
+                },
+                getBubbleRadius: function(feature) {
+                    if (isNaN(feature.attributes.size)) {
+                        return minBubbleSize * .5;
+                    }
+                    return (minBubbleSize + feature.attributes.size * 
+                        (maxBubbleSize - minBubbleSize)) * .5;
+                }            
+            };
+
+            var defaultStyle = {
+                    pointRadius: or(layerOptions.featureSize * .5, DEFAULT_POINT_RADIUS),
+                    fillColor: '${getColor}',
+                    fillOpacity: opacity,
+                    strokeDashstyle: layerOptions.strokeDashstyle,
+                    strokeLinecap: layerOptions.strokeLinecap,
+                    graphicZIndex: 0
+                };
+
+            switch (layerOptions.featureType) {
+
+                case FeatureType.GRAPHIC:
+                    defaultStyle = _.extend(defaultStyle, {
+                        externalGraphic: layerOptions.externalGraphic,
+                        graphicWidth: layerOptions.graphicWidth,
+                        graphicHeight: layerOptions.graphicHeight
+                    });                        
+
+                default:
+                case FeatureType.POINTS:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
+                    });
+                    break;
+
+                case FeatureType.SQUARE_TILES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
+                    });
+                    break;
+
+                case FeatureType.SHAPES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity),
+                    });
+                    break;
+                
+                case FeatureType.BUBBLES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        pointRadius: '${getBubbleRadius}',
+                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .5)
+                    });
+                    break;
+            }
+
+            var selectStyle = {
+                    fillOpacity: (defaultStyle.fillOpacity == 1 ? .8 : Math.min(1, defaultStyle.fillOpacity * 1.5)),
+                    strokeOpacity: (defaultStyle.strokeOpacity == 1 ? .1 : Math.min(1, defaultStyle.strokeOpacity * 1.5)),
+                    //TODO: this is not having any effect
+                    graphicZIndex: 100
+                };
+
+            var styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style(defaultStyle, {context: context}),
+                'select': new OpenLayers.Style(selectStyle, {context: context})
+            });
+
+            return styleMap;
+        },
+
+
+        layerToggled: function(model)
+        {
+            this.featureLayers[model.id].setVisibility(model.isEnabled());
+        },
+
+        layerChanged: function(model)
+        {
+            var layer = this.featureLayers[model.id];
+            if (model.hasChanged('layerOptions.htmlRenderer')) {
+                this.destroyRenderLayer(model);
+                this.initRenderLayer(model);
+                this.featureReset(model.featureCollection);
+                return;
+            }
+
+            layer.styleMap = this.getStyleMapForLayer(model);
+            if (model.hasChangedColors()
+                || model.hasChanged('layerOptions.featureType')
+                || model.hasChanged('layerOptions.featureTypeFallback')
+                || model.hasChanged('layerOptions.attrMap.numeric') 
+                || model.hasChanged('layerOptions.attrMap.featureSize') 
+                || model.hasChanged('layerOptions.attrMap.featureColor')) {
+                    // console.log('* featureReset '+collection.mapLayer.id);
+                    this.featureReset(model.featureCollection);
+            } else {
+                // console.log('* layer.redraw '+model.id);
+                layer.redraw();
+            }
+        },
+
+        drawLayer: function(model)
+        {
+            // add all buffered features at once
+            if (this._addFeatures[model.id] && this._addFeatures[model.id].length) {
+                this.featureLayers[model.id].addFeatures(this._addFeatures[model.id]);
+                delete this._addFeatures[model.id];
+            }
+        },
+
+        initRenderLayer: function(model)
+        {
+            var self = this,
+                opts = model.getLayerOptions(),
+                layer = new OpenLayers.Layer.Vector(model.id, {
                 styleMap: this.getStyleMapForLayer(model),
-                renderers: ["Canvas"],
+                renderers: [(opts.htmlRenderer && opts.htmlRenderer != '' ?
+                    opts.htmlRenderer : 'Canvas'), 'Canvas', 'SVG'],
                 wrapDateLine: true,
                 rendererOptions: { 
-                    zIndexing: true
+                    //zIndexing: true
                 }, 
             });
 
@@ -176,142 +306,23 @@ define([
                     // add code to remove feature from highlight layer
                 },
             });
+
             this.map.addControl(selectControl);
             selectControl.activate();
             // make sure the SelectControl does not disable map panning when clicked on feature
             selectControl.handlers.feature.stopDown = false;
-
-            MapOLView.__super__.attachLayer.call(this, model);
         },
 
-        getStyleMapForLayer: function(model)
-        { 
-            var self = this,
-                opacity = model.getDisplay('opacity'),
-                layerOptions = model.attributes.layerOptions;
-
-            var context = {
-                getColor: function(feature) {
-                    return feature.attributes.color;
-                },
-                getDarkerColor: function(feature) {
-                    return feature.attributes.darkerColor;
-                },
-                getBubbleRadius: function(feature) {
-                    return MIN_BUBBLE_SIZE + feature.attributes.size * (MAX_BUBBLE_SIZE - MIN_BUBBLE_SIZE) / 2;
-                },
-                getStrokeWidth: function(feature) {
-                    return MIN_POLYGON_STROKE_WIDTH + feature.attributes.size * (MAX_POLYGON_STROKE_WIDTH - MIN_POLYGON_STROKE_WIDTH);
-                }
-            };
-
-            var defaultStyle = {
-                    fillOpacity: opacity,
-                    graphicZIndex: 0,
-                },
-                selectStyle = {
-                    fillOpacity: DEFAULT_SELECTED_FEATURE_OPACITY,
-                    strokeColor: DEFAULT_SELECTED_STROKE_COLOR,
-                    strokeOpacity: DEFAULT_SELECTED_STROKE_OPACITY,
-                    strokeWidth: DEFAULT_SELECTED_STROKE_WIDTH,
-                    //TODO: this is not having any effect
-                    graphicZIndex: 100
-                },
-                temporaryStyle = {};
-
-            switch (layerOptions.featureType) {
-
-                case FeatureType.GRAPHIC:
-                    defaultStyle = _.extend(defaultStyle, {
-                        externalGraphic: layerOptions.externalGraphic,
-                        graphicWidth: layerOptions.graphicWidth,
-                        graphicHeight: layerOptions.graphicHeight
-                    });                        
-
-                default:
-                case FeatureType.POINTS:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        strokeColor: '${getDarkerColor}',
-                        pointRadius: DEFAULT_POINT_RADIUS,
-                        strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
-                        strokeOpacity: opacity * .8
-                    });
-                    break;
-
-                case FeatureType.CELLS:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        strokeOpacity: 0,
-                    });
-                    break;
-
-                case FeatureType.SHAPES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        fillOpacity: opacity,
-                        strokeOpacity: opacity,
-                        strokeColor: '${getColor}',
-                        strokeWidth: '${getStrokeWidth}',
-                    });
-                    selectStyle = _.extend(selectStyle, {
-                        strokeColor: '${getColor}',
-                        strokeWidth: '${getStrokeWidth}'
-                    });
-                    break;
-                
-                case FeatureType.BUBBLES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        fillColor: '${getColor}',
-                        pointRadius: '${getBubbleRadius}',
-                        strokeColor: '${getDarkerColor}',
-                        strokeWidth: DEFAULT_POINT_STROKE_WIDTH,
-                        strokeOpacity: opacity * .5
-                    });
-                    break;
-            }
-
-            return new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style(defaultStyle, {context: context}),
-                //'temporary': new OpenLayers.Style(temporaryStyle, {context: context}),
-                'select': new OpenLayers.Style(selectStyle, {context: context})
-            });
-        },
-
-
-        layerToggled: function(model)
-        {
-            this.featureLayers[model.id].setVisibility(model.isEnabled());
-        },
-
-        layerChanged: function(model)
-        {
-            var layer = this.featureLayers[model.id];
-            layer.styleMap = this.getStyleMapForLayer(model);
-            if (model.hasChangedColors() 
-                || model.hasChanged('layerOptions.featureType')
-                || model.hasChanged('layerOptions.featureSizeAttr')
-                || model.hasChanged('layerOptions.featureColorAttr')) {
-                    this.featureReset(model.featureCollection);
-            } else {
-                layer.redraw();
-            }
-        },
-
-        drawLayer: function(model)
-        {
-            // add all buffered features at once
-            if (this._addFeatures[model.id] && this._addFeatures[model.id].length) {
-                this.featureLayers[model.id].addFeatures(this._addFeatures[model.id]);
-                delete this._addFeatures[model.id];
-            }
-        },
-
-        destroyLayer: function(model) 
+        destroyRenderLayer: function(model) 
         {
             this.featureLayers[model.id].destroyFeatures();
             this.map.removeLayer(this.featureLayers[model.id]);
             delete this.featureLayers[model.id];
+        },
+
+        destroyLayer: function(model) 
+        {
+            this.destroyRenderLayer(model);
             MapOLView.__super__.destroyLayer.call(this, model);
             // TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
             /*this.featureLayers[model.id].destroy();*/
@@ -333,63 +344,33 @@ define([
             // to this event handler -- check Backbone docs
             var collection = model.collection;
 
-            // TODO: should add features directly with GeoJSON to streamline
-            // the handling of shapes vs. points
-            /*var format = new OpenLayers.Format.GeoJSON({
-                'internalProjection': this.map.baseLayer.projection,
-                'externalProjection': new OpenLayers.Projection("EPSG:4326")
-            });
-            this.featureLayers[model.id].addFeatures(format.read(model.attributes));
-            */
-
-            var opts = model.getRenderAttributes(),
-                loc = model.get('loc'),
-                lng = loc[0],
-                lat = loc[1],
-                pt = new OpenLayers.Geometry.Point(lng, lat),
-                pts,
+            var attrs = model.getRenderAttributes(),
+                layerOptions = collection.mapLayer.attributes.layerOptions,
                 geometry;
 
-            switch(collection.mapLayer.attributes.layerOptions.featureType) {
-                
+            switch (layerOptions.featureType) {
+
                 case FeatureType.POINTS:
-                default:
-                    pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-                    geometry = pt;
+                case FeatureType.BUBBLES:
+                    geometry = this.formats.geoJSON.parseGeometry({
+                        type: 'Point',
+                        coordinates: model.getCenter()
+                    });
                     break;
-
-                case FeatureType.POLYGONS:
-                    // tmp
-                    /*if (extra && extra.min && extra.min.endLoc) {
-                        pts = [
-                            pt,
-                            new OpenLayers.Geometry.Point(extra.min.endLoc[0], extra.min.endLoc[1])
-                        ];
-                    }*/
-
-                case FeatureType.CELLS:
-                    if (!pts) {
-                        var gw = collection.gridSize / 2;
-                        pts = [
-                            new OpenLayers.Geometry.Point(pt.x - gw, pt.y - gw),
-                            new OpenLayers.Geometry.Point(pt.x - gw, pt.y + gw),
-                            new OpenLayers.Geometry.Point(pt.x + gw, pt.y + gw),
-                            new OpenLayers.Geometry.Point(pt.x + gw, pt.y - gw)
-                        ];
+                case FeatureType.SQUARE_TILES:
+                    if (!layerOptions.featureTypeFallback || model.attributes.geometry.type != 'Point') {
+                        geometry = this.formats.geoJSON.parseGeometry({
+                            type: 'Polygon',
+                            coordinates: [model.getBox()]
+                        });
+                        break;
                     }
-
-                    var strPts = [];
-                    for (var i = 0; i < pts.length; i++) {
-                        var pt = pts[i];
-                        pt.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-                        strPts.push(pt.x+' '+pt.y);
-                    }
-                    var wkt = 'POLYGON(' + strPts.join(', ') + ')';
-                    var geometry = OpenLayers.Geometry.fromWKT(wkt);
+                case FeatureType.SHAPES:
+                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
                     break;
             }
-            
-            var feature = new OpenLayers.Feature.Vector(geometry, opts);
+
+            var feature = new OpenLayers.Feature.Vector(geometry, attrs);
             
             if (!this._addFeatures[collection.mapLayer.id]) {
                 this._addFeatures[collection.mapLayer.id] = [];
@@ -403,41 +384,6 @@ define([
 
         featureChange: function(model, options)
         {
-        },
-
-        add30kmtemp: function()
-        {
-            var style = new OpenLayers.Style({
-                strokeColor: '#999999',
-                pointRadius: 7,
-                fillOpacity: 0,
-                strokeOpacity: .8,
-                strokeWidth: 1
-            }, {context: {}});
-
-            layer = new OpenLayers.Layer.Vector(null, {
-                projection: new OpenLayers.Projection("EPSG:4326"),
-                sphericalMercator: true,
-                styleMap: new OpenLayers.StyleMap({
-                    "default": style,
-                }),
-                renderers: ["Canvas"],
-                wrapDateLine: true
-            });
-
-            this.map.addLayers([layer]);
-
-            var ctr = new OpenLayers.Geometry.Point(141.033247, 37.425252);
-            ctr.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-            var geometry;
-
-            var radius = 30000, numSegments = 50;
-
-            var wkt = wktCircle(ctr, radius, radius, numSegments);
-            var geometry = OpenLayers.Geometry.fromWKT(wkt);
-
-            var feature = new OpenLayers.Feature.Vector(geometry, {});
-            layer.addFeatures([feature]);
         },
 
         featureSelected: function(feature) 
@@ -480,69 +426,20 @@ define([
                 }
             }
         },
-        
-        toWebMercator: function (googLatLng) 
+           
+        setVisibleMapArea: function(area)
         {
-            // TODO streamline projection 
-
-            // Extract property names from Google response
-            // It seems the API changes the response from Za/Yz/$a
-            
-            props = []
-            for (prop in googLatLng) {
-                if (googLatLng.hasOwnProperty(prop)) {
-                    props.push(prop);
-                }
-            }
-
-            // Assign the property to lat/lng based on their object index
-            $.each(googLatLng, function(index, val) { 
-                if(index == props[0])
-                {
-                    lat=val;
-                } else if (index == props[1])
-                {
-                    lng=val;
-                }
-            });     
-            
-            translation = new Geometry.Point(lng, lat);
-            translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));    
-                    
-            return [translation.x, translation.y];
+            var center = new OpenLayers.LonLat(area.center[0], area.center[1]);
+            center.transform(this.externalProjection, this.internalProjection);    
+            this.map.setCenter(center, area.zoom);      
         },
-            
-        setVisibleMapArea: function(result)
+
+        zoomToExtent: function(bbox) 
         {
-            var center;
-            var zoom;
-            console.log('setVisibleMapArea', result);
-            
-            switch(result.type) {
-                case 'google':
-                    var first = result[0],          
-                    center = this.toWebMercator(first.geometry.location),
-                    viewport = first.geometry.viewport,
-                    viewportSW = viewport.getSouthWest(),
-                    viewportNE = viewport.getNorthEast(),
-                    min = this.toWebMercator(viewportSW),
-                    max = this.toWebMercator(viewportNE),
-                    zoom = this.map.getZoomForExtent(new OpenLayers.Bounds(min[0], min[1], max[0], max[1]));
-                    break;
-
-                default:
-                    translation = new Geometry.Point(result.center[0], result.center[1]);
-                    translation.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));    
-                    center = [translation.x, translation.y]; 
-                    if (result.zoom != undefined) {
-                        zoom = result.zoom;
-                    }
-                    break;
-            }
-
-            if (center) {
-                this.map.setCenter(new OpenLayers.LonLat(center[0], center[1]), zoom);      
-            }       
+            var bounds = new OpenLayers.Bounds(bbox[0], bbox[1], bbox[2], bbox[3]);
+            bounds.transform(this.externalProjection, this.internalProjection);
+            this.map.zoomToExtent(bounds, !this.map.isValidZoomLevel(
+                this.map.getZoomForExtent(bounds)));
         },
 
     });
@@ -736,10 +633,10 @@ define([
     ViewBase.osm = OpenLayers.Class(Baselayer,
     {
         providerName: 'OpenStreetMap',
-        initMapLayer: function(change)
+        initMapLayer: function(change, tileRoot)
         {
             var self = this;
-            this.mapLayer = this.mapLayer = new OpenLayers.Layer.OSM(null, null, {
+            this.mapLayer = this.mapLayer = new OpenLayers.Layer.OSM(null, tileRoot, {
                 baselayer: true,
                 numZoomLevels: MAP_NUM_ZOOM_LEVELS,
                 eventListeners: {
@@ -786,6 +683,21 @@ define([
             'light': 'toner-lite',
             'watercolor': 'watercolor'
         }
+    });
+
+    ViewBase.blank = OpenLayers.Class(Baselayer,
+    {
+        providerName: 'Blank',
+        initMapLayer: function(change)
+        {
+            ViewBase.osm.prototype.initMapLayer.call(this, false, "/assets/blank.gif");
+        },
+
+        mapStyles: {
+            'dark': 'Dark',
+            'light': 'Light'
+        }
+
     });
 
     return MapOLView;

@@ -7,6 +7,8 @@ define([
     'text!templates/homepage.html',
     'lib/color-gradient/color-gradient'
 ], function($, _, Backbone, config, utils, templateHtml, ColorGradient) {
+    "use strict";
+
     var MapViewBase = Backbone.View.extend({
 
         initialize: function(options) 
@@ -14,29 +16,9 @@ define([
             this.layers = [];
             this.vent = options.vent;
 
-            _.bindAll(this, "geocodeAndSetMapLocation");
-            options.vent.bind("geocodeAndSetMapLocation", this.geocodeAndSetMapLocation);
-            
             if (options.visibleMapArea) {
                 this.initialVisibleMapArea = options.visibleMapArea;
             }
-        },
-
-        geocodeAndSetMapLocation: function(addr)
-        {               
-            // TODO move to app
-            var self = this;
-            
-            geocoder = new google.maps.Geocoder();
-            geocoder.geocode( {'address': addr}, function (results, status) {
-                console.log(results);
-                if (status == google.maps.GeocoderStatus.OK) {
-                    results.type = 'google';
-                    self.setVisibleMapArea(results);
-                } else {    
-                    alert ("Cannot find " + addr + "! Status: " + status);
-                }
-            });
         },
 
         renderMap: function(viewBase, viewStyle) 
@@ -86,6 +68,7 @@ define([
             this.layers.push(model);
             this.listenTo(model, 'toggle:enabled', this.layerToggled);
             this.listenTo(model, 'change', this.layerChanged);
+            this.listenTo(model, 'toggle:colorScheme', this.layerChanged);
             var c = model.featureCollection;
             this.listenTo(c, {
                 reset: this.featureReset
@@ -112,7 +95,6 @@ define([
 
         destroyLayer: function(model)
         {
-            console.log(this, this.layers);
             this.layers.splice(this.layers.indexOf(model), 1);
             this.stopListening(model);
             this.stopListening(model.featureCollection);

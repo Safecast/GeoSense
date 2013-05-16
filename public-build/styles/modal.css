@@ -1,12 +1,23 @@
 .modal 
 {
+	max-height: 580px !important;
+	width: 560px;
+}
+.modal.large {
+	width: 720px !important;
 }
 .modal input, .modal textarea
 {
 	width: 480px;
 }
-.modal .urls input {
+.setup-view .urls input {
 	color: #aaa;
+}
+.setup-view #setup-settings button {
+	width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
 }
 .modal .urls input, .modal .urls textarea {
 	cursor: text;

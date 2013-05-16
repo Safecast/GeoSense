@@ -7,6 +7,8 @@ define([
 	'text!templates/layers-panel.html',
 	'views/panel-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
+    "use strict";
+
 	var LayersPanelView = PanelViewBase.extend({
 
 		className: 'panel layer-panel',
@@ -54,8 +56,7 @@ define([
 
 		layerMoved: function(event, ui)
 		{
-			var layer = app.getMapLayer($(ui.item).attr('data-id'))
-				previousPosition = layer.get('position');
+			var layer = app.getMapLayer($(ui.item).attr('data-id'));
 			layer.set({position: this.getSortableItemIndex(ui.item)}, {
 				silent: false
 			});

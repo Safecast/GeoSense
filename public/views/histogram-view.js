@@ -7,6 +7,7 @@ define([
 	'text!templates/histogram.html',
 	'd3',
 ], function($, _, Backbone, config, utils, templateHtml, d3) {
+    "use strict";
 
 	var HistogramView = Backbone.View.extend({
 
@@ -22,7 +23,7 @@ define([
 		render: function()
 		{	
 			var self = this;
-			$(this.el).html(this.template());
+			$(this.el).hide().html(this.template());
 			var graphEl = self.$el;
 
 			if (!this.histogramData) {
@@ -34,6 +35,7 @@ define([
 						self.render();
 					},
 					error: function() {
+						self.histogramData = [];
 						console.error('failed to fetch histogram');
 					}
 				});
@@ -42,11 +44,13 @@ define([
 
 			var data = this.histogramData,
 				len = data.length,
-				extremes = self.model.getExtremes(),
-				maxVal = extremes.maxVal,
-				minVal = extremes.minVal,
+				extremes = this.model.getMappedExtremes(),
+				minVal = extremes.numeric ? extremes.numeric.min : NaN,
+				maxVal = extremes.numeric ? extremes.numeric.max : NaN,
 				graphH = graphEl.innerHeight(),
 				graphW = graphEl.innerWidth();
+
+			if (!len) return this;
 
 			var maxY = data[0].y,
 				minY = data[0].y,
@@ -61,7 +65,7 @@ define([
 			var yRatio = minY0 / maxY;
 
 			var maxYRatio;
-			if (self.model.attributes.layerOptions.cropDistribution) {
+			if (self.model.getLayerOptions().cropDistribution) {
 				maxYRatio = 1 / graphH * CROP_DISTRIBUTION_RATIO;
 			}
 
@@ -150,6 +154,7 @@ define([
 				.text(function(d) { return d } );
 			*/
 
+			this.$el.show('fast');
 			return this;
 		}
 	});

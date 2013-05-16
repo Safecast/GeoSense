@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/data-library.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var DataLibraryView = Backbone.View.extend({
 
 	    tagName: 'div',
@@ -30,7 +32,7 @@ define([
 				$(self.el).css('display','block');	
 				$(self.el).animate({
 				    left: 0,
-				  }, 400, 'easeOutQuad', function() {
+				  }, 'fast', 'easeOutCubic', function() {
 				  });
 			});	
 			
@@ -49,7 +51,7 @@ define([
 			var self = this;	
 			$.ajax({
 				type: 'GET',
-				url: '/api/pointcollections',
+				url: '/api/featurecollections',
 				success: function(data) {
 
 					$.each(data, function(key, featureCollection) { 
@@ -60,7 +62,6 @@ define([
 						revert: true,
 						stack: '#dragLabel',
 						start: function(event, ui) { 
-							var test = 'blah';
 							$('#dropZone').addClass('visible');
 							$(this).css("opacity",".9");
 						},
@@ -83,9 +84,9 @@ define([
 		
 		drawDataSource: function(data)
 		{
-			dataDiv = '<div class="data-item" data-id="'+data._id+'">'
+			var dataDiv = '<div class="data-item" data-id="'+data._id+'">'
 				+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
-				+(data.fullCount ? '<p class="data-count micro">'+formatLargeNumber(data.fullCount)+'</p>' : '')
+				+(data.count ? '<p class="data-count micro">'+formatLargeNumber(data.count)+'</p>' : '')
 				+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')
 				+(data.source ? '<h5 class="data-source micro">Source: '+data.source+'</p>' : '')
 				+'</div>'
@@ -106,7 +107,7 @@ define([
 			var self = this;
 			$(self.el).animate({
 			    left: -350,
-			  }, 400, 'easeOutQuad', function() {
+			  }, 'fast', 'easeInCubic', function() {
 					$('#dropZone').remove();
 					app.dataLibraryVisible = false;
 					$(window).unbind();

@@ -29,13 +29,13 @@
 	background-image:url('../assets/feature-cells-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.cells.active {
 	background-image:url('../assets/feature-cells-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.points {
 	background-image:url('../assets/feature-points.png');
@@ -46,13 +46,13 @@
 	background-image:url('../assets/feature-points-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.points.active {
 	background-image:url('../assets/feature-points-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.bubbles {
 	background-image:url('../assets/feature-bubbles.png');
@@ -63,13 +63,13 @@
 	background-image:url('../assets/feature-bubbles-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 .sidebar-view .data-container .accordion-inner .data-toggle .btn-group.features .btn.feature-type.bubbles.active {
 	background-image:url('../assets/feature-bubbles-active.png');
 	background-repeat:no-repeat;
 	background-position: 0px 0px;
-	border:1px solid #3fa8e1;
+	border:1px solid #44bbee;
 }
 .btn-group.colors {
 	margin-top:18px;
@@ -82,18 +82,6 @@
 .feature-settings.B label {
 	font-style:italic;
 	color:#777;
-}
-#gradientEditor .gradient-editor-color-editor
-{
-	margin-top:15px;
-	margin-left:7px;
-}
-#gradientEditor .gradient-editor-instructions
-{
-	display:none;
-}
-#gradientEditor .colorpicker_rgba_g {
-	display:none;
 }
 .accordion-inner .data-controls .color-gradient {
 	display:none;

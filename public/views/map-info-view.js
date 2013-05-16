@@ -7,6 +7,8 @@ define([
 	'text!templates/map-info-modal.html',
 	'views/modal-view'
 ], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+    "use strict";
+
 	//var MapInfoView = PanelViewBase.extend({
 	var MapInfoView = ModalView.extend({
 
@@ -23,7 +25,6 @@ define([
 
 		populateFromModel: function()
 		{
-			console.log('----------');
 			var mapInfo = this.model.attributes;
 			this.setTitle(mapInfo.title);
 			var fields = [/*'title',*/ 'description', 'author', 'linkURL', 'twitter'];

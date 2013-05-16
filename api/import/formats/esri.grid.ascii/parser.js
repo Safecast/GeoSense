@@ -7,7 +7,7 @@ var EventEmitter = require('events').EventEmitter,
     fs = require('fs');
 
 // Utils function
-var merge = function(obj1,obj2){
+var merge = function(obj1, obj2){
     var r = obj1||{};
     for(var key in obj2){
         r[key] = obj2[key];
@@ -407,11 +407,11 @@ module.exports = function(){
                         //console.log(state.count);
 
                         data = {
-                            loc: [
+                            'coordinates': [
                                 state.headerValues.xllcorner + state.headerValues.cellsize * state.colIndex + state.headerValues.cellsize / 2,
                                 state.headerValues.yllcorner + state.headerValues.cellsize * (state.headerValues.nrows - 1 - state.rowIndex) + state.headerValues.cellsize / 2
-                                ],
-                            val: line[i]
+                            ],
+                            'val': line[i]
                         };
 
                         //console.log('emit', state.colIndex, state.rowIndex, data);

@@ -3,7 +3,8 @@ define([
 	'underscore',
 	'backbone',
 	'models/geo-feature',
-], function($, _, Backbone, GeoFeature) {
+	'parsers/index'
+], function($, _, Backbone, GeoFeature, Parser) {
 	var GeoFeatureCollection = Backbone.Collection.extend({
 
 		model: GeoFeature,
@@ -16,37 +17,78 @@ define([
 		initialize: function(models, options) 
 		{
 			this.mapLayer = options.mapLayer;
-			this.mapLayer = options.mapLayer;
+			this.queryParams = options.queryParams ? $.extend({}, options.queryParams) : {};
 			this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
+			this.urlFormat = options.urlFormat;
+			if (!options.parser) {
+				this.parser = new Parser.GeoJSON(this);
+			} else {
+				this.parser = new Parser[options.parser](this);
+			}
 			this.initiallyFetched = this.visibleMapAreaFetched = false;
 			this.on('error', function() {
 				this.initiallyFetched = false;
 			})
 		},
 
-		url: function() 
+		canFetch: function() 
 		{
-			/* Example urlParams for time-based:
+			return this.mapLayer.attributes.featureCollection 
+				|| (this.urlFormat != undefined && this.urlFormat != '');
+		},
 
-				urlParams.t = 'w';
-				urlParams.from = fromDate.format('%Y-%m-%d');
-				urlParams.to = toDate.format('%Y-%m-%d');
+		fetch: function(options) {
+			var options = options || {};
+			if (this.urlFormat != undefined) {
+				options = _.extend(options, {dataType: 'jsonp'});
+			}
+			return GeoFeatureCollection.__super__.fetch.call(this, options);
+		},
+
+		url: function(queryParams) 
+		{
+			if (this.urlFormat != undefined) {
+				var url = this.urlFormat.format(this.urlParams);
+				return url;
+			}
+
+			/* Example queryParams for time-based:
+
+				queryParams.t = 'w';
+				queryParams.from = fromDate.format('%Y-%m-%d');
+				queryParams.to = toDate.format('%Y-%m-%d');
 
 			for a bounding box with zoom:
 
-				urlParams.b = [W, S, N, E]
-				urlParams.z = 1..20
+				queryParams.b = [W, S, N, E]
+				queryParams.z = 1..20
 
 			*/
+
+			if (!queryParams) {
+				var queryParams = {},
+					bounds = this.urlParams.bounds;
+				if (bounds) {
+					queryParams.b = [bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]];
+				}
+				queryParams.z = this.urlParams.zoom;
+			};
+
 			return this.mapLayer.url() + '/features' 
-				+ '?' + genQueryString(this.urlParams);
+				+ '?' + genQueryString(_.extend(this.queryParams, queryParams));
 		},
 
 		setVisibleMapArea: function(visibleMapArea) 
 		{
-			console.log('GeoFeatureCollection.setVisibleMapArea '+this.mapLayer.id);	
-			this.urlParams.b = [visibleMapArea.bounds[0][0], visibleMapArea.bounds[0][1], visibleMapArea.bounds[1][0], visibleMapArea.bounds[1][1]];
-			this.urlParams.z = visibleMapArea.zoom;
+			var bounds = visibleMapArea.bounds;
+			this.urlParams = {
+				bounds: bounds,
+				zoom: visibleMapArea.zoom,
+				centerX: visibleMapArea.center[0],
+				centerY: visibleMapArea.center[1],
+				radius: visibleMapArea.radius,
+				query: ''
+			};
 			this.visibleMapAreaFetched = false;
 		},
 
@@ -57,16 +99,10 @@ define([
 
 	    parse: function(resp, xhr) 
 	    {
-	    	if (resp['items']) {
-	    		this.fullCount = resp.fullCount;
-	    		this.maxReducedCount = resp.maxReducedCount;
-	    		this.resultCount = resp.resultCount;
-	    		this.originalCount = resp.originalCount;
-	    		this.gridSize = resp.gridSize;
-	    		resp = resp['items'];
-	    	}
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
-			return GeoFeatureCollection.__super__.parse.call(this, resp, xhr);
+			var parsed = this.parser.parse(resp, xhr);
+	    	this.counts = parsed.counts || {};
+	    	return parsed.features;
 	    },
 				
 	});
