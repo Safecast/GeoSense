@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/header.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var HeaderView = Backbone.View.extend({
 
 	    tagName: 'div',
@@ -40,6 +42,10 @@ define([
 			$(this.el).html(this.template());
 			this.populateFromModel();
 			
+			this.$('.search-query').click(function() {
+				$(this).select();
+			});
+
 			if (!app.isMapAdmin()) {
 				this.$('.admin-tool').remove();
 			} 
@@ -51,10 +57,9 @@ define([
 		{		
 			if (event.keyCode == 13) {
 				if (this.$("#search").is(":focus")) {
-					this.$("#search").blur();
-					var addr = $('#search').val();
-					if (addr != '') {
-						this.vent.trigger("geocodeAndSetMapLocation", addr);
+					var address = $('#search').val();
+					if (address != '') {
+						app.zoomToAddress(address);
 					}
 				}
 			}
@@ -63,12 +68,16 @@ define([
 	    populateFromModel: function()
 	    {
 			var mapInfo = this.model.attributes;
-
-			this.$('.brand').attr('href', app.genPublicURL());
-			this.$('.brand').click(function() {
+			var title = $('<a>');
+			title.text(mapInfo.title);
+			title.attr('href', app.genPublicURL());
+			title.click(function() {
+				console.log(app.getDefaultVisibleMapArea());
 				app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
 				return false;
 			});
+			this.$('.brand h1').html(title);
+
 			if (mapInfo.linkURL) {
 				this.$('#authorLink').show();
 				this.$('#authorLink a').attr('href', mapInfo.linkURL);
@@ -76,7 +85,6 @@ define([
 			} else {
 				this.$('#authorLink').hide();
 			}
-			this.$('.brand').html('<h1>GeoSense</h1><h3>' + mapInfo.title + '</h3>');
 		},
 
 		mapViewToggleClicked: function(evt)

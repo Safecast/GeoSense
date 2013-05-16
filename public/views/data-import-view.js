@@ -7,10 +7,12 @@ define([
 	'text!templates/data-import.html',
 	'views/modal-view'
 ], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+    "use strict";
+
 	var DataImportView = ModalView.extend({
 
 	    tagName: 'div',
-		className: 'data-import-view modal fade',
+		className: 'data-import-view modal large fade',
 		
 	    events: {
 	    	'change .step.source input': 'sourceInputChanged',
@@ -18,6 +20,7 @@ define([
 			'click .source-submit': 'sourceSubmitButtonClicked',
 			'click .back': 'backButtonClicked',
 			'click .from-field .remove' : 'fromFieldRemoveClicked',
+			'click .btn.filetype': 'filetypeButtonClicked'
 	    },
 
 	    initialize: function(options) {
@@ -30,35 +33,61 @@ define([
 			this.inspectedSource;
 			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
 
-			this.toFields = {
-				'loc': 'Point X,Y',
-				'val': 'Point Value',
-				'datetime':'Date',
-				'label': 'Point Label',
-				'attributes': 'Attributes'
+			this.defaultDescripts = [
+				{to: 'geometry.coordinates', type: 'LatLng', label: 'coordinates', options: {}, allowedTypes: ['LatLng', 'LngLat']},
+				{toTemplate: 'properties.$field', type: 'Number', label: '', options: {}},
+				{toTemplate: 'properties.$field', type: 'String', label: '', options: {}},
+				{toTemplate: 'properties.$field', type: 'Date', label: '', options: {}},
+			];
+
+			this.emptyDescript = {toTemplate: 'properties.$field', type: 'String', label: '', options: {}};
+
+			this.fieldTypes = {
+				"Number": "Number",
+				"String": "Text",
+				"Date": "Date",
+				"Array": "List",
+				"Object": "Object",
+				"LatLng": "Lat,Lng",
+				"LngLat": "Lng,Lat",
 			};
 	    },
 
 	    canImport: function()
 	    {
 	    	return !this.isLoading 
-	    		&& this.$('input[name=url]').val().length;
+	    		&& this.$('input[name=url]').val().length
+	    		&& this.$('.filetype.active').length;
+	    },
+
+	    setButtonState: function()
+	    {
+	    	this.$('.btn.source-submit').attr('disabled', !this.canImport());
+			this.$('.import-run').attr('disabled', !this.canImport());
 	    },
 
 	    sourceSubmitButtonClicked: function() 
 	    {
 	    	var self = this;
 	    	if (!this.canImport()) return false;
-	    	console.log('sourceSubmit');
 			this.runImport({inspect: true, max: this.maxPreview}, {
 				success: function(responseData) {
 					if (responseData.items && responseData.items.length) {
-						self.initSourceForMapping(responseData);
+						self.initDataTransformForSource(responseData);
 						self.setStep('mapping');
 					}
 				}
 			});
 			return false;
+	    },
+
+	    filetypeButtonClicked: function(event) 
+	    {
+	    	this.$('.btn.filetype').each(function() {
+	    		$(this).toggleClass('active', event.currentTarget == this);
+	    	});
+	    	this.setButtonState();
+	    	return false;
 	    },
 
 	    backButtonClicked: function() 
@@ -68,15 +97,23 @@ define([
 
 	    sourceInputChanged: function() 
 	    {
-	    	var prev = this.$('input[name=url]').data('prevVal'),
+	    	var self = this,
+	    		prev = this.$('input[name=url]').data('prevVal'),
 	    		cur = this.$('input[name=url]').val();
+	    	
 	    	this.$('input[name=url]').data('prevVal', cur);
 	    	if (1/*!prev || !prev.length*/) { // TODO detect a 100% change
 	    		cur = cur.replace(/^https:\/\/www.dropbox.com\//, 
 	    			'https://dl.dropbox.com/');
 	    		this.$('input[name=url]').val(cur);
+	    		var extMatch = cur.match(/\.([^\.]+)$/),
+	    			ext = extMatch ? extMatch[1] : undefined;
+	    		self.$('.btn.filetype').each(function() {
+	    			$(this).toggleClass('active', ext != undefined && $(this).hasClass(ext));
+	    		});
 	    	}
-	    	this.$('.btn.source-submit').attr('disabled', !this.canImport());
+
+	    	this.setButtonState();
 	    },
 
 		importButtonClicked: function() 
@@ -93,7 +130,7 @@ define([
 			return false;
 		},
 
-		initSourceForMapping: function(data) 
+		initDataTransformForSource: function(data) 
 		{
 			var self = this;
 			this.inspectedSource = data;
@@ -101,6 +138,8 @@ define([
 			_.each(this.inspectedSource.items[0], function(value, key) {
 				self.fromFields[key] = key;
 			});
+			console.log('initDataTransformForSource');
+			this.descripts = _.deepClone(this.defaultDescripts);
 
 			this.$('.from-data thead').empty();
 			this.$('.from-data tbody').empty();
@@ -127,34 +166,10 @@ define([
 				self.$('.from-data tbody').append('<tr>' + tds + '</tr>');
 			});
 
-			var initClickHandler = function(f) {
-				$('.show-field-settings', f).hide();
-				// solve with popover
-				/*$('.show-field-settings', f).click(function() {
-					$('.field-settings', f).toggle();
-					return false;
-				});*/
-			};
-
 			this.updateHandleStates();
 
-			for (var k in this.toFields) {
-				var f = this.toFieldTemplate.clone();
-				f.removeClass('element-template');
-				$('.field-title', f).text(this.toFields[k]);
-				$('.to-field', f).attr('data-to', k);
-				$('.field-settings', f).hide();
-				initClickHandler(f);
-				this.$('.to-data thead').append(f).show();
-			}
-			this.$('.to-field').sortable({
-				connectWith: '.to-field',
-				stop: function(event, ui) {
-					// prevent double loading since dropping from draggable into the sortable
-					// will also fire this event, but draggable.stop fires later than this one.
-					if (self.preventSortableEvents) return;
-					self.loadImportPreview();
-				}
+			_.each(this.descripts, function(descript) {
+				self.initDescript(descript);
 			});
 
 			this.$('.from-field').draggable({
@@ -168,14 +183,144 @@ define([
 					self.$('.to-field').addClass('highlight');
 				},
 				stop: function(event, ui) {
+					console.log('* draggable stop');
 					self.preventSortableEvents = false;
+					self.removePopover();
+
 					self.$('.to-field').removeClass('highlight');
 					self.$('.to-data .from-field').removeClass('half-opacity');
 					self.updateHandleStates();
+
+					self.updateDescripts();
 					self.loadImportPreview();
 				}
 			});
+		},
 
+		initDescript: function(descript)
+		{
+			var self = this,
+				container = self.toFieldTemplate.clone();
+			container.removeClass('element-template');
+			descript.dismiss = function()
+			{
+				$('.show-field-settings', container)
+					//.attr('disabled', !descript.to)
+					.popover('hide');
+			};
+			descript.updateContainer = function() {
+				$('.field-label', container).text(descript.label);
+				$('.field-type', container).text(self.fieldTypes[descript.type]);
+			};
+			descript.container = container;
+			self.initDescriptSettings(descript);
+			self.$('.to-data thead').append(container).show();
+			descript.updateContainer();
+			$('.to-field', container).sortable({
+				connectWith: '.to-field',
+				start: function(event, ui) {
+				},
+				stop: function(event, ui) {
+					if (self.preventSortableEvents) return;
+					self.removePopover();
+					console.log('* sortable stop');
+					// prevent double loading since dropping from draggable into the sortable
+					// will also fire this event, but draggable.stop fires later than this one.
+					self.updateDescripts();
+					self.loadImportPreview();
+				}
+			});
+		},
+
+		initDescriptSettings: function(descript) 
+		{
+			var self = this,
+				el = $('.field-settings', descript.container).remove();
+
+			$('select.field-type', el).each(function() {
+				var select = $(this),
+					allowedTypes = descript.allowedTypes || _.keys(self.fieldTypes);
+				_.each(allowedTypes, function(type) {
+					select.append('<option value="' + type + '">' + self.fieldTypes[type] + '</option>');
+				});
+			});
+
+			$('.show-field-settings', descript.container).popover({
+				title: 'Transform',
+				content: el,
+				html: true,
+				container: 'body',
+				animation: false
+			}).on('shown', function(evt) {
+				$(this).addClass('active');
+				var trigger = this;
+
+				$('.field-setting', el).each(function() {
+					if ($(this).attr('type') == 'checkbox') {
+						$(this).attr('checked', getAttr(descript, $(this).attr('name')));
+					} else {
+						$(this).val(getAttr(descript, $(this).attr('name')));
+					}
+				});
+
+				$('.field-setting', el).change(function() {
+					setAttr(descript, $(this).attr('name'), 
+						$(this).attr('type') == 'checkbox' ? $(this).is(':checked') : $(this).val());
+					self.updateDescripts();
+					self.loadImportPreview();
+				});
+
+				self.$('.show-field-settings').each(function() {
+					if (this != trigger) {
+						$(this).popover('hide');
+					}
+				});
+
+			}).on('hidden', function(evt) {
+				$(this).removeClass('active');
+				return false;
+			}).click(function(evt) {
+				return false;
+			});
+		},
+
+		updateDescripts: function()
+		{
+			var validDescripts = [];
+			_.each(this.descripts, function(descript) {
+				descript.from = [];
+				var fromFields = $('.from-field', descript.container);
+				descript.from = [];
+				for (var j = 0; j < fromFields.length; j++) {
+					descript.from.push($(fromFields[j]).attr('data-from'));
+				}
+				if (!descript.from.length) {
+				 	if (descript.toTemplate) {
+						descript.to = null;
+						descript.label = '';					
+					}
+				} else {
+					if (!descript.to && descript.toTemplate) {
+						descript.to = descript.toTemplate.replace('$field', descript.from[0].replace(/\./g,' '));
+						descript.label = descript.to;
+					}
+					validDescripts.push({
+						to: _.clone(descript.to),
+						from: _.clone(descript.from),
+						options: _.clone(descript.options),
+						type: _.clone(descript.type)
+					});
+				}
+				descript.updateContainer();
+			});
+
+			if (validDescripts.length >= this.descripts.length - 1) {
+				var newDescript = _.clone(this.emptyDescript);
+				this.descripts.push(newDescript);
+				this.initDescript(newDescript)
+			}
+
+			return validDescripts;
 		},
 
 	    render: function() 
@@ -186,12 +331,11 @@ define([
 			var self = this;
 
 			this.spinner = this.$('.spinner').html(new Spinner({radius:6,length:0,width:6,color:'#333',lines:7,speed:1.5}).spin().el).hide();
-
 			this.setStep('source');					
 
 			if (DEV) {
 				this.$('[name=url]').val('https://dl.dropbox.com/s/cb4blktkkelwg1n/nuclear_reactors.csv');
-				self.sourceSubmitButtonClicked();
+				//self.sourceSubmitButtonClicked();
 			}
 
 			this.sourceInputChanged();
@@ -205,6 +349,19 @@ define([
 			});
 
 	        return this;
+	    },
+
+	    removePopover: function() 
+	    {
+			_.each(this.descripts, function(descript) {
+				descript.dismiss();
+			});
+	    },
+
+	    detach: function()
+	    {
+	    	this.removePopover();
+			return DataImportView.__super__.detach.call(this);
 	    },
 
 	    setStep: function(step)
@@ -234,86 +391,55 @@ define([
 	    fromFieldRemoveClicked: function(event) {
 			$(event.currentTarget).closest('.from-field').remove();
 			this.updateHandleStates();
-			this.previousFieldDefs = null;
+			this.previousValidDescripts = null;
+			this.updateDescripts();
 			this.loadImportPreview();
 			return false;
 	    },
 
-	    setAlert: function(html) {
+	    setAlert: function(html, title) {
 	    	if (!html) {
 				this.$('.modal-body .alert').hide();
 	    	} else {
-				this.$('.modal-body .alert').show();
-				this.$('.modal-body .alert').html(html);
+				this.$('.modal-body .alert').show('fast');
+				this.$('.modal-body .errors').html(html);
+				this.$('.modal-body .error-title').html(title);
 	    	}
-	    },
-
-	    getFieldDefs: function() 
-	    {
-			var defs = {},
-				valid = false;
-			for (var k in this.toFields) {
-				//console.log(this.$('.to-field[data-to=' + k +'] .from-field'));
-				var fromFields = this.$('.to-field[data-to=' + k +'] .from-field'),
-					def = {
-						fromFields: []
-					};
-				for (var i = 0; i < fromFields.length; i++) {
-					def.fromFields.push($(fromFields[i]).attr('data-from'));
-				}
-				if (def.fromFields.length) {
-					defs[k] = def;
-					valid = true;
-				}
-			}
-
-			var errors = [];
-			
-			// move validation to server
-			/*if (!defs.loc.fromFields.length) {
-				errors.push('Point X,Y is required');
-			}*/
-
-			return {fieldDefs: defs, errors: errors, valid: valid};
 	    },
 	
 		runImport: function(params, options)
 		{
 			var self = this,
-				defs, fieldDefs,
-				options = options || {};
+				options = options || {},
+				validDescripts;
 
 			if (!params.inspect) {
-				defs = this.getFieldDefs();
-				fieldDefs = defs.fieldDefs || [];
-
-				if (defs.errors.length) {
-					if (!options.silent) {
-						this.setAlert('<ul><li>' + defs.errors.join('</li></li>') + '</li></ul>');
-					}
-					if (!params.preview) {
-						return false;
-					}
-				}
-
-				if (!defs.valid && params.preview) {
+				validDescripts = this.updateDescripts();				
+				if (!validDescripts.length && params.preview) {
 					self.updateImportPreview([]);
 					return;
 				}
 			}
 
-			this.previousFieldDefs = fieldDefs;
+			if (options.ifChanged && this.previousValidDescripts && _.isEqual(this.previousValidDescripts, validDescripts)) {
+				return;
+			}
+			this.previousValidDescripts = validDescripts;
 
 			var params = _.extend({
 				url: this.$('input[name=url]').val(),
-				fields: fieldDefs,
+				format: this.$('.filetype.active').attr('data-value'),
+				transform: validDescripts,
 			}, params);
+
 			console.log('Requesting import', params);
 			this.setAlert();
 			this.setLoading(true);
+
 			if (this.request) {
 //				this.request.abort();
 			}
+
 			this.request = $.ajax({
 				type: 'POST',
 				url: '/api/import/',
@@ -336,10 +462,10 @@ define([
 					var lis = '';
 					if (errors) {
 						for (var k in errors) {
-							lis += '<li><i class="icon icon-ban-circle"></i> ' + errors[k].message + '</li>';
+							lis += '<li>' + errors[k].message + '</li>';
 						}
 						if (!options.silent) {
-							self.setAlert('<ul>' + lis + '</ul>');
+							self.setAlert('<ul>' + lis + '</ul>', 'Import failed with the following errors:');
 						}
 					}
 					if (params.preview) {
@@ -355,8 +481,7 @@ define([
 		setLoading: function(isLoading)
 		{
 			this.isLoading = isLoading;
-			this.$('.import-run').attr('disabled', isLoading);
-			this.$('.source-submit').attr('disabled', isLoading);
+			this.setButtonState();			
 			if (isLoading) {
 				this.spinner.show();
 			} else {
@@ -366,8 +491,7 @@ define([
 
 		loadImportPreview: function()
 		{
-			if (this.previousFieldDefs && _.isEqual(this.previousFieldDefs, this.getFieldDefs().fieldDefs)) return;
-			this.runImport({preview: true, max: this.maxPreview}, {silent: true});
+			this.runImport({preview: true, max: this.maxPreview}, {silent: true, ifChanged: true});
 		},
 
 		updateImportPreview: function(items)
@@ -376,39 +500,51 @@ define([
 			var rows = items.reduce(function(rows, current) {
 				var row = ''
 				if (current) {
-					for (var k in self.toFields) {
-						var val = undefined, tdclass = undefined;
-						if (typeof current[k] == 'object' && current[k].error) {
-							tdclass = 'conversion-error';
-							switch (current[k].name){
-								case 'ValueSkippedError':
-									//val = 'skipped';
-									val = current[k].message;
-									break;
-								default:
-									val = current[k].message;
-							}
-						} else {
-							switch (k) {
-								default:
-									val = current[k];
-									break;
-								case 'datetime':
-									if (current[k]) {
-										val = new Date(current[k]);
+					_.each(self.descripts, function(descript) {
+						var out, tdclass, val, isError;
+						if (descript.to) {
+							val = getAttr(current, descript.to);
+							isError = typeof val == 'object' && val.error;
+							if (isError) {
+								tdclass = 'conversion-error';
+								switch (val.name){
+									case 'ValueSkippedWarning':
+										out = val.message;
+										break;
+									default:
+										out = val.message;
+								}
+							} else {
+								switch (descript.type) {
+									default:
+										out = val;
+										break;
+									case 'Date':
 										if (val) {
-											val = val.format(locale.formats.DATE_TIME);
+											out = new Date(val);
+											if (out) {
+												out = out.format(locale.formats.DATE_TIME);
+											}
 										}
-									}
-							}
-							if (val == undefined || 
-								((typeof val == 'string' || Array.isArray(val)) && !val.length)) {
-									tdclass = 'conversion-blank';
-									val = 'blank';
+								}
 							}
 						}
-						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + val + '</td>';
-					}
+
+						var isTransformed = descript.to && descript.to.length;
+						if (isTransformed && (out == undefined ||
+							((typeof out == 'string' || Array.isArray(out)) && !out.length))) {
+								tdclass = 'conversion-blank';
+								out = 'blank';
+						} else if (!isError) {
+							if (isTransformed) {
+								out = '<i class="icon icon-ok-circle half-opacity"></i> ' + out;
+							} else {
+								out = '&nbsp;';
+							}
+						}
+
+						row += '<td' + (tdclass ? ' class="' + tdclass + '"' : '') + '>' + out + '</td>';
+					});
 				}
 				rows.push('<tr>' + row + '</tr>');
 				return rows;
@@ -417,6 +553,7 @@ define([
 		}
 		
 	});
+
 
 	return DataImportView;
 });

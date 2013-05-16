@@ -32,6 +32,18 @@ lib/bootstrap/css/bootstrap.min.css
 ----------------
 lib/bootstrap/css/bootstrap.min.css
 
+lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css
+----------------
+lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css
+
+lib/bootstrap-glyphicons/css/bootstrap.icon-large.css
+----------------
+lib/bootstrap-glyphicons/css/bootstrap.icon-large.css
+
+lib/bootstrap-glyphicons/css/bootstrap.icon-large.min.css
+----------------
+lib/bootstrap-glyphicons/css/bootstrap.icon-large.min.css
+
 lib/colorpicker/css/colorpicker.css
 ----------------
 lib/colorpicker/css/colorpicker.css
@@ -39,10 +51,6 @@ lib/colorpicker/css/colorpicker.css
 lib/colorpicker/css/layout.css
 ----------------
 lib/colorpicker/css/layout.css
-
-lib/gradient-editor/gradient-editor.css
-----------------
-lib/gradient-editor/gradient-editor.css
 
 lib/jquery-ui/css/no-theme/jquery-ui-1.10.0.custom.css
 ----------------
@@ -385,7 +393,6 @@ styles/homepage.css
 styles/header.css
 styles/map.css
 styles/map-gl.css
-styles/modal.css
 styles/data-import.css
 styles/sidebar.css
 styles/chat.css
@@ -396,8 +403,9 @@ styles/data-detail.css
 styles/map-layer-editor.css
 styles/jquery.miniColors.css
 styles/bootstrap.css
-styles/../lib/gradient-editor/gradient-editor.css
+styles/../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css
 styles/../lib/colorpicker/css/colorpicker.css
+styles/modal.css
 styles/main.css
 
 styles/map-gl.css
@@ -476,10 +484,6 @@ styles/sidebar.css
 ----------------
 styles/sidebar.css
 
-test/qunit/qunit.css
-----------------
-test/qunit/qunit.css
-
 main.js
 ----------------
 lib/underscore/underscore-min.js
@@ -525,15 +529,19 @@ text!templates/data-import.html
 views/data-import-view.js
 text!templates/share.html
 views/share-view.js
-models/geo-feature.js
-collections/geo-feature-collection.js
 lib/backbone-deep-model/lib/underscore.mixin.deepExtend.js
 lib/backbone-deep-model/src/deep-model.js
+models/geo-feature.js
+parsers/geojson.js
+parsers/twitter.js
+parsers/index.js
+collections/geo-feature-collection.js
 models/map_layer.js
 models/map.js
 router.js
 app.js
 lib/jquery-ui/js/jquery-ui-1.10.0.custom.min.js
+lib/backbone_super/backbone_super.js
 lib/jquery/jquery.color.js
 lib/jquery/jquery.glowing.js
 lib/jquery/jquery.miniColors.min.js

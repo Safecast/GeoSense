@@ -7,6 +7,8 @@ define([
 	'text!templates/data-detail.html',
 	'views/panel-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
+    "use strict";
+
 	var DataDetailView = PanelViewBase.extend({
 
 		className: 'panel data-detail',
@@ -18,15 +20,31 @@ define([
 	    {
 	    	DataDetailView.__super__.initialize.call(this, options);
 		    this.template = _.template(templateHtml);	
+	    	
+	    	this.defaultLayout = [
+	    		{fields: ['%(label)s', '%(datetime)s'], label: false, class: "box title"},
+	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
+	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
+	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
+
+	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), class: 'muted'},
+	    		{fields: ['%(numeric)s.max'], label: 'peak', class: 'muted'},
+	    		{fields: ['%(numeric)s.min'], label: 'minimum', class: 'muted'},
+	    		{fields: ['%(numeric)s.avg'], label: 'average', class: 'muted'}
+	    	];
 	    },
 
 	    setModel: function(model)
 	    {
 	    	if (this.model) {
 	    		this.stopListening(this.model);
+	    		if (this.model.collection && this.model.collection.mapLayer)
+	    			this.stopListening(this.model.collection.mapLayer);
 	    	}
 	    	this.model = model;
 	    	this.populateFromModel();
+	    	this.listenTo(model.collection.mapLayer, 
+	    		'change', this.populateFromModel);
 	    	this.listenTo(model.collection.mapLayer, 
 	    		'toggle:valFormatter', this.populateFromModel);
 	    },
@@ -34,134 +52,140 @@ define([
 	    populateFromModel: function()    
 		{
 			var model = this.model,
-				obj = this.compileDetailDataForModel(model) || {data: {}, metadata: {}},
+				rows = this.compileDetailDataForModel(model),
 				body = this.$('.panel-body');
 
-			var getRow = function(o) {
-				if (o.label && o.value != null) {
-					return '<tr><th class="value-label">' + o.label + '</th><td class="value">' + o.value + '</td></tr>';
-				} else if (o.label) {
-					return '<tr><td colspan="2" class="value-label single"><h5 class="box">' + o.label + '</h5></td></tr>';
+			var makeRow = function(o) {
+				var span = o.class ? '<span class="' + o.class + '">' : '<span>';
+				if (o.label != undefined && o.value != undefined) {
+					return '<tr><th class="detail-label">' + span + o.label + '</span></th><td class="detail-value">' + span + o.value + '</span></td></tr>';
+				} else if (o.label != undefined) {
+					return '<tr><td colspan="2" class="detail-label single">' + span + o.label + '</span></td></tr>';
 				} else if (o.value != undefined) {
-					return '<tr><td colspan="2" class="value single">' + o.value + '</td></tr>';
-				} else if (o.body != undefined) {
-					return '<tr><td colspan="2" class="body"><div class="meta box">' + o.body + '</div></td></tr>';
+					return '<tr><td colspan="2" class="detail-value single">' + span + o.value + '</span></td></tr>';
 				}
 				return '';
 			};
 
 			var table = $('.detail-data', body),
-				items = '';
-			for (var i = 0; i < obj.data.length; i++) {
-				items += getRow(obj.data[i]);
+				tableRows = [];
+			for (var i = 0; i < rows.length; i++) {
+				tableRows.push(makeRow(rows[i]));
 			} 	
-			table.html(items);
-			table.toggle(items != '');
 
-			var table = $('.detail-metadata', body),
-				items = '';
-			for (var i = 0; i < obj.metadata.length; i++) {
-				items += getRow(obj.metadata[i]);
-			} 	
-			table.html(items);
-			table.toggle(items != '');
+			table.html(tableRows.join('\n'));
+			if (this.model.collection && this.model.collection.mapLayer) {
+				this.$('.model-title').text(this.model.collection.mapLayer.getDisplay('title'));
+			}
 		},
 
 	    compileDetailDataForModel: function(model)
 	    {
-	    	if (!model.collection) return;
+	    	if (!model.collection) return [];
 	    	var mapLayer = model.collection.mapLayer,
 				layerOptions = mapLayer.getLayerOptions(),
+				layout = mapLayer.getDisplay('detailLayout') || this.defaultLayout,
 				valFormatter = mapLayer.getValFormatter(),
-				val = model.get('val'),
-				altVal = model.get('altVal'),
-				label = model.get('label'),
-				datetime = model.get('datetime'),
-				count = model.get('count'),
-				description = model.get('description'),
-				description = description ?
-					typeof(description) == 'object' ? description.min : description : null,
-				maxDateFormatted, minDateFormatted;
+				displayedFields = {};
 
-			this.$('.model-title').text(mapLayer.getDisplay('title'));
-
-			if (datetime) {
-				var maxDate = typeof(datetime) == 'object' ? datetime.max : datetime;
-				var minDate = typeof(datetime) == 'object' ? datetime.min : datetime;
-
-				maxDateFormatted = maxDate ? 
-					new Date(maxDate).format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT) : null;
-				minDateFormatted = minDate ? 
-					new Date(minDate).format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT) : null;
-			}
-
-			var data = [];
-
-			if (minDateFormatted) {
-				var formattedDate = minDateFormatted != maxDateFormatted ? __('%(minDate)s–%(maxDate)s', {
-						minDate: minDateFormatted,
-						maxDate: maxDateFormatted
-					}) : minDateFormatted;
-			} else {
-				var formattedDate = '';
-			}
-
-			if (label) {
-				data.push({
-					label: label.min + '<br />' + formattedDate
-				});
-			} else {
-				data.push({
-					label: formattedDate
-				});
-			}
-
-			if (mapLayer.isNumeric()) {
-				data.push({
-					label: valFormatter.unit, 
-					value: valFormatter.format(typeof(val) == 'object' ? val.avg : val)
-				});
-			}
-
-			if (description && description.length) {
-				data.push({
-					body: description
-				});
-			}
-
-			var metadata = mapLayer.attributes.featureCollection.reduce ? [
-				{
-					label: __('no. of ') + (layerOptions.itemTitlePlural || 'samples'),
-					value: formatLargeNumber(count)
-				}
-			] : [];
-			if (count > 1) {
-				metadata = metadata.concat([
-					{
-						label: __('peak', {
-							unit: valFormatter.unit
-						}),
-						value: valFormatter.format(val.max)
-					}, 
-					{
-						label: __('minimum', {
-							unit: valFormatter.unit
-						}),
-						value: valFormatter.format(val.min)
-					}, 
-					{
-						label: __('average', {
-							unit: valFormatter.unit
-						}),
-						value: valFormatter.format(val.avg)
-					} 
-				]);
-			}
-
-			return {
-				data: data,
-				metadata: metadata
+			var isDate = function(value) {
+				return value instanceof Date;
 			};
+
+			var isEmpty = function(value) {
+				return !isDate(value)
+					&& ((typeof value == 'object' && _.isEmpty(value)) 
+					|| (!value && value != 0) || value === '');
+			};
+
+			var getValue = function(value, formatter) {
+				if (isDate(value) || typeof value != 'object') return formatter ? formatter.format(value) : value;
+				return value.avg ? getValue(value.avg, formatter) :
+					__('%(min)s – %(max)s').format({
+						min: getValue(value.min, formatter),
+						max: getValue(value.max, formatter)
+					});
+			};
+
+			var dateFormatter = {
+				format: function(value) {
+					var value = value instanceof Date ? value : new Date(value);
+					return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
+				}
+			};
+
+			var fieldSubst = !layerOptions.attrMap ? {} : {
+				'numeric': layerOptions.attrMap.numeric,
+				'datetime': layerOptions.attrMap.datetime,
+				'label': layerOptions.attrMap.label
+			};
+
+			var fields = mapLayer.getFeatureCollectionAttr('fields');
+
+			var labelSubst = {
+				'numeric': !isEmpty(valFormatter.unit) ? valFormatter.unit : 
+					(fieldSubst.numeric && fields ? fields.reduce(function(a, b) {
+						if (b.name == fieldSubst.numeric) return b.label;
+						return a;
+					}) : __('Value')),
+				'unit': valFormatter.unit,
+				'itemTitlePlural': mapLayer.getDisplay('itemTitlePlural') || __('samples')
+			};
+
+			var rows = [];
+
+			_.each(layout, function(row) {
+				var content = [];
+				var addToContent = function(content, fieldName, field) {
+					var value = model.get(fieldName),
+						formatter = false;
+					displayedFields[fieldName] = true;
+					if (!isEmpty(value)) {
+						switch (field.split('.')[0]) {
+							case '%(datetime)s': 
+								formatter = dateFormatter;
+								break;
+							case '%(numeric)s':
+								formatter = valFormatter;
+								break; 
+						};
+						content.push(getValue(value, formatter));
+					}
+					return content;
+				};
+
+				var addRow = function(content, row)
+				{
+					if (content.length) {
+						var out = content.join(row.join || '<br />');
+						if (row.label) {
+							rows.push({label: row.label.format(labelSubst), value: out, class: row.class});
+						} else {
+							rows.push({value: out, class: row.class});
+						}
+					}
+				}
+
+				_.each(row.fields, function(field) {
+					var fieldName = field.format(fieldSubst);
+					if (fieldName == 'properties.$other') {
+						_.each(model.get('properties'), function(value, key) {
+							if (!displayedFields['properties.' + key]) {
+								addRow(addToContent([], 'properties.' + key, field), {
+									label: row.label ? row.label.format(_.extend(fieldSubst, {field: key})) : false,
+									class: row.class
+								});
+							}
+						});
+					} else {
+						addToContent(content, fieldName, field);
+					}
+				});
+				addRow(content, row);
+
+			});
+
+			return rows;
 	    }
 
 	});

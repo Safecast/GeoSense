@@ -19,7 +19,9 @@ app.configure(function() {
 	console.info('Serving static files from '+staticDir);
 	app.use(express.static(staticDir));
 	app.use(express.logger('dev'));
-  	app.use(express.compress());
+  	if (!config.DEV) {
+	  	app.use(express.compress());
+  	}
 	app.use(express.methodOverride());
  	app.use(express.bodyParser());
 	app.use(express.cookieParser());
@@ -83,10 +85,10 @@ function staticRoute(req, res, slug, admin)
 {
 	var serveMap = function(err, map, routingByHost) {
 		if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
-		console.log('serving map: '+map.publicslug+', admin: '+admin);
+		console.success('serving map: '+map.publicslug+', admin: '+admin);
 		if (admin) {
 			req.session.user = map.createdBy;
-			console.log('Implicitly authenticated user:', req.session.user);
+			console.warn('Implicitly authenticated user:', req.session.user);
 		}
 		res.end(ejs.render(templates['public/base.html'], {
 			nodeEnv: process.env.NODE_ENV,
@@ -94,7 +96,7 @@ function staticRoute(req, res, slug, admin)
 		}));
 	}
 
-	console.log('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
+	console.info('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
 
 	if (slug) {
 		// For any hosts other than the default hosts, passing a slug is not allowed
@@ -109,16 +111,19 @@ function staticRoute(req, res, slug, admin)
 			serveMap(err, map);
 		});
 	} else {
+		// Serve the home page
 		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) != -1) {
 			serveHome(req, res);
 			return;
 		}
-		// Try to find map by host, or serve home page
+		// Try to find map by host
 		models.Map.findOne({host: req.headers.host, active: true}, function(err, map) {
+			// Serve the home page if there is no map with that host
 			if (!err && !map) {
 				serveHome(req, res);
 				return;
 			}
+			// Otherwise serve the map
 			serveMap(err, map, true);
 		});
 	}

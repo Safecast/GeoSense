@@ -81,7 +81,7 @@ p {
   line-height: 18px;
 }
 
-h1 {
+h2, .homepage h1 {
 	font-family: Vit, sans-serif;
 	font-style: normal;
 	font-weight: 700;
@@ -101,9 +101,9 @@ h1 {
 	left:50%;
 }
 
-h2,
-h3, 
-label.title {
+h1, .homepage h2,
+h3, .modal h2,
+label.title, .box.title {
 /*	font-family: OswaldLight,sans-serif;*/
 	font-family: "AlternateGothicFSNo3", sans-serif;
 	
@@ -117,7 +117,7 @@ label.title {
 	color:#999;
 }
 
-fieldset p {
+fieldset p, fieldset table {
 	margin-bottom: .5em;
 }
 
@@ -177,9 +177,6 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	height: 100%;
 }
 
-.modal {
-	max-height: 600px !important;
-}
 
 fieldset.two-column div {
 	width: 50%;
@@ -205,6 +202,14 @@ fieldset.two-column input {
   background: transparent !important;
 }
 
+.map-style-dark #map_canvas {
+	background-color: #ddd;
+}
+
+.map-style-dark #map_canvas {
+	background-color: #2f2f2f;
+}
+
 #map_canvas img {
 	/* reset a bootstrap setting that conflicts with OpenStreetMap */
 	max-width: none !important;
@@ -214,4 +219,9 @@ input.text.large {
 	font-size: 18px;
 	height: 40px;
 	color: #999;
+}
+
+.popover {
+	/* for popover in modal dialogs */
+	z-index: 1100 !important;
 }

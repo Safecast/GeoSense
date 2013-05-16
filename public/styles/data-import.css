@@ -1,7 +1,3 @@
-.data-import-view.modal {
-	width: 720px;
-}
-
 .data-import-view .modal-body .add .tab-content .input-large
 {
 	width:440px;
@@ -19,7 +15,7 @@
 .data-import-view .step.source fieldset {
 	margin-left: auto;
 	margin-right: auto;
-	width: 490px;
+	width: 492px;
 }
 
 .data-import-view .modal-body .add .tab-content .btn.large p
@@ -40,20 +36,12 @@
 	width:100px;
 }
 
-.data-import-view .table-container
-{
-	height: 150px;
-	overflow: scroll;
-	width: 100%;
-}
-
 .data-import-view .target {
-	padding-top: 40px;
-	background: url(../assets/large-brace.png) 50% 0px no-repeat;
+	margin-top: 20px;
 }
 
 .data-import-view .target .table-container {
-	background: url(../assets/field-map-howto.png) 30px 60px no-repeat;
+	background: url(../assets/field-map-howto.png) 30px 70px no-repeat;
 }
 
 .data-import-view .target.mapped .table-container {
@@ -69,18 +57,27 @@
 }
 
 .data-import-view td.conversion-blank {
-	color: #ccc;
+	color: #ddd;
 }
 
 .data-import-view .table-container {
-	max-height: 220px;
 	overflow: auto;
+	height: 150px;
+	overflow: scroll;
+}
+
+.data-import-view h4 {
+	color: #ddd;
+	font-size: 18px;
+	margin: 0 auto 10px auto;
+	width: 100%;
+	text-align: center;
 }
 
 .data-import-view .modal-body table th, .data-import-view .modal-body table td {
 	padding: .4em;
 	width: 20%;
-	max-width: 200px;
+	max-width: 250px;
 	overflow: hidden;
 }
 
@@ -99,7 +96,11 @@
 	height: 18px;
 	text-align: right;
 	text-shadow:rgba(50,50,50,.5) 1px 1px 1px;
-	box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, .1);
+	box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, .2);
+	border-width: 1px;
+	border-color: #aaa;
+	border-style: solid;
+	z-index: 999;
 }
 
 .data-import-view .btn.back {
@@ -142,6 +143,7 @@
 	min-height: 28px;
 	margin: 0 0 .5em 0;
 	padding: 2px;
+	border-color: #ddd;
 }
 
 .data-import-view .to-field .from-field {
@@ -172,10 +174,14 @@
 
 }
 
-.data-import-view select
-{
-	width:523px;
-	opacity:.3;
+.data-import-view button.show-field-settings {
+	margin-bottom: 2px;
+	white-space: nowrap;
+	width: 100%;
+}
+
+.data-import-view .field-label {
+	font-weight: bold;
 }
 
 .data-import-view .modal-body .add .nav.nav-tabs .label
@@ -196,11 +202,53 @@
 
 .data-import-view .field-settings {
 	font-size: 12px;
-	line-height: 100%;
+	white-space: nowrap;
 }
 
 .data-import-view .state-indicator {
 	position: relative;
 	height: 28px;
 	margin-right: 1em;
+}
+
+.data-import-view .btn-group.select-filetype .btn {
+	width: 98px;
+	height: 80px;
+}
+
+.data-import-view .btn.source-submit {
+	display: block;
+	margin: 20px auto 0 auto;
+	width: 150px;
+	height: 40px;
+}
+
+.icon.icon-filetype {
+	background-image: url(../assets/filetypes.png);
+	width: 50px;
+	height: 50px;
+}
+
+.icon.icon-filetype span {
+	display: none;
+}
+
+.icon.icon-filetype.csv {
+	background-position: 0px 0%;
+}
+
+.icon.icon-filetype.geojson {
+	background-position: -50px 0%;
+}
+
+.icon.icon-filetype.kml {
+	background-position: -100px 0%;
+}
+
+.icon.icon-filetype.rss {
+	background-position: -150px 0%;
+}
+
+.icon.icon-filetype.esri-grid {
+	background-position: -200px 0%;
 }

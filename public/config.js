@@ -33,21 +33,16 @@ var DataStatus = {
 
 var FeatureType = {
 	POINTS: 'P',
-	CELLS: 'C',
+	SQUARE_TILES: 'ST',
 	BUBBLES: 'B',
-	POLYGONS: 'Y' 
+	SHAPES: 'S' 
 };
 
-FeatureType.DEFAULT = FeatureType.CELLS;
+FeatureType.DEFAULT = FeatureType.POINTS;
 
 var LayerType = {
 	POINTS: 'PL',
 	SHAPES: 'SL'
-};
-
-var MapLayerType = {
-	POINTS: 'P',
-	SHAPES: 'S'
 };
 
 var ColorType = {
@@ -65,16 +60,10 @@ var UnitFormat = {
 var COLOR_GRADIENT_STEP = null; // 1 / 500.0;
 
 var DEFAULT_FEATURE_OPACITY = .75,
-	DEFAULT_SELECTED_FEATURE_OPACITY = DEFAULT_FEATURE_OPACITY + (1 - DEFAULT_FEATURE_OPACITY) / 2,
-	MIN_BUBBLE_SIZE = 2,
+	MIN_BUBBLE_SIZE = 8,
 	MAX_BUBBLE_SIZE = 60,
-	DEFAULT_SELECTED_STROKE_COLOR = '#eee',
 	DEFAULT_POINT_RADIUS = 7,
-	DEFAULT_POINT_STROKE_WIDTH = 1,
-	DEFAULT_SELECTED_STROKE_WIDTH = 3,
-	DEFAULT_SELECTED_STROKE_OPACITY = .8
-	MIN_POLYGON_STROKE_WIDTH = 2,
-	MAX_POLYGON_STROKE_WIDTH = DEFAULT_POINT_RADIUS * 4;
+	DEFAULT_FEATURE_STROKE_WIDTH = 1;
 
 // the higher this ratio, the more cropping of extreme high values in histograms if
 // cropDistribution == true
@@ -99,9 +88,8 @@ if (!IS_BROWSER) {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
 		ColorType: ColorType,
-		MapLayerType: MapLayerType,
 	};
 } else {
 	// Browser: define console.log if undefined
-	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {} }; 
+	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {}, error: function() {} }; 
 }

@@ -10,6 +10,7 @@ define([
 	'views/legend-view',
 	'lib/color-gradient/color-gradient',
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, ColorGradient) {
+    "use strict";
 
 	var MapLayerView = Backbone.View.extend({
 
@@ -19,7 +20,9 @@ define([
 			//'click .visibility' : 'visibilityChanged',
 			'click .panel-controls .toggle-layer': 'toggleLayerClicked',
 			'click .panel-controls .show-layer-editor': 'showLayerEditorClicked',
-			'click .panel-controls .show-layer-details': 'showLayerDetailsClicked'
+			'click .panel-controls .show-layer-details': 'showLayerDetailsClicked',
+			'click .panel-controls .show-layer-extents': 'showLayerExtentsClicked',
+			'click .panel-controls .move-layer ': function() { return false; }
 	    },
 
 	    initialize: function(options) 
@@ -29,7 +32,6 @@ define([
 		    this.listenTo(this.model, 'change', this.modelChanged);
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
 		    this.listenTo(this.model, 'destroy', this.remove);
-			this.listenTo(this.vent, 'panel:resize', this.panelViewResized);
 
 			this.listenTo(this.model.featureCollection, 'request', this.layerFeaturesRequest);
 			this.listenTo(this.model.featureCollection, 'error', this.layerFeaturesRequestError);
@@ -62,7 +64,6 @@ define([
 	    {
 	    	this.isLoading = false;
 	    	this.updateStatus(__('failed'));
-	    	console.log('layerFeaturesRequestError', xhr);
 	    },
 
 	    layerFeaturesSynced: function(model, resp, options)
@@ -74,9 +75,8 @@ define([
 	    updateStatus: function(status) 
 	    {
 	    	var countStatus = '',
-				progress = this.model.attributes.featureCollection.progress,
+				progress = this.model.getFeatureCollectionAttr('progress'),
 				featureCollection = this.model.featureCollection;
-
 
 			if (this.isLoading || this.model.getDataStatus() != DataStatus.COMPLETE) {
 		    	this.showSpinner();
@@ -84,19 +84,20 @@ define([
 		    	this.hideSpinner();
 			}
 
-
 			if (!status) {
 		    	switch (this.model.getDataStatus()) {
 		    		case DataStatus.COMPLETE:
 		    			if (this.model.isEnabled()) {
 		    				if (featureCollection.initiallyFetched) {
 								status = __('%(number)i of %(total)i', {
-									number: formatLargeNumber(featureCollection.originalCount),
-									total: formatLargeNumber(featureCollection.fullCount)
+									number: formatLargeNumber(featureCollection.counts.original),
+									total: formatLargeNumber(featureCollection.counts.full)
 								});
 								var url = featureCollection.url();
-								status += ' <a target="_blank" class="download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
-									+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+								if (this.model.attributes.featureCollection) {
+									status += ' <a target="_blank" class="download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
+										+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+								}
 							} else {
 			    				status = 'loading…';
 							}
@@ -137,6 +138,7 @@ define([
 
 	    render: function() 
 	    {
+	    	var self = this;
 			this.$el.html(this.template());
 			this.$el.attr('data-id', this.model.id);
 
@@ -157,6 +159,11 @@ define([
 			} else {
 				this.toggleEl.addClass('collapsed');
 			}
+			this.collapseEl.on('show', function() {
+				if (!self.model.isEnabled()) {
+					self.model.toggleEnabled(true);
+				}
+			});
 
 			this.$('.status').toggle(enabled);
 			this.$('.admin-control').toggle(app.isMapAdmin());
@@ -207,7 +214,7 @@ define([
 	    	}
 			if (!this.model.canDisplayValues()
 				|| !this.model.isNumeric()
-				|| !this.model.attributes.layerOptions.histogram) return;
+				|| !this.model.getLayerOptions().histogram) return;
 			
 			this.$('.graphs').append(this.histogramView.el);
 			this.histogramView.render().delegateEvents();
@@ -225,15 +232,25 @@ define([
 			this.legendView.render().delegateEvents();
 	    },
 
+	    setSuperView: function(superView) {
+			this.listenTo(superView, 'panel:resize', this.panelViewResized);
+	    },
+
 		panelViewResized: function(panelView) 
 		{
-			if (panelView == this.superView && this.histogramView) {
+			if (this.histogramView) {
 				this.histogramView.render();
+			}
+	    	if (this.legendView) {
+				this.legendView.removePopover();
 			}
 		},
 
 		updateEnabled: function(animate)
 		{
+	    	if (this.legendView) {
+				this.legendView.removePopover();
+			}
 			var enabled = this.model.isEnabled(),
 				d = animate || animate == undefined ? 'fast' : 0;
 			$(this.el).toggleClass('enabled', enabled);
@@ -248,25 +265,35 @@ define([
 			} else {
 				this.expand();
 			}
+
+			this.$('.layer-extents').toggle(enabled 
+				&& this.model.getBbox().length > 0);
 		},
 
 		modelChanged: function(model)
 		{
+	    	if (this.legendView) {
+				this.legendView.removePopover();
+			}
 			this.populateFromModel(
 				this.model.hasChangedColors() 
 				|| this.model.hasChanged('featureCollection.status')
+				|| this.model.hasChanged('layerOptions.unit')
 				|| this.model.hasChanged('layerOptions.histogram'));
 		},
 
-	    populateFromModel: function(renderGraphs)
+	    populateFromModel: function(renderSubViews)
 	    {
 	    	this.updateEnabled(false);
-            if (renderGraphs) {
+            if (renderSubViews) {
 				this.renderHistogram();
+				this.renderLegend();
 			}
-			this.renderLegend();
 			this.updateStatus();
 			this.$('.model-title').text(this.model.getDisplay('title'));
+
+			this.$('.admin-control.layer-editor').toggle(app.isMapAdmin()
+				&& this.model.getDataStatus() == DataStatus.COMPLETE);
 
 			var collectionAttrs = this.model.attributes.featureCollection,
 				description = this.model.getDisplay('description'),
@@ -281,7 +308,7 @@ define([
 				this.$('.panel-controls .layer-details').hide();
 			}
 
-			if (source || collectionAttrs.sync) {
+			if (source || (collectionAttrs && collectionAttrs.sync)) {
 				this.$('.source').show();
 				var sourceLink = sourceUrl && sourceUrl.length ?
 						'<a href="%(sourceUrl)s">%(source)s</a>'.format({sourceUrl: sourceUrl, source: source}) : source;
@@ -313,6 +340,12 @@ define([
 		showLayerEditorClicked: function(event)
 		{
 			this.vent.trigger('showMapLayerEditor', this.model);
+			return false;
+		},
+
+		showLayerExtentsClicked: function(event)
+		{
+			app.mapView.zoomToExtent(this.model.attributes.featureCollection.bbox);
 			return false;
 		},
 

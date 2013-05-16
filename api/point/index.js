@@ -8,6 +8,7 @@ var config = require('../../config.js'),
 
 var Point = models.Point,
 	PointCollection = models.PointCollection,
+	GeoFeatureCollection = models.GeoFeatureCollection,
 	Map = models.Map,
 	handleDbOp = utils.handleDbOp;
 
@@ -18,7 +19,7 @@ var PointAPI = function(app)
 			PointCollection.findOne({_id: req.params.pointcollectionid, active: true}, function(err, pointCollection) {
 				if (!err && pointCollection) {
 					collectionName = 'r_points_hist-' + config.HISTOGRAM_SIZES[0];
-					var Model = models.onTheFlyModel(collectionName);
+					var Model = models.adHocModel(collectionName);
 					var query = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 					console.log(query);
 					Model.find(query, function(err, datasets) {
@@ -61,21 +62,15 @@ var PointAPI = function(app)
 		});
 
 		app.get('/api/pointcollections', function(req, res){
-		  	PointCollection.find({active: true}, null, {sort: {'title': 1}}, function(err, datasets) {
-		  		var sources = [];
-		  		for (var i = 0; i < datasets.length; i++) {
-		  			sources.push(datasets[i].toObject());
-		  			// TODO: count
-		  			//sources[i].fullCount = ;
-		  		}
-		    	res.send(sources);
+		  	GeoFeatureCollection.find({active: true}, null, {sort: {'title': 1}}, function(err, documents) {
+		    	res.send(documents);
 			});
 		});
 
 		app.get('/api/map/:publicslug/layer/:layerId/features', function(req, res) 
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -85,19 +80,35 @@ var PointAPI = function(app)
 					if (!mapLayer) {
 						res.send('map layer not found', 404);
 					} else {
-						var pointCollection = mapLayer.pointCollection,
+
+						var featureCollection = mapLayer.featureCollection,
 							urlObj = url.parse(req.url, true),
 							queryOptions = {},
-							filterQuery = {};
-
-						var zoom = parseInt(urlObj.query.z) || 0;
+							filterQuery = {},
+							zoom = parseInt(urlObj.query.z) || 0;
+						
 						if (isNaN(zoom) || zoom < 0) {
 							zoom = 0;
-						}
-						if (zoom >= config.GRID_SIZES.length) {
+						} else if (zoom >= config.GRID_SIZES.length) {
 							zoom = config.GRID_SIZES.length - 1;
 						}
-						var gridSize = config.GRID_SIZES[zoom];
+
+						// TODO
+						var bbox = null,
+							conditions = {},
+							fields = null,
+							gridSize = config.GRID_SIZES[zoom],
+							findOpts = {};
+
+						if (featureCollection.reduce) {
+							findOpts.gridSize = gridSize;
+						}
+						
+						featureCollection.findFeaturesWithin(bbox, conditions, fields, findOpts, function(err, collection) {
+							//collection.features = [collection.features[0]];
+							res.send(collection.toGeoJSON());
+						});
+						return;
 
 						var timeGrid = false,
 							reduceKey = false;
@@ -234,12 +245,12 @@ var PointAPI = function(app)
 
 
 						if (mapLayer.layerOptions.queryOptions) {
-							queryOptions = _.extend(_.clone(config.API_RESULT_QUERY_OPTIONS), 
+							queryOptions = _.cloneextend(_.clone(config.API_RESULT_QUERY_OPTIONS), 
 								adjustKeys(mapLayer.layerOptions.queryOptions, reduce ? 'value' : null, 1));
 						}
 
 						if (mapLayer.layerOptions.filterQuery) {
-							filterQuery = _.extend(filterQuery, 
+							filterQuery = _.cloneextend(filterQuery, 
 								adjustKeys(mapLayer.layerOptions.filterQuery, reduce ? 'value' : null));
 						}
 						
@@ -360,10 +371,10 @@ var PointAPI = function(app)
 									timeGrid: timeGrid,
 									gridSize: gridSize
 								});
-								PointModel = models.onTheFlyModel(collectionName);
+								PointModel = models.adHocModel(collectionName);
 								//pointQuery = {'value.pointCollection': mongoose.Types.ObjectId(req.params.pointcollectionid)};
 								pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
-								pointQuery = _.extend(pointQuery, filterQuery);
+								pointQuery = _.cloneextend(pointQuery, filterQuery);
 
 								dequeueBoxQuery();
 							} else {
@@ -373,7 +384,7 @@ var PointAPI = function(app)
 									pointQuery = {'pointCollection': req.params.pointcollectionid};
 								} else {
 									collectionName = 'r_points_loc-0';
-									PointModel = models.onTheFlyModel(collectionName);
+									PointModel = models.adHocModel(collectionName);
 									pointQuery = {'value.pointCollection': pointCollection.linkedPointCollection || pointCollection._id};
 								}
 								dequeueBoxQuery();
