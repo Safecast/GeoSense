@@ -1,7 +1,6 @@
 
 .panel
 {
-	z-index:1000;
 	position:absolute;
 	top:15px;
 	right:15px;
@@ -13,14 +12,14 @@
 	color: #ddd;
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
-	width: 320px;
-	overflow: hidden;
+	width: 240px;
+	overflow: visible;
 }
 .panel .panel-header, .panel .panel-body {
 	text-shadow: rgba(50,50,50,.9) 1px 1px 0px;
+	overflow: hidden;
 }
 .panel .panel-body {
-	max-height: 700px;
 	overflow: visible;
 	margin-bottom: 20px;
 }
@@ -64,10 +63,6 @@
 	left: 80px;
 	bottom: 40px;
 }
-.panel.layer-panel, .panel.data-detail {
-	display: none;
-	width: 222px;
-}
 .panel.map-tour .btn.next {
 	float: right;
 }
@@ -81,19 +76,23 @@
 	width: 100%;
 }
 .panel .accordion-body .accordion-body-content {
-	padding: 5px 0 10px 0;
+	padding: 2px 0 15px 0;
 }
 .panel .accordion-heading {
 	position: relative;
 	white-space: nowrap;
 }
-.panel .accordion-heading .accordion-toggle {
-	padding: 3px 0 3px 0;
+.panel .accordion-heading .accordion-toggle, .panel .accordion-heading .accordion-toggle a {
+	padding: 0;
+}
+.layer-panel h4, .layer-panel h4 a {
+	font-size: 24px !important;
+	line-height: 28px;
+	color: white !important;
 }
 .panel .accordion-group {
 	border: none;
-	width: 222px;
-	padding: 0 0 5px 0;
+	padding: 00;
 	margin: 0;
 }
 .panel.extended, .panel.extended .accordion-group {
@@ -107,7 +106,7 @@
 	left: 0px;
 }
 .panel .panel-header .frame {
-	background-color:rgba(50, 50, 50, .5);
+	background-color:rgba(50, 50, 50, .6);
 	border-radius: 6px;
 	-moz-border-radius:6px;
 	-webkit-border-radius:6px;
@@ -129,7 +128,7 @@
 .panel .panel-controls {
 	list-style: none;
 	padding: 0;
-	margin: 2px 0 0 0;
+	margin: 4px 0 0 0;
 	position: absolute;
 	right: 0px;
 	top: 0px;
@@ -197,19 +196,31 @@
 }
 .panel table {
 	padding: 0;
-	margin: 0;
 	width: 100%;
 }
 .panel .box {
+	padding: 5px 8px 6px 8px;
 	margin-top: 4px;
 	background-color:rgba(50,50,50,.6);
 	border-radius: 4px;
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
 }
-.panel .box.meta  {
-	font-size: 12px;
-	color: #ccc;
-	padding: 7px 10px 8px 10px;
-	line-height: 1.5em;
+.panel .box.text-body {
+	white-space: normal;
+	text-align: left;
+	line-height: 1.3em;
+}
+.panel .tooltip-inner {
+  background-color: #666;
+} 
+.panel .tooltip.top .tooltip-arrow {
+  border-top-color: #666;  
+}
+.panel .tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #666;  
+}
+.panel .tooltip.in {
+  opacity: 1.0;
+  filter: alpha(opacity=100);
 }

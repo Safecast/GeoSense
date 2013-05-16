@@ -9,7 +9,7 @@ var config = require('../../config.js'),
 	_ = require('cloneextend');
 
 var Point = models.Point,
-	PointCollection = models.PointCollection,
+	GeoFeatureCollection = models.GeoFeatureCollection,
 	Map = models.Map,
 	LayerOptions = models.LayerOptions,
 	User = models.User,
@@ -47,12 +47,12 @@ var MapAPI = function(app)
 				});
 		});
 
-		function sortByPosition(arr) 
+		var sortByPosition = function(arr) 
 		{
 			return arr.sort(function(a, b) { return a.position - b.position });
 		}
 
-		function prepareMapResult(req, map) 
+		var prepareMapResult = function(req, map) 
 		{
 			var m = {
 				admin: permissions.canAdminMap(req, map)
@@ -64,7 +64,7 @@ var MapAPI = function(app)
 				}
 				if (k == 'layers') {
 					for (var i = 0; i < m[k].length; i++) {
-						m[k][i] = prepareLayerResult(req, m[k][i]);
+						m[k][i] = prepareLayerResult(req, m[k][i], map);
 					}
 					m[k] = sortByPosition(m[k]);
 				}
@@ -72,23 +72,24 @@ var MapAPI = function(app)
 			return m;
 		}
 
-		function prepareLayerResult(req, layer) {
+		var prepareLayerResult = function (req, layer, map) 
+		{
 			// if this is called by prepareMapResult, the layer's toObject() 
 			// was already called.
 			var layer = layer.toObject ?
 				layer.toObject() : layer;
-			layer.featureCollection = layer.pointCollection;
-			delete layer.featureCollection.importParams;
 
-			// sending deprecated pointCollection -- TODO: delete layer.pointCollection
+			if (!permissions.canAdminMap(req, map)) {
+				delete layer.featureCollection.importParams;
+			}
 
 			return layer;
-		}
+		};
 
 		// Returns a specific map by publicslug
 		app.get('/api/map/:publicslug', function(req, res){
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -104,7 +105,7 @@ var MapAPI = function(app)
 		// session
 		app.get('/api/map/admin/:adminslug', function(req, res) {	
 			Map.findOne({adminslug: req.params.adminslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -170,7 +171,7 @@ var MapAPI = function(app)
 		app.put('/api/map/:publicslug', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
 				.populate('modifiedBy')
@@ -178,12 +179,14 @@ var MapAPI = function(app)
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
 
 					var fields = ['title', 'description', 'author', 
-						'linkURL', 'twitter', 'initialArea', 'displayInfo', 'host'];
+						'linkURL', 'twitter', 'initialArea', 'viewOptions', 
+						'displayInfo', 'host'];
 
 					for (var i = fields.length - 1; i >= 0; i--) {
 						var f = req.body[fields[i]];
 						if (f != undefined) {
 							map[fields[i]] = f;
+							console.log(fields[i], f);
 						}
 					}
 
@@ -226,7 +229,7 @@ var MapAPI = function(app)
 
 								// find again since createdBy and modifiedBy won't be populated after map.save()
 								Map.findOne({_id: req.params.mapid})
-									.populate('layers.pointCollection')
+									.populate('layers.featureCollection')
 									.populate('layers.layerOptions')
 									.populate('createdBy')
 									.populate('modifiedBy')
@@ -260,7 +263,7 @@ var MapAPI = function(app)
 		app.delete('/api/map/:publicslug', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
@@ -282,7 +285,7 @@ var MapAPI = function(app)
 		app.get('/api/map/:publicslug/layer/:layerId', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
@@ -290,9 +293,9 @@ var MapAPI = function(app)
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 					// only send if complete; or incomplete was requested 
-					if (mapLayer.pointCollection.status == config.DataStatus.COMPLETE ||
-						url.parse(req.url, true).query.incomplete) {
-							res.send(prepareLayerResult(req, mapLayer));
+					if (mapLayer.featureCollection && (mapLayer.featureCollection.status == config.DataStatus.COMPLETE ||
+						url.parse(req.url, true).query.incomplete)) {
+							res.send(prepareLayerResult(req, mapLayer, map));
 					} else {
 						res.send('map layer is incomplete', 403);
 					}
@@ -303,7 +306,7 @@ var MapAPI = function(app)
 		app.put('/api/map/:publicslug/layer/:layerId', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
@@ -312,16 +315,48 @@ var MapAPI = function(app)
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
 
-					// set all public elements of layerOptions
-					for (var k in req.body.layerOptions) {
-						if (k[0] != '_') {
-							console.log(k, req.body.layerOptions[k]);
-							mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
-						}
+					var cloneDefaults;
+					if (!mapLayer.featureCollection || (mapLayer.featureCollection.defaults 
+						&& mapLayer.layerOptions._id.toString() == mapLayer.featureCollection.defaults.toString())) {
+							console.warn('Cloning defaults for new layerOptions');
+							
+							cloneDefaults = function(callback) {
+								models.cloneLayerOptionsDefaults(mapLayer, function(err, clone) {
+								if (handleDbOp(req, res, err, clone)) return;
+									mapLayer.layerOptions = clone._id;
+									map.save(function(err, map) {
+										// TODO: Can this really not be simplified?
+										Map.findById(map._id)
+											.populate('layers.featureCollection')
+											.populate('layers.layerOptions')
+											.exec(function(err, map) {
+												if (handleDbOp(req, res, err, map)) return;
+												var mapLayer = map.layers.id(req.params.layerId);
+												callback(false, mapLayer);
+											});
+									});
+								});
+							};
+
+					} else {
+						console.warn('Updating existing layerOptions');
+						cloneDefaults = function(callback) { callback(false, mapLayer); }
 					}
 
-					mapLayer.layerOptions.save(function(err, opts) {
-						if (!handleDbOp(req, res, err, true)) {
+					cloneDefaults.call(mapLayer.featureCollection, function(err, mapLayer) {
+						if (handleDbOp(req, res, err, true)) return;
+
+						// set all public elements of layerOptions
+						for (var k in req.body.layerOptions) {
+							if (k[0] != '_') {
+								console.log(k, req.body.layerOptions[k]);
+								mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
+							}
+						}
+
+						mapLayer.layerOptions.save(function(err, opts) {
+							if (handleDbOp(req, res, err, true)) return;
+
 							console.log('layer options updated');
 							
 							if (req.body.position != undefined) {
@@ -335,52 +370,60 @@ var MapAPI = function(app)
 									setIndex(layerIds, oldIndex, newIndex);
 									for (var j = 0; j < layerIds.length; j++) {
 										map.layers.id(layerIds[j]).set('position', j);
-										console.log(map.layers.id(layerIds[j]).pointCollection.title, map.layers.id(layerIds[j]).position);
+										//console.log(map.layers.id(layerIds[j]).featureCollection.title, map.layers.id(layerIds[j]).position);
 									}
 									map.save(function(err, map) {
 										if (!handleDbOp(req, res, err, true)) {
-											console.log('layer position changed to ' + newPosition);
-											res.send(prepareLayerResult(req, mapLayer));
+											console.log('layer position set to ' + newPosition);
+											res.send(prepareLayerResult(req, mapLayer, map));
 										}
 									});
 									return;
 								}
 							}
 
-							res.send(prepareLayerResult(req, mapLayer));
-						}
+							res.send(prepareLayerResult(req, mapLayer, map));
+						});
 					});
-
-					return;
 			  	});
 		});
 
 		// Creates a new map layer from a point collection
 		app.post('/api/map/:publicslug/layer', function(req, res)
 		{
+			if (!req.body.featureCollection) {
+				res.send('no feature collection specified', 403);
+			}
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-				    PointCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
+				    GeoFeatureCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
 				    	// TODO: check ownership instead of (unreliably) checking for status
 				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
 				    	.populate('defaults')
 				    	.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
-						    var defaults = collection.defaults.toObject();
-						    delete defaults['_id'];
-						    var options = new LayerOptions(defaults);
+							if (!collection.defaults) {
+								console.warn('Creating new layerOptions');
+								cloneDefaults = function(callback) {
+									this.cloneDefaults(function(err, clone) {
+										callback(err, clone);
+									});
+								};
+							} else {
+								console.warn('Using defaults for layerOptions');
+								cloneDefaults = function(callback) { callback(false, collection.defaults); }
+							}
 
-						    options.save(function(err) {
-								if (handleDbOp(req, res, err, true)) return;
+							cloneDefaults.call(collection, function(err, layerOptions) {
 								var sortedLayers = sortByPosition(map.layers);
 							    var layer = {
 							    	// set _id so it can be referenced below
 							    	_id: new mongoose.Types.ObjectId(),
-							    	pointCollection: collection,
-							    	layerOptions: options._id,
+							    	featureCollection: collection,
+							    	layerOptions: layerOptions,
 							    	position: (sortedLayers.length ? 
 							    		(sortedLayers[sortedLayers.length - 1].position != null ?
 							    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
@@ -391,14 +434,15 @@ var MapAPI = function(app)
 								    if (handleDbOp(req, res, err, map)) return;
 							        console.log("map layer created");
 									Map.findOne({_id: map._id})
-										.populate('layers.pointCollection')
+										.populate('layers.featureCollection')
 										.populate('layers.layerOptions')
 										.exec(function(err, map) {
 										    if (handleDbOp(req, res, err, map)) return;
-									       	res.send(prepareLayerResult(req, map.layers.id(layer._id)));
+									       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
 										});
 							  	});
-						    });
+							});
+
 					    });
 			    });
 		});
@@ -407,7 +451,7 @@ var MapAPI = function(app)
 		app.delete('/api/map/:publicslug/layer/:layerId', function(req, res)
 		{
 			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.pointCollection')
+				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;

@@ -1,9 +1,17 @@
 var config = require('./config.js'),
+    errors = require('./errors.js'),
+    HTTPError = errors.HTTPError,
     mailer = require('mailer'),
     fs = require('fs'),
     _ = require('cloneextend'),
     mongoose = require('mongoose'),
     console = require('./ext-console');
+
+// These Array methods do not exist under MongoDB, under which some of the utility
+// functions below will be used while supplementing the Array methods.
+var isArray = Array.isArray,
+    arrayMap = Array.prototype.map,
+    arrayReduce = Array.prototype.reduce;
 
 exports.connectDB = function(callback, exitProcessOnError) 
 {
@@ -21,8 +29,15 @@ exports.connectDB = function(callback, exitProcessOnError)
         }
     });
 
-    console.info('Connecting to database', config.DB_PATH);
-    return mongoose.connect(config.DB_PATH).connection;
+    if (!config.DB_URI) {
+        console.error('config.DB_URI is not defined');
+        if (exitProcessOnError == undefined || exitProcessOnError) {
+            process.exit(1);
+        }
+    } else {
+        console.info('Connecting to database', config.DB_URI);
+        return mongoose.connect(config.DB_URI).connection;
+    }
 };
 
 /**
@@ -130,6 +145,10 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
     });
 }
 
+function sendError(res, err) {
+    res.send(err, err.statusCode || 500);
+}
+
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
     if (err) {
@@ -138,22 +157,24 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
         switch (err.name) {
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 
-                sendErr = config.DEBUG ? err : {
-                    message: 'Server error'
-                };          
-                res.send(sendErr, 500);
+                if (!config.DEBUG) {
+                    err = new HTTPError('Internal Server Error', 500);
+                }
+                sendError(res, err);
                 break;
             case 'ValidationError':
+                err = new HTTPError(err.message, 403);
+            case 'HTTPError':
                 // certain error messages should be available to client:
-                res.send(err, 403);
+                sendError(res, err);
                 break;
         }
         return true;
     } else if (!op) {
-        res.send((name ? name + ' ' : '') + 'not found', 404);
+        sendError(res, new HTTPError((name ? name + ' ' : '') + 'not found', 404));
         return true;
     } else if (permissionCallback && !permissionCallback(req, op)) {
-        res.send('permission denied', 403);
+        sendError(res, new HTTPError('permission denied', 403));
         return true;
     }
 
@@ -190,20 +211,23 @@ exports.validateExistingCollection = function(err, collection, callback)
 {
     if (err || !collection) {
         if (!err) {
-            err = new Error('PointCollection not found');
+            err = new Error('feature collection not found');
         }
         if (callback) {
+            console.error(err.message);
             callback(err);
         } else {
-            console.error(err.message);
+            throw err;
         }
         return false;
     }
     if (collection.status == config.DataStatus.IMPORTING || collection.status == config.DataStatus.REDUCING) {
         var err = new Error('Collection is currently busy');
-        console.error(err.message);
         if (callback) {
+            console.error(err.message);
             callback(err);
+        } else {
+            throw err;
         }
         return false;
     }
@@ -421,3 +445,45 @@ exports.deleteUndefined = function(obj)
 
     return obj;
 }
+
+exports.findExtremes = function(value, previous) {
+    var map = function(el) {
+            if (typeof el == 'object' && el.sum != undefined 
+                && el.min != undefined && el.max != undefined && el.count != undefined) return el;
+            return {
+                sum: el,
+                min: el,
+                max: el,
+                count: 1
+            }
+        },
+        arr = isArray(value) ? value : [value],
+        reduce = function(a, b) {
+            a.sum = typeof b.sum != 'number' ? NaN : isNaN(a.sum) ? b.sum : a.sum + b.sum;
+            a.min = a.min == undefined || b.min < a.min ? b.min : a.min;
+            a.max = a.max == undefined || b.max > a.max ? b.max : a.max;
+            a.count = isNaN(a.count) ? b.count : a.count + b.count;
+            return a;
+        };
+
+    //return arr.map(map).reduce(reduce, previous || {});
+    return arrayReduce.call(arrayMap.call(arr, map), reduce, previous || {});
+};
+
+exports.callbackOrThrow = function(err, callback)
+{
+    if (err) {
+        if (callback) {
+            console.log(err);
+            callback(err);
+            return true;
+        }
+        throw err;
+    }
+};
+
+exports.isValidDate = function(d) {
+    if (Object.prototype.toString.call(d) !== "[object Date]")
+        return false;
+    return !isNaN(d.getTime());
+};

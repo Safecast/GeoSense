@@ -6,10 +6,12 @@ define([
 	'utils',
 	'text!templates/homepage.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var HomepageView = Backbone.View.extend({
 
 	    tagName: 'div',
-		className: 'homepage-view',
+		className: 'homepage',
 		
 	    events: {
 			'click #createMap': 'createMapButtonClicked',
@@ -35,7 +37,7 @@ define([
 				type: 'GET',
 				url: '/api/maps/featured',
 				success: function(data) {
-					for (i = 0; i < data.length; i++) {
+					for (var i = 0; i < data.length; i++) {
 						var url = genMapURL(data[i]);
 						self.featuredMaps.push('<tr><td>' + data[i].title + '</td><td><a target="_self" href="' + url + '">' + url + '</a></td><tr>');
 					}
@@ -59,7 +61,7 @@ define([
 			var self = this;
 			self.$('#mapTable').fadeOut('fast',function(){
 				self.$('#mapTable').empty();
-				for(i=self.featuredMapSet;i<(self.numberOfMapsDisplay + self.featuredMapSet);i++)
+				for(var i = self.featuredMapSet;i<(self.numberOfMapsDisplay + self.featuredMapSet);i++)
 				{
 					self.$('#mapTable').append(self.featuredMaps[i]);
 				}

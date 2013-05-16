@@ -5,6 +5,8 @@ var config = {
 
 	DEV: DEV,
 	DEBUG: DEV,	
+	VERBOSE: false,
+	DEBUG_MAPREDUCE: DEV && 0,
 	LIMITED_PROD_ACCESS: !DEV,
 
 	CLOCK_PROCESS_RUN_TIME: '0 10 * * * *',
@@ -19,11 +21,14 @@ var config = {
 	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,
 
-	COLLECTION_DEFAULTS: {
+	LAYER_OPTIONS_DEFAULTS: {
 		visible: true,
-		featureType: 'C',
+		featureType: 'P',
 		colorType: 'L',
-		colors: [{position: '0%', color: '#00c9ff'}, {position: '100%', color: '#81ffff'}],
+		colorSchemes: [{
+			name: 'default',
+			colors: [{position: '0%', color: '#44bbee'}/*, {position: '100%', color: '#81ffff'}*/],
+		}],
 		opacity: .5
 	},
 
@@ -33,6 +38,13 @@ var config = {
 
 	GRID_SIZES: {
 	},
+
+	MAX_RESULT_COUNT: 2000,
+
+	MIN_FEATURE_SIZE: 1,
+	MAX_FEATURE_SIZE: 500,
+	MIN_STROKE_WIDTH: .1,
+	MAX_STROKE_WIDTH: 200,
 
 	GRID_SIZE_PIXELS: 15,
 
@@ -52,14 +64,12 @@ var config = {
 		// could be used to pass options to reduce script, such as limit: n
 		DB_OPTIONS: {
 		},
-		// toggles time-based reduction
-		OPTIONS: {
-			timebased: false, // create time-based reductions
-			grid: true, // create grid-based reductions
-			unreduced: true, // create unreduced copies
-			histogram: true // create histogram reductions
-		}
+		DEFAULT_ENABLED_TYPES: ['tile', 'weekly', 'histogram']
 	},
+
+	TILE_DEFAULT: 'Rect',
+	MIN_FEATURES_LIMIT: 300,
+	MIN_FEATURES_TILE: 1000,
 
 	DataStatus: {
 		IMPORTING: 'I',
@@ -79,7 +89,9 @@ var config = {
 	JobStatus: {
 		ACTIVE: 'A',
 		IDLE: 'I'
-	}
+	},
+
+	DEFAULT_LABEL_FIELDS: ['title', 'Title', 'name', 'Name', 'label', 'Label'],
 };
 
 for (var zoom = 0; zoom < config.MAP_RESOLUTIONS.length; zoom++) {
@@ -101,14 +113,14 @@ if (typeof require == 'function') {
 	};
 } 
 
-if (DEV) {
-	// use local db
-	config.DB_PATH = 'mongodb://localhost/geosense';
-} else if (PROD) {
-	// import production settings
-	if (utils) {
-		utils.import(config, require('./config-prod.js'));
-	}
+// import custom settings
+if (utils) {
+	utils.import(config, require('./config-custom.js'));
+}
+
+if (DEV && !config.DB_URI) {
+	// use default test db
+	config.DB_URI = 'mongodb://localhost/geosense';
 }
 
 if (utils) {

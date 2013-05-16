@@ -1,6 +1,10 @@
 .layer-panel .legend .unit, .layer-panel h5, .layer-panel .source {
-	text-align: center;
 	padding: .1em .25em .4em .25em;
+	text-align: center;
+}
+.layer-panel .legend .dropdown-menu {
+	text-align: left;
+	min-width: 0px !important;
 }
 .layer-panel .panel-body {
 	margin-top: 10px;
@@ -8,12 +12,13 @@
 .layer-panel .legend .unit, .layer-panel h5 {
 	font-weight: bold;
 }
-.layer-panel .meta.source, .layer-panel .meta.source a {
+.layer-panel .source, .layer-panel .source {
+	margin: 0;
+	padding-bottom: 0;
+}
+.layer-panel .source, .layer-panel .source a {
 	color: #aaa;
 	font-size: 11px;
-}
-.layer-panel .meta.source {
-	padding: .2em .75em .4em .75em;
 }
 .layer-panel .legend .unit {
 	font-size: 12px;
@@ -24,7 +29,16 @@
     display: inline-block !important;
     height: 13px !important;
 } 
-.layer-panel .legend .unit .nav-pills a, .unit .nav-pills span {
+.layer-panel .legend .caret {
+	padding: 0;
+	margin: 5px 0 0 0;
+	border-top-color: #fff !important;
+}
+.layer-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
+	padding: 0 8px 0 8px !important;
+	height: 14px;
+}
+.layer-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
 	color: #aaa !important;
 	margin: 1px !important;
 	padding: 3px 8px 3px 8px !important;
@@ -49,13 +63,9 @@
 	font-size:20pt;
 	font-weight:bold;
 }
-.layer-panel h4, .layer-panel h4 a {
-	font-size: 24px !important;
-	color: white !important;
-}
 .layer-panel .map-layer .status {
 	position: relative;
-	padding: 3px 0 3px 0;
+	padding: 2px 0 2px 0;
 }
 .layer-panel .map-layer.disabled {
 	-moz-opacity:.40 !important; filter:alpha(opacity=40) !important; opacity:.40 !important; 
@@ -64,12 +74,12 @@
 	height: 16px;
 	position: absolute;
 	right: 0px;
-	top: 3px;
+	top: 1px;
 }
 .layer-panel .model-title {
 	display: inline-block;
-	max-width: 65%;
-	 
+	max-width: 66%;
+	overflow: hidden;
 }
 .layer-panel.extended .model-title {
 	max-width: 80%;
@@ -113,7 +123,7 @@
 }
 .layer-panel .histogram {
 	position: relative;
-	width: 222px;
+	width: 240px;
 	height: 30px;
 }
 .layer-panel .histogram .graph-max-y {
@@ -131,4 +141,14 @@
 .layer-panel.extended .histogram {
 	width: 444px;
 	height: 60px;
+}
+.popover .nav a {
+	color: #666;
+}
+.popover .nav {
+	margin-bottom: 0;
+}
+.popover .nav a.active {
+	font-weight: bold;
+	color: #000;
 }

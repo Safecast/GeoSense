@@ -1,10 +1,7 @@
 var	models = require('../models'),
-	GeoFeature = models.GeoFeature,
+	api = new require('../api')(),
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	config = require('../config'),
-	utils = require('../utils'),
-	converter = require('../api/import/conversion/shp'),
-	format = require('../api/import/formats/json'),
 	assert = require('assert'),
 	mongoose = require('mongoose');
 
@@ -12,64 +9,49 @@ describe('GeoJSON', function() {
 	var featureCollection;
 
 	before(function(done) {
-		mongoose.connect(config.DB_PATH);
-		GeoFeature.remove(function(err) {
-			if (err) {
-				console.log('done');
-				return done(err);
-			}
-			featureCollection = new GeoFeatureCollection();
-			featureCollection.save(function(err) {
-			console.log('done');
-				return done(err);
-			});
+		mongoose.connect(config.DB_URI);
+		featureCollection = new GeoFeatureCollection({
+			active: true, 
+			status: config.DataStatus.COMPLETE, 
+			title: 'GeoJSON test'
+		});
+		featureCollection.save(function(err, collection) {
+			return done(err);
 		});
 	});
 
-	it('should import a GeoJSON file and save each Feature in the DB', function(done) {
+	var ImportedModel;
 
-		var parser = format.Parser(),
-			totalCount, saved = 0;
+	it('should import a GeoJSON file and save each Feature in the DB, determining the collection\'s bbox', function(done) {
 
-		var onData = function(data) {
-			var f = new GeoFeature(data, false);
-			f.featureCollection = featureCollection;
-			f.set('properties.foo', 'foo1', null);
-			f.save(function(err, result) {
-				if (err) throw err;
-				saved++;
-			});
-		};
-
-		var onEnd = function(data) {
-			assert.equal(saved, totalCount);
+		api.import.import({
+			path: 'test/data/internet_users_2005_choropleth_lowres.json',
+			format: 'geojson'
+		}, null, null, function(err, collection) {
+			if (err) throw err;
+			//console.log(collection);
+			assert.deepEqual(collection.bbox.toObject(), [-180, -55.71, 179.96, 83.57 ]);
+			assert.deepEqual(collection.bounds2d.toObject(), [[-180, -55.71], [179.96, 83.57]]);
+			ImportedModel = collection.getFeatureModel();
 			done();
-		};
-
-		parser.on('data', onData)
-			.on('end', onEnd)
-			.on('root', function(root, count) {
-				totalCount = count;
-		  	});
-
-		parser.fromPath('test/data/internet_users_2005_choropleth_lowres.json');
+		});
 
 	});
 
 	it('should find Switzerland by name', function(done) {
 
-		GeoFeature.findOne({'properties.name': 'Switzerland'}, function(err, result) {
-			if (err) throw err;
-			assert(result);
-			assert.deepEqual(result.toGeoJSON().bbox, [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
-			done();
+		ImportedModel.findOne({'properties.name': 'Switzerland'}, function(err, result) {
+				if (err) throw err;
+				assert(result);
+				assert.deepEqual(result.toGeoJSON().bbox, [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
+				done();
 		});
 
 	});
 
 	it('should find countries within a box', function(done) {
 
-		GeoFeature.findWithin([[1,40],[11,48]], null, null, {sort: {'properties.name': 1}}, function(err, result) {
+		ImportedModel.within([[1,40],[11,48]]).sort({'properties.name': 1}).exec(function(err, result) {
 			if (err) throw err;
 			assert(result.length);
 			var countries = result.map(function(val) { return val.properties.name; });

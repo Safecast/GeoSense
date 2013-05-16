@@ -16,9 +16,40 @@ define([
             return this.parentMap.url() + '/layer';
         },
 
+        getLayerOptions: function() 
+        {
+            return this.attributes.layerOptions ? 
+                this.attributes.layerOptions : {};
+        },
+
+        getFeatureCollectionAttr: function(name, def)
+        {
+            return this.attributes.featureCollection 
+                && this.attributes.featureCollection[name] != undefined ?
+                this.attributes.featureCollection[name] 
+                : (def != undefined ? def : null);
+        },
+
+        getOption: function(name, def)
+        {
+            var opts = this.attributes.layerOptions;
+            if (!opts || opts[name] == undefined) return def;
+            return opts[name];
+        },
+
+        limitFeatures: function()
+        {
+            return this.getFeatureCollectionAttr('limitFeatures', true);
+        },
+
         getDataStatus: function()
         {
-            return this.attributes.featureCollection.status;
+            return this.getFeatureCollectionAttr('status', DataStatus.COMPLETE);
+        },
+
+        getBbox: function()
+        {
+            return this.getFeatureCollectionAttr('bbox', []);
         },
 
         getDisplay: function(attrName)
@@ -44,13 +75,23 @@ define([
                 options = options || {};
                 
             this.parentMap = options.parentMap;
-            this.featureCollection = new GeoFeatureCollection([], {mapLayer: this});
+            if (this.attributes.featureCollection) {
+                this.featureCollection = new GeoFeatureCollection([], {mapLayer: this});
+            } else {
+                var feed = this.getLayerOptions().feed;
+                this.featureCollection = new GeoFeatureCollection([], {mapLayer: this, 
+                    urlFormat: feed ? feed.url : '',
+                    parser: feed ? feed.parser : ''
+                });
+            }
             this.valFormatters = [];
 
             this.sessionOptions = _.extend(options.sessionOptions || {}, {
                 enabled: (this.attributes.layerOptions ?
                     this.attributes.layerOptions.enabled : true),
-                valFormatterIndex: 0
+                valFormatterIndex: 0,
+                colorSchemeIndex: attributes && attributes.layerOptions ? 
+                    attributes.layerOptions.colorSchemeIndex : 0
             });
 
             this.on('change', this.onChange, this);
@@ -100,18 +141,38 @@ define([
             this.trigger('toggle:valFormatter', this);
         },
 
-        getLayerOptions: function()
+        setColorScheme: function(index)
         {
-            return this.attributes.layerOptions;
+            delete this._normalizedColors;
+            delete this._colorGradient;
+            this.sessionOptions.colorSchemeIndex = index;
+            this.trigger('toggle:colorScheme', this);
         },
 
-        getExtremes: function()
+        getCounts: function()
         {
-            return {
-                minVal: this.attributes.featureCollection.minVal, 
-                maxVal: this.attributes.featureCollection.maxVal,
-                maxCount: this.featureCollection.maxReducedCount
-            };
+            return this.featureCollection.counts;
+        },
+
+        isNumeric: function()
+        {
+            var x = this.getFeatureCollectionAttr('extremes', {}),
+                attrMap = this.getOption('attrMap', {}),
+                numAttr = attrMap.numeric;
+            return numAttr != undefined 
+                && getAttr(x, numAttr) != undefined;
+        },
+
+        getMappedExtremes: function()
+        {
+            var x = this.getFeatureCollectionAttr('extremes', {}),
+                attrMap = this.getOption('attrMap', {}),
+                r = {};
+
+            for (var k in attrMap) {
+                r[k] = getAttr(x, attrMap[k]);
+            }
+            return r;
         },
 
         colorAt: function(pos)
@@ -122,11 +183,22 @@ define([
             return this._colorGradient.colorAt(pos, COLOR_GRADIENT_STEP);
         },
 
+        getColorScheme: function(index)
+        {
+            var index = index != undefined ? index : this.sessionOptions.colorSchemeIndex,
+                schemes = this.getLayerOptions().colorSchemes;
+            if (!schemes) {
+                return {colors: []};
+            }
+            if (!index) return schemes[0];
+            return schemes[index];
+        },
+
         getNormalizedColors: function(originalColors) 
         {
             var self = this,
-                originalColors = originalColors || this.attributes.layerOptions.colors,
-                extremes = this.getExtremes();
+                originalColors = originalColors || this.getColorScheme().colors,
+                extremes = this.getMappedExtremes();
             if (!this._normalizedColors) {
                 this._normalizedColors = originalColors.map(function(c) {
                     var p = parseFloat(c.position),
@@ -134,7 +206,10 @@ define([
                         sc = (c.position || '') + '';
                     return _.extend({}, c, {
                         position: sc[sc.length - 1] == '%' ?
-                            p / 100 : (p - extremes.minVal) / (extremes.maxVal - extremes.minVal)
+                            p / 100 
+                            : (extremes.numeric ?
+                                (p - extremes.numeric.min) / (extremes.numeric.max - extremes.numeric.min)
+                                : 0)
                     });
                 });
             }
@@ -154,13 +229,6 @@ define([
             return this.sessionOptions.enabled;
         },
 
-        isNumeric: function()
-        {
-            return this.attributes.featureCollection.isNumeric 
-                && this.attributes.featureCollection.maxVal != undefined 
-                && this.attributes.featureCollection.minVal != undefined;
-        },
-
         canDisplayValues: function()
         {
             var s = this.getDataStatus();
@@ -172,8 +240,11 @@ define([
 
         hasChangedColors: function()
         {
-            var c1 = this.previousAttributes().layerOptions.colors, 
-                c2 = this.attributes.layerOptions.colors;
+            var prev = this.previousAttributes();
+            if (!prev.layerOptions) return true;
+            var c1 = prev.layerOptions.colorSchemes, 
+                c2 = this.attributes.layerOptions.colorSchemes;
+
             return this.hasChanged('layerOptions.colorLabelColor') || (c1 && c2 && !_.isEqual(c1, c2));
         }
 

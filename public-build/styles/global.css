@@ -56,7 +56,7 @@ p {
   font-weight: normal;
   line-height: 18px;
 }
-h1 {
+h2, .homepage h1 {
 	font-family: Vit, sans-serif;
 	font-style: normal;
 	font-weight: 700;
@@ -73,9 +73,9 @@ h1 {
 	top:50%;
 	left:50%;
 }
-h2,
-h3, 
-label.title {
+h1, .homepage h2,
+h3, .modal h2,
+label.title, .box.title {
 	font-family: "AlternateGothicFSNo3", sans-serif;
 	
 	font-size:15pt;
@@ -86,7 +86,7 @@ label.title {
 	font-size:12pt;
 	color:#999;
 }
-fieldset p {
+fieldset p, fieldset table {
 	margin-bottom: .5em;
 }
 h4, h5, .condensed {
@@ -135,9 +135,6 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	width: 15px;
 	height: 100%;
 }
-.modal {
-	max-height: 600px !important;
-}
 fieldset.two-column div {
 	width: 50%;
 	overflow: hidden;
@@ -157,6 +154,12 @@ fieldset.two-column input {
   cursor: pointer;
   background: transparent !important;
 }
+.map-style-dark #map_canvas {
+	background-color: #ddd;
+}
+.map-style-dark #map_canvas {
+	background-color: #2f2f2f;
+}
 #map_canvas img {
 	
 	max-width: none !important;
@@ -165,4 +168,8 @@ input.text.large {
 	font-size: 18px;
 	height: 40px;
 	color: #999;
+}
+.popover {
+	
+	z-index: 1100 !important;
 }

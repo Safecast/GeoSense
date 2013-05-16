@@ -6,6 +6,8 @@ define([
 	'utils',
 	'text!templates/modal.html',
 ], function($, _, Backbone, config, utils, templateHtml) {
+    "use strict";
+
 	var ModalView = Backbone.View.extend({
 
 	    tagName: 'div',
@@ -39,8 +41,13 @@ define([
 	        $('body').append(this.el);
 			$(this.el).modal('show');
 			$(this.el).on('hidden', function() {
-				$(self.el).detach();
+				self.detach();
 			});
+	  	},
+
+	  	detach: function()
+	  	{
+			$(self.el).detach();
 	  	},
 
 	    close: function()

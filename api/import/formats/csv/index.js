@@ -2,6 +2,7 @@ var	csv = require('csv'),
 	request = require('request');
 
 module.exports = {
+
 	Parser: csv,
 	Request: function(opts) 
 	{
@@ -12,5 +13,11 @@ module.exports = {
 			opts.headers.Accept = 'text/csv';
 		}
 		return request(opts);
-	}
+	},
+
+	transform: [
+		{ to: 'source', from: '*', type: 'Object' },
+		{ to: 'type', set: 'Point' },
+		{ to: 'geometry.type', set: 'Point' }
+	]
 };

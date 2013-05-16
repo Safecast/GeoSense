@@ -1,7 +1,3 @@
-// Filename: main.js
-
-// Require.js allows us to configure shortcut alias
-// There usage will become more apparent further along in the tutorial.
 require.config({
 	paths: {
         jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
@@ -15,7 +11,8 @@ require.config({
         deepmodel: 'lib/backbone-deep-model/src/deep-model',
         openlayers: 'lib/openlayers/OpenLayers-2.12/OpenLayers',
         cloudmade: 'lib/openlayers/cloudmade',
-        stamen: 'lib/openlayers/stamen'
+        stamen: 'lib/openlayers/stamen',
+        backbone_super: 'lib/backbone_super/backbone_super'
   	},
 
     shim: {
@@ -43,6 +40,9 @@ require.config({
         },
         'stamen': {
             deps: ['openlayers']
+        },
+        'backbone_super': {
+            deps: ['backbone'],
         }
     }
 
@@ -55,6 +55,7 @@ require([
     'backbone',
     'app',
     'jqueryui',
+    'backbone_super',
     'lib/jquery/jquery.color',
     'lib/jquery/jquery.glowing',
     'lib/jquery/jquery.miniColors.min',
@@ -62,6 +63,7 @@ require([
     'bootstrap',
     'locale',
 ], function($, _, Backbone, App, ui) {
+    var app;
 	// The "app" dependency is passed in as "App"
 	App.initialize();
 });
