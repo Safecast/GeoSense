@@ -1,6 +1,0 @@
-[submodule "public/libs/threex"]
-	path = public/libs/threex
-	url = git://github.com/jeromeetienne/threex.git
-[submodule "public/libs/three"]
-	path = public/libs/three
-	url = git://github.com/mrdoob/three.js.git
