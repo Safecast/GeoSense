@@ -959,7 +959,8 @@ ImportAPI.prototype.cli = {
 				if (!err) {
 					console.success('Existing collections:', docs.length);
 					docs.forEach(function(doc) {
-						var dump = {_id: doc._id, title: doc.title, status: doc.status};
+						var dump = {_id: doc._id, title: doc.title, status: doc.status,
+							createdAt: doc.createdAt, updatedAt: doc.updatedAt, lastReducedAt: doc.lastReducedAt};
 						console.log('*', dump);
 					});
 				}
