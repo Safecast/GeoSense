@@ -16,16 +16,13 @@ var adHocModel = function(collectionName, Schema, options) {
     return adHocModels[collectionName];
 };
 
+/*
+Modifies the JSON object to be sent to the client as GeoJSON 
+*/
 var toGeoJSON = function(obj) 
 {
-    var gj = _.clone(obj);
-    /*if (!obj.bbox && obj.bounds && obj.bounds.length == 2) {
-        obj.bbox = obj.bounds.reduce(function(a, b) {
-            return a.concat(b);
-        });
-    } */
-    delete gj.bounds2d;
-    return gj;
+    delete obj.bounds2d;
+    return obj;
 };
 
 
