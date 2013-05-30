@@ -1,4 +1,5 @@
 var mongoose = require('mongoose'),
+    _ = require('cloneextend'),
     adHocModels = {};
 
 
@@ -17,12 +18,14 @@ var adHocModel = function(collectionName, Schema, options) {
 
 var toGeoJSON = function(obj) 
 {
+    var gj = _.clone(obj);
     /*if (!obj.bbox && obj.bounds && obj.bounds.length == 2) {
         obj.bbox = obj.bounds.reduce(function(a, b) {
             return a.concat(b);
         });
     } */
-    return obj;
+    delete gj.bounds2d;
+    return gj;
 };
 
 
