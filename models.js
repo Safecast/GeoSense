@@ -8,8 +8,8 @@ var config = require('./config'),
 
 var useTimestamps = function (schema, options) {
     schema.add({
-        createdAt: Date
-      , updatedAt: Date
+        createdAt: {type: Date, index: 1},
+        updatedAt: {type: Date, index: 1}
     });
     schema.pre('save', function (next) {    
       if (!this.createdAt) {
