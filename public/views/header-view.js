@@ -12,13 +12,14 @@ define([
 
 	    tagName: 'div',
 		className: 'header-view',
-		
+
 	    events: {
 			'click #aboutMap': 'aboutMapClicked',
 			'click #aboutGeoSense' : 'aboutGeoSenseClicked',
 			'click #shareLink' : 'shareLinkClicked',
 			'click #postFacebook' : 'postFacebookClicked',
 			'click #postTwitter' : 'postTwitterClicked',
+			'click #postGooglePlus' : 'postGooglePlusClicked',
 			'click .map-tool.setup' : 'setupButtonClicked',
 			'click .map-tool.add-data' : 'addDataButtonClicked',
 			'click .map-tool.upload' : 'uploadButtonClicked',
@@ -26,35 +27,35 @@ define([
 			'click #mapView a' : 'mapViewToggleClicked',
 			'click #viewBase .dropdown-menu a' : 'viewBaseToggleClicked',
 			'click #viewStyle .dropdown-menu a' : 'viewStyleToggleClicked',
-			
+
 			'keypress input': 'keyEvent',
 	    },
 
-	    initialize: function(options) 
+	    initialize: function(options)
 	    {
 		    this.template = _.template(templateHtml);
-			this.vent = options.vent;	
+			this.vent = options.vent;
 			this.listenTo(this.model, 'sync', this.populateFromModel);
 	    },
 
-	    render: function() 
+	    render: function()
 	    {
 			$(this.el).html(this.template());
 			this.populateFromModel();
-			
+
 			this.$('.search-query').click(function() {
 				$(this).select();
 			});
 
 			if (!app.isMapAdmin()) {
 				this.$('.admin-tool').remove();
-			} 
+			}
 
 	        return this;
 	    },
 
-		keyEvent: function(event) 
-		{		
+		keyEvent: function(event)
+		{
 			if (event.keyCode == 13) {
 				if (this.$("#search").is(":focus")) {
 					var address = $('#search').val();
@@ -64,7 +65,7 @@ define([
 				}
 			}
 		},
-		
+
 	    populateFromModel: function()
 	    {
 			var mapInfo = this.model.attributes;
@@ -112,13 +113,13 @@ define([
 			app.setViewStyle(style);
 			evt.preventDefault();
 		},
-		
-		timelineButtonClicked: function(evt) 
+
+		timelineButtonClicked: function(evt)
 		{
 			evt.preventDefault();
 		},
-		
-		setupButtonClicked: function(evt) 
+
+		setupButtonClicked: function(evt)
 		{
 			app.showSetupView();
 			evt.preventDefault();
@@ -136,34 +137,36 @@ define([
 			evt.preventDefault();
 		},
 
-		aboutGeoSenseClicked: function(evt) 
-		{	
+		aboutGeoSenseClicked: function(evt)
+		{
 			app.showAbout();
 			evt.preventDefault();
 		},
-		
-		aboutMapClicked: function(evt) 
+
+		aboutMapClicked: function(evt)
 		{
 			app.showMapInfo();
 			evt.preventDefault();
 		},
-		
+
 		shareLinkClicked: function(evt)
 		{
 			app.showShareLink();
 			evt.preventDefault();
 		},
 
-		postTwitterClicked: function(evt) 
+		postTwitterClicked: function(evt)
 		{
 			var mapInfo = this.model.attributes,
 				tweet = {},
 				url = app.genPublicURL(true);
+
 			tweet.url = url;
-			tweet.text = __('Check out the %(title)s map:', {
+			tweet.text = __('Check out the %(title)s map: - %(url)s', {
 				url: url,
 				title: mapInfo.title
 			});
+
 			if (mapInfo.twitter) {
 				tweet.via = mapInfo.twitter;
 			}
@@ -172,26 +175,33 @@ define([
 			window.open(url, __('Tweet this post'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 			evt.preventDefault();
 		},
-		
-		postFacebookClicked: function(evt) 
+
+		postFacebookClicked: function(evt)
 		{
-			var mapInfo = this.model.attributes;
-				url = 'http://www.facebook.com/sharer.php?u='
+			var mapInfo = this.model.attributes,
+				url = 'http://www.facebook.com/share.php?u='
 			url += encodeURIComponent(app.genPublicURL(true));
-			url += '&t=' +encodeURIComponent(__('Check out the %(title)s map', {
-				title: mapInfo.title
-			}));
 			window.open('' + url, __('Share it on Facebook'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 			evt.preventDefault();
 		},
-		
-		remove: function() 
+
+		postGooglePlusClicked: function(evt)
+		{
+			var mapInfo = this.model.attributes,
+				url = 'https://plus.google.com/share?url=';
+			url += encodeURIComponent(app.genPublicURL(true));
+
+			window.open(url, __('Share it on Google Plus'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
+			evt.preventDefault();
+		},
+
+		remove: function()
 		{
 			$(window).unbind();
 			$(this.el).remove();
 			return this;
 		},
-	  
+
 	});
 
 	return HeaderView;
