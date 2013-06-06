@@ -120,6 +120,52 @@ define([
             return this;
         },
 
+        initSelectControl: function()
+        {
+            var self = this,
+                layers = [];
+            this.map.layers.forEach(function(layer, index) {
+                if (!layer.baselayer) {
+                    layers.push(layer);
+                }
+            });
+            if (this.selectControl) {
+                this.map.removeControl(this.selectControl);
+            }
+
+            // too slow because of redrawing of full layer
+            /*var hover = new OpenLayers.Control.SelectFeature(layer, {
+                hover: true,
+                highlightOnly: true,
+                renderIntent: "temporary",
+            });
+            this.map.addControl(hover);
+            hover.activate();*/
+
+            this.selectControl = new OpenLayers.Control.SelectFeature(layers, {
+                clickout: true, multiple: false, hover: false, box: false,
+                onBeforeSelect: function(feature) {
+                    // TODO: Since the layer is redrawn on select, selection is very slow.
+                    // Workaround: Add code to add feature to highlight layer, then return false.
+                     //self.featureSelected(feature);
+                     //return false;
+                },
+                onSelect: function(feature) {
+                    self.featureSelected(feature);
+                },
+                onUnselect: function(feature) {
+                    self.featureUnselected(feature);
+                    // TODO: See above
+                    // add code to remove feature from highlight layer
+                },
+            });
+
+            this.map.addControl(this.selectControl);
+            this.selectControl.activate();
+            // make sure the SelectControl does not disable map panning when clicked on feature
+            this.selectControl.handlers.feature.stopDown = false;
+        },
+
         attachLayer: function(model)
         {
             this.initRenderLayer(model);
@@ -280,38 +326,7 @@ define([
             this.featureLayers[model.id] = layer;
             layer.setVisibility(model.isEnabled());
             this.map.addLayers([layer]);
-
-            // too slow because of redrawing of full layer
-            /*var hover = new OpenLayers.Control.SelectFeature(layer, {
-                hover: true,
-                highlightOnly: true,
-                renderIntent: "temporary",
-            });
-            this.map.addControl(hover);
-            hover.activate();*/
-
-            var selectControl = new OpenLayers.Control.SelectFeature(layer, {
-                clickout: true, multiple: false, hover: false, box: false,
-                onBeforeSelect: function(feature) {
-                    // TODO: Since the layer is redrawn on select, selection is very slow.
-                    // Workaround: Add code to add feature to highlight layer, then return false.
-                     //self.featureSelected(feature);
-                     //return false;
-                },
-                onSelect: function(feature) {
-                    self.featureSelected(feature);
-                },
-                onUnselect: function(feature) {
-                    self.featureUnselected(feature);
-                    // TODO: See above
-                    // add code to remove feature from highlight layer
-                },
-            });
-
-            this.map.addControl(selectControl);
-            selectControl.activate();
-            // make sure the SelectControl does not disable map panning when clicked on feature
-            selectControl.handlers.feature.stopDown = false;
+            this.initSelectControl();
         },
 
         destroyRenderLayer: function(model) 
