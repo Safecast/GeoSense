@@ -113,7 +113,7 @@ GeoSense utilizes [RequireJS](http://requirejs.org/) to create an optimized
 build for faster page load times. To create a build, run the following command 
 from the GeoSense folder:
 
-	node r.js -o public/libs/app.build.js
+	node r.js -o public/app.build.js
 
 You now have an optimized copy of the `public/` folder ready for deployment 
 under `public-build`.
