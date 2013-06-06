@@ -160,7 +160,8 @@ define([
                     fillOpacity: opacity,
                     strokeDashstyle: layerOptions.strokeDashstyle,
                     strokeLinecap: layerOptions.strokeLinecap,
-                    graphicZIndex: 0
+                    graphicZIndex: 0,
+                    graphicName: null
                 };
 
             switch (layerOptions.featureType) {
@@ -269,7 +270,7 @@ define([
                 layer = new OpenLayers.Layer.Vector(model.id, {
                 styleMap: this.getStyleMapForLayer(model),
                 renderers: [(opts.htmlRenderer && opts.htmlRenderer != '' ?
-                    opts.htmlRenderer : 'Canvas'), 'Canvas', 'SVG'],
+                    opts.htmlRenderer : 'SVG'), 'SVG', 'VML', 'Canvas'],
                 wrapDateLine: true,
                 rendererOptions: { 
                     //zIndexing: true
