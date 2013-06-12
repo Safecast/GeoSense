@@ -20,7 +20,9 @@ var dump = function(obj) {
 				str += ' ';
 			}
 			var d = '';
-			if (typeof obj[k] == 'function')  {
+			if (obj[k] == null) {
+				d = k + ': null\n';
+			} else if (typeof obj[k] == 'function') {
 				d = k + ': [Function]\n';
 			} else if (typeof obj[k] == 'object') {
 				if (obj[k].isObjectId) {
