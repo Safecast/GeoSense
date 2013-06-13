@@ -99,11 +99,11 @@ describe('MapReduce', function() {
 		}, null, null, function(err) {
 			if (err) throw err;
 
-			featureCollection.getMapReducedFeatureModel({time: 'daily'})
+			featureCollection.getMapReducedFeatureModel({timeGrid: 'daily'})
 				.find(function(err, features) {
 					if (err) throw err;
+					console.log('----', features);
 					assert.equal(features.length, days);
-					console.log(features[0]);
 					assert.equal(features[0].get('value').count, days);
 					done();
 				});
@@ -121,7 +121,7 @@ describe('MapReduce', function() {
 		}, null, null, function(err) {
 			if (err) throw err;
 
-			featureCollection.getMapReducedFeatureModel({gridSize: config.GRID_SIZES[normalZoom]})
+			featureCollection.getMapReducedFeatureModel({tileSize: config.GRID_SIZES[normalZoom]})
 				.find(function(err, features) {
 					if (err) throw err;
 					assert.equal(features.length, 1);
@@ -143,7 +143,7 @@ describe('MapReduce', function() {
 		}, null, null, function(err) {
 			if (err) throw err;
 
-			featureCollection.getMapReducedFeatureModel({gridSize: config.GRID_SIZES[normalZoom + 1]})
+			featureCollection.getMapReducedFeatureModel({tileSize: config.GRID_SIZES[normalZoom + 1]})
 				.find(function(err, features) {
 					if (err) throw err;
 					assert.equal(features.length, 4);
@@ -155,7 +155,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should find features at the next zoom level within one quarter of its area, resulting in one feature', function(done) {
-		featureCollection.getMapReducedFeatureModel({gridSize: config.GRID_SIZES[normalZoom + 1]})
+		featureCollection.getMapReducedFeatureModel({tileSize: config.GRID_SIZES[normalZoom + 1]})
 			// $within $box is inclusive -- hence subtract very small number from northeast of box
 			.within([[0, 0], [config.GRID_SIZES[normalZoom] / 2 - .00000001, config.GRID_SIZES[normalZoom] / 2 - .00000001]])
 			.exec(function(err, features) {
