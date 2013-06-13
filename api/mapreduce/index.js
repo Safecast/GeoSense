@@ -107,6 +107,9 @@ MapReduceAPI.prototype.mapReduce = function(params, req, res, callback)
 	}
 
 	console.success('*** MapReduce with types:', params.types.join(', '));
+	if (params.zoom) {
+		console.log('*** zoom levels:', params.zoom);
+	}
 	Job.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE}, function(err, job) {
 		if (job && job.status != config.JobStatus.IDLE) {
 			// tmp
@@ -339,6 +342,15 @@ MapReduceAPI.prototype.cli = {
 			}
 			if (params.types) {
 				params.types = (params.types + '').split(',');
+			}
+			if (params.zoom) {
+				var match = (params.zoom + '').match(/^([0-9]+)(\-([0-9]+))?$/);
+				params.zoom = [];
+				if (match) {
+					for (var i = Math.min(match[1], match[3] || match[1]); i <= Math.max(match[1], match[3] || match[1]); i++) {
+						params.zoom.push(i + '');
+					}
+				}
 			}
 			if (params.featureCollectionId) {
 				this.mapReduce(params, null, null, callback);
