@@ -49,7 +49,7 @@ or as a background service:
 You can then run the development server using the following command from the 
 GeoSense folder:
 
-	node server.js NODE_ENV=development node server.js
+	NODE_ENV=development node server.js
 
 You should get a success message such as `Web server running at 
 http://0.0.0.0:3000/`. You'll now be able to open GeoSense in your web
