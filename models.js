@@ -165,6 +165,9 @@ GeoFeatureSchema.plugin(useTimestamps);
 
 GeoFeatureSchema.pre('save', function(next) {
     this.geocoded = this.bounds2d && this.bounds2d.length;
+    if (this.geocoded && !this.geometry.type) {
+        this.geometry.type = 'Point';
+    }
     next();
 });
 
