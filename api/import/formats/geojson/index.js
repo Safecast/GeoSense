@@ -3,7 +3,11 @@ var json = require('../json'),
 
 module.exports = {
 
-    Parser: json.Parser,
+    Parser: function() 
+    {
+        return json.Parser(['features', true]);
+    },
+
     Request: json.Request,
 
     transform: [

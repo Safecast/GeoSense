@@ -23,7 +23,10 @@ define([
 			'click .btn.filetype': 'filetypeButtonClicked'
 	    },
 
-	    initialize: function(options) {
+	    expandObjects: true,
+
+	    initialize: function(options) 
+	    {
 		    this.template = _.template(templateHtml);	
 			this.vent = options.vent;
 			this.responseData = null;
@@ -130,14 +133,35 @@ define([
 			return false;
 		},
 
+		displayAttr: function(val)
+		{
+			if (Array.isArray(val)) {
+				return '[' + val + ']';
+			}
+			if (typeof val == 'object') {
+				return '[Object]';
+			}
+			return val + '';
+		},
+
 		initDataTransformForSource: function(data) 
 		{
 			var self = this;
 			this.inspectedSource = data;
 			this.fromFields = {};
-			_.each(this.inspectedSource.items[0], function(value, key) {
-				self.fromFields[key] = key;
-			});
+
+			var addFields = function(item, path) {
+				_.each(item, function(value, key) {
+					var p = path ? path + '.' + key : key;
+					self.fromFields[p] = p;
+					if (typeof value == 'object' && !Array.isArray(value)) {
+						addFields(value, p);
+					}
+				});
+			};
+
+			addFields(this.inspectedSource.items[0]);
+
 			console.log('initDataTransformForSource');
 			this.descripts = _.deepClone(this.defaultDescripts);
 
@@ -161,7 +185,7 @@ define([
 			_.each(this.inspectedSource.items, function(row) {
 				var tds = '';
 				_.each(self.fromFields, function(tmp, key) {
-					tds += '<td>' + row[key] + '</td>';
+					tds += '<td>' + self.displayAttr(getAttr(row, key)) + '</td>';
 				});
 				self.$('.from-data tbody').append('<tr>' + tds + '</tr>');
 			});
@@ -334,7 +358,7 @@ define([
 			this.setStep('source');					
 
 			if (DEV) {
-				this.$('[name=url]').val('https://dl.dropbox.com/s/cb4blktkkelwg1n/nuclear_reactors.csv');
+				this.$('[name=url]').val('https://dl.dropboxusercontent.com/s/28fvvskvmhrhdxx/Amsterdam.dat.json');
 				//self.sourceSubmitButtonClicked();
 			}
 
@@ -517,7 +541,7 @@ define([
 							} else {
 								switch (descript.type) {
 									default:
-										out = val;
+										out = self.displayAttr(val);
 										break;
 									case 'Date':
 										if (val) {

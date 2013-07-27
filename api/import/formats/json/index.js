@@ -4,9 +4,9 @@ var JSONStream = require('JSONStream'),
 
 module.exports = {
 
-    Parser: function() 
+    Parser: function(parse) 
     {
-        var parser = JSONStream.parse(['features', true]);
+        var parser = JSONStream.parse(parse || [true]);
         parser.fromStream = function(stream) {
             this.readStream = stream;
             stream.pipe(this);

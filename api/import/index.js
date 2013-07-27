@@ -632,6 +632,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 						} else {
 							if (!fieldNames) {
+								console.log(data);
 								fieldNames = Object.keys(data);
 							}
 							doc = data;
