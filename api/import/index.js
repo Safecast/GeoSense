@@ -11,6 +11,7 @@ var config = require('../../config'),
 	transform = require("./data_transform"),
 	getAttr = transform.util.getAttr,
 
+	fs = require('fs'),
   	mongoose = require('mongoose'),
 	date = require('datejs'),
 	url = require('url'),
@@ -282,6 +283,14 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			throw err;
     	}
     	dataTransform.addFields(customTransform.descripts);
+    }
+
+    if (params.layerOptions) {
+    	if (typeof params.layerOptions != 'object') {
+			console.log('* Loading layerOptions: '+params.layerOptions);
+    		params.layerOptions = JSON.parse(fs.readFileSync(params.layerOptions));
+	    	console.log('* layerOptions:', params.layerOptions);
+    	}
     }
 
 	var importCount = 0,
@@ -809,9 +818,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		if (!params.dry) {
 			console.info('*** Creating new collection ***');
 		}
-		var defaults = new LayerOptions(
-			_.cloneextend(config.LAYER_OPTIONS_DEFAULTS,
-				format.defaults || {}));
+		var defs = _.cloneextend(config.LAYER_OPTIONS_DEFAULTS, format.defaults || {});
+		if (params.layerOptions) {
+			defs = _.cloneextend(defs, params.layerOptions);
+		}
+		console.log(defs);
+		var defaults = new LayerOptions(defs);
 
 		var defaultsSave = !params.dry ?
 			defaults.save : function(callback) { callback(false, defaults) };
@@ -904,6 +916,7 @@ function getImportParams(params)
 		path: params.p || params.path,
 		format: params.f || params.format,
 		transform: params.t || params.transform, 
+		layerOptions: params.layerOptions,
 		append: params.append,
 		from: params.from,
 		to: params.to,
@@ -928,6 +941,7 @@ ImportAPI.prototype.cli = {
 
 		if (!showHelp && utils.connectDB()) {
 			params.append = params._[1];
+			console.log(params);
 			this.import(getImportParams(params), null, null, callback);
 		} else {
 			callback(false, help);
