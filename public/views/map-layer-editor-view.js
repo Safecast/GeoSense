@@ -27,6 +27,13 @@ define([
 	    	'change .preview': 'previewChanged',
 	    	'change .show-advanced': 'showAdvancedChanged',
 	    	'click .generate-colors': 'generateColorsClicked',
+	    	'click .import-export': 'importExportClicked',
+	    	'click .import-settings': 'importSettingsClicked',
+	    	'change textarea[name=settings-json]': 'importSettingsChanged',
+	    	'click textarea[name=settings-json]': function(event) {
+	    		$(event.currentTarget).select();
+	    		return false;
+	    	},
 	    	'click .hide-color-generator': 'hideColorGenerator',
 	    	'click .remove-color': 'removeColorClicked',
 	    	'click .add-color': 'addColorClicked',
@@ -486,6 +493,36 @@ define([
 	    	this.addColorRow();
 			this.modelInputChanged();
 			return false;
+	    },
+
+	    importExportClicked: function(event) 
+	    {
+	    	var opts = _.extend({}, this.model.getLayerOptions());
+	    	for (var k in opts) {
+	    		if (k[0] == '_') delete opts[k];
+	    	}
+			this.$('textarea[name=settings-json]').val(JSON.stringify(opts));
+	    	this.$('.import-settings').attr('disabled', true);
+	    },
+
+	    importSettingsChanged: function(event)
+	    {
+	    	try {
+		    	var parse = JSON.parse(this.$('textarea[name=settings-json]').val());
+	    	} catch(e) {
+	    	}
+	    	self.$('.import-settings').attr('disabled', !parse);			
+	    },
+
+	    importSettingsClicked: function(event)
+	    {
+	    	this.$('.import-export').popover('hide');
+	    	var saved = _.deepClone(this.model.attributes);
+	    	this.model.setLayerOptions(JSON.parse(this.$('textarea[name=settings-json]').val()));
+	    	this.populateFromModel();
+	    	this.setButtonState(true, false);
+	    	this.isChanged = true;
+	    	this.savedModelAttributes = saved;
 	    },
 
 	    generateColorsClicked: function(event) 

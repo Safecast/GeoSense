@@ -22,6 +22,12 @@ define([
                 this.attributes.layerOptions : {};
         },
 
+        setLayerOptions: function(layerOptions) {
+            for (var k in layerOptions) {
+                this.set('layerOptions.' + k, layerOptions[k]);
+            }
+        },
+
         getFeatureCollectionAttr: function(name, def)
         {
             return this.attributes.featureCollection 

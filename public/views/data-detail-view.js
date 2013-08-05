@@ -22,6 +22,7 @@ define([
 		    this.template = _.template(templateHtml);	
 	    	
 	    	this.defaultLayout = [
+	    		{fields: ['properties.icon'], label: false, formatter: 'icon', class: 'icon muted'},
 	    		{fields: ['%(label)s', '%(datetime)s'], label: false, class: "box title"},
 	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
 	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
@@ -100,18 +101,28 @@ define([
 
 			var getValue = function(value, formatter) {
 				if (isDate(value) || typeof value != 'object') return formatter ? formatter.format(value) : value;
-				return value.avg ? getValue(value.avg, formatter) :
-					__('%(min)s – %(max)s').format({
+				if (value.value != undefined) return getValue(value.value, formatter);
+				if (value.avg != undefined) return getValue(value.avg, formatter);
+				return __('%(min)s to %(max)s').format({
 						min: getValue(value.min, formatter),
 						max: getValue(value.max, formatter)
 					});
 			};
 
-			var dateFormatter = {
-				format: function(value) {
-					var value = value instanceof Date ? value : new Date(value);
-					return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
+			var formatters = {
+				date: {
+					format: function(value) {
+						var value = value instanceof Date ? value : new Date(value);
+						return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
+					}
+				},
+				numeric: valFormatter,
+				icon: {
+					format: function(value) {
+						return '<img class="icon" src="' + value + '" />';
+					}
 				}
+
 			};
 
 			var fieldSubst = !layerOptions.attrMap ? {} : {
@@ -129,24 +140,26 @@ define([
 						return a;
 					}) : __('Value')),
 				'unit': valFormatter.unit,
-				'itemTitlePlural': mapLayer.getDisplay('itemTitlePlural') || __('samples')
+				'itemTitlePlural': mapLayer.getDisplay('itemTitlePlural') || __('samples'),
 			};
 
 			var rows = [];
 
+			console.log(model);
+
 			_.each(layout, function(row) {
 				var content = [];
-				var addToContent = function(content, fieldName, field) {
+				var addToContent = function(content, fieldName, field, row) {
 					var value = model.get(fieldName),
-						formatter = false;
+						formatter = row.formatter ? formatters[row.formatter] : false;
 					displayedFields[fieldName] = true;
 					if (!isEmpty(value)) {
 						switch (field.split('.')[0]) {
 							case '%(datetime)s': 
-								formatter = dateFormatter;
+								formatter = formatters.date;
 								break;
 							case '%(numeric)s':
-								formatter = valFormatter;
+								formatter = formatters.numeric;
 								break; 
 						};
 						content.push(getValue(value, formatter));
@@ -171,14 +184,16 @@ define([
 					if (fieldName == 'properties.$other') {
 						_.each(model.get('properties'), function(value, key) {
 							if (!displayedFields['properties.' + key]) {
-								addRow(addToContent([], 'properties.' + key, field), {
+								var r = {
 									label: row.label ? row.label.format(_.extend(fieldSubst, {field: key})) : false,
-									class: row.class
-								});
+									class: row.class,
+									formatter: row.formatter
+								}								
+								addRow(addToContent([], 'properties.' + key, field, r), r);
 							}
 						});
 					} else {
-						addToContent(content, fieldName, field);
+						addToContent(content, fieldName, field, row);
 					}
 				});
 				addRow(content, row);

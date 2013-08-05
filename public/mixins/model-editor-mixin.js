@@ -21,7 +21,6 @@ define([
 
 		populateModelInputs: function() 
 		{
-			this.savedAttributes = _.extend({}, this.model.attributes);
 			this.savedModelAttributes = _.deepClone(this.model.attributes);
 			for (var name in this.modelInputs) {
 				var val = this.model.get(name);

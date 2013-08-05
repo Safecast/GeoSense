@@ -21,12 +21,21 @@ define([
 	    	this.template = _.template(templateHtml);
 		    this.listenTo(this.model, 'toggle:valFormatter', this.valFormatterChanged);
 		    this.listenTo(this.model, 'toggle:colorScheme', this.colorSchemeChanged);
+		    this.listenTo(this.model.featureCollection, 'reset', this.countsChanged);
+			this.hasBeenVisible = false;
 	    },
 
 	    unitToggleClicked: function(event)
 	    {
 			this.model.setValFormatter(parseInt($(event.currentTarget).attr('data-index')));
 			event.preventDefault();
+	    },
+
+	    countsChanged: function(event)
+	    {
+	    	if (this.model.getOption('attrMap', {}).featureColor == 'count') {
+				this.updateColorBarLabels();
+	    	}
 	    },
 
 	    valFormatterChanged: function(model)
@@ -175,12 +184,33 @@ define([
 				var val,
 					maxIndex,
 					isNumeric = this.model.isNumeric(),
+					isCounts = this.model.getOption('attrMap', {}).featureColor == 'count',
+					hasCountsGtZero = false,
+					counts = this.model.getCounts(),
+					mag = !counts ? 0 : counts.max > 10000 ? 1000	
+						: counts.max > 100 ? 100
+						: 1,
 					extremes = this.model.getMappedExtremes(),
 					minVal = extremes.numeric ? extremes.numeric.min : NaN,
 					maxVal = extremes.numeric ? extremes.numeric.max : NaN,
 					numAttr = this.model.attrMap ? this.model.attrMap.numeric : null;
 
-				if (!isNumeric || (colors[i].title && colors[i].title.length)) {
+				if (isCounts) {
+					if (counts && counts.max) {
+						val = colors[i].position * counts.max;
+						if (val < 1) {
+							val = 1;
+						} else {
+							if (val > mag) {
+								val = Math.round(val / mag) * mag;								
+							}
+							val = autoFormatNumber(val);
+						}
+						hasCountsGtZero = true;
+					} else {
+						val = '&nbsp;';
+					}
+				} else if (!isNumeric || (colors[i].title && colors[i].title.length)) {
 					val = colors[i].title || '&nbsp;';
 				} else {
 					hasNumbers = true;
@@ -203,6 +233,17 @@ define([
 
 			if (maxIndex != undefined && colors[maxIndex].position < 1.0) {
 				$(segments[maxIndex]).append('+');
+			}
+
+			if (isCounts) {
+				if (hasCountsGtZero) {
+					this.$el.show('fast');
+					this.hasBeenVisible = true;
+				} else {
+					this.$el.hide(this.hasBeenVisible ? 'fast' : null);
+				}
+			} else {
+				this.hasBeenVisible = false;
 			}
 		}
 
