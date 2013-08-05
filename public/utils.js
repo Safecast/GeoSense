@@ -422,3 +422,8 @@ function genMapURL(mapInfo, opts, admin)
 	return baseUrl + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
 };
 
+if (!Array.isArray) {
+  Array.isArray = function (vArg) {
+    return Object.prototype.toString.call(vArg) === "[object Array]";
+  };
+}

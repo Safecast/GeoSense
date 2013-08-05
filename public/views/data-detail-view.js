@@ -103,6 +103,9 @@ define([
 				if (isDate(value) || typeof value != 'object') return formatter ? formatter.format(value) : value;
 				if (value.value != undefined) return getValue(value.value, formatter);
 				if (value.avg != undefined) return getValue(value.avg, formatter);
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				}
 				return __('%(min)s to %(max)s').format({
 						min: getValue(value.min, formatter),
 						max: getValue(value.max, formatter)
