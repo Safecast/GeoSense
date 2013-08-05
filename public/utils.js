@@ -226,7 +226,7 @@ ValFormatter.prototype.format = function(val)
 */
 String.prototype.format = function(replacements) {
 	return this.replace(/\%\(([a-z0-9_]+)\)([sif])/ig, function(match, name, type) { 
-		return typeof replacements[name] != 'undefined'
+		return typeof replacements[name] == 'function' ? replacements[name].apply(this) : typeof replacements[name] != 'undefined'
 			? replacements[name]
 			: match;
 	});

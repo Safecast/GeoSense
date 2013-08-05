@@ -164,21 +164,20 @@
                 <div class="advanced">
                     <div class="divider"></div>
                     <p>
+                        <label class="title">Map color to</label>
+                        <select class="model-input" name="layerOptions.attrMap.featureColor">
+                            <option value="">(default)</option>
+                            <option value="count">sample size</option>
+                            <option value="val.avg">average value</option>
+                        </select>
+                    </p>
+                    <div class="divider"></div>
+                    <p>
                         <label class="title">Label color</label>
                         <input class="color-picker model-input" name="layerOptions.colorLabelColor" type="text" placeholder="auto" />
                     </p>
                 </div>
 
-                <!-- TODO: this needs to be reflected in the legend
-                <p>
-                    <label class="title">Map color to</label>
-                    <select class="model-input" name="layerOptions.attrMap.featureColor">
-                        <option value="">(default)</option>
-                        <option value="count">sample size</option>
-                        <option value="val.avg">average value</option>
-                    </select>
-                </p>
-                -->
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-stroke">
@@ -272,9 +271,20 @@
                     </label>
                 </p>
                 <div class="divider"></div>
-                <p>
+                <p class="pull-left">
                     <button class="btn btn-danger destroy">Remove Layer</button>
                 </p>
+                <p class="advanced pull-right">
+                    <button data-content-selector=".settings-export" data-title="Export or Import Settings" data-placement="right" class="btn import-export has-popover">Export/Import…</button>
+                </p>
+
+                <div class="settings-export">
+                    <div class="clearfix">
+                        <textarea name="settings-json" class="text"></textarea>
+                        <button class="import-settings btn btn-warning generate-colors pull-right">Import</button>
+                    </div>
+                </div>
+
             </fieldset>
 
         </div>

@@ -70,8 +70,8 @@ define([
 
             switch (colorType) {
                 case ColorType.SOLID: 
-                    color = l.colorAt(0);
-                    break;
+                    //color = l.colorAt(0);
+                    //break;
                 case ColorType.LINEAR_GRADIENT:
                 case ColorType.PALETTE:
                     var colorPos;
