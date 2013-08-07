@@ -7,7 +7,7 @@ define([
 ], function($, _, Backbone, GeoFeature, Parser) {
     "use strict";
 
-	var GeoFeatureCollection = Backbone.Collection.extend({
+	var MapFeatures = Backbone.Collection.extend({
 
 		model: GeoFeature,
 		
@@ -44,7 +44,7 @@ define([
 			if (this.urlFormat != undefined) {
 				options = _.extend(options, {dataType: 'jsonp'});
 			}
-			return GeoFeatureCollection.__super__.fetch.call(this, options);
+			return MapFeatures.__super__.fetch.call(this, options);
 		},
 
 		url: function(queryParams) 
@@ -109,5 +109,5 @@ define([
 				
 	});
 
-	return GeoFeatureCollection;
+	return MapFeatures;
 });

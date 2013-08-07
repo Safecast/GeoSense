@@ -2,11 +2,11 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'collections/geo-feature-collection',
+    'collections/map-features',
     'lib/color-gradient/color-gradient',
     'deepextend',
     'deepmodel',
-], function($, _, Backbone, GeoFeatureCollection, ColorGradient) {
+], function($, _, Backbone, MapFeatures, ColorGradient) {
     "use strict";
 
     var MapLayer = Backbone.DeepModel.extend({
@@ -84,10 +84,10 @@ define([
                 
             this.parentMap = options.parentMap;
             if (this.attributes.featureCollection) {
-                this.featureCollection = new GeoFeatureCollection([], {mapLayer: this});
+                this.featureCollection = new MapFeatures([], {mapLayer: this});
             } else {
                 var feed = this.getLayerOptions().feed;
-                this.featureCollection = new GeoFeatureCollection([], {mapLayer: this, 
+                this.featureCollection = new MapFeatures([], {mapLayer: this, 
                     urlFormat: feed ? feed.url : '',
                     parser: feed ? feed.parser : ''
                 });

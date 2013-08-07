@@ -6,8 +6,8 @@ define([
 	'utils',
 	'text!templates/homepage.html',
 	'models/map',
-	'collections/map-collection'
-], function($, _, Backbone, config, utils, templateHtml, Map, MapCollection) {
+	'collections/maps'
+], function($, _, Backbone, config, utils, templateHtml, Map, Maps) {
     "use strict";
 
 	var HomepageView = Backbone.View.extend({
@@ -35,7 +35,7 @@ define([
 
 		fetchFeaturedMaps: function() {
 			var self = this;
-			new MapCollection().forType('featured').fetch({
+			new Maps().forType('featured').fetch({
 				success: function(collection, response, options) {
 					collection.each(function(model) {
 						var url = genMapURL(model.attributes);
