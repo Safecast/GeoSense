@@ -42,7 +42,7 @@ var setAttr = function(obj, path, value) {
 };
 
 function formatLargeNumber(c) {
-	if (c > 1000000) {
+	if (c >= 1000000) {
 		c = Math.round(c / 1000000 * 10) / 10 + 'M';
 	} else if (c > 5000) {
 		c = Math.round(c / 1000) + 'K';
