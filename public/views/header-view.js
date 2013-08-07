@@ -175,7 +175,7 @@ define([
 		
 		postFacebookClicked: function(evt) 
 		{
-			var mapInfo = this.model.attributes;
+			var mapInfo = this.model.attributes,
 				url = 'http://www.facebook.com/sharer.php?u='
 			url += encodeURIComponent(app.genPublicURL(true));
 			url += '&t=' +encodeURIComponent(__('Check out the %(title)s map', {
