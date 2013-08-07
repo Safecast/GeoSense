@@ -11,12 +11,6 @@ var config = {
 
 	CLOCK_PROCESS_RUN_TIME: '0 10 * * * *',
 
-	DEFAULT_HOSTS: [
-		'localhost:3000',
-		'hollow-warrior-5556.herokuapp.com',
-		'geosense.herokuapp.com'
-	],
-
 	// since dev server restarts frequently and sessions are lost, circumvent 
 	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,
@@ -125,6 +119,17 @@ if (DEV && !config.DB_URI) {
 
 if (!config.BASE_URL && DEV) {
 	config.BASE_URL = 'http://localhost:' + config.SERVER_PORT + '/';
+}
+
+if (!config.DEFAULT_HOSTS) {
+	config.DEFAULT_HOSTS = [];
+	if (config.BASE_URL) {
+		//detect default host from BASE_URL
+		var match = config.BASE_URL.match(/^(.*:\/\/)?([^\/]*)/);
+		if (match) {
+			config.DEFAULT_HOSTS.push(match[2]);
+		}
+	}
 }
 
 if (utils) {
