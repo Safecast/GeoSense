@@ -9,7 +9,9 @@ if (IS_BROWSER) {
 var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
-var BASE_URL = 'http://' + (!DEV ? 'geosense.herokuapp.com' : 'localhost:3000');
+if (!BASE_URL) {
+	var BASE_URL = '/';
+}
 var CLOUDMADE_KEY = '0a77f5f7d290465f9fe419f4ee788c50';
 
 var MapStatus = {

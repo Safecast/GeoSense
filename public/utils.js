@@ -415,11 +415,12 @@ function genMapURL(mapInfo, opts, admin)
 {
 	var customHost = !DEV && !admin && mapInfo.host && mapInfo.host != '';
 	if (customHost) {
-		var baseUrl = 'http://' + mapInfo.host;
+		var base = 'http://' + mapInfo.host;
 	} else {
-		var baseUrl = BASE_URL;
+		var base = BASE_URL.replace(/\/$/, '');
+		console.log(base);
 	}
-	return baseUrl + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
+	return base + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
 };
 
 if (!Array.isArray) {
