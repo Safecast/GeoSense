@@ -518,7 +518,7 @@ define([
                                 + '<span class="view-base-caption">' + cls.providerName + '</span>'
                                 + '</a></li>');
                         }
-                        $('#viewBase .dropdown-menu').html(li.join(''));
+                        $('#viewBase .dropdown-menu .base-choices').html(li.join(''));
                         $('#viewBaseCurrent').text(this.mapView.ViewBase[this.mapView.viewBase].prototype.providerName);
                         $('#viewBaselayer').show();
                     } else {
@@ -542,6 +542,11 @@ define([
                 if (navigate || navigate == undefined) {
                     app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
                 }
+            },
+
+            setViewOptions: function(opts) 
+            {
+                this.mapView.setViewOptions(opts);
             },
 
             showMapInfo: function() 

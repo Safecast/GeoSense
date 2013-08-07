@@ -50,6 +50,27 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
+			this.$('.baselayer-opacity .slider').slider({
+				min: 0,
+				max: 1,
+				range: "min",
+				step: .025,
+				slide: function( event, ui ) {
+					app.setViewOptions({baselayerOpacity: ui.value});
+				}
+		    });
+
+			var input = this.$('input[name=backgroundColor]'),
+	    		val = undefined;
+	    	if (val != undefined) {
+				$(input).miniColors('value', val);	
+	    	}
+			$(input).miniColors({
+			    change: function(hex, rgb) { 
+					//self.modelInputChanged()
+				}
+			});
+
 	        return this;
 	    },
 

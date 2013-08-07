@@ -65,7 +65,8 @@ var FeatureAPI = function(app)
 						date,
 						boxes,
 						features = [],
-						datetimeAttr = mapLayer.layerOptions.attrMap.datetime;
+						datetimeAttr = mapLayer.layerOptions ? 
+							mapLayer.layerOptions.attrMap.datetime : null;
 
 					// adjust zoom						
 					if (isNaN(zoom) || zoom < 0) {

@@ -4,6 +4,7 @@ var config = require('../../config.js'),
 	utils = require("../../utils.js"),
 	url = require('url'),
 	mongoose = require('mongoose'),
+	console = require('../../ext-console.js'),
 	_ = require('cloneextend');
 
 var Point = models.Point,
