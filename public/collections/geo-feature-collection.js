@@ -5,6 +5,8 @@ define([
 	'models/geo-feature',
 	'parsers/index'
 ], function($, _, Backbone, GeoFeature, Parser) {
+    "use strict";
+
 	var GeoFeatureCollection = Backbone.Collection.extend({
 
 		model: GeoFeature,

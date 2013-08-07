@@ -4,13 +4,15 @@ define([
 	'backbone',
 	'models/map_layer',
 ], function($, _, Backbone, MapLayer) {
+    "use strict";
+    
 	var Map = Backbone.Model.extend({
 		
-		idAttribute: "_id",
+		idAttribute: "publicslug",
 		urlRoot: window.BASE_URL + 'api/map',
 
-		url: function() {
-			return this.urlRoot + '/' + this.attributes.publicslug;
+		publicAdminUrl: function() {
+			return BASE_URL + 'admin/' + this.attributes.publicslug;
 		},
 
 		newLayerInstance: function(attributes, options) {
