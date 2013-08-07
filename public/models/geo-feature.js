@@ -5,6 +5,8 @@ define([
     'deepextend',
     'deepmodel',
 ], function($, _, Backbone) {
+    "use strict";
+
 	var GeoFeature = Backbone.DeepModel.extend({
 		
 		idAttribute: "_id",

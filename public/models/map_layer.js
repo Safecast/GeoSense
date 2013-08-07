@@ -7,6 +7,8 @@ define([
     'deepextend',
     'deepmodel',
 ], function($, _, Backbone, GeoFeatureCollection, ColorGradient) {
+    "use strict";
+
     var MapLayer = Backbone.DeepModel.extend({
         
         idAttribute: "_id",

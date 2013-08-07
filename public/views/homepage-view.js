@@ -5,7 +5,9 @@ define([
 	'config',
 	'utils',
 	'text!templates/homepage.html',
-], function($, _, Backbone, config, utils, templateHtml) {
+	'models/map',
+	'collections/map-collection'
+], function($, _, Backbone, config, utils, templateHtml, Map, MapCollection) {
     "use strict";
 
 	var HomepageView = Backbone.View.extend({
@@ -33,22 +35,20 @@ define([
 
 		fetchFeaturedMaps: function() {
 			var self = this;
-			$.ajax({
-				type: 'GET',
-				url: '/api/maps/featured',
-				success: function(data) {
-					for (var i = 0; i < data.length; i++) {
-						var url = genMapURL(data[i]);
-						self.featuredMaps.push('<tr><td>' + data[i].title + '</td><td><a target="_self" href="' + url + '">' + url + '</a></td><tr>');
-					}
+			new MapCollection().forType('featured').fetch({
+				success: function(collection, response, options) {
+					collection.each(function(model) {
+						var url = genMapURL(model.attributes);
+						self.featuredMaps.push('<tr><td>' + model.attributes.title + '</td><td><a target="_self" href="' + url + '">' + url + '</a></td><tr>');
+					});
 					app.setUIReady();
 					self.showRecentMaps();
 				},
-				error: function() {
+				error: function(collection, response, options) {
 					app.setUIReady();
 					console.error('failed to fetch unique map');
 				}
-			});	
+			});
 		},
 		
 		showRecentMaps: function()
@@ -86,14 +86,12 @@ define([
 				this.$('#errorMessage').show();
 			} else {
 				console.log('creating map', postData);
-				$.ajax({
-					type: 'POST',
-					url: '/api/map',
-					data: postData,
-					success: function(data) {
-						window.location.href = '/admin/' + data.publicslug+'/setup';
+				new Map().save(postData, {
+					success: function(model, response, options) {
+						console.log('new map created');
+						window.location.href = model.publicAdminUrl() + '/setup';
 					},
-					error: function() {
+					error: function(model, xhr, options) {
 						console.error('failed to create a new map');
 					}
 				});
