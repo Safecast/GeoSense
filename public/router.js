@@ -753,7 +753,10 @@ define([
 
         var initialize = function() {
             window.app = new AppRouter();
-            if (!Backbone.history.start({ pushState: true })) {
+            if (!Backbone.history.start({
+                pushState: true,
+                root: window.BASE_URL
+            })) {
                 $('#app').html('page not found');
             }
         };

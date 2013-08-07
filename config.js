@@ -126,7 +126,6 @@ if (DEV && !config.DB_URI) {
 if (!config.BASE_URL && DEV) {
 	config.BASE_URL = 'http://localhost:' + config.SERVER_PORT + '/';
 }
-console.log(config.BASE_URL);
 
 if (utils) {
 	utils.import(config, require("./public/config.js"));

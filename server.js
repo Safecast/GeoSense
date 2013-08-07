@@ -163,7 +163,12 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/
 
 // Connect DB, load templates and start listening
 
-console.info('NODE_ENV=' + process.env.NODE_ENV);
+if (!config.BASE_URL) {
+	console.error('config.BASE_URL is not defined');
+} else {
+	console.info('Base URL:', config.BASE_URL);
+}
+console.info('Environment:', process.env.NODE_ENV);
 
 utils.connectDB(function() {
 	utils.loadFiles(['public/base.html'], __dirname, function(err, contents) {
