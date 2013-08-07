@@ -418,7 +418,6 @@ function genMapURL(mapInfo, opts, admin)
 		var base = 'http://' + mapInfo.host;
 	} else {
 		var base = BASE_URL.replace(/\/$/, '');
-		console.log(base);
 	}
 	return base + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
 };

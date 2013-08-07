@@ -755,7 +755,8 @@ define([
             window.app = new AppRouter();
             if (!Backbone.history.start({
                 pushState: true,
-                root: window.BASE_URL
+                root: window.BASE_URL.replace(/^(.*:\/\/)?[^\/]*\/?/, ''), // strip host and port and beginning /
+                silent: false
             })) {
                 $('#app').html('page not found');
             }
