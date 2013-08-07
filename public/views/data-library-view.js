@@ -5,7 +5,8 @@ define([
 	'config',
 	'utils',
 	'text!templates/data-library.html',
-], function($, _, Backbone, config, utils, templateHtml) {
+	'collections/geo-feature-collections'
+], function($, _, Backbone, config, utils, templateHtml, GeoFeatureCollections) {
     "use strict";
 
 	var DataLibraryView = Backbone.View.extend({
@@ -49,13 +50,11 @@ define([
 		fetchDataCollections: function() {	
 			
 			var self = this;	
-			$.ajax({
-				type: 'GET',
-				url: '/api/featurecollections',
-				success: function(data) {
+			new GeoFeatureCollections().fetch({
+				success: function(collection, response, options) {
 
-					$.each(data, function(key, featureCollection) { 
-						self.drawDataSource(featureCollection);
+					collection.each(function(model) { 
+						self.drawDataSource(model);
 					});
 					
 					self.$('.data-item').draggable({
@@ -76,15 +75,16 @@ define([
 				      drop: self.dataDrop
 				    } );	
 				},
-				error: function() {
+				error: function(collection, response, options) {
 					console.error('failed to fetch collections');
 				}
 			});
 		},
 		
-		drawDataSource: function(data)
+		drawDataSource: function(model)
 		{
-			var dataDiv = '<div class="data-item" data-id="'+data._id+'">'
+			var data = model.attributes,
+				dataDiv = '<div class="data-item" data-id="'+data._id+'">'
 				+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
 				+(data.count ? '<p class="data-count micro">'+formatLargeNumber(data.count)+'</p>' : '')
 				+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')

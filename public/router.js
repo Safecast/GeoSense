@@ -15,7 +15,6 @@ define([
     'views/data-import-view',
     'views/modal-view',
     'views/share-view',
-    'collections/geo-feature-collection',
     'models/map',
     'models/map_layer'
 ], function($, _, Backbone, HomepageView, HeaderView, 
@@ -23,7 +22,7 @@ define([
     MapInfoView, MapLayerEditorView,
     MapLayerView, DataLibraryView, DataImportView,
     ModalView, ShareView,
-    GeoFeatureCollection, Map, MapLayer) {
+    Map, MapLayer) {
         "use strict";
         var AppRouter = Backbone.Router.extend({
 
