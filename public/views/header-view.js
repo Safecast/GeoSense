@@ -71,6 +71,7 @@ define([
 					input.val(ui.value);
 				}
 		    });
+		    input.val(opacity);
 		    input.change(function() {
 		    	var val = parseFloat($(this).val());
 		    	if (isNaN(val) || val > 1) val = 1;
