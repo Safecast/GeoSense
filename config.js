@@ -1,5 +1,5 @@
 var PROD = typeof process != 'undefined' && process.env.NODE_ENV == 'production';
-var DEV = !PROD; // process.env.NODE_ENV == 'development';
+var DEV = process.env.NODE_ENV == 'development';
 
 var config = {
 
@@ -122,6 +122,11 @@ if (DEV && !config.DB_URI) {
 	// use default test db
 	config.DB_URI = 'mongodb://localhost/geosense';
 }
+
+if (!config.BASE_URL && DEV) {
+	config.BASE_URL = 'http://localhost:' + config.SERVER_PORT + '/';
+}
+console.log(config.BASE_URL);
 
 if (utils) {
 	utils.import(config, require("./public/config.js"));

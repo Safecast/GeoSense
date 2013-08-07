@@ -7,7 +7,7 @@ define([
 	var Map = Backbone.Model.extend({
 		
 		idAttribute: "_id",
-		urlRoot: (window.BASE_URL || '/') + 'api/map',
+		urlRoot: window.BASE_URL + 'api/map',
 
 		url: function() {
 			return this.urlRoot + '/' + this.attributes.publicslug;
