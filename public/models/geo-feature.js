@@ -68,26 +68,19 @@ define([
                 normVal = (val - minVal) / (maxVal - minVal),
                 normCount = count / counts.max,
                 color,
-                colorType = val != undefined ? options.colorType : ColorType.SOLID,
                 size;
 
-            switch (colorType) {
-                case ColorType.SOLID: 
-                    color = l.colorAt(0);
-                    break;
-                case ColorType.LINEAR_GRADIENT:
-                case ColorType.PALETTE:
-                    var colorPos;
+            switch (options.colorType) {
+                default:
                     switch (attrMap.featureColor) {
                         case 'count':
                             color = l.colorAt(normCount);
                             break;
                         default:
                         case 'val.avg':
-                            color = l.colorAt(normVal);
+                            color = l.colorAt(!isNaN(normVal) ? normVal : 0);
                             break;
                     }
-                    break;
             }
 
             switch (attrMap.featureSize) {
