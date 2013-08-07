@@ -107,6 +107,8 @@ define([
                 this.listenTo(this.vent, 'showMapLayerEditor', this.showMapLayerEditor);
                 this.listenTo(this.vent, 'viewOptionsChanged', this.viewOptionsChanged);
 
+                this.sessionOptions = {};
+
                 this.isEmbedded = window != window.top;
             }, 
 
@@ -195,11 +197,12 @@ define([
             },
 
             getCurrentViewOptions: function() {
-                return {
+                var opts = $.extend(this.sessionOptions.viewOptions, {
                     viewName: this.mapViewName,
                     viewBase: this.mapView.viewBase,
                     viewStyle: this.mapView.viewStyle
-                };
+                });
+                return opts;
             },
 
             genMapURI: function(mapViewName, opts, admin)
@@ -260,6 +263,7 @@ define([
                             console.log('initMapInfo');
                             self.initMap();
                             var opts = self.map.attributes.viewOptions || {};
+                            self.setViewOptions(opts);
                             var or = function(a, b) { return a && a != '' ? a : b };
                             self.initMapView(or(mapViewName, opts.viewName), 
                                 center, zoom, 
@@ -485,6 +489,8 @@ define([
             {
                 var self = this;
                 if (view == this.mapView) {
+                    self.setViewOptions();
+
                     $("#app").removeClass(function(index, css) {
                         return (css.match(/\bmap-style-\S+/g) || []).join(' ');
                     });
@@ -495,12 +501,13 @@ define([
                         var li = [];
                         $.each(this.mapView.viewStyles, function(styleName, title) {
                             var s = styleName;
-                            li.push('<li' + (s == self.mapView.viewStyle ? ' class="inactive"' : '') + '>'
+                            li.push('<li class="view-style' + (s == self.mapView.viewStyle ? ' inactive' : '') + '">'
                                 + '<a href="#' + s + '">' 
                                 + title
                                 + '</a></li>');
                         });
-                        $('#viewStyle .dropdown-menu').html(li.join(''));
+                        $('#viewStyle .dropdown-menu .view-style').remove();
+                        $('#viewStyle .dropdown-menu').prepend(li.join(''));
                         $('#viewStyleCurrent').text(this.mapView.viewStyles[this.mapView.viewStyle]);
                         $('#viewStyle').show();
                     } else {
@@ -511,14 +518,15 @@ define([
                         var li = [];
                         for (var key in this.mapView.ViewBase) {
                             var cls = this.mapView.ViewBase[key].prototype;
-                            li.push('<li' + (key == self.mapView.viewBase ? ' class="inactive"' : '') + '>'
+                            li.push('<li class="view-base' + (key == self.mapView.viewBase ? ' inactive' : '') + '">'
                                 + '<a href="#' + key + '">' 
                                 + '<span class="view-base-thumb"' + (key != 'blank' ? ' style="background: url(' 
                                 + window.BASE_URL + '/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
                                 + '<span class="view-base-caption">' + cls.providerName + '</span>'
                                 + '</a></li>');
                         }
-                        $('#viewBase .dropdown-menu .base-choices').html(li.join(''));
+                        $('#viewBase .dropdown-menu .view-base').remove();
+                        $('#viewBase .dropdown-menu').prepend(li.join(''));
                         $('#viewBaseCurrent').text(this.mapView.ViewBase[this.mapView.viewBase].prototype.providerName);
                         $('#viewBaselayer').show();
                     } else {
@@ -534,6 +542,7 @@ define([
                 if (navigate || navigate == undefined) {
                     app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
                 }
+                this.setViewOptions();
             },
 
             setViewBase: function(viewBase, navigate)
@@ -542,11 +551,19 @@ define([
                 if (navigate || navigate == undefined) {
                     app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
                 }
+                this.setViewOptions();
             },
 
             setViewOptions: function(opts) 
             {
-                this.mapView.setViewOptions(opts);
+                if (opts) {
+                    this.sessionOptions.viewOptions = $.extend(this.sessionOptions.viewOptions, opts);
+                } else {
+                    opts = this.sessionOptions.viewOptions;
+                }
+                if (this.mapView) {
+                    this.mapView.updateViewOptions(opts);
+                }
             },
 
             showMapInfo: function() 

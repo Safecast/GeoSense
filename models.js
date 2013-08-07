@@ -134,7 +134,8 @@ var Map = mongoose.model('Map', new mongoose.Schema({
         viewName: String,
         viewBase: String,
         viewStyle: String,
-        baselayerOpacity: Number
+        baselayerOpacity: Number,
+        backgroundColor: {type: String, required: false, match: colorMatch}
     },
     // TODO: Enforce privacy (currently unused because no user login required)
     status: {type: String, enum: [config.MapStatus.PRIVATE, config.MapStatus.PUBLIC], required: true, default: config.MapStatus.PUBLIC},

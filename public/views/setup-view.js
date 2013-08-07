@@ -158,7 +158,7 @@ define([
 			if (!this.viewOptionsChanged) return;
 
 			var postData = {
-				viewOptions: this.getCurrentViewOptions()
+				viewOptions: app.getCurrentViewOptions()
 			};
 
 			var self = this;
@@ -213,17 +213,12 @@ define([
 			return a;	
 		},
 
-		getCurrentViewOptions: function()
-		{
-			return app.getCurrentViewOptions();
-		},
-		
 	  	show: function() 
 	  	{
 			this.initialAreaChanged = app.mapView && !_.isEqual(this.model.attributes.initialArea, 
 				this.getInitialMapArea());
 			this.viewOptionsChanged = app.mapView && !_.isEqual(this.model.attributes.viewOptions, 
-				this.getCurrentViewOptions());
+				app.getCurrentViewOptions());
 			this.$('#savePositionButton').attr('disabled', !this.initialAreaChanged);
 			this.$('#saveViewOptionsButton').attr('disabled', !this.viewOptionsChanged);
 	  		SetupView.__super__.show.call(this);
