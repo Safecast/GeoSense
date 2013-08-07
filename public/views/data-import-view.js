@@ -466,7 +466,7 @@ define([
 
 			this.request = $.ajax({
 				type: 'POST',
-				url: '/api/import/',
+				url: window.BASE_URL + '/api/import/',
 				data: params,
 				success: function(responseData) {
 					console.log('import response', responseData);
