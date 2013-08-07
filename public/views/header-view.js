@@ -50,25 +50,47 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
-			this.$('.baselayer-opacity .slider').slider({
+			this.$('.base-options').click(function(event) {
+				event.stopPropagation();
+			});
+
+			var opts = this.model.attributes.viewOptions || {},
+				opacity = opts.baselayerOpacity || 1,
+				backgroundColor = opts.backgroundColor,
+				slider = this.$('.baselayer-opacity .slider'),
+				input = this.$('input[name=baselayerOpacity]');
+
+			slider.slider({
 				min: 0,
 				max: 1,
 				range: "min",
 				step: .025,
+				value: opacity,
 				slide: function( event, ui ) {
 					app.setViewOptions({baselayerOpacity: ui.value});
+					input.val(ui.value);
 				}
 		    });
+		    input.change(function() {
+		    	var val = parseFloat($(this).val());
+		    	if (isNaN(val) || val > 1) val = 1;
+		    	if (val < 0) val = 0;
+		    	$(this).val(val);
+		    	slider.slider('value', val);
+		    });
 
-			var input = this.$('input[name=backgroundColor]'),
-	    		val = undefined;
-	    	if (val != undefined) {
-				$(input).miniColors('value', val);	
+			var colorInput = this.$('input[name=backgroundColor]');
+	    	if (backgroundColor != undefined) {
+				$(colorInput).miniColors('value', backgroundColor);	
 	    	}
-			$(input).miniColors({
+			$(colorInput).miniColors({
 			    change: function(hex, rgb) { 
-					//self.modelInputChanged()
+					app.setViewOptions({backgroundColor: hex});
 				}
+			});
+			$(colorInput).change(function() {
+				// when blank
+				app.setViewOptions({backgroundColor: $(this).val()});
 			});
 
 	        return this;

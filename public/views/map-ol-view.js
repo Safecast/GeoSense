@@ -443,10 +443,13 @@ define([
             }
         },
 
-        setViewOptions: function(opts) 
+        updateViewOptions: function(opts) 
         {
             if (opts.baselayerOpacity != undefined) {
                 this.baselayer.mapLayer.setOpacity(opts.baselayerOpacity);
+            }
+            if (opts.backgroundColor != undefined) {
+                this.$el.css('background-color', opts.backgroundColor);
             }
         },
            
