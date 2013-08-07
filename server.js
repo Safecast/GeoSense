@@ -10,7 +10,6 @@ var application_root = __dirname,
     console = require('./ext-console');
 
 var templates;
-var port = process.env.PORT || 3000;
 var app = express();
 
 app.configure(function() {
@@ -52,6 +51,7 @@ function serveHome(req, res)
 		// would still serve that map (in non-admin mode).
 		res.end(ejs.render(templates['public/base.html'], {
 			nodeEnv: process.env.NODE_ENV,
+			config: config,
 			mapSlugByHost: false
 		}));
 	} else {
@@ -92,6 +92,7 @@ function staticRoute(req, res, slug, admin)
 		}
 		res.end(ejs.render(templates['public/base.html'], {
 			nodeEnv: process.env.NODE_ENV,
+			config: config,
 			mapSlugByHost: (routingByHost ? map.publicslug : false)
 		}));
 	}
@@ -162,14 +163,16 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/
 
 // Connect DB, load templates and start listening
 
+console.info('NODE_ENV=' + process.env.NODE_ENV);
+
 utils.connectDB(function() {
 	utils.loadFiles(['public/base.html'], __dirname, function(err, contents) {
 	    if (err) {
 	    	throw err;
 	    } else {
 	        templates = contents;
-			app.listen(port, "0.0.0.0");
-			console.success('Web server running at http://0.0.0.0:' + port + "/");
+			app.listen(config.SERVER_PORT, config.SERVER_HOST);
+			console.success('Web server running at http://' + config.SERVER_HOST + ':' + config.SERVER_PORT + "/");
 	    }
 	});
 }, false);
