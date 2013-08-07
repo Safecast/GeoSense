@@ -35,7 +35,7 @@ define([
             this.externalProjection = new OpenLayers.Projection("EPSG:4326"); // aka WGS 84
             this.internalProjection = null; // determined by baselayer -- usually EPSG:900913
 
-            OpenLayers.ImgPath = "/assets/openlayers-light/";   
+            OpenLayers.ImgPath = window.BASE_URL + "/assets/openlayers-light/";   
             this.featureLayers = {};
         },
 
