@@ -196,7 +196,7 @@ define([
 				this.model.destroy({
 					success: function(model, response, options) {
 						console.log('deleted map: ' + id);
-						window.location = '/';
+						window.location = window.BASE_URL;
 					},
 					error: function(model, xhr, options) {
 						console.error('failed to delete map: ' + id, xhr);
