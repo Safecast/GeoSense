@@ -513,7 +513,8 @@ define([
                             var cls = this.mapView.ViewBase[key].prototype;
                             li.push('<li' + (key == self.mapView.viewBase ? ' class="inactive"' : '') + '>'
                                 + '<a href="#' + key + '">' 
-                                + '<span class="view-base-thumb"' + (key != 'blank' ? ' style="background: url(/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
+                                + '<span class="view-base-thumb"' + (key != 'blank' ? ' style="background: url(' 
+                                + window.BASE_URL + '/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
                                 + '<span class="view-base-caption">' + cls.providerName + '</span>'
                                 + '</a></li>');
                         }
