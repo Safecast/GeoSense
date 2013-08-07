@@ -837,7 +837,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			}
 			var filename = params.url || params.path,
 				titlefy = function(s) {
-					var s = s.replace(/_/, ' ');
+					var s = unescape(s).replace(/_/, ' ');
       				return s.substr(0, 1).toUpperCase() + s.substring(1);
     			};
 			runImport(new ToCollectionModel({
