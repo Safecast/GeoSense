@@ -78,6 +78,7 @@ define([
 		    	if (val < 0) val = 0;
 		    	$(this).val(val);
 		    	slider.slider('value', val);
+				app.setViewOptions({baselayerOpacity: val});
 		    });
 
 			var colorInput = this.$('input[name=backgroundColor]');
