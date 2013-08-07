@@ -442,6 +442,13 @@ define([
                 }
             }
         },
+
+        setViewOptions: function(opts) 
+        {
+            if (opts.baselayerOpacity != undefined) {
+                this.baselayer.mapLayer.setOpacity(opts.baselayerOpacity);
+            }
+        },
            
         setVisibleMapArea: function(area)
         {
@@ -706,7 +713,7 @@ define([
         providerName: 'Blank',
         initMapLayer: function(change)
         {
-            ViewBase.osm.prototype.initMapLayer.call(this, false, "/assets/blank.gif");
+            ViewBase.osm.prototype.initMapLayer.call(this, false, window.BASE_URL + "/assets/blank.gif");
         },
 
         mapStyles: {

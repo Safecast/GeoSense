@@ -240,3 +240,13 @@
 {
 	opacity:1;
 }
+
+.header-view .dropdown-menu .slider {
+	margin: 3px 13px 3px 13px;
+	width: 165px;
+	margin-right: 13px;
+}
+
+.dropdown-menu a.ui-slider-handle {
+	padding: 0;
+}

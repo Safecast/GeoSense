@@ -13,7 +13,8 @@ var Point = models.Point,
 	Map = models.Map,
 	LayerOptions = models.LayerOptions,
 	User = models.User,
-	handleDbOp = utils.handleDbOp;
+	handleDbOp = utils.handleDbOp,
+	console = require('../../ext-console');
 
 var MapAPI = function(app) 
 {
@@ -321,7 +322,7 @@ var MapAPI = function(app)
 							console.warn('Cloning defaults for new layerOptions');
 							
 							cloneDefaults = function(callback) {
-								models.cloneLayerOptionsDefaults(mapLayer, function(err, clone) {
+								models.cloneLayerOptionsDefaults(mapLayer.featureCollection, function(err, clone) {
 								if (handleDbOp(req, res, err, clone)) return;
 									mapLayer.layerOptions = clone._id;
 									map.save(function(err, map) {
@@ -349,7 +350,7 @@ var MapAPI = function(app)
 						// set all public elements of layerOptions
 						for (var k in req.body.layerOptions) {
 							if (k[0] != '_') {
-								console.log(k, req.body.layerOptions[k]);
+								//console.log(k, req.body.layerOptions[k]);
 								mapLayer.layerOptions.set(k, req.body.layerOptions[k]);
 							}
 						}
@@ -357,7 +358,7 @@ var MapAPI = function(app)
 						mapLayer.layerOptions.save(function(err, opts) {
 							if (handleDbOp(req, res, err, true)) return;
 
-							console.log('layer options updated');
+							console.success('layerOptions updated');
 							
 							if (req.body.position != undefined) {
 								var newPosition = parseInt(req.body.position);
@@ -405,19 +406,22 @@ var MapAPI = function(app)
 				    	.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
+
 							if (!collection.defaults) {
 								console.warn('Creating new layerOptions');
-								cloneDefaults = function(callback) {
-									this.cloneDefaults(function(err, clone) {
-										callback(err, clone);
-									});
+								getDefaults = function(callback) {
+									// TODO: the GeoFeatureCollection has no defaults, due to a bug.
+									// create new:
+									models.cloneLayerOptionsDefaults(collection, callback);
 								};
 							} else {
+								// Until overwritten by the user, the new layer will use the GeoFeatureCollection's
+								// default settings.
 								console.warn('Using defaults for layerOptions');
-								cloneDefaults = function(callback) { callback(false, collection.defaults); }
+								getDefaults = function(callback) { callback(false, collection.defaults); }
 							}
 
-							cloneDefaults.call(collection, function(err, layerOptions) {
+							getDefaults.call(collection, function(err, layerOptions) {
 								var sortedLayers = sortByPosition(map.layers);
 							    var layer = {
 							    	// set _id so it can be referenced below

@@ -133,7 +133,8 @@ var Map = mongoose.model('Map', new mongoose.Schema({
     viewOptions: {
         viewName: String,
         viewBase: String,
-        viewStyle: String
+        viewStyle: String,
+        baselayerOpacity: Number
     },
     // TODO: Enforce privacy (currently unused because no user login required)
     status: {type: String, enum: [config.MapStatus.PRIVATE, config.MapStatus.PUBLIC], required: true, default: config.MapStatus.PUBLIC},
@@ -226,9 +227,11 @@ GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
 cloneLayerOptionsDefaults = function(featureCollection, callback)
 {
     if (!featureCollection || !featureCollection.defaults) {
+        console.warn('featureCollection has no defaults, creating from LAYER_OPTIONS_DEFAULTS')
         return new LayerOptions(config.LAYER_OPTIONS_DEFAULTS).save(callback);
     }
     LayerOptions.findById(featureCollection.defaults, function(err, defaults) {
+        console.log('cloning featureCollection.defaults', defaults._id);
         if (err) {
             callback(err);
             return;

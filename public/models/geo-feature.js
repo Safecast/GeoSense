@@ -53,6 +53,7 @@ define([
 		{
             var l = this.collection.mapLayer,
                 options = l.getLayerOptions(),
+                attrMap = this.collection.mapLayer.getOption('attrMap', {}),
                 extremes = l.getMappedExtremes(),
                 counts = l.getCounts(),
                 val = this.getNumericVal(),
@@ -72,12 +73,12 @@ define([
 
             switch (colorType) {
                 case ColorType.SOLID: 
-                    //color = l.colorAt(0);
-                    //break;
+                    color = l.colorAt(0);
+                    break;
                 case ColorType.LINEAR_GRADIENT:
                 case ColorType.PALETTE:
                     var colorPos;
-                    switch (options.attrMap.featureColor) {
+                    switch (attrMap.featureColor) {
                         case 'count':
                             color = l.colorAt(normCount);
                             break;
@@ -89,7 +90,7 @@ define([
                     break;
             }
 
-            switch (options.attrMap ? options.attrMap.featureSize : null) {
+            switch (attrMap.featureSize) {
                 default:
                 case 'count':
                     size = normCount;

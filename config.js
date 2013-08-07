@@ -23,7 +23,7 @@ var config = {
 			name: 'default',
 			colors: [{position: '0%', color: '#44bbee'}/*, {position: '100%', color: '#81ffff'}*/],
 		}],
-		opacity: .5
+		opacity: .5,
 	},
 
 	NUM_ZOOM_LEVELS: 20,
