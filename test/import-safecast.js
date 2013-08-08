@@ -77,9 +77,8 @@ describe('Safecast', function() {
 		importCollection.getFeatureModel().findOne(function(err, feature) {
 			if (err) throw err;
 			var f = feature;
-			console.log('====================================>', f);
 			assert.equal(f.geometry.type, 'Point');
-			assert.equal(f.type, 'Point');
+			assert.equal(f.type, 'Feature');
 			assert.equal(Number(f.source.Value), f.properties.val);
 			assert.equal(Number(f.source.Longitude), f.geometry.coordinates[0]);
 			assert.equal(Number(f.source.Latitude), f.geometry.coordinates[1]);
