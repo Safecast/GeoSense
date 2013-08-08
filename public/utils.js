@@ -266,31 +266,32 @@ Date.prototype.format = function(format, displayTimezoneOffset) {
 
 Date.prototype.formatReplacements = {
   	d: function() {
-  		return lpad(this.getDate(), '0', 2);
+  		console.log(this);
+  		return lpad(this.getUTCDate(), '0', 2);
   	},
   	m: function() {
-  		return lpad(this.getMonth() + 1, '0', 2);
+  		return lpad(this.getUTCMonth() + 1, '0', 2);
   	},
   	Y: function() {
-  		return this.getFullYear();
+  		return this.getUTCFullYear();
   	},
   	y: function() { 
-  		return new String(this.getFullYear()).substr(2, 2);
+  		return new String(this.getUTCFullYear()).substr(2, 2);
   	},
   	B: function() { 
-  		return locale.MONTH_NAMES[this.getMonth()] 
+  		return locale.MONTH_NAMES[this.getUTCMonth()] 
   	},
   	b: function() { 
-  		return locale.ABBR_MONTH_NAMES[this.getMonth()] 
+  		return locale.ABBR_MONTH_NAMES[this.getUTCMonth()] 
   	},
   	H: function() {
-  		return lpad(this.getHours() + '', '0', 2);
+  		return lpad(this.getUTCHours() + '', '0', 2);
   	},
   	i: function() {
-  		return lpad(this.getMinutes() + '', '0', 2);
+  		return lpad(this.getUTCMinutes() + '', '0', 2);
   	},
   	s: function() {
-  		return lpad(this.getSeconds() + '', '0', 2);
+  		return lpad(this.getUTCSeconds() + '', '0', 2);
   	}
 };
 

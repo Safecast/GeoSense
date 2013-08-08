@@ -57,38 +57,40 @@ describe('DataTransform', function() {
 		}
 	]);
 
-	var result = dataTransform.transformModel(PseudoModel(source), PseudoModel);
+	dataTransform.on('data', function(model, transformed) {
+		it('should convert [Lat,Lng] to [Lng,Lat]', function() {
+			assert.deepEqual(model.get('xy'), [11, 10]);
+		});
 
-	it('should convert [Lat,Lng] to [Lng,Lat]', function() {
-		assert.deepEqual(result.model.get('xy'), [11, 10]);
+		it('should convert "Lng,Lat" to [Lng,Lat] and clamp the numbers to -180 <= n < 180', function() {
+			assert.deepEqual(model.get('coordinates'), [-180, -175]);
+		});
+
+		it('should cast numeric fields to numbers and return an object', function() {
+			assert.deepEqual(model.get('numbers'), {lat: 10, lng: 11});
+		});
+
+		it('should return an array of numbers extracted from a comma-separated string', function() {
+			assert.deepEqual(model.get('array1'), [180, 185]);
+		});
+
+		it('should return an array of all items', function() {
+			assert.deepEqual(model.get('array2'), [source.coordinates]);
+		});
+
+		it('should correctly apply filters', function() {
+			var arr = [1, 2, 3, 0, 4, 5, 0, 6];
+			assert.deepEqual(
+				transform.filterValue(arr, ['notZero', 'isEven', 'lte,4']),
+				[2, 4]
+			);
+			assert.equal(
+				transform.filterValue(1, ['isEven']),
+				undefined
+			);
+		});
 	});
 
-	it('should convert "Lng,Lat" to [Lng,Lat] and clamp the numbers to -180 <= n < 180', function() {
-		assert.deepEqual(result.model.get('coordinates'), [-180, -175]);
-	});
-
-	it('should cast numeric fields to numbers and return an object', function() {
-		assert.deepEqual(result.model.get('numbers'), {lat: 10, lng: 11});
-	});
-
-	it('should return an array of numbers extracted from a comma-separated string', function() {
-		assert.deepEqual(result.model.get('array1'), [180, 185]);
-	});
-
-	it('should return an array of all items', function() {
-		assert.deepEqual(result.model.get('array2'), [source.coordinates]);
-	});
-
-	it('should correctly apply filters', function() {
-		var arr = [1, 2, 3, 0, 4, 5, 0, 6];
-		assert.deepEqual(
-			transform.filterValue(arr, ['notZero', 'isEven', 'lte,4']),
-			[2, 4]
-		);
-		assert.equal(
-			transform.filterValue(1, ['isEven']),
-			undefined
-		);
-	});
+	dataTransform.transform(PseudoModel(source), PseudoModel);
 
 });

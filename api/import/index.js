@@ -117,11 +117,11 @@ var ImportAPI = function(app)
 							sendItems.push(result.toObject());
 						}
 					},
-					transform: function(err, result) {
+					transform: function(err, model, transformed) {
 						if (req.body.preview) {
 							var expanded = {};
-							for (var k in result.transformed) {
-								scopeFunctions.setAttr(expanded, k, result.transformed[k]);
+							for (var k in transformed) {
+								scopeFunctions.setAttr(expanded, k, transformed[k]);
 							}
 							sendItems.push(expanded);
 						}
@@ -251,6 +251,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     parser = format.Parser();
 
     dataTransform = new transform.DataTransform(format.transform, {strict: !params.dry});
+    dataTransform.verbose = config.DEBUG && config.VERBOSE;
 	var customTransform;
     if (params.transform) {
     	if (typeof params.transform != 'object') {
@@ -655,96 +656,97 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							dataCallbacks.data(false, doc);
 						}
 
-						var transformResult = dataTransform.transformModel(doc, ToSaveModel, {
-							DEBUG: config.DEBUG && config.VERBOSE
-						});
+						dataTransform.transform(doc, ToSaveModel);
 
-						if (dataCallbacks.transform) {
-							dataCallbacks.transform(false, transformResult);
+					}
+			    }
+
+			    function onTransformData(saveModel, transformed)
+			    {
+					if (dataCallbacks.transform) {
+						dataCallbacks.transform(false, saveModel, transformed);
+					}
+
+					var doSave;
+
+					if (saveModel) {
+						var loc = saveModel.geometry.coordinates,
+							datetime = saveModel.properties ? saveModel.properties.datetime : undefined,
+							incrementor = saveModel.incrementor;
+
+						doSave = saveModel
+							&& (!loc || !loc.length || !params.bounds 
+								|| (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
+							&& (!datetime || !params.from || datetime >= params.from)
+							&& (!datetime || !params.to || datetime <= params.to)
+							&& (!params.incremental || !collection.extremes || collection.extremes.incrementor == undefined 
+								|| incrementor == undefined || incrementor > collection.extremes.incrementor.max);
+					}
+
+					if (doSave) {
+				    	if (self.readStream) {
+				    		// unless paused, incoming data will pile up since saving
+				    		// is slow. pausing the readStream until all are saved keeps 
+				    		// memory consumption low.
+					    	self.readStream.pause();
+				    	}
+						saveModel.importJob = job;
+						saveModel.set(toCollectionField, collection);
+
+						// determine extremes of all properties
+						if (!extremes.properties) {
+							extremes.properties = {};
 						}
-
-						var saveModel = transformResult.model,
-							doSave;
-
-						if (saveModel) {
-							var loc = saveModel.geometry.coordinates,
-								datetime = saveModel.properties ? saveModel.properties.datetime : undefined,
-								incrementor = saveModel.incrementor;
-
-							doSave = saveModel
-								&& (!loc || !loc.length || !params.bounds 
-									|| (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
-								&& (!datetime || !params.from || datetime >= params.from)
-								&& (!datetime || !params.to || datetime <= params.to)
-								&& (!params.incremental || !collection.extremes || collection.extremes.incrementor == undefined 
-									|| incrementor == undefined || incrementor > collection.extremes.incrementor.max);
-						}
-
-						if (doSave) {
-					    	if (self.readStream) {
-					    		// unless paused, incoming data will pile up since saving
-					    		// is slow. pausing the readStream until all are saved keeps 
-					    		// memory consumption low.
-						    	self.readStream.pause();
-					    	}
-							saveModel.importJob = job;
-							saveModel.set(toCollectionField, collection);
-
-							// determine extremes of all properties
-							if (!extremes.properties) {
-								extremes.properties = {};
+						for (var key in saveModel.properties) {
+							extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
+							// determine type for each property as long as it remains constant
+							var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
+								: typeof saveModel.properties[key];
+							if (propertyType == 'string' && transform.Cast.Date(saveModel.properties[key])) {
+								propertyType = 'Date';
 							}
-							for (var key in saveModel.properties) {
-								extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
-								// determine type for each property as long as it remains constant
-								var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
-									: typeof saveModel.properties[key];
-								if (propertyType == 'string' && transform.Cast.Date(saveModel.properties[key])) {
-									propertyType = 'Date';
-								}
-								if (propertyTypes[key] == undefined) {
-									propertyTypes[key] = propertyType;
-								} else {
-									if (propertyTypes[key] != propertyType) {
-										propertyTypes[key] = false;
-									}
-								}
-							}
-							// determine extremes of all incrementor
-							if (incrementor) {
-								extremes.incrementor = utils.findExtremes(incrementor, extremes.incrementor);
-							}
-
-							numSaving++;
-							importCount++;
-
-							var saveHandler = makeSaveHandler(saveModel, self);
-							//console.log('SAVE', saveModel);
-							if (!params.dry) {
-								saveModel.save(saveHandler);
+							if (propertyTypes[key] == undefined) {
+								propertyTypes[key] = propertyType;
 							} else {
-								saveHandler(false, saveModel);
+								if (propertyTypes[key] != propertyType) {
+									propertyTypes[key] = false;
+								}
 							}
+						}
+						// determine extremes of all incrementor
+						if (incrementor) {
+							extremes.incrementor = utils.findExtremes(incrementor, extremes.incrementor);
+						}
+
+						numSaving++;
+						importCount++;
+
+						var saveHandler = makeSaveHandler(saveModel, self);
+						//console.log('SAVE', saveModel);
+						if (!params.dry) {
+							saveModel.save(saveHandler);
 						} else {
-							if (saveModel && params.break) {
-						    	debugStats('reached break point, ending', 'success', null, true);
-								ended = true;
-								self.end();
-								return;
-							} else {
-								debugStats('* skipping point' + (doc && doc.get('sourceId') ? ' [sourceId=' + doc.get('sourceId') + ']' : ''));
-								numSkipped++;
-						    	postSave(self);
-							}
+							saveHandler(false, saveModel);
 						}
+					} else {
+						if (saveModel && params.break) {
+					    	debugStats('reached break point, ending', 'success', null, true);
+							ended = true;
+							self.end();
+							return;
+						} else {
+							debugStats('* skipping record');
+							numSkipped++;
+					    	postSave(self);
+						}
+					}
 
-						if (numRead == 1 || numRead % 5000 == 0) {
-					    	debugStats('update progress', 'info', (collection.numBusy ? Math.round(collection.progress / collection.numBusy * 100)+'%' : ''));
-					    	collection.progress = numSaved;
-					    	if (!params.dry) {
-						    	collection.save();
-					    	}
-						}
+					if (numRead == 1 || numRead % 5000 == 0) {
+				    	debugStats('update progress', 'info', (collection.numBusy ? Math.round(collection.progress / collection.numBusy * 100)+'%' : ''));
+				    	collection.progress = numSaved;
+				    	if (!params.dry) {
+					    	collection.save();
+				    	}
 					}
 			    }
 
@@ -782,6 +784,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					.on('data', onData)								
 				    .on('end', onEnd)
 				    .on('error', onError);
+
+				dataTransform.on('data', onTransformData);
 
 				if (params.stream) {
 					console.info('*** Importing from stream ***', params.stream, '[converter=' + params.converter + ']');
