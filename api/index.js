@@ -1,7 +1,7 @@
 var MapAPI = require('./map'),
 	FeatureAPI = require('./feature'),
 	ImportAPI = require('./import'),
-	MapReduceAPI = require('./mapreduce');
+	AggregateAPI = require('./aggregate');
 
 var API = function(app)
 {
@@ -9,7 +9,7 @@ var API = function(app)
 		map: new MapAPI(app),
 		feature: new FeatureAPI(app),
 		import: new ImportAPI(app),
-		mapReduce: new MapReduceAPI(app)
+		aggregate: new AggregateAPI(app)
 	};
 };
 

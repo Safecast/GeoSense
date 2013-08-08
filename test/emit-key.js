@@ -1,4 +1,4 @@
-var	EmitKey = require('../api/mapreduce/mapreduce_abstraction').EmitKey,
+var	EmitKey = require('../api/aggregate/mapreduce_abstraction').EmitKey,
 	assert = require('assert');
 
 describe('MapReduce', function() {

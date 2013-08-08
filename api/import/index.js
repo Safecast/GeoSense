@@ -18,8 +18,8 @@ var config = require('../../config'),
 	_ = require('cloneextend'),
 	path = require('path'),
 	console = require('../../ext-console.js'),
-	MapReduceAPI = require('../mapreduce'),
-	scopeFunctions = require('../mapreduce/mapreduce_abstraction/keys').scopeFunctions;
+	AggregateAPI = require('../aggregate'),
+	scopeFunctions = require('../aggregate/mapreduce_abstraction/keys').scopeFunctions;
 
 var LayerOptions = models.LayerOptions,
 	handleDbOp = utils.handleDbOp;
@@ -76,8 +76,8 @@ var ImportAPI = function(app)
 				params.url = req.body.url;
 			}
 
-			if (req.body.mapreduce == null || req.body.mapreduce) {
-				params.mapreduce = !params.dry;
+			if (req.body.aggregate == null || req.body.aggregate) {
+				params.aggregate = !params.dry;
 			}
 
 			if (!valid) {
@@ -519,12 +519,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 									}
 								} else {
 							    	debugStats('*** job completed ***', 'success', null, true);
-									if (params.mapreduce) {
-										console.log('**** starting mapreduce');
-										var mapReduceParams = {
+									if (params.aggregate) {
+										console.log('**** starting aggregate');
+										var aggregateParams = {
 											featureCollectionId: collection._id.toString()
 										};
-										new MapReduceAPI().mapReduce(mapReduceParams, req, res, callback);
+										new AggregateAPI().aggregate(aggregateParams, req, res, callback);
 									} else {
 										if (callback) {
 											callback(false, collection);
@@ -927,7 +927,7 @@ function getImportParams(params)
 		break: (params.break ? params.break && params.break != 'off' : undefined), 
 		interval: params.interval,
 		bounds: params.bounds,
-		mapreduce: (params.mapreduce ? params.mapreduce && params.mapreduce != 'off' : undefined),
+		aggregate: (params.aggregate ? params.aggregate && params.aggregate != 'off' : undefined),
 		fields: (params.fields ? JSON.parse(params.fields) : undefined) // precedence over converter
 	});
 }

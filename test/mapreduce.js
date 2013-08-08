@@ -2,7 +2,7 @@ var	models = require('../models'),
 	config = require('../config'),
 	api = new require('../api')(),
 	utils = require('../utils'),
-	EmitKey = require('../api/mapreduce/mapreduce_abstraction').EmitKey,
+	EmitKey = require('../api/aggregate/mapreduce_abstraction').EmitKey,
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	assert = require('assert'),
 	mongoose = require('mongoose');
@@ -90,7 +90,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should run MapReduce to get a daily overall', function(done) {
-		api.mapReduce.mapReduce({
+		api.aggregate.aggregate({
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom,
 			types: ['daily'],
@@ -112,7 +112,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should run MapReduce at the size of the area where features where generated, resulting in 1 single feature', function(done) {
-		api.mapReduce.mapReduce({
+		api.aggregate.aggregate({
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom,
 			types: ['tile'],
@@ -134,7 +134,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should run MapReduce for the next zoom level, which has a grid cell area 4 times smaller, resulting in 4 features', function(done) {
-		api.mapReduce.mapReduce({
+		api.aggregate.aggregate({
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom + 1,
 			types: ['tile'],
