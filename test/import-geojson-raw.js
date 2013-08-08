@@ -1,7 +1,7 @@
 var	models = require('../models'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	config = require('../config'),
-	format = require('../api/import/formats/json'),
+	format = require('../api/import/formats/geojson'),
 	assert = require('assert'),
 	mongoose = require('mongoose'),
 	_ = require('cloneextend');
