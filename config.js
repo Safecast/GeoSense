@@ -1,5 +1,5 @@
 var PROD = typeof process != 'undefined' && process.env.NODE_ENV == 'production';
-var DEV = process.env.NODE_ENV == 'development';
+var DEV = typeof process != 'undefined' && process.env.NODE_ENV == 'development';
 
 var config = {
 
