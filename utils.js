@@ -35,7 +35,7 @@ exports.connectDB = function(callback, exitProcessOnError)
             process.exit(1);
         }
     } else {
-        console.info('Connecting to database', config.DB_URI);
+        console.info('Connecting to database', config.DB_URI.replace(/([^:]):.*@/, '$1:***@'));
         return mongoose.connect(config.DB_URI).connection;
     }
 };
