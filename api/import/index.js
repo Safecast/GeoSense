@@ -219,7 +219,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		} 
 	}
 
-	//console.log('import params', params);
 	var formatModule, format, parser, dataTransform;
 
 	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
@@ -438,7 +437,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						}
 						var fieldNames = collection.fields.map(function(field) { return field.name });
 						// check if default label fields exist and use first
-						console.log(fieldNames);
 						config.DEFAULT_LABEL_FIELDS.every(function(fieldName) {
 							var f = 'properties.' + fieldName;
 							if (fieldNames.indexOf(f) != -1) {
@@ -641,7 +639,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 						} else {
 							if (!fieldNames) {
-								console.log(data);
+								//console.log(data);
 								fieldNames = Object.keys(data);
 							}
 							doc = data;
@@ -822,7 +820,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		if (params.layerOptions) {
 			defs = _.cloneextend(defs, params.layerOptions);
 		}
-		console.log(defs);
+		//console.log(defs);
 		var defaults = new LayerOptions(defs);
 
 		var defaultsSave = !params.dry ?
@@ -941,10 +939,10 @@ ImportAPI.prototype.cli = {
 
 		if (!showHelp && utils.connectDB()) {
 			params.append = params._[1];
-			console.log(params);
+			//console.log(params);
 			this.import(getImportParams(params), null, null, callback);
 		} else {
-			callback(false, help);
+			callback(false, help, true);
 		}
 	},
 	
@@ -963,7 +961,7 @@ ImportAPI.prototype.cli = {
 				this.syncAll(getImportParams(params), null, null, callback);
 			}
 		} else {
-			callback(false, help);
+			callback(false, help, true);
 		}
 	},
 

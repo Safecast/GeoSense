@@ -193,9 +193,9 @@ exports.import = function(into, mod) {
     return mod;
 }
 
-exports.exitCallback = function(err, showHelp) {
+exports.exitCallback = function(err, data, showHelp) {
     if (showHelp) {
-        console.info(showHelp);
+        console.info(data);
     }
     if (err) {
         console.error(err.message);
