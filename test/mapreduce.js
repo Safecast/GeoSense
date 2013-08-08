@@ -102,7 +102,6 @@ describe('MapReduce', function() {
 			featureCollection.getMapReducedFeatureModel({timeGrid: 'daily'})
 				.find(function(err, features) {
 					if (err) throw err;
-					console.log('----', features);
 					assert.equal(features.length, days);
 					assert.equal(features[0].get('value').count, days);
 					done();
@@ -126,7 +125,6 @@ describe('MapReduce', function() {
 					if (err) throw err;
 					assert.equal(features.length, 1);
 					assert.equal(features[0].get('value').count, generateCount);
-					//console.log(features[0].toGeoJSON());
 					done();
 				});
 
