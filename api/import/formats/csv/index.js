@@ -17,7 +17,6 @@ module.exports = {
 
 	transform: [
 		{ to: 'source', from: '*', type: 'Object' },
-		{ to: 'type', set: 'Point' },
 		{ to: 'geometry.type', set: 'Point' }
 	]
 };
