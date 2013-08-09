@@ -415,6 +415,10 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						}
 					}
 
+					console.info('* Detected fields:', collection.fields.reduce(function(previousValue, currentValue) {
+						return previousValue.concat(['`' + currentValue.name + '` (' + currentValue.type + ')']);
+					}, []).join(', '));
+
 					collection.active = true;
 					collection.numBusy = 0;
 					if (bounds) {
@@ -702,14 +706,20 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							// determine type for each property as long as it remains constant
 							var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
 								: typeof saveModel.properties[key];
+							// try to cast Date
 							if (propertyType == 'string' && transform.Cast.Date(saveModel.properties[key])) {
 								propertyType = 'Date';
 							}
+							// if this is the first time we encounter the property
 							if (propertyTypes[key] == undefined) {
 								propertyTypes[key] = propertyType;
 							} else {
+								// if the property type is inconsistent, set to false (except: 
+								// if one was a Date and the other was a string, then reset to string,
+								// since some random strings parse as Date)
 								if (propertyTypes[key] != propertyType) {
-									propertyTypes[key] = false;
+									propertyTypes[key] = propertyTypes[key] == 'Date' || propertyType == 'Date' ?
+										'string' : false;
 								}
 							}
 						}

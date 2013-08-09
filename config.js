@@ -5,7 +5,7 @@ var config = {
 
 	DEV: DEV,
 	DEBUG: DEV,	
-	VERBOSE: true,
+	VERBOSE: false,
 	DEBUG_MAPREDUCE: DEV && 0,
 	LIMITED_PROD_ACCESS: !DEV,
 
