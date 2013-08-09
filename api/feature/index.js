@@ -65,7 +65,7 @@ var FeatureAPI = function(app)
 						date,
 						boxes,
 						features = [],
-						datetimeAttr = mapLayer.layerOptions ? 
+						datetimeAttr = mapLayer.layerOptions && mapLayer.layerOptions.attrMap ? 
 							mapLayer.layerOptions.attrMap.datetime : null;
 
 					// adjust zoom						
@@ -77,7 +77,7 @@ var FeatureAPI = function(app)
 
                     var tileSize = config.GRID_SIZES[zoom],
 						mapReduceOpts = {
-							tileSize: (featureCollection.tile ? tileSize : undefined)
+							tileSize: (featureCollection.tile && featureCollection.tile.length ? tileSize : undefined)
 						},
 						extraAttrs = { counts: {
 							full: 0, original: 0, max: 0, result: 0
