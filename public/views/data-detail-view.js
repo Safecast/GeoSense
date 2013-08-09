@@ -148,8 +148,6 @@ define([
 
 			var rows = [];
 
-			console.log(model);
-
 			_.each(layout, function(row) {
 				var content = [];
 				var addToContent = function(content, fieldName, field, row) {

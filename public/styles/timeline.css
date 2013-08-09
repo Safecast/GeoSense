@@ -1,0 +1,21 @@
+.timeline .graph {
+	height: 200px;
+	width: 100%;
+}
+
+.axis path,
+.axis line {
+    fill: transparent;
+    stroke: #999;
+    shape-rendering: crispEdges;
+}
+ 
+.axis text {
+    fill: white;
+    font-size: 11px;
+}
+ 
+.circle {
+    /*fill: #222;*/
+    opacity: .5;
+}

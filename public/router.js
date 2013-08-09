@@ -332,8 +332,8 @@ define([
                 });
 
                 this.listenTo(this.mapView, 'visibleAreaChanged', this.visibleMapAreaChanged);
-                this.listenTo(this.mapView, 'feature:select', this.showDetailData);
-                this.listenTo(this.mapView, 'feature:unselect', this.hideDetailData);
+                this.listenTo(this.mapView, 'feature:select', this.featureSelect);
+                this.listenTo(this.mapView, 'feature:unselect', this.featureUnselect);
                 this.listenTo(this.mapView, 'view:ready', this.mapViewReady);
 
                 var mapEl = this.mapView.render().el;
@@ -667,26 +667,39 @@ define([
                 this.dataImportView.show();
             },
 
-            showDetailData: function(model, panelAnimation)    
+            featureSelect: function(model, mapFeature)    
             {
-                if (!this.dataDetailView) {
-                    this.dataDetailView = new DataDetailView().render();
+                var self = this;
+                if (!SHOW_DETAIL_DATA_ON_MAP) {
+                    if (!this.dataDetailView) {
+                        this.dataDetailView = new DataDetailView().render();
+                    }
+                    if (!this.dataDetailView.isAttached) {
+                        this.attachPanelView(this.dataDetailView);
+                        this.dataDetailView.snapToView(this.layersPanelView, 'left', true)
+                            .hide().show('fast');
+                    }
+                    this.dataDetailView.setPanelState(true);
+                    this.dataDetailView.setModel(model);
+                    this.dataDetailView.show();
+                } else {
+                    var dataDetailView = new DataDetailView();
+                    dataDetailView.render();
+                    dataDetailView.setModel(model);
+                    dataDetailView.on('panel:close', function() {
+                        self.mapView.destroyPopupForFeature(mapFeature);
+                    });
+                    var el = dataDetailView.el;
+                    this.mapView.setPopupForFeature(mapFeature, el);
                 }
-                if (!this.dataDetailView.isAttached) {
-                    this.attachPanelView(this.dataDetailView);
-                    this.dataDetailView.snapToView(this.layersPanelView, 'left', true)
-                        .hide().show('fast');
-                }
-                this.dataDetailView.setPanelState(true);
-                this.dataDetailView.setModel(model);
-                this.dataDetailView.show();
             },
 
-            hideDetailData: function(model)
+            featureUnselect: function(model, mapFeature)
             {
                 if (this.dataDetailView) {
                     this.dataDetailView.hide();
                 }
+                this.mapView.destroyPopupForFeature(mapFeature);
             },
 
             showMapLayerEditor: function(model)

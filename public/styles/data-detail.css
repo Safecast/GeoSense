@@ -80,3 +80,10 @@
 	margin-bottom: .25em;
 }
 
+.panel.data-detail .arrow-down-center {
+	display: none;
+}
+
+.olPopup .panel.data-detail .arrow-down-center {
+	display: block;
+}
