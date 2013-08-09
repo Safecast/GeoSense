@@ -7,7 +7,8 @@ var config = require('../../config'),
 	url = require('url'),
 	console = require('../../ext-console.js'),
 	mongoose = require('mongoose'),
-	_ = require('cloneextend');
+	_ = require('cloneextend'),
+	moment = require('moment');
 
 	Map = models.Map,
 	GeoFeatureCollection = models.GeoFeatureCollection,
@@ -114,7 +115,7 @@ var FeatureAPI = function(app)
 				    	var err;
 				    	if (!strDate) {
 				    		err = new errors.ValidationError("required parameter: d");
-				    	} else if (!utils.isValidDate(date)) {
+				    	} else if (!moment(date).isValid()) {
 				    		err = new errors.ValidationError("invalid date: " + strDate);
 				    	}
 			    		if (handleDbOp(req, res, err, true)) return;
