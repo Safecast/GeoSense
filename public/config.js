@@ -19,6 +19,8 @@ var MapStatus = {
 	PUBLIC: 'A'
 }
 
+var SHOW_DETAIL_DATA_ON_MAP = true;
+
 var DEFAULT_COLOR_EDITOR_COLOR = '#999999',
 	DEFAULT_COLOR_EDITOR_POSITION = '100%',
 	COLOR_BAR_INVERT_CUTOFF = 0x66;
@@ -95,3 +97,4 @@ if (!IS_BROWSER) {
 	// Browser: define console.log if undefined
 	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {}, error: function() {} }; 
 }
+

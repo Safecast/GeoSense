@@ -10,7 +10,8 @@ define([
 
 	var PanelViewBase = Backbone.View.extend({
 
-	    tagName: 'div',
+	    tagName: 'panel',
+	    draggable: null,
 
 	    initialize: function(options) 
 	    {
@@ -70,6 +71,11 @@ define([
 			return this.$el.is(':visible');
 		},
 
+		isDraggable: function() 
+		{
+			return this.draggable == undefined ? this.$el.is('.panel-draggable') : this.draggable;
+		},
+
 		show: function(duration, complete) 
 		{
 			this.$el.show(duration, complete);
@@ -85,7 +91,9 @@ define([
 		attachTo: function(parentElement)
 		{
 			$(parentElement).append(this.el);
-			this.$el.draggable('option', 'containment', parentElement);
+			if (this.isDraggable()) {
+				this.$el.draggable('option', 'containment', parentElement);
+			}
 			this.isAttached = true;
 			return this;
 		},
@@ -95,28 +103,30 @@ define([
 			this.$el.html(this.template());
 			var self = this;
 
-			this.$el.draggable({
-				start: function() {
-					//$(this).css('right', 'auto');
-					$(this).css('bottom', 'auto');
-				},
-				handle: this.$('.panel-header'),
-				stop: function() {
-					var el = this,
-						right = $(this).position().left + $(this).outerWidth();
-					$('.snap.right').each(function() {
-						if (right == $(this).position().left) {
-							//console.log(this, $(this).position());
-							// re-dock to right edge
-							$(el).css('left', 'auto');
-						}
-					});
-				},
+			if (this.isDraggable()) {
+				this.$el.draggable({
+					start: function() {
+						//$(this).css('right', 'auto');
+						$(this).css('bottom', 'auto');
+					},
+					handle: this.$('.panel-header'),
+					stop: function() {
+						var el = this,
+							right = $(this).position().left + $(this).outerWidth();
+						$('.snap.right').each(function() {
+							if (right == $(this).position().left) {
+								//console.log(this, $(this).position());
+								// re-dock to right edge
+								$(el).css('left', 'auto');
+							}
+						});
+					},
 
-				snap: ".snap, .panel", snapMode: "outer"
-			});
-			this.$el.css('position', 'absolute'); // draggable sets it to relative
-
+					snap: ".snap, .panel", snapMode: "outer"
+				});
+				this.$el.css('position', 'absolute'); // draggable sets it to relative
+			}
+			
 			this.$('a.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			
 				if ($(self.el).is('.extended')) {
@@ -133,6 +143,7 @@ define([
 
 			this.$('a.panel-close').click(function() {
 				self.detach();
+				self.trigger('panel:close', self);
 				return false;
 			});
 

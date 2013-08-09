@@ -6,10 +6,11 @@ define([
     'utils',
     'text!templates/map-ol.html',
     'views/map-view-base',
+    'views/data-detail-view',
     'openlayers',
     'cloudmade',
     'stamen'
-], function($, _, Backbone, config, utils, templateHtml, MapViewBase, OpenLayers) {
+], function($, _, Backbone, config, utils, templateHtml, MapViewBase, DataDetailView, OpenLayers) {
     "use strict";
 
     var Geometry = OpenLayers.Geometry;
@@ -331,9 +332,18 @@ define([
 
         destroyRenderLayer: function(model) 
         {
-            this.featureLayers[model.id].destroyFeatures();
+            this.destroyFeaturesForLayer(model);
             this.map.removeLayer(this.featureLayers[model.id]);
             delete this.featureLayers[model.id];
+        },
+
+        destroyFeaturesForLayer: function(model)
+        {
+            var self = this;
+            this.featureLayers[model.id].features.forEach(function(feature) {
+                self.destroyPopupForFeature(feature);
+            });
+            this.featureLayers[model.id].destroyFeatures();  
         },
 
         destroyLayer: function(model) 
@@ -350,7 +360,7 @@ define([
 
         featureReset: function(collection, options) 
         {
-            this.featureLayers[collection.mapLayer.id].destroyFeatures();  
+            this.destroyFeaturesForLayer(collection.mapLayer);
             MapOLView.__super__.featureReset.call(this, collection, options);
         },        
 
@@ -404,12 +414,42 @@ define([
 
         featureSelected: function(feature) 
         {
-            this.trigger('feature:select', feature.attributes.model);
+            this.trigger('feature:select', feature.attributes.model, feature);
+        },
+
+        setPopupForFeature: function(feature, el)
+        {
+            this.destroyPopupForFeature(feature);
+            var popup = new OpenLayers.Popup("popup", 
+                feature.geometry.getBounds().getCenterLonLat(),
+                null,
+                '',
+                null, false);
+
+            feature.popup = popup;
+            this.map.addPopup(popup);
+
+            $(popup.div).css({overflow: 'visible', background: 'blue', height: 0, width: 0});
+            $(popup.div).append(el);
+
+            $(el).css({
+                top: 'auto', left: '-' + ($(el).outerWidth() / 2) + 'px', right: 'auto', bottom: 25
+            });
+        },
+
+        destroyPopupForFeature: function(feature)
+        {
+            if (feature.popup) {
+                this.map.removePopup(feature.popup);
+                feature.popup.destroy();
+                feature.popup = null;
+                this.selectControl.unselect(feature);
+            }
         },
 
         featureUnselected: function(feature) 
         {
-            this.trigger('feature:unselect', feature.attributes.model);
+            this.trigger('feature:unselect', feature.attributes.model, feature);
         },
 
         updateViewBase: function(viewBase, viewStyle)
