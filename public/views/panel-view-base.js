@@ -11,7 +11,7 @@ define([
 	var PanelViewBase = Backbone.View.extend({
 
 	    tagName: 'panel',
-	    draggable: null,
+	    draggable: undefined,
 
 	    initialize: function(options) 
 	    {

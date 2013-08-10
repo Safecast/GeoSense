@@ -106,7 +106,8 @@ define([
 				if (Array.isArray(value)) {
 					return value.join(', ');
 				}
-				return __('%(min)s to %(max)s').format({
+				var minMax = formatter.minMaxFormat || __('%(min)s to %(max)s');
+				return __(minMax).format({
 						min: getValue(value.min, formatter),
 						max: getValue(value.max, formatter)
 					});
@@ -125,8 +126,10 @@ define([
 						return '<img class="icon" src="' + value + '" />';
 					}
 				}
-
 			};
+
+			formatters.icon.minMaxFormat = __('%(min)s %(max)s');
+			formatters.date.minMaxFormat = formatters.numeric.minMaxFormat = __('%(min)s–%(max)s');
 
 			var fieldSubst = !layerOptions.attrMap ? {} : {
 				'numeric': layerOptions.attrMap.numeric,

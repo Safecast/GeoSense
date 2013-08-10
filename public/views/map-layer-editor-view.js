@@ -13,7 +13,7 @@ define([
 
 	var MapLayerEditorView = PanelViewBase.extend({
 
-		className: 'panel map-layer-editor',
+		className: 'panel panel-draggable map-layer-editor',
 		
 	    events: {
 	    	'click .btn.save': 'saveButtonClicked',
