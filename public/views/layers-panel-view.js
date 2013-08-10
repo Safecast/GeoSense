@@ -11,7 +11,7 @@ define([
 
 	var LayersPanelView = PanelViewBase.extend({
 
-		className: 'panel layer-panel',
+		className: 'panel panel-draggable layer-panel',
 		
 	    events: {
 	    },

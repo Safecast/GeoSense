@@ -7,7 +7,6 @@
 	padding: 33px 20px 0 20px;
 	box-shadow: 0px 5px 20px 0px rgba(0, 0, 0, .4);
 	background-color:rgba(100,100,100,.8);
-	border-color:#222;
 	border-radius:8px;
 	color: #ddd;
 	-moz-border-radius:8px;
@@ -18,7 +17,7 @@
 
 .map-style-dark .panel {
 	color: #aaa;
-	background-color:rgba(0,0,0,.5);
+	background-color:rgba(0,0,0,.7);
 	/*
 	text-shadow:rgba(0,0,0,.8) 1px 1px 0px;
 	*/
@@ -38,7 +37,7 @@
 	border-right: 20px solid transparent;
 	
 	border-top: 20px solid;
-	border-top-color: rgba(120,120,120,.8);
+	border-top-color: rgba(120,120,120,.7);
 }
 
 .map-style-dark .panel .arrow-down {
