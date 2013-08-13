@@ -56,7 +56,7 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
         name: {type: String, required: true},
         colors: [{
             color: {type: String, required: true, match: colorMatch},
-            position: {type: String, match: /^[0-9]+(\.[0-9]+)?%?$/},
+            position: {type: String, match: /^-?[0-9]+(\.[0-9]+)?%?$/},
             interpolation: {type: String, enum: ['lerpRGB', 'threshold', ''], required: false},
             label: String,
             description: String
@@ -76,8 +76,10 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
         numeric: {type: String},
         datetime: {type: String},
         label: {type: String},
-        group: {type: String},
     },
+    filter: [{
+        field: {type: String}
+    }],
     featureSize: {type: Number, min: config.MIN_FEATURE_SIZE, max: config.MAX_FEATURE_SIZE},
     minFeatureSize: {type: Number, min: config.MIN_FEATURE_SIZE, max: config.MAX_FEATURE_SIZE},
     datetimeFormat: String,
