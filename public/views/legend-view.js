@@ -195,36 +195,40 @@ define([
 					maxVal = extremes.numeric ? extremes.numeric.max : NaN,
 					numAttr = this.model.attrMap ? this.model.attrMap.numeric : null;
 
-				if (isCounts) {
-					if (counts && counts.max) {
-						val = colors[i].position * counts.max;
-						if (val < 1) {
-							val = 1;
-						} else {
-							if (val > mag) {
-								val = Math.round(val / mag) * mag;								
-							}
-							val = autoFormatNumber(val);
-						}
-						hasCountsGtZero = true;
-					} else {
-						val = '&nbsp;';
-					}
-				} else if (!isNumeric || (colors[i].title && colors[i].title.length)) {
-					val = colors[i].title || '&nbsp;';
+				if (colors[i].label != undefined) {
+					val = colors[i].label;
 				} else {
-					hasNumbers = true;
-					if (isGradient) {
-						val = valFormatter.format(
-							minVal + colors[i].position * (maxVal - minVal));
-						if (maxIndex == undefined || colors[i].position > colors[maxIndex].position) {
-							maxIndex = i;
+					if (isCounts) {
+						if (counts && counts.max) {
+							val = colors[i].position * counts.max;
+							if (val < 1) {
+								val = 1;
+							} else {
+								if (val > mag) {
+									val = Math.round(val / mag) * mag;								
+								}
+								val = autoFormatNumber(val);
+							}
+							hasCountsGtZero = true;
+						} else {
+							val = '&nbsp;';
 						}
+					} else if (!isNumeric || (colors[i].title && colors[i].title.length)) {
+						val = colors[i].title || '&nbsp;';
 					} else {
-						val = '%(min)s – %(max)s'.format({
-							min: valFormatter.format(minVal),
-							max: valFormatter.format(maxVal)
-						});
+						hasNumbers = true;
+						if (isGradient) {
+							val = valFormatter.format(
+								minVal + colors[i].position * (maxVal - minVal));
+							if (maxIndex == undefined || colors[i].position > colors[maxIndex].position) {
+								maxIndex = i;
+							}
+						} else {
+							val = '%(min)s – %(max)s'.format({
+								min: valFormatter.format(minVal),
+								max: valFormatter.format(maxVal)
+							});
+						}
 					}
 				}
 
