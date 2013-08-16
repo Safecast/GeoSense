@@ -98,7 +98,7 @@ function staticRoute(req, res, slug, admin)
 	}
 
 	console.info('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
-	config.DEFAULT_HOSTS.indexOf(req.headers.host, config.DEFAULT_HOSTS);
+	console.log(config.DEFAULT_HOSTS.indexOf(req.headers.host, config.DEFAULT_HOSTS));
 
 	if (slug) {
 		// For any hosts other than the default hosts, passing a slug is not allowed
