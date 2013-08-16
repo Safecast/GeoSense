@@ -446,8 +446,8 @@ exports.deleteUndefined = function(obj)
 
 exports.findExtremes = function(value, previous) {
     var map = function(el) {
-            if (typeof el == 'object' && el.sum != undefined 
-                && el.min != undefined && el.max != undefined && el.count != undefined) return el;
+            if (typeof el == 'object' &&  
+                (el.min != undefined || el.max != undefined)) return el;
             return {
                 sum: el,
                 min: el,
