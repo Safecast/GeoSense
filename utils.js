@@ -151,9 +151,8 @@ function sendError(res, err) {
 
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
+    var statusCode;
     if (err) {
-        console.log(err.name, err);
-
         switch (err.name) {
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 
@@ -163,10 +162,10 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
                 sendError(res, err);
                 break;
             case 'ValidationError':
-                err = new HTTPError(err.message, 403);
+                err = new errors.ValidationError(err.msg, err.errors);
             case 'HTTPError':
                 // certain error messages should be available to client:
-                sendError(res, err);
+                sendError(res, err, statusCode || err.statusCode);
                 break;
         }
         return true;

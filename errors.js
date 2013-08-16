@@ -34,10 +34,10 @@ HTTPError.prototype.name = 'HTTPError';
 HTTPError.prototype.message = 'HTTP Error';
 
 var ValidationError = function(msg, errors) {
-	ValidationError.super_.call(this, msg, this.constructor);
+	ValidationError.super_.call(this, msg, 403);
     this.errors = errors;
 }
-util.inherits(ValidationError, BasicError)
+util.inherits(ValidationError, HTTPError)
 ValidationError.prototype.name = 'ValidationError';
 ValidationError.prototype.message = 'Validation Error';
 

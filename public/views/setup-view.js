@@ -101,6 +101,7 @@ define([
 
 			var self = this;
 			this.$('#saveCloseButton').attr('disabled', true);
+			self.modelFieldInputs.removeClass('error');
 
 			this.model.save(postData, {
 				success: function(model, response, options) {
@@ -112,11 +113,14 @@ define([
 					var data = $.parseJSON(xhr.responseText);
 					console.error('failed to update map: ' + self.model.id);
 					if (data && data.errors) {
-						self.modelFieldInputs.removeClass('error');
-						for (var k in data.errors) {
-							$('[name="' + data.errors[k].path + '"]', this.modelFieldInputs).addClass('error');
-						}
-						console.error('errors:', data.errors);
+						_.each(data.errors, function(err) {
+							var sel = 'input[name="' + err.path + '"]',
+								input = self.$(sel);
+							input.addClass('error');
+							/*input.tooltip('destroy');
+							input.tooltip({trigger: 'focus', title: err.message});
+							input[0].focus();*/
+						});
 					}
 					self.$('#saveCloseButton').attr('disabled', false);
 				}
@@ -171,6 +175,7 @@ define([
 				error: function(model, xhr, options) {
 					var data = $.parseJSON(xhr.responseText);
 					console.error('failed to update map: ' + self.model.id);
+					console.log('d', data);
 					if (data && data.errors) {
 						console.error('errors:', data.errors);
 					}
