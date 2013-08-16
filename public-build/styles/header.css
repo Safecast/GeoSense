@@ -15,7 +15,7 @@
 	padding-top:5px;
 	height:45px;
 	background: #101010;
-	border-bottom: 1px #222 solid;
+	border-bottom: 1px #2C2C2C solid;
 }
 .header-view .brand
 {
@@ -206,4 +206,23 @@
 .header-view .graph.active
 {
 	opacity:1;
+}
+.header-view .dropdown-menu p {
+	padding: 0px 15px;
+	margin: 0;
+}
+.header-view .dropdown-menu .slider {
+	margin: 3px 0px 3px 13px;
+	width: 80px;
+}
+.header-view .dropdown-menu .base-options input.number {
+	width: 20px;
+}
+.header-view .dropdown-menu .base-options a {
+	display: inline-block;
+	padding: 0;
+}
+.header-view .dropdown-menu .miniColors-trigger {
+	margin: 0 0 9px 3px;
+	display: inline-block;
 }
