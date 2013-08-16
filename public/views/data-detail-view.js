@@ -28,7 +28,7 @@ define([
 	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
 
-	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), class: 'muted'},
+	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'muted'},
 	    		{fields: ['%(numeric)s.max'], label: 'peak', class: 'muted'},
 	    		{fields: ['%(numeric)s.min'], label: 'minimum', class: 'muted'},
 	    		{fields: ['%(numeric)s.avg'], label: 'average', class: 'muted'}
@@ -157,7 +157,7 @@ define([
 					var value = model.get(fieldName),
 						formatter = row.formatter ? formatters[row.formatter] : false;
 					displayedFields[fieldName] = true;
-					if (!isEmpty(value)) {
+					if (!formatter && !isEmpty(value)) {
 						switch (field.split('.')[0]) {
 							case '%(datetime)s': 
 								formatter = formatters.date;
