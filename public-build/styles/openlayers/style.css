@@ -95,14 +95,14 @@ div.olControlMousePosition {
 }
 .olControlOverviewMapExtentRectangle {
     overflow: hidden;
-    background-image: url("/assets/blank.gif");
+    background-image: url("../../assets/blank.gif");
     cursor: move;
     border: 2px dotted red;
 }
 .olControlOverviewMapRectReplacement {
     overflow: hidden;
     cursor: move;
-    background-image: url("/assets/overview_replacement.gif");
+    background-image: url("../../assets/overview_replacement.gif");
     background-repeat: no-repeat;
     background-position: center;
 }
@@ -127,7 +127,7 @@ div.olControlMousePosition {
     overflow: auto;
 }    
 .olControlNavigationHistory {
-   background-image: url("/assets/navigation_history.png");
+   background-image: url("../../assets/navigation_history.png");
    background-repeat: no-repeat;
    width:  24px;
    height: 24px;
@@ -232,7 +232,7 @@ div.olControlSaveFeaturesItemInactive {
     font-size: 1px;
 }
 .olPopupCloseBox {
-  background: url("/assets/close.gif") no-repeat;
+  background: url("../../assets/close.gif") no-repeat;
   cursor: pointer;
 }
 .olFramedCloudPopupContent {
@@ -326,7 +326,7 @@ span.olGoogleAttribution.hybrid a, span.olGoogleAttribution.satellite a {
 }
 .olControlNavToolbar div,
 .olControlEditingToolbar div {
-    background-image: url("/assets/editing_tool_bar.png");
+    background-image: url("../../assets/editing_tool_bar.png");
     background-repeat: no-repeat;
     margin: 0 0 5px 5px;
     width: 24px;
