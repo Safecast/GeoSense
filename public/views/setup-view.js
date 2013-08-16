@@ -175,7 +175,6 @@ define([
 				error: function(model, xhr, options) {
 					var data = $.parseJSON(xhr.responseText);
 					console.error('failed to update map: ' + self.model.id);
-					console.log('d', data);
 					if (data && data.errors) {
 						console.error('errors:', data.errors);
 					}
