@@ -151,7 +151,6 @@ function sendError(res, err) {
 
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
-    var statusCode;
     if (err) {
         switch (err.name) {
             default:
@@ -165,7 +164,7 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
                 err = new errors.ValidationError(err.msg, err.errors);
             case 'HTTPError':
                 // certain error messages should be available to client:
-                sendError(res, err, statusCode || err.statusCode);
+                sendError(res, err);
                 break;
         }
         return true;
