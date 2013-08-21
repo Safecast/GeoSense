@@ -129,7 +129,7 @@ if (!config.DEFAULT_HOSTS) {
 		if (match) {
 			config.DEFAULT_HOSTS.push(match[2]);
 		}
-		console.log('default hosts', config.DEFAULT_HOSTS);
+		//console.log('default hosts', config.DEFAULT_HOSTS);
 	}
 }
 
