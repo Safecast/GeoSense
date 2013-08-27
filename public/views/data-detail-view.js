@@ -29,9 +29,10 @@ define([
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
 
 	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'muted'},
-	    		{fields: ['%(numeric)s.max'], label: 'peak', class: 'muted'},
-	    		{fields: ['%(numeric)s.min'], label: 'minimum', class: 'muted'},
-	    		{fields: ['%(numeric)s.avg'], label: 'average', class: 'muted'}
+	    		{fields: ['%(numeric)s.max'], label: __('peak'), class: 'muted'},
+	    		{fields: ['%(numeric)s.min'], label: __('minimum'), class: 'muted'},
+	    		{fields: ['%(numeric)s.avg'], label: __('average'), class: 'muted'},
+	    		{fields: ['%(numeric)s.stddev'], label: __('std. deviation'), class: 'muted'}
 	    	];
 	    },
 

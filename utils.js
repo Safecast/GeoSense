@@ -445,12 +445,16 @@ exports.deleteUndefined = function(obj)
     return obj;
 }
 
+/**
+ * Destructively finds the extremes (sum, min, max, diff, count) in two arrays or numbers.
+ */
 exports.findExtremes = function(value, previous) {
     var map = function(el) {
             if (typeof el == 'object' &&  
                 (el.min != undefined || el.max != undefined)) return el;
             return {
                 sum: el,
+                diff: 0,
                 min: el,
                 max: el,
                 count: 1
@@ -458,7 +462,17 @@ exports.findExtremes = function(value, previous) {
         },
         arr = isArray(value) ? value : [value],
         reduce = function(a, b) {
-            a.sum = typeof b.sum != 'number' ? NaN : isNaN(a.sum) ? b.sum : a.sum + b.sum;
+            if (!a) return b;
+            if (typeof b.sum != 'number') {
+                delete a.sum;
+                delete a.diff;
+            } else {
+                // inspired by https://gist.github.com/RedBeard0531/1886960:
+                var delta = a.sum/a.count - b.sum/b.count; // a.mean - b.mean
+                var weight = (a.count * b.count)/(a.count + b.count);
+                a.diff += b.diff + delta*delta*weight;
+                a.sum += b.sum;
+            }
             a.min = a.min == undefined || b.min < a.min ? b.min : a.min;
             a.max = a.max == undefined || b.max > a.max ? b.max : a.max;
             a.count = isNaN(a.count) ? b.count : a.count + b.count;
@@ -466,8 +480,25 @@ exports.findExtremes = function(value, previous) {
         };
 
     //return arr.map(map).reduce(reduce, previous || {});
-    return arrayReduce.call(arrayMap.call(arr, map), reduce, previous || {});
+    return arrayReduce.call(arrayMap.call(arr, map), reduce, previous || null);
 };
+
+/**
+ * Destructively sets average, variance and standard deviation on an object containing 
+ * extremes as determined by findExtremes.
+ */
+exports.setStats = function(value) {
+    if (typeof value.sum == 'number') {
+        value.avg = value.sum / value.count;
+        value.variance = value.diff / value.count;
+        value.stddev = Math.sqrt(value.variance);
+    } else {
+        delete value.avg;
+        delete value.variance;
+        delete value.stddev;
+    }
+    return value;
+}
 
 exports.callbackOrThrow = function(err, callback)
 {
