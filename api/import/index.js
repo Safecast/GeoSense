@@ -431,6 +431,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (collection.limitFeatures == undefined) {
 						collection.limitFeatures = numSaved >= config.MIN_FEATURES_LIMIT;
 					}
+
 					collection.status = collection.tile ? 
 						(!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
 
@@ -952,7 +953,9 @@ ImportAPI.prototype.cli = {
 			+ "\nImports records from a URL or a file into a new point collection.\n";
 
 		if (!showHelp && utils.connectDB()) {
-			params.append = params._[1];
+			if (!params.append) {
+				params.append = params._[1];
+			}
 			//console.log(params);
 			this.import(getImportParams(params), null, null, callback);
 		} else {

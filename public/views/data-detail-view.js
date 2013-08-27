@@ -102,11 +102,11 @@ define([
 
 			var getValue = function(value, formatter) {
 				if (isDate(value) || typeof value != 'object') return formatter ? formatter.format(value) : value;
-				if (value.value != undefined) return getValue(value.value, formatter);
 				if (value.avg != undefined) return getValue(value.avg, formatter);
 				if (Array.isArray(value)) {
 					return value.join(', ');
 				}
+				if (value.min == value.max) return getValue(value.min, formatter);
 				var minMax = formatter.minMaxFormat || __('%(min)s to %(max)s');
 				return __(minMax).format({
 						min: getValue(value.min, formatter),
@@ -158,7 +158,7 @@ define([
 					var value = model.get(fieldName),
 						formatter = row.formatter ? formatters[row.formatter] : false;
 					displayedFields[fieldName] = true;
-					if (!formatter && !isEmpty(value)) {
+					if (!formatter) {
 						switch (field.split('.')[0]) {
 							case '%(datetime)s': 
 								formatter = formatters.date;
@@ -167,6 +167,8 @@ define([
 								formatter = formatters.numeric;
 								break; 
 						};
+					}
+					if (!isEmpty(value)) {
 						content.push(getValue(value, formatter));
 					}
 					return content;
