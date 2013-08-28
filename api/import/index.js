@@ -13,7 +13,6 @@ var config = require('../../config'),
 
 	fs = require('fs'),
   	mongoose = require('mongoose'),
-	date = require('datejs'),
 	url = require('url'),
 	_ = require('cloneextend'),
 	path = require('path'),
