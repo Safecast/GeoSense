@@ -77,6 +77,10 @@ define([
 				success: function(responseData) {
 					if (responseData.items && responseData.items.length) {
 						self.initDataTransformForSource(responseData);
+						if (responseData.autoTransform) {
+							self.importButtonClicked();
+							return;
+						}
 						self.setStep('mapping');
 					}
 				}
@@ -162,8 +166,13 @@ define([
 
 			addFields(this.inspectedSource.items[0]);
 
-			console.log('initDataTransformForSource');
-			this.descripts = _.deepClone(this.defaultDescripts);
+			if (this.inspectedSource.autoTransform) {
+				// TODO: should also place column labels in target table
+				// and set the appropriate options
+				this.descripts = this.inspectedSource.descripts;
+			} else {
+				this.descripts = _.deepClone(this.defaultDescripts);
+			}
 
 			this.$('.from-data thead').empty();
 			this.$('.from-data tbody').empty();

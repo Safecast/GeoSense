@@ -64,8 +64,7 @@ var ImportAPI = function(app)
 			req.body.path = null;
 
 			var validationErrs = {},
-				valid = true,
-				transform;
+				valid = true;
 
 			if (!req.body.url) {
 				valid = false;
@@ -85,7 +84,8 @@ var ImportAPI = function(app)
 				console.error(err);
 	            res.send(err, 403);
 			} else {
-				var sendItems = req.body.preview || req.body.inspect ? [] : null;
+				var sendItems = req.body.preview || req.body.inspect ? [] : null,
+					descripts, autoTransform;
 				self.import(params, req, res, function(err, collection) {
 					var err = err;
 					if (err && !err.statusCode) {
@@ -105,6 +105,8 @@ var ImportAPI = function(app)
 					if (!req.body.background) {
 						res.send({
 							collection: collection,
+							autoTransform: autoTransform,
+							descripts: descripts,
 							items: sendItems
 						});
 					}
@@ -118,6 +120,7 @@ var ImportAPI = function(app)
 						}
 					},
 					transform: function(err, model, transformed) {
+						autoTransform = transformed.type == 'Feature';
 						if (req.body.preview) {
 							var expanded = {};
 							for (var k in transformed) {
@@ -126,13 +129,14 @@ var ImportAPI = function(app)
 							sendItems.push(expanded);
 						}
 					},
-					start: function(err, collection) {
+					start: function(err, collection, dataTransform) {
 						if (req.body.background) {
 							console.success('import request started, performing in background and responding immediately');
 							res.send({
 								collection: collection,
 							});
 						}
+						descripts = dataTransform.descripts;
 					},
 				});
 			}
@@ -358,7 +362,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		    	console.success('*** job started ***');
 
 				if (dataCallbacks.start) {
-					dataCallbacks.start(false, collection);
+					dataCallbacks.start(false, collection, dataTransform);
 				}			
 
 				var extremes = _.clone(collection.extremes || {}),
