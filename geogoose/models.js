@@ -18,7 +18,7 @@ var geoJSONFeatureCollectionDefinition = {
         bbox: {type: Array},
         geometry: {
             type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"], index: 1},
-            coordinates: {type: Array, /*required: true*/ index: 1}
+            coordinates: {type: Array, /*required: true, index: 1*/}
         },
         properties: mongoose.Schema.Types.Mixed,
     },

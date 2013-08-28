@@ -718,8 +718,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
 								: typeof saveModel.properties[key];
 							// try to cast Date
-							if (propertyType == 'string' && transform.Cast.Date(saveModel.properties[key])) {
-								propertyType = 'Date';
+							if (propertyType == 'string') {
+								if (transform.Filter.isDecimal(saveModel.properties[key])) {
+									propertyType = 'Number';
+								} else if (transform.Filter.isValidDate(saveModel.properties[key], false)) {
+									propertyType = 'Date';
+								}
 							}
 							// if this is the first time we encounter the property
 							if (propertyTypes[key] == undefined) {
