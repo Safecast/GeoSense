@@ -25,7 +25,7 @@ define([
 	    		{fields: ['properties.icon'], label: false, formatter: 'icon', class: 'icon muted'},
 	    		{fields: ['%(label)s', '%(datetime)s'], label: false, class: "box title"},
 	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
-	    		{fields: ['properties.description'], label: false, class: 'box text-body muted'},
+	    		{fields: ['properties.description', 'properties.summary'], label: false, class: 'box text-body muted'},
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
 
 	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'muted'},

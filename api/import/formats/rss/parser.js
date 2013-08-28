@@ -15,8 +15,10 @@ RSS.prototype.fromStream = function(readStream, options)
 	RSS.super_.prototype.fromStream.call(this, readStream, options);
 	this.fieldTypes = {};
 
-	this.readStream.on('updateElement: item', function(element) {
-		self.parse(element);
+	['updateElement: item', 'updateElement: entry'].forEach(function(on) {
+		self.readStream.on(on, function(element) {
+			self.parse(element);
+		});
 	});
 
     return this;
@@ -25,14 +27,25 @@ RSS.prototype.fromStream = function(readStream, options)
 RSS.prototype.parse = function(element)
 {
 	switch (element.$name) {
-		// this will parse RSS data such as http://www.gdacs.org/rss.aspx?profile=GDACS
+		// this will parse RSS data such as http://www.gdacs.org/rss.aspx?profile=GDACS,
+		// and Atom data such as http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.atom
 		case 'item':
+		case 'entry':
 			var data = {
 				type: 'Feature',
 				properties: {}
 			};
 
-			this.copyFields(['title', 'description', 'link', 'pubDate'], element, data.properties);
+			this.copyFields(['title', 'description', 'summary', 'link', 'pubDate', 'updated'], element, data.properties);
+
+			// Atom fields
+			if (typeof data.properties.link == 'object' && data.properties.link.$) {
+				data.properties.link = data.properties.link.$.href;
+			}
+			if (typeof data.properties.summary == 'object' && data.properties.summary.$) {
+				data.properties.summary = data.properties.summary.$text;
+			}
+
 			if (data.properties.pubDate) {
 				data.properties.pubDate = Cast.Date(data.properties.pubDate);
 			}
@@ -41,15 +54,17 @@ RSS.prototype.parse = function(element)
 				data.geometry = {
 					type: 'Point',
 					coordinates: [
-						parseFloat(element['geo:Point']['geo:long']), 
-						parseFloat(element['geo:Point']['geo:lat'])]
+						parseFloat(element['geo:Point']['geo:lat']),
+						parseFloat(element['geo:Point']['geo:long'])] 
 				};
 			}
 
 			if ('georss:point' in element) {
 				data.geometry = {
 					type: 'Point',
-					coordinates: element['georss:point'].split(/[^0-9\.\-]/).map(parseFloat)
+					coordinates: element['georss:point']
+						.split(/[^0-9\.\-]/).map(parseFloat)
+						.reverse()
 				};
 			}
 

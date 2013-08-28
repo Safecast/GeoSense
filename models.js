@@ -207,7 +207,7 @@ var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema(
     unit: String,
     sourceFieldNames: {type: Array, default: []},
     fields: {type: Array},
-    extremes: { type: mongoose.Schema.Types.Mixed, index: 1, default: {} },
+    extremes: { type: mongoose.Schema.Types.Mixed, /*index: 1,*/ default: {} },
     importParams: mongoose.Schema.Types.Mixed,
     gridSize: Number,
     defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
