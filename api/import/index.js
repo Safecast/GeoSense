@@ -29,6 +29,10 @@ var ImportAPI = function(app)
 	var self = this;
 	if (app) {
 		app.post('/api/import/', function(req, res) {
+			// TODO: hack because cloneextend sometimes throws error
+			// http://stackoverflow.com/questions/16585209/node-js-object-object-has-no-method-hasownproperty			
+			req.body = JSON.parse(JSON.stringify(req.body));
+
 			if (!permissions.canImportData(req)) {
 	            res.send('import not allowed', 403);
 	            return;
@@ -164,6 +168,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	var allowedHeaderValues = {
 		gridSize: null
 	};
+
+	console.log('d===',defaults);
+	console.log('p===',params);
 
 	var params = _.cloneextend(defaults, params);
 
