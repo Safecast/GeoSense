@@ -36,7 +36,7 @@ exports.connectDB = function(callback, exitProcessOnError)
         }
     } else {
         console.info('Connecting to database', config.DB_URI.replace(/([^:]):.*@/, '$1:***@'));
-        var opts = { db: { native_parser: true }};
+        var opts = { db: { native_parser: config.MONGODB_NATIVE_PARSER }};
         return mongoose.connect(config.DB_URI, opts).connection;
     }
 };
