@@ -168,9 +168,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		gridSize: null
 	};
 
-	console.log('d===',defaults);
-	console.log('p===',params);
-
 	var params = _.cloneextend(defaults, params);
 
 	if (!params.format) {
@@ -849,7 +846,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		if (params.layerOptions) {
 			defs = _.cloneextend(defs, params.layerOptions);
 		}
-		//console.log(defs);
 		var defaults = new LayerOptions(defs);
 
 		var defaultsSave = !params.dry ?
