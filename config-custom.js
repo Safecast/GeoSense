@@ -8,5 +8,6 @@ module.exports = {
 	SMTP_USERNAME: process.env.SMTP_USERNAME,			
 	SMTP_PASSWORD: process.env.SMTP_PASSWORD,
 	DEFAULT_HOSTS: process.env.DEFAULT_HOSTS ?
-		process.env.DEFAULT_HOSTS.split(',') : null
+		process.env.DEFAULT_HOSTS.split(',') : null,
+	MONGODB_NATIVE_PARSER: process.env.MONGODB_NATIVE_PARSER || false
 };
