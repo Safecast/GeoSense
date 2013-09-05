@@ -34,7 +34,7 @@ define([
 			var self = this;
 			$(self.modelInputs[name]).each(function() {
 				if ($(this).is('.btn-group')) {
-			    	self.$('.btn', this).each(function() {
+			    	$('.btn', this).each(function() {
 				    	if ($(this).val() != val) {
 					    	$(this).removeClass('active');
 				    	} else {
@@ -49,6 +49,19 @@ define([
 			})
 		},
 
+	    populateFromModel: function()
+	    {
+			this.populateModelInputs();
+			if (this.customPopulateFromModel) {
+				this.customPopulateFromModel();
+			}
+		},
+
+	    /*modelInputChanged: function(event) 
+	    {
+	    	console.log('change:', $(event.currentTarget).attr('name'), $(event.currentTarget).val());
+	    },*/
+
 		getValueFromModelInput: function(name)
 		{
 			var from = $(this.modelInputs[name][0]),
@@ -61,18 +74,22 @@ define([
 			return val;
 		},
 
-		updateModelFromInputs: function(options)
+		getValuesFromModelInputs: function()
 		{
 			var values = {};
 			for (var name in this.modelInputs) {
 				values[name] = this.getValueFromModelInput(name);
 			}
-
 			// this method may be defined by the view that inherits from the mixin
-			if (this.getModelInputValues) {
-				values = this.getModelInputValues(values);
+			if (this.customGetValuesFromModelInputs) {
+				values = this.customGetValuesFromModelInputs(values);
 			}
+			return values;
+		},
 
+		updateModelFromInputs: function(options)
+		{	
+			var values = this.getValuesFromModelInputs();
 			this.model.set(values, options || {});
 		},
 

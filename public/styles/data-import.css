@@ -66,9 +66,8 @@
 	overflow: scroll;
 }
 
-.data-import-view h4 {
-	color: #ddd;
-	font-size: 18px;
+.data-import-view form h4 {
+	font-size: 13px;
 	margin: 0 auto 10px auto;
 	width: 100%;
 	text-align: center;
@@ -212,8 +211,7 @@
 }
 
 .data-import-view .btn-group.select-filetype .btn {
-	width: 98px;
-	height: 80px;
+	padding: 12px 0 8px 0;
 }
 
 .data-import-view .btn.source-submit {

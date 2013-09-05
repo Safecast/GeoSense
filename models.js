@@ -201,7 +201,8 @@ GeoFeatureMapReducedSchema.methods.toGeoJSON = function(extraAttrs)
 
 
 var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema({
-    title: String,
+    title: {type: String, index: 1},
+    tags: [{type: String, index: 1}],
     description: String,
     source: String,
     unit: String,

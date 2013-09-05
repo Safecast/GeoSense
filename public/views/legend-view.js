@@ -11,6 +11,7 @@ define([
 	var LegendView = Backbone.View.extend({
 
 		className: 'legend',
+		autoHide: true,
 	    events: {
 	    	'click .unit-toggle': 'unitToggleClicked',
 	    	'click .color-scheme-trigger': function(event) { event.preventDefault(); }
@@ -23,6 +24,7 @@ define([
 		    this.listenTo(this.model, 'toggle:colorScheme', this.colorSchemeChanged);
 		    this.listenTo(this.model.featureCollection, 'reset', this.countsChanged);
 			this.hasBeenVisible = false;
+			this.autoHide = options.autoHide != undefined ? options.autoHide : this.autoHide;
 	    },
 
 	    unitToggleClicked: function(event)
@@ -78,7 +80,7 @@ define([
 			this.removePopover();
 
 			var valFormatter = this.model.getValFormatter(),
-				unit = valFormatter.unit,
+				unit = !this.isDisplayingCounts() ? valFormatter.unit : this.model.getDisplay('itemTitlePlural'),
 				schemes = this.model.getLayerOptions().colorSchemes,
 				scheme = this.model.getColorScheme();
 
@@ -94,7 +96,7 @@ define([
 						+ '">'
 						+ (formatters.length > 1 ? '<a href="#" class="unit-toggle" data-index="' + 
 							i + '">' : '<span>')
-						+ f.unit 
+						+ '<strong>' + unit + '</strong>'
 						+ (formatters.length > 1 ? '</a>' : '</span>')
 						+ '</li>';
 					var li = $(li);
@@ -113,7 +115,7 @@ define([
 			    	return '<li><a href="#" class="color-scheme-toggle" data-index="' + index + '">'
 			    		+ scheme.name + '</a></li>';
 			    });
-				ul.append('<li><a href="#" class="color-scheme-trigger has-popover" data-placement="bottom"><i class="icon icon-white icon-adjust half-opacity"></i> <span class="caret"></span></a>');
+				ul.append('<li><a href="#" class="color-scheme-trigger has-popover" data-placement="bottom"><i class="glyphicon glyphicon-adjust"></i> <span class="caret"></span></a>');
 				this.colorSchemeTrigger = this.$('.color-scheme-trigger');
 
 				$('.color-schemes', colorSchemePopover).append(schemeItems.join('\n'));
@@ -128,9 +130,8 @@ define([
 						return colorSchemePopover.html();
 					},
 					html: true,
-					container: 'body',
 					title: __('Color Schemes') 
-				}).on('shown', function() {
+				}).on('shown.bs.popover', function() {
 					$('.color-scheme-toggle').click(function(event) {
 						self.colorSchemeTrigger.popover('hide');
 						return self.colorSchemeToggleClicked(event);
@@ -147,7 +148,7 @@ define([
 
 				for (var i = 0; i < colors.length; i++) {
 					var baseColor = colors[i].color,
-						darkerColor = multRGB(baseColor, .85),
+						darkerColor = multRGB(baseColor, .95),
 						channels = getRGBChannels(labelColor || baseColor),
 						invert = rgb2hsb(channels)[2] < .5,
 						invert = labelColor ? !invert : invert;
@@ -170,6 +171,11 @@ define([
 			return this;
 		},
 
+		isDisplayingCounts: function()
+		{
+			return this.model.getOption('attrMap', {}).featureColor == 'count';
+		},
+
 		updateColorBarLabels: function()
 		{
 			if (!this.$('.color-bar').length) return;
@@ -184,7 +190,7 @@ define([
 				var val,
 					maxIndex,
 					isNumeric = this.model.isNumeric(),
-					isCounts = this.model.getOption('attrMap', {}).featureColor == 'count',
+					isCounts = this.isDisplayingCounts(),
 					hasCountsGtZero = false,
 					counts = this.model.getCounts(),
 					mag = !counts ? 0 : counts.max > 10000 ? 1000	
@@ -243,7 +249,7 @@ define([
 				if (hasCountsGtZero) {
 					this.$el.show('fast');
 					this.hasBeenVisible = true;
-				} else {
+				} else if (this.autoHide) {
 					this.$el.hide(this.hasBeenVisible ? 'fast' : null);
 				}
 			} else {

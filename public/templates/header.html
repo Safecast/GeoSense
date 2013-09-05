@@ -1,105 +1,81 @@
-<div class="navbar navbar-fixed-top">
-	<div class="state" id="stateIndicator">
-		<div class="message">
-			<h4 id="stateIndicatorMessage"><h4>
-		</div>
-	</div>
-	<div class="navbar-inner">
-		<div class="container-fluid">
-			<div class="brand">
-				<h2>GeoSense</h2>
-				<h1></h1>
-			</div>
-			<div class="nav-collapse">
-				<ul class="nav">
-					<li class="dropdown">
-						<a href="#"
-							class="dropdown-toggle"
-							data-toggle="dropdown">About
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-							<li id="aboutMap"><a href="#">About this map</a></li>
-							<li id="authorLink"><a href="#"><span class="text"></span> <span class="icon icon-chevron-right half-opacity" /></span></a></li>
-							<li class="divider"></li>
-							<li id="aboutGeoSense"><a href="#">About GeoSense</a></li>
-							<li><a href="http://www.media.mit.edu/" target="_blank">MIT Media Lab <span class="icon icon-chevron-right half-opacity" /></a></li>
-						</ul>
-					</li>
-					<li class="dropdown">
-						<a class="dropdown-toggle"
-							data-toggle="dropdown">Share
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-							<li id="shareLink"><a href="#">Link or embed</a></li>
-							<li id="postTwitter"><a href="#">Post to Twitter</a></li>
-							<li id="postFacebook"><a href="#">Share on Facebook</a></li>
-						</ul>
-					</li>
-					<li class="divider-vertical"></li>
+<header class="navbar navbar-inverse navbar-fixed-top bs-docs-nav" role="banner">
 
-				</ul>
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <div class="navbar-brand">
+	    <!--<a class="app-title" href="#">--><span class="app-title">GeoSense</span><!--</a>--> <a class="map-title"></a>
+	  </div>
+  </div>
 
-				<ul id="mapView" class="nav nav-pills">
-					<li class="map-view-toggle map">
-				    	<a href="#map">Map</a>
-				  	</li>
-				</ul>
-				<ul id="viewStyle" class="nav">
-					<li class="dropdown">
-						<a href="#"
-							class="dropdown-toggle"
-							data-toggle="dropdown">Style: <span id="viewStyleCurrent"></span>
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-		                    <li>
-		                    	<ul class="style-choices">
-		                    	</ul>
-		                    </li>
-		                    <li class="divider"></li>
-		                    <li class="base-options">
-			                    <p class="baselayer-opacity clearfix">
-			                        <label class="title" for="">Base Opacity</label>  
-			                        <span class="pull-left">
-			                            <input class="number" name="baselayerOpacity" type="text" />
-			                        </span>
-			                        <span class="slider pull-left" data-field="layerOptions.opacity"></span>
-			                    </p>
-			                    <p class="background-color">
-			                        <label class="title" for="">Background</label>  
-									<input name="backgroundColor" type="text" class="color-picker" size="7" placeholder="default" value="" />
-			                    </p>
-			                </li>
-						</ul>
-					</li>
-				</ul>
-				<ul id="viewBase" class="nav">
-					<li class="dropdown">
-						<a href="#"
-							class="dropdown-toggle"
-							data-toggle="dropdown">Base: <span id="viewBaseCurrent"></span>
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-		                    <li>
-		                    	<ul class="base-choices">
-		                    	</ul>
-		                    </li>
-						</ul>
-					</li>
-				</ul>
+  <!-- Collect the nav links, forms, and other content for toggling -->
+  <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+    <ul class="nav navbar-nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+					<li id="aboutMap"><a href="#">About this map</a></li>
+					<li id="authorLink"><a href="#"><span class="text"></span> <span class="glyphicon glyphicon-chevron-right half-opacity" /></span></a></li>
+					<li class="divider"></li>
+					<li id="aboutGeoSense"><a href="#">About GeoSense</a></li>
+					<li><a href="http://www.media.mit.edu/" target="_blank">MIT Media Lab <span class="glyphicon glyphicon-chevron-right half-opacity" /></a></li>
+        </ul>
+      </li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Share <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+					<li id="shareLink"><a href="#">Link or embed</a></li>
+					<li id="postTwitter"><a href="#">Post to Twitter</a></li>
+					<li id="postFacebook"><a href="#">Share on Facebook</a></li>
+        </ul>
+      </li>
+    </ul>
+		<ul id="mapView" class="nav navbar-nav">
+			<li class="map-view-toggle map">
+		    	<a href="#map">Map</a>
+		  	</li>
+		</ul>
 
-				<ul id="map-tools">
-					<li class="admin-tool"><a href="#" class="map-tool setup"><span class="icon map-tool-icon setup"></span></a></li>
-					<li class="admin-tool"><a href="#" class="map-tool upload"><span class="icon map-tool-icon upload"></span></a></li>
-					<li class="admin-tool"><a href="#" class="map-tool add-data"><span class="icon map-tool-icon add-data"></span></a></li>
-<!--					<li><a href="#" class="map-tool timeline"><span class="icon map-tool-icon graph"></span></a></li>-->
+		<ul class="nav navbar-nav">
+			<li id="viewBase" class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">Base: <span id="viewBaseCurrent"></span>	<b class="caret"></b></a>
+				<ul class="dropdown-menu">
+          <li>
+          	<ul class="base-choices"></ul>
+          </li>
 				</ul>
-				<div class="setup" id="setupButton"><div class="icon"></div></div>
-				<input type="text" class="search-query" id="search" placeholder="Search address">
-			</div>
-		</div>
-	</div>
-</div>
+			</li>
+      <li id="viewStyle" class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Style: <span id="viewStyleCurrent"></span> <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li>
+            <ul id="viewStyleChoices" class="style-choices"></ul>
+          </li>
+          <li class="divider"></li>
+          <li><a id="customizeViewOptions" href="#">Customize…</a></li>
+        </ul>
+      </li>
+		</ul>
+
+    <form class="navbar-form navbar-right search-form" role="search">
+      <div class="input-group">
+        <input type="text" class="form-control search-query" placeholder="Search address">
+        <span class="input-group-btn">
+          <button type="submit" class="btn btn-inverse"><span class="glyphicon glyphicon-search" /></button>
+        </span>
+      </div>
+    </form>
+
+    <ul class="nav navbar-form navbar-right admin-tools">
+			<button type="submit" class="btn btn-inverse admin-tool map-tool setup"><span class="glyphicon glyphicon-cog"></span><span class="caption"> Setup</span></button>
+			<button type="submit" class="btn btn-inverse admin-tool map-tool upload"><span class="glyphicon glyphicon-cloud-upload"></span><span class="caption"> Import</span></button>
+			<button type="submit" class="btn btn-inverse admin-tool map-tool add-data"><span class="glyphicon glyphicon-list"></span><span class="caption"> Library</span></button>
+    </ul>
+
+  </nav><!-- /.navbar-collapse -->
+</header>

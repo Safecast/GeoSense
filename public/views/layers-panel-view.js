@@ -11,8 +11,9 @@ define([
 
 	var LayersPanelView = PanelViewBase.extend({
 
-		className: 'panel panel-draggable layer-panel',
-		
+		className: 'panel panel-default layers-panel',
+	  	subViewContainer: '.layers-container',
+
 	    events: {
 	    },
 
@@ -21,7 +22,7 @@ define([
 	    	LayersPanelView.__super__.initialize.call(this, options);
 		    this.template = _.template(templateHtml);	
 			this.sortableItemsSelector = '.map-layer';
-			this.sortableHandleSelector = '.drag-handle';
+			this.sortableHandleSelector = '.collapsible-heading';
 	    },
 
 		render: function()

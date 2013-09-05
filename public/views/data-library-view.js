@@ -5,75 +5,113 @@ define([
 	'config',
 	'utils',
 	'text!templates/data-library.html',
+	'models/map_layer',
+	'views/panel-view-base',
+	'views/map-layer-view',
 	'collections/geo-feature-collections'
-], function($, _, Backbone, config, utils, templateHtml, GeoFeatureCollections) {
+], function($, _, Backbone, config, utils, templateHtml, MapLayer, PanelViewBase, MapLayerView, GeoFeatureCollections) {
     "use strict";
 
-	var DataLibraryView = Backbone.View.extend({
+	var DataLibraryView = PanelViewBase.extend({
 
-	    tagName: 'div',
-		className: 'data-library',
-		
+		className: 'panel panel-default panel-stick-left panel-scrollable layers-panel data-library',
+		draggable: false,
+
 	    events: {
-			'click #closeDatalibrary' : 'closeButtonClicked',
+			'submit form.search, keypress form.search .search-query': 'searchClicked',
 	    },
+
+	  	subViewContainer: '.collections-list',
+	    prevQuery: '',
+	    dataCollectionsFetched: false,
+	    hasSearchQuery: false,
 
 	    initialize: function(options) {
 		    this.template = _.template(templateHtml);
+		    this.collection = new GeoFeatureCollections();
+		    this.listenTo(this.collection, 'reset', this.featureCollectionReset);
 	    },
 
-	    render: function() {
+	    render: function() 
+	    {
 			var self = this;
-			$(this.el).html(this.template());
-			
-			this.fetchDataCollections();
-				
-			$(this.el).animate({left: -350}, 1, function()
-			{
-				$(self.el).css('display','block');	
-				$(self.el).animate({
-				    left: 0,
-				  }, 'fast', 'easeOutCubic', function() {
-				  });
-			});	
-			
+			DataLibraryView.__super__.render.call(this);
+			this.on('panel:show', function() {
+				setTimeout(function() {
+					if (!self.hasSearchQuery) {
+						self.fetchDataCollections();
+					}
+				}, 250); // wait for slide
+				self.$('.search-query').trigger('click');
+			});
 			$('body').append('<div class="drop-zone" id="dropZone"><h3 class="instruction">DROP HERE</h3></div>');
-			
+			this.$('form.search .search-query').on('click', function() {
+				$(this).select();
+			});
+			this.$('form.search .search-query').keyup(function() {
+				//self.searchClicked();
+			});
 	        return this;
 	    },
 
-		show: function()
-		{
-			$(this.el).addClass('visible');	
-		},
+	    searchClicked: function(event)
+	    {
+	    	var query = this.$('.search-query').val();
+	    	if (true/*this.prevQuery != query*/) {
+		    	this.fetchDataCollections({q: query});
+		    	this.prevQuery = query;
+		    	this.hasSearchQuery = query != '';
+	    	}
+	    	return false;
+	    },
 
-		fetchDataCollections: function() {	
+	    featureCollectionReset: function(collection) {
+	    	this.$(this.subViewContainer).empty();
+	    	var self = this;
+	    	this.$('form.search .help-block').text(
+	    		collection.length == 1 ?  
+	    		__('%(num)s collection found', {num: collection.length})
+	    		: __('%(num)s collections found', {num: collection.length})
+	    	);
+			collection.each(function(model, index) { 
+				var mapLayer = new MapLayer({
+						featureCollection: model.attributes,
+						layerOptions: model.attributes.defaults
+					}),
+	            	mapLayerView = new MapLayerView({model: mapLayer});
+            	mapLayerView.expandContent = false;
+            	mapLayerView.legendViewOptions.autoHide = false;
+	            self.appendSubView(mapLayerView.render());
+			});
 			
+			self.$('.map-layer').draggable({
+				revert: 'invalid',
+				stack: '#dropZone',
+				start: function(event, ui) { 
+					$('#dropZone').addClass('visible');
+					ui.helper.css('width', $(this).outerWidth() + 'px');
+					ui.helper.addClass('drag-helper');
+				},
+				helper: 'clone',
+				appendTo: self.$el,
+				stop: function(event, ui) {
+					$('#dropZone').removeClass('visible');
+				}
+			});
+
+			$('#dropZone').droppable( {
+		    	accept: '.map-layer',
+		    	hoverClass: '',
+		    	drop: self.dataDrop
+		    } );	
+	    },
+
+		fetchDataCollections: function(params) {	
 			var self = this;	
-			new GeoFeatureCollections().fetch({
+			this.dataCollectionsFetched = true;
+			this.collection.fetch({
+				data: params,
 				success: function(collection, response, options) {
-
-					collection.each(function(model) { 
-						self.drawDataSource(model);
-					});
-					
-					self.$('.data-item').draggable({
-						revert: true,
-						stack: '#dragLabel',
-						start: function(event, ui) { 
-							$('#dropZone').addClass('visible');
-							$(this).css("opacity",".9");
-						},
-						stop: function(event, ui) {
-							$('#dropZone').removeClass('visible');
-						}
-					});
-
-					$('#dropZone').droppable( {
-				      accept: '.data-item',
-				      hoverClass: '',
-				      drop: self.dataDrop
-				    } );	
 				},
 				error: function(collection, response, options) {
 					console.error('failed to fetch collections');
@@ -81,40 +119,11 @@ define([
 			});
 		},
 		
-		drawDataSource: function(model)
-		{
-			var data = model.attributes,
-				dataDiv = '<div class="data-item" data-id="'+data._id+'">'
-				+'<div class="clearfix"><div class="data-icon"></div><h4 class="data-title">'+data.title+'</h4></div>'
-				+(data.count ? '<p class="data-count micro">'+formatLargeNumber(data.count)+'</p>' : '')
-				+(data.description ? '<p class="data-description micro">'+data.description+'</p>' : '')
-				+(data.source ? '<h5 class="data-source micro">Source: '+data.source+'</p>' : '')
-				+'</div>'
-			this.$('.data-container').append(dataDiv);
-		},
-		
 		dataDrop: function (event, ui ) {
 		  	var draggable = ui.draggable;
-			app.saveNewMapLayer(draggable.attr('data-id'));
-			$(ui.draggable).css("display","none");
+			app.saveNewMapLayer(draggable.attr('data-feature-collection-id'));
 		},
 		
-		closeButtonClicked: function() {
-			this.remove();
-		},
-		
-		remove: function() {
-			var self = this;
-			$(self.el).animate({
-			    left: -350,
-			  }, 'fast', 'easeInCubic', function() {
-					$('#dropZone').remove();
-					app.dataLibraryVisible = false;
-					$(window).unbind();
-					$(self.el).remove();
-					return this;
-			  });	
-		},
 	});
 
 	return DataLibraryView;

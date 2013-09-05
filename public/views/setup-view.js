@@ -63,11 +63,12 @@ define([
 			});
 			
 			this.$(".enter-email").click(function() {
-				$('#tab-setup-metadata').trigger('click');
+				self.$('#tab-setup-author').trigger('click');
+				self.$('input.email').focus();
 				return false;
 			});
 
-			this.modelFieldInputs = this.$('#setup-metadata input, #setup-metadata textarea, #setup-custom-domain input');
+			this.modelFieldInputs = this.$('form.map-setup .form-control');
 			this.$('#cancelButton').hide();
 
 			this.modelFieldInputs.each(function() {
@@ -101,7 +102,7 @@ define([
 
 			var self = this;
 			this.$('#saveCloseButton').attr('disabled', true);
-			self.modelFieldInputs.removeClass('error');
+			self.modelFieldInputs.removeClass('has-error');
 
 			this.model.save(postData, {
 				success: function(model, response, options) {
@@ -116,7 +117,7 @@ define([
 						_.each(data.errors, function(err) {
 							var sel = 'input[name="' + err.path + '"]',
 								input = self.$(sel);
-							input.addClass('error');
+							input.addClass('has-error');
 							/*input.tooltip('destroy');
 							input.tooltip({trigger: 'focus', title: err.message});
 							input[0].focus();*/

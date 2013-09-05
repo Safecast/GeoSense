@@ -12,7 +12,7 @@ define([
 	//var MapInfoView = PanelViewBase.extend({
 	var MapInfoView = ModalView.extend({
 
-		/*className: 'panel map-info',*/
+		/*className: 'panel panel-default map-info',*/
 	    events: {
 	    },
 

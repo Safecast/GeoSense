@@ -11,7 +11,8 @@ define([
 
 	var DataDetailView = PanelViewBase.extend({
 
-		className: 'panel data-detail',
+		className: 'panel panel-default data-detail',
+		draggable: false,
 		
 	    events: {
 	    },
@@ -23,7 +24,7 @@ define([
 	    	
 	    	this.defaultLayout = [
 	    		{fields: ['properties.icon'], label: false, formatter: 'icon', class: 'icon muted'},
-	    		{fields: ['%(label)s', '%(datetime)s'], label: false, class: "box title"},
+	    		{fields: ['%(label)s', '%(datetime)s'], label: false, class: "box heading"},
 	    		{fields: ['%(numeric)s'], label: '%(numeric)s', class: 'large'},
 	    		{fields: ['properties.description', 'properties.summary'], label: false, class: 'box text-body muted'},
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
@@ -167,7 +168,7 @@ define([
 								formatter = formatters.numeric;
 								break; 
 						};
-					}
+					} 
 					if (!isEmpty(value)) {
 						content.push(getValue(value, formatter));
 					}

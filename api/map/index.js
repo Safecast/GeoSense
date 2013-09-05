@@ -187,13 +187,15 @@ var MapAPI = function(app)
 						var f = req.body[fields[i]];
 						if (f != undefined) {
 							map[fields[i]] = f;
-							console.log(fields[i], f);
+							//console.log(fields[i], f);
 						}
 					}
 
 					if (map.host && map.host != '') {
 						var split = map.host.split('://');
 						map.host = split.pop();
+					} else {
+						delete map.SMTP_HOST;
 					}
 
 					if (map.linkURL && map.linkURL != '') {
@@ -225,8 +227,8 @@ var MapAPI = function(app)
 							if (handleDbOp(req, res, err, user, 'user')) return;
 							map.createdBy = map.modifiedBy = user;
 							map.save(function(err, map) {
+								console.success('map saved', err);
 								if (handleDbOp(req, res, err, map, 'map')) return;
-								console.log('map updated');
 
 								// find again since createdBy and modifiedBy won't be populated after map.save()
 								Map.findOne({_id: req.params.mapid})
@@ -253,7 +255,7 @@ var MapAPI = function(app)
 						}
 						map.save(function(err, map) {
 							if (handleDbOp(req, res, err, map, 'map')) return;
-							console.log('map updated');
+							console.success('map updated');
 						 	res.send(prepareMapResult(req, map));
 						});
 					}

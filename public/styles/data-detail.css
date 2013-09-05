@@ -20,29 +20,27 @@
 }
 
 .panel.data-detail .detail-label {
-	color: #fff;
+	/*color: #fff;*/
 	font-weight: normal;
 	text-align: left;
-	/*width: 50%;*/
 	white-space: nowrap;
 	line-height: 1.3em;
 	overflow: hidden;
 }
 
 .panel.data-detail .detail-label .muted {
-	color: #aaa;
+	color: #888;
 }
 
 .panel.data-detail .detail-value {
-	color: #fff;
-	/*width: 50%;*/
+	/*color: #fff;*/
 	text-align: right;
 	line-height: 1.3em;
 	overflow: hidden;
 }
 
 .panel.data-detail .detail-value .muted {
-	color: #bbb;
+/*	color: #bbb;*/
 }
 
 .panel.data-detail .detail-label.single, .panel.data-detail .detail-value.single {
@@ -56,9 +54,7 @@
 }
 
 .panel.data-detail .box.title {
-	color: #fff;
-	line-height: 1.1em;
-	font-size: 19px;
+	/*color: #fff;*/
 	padding-bottom: .25em;
 }
 

@@ -3,7 +3,7 @@
 	width: 22px;
 	background: url(../assets/trigger.png) center no-repeat;
 	vertical-align: middle;
-	margin: 0 .25em;
+	margin: 4px .25em;
 	display: inline-block;
 	outline: none;
 }
@@ -22,6 +22,9 @@
 	border-radius: 5px;
 	padding: 5px;
 	z-index: 999999;
+	-webkit-box-sizing: content-box !important;
+	-moz-box-sizing: content-box !important;
+	box-sizing: content-box !important;
 }
 
 .miniColors-selector.black {

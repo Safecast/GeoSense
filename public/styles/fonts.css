@@ -1,0 +1,83 @@
+/*
+@font-face {
+    font-family: 'Vit';
+    src: url('../assets/type/vit.eot');
+    src: url('../assets/type/vit.eot?#iefix') format('embedded-opentype'),
+         url('../assets/type/vit.woff') format('woff'),
+         url('../assets/type/vit.ttf') format('truetype'),
+         url('../assets/type/vit.svg#Vit') format('svg');
+    font-weight: bold;
+    font-style: normal;
+}
+*/
+
+@import url(http://fonts.googleapis.com/css?family=Oxygen:300,700|Oswald:400|Roboto+Slab:300,700);
+
+body, select, textarea, p, input, button {
+  font-family: "Oxygen", sans-serif;
+  font-weight: 300;
+}
+
+.app-title {
+  font-family: "Roboto Slab";
+  font-weight: 400;
+}
+
+.navbar-inverse .navbar-brand {
+  color: white;
+}
+
+h1,
+h3, .modal h2,
+label, .box.title, header .map-title, .panel-heading, 
+.title {
+/*  font-family: OswaldLight,sans-serif;*/
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  
+  font-size:13px;
+  color:#666;
+}
+
+.muted {
+  color:#999;
+}
+
+header a, header a:hover, header a:focus {
+  text-decoration: none;
+  color: white;
+}
+
+header .map-title {
+  font-size: 21px;
+  padding-left: 5px;
+  color: white;
+}
+
+.collapsible-heading, .collapsible-heading a, .heading, .homepage h2 {
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 25px;
+  color: #353535;
+}
+
+.box.heading {
+  font-size: 16px;
+  line-height: 22px;
+}
+
+label, .hint-toggle {
+  font-size: 13px;
+  color:#666;
+}
+
+h4, h5, .condensed {
+/*  font-family: OswaldBold, sans-serif;*/
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+}
+
+b, strong {
+  font-weight: 700;
+}

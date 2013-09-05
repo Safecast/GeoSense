@@ -30,6 +30,7 @@ define([
 
 	    render: function() {
 			$(this.el).html(this.template());
+			this.$('.alert').hide();
 	        return this;
 	    },
 
@@ -96,6 +97,7 @@ define([
 					}
 				});
 			}
+			return false;
 		}
 	});
 

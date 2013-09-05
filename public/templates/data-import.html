@@ -1,102 +1,106 @@
-<div class="modal-header">
-<a class="close" data-dismiss="modal">×</a>
-<h3 class="title">Data Import</h3>
-</div>
-<div class="modal-body">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Data Import</h4>
+        </div>
+        <div class="modal-body">
 
-<form class="step source well">
-    <fieldset>
-        <p>
-        	Please enter the URL and type of the dataset you would like to import.
-        </p>
-        <p>
-	        <label class="title">Source URL</label>
-    	    <input name="url" class="text large" placeholder="http://" value="" />
-    	</p>
+			<form class="step source well">
+			    <fieldset>
+			        <p class="help-block">
+			        	Please enter the URL and type of the dataset you would like to import.
+			        </p>
+			        <div class="form-group">
+				        <label>Source URL</label>
+			    	    <input name="url" class="form-control text input-lg" placeholder="http://" value="" />
+			    	</div>
 
-		<p class="btn-group select-filetype" data-toggle="buttons-radio">
-			<button class="btn filetype csv" data-value="csv"><i class="icon icon-filetype csv"><span>CSV</span></i></button>
-			<button class="btn filetype geojson json" data-value="geojson"><i class="icon icon-filetype geojson"><span>GeoJSON</span></i></button>
-			<button class="btn filetype kml" data-value="kml"><i class="icon icon-filetype kml"><span>KML</span></i></button>
-			<button class="btn filetype rss" data-value="rss"><i class="icon icon-filetype rss"><span>RSS</span></i></button>
-			<button class="btn filetype asc ascii" data-value="esri.grid.ascii"><i class="icon icon-filetype esri-grid"><span>ESRI grid</span></i></button>
-		</p>
+					<div class="btn-group btn-group-justified select-filetype" data-toggle="buttons-radio">
+						<a href="#" class="btn btn-default filetype csv" data-value="csv"><i class="icon icon-filetype csv"><span>CSV</span></i></a>
+						<a href="#" class="btn btn-default filetype geojson json" data-value="json"><i class="icon icon-filetype geojson"><span>GeoJSON</span></i></a>
+						<a href="#" class="btn btn-default filetype kml" data-value="kml"><i class="icon icon-filetype kml"><span>KML</span></i></a>
+						<a href="#" class="btn btn-default filetype rss" data-value="rss"><i class="icon icon-filetype rss"><span>RSS</span></i></a>
+						<a href="#" class="btn btn-default filetype asc ascii" data-value="esri.grid.ascii"><i class="icon icon-filetype esri-grid"><span>ESRI grid</span></i></a>
+					</div>
 
-		<p>
-			<button class="source-start btn btn-primary source-submit">Next <i class="icon icon-white icon-arrow-right half-opacity"></i></button>
-		</p>
+      				<div class="form-group">
+						<button class="source-start btn btn-primary source-submit">Import <i class="glyphicon glyphicon-arrow-right half-opacity"></i></button>
+					</div>
 
-    </fieldset>
-</form>
+			    </fieldset>
+			</form>
 
-<!-- Review data -->
-<form class="step mapping">
+			<!-- Review data -->
+			<form class="step transform">
 
-	<div class="source">
-		<h4>Source Data</h4>
-		<div class="table-container">
-			<table class="from-data table table-striped">
-				<thead>
-			    	<tr>
-			    		<th class="element-template">
+				<div class="source">
+					<h4>Source Data</h4>
+					<div class="table-container">
+						<table class="from-data table table-striped">
+							<thead>
+						    	<tr>
+						    		<th class="element-template">
 
-			    			<span class="well clearfix">
-					    		<span class="from-field label" data-from="">
-					    			<a href="" class="remove"><span class="icon icon-white icon-remove-sign"></span></a>
-					    			<span class="field-name"></span> 
-					    		</span>
-					    	</span>
+						    			<span class="well clearfix">
+								    		<span class="from-field label" data-from="">
+								    			<a href="" class="remove"><span class="glyphicon glyphicon-remove-sign"></span></a>
+								    			<span class="field-name"></span> 
+								    		</span>
+								    	</span>
 
-					    </th>
-			    	</tr>
-			    </thead>
-			    <tbody>
-			    </tbody>
-			</table>
+								    </th>
+						    	</tr>
+						    </thead>
+						    <tbody>
+						    </tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="target">
+					<h4>Transformed Data</h4>
+					<div class="table-container">
+						<table class="to-data table table-striped">
+							<thead>
+						    	<tr>
+								    <th class="element-template">
+								    	<button class="btn btn-default btn-sm show-field-settings" data-placement="top"> <span class="field-label"></span> <span class="glyphicon glyphicon-cog half-opacity"></span> <span class="field-type half-opacity micro"></span></button>
+								    	<span class="well to-field clearfix" data-to=""></span>
+								    	<div class="field-settings">
+								    		<label>Type</label>
+								    		<select class="field-type field-setting" name="type">
+								    		</select>
+											<!--<label class="checkbox">
+											   	<input class="field-setting" name="options.skipEmpty" type="checkbox"> Skip empty
+											</label>
+											<label class="checkbox">
+											   	<input class="field-setting" name="options.skipZero" type="checkbox"> Skip zero
+											</label>-->
+				    			    	</span>
+								    </th>
+						    	</tr>
+						    </thead>
+						    <tbody>
+						    </tbody>
+						</table>
+					</div>
+				</div>
+
+			</form>
+
+			<!-- Alerts -->
+			<div class="alert alert-block alert-error">
+		         <strong class="error-title"></strong>
+		         <div class="errors"></div>
+		   </div>
+
 		</div>
-	</div>
-
-	<div class="target">
-		<h4>Transformed Data</h4>
-		<div class="table-container">
-			<table class="to-data table table-striped">
-				<thead>
-			    	<tr>
-					    <th class="element-template">
-					    	<button class="btn show-field-settings" data-placement="top"> <span class="field-label"></span> <span class="icon icon-cog half-opacity"></span> <span class="field-type half-opacity micro"></span></button>
-					    	<span class="well to-field clearfix" data-to=""></span>
-					    	<div class="field-settings">
-					    		<label class="title">Type</label>
-					    		<select class="field-type field-setting" name="type">
-					    		</select>
-								<label class="checkbox">
-								   	<input class="field-setting" name="options.skipEmpty" type="checkbox"> Skip empty
-								</label>
-								<label class="checkbox">
-								   	<input class="field-setting" name="options.skipZero" type="checkbox"> Skip zero
-								</label>
-	    			    	</span>
-					    </th>
-			    	</tr>
-			    </thead>
-			    <tbody>
-			    </tbody>
-			</table>
-		</div>
-	</div>
-
-</form>
-
-<!-- Alerts -->
-<div class="alert alert-block alert-error">
-         <strong class="error-title"></strong>
-         <div class="errors"></div>
-   </div>
-</div>
-<div class="modal-footer">
-	<button class="step mapping btn back"><i class="icon-arrow-left half-opacity"></i> </span> Use another source</button>
-	<button data-dismiss="modal" class="btn cancel">Cancel</button>
-	<button class="step mapping import-run btn btn-primary">Import Data</button>
-	<div class="state-indicator pull-right"><div class="spinner"></div></div>
-</div>
-
+        <div class="modal-footer">
+			<button class="btn btn-default step transform back"><i class="glyphicon glyphicon-arrow-left half-opacity"></i> Use another source</button>
+			<button data-dismiss="modal" class="btn btn-default pull-right cancel">Cancel</button>
+			<button class="step transform import-run btn btn-primary pull-right">Transform Data</button>
+			<div class="state-indicator pull-right"><div class="spinner"></div></div>
+        </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

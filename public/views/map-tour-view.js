@@ -13,7 +13,7 @@ define([
 	*/
 	var MapTourView = window.PanelViewBase.extend({
 
-		className: 'panel map-tour',
+		className: 'panel panel-default map-tour',
 		
 	    events: {
 			'click .btn.previous' : 'previousStep',
