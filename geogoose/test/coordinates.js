@@ -47,5 +47,10 @@ describe('coordinates', function() {
 			[1, 2, 3, 4]), [[1, 2], [3, 4]]);
 	});
 
+	it('should return one-dimensional array for points', function() {
+		assert.deepEqual(coordinates.getBounds(
+			[[[[11,12]]],[11,12]], false, true), [11, 12]);
+	});
+
 });
 

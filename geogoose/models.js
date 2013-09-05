@@ -30,7 +30,7 @@ GeoFeatureCollectionSchemaMiddleware.pre = {
     save: function(next) {
         if (this.bbox && this.bbox.length) {
             // Store 2d-indexable bounds >= -180 and < 180
-            this.bounds2d = getBounds(boundsFromBbox(this.bbox), true);
+            this.bounds2d = getBounds(boundsFromBbox(this.bbox), true, true);
         }
         if (next) next();
     }
@@ -95,10 +95,12 @@ GeoFeatureSchemaMiddleware.pre = {
         if (!this.type) this.type = 'Feature';
         if (this.geometry.coordinates && this.geometry.coordinates.length) {
             var bounds = getBounds(this.geometry.coordinates);
-            // GeoJSON specifies a one-dimensional array for the bbox
-            this.bbox = bboxFromBounds(bounds);
+            if (this.geometry.type != 'Point') {
+                // GeoJSON specifies a one-dimensional array for the bbox
+                this.bbox = bboxFromBounds(bounds);
+            }
             // Store 2d-indexable bounds >= -180 and < 180
-            this.bounds2d = getBounds(bounds, true);
+            this.bounds2d = getBounds(bounds, true, true);
         }
         if (next) next();
     }

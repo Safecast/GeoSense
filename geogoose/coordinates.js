@@ -38,14 +38,14 @@ be a n-dimensional array of coordinates, such as [11,12] or
 If the second parameter is true, the final coordinates will be overflown
 so that they are >= -180 and < 180, suitable for MongoDB 2d indexes.
 */
-var getBounds = function(coordinates, overflow180) 
+var getBounds = function(coordinates, overflow180, returnPoint) 
 {
     if (!isArray(coordinates) || !coordinates.length) {
         return;
     } else if (!isArray(coordinates[0])) {
         coordinates = [coordinates];
     }
-    return arrayReduce.call(coordinates, function(a, b) {
+    var bounds = arrayReduce.call(coordinates, function(a, b) {
         if (!isArray(b)) return a;
         var bmax, bmin;
         if (isArray(b[0])) {
@@ -64,6 +64,10 @@ var getBounds = function(coordinates, overflow180)
             [Math.max(bmax[0], a[1][0]), Math.max(bmax[1], a[1][1])]
         ];
     }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
+    if (returnPoint && bounds[0][0] == bounds[1][0] && bounds[0][1] == bounds[1][1]) {
+        return bounds[0];
+    }
+    return bounds;
 };
 
 var bboxFromBounds = function(bounds)
