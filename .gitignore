@@ -39,3 +39,5 @@ node_modules/.bin/express
 config-prod.js
 
 prod-scripts
+tmp/*
+TODO.txt

@@ -25,9 +25,9 @@ define([
 			'click .map-tool.timeline' : 'timelineButtonClicked',
 			'click #mapView a' : 'mapViewToggleClicked',
 			'click #viewBase .dropdown-menu a' : 'viewBaseToggleClicked',
-			'click #viewStyle .dropdown-menu a' : 'viewStyleToggleClicked',
-			
-			'keypress input': 'keyEvent',
+			'click .view-style a' : 'viewStyleToggleClicked',
+			'click #customizeViewOptions': 'customizeViewOptionsClicked',
+			'click .search-form button': 'searchClicked'
 	    },
 
 	    initialize: function(options) 
@@ -50,70 +50,22 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
-			this.$('.base-options').click(function(event) {
-				event.stopPropagation();
-			});
-
-			var opts = this.model.attributes.viewOptions || {},
-				opacity = opts.baselayerOpacity || 1,
-				backgroundColor = opts.backgroundColor,
-				slider = this.$('.baselayer-opacity .slider'),
-				input = this.$('input[name=baselayerOpacity]');
-
-			slider.slider({
-				min: 0,
-				max: 1,
-				range: "min",
-				step: .025,
-				value: opacity,
-				slide: function( event, ui ) {
-					app.setViewOptions({baselayerOpacity: ui.value});
-					input.val(ui.value);
-				}
-		    });
-		    input.val(opts.baselayerOpacity);
-		    input.change(function() {
-		    	var val = parseFloat($(this).val());
-		    	if (isNaN(val) || val > 1) val = 1;
-		    	if (val < 0) val = 0;
-		    	$(this).val(val);
-		    	slider.slider('value', val);
-				app.setViewOptions({baselayerOpacity: val});
-		    });
-
-			var colorInput = this.$('input[name=backgroundColor]');
-	    	if (backgroundColor != undefined) {
-				$(colorInput).miniColors('value', backgroundColor);	
-	    	}
-			$(colorInput).miniColors({
-			    change: function(hex, rgb) { 
-					app.setViewOptions({backgroundColor: hex});
-				}
-			});
-			$(colorInput).change(function() {
-				// when blank
-				app.setViewOptions({backgroundColor: $(this).val()});
-			});
-
 	        return this;
 	    },
 
-		keyEvent: function(event) 
-		{		
-			if (event.keyCode == 13) {
-				if (this.$("#search").is(":focus")) {
-					var address = $('#search').val();
-					if (address != '') {
-						app.zoomToAddress(address);
-					}
-				}
+		searchClicked: function(event)
+		{
+			var address = this.$('.search-query').val();
+			if (address != '') {
+				app.zoomToAddress(address);
 			}
+			return false;
 		},
 		
 	    populateFromModel: function()
 	    {
 			var mapInfo = this.model.attributes;
-			var title = $('<a>');
+			var title = this.$('.map-title');
 			title.text(mapInfo.title);
 			title.attr('href', app.genPublicURL());
 			title.click(function() {
@@ -121,7 +73,6 @@ define([
 				app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
 				return false;
 			});
-			this.$('.brand h1').html(title);
 
 			if (mapInfo.linkURL) {
 				this.$('#authorLink').show();
@@ -155,6 +106,12 @@ define([
 			var link = evt.currentTarget;
 			var style = link.href.split('#')[1];
 			app.setViewStyle(style);
+			evt.preventDefault();
+		},
+
+		customizeViewOptionsClicked: function(evt)
+		{
+			app.showBaselayerEditor();
 			evt.preventDefault();
 		},
 		

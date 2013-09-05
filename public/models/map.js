@@ -3,10 +3,12 @@ define([
 	'underscore',
 	'backbone',
 	'models/map_layer',
+    'deepextend',
+    'deepmodel',
 ], function($, _, Backbone, MapLayer) {
     "use strict";
     
-	var Map = Backbone.Model.extend({
+	var Map = Backbone.DeepModel.extend({
 		
 		idAttribute: "publicslug",
 		urlRoot: window.BASE_URL + 'api/map',

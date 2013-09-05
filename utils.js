@@ -153,6 +153,7 @@ function sendError(res, err) {
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
     if (err) {
+        console.error('Error', err);
         switch (err.name) {
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 

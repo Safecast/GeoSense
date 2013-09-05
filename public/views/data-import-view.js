@@ -81,7 +81,7 @@ define([
 							self.importButtonClicked();
 							return;
 						}
-						self.setStep('mapping');
+						self.setStep('transform');
 					}
 				}
 			});
@@ -367,7 +367,7 @@ define([
 			this.setStep('source');					
 
 			if (DEV) {
-				this.$('[name=url]').val('https://dl.dropboxusercontent.com/s/28fvvskvmhrhdxx/Amsterdam.dat.json');
+				this.$('[name=url]').val('https://dl.dropbox.com/s/cb4blktkkelwg1n/nuclear_reactors.csv');
 				//self.sourceSubmitButtonClicked();
 			}
 
@@ -403,6 +403,7 @@ define([
 	    	this.$('.step').each(function() {
 	    		$(this).toggle($(this).is('.' + step));
 	    	});
+	    	this.$('.modal-dialog').toggleClass('large', step == 'transform');
 	    },
 
 	    updateHandleStates: function()

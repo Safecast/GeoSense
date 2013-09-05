@@ -9,6 +9,7 @@ define([
     'views/layers-panel-view',
     'views/data-detail-view',
     'views/map-info-view',
+    'views/baselayer-editor-view',
     'views/map-layer-editor-view',
     'views/map-layer-view',
     'views/data-library-view',
@@ -19,7 +20,7 @@ define([
     'models/map_layer'
 ], function($, _, Backbone, HomepageView, HeaderView, 
     SetupView, MapOLView, LayersPanelView, DataDetailView,
-    MapInfoView, MapLayerEditorView,
+    MapInfoView, BaselayerEditorView, MapLayerEditorView,
     MapLayerView, DataLibraryView, DataImportView,
     ModalView, ShareView,
     Map, MapLayer) {
@@ -104,7 +105,6 @@ define([
                 this.adminRoute = false;
                 this.routingByHost = false;
 
-                this.listenTo(this.vent, 'showMapLayerEditor', this.showMapLayerEditor);
                 this.listenTo(this.vent, 'viewOptionsChanged', this.viewOptionsChanged);
 
                 this.sessionOptions = {};
@@ -347,6 +347,8 @@ define([
 
                 this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
                 this.attachPanelView(this.layersPanelView);
+
+                this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
             },
 
             mapViewReady: function() 
@@ -388,6 +390,14 @@ define([
                             self.fetchMapFeatures();                
                         }, 300);
                     }*/
+                });
+
+                this.listenTo(model, 'showMapLayerEditor', function() {
+                    this.showMapLayerEditor(model);
+                });
+
+                this.listenTo(model, 'destroy', function() {
+                    self.stopListening(model);
                 });
 
                 if (model.getDataStatus() != DataStatus.COMPLETE) {
@@ -495,30 +505,36 @@ define([
                         return (css.match(/\bmap-style-\S+/g) || []).join(' ');
                     });
 
+                    var viewStyles = {},
+                        viewStyle = this.mapView.viewStyle || 'default';
                     if (this.mapView.viewStyles) {
-                        $('#app').addClass('map-style-'+this.mapView.viewStyle);
-
-                        var li = [];
-                        $.each(this.mapView.viewStyles, function(styleName, title) {
-                            var s = styleName;
-                            li.push('<li class="view-style' + (s == self.mapView.viewStyle ? ' inactive' : '') + '">'
-                                + '<a href="#' + s + '">' 
-                                + title
-                                + '</a></li>');
-                        });
-                        $('#viewStyle .dropdown-menu .view-style').remove();
-                        $('#viewStyle .dropdown-menu').prepend(li.join(''));
-                        $('#viewStyleCurrent').text(this.mapView.viewStyles[this.mapView.viewStyle]);
-                        $('#viewStyle').show();
+                        viewStyles = this.mapView.viewStyles;
                     } else {
-                        $('#viewStyle').hide();
-                    }   
+                        viewStyles = {'default': 'Default'};
+                    };
+                    
+                    $('#app').addClass('map-style-'+viewStyle);
+
+                    var li = [];
+                    $.each(viewStyles, function(styleName, title) {
+                        var s = styleName;
+                        li.push('<li class="view-style' + (s == viewStyle ? ' active' : '') + '">'
+                            + '<a href="#' + s + '">' 
+                            + title
+                            + '</a></li>');
+                    });
+                    $('#viewStyle .dropdown-menu .view-style').remove();
+                    $('#viewStyle .dropdown-menu').prepend(li.join(''));
+                    $('#viewStyleCurrent').text(viewStyles[viewStyle]);
+                    $('#viewStyle').show();
+
+                        //$('#viewStyle').hide();
 
                     if (this.mapView.viewBase) {
                         var li = [];
                         for (var key in this.mapView.ViewBase) {
                             var cls = this.mapView.ViewBase[key].prototype;
-                            li.push('<li class="view-base' + (key == self.mapView.viewBase ? ' inactive' : '') + '">'
+                            li.push('<li class="view-base' + (key == self.mapView.viewBase ? ' active' : '') + '">'
                                 + '<a href="#' + key + '">' 
                                 + '<span class="view-base-thumb"' + (key != 'blank' ? ' style="background: url(' 
                                 + window.BASE_URL + '/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
@@ -574,14 +590,16 @@ define([
 
             toggleDataLibrary: function() 
             {
-                if (!this.dataLibraryVisible) {
-                    this.dataLibraryView = new DataLibraryView();
-                    this.$mainEl.append(this.dataLibraryView.render().el);
-                    this.dataLibraryVisible = true;
+                var self = this;
+                if (!this.dataLibraryView) {
+                    this.dataLibraryView = new DataLibraryView().render();
+                }
+                if (!this.dataLibraryView.isVisible()) {
+                    this.attachPanelView(this.dataLibraryView);
+                    this.dataLibraryView.show('fast');
                 } else {
-                    this.dataLibraryView.remove();
-                    this.dataLibraryVisible = false;
-                }       
+                    this.dataLibraryView.close('fast');
+                }
             },
 
             showShareLink: function()
@@ -702,6 +720,14 @@ define([
                 this.mapView.destroyPopupForFeature(mapFeature);
             },
 
+            showBaselayerEditor: function() 
+            {
+                this.attachPanelView(this.baselayerEditorView)
+                    .snapToView(this.layersPanelView, 'left', true)
+                    .hide()
+                    .show('fast');
+            },
+
             showMapLayerEditor: function(model)
             {
                 var layerId = model.id;
@@ -723,9 +749,7 @@ define([
                             this.mapLayerEditorViews[k].snapToView(this.layersPanelView, 'left', true)
                                 .show('fast');
                         } else {
-                            this.mapLayerEditorViews[k].hide('fast', function() {
-                                self.mapLayerEditorViews[k].detach();
-                            });
+                            this.mapLayerEditorViews[k].close('fast');
                         }
                     }
                 }
@@ -734,6 +758,7 @@ define([
             attachPanelView: function(panelView)
             {
                 panelView.attachTo(this.mainEl);
+                return panelView;
             },
 
             saveNewMapLayer: function(featureCollectionId)

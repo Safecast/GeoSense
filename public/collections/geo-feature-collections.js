@@ -2,12 +2,13 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'models/map',
-], function($, _, Backbone, Map) {
+	'models/map_layer',
+], function($, _, Backbone, MapLayer) {
     "use strict";
 
 	var GeoFeatureCollections = Backbone.Collection.extend({
 
+		//model: MapLayer,
 		fetchType: null,
 
 		url: function() {

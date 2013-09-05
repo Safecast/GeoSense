@@ -1,13 +1,23 @@
-<div class="backdrop"></div>
-<div class="content">
-	<div class="well">
-		<button class="btn" id="closeDatalibrary"><i class="icon-arrow-left half-opacity"></i>&nbsp;Close Library</button>
+<div class="panel-heading" style="position: relative;">
+	Data Library
+	<div class="btn-group btn-group-xs pull-right">
+		<button type="button" class="btn btn-default panel-extend"><span class="glyphicon glyphicon-plus-sign"></span></button>
+        <button type="button" class="btn btn-default panel-close"><span class="glyphicon glyphicon-remove-sign"></span></button>
 	</div>
-	<!--
-	<div class="data-search">
-		<input type="text" placeholder="Search data library" />
+</div>
+<div class="panel-body">
+	<form class="search">
+		<div class="input-group">
+      		<input type="text" class="form-control search-query" placeholder="Search library">
+      		<span class="input-group-btn">
+        		<button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+      		</span>
+		</div>
+		<p class="help-block muted">
+		</p>
+	</form>
+	<div class="panel-scrollable-container">
+		<div class="panel-scrollable-content collections-list">
+		</div>
 	</div>
-	-->
-	<div class="instructions">Drag & drop right onto your map</div>
-	<div class="well data-container"></div>
 </div>

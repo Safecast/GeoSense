@@ -1,3 +1,40 @@
+.header-view .navbar-right {
+	padding-right: 0;
+}
+
+.header-view .search-form .input-group {
+	width: 12em;
+}
+
+.header-view .btn-inverse {
+	background-color: #444;
+	color: #eee;
+}
+
+.header-view .btn-inverse:hover, .header-view .btn-inverse:focus {
+	background-color: #555;
+	color: #fff;
+}
+
+.header-view input {
+}
+
+/* Desktops and laptops ----------- */
+@media only screen and (max-width : 1200px) {
+	.header-view .search-query {
+		/*width: 5em;*/
+	}
+	.header-view .admin-tools .caption {
+		display: none;
+	}
+}
+
+.header-view .navbar-brand {
+	padding: 14px 15px;
+}
+
+
+/*
 .header-view
 {
 	position: absolute;
@@ -88,18 +125,6 @@
 	border:1px solid #111;
 	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 0px rgba(255, 255, 255, 0.15);
 	border-radius:3px;
-}
-
-.search-query
-{
-	color:#FFF;
-	transition: .2s;
-	-moz-transition: .2s; /* Firefox 4 */
-	-webkit-transition: .2s; /* Safari and Chrome */
-	-o-transition: .2s; /* Opera */
-	background-color: #333;
-	color: #eee;
-	width: 250px;
 }
 
 .search-query:focus {
@@ -264,3 +289,4 @@
 	margin: 0 0 9px 3px;
 	display: inline-block;
 }
+*/

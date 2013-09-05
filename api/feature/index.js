@@ -33,9 +33,24 @@ var FeatureAPI = function(app)
 
 		app.get('/api/featurecollections', function(req, res)
 		{
-		  	GeoFeatureCollection.find({active: true}, null, {sort: {'title': 1}}, function(err, documents) {
-		    	res.send(documents);
-			});
+			var urlObj = url.parse(req.url, true),
+				filterQuery = {$and: [{active: true}, {status: config.DataStatus.COMPLETE}]};
+			if (urlObj.query.q && typeof urlObj.query.q == 'string') {
+				var rx = {$regex: '.*' + urlObj.query.q + '.*', $options: 'i'};
+				filterQuery.$or = [
+					{title: rx},
+					{tags: rx}
+				];
+			}
+			GeoFeatureCollection.find(filterQuery)
+				.sort({title: 1})
+				.populate('defaults')
+				.populate('createdBy')
+				.populate('modifiedBy')
+				.exec(function(err, collections) {
+					if (handleDbOp(req, res, err, collections)) return;
+			    	res.send(collections);
+				});
 		});
 
 		app.get('/api/map/:publicslug/layer/:layerId/features', function(req, res) 

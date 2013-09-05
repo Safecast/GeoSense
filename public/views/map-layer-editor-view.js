@@ -7,13 +7,14 @@ define([
 	'text!templates/map-layer-editor.html',
 	'views/panel-view-base',
 	'mixins/model-editor-mixin',
+	'mixins/editor-widgets-mixin',
 	'lib/color-gradient/color-gradient',
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, ModelEditorMixin, ColorGradient) {
+], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, ModelEditorMixin, EditorWidgetsMixin, ColorGradient) {
     "use strict";
 
 	var MapLayerEditorView = PanelViewBase.extend({
 
-		className: 'panel panel-draggable map-layer-editor',
+		className: 'panel panel-default map-layer-editor',
 		
 	    events: {
 	    	'click .btn.save': 'saveButtonClicked',
@@ -24,8 +25,8 @@ define([
 	    	'change .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
 	    	// does not work well with live preview since val is unchanged
 	    	// 'keydown .model-input, .color-palette input, .color-palette select': 'modelInputChanged',
-	    	'change .preview': 'previewChanged',
-	    	'change .show-advanced': 'showAdvancedChanged',
+	    	'click .show-preview': 'previewChanged',
+	    	'click .show-advanced': 'showAdvancedChanged',
 	    	'click .generate-colors': 'generateColorsClicked',
 	    	'click .import-export': 'importExportClicked',
 	    	'click .import-settings': 'importSettingsClicked',
@@ -75,10 +76,25 @@ define([
 	    		featureCollection = this.model.attributes.featureCollection;
 			MapLayerEditorView.__super__.render.call(this);
 
+	    	/*
+			// Replace selects with dropdowns -- problem: must be populated on model events
+	    	var selectTemplate = this.$('.element-template.select-dropdown').remove()
+	    		.clone().removeClass('element-template');
+	    	this.$('select').each(function() {
+	    		var name = $(this).attr('name'),
+	    			opts = $('option', this),
+	    			el = selectTemplate.clone(),
+	    			li = '';
+	    		opts.each(function() {
+	    			li += '<li data-value="' + $(this).attr('value') + '">' + $(this).text() + '</li>';
+	    		});
+	    		$('.dropdown-menu', el).html(li);
+	    		$(this).after(el).remove();
+	    	});*/
+
 	    	this.colorRowTemplate = this.$('.color-palette tr.element-template').remove()
 	    		.clone().removeClass('element-template');
 			this.initModelInputs();
-			this.initSliders();
 
 			this.$('.dropdown-toggle').dropdown();
 
@@ -105,11 +121,29 @@ define([
 				}
 			});
 
+			this.$('.hint-toggle').each(function() {
+				var el = self.$('.hint.' + $(this).attr('data-target')).remove();
+				$('a', el).click(function() {
+					window.open($(this).attr('href'));
+					return false;
+				});
+				$(this).popover({
+					content: el,
+					html: true,
+					placement: $(this).attr('data-placement') || 'right'
+				});
+				$(this).click(function() {
+					return false;
+				});
+			});
+
+			this.initSliders();
 			this.populateFromModel();
 			this.initColorPicker(this.$('.model-input.color-picker'));
 
+			this.$('.color-palette tbody tr').addClass('drag-handle');
 			this.$('.color-palette tbody').sortable({
-				handle: '.drag-handle',
+				//handle: '.drag-handle',
 				stop: function(event, ui) {
 					self.modelInputChanged(event);
 				}
@@ -118,6 +152,7 @@ define([
 			this.initColorPicker(this.$('.model-input.color-picker'));
 
 			this.$('.has-tooltip').tooltip({ delay: 0, animation: false });
+			this.$('.show-preview').addClass('active');
 
 			return this;
 	    },
@@ -129,41 +164,6 @@ define([
 			this.$('.model-title').text(this.model.getDisplay('title'));
 			this.$('.model-numeric').toggle(this.model.isNumeric());
 	    },
-
-	    initSliders: function() 
-	    {
-	    	var self = this,
-	    		or = function(val1, val2) {
-	    			return !isNaN(val1) ? val1 : val2
-	    		};
-			this.$('.slider').each(function() {
-				var fieldName = $(this).attr('data-field'),
-					min = or(parseFloat($(this).attr('data-min')), 0),
-					max = or(parseFloat($(this).attr('data-max')), 1);
-				$(this).slider({
-					min: min,
-					max: max,
-					range: "min",
-					step: (max == 1 ? .05 : 1),
-					slide: function( event, ui ) {
-						$(self.modelInputs[fieldName][0]).val(ui.value);
-						self.modelInputChanged();
-					}
-			    });
-			    $(self.modelInputs[fieldName][0]).change(function() {
-			    	self.updateSliders();
-			    });
-			});
-		},
-
-		updateSliders: function() 
-		{
-	    	var self = this;
-			this.$('.slider').each(function() {
-				var fieldName = $(this).attr('data-field');
-				$(this).slider('value', $(self.modelInputs[fieldName][0]).val());
-			});
-		},
 
 		populateFieldInputs: function()
 		{
@@ -181,18 +181,17 @@ define([
 			});
 		},
 
-	    populateFromModel: function()
+	    customPopulateFromModel: function()
 	    {
 			this.updateFromModel();
 			this.populateFieldInputs();
-			this.populateModelInputs();
 			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
 			this.populateColorSchemes();
 			this.setButtonState(false, false);
 			this.updateSliders();
 	    },
 
-	    getModelInputValues: function(values)
+	    customGetValuesFromModelInputs: function(values)
 	    {
 	    	var self = this,
 	    		schemes = _.deepClone(this.model.get('layerOptions.colorSchemes')) || [{}];
@@ -220,7 +219,6 @@ define([
 	    	this.updateModelFromInputs();
 	    	this.model.save({}, {
 	    		success: function(model, response, options) {
-	    			self.populateFromModel();
 	    		},
 	    		error: function(model, xhr, options) {
 			    	self.setButtonState(true);
@@ -259,7 +257,7 @@ define([
 
 	    updateModel: function()
 	    {
-	    	this.setButtonState(this.isChanged);
+	    	this.setButtonState(this.isChanged, false);
 	    	if (this.isPreviewEnabled()) { 
     			this.model.setColorScheme(this.colorSchemeIndex);
 	    	}
@@ -268,19 +266,23 @@ define([
 
 	    previewChanged: function(event) 
 	    {
+			this.$('.show-preview').toggleClass('active');
 	    	if (this.isPreviewEnabled()) {
 		    	this.updateModel();
 	    	}
+			return false;
 	    },
 
 		showAdvancedChanged: function(event)
 		{
+			this.$('.show-advanced').toggleClass('active');
 			this.setButtonState();
+			return false;
 		},
 
 	    isPreviewEnabled: function()
 	    {
-			return this.$('.preview').is(':checked');
+			return this.$('.show-preview').is('.active');
 	    },
 
 	    hideColorGenerator: function(event) {
@@ -306,7 +308,7 @@ define([
 
 	    	var duration = animated || animated == undefined ? 
 	    		'fast' : null,
-	    		showAdvanced = this.$('.show-advanced').is(':checked');
+	    		showAdvanced = this.$('.show-advanced').is('.active');
 
 			this.$('.advanced').each(function() {
 				if (!$(this).hasClass('feature-settings')) {
@@ -327,19 +329,6 @@ define([
 					$(this).hide(duration);
 				}
 	    	});
-	    },
-
-	    initColorPicker: function(input, val) 
-	    {
-	    	var self = this;
-	    	if (val != undefined) {
-				$(input).miniColors('value', val);	
-	    	}
-			$(input).miniColors({
-			    change: function(hex, rgb) { 
-					self.modelInputChanged()
-				}
-			});
 	    },
 
 	    addColorRow: function(c)
@@ -453,8 +442,8 @@ define([
 	    	}
 	    	var scheme = this.model.getColorScheme(this.colorSchemeIndex),
 	    		schemeItems = this.$('.color-schemes .dropdown-menu .color-scheme');
-	    	schemeItems.removeClass('inactive');
-	    	$(schemeItems[this.colorSchemeIndex]).addClass('inactive');
+	    	schemeItems.removeClass('active');
+	    	$(schemeItems[this.colorSchemeIndex]).addClass('active');
 	    	this.$('.color-scheme-name').val(scheme.name);
 	    	this.populateColorTable(scheme.colors);
 	    	this.setButtonState();
@@ -627,6 +616,7 @@ define([
 	});
 
 	_.extend(MapLayerEditorView.prototype, ModelEditorMixin);
+	_.extend(MapLayerEditorView.prototype, EditorWidgetsMixin);
 
 	return MapLayerEditorView;
 });

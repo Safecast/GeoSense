@@ -1,9 +1,10 @@
 require.config({
 	paths: {
-        jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
+        //jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
+        jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.3.custom.min',
     	underscore: 'lib/underscore/underscore-min',
     	backbone: 'lib/backbone/backbone',
-        bootstrap: 'lib/bootstrap/js/bootstrap.min', 
+        bootstrap: 'lib/bootstrap/dist/js/bootstrap.min', 
         d3: 'lib/d3/d3.v2.min',
     	text: 'lib/require/text',
         locale: 'locale/locale.en',
@@ -55,12 +56,12 @@ require([
     'backbone',
     'app',
     'jqueryui',
+    'bootstrap',
     'backbone_super',
     'lib/jquery/jquery.color',
     'lib/jquery/jquery.glowing',
     'lib/jquery/jquery.miniColors.min',
     'lib/colorpicker/js/colorpicker',
-    'bootstrap',
     'locale',
 ], function($, _, Backbone, App, ui) {
     var app;

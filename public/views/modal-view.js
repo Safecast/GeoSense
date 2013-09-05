@@ -38,8 +38,7 @@ define([
 	  	show: function() 
 	  	{
 	  		var self = this;
-	        $('body').append(this.el);
-			$(this.el).modal('show');
+	        $(this.el).modal('show');
 			$(this.el).on('hidden', function() {
 				self.detach();
 			});

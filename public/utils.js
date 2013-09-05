@@ -41,6 +41,14 @@ var setAttr = function(obj, path, value) {
 	_set(obj, path.split('.'));
 };
 
+var expandObj = function(obj) {
+	var retObj = {};
+	for (var k in obj) {
+		setAttr(retObj, k, obj[k]);
+	}
+	return retObj;
+};
+
 function formatLargeNumber(c) {
 	if (c >= 1000000) {
 		c = Math.round(c / 1000000 * 10) / 10 + 'M';
@@ -266,7 +274,6 @@ Date.prototype.format = function(format, displayTimezoneOffset) {
 
 Date.prototype.formatReplacements = {
   	d: function() {
-  		console.log(this);
   		return lpad(this.getUTCDate(), '0', 2);
   	},
   	m: function() {

@@ -15,20 +15,21 @@ define([
 	var MapLayerView = Backbone.View.extend({
 
 		className: 'map-layer',
-		
+
 	    events: {
-			//'click .visibility' : 'visibilityChanged',
-			'click .panel-controls .toggle-layer': 'toggleLayerClicked',
-			'click .panel-controls .show-layer-editor': 'showLayerEditorClicked',
-			'click .panel-controls .show-layer-details': 'showLayerDetailsClicked',
-			'click .panel-controls .show-layer-extents': 'showLayerExtentsClicked',
-			'click .panel-controls .move-layer ': function() { return false; }
+			'click .toggle-layer': 'toggleLayerClicked',
+			'click .show-layer-editor': 'showLayerEditorClicked',
+			'click .show-layer-details': 'showLayerDetailsClicked',
+			'click .show-layer-extents': 'showLayerExtentsClicked',
+			'click .move-layer ': function() { return false; }
 	    },
 
 	    initialize: function(options) 
 	    {
-			this.vent = options.vent;
-		    this.template = _.template(templateHtml);	
+		    this.template = _.template(templateHtml);
+		    this.legendViewOptions = {};
+		    this.expandContent = true;
+
 		    this.listenTo(this.model, 'change', this.modelChanged);
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
 		    this.listenTo(this.model, 'destroy', this.remove);
@@ -95,8 +96,8 @@ define([
 								});
 								var url = featureCollection.url();
 								if (this.model.attributes.featureCollection) {
-									status += ' <a target="_blank" class="download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
-										+ url + '"><span class="icon icon-white icon-download half-opacity"></span></a>';		
+									status += '&nbsp;&nbsp;<a target="_blank" class="muted download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
+										+ url + '"><span class="glyphicon glyphicon-download muted"></span></a>';		
 								}
 							} else {
 			    				status = 'loading…';
@@ -141,55 +142,72 @@ define([
 	    	var self = this;
 			this.$el.html(this.template());
 			this.$el.attr('data-id', this.model.id);
+			this.$el.attr('data-feature-collection-id', this.model.attributes.featureCollection._id);
 
 			var stateIndicator = this.$('.state-indicator');
 			if (stateIndicator.length) {
-				this.spinner = stateIndicator.html(new Spinner({radius:4,length:0,width:4,color:'#eee',lines:7,speed:1.5}).spin().el).hide();
+				this.spinner = stateIndicator.html(new Spinner({radius:4,length:0,width:4,color:'#888',lines:7,speed:1.5}).spin().el).hide();
 			}
 			
 			// set up accordion group
-			this.toggleEl = this.$(".accordion-toggle");
+			this.toggleEl = this.$(".collapse-toggle");
 			this.collapseEl = this.$(".collapse");
-			this.toggleEl.attr("href", "#collapse-" + this.className + '-' + this.model.id);
-			this.collapseEl.attr("id", "collapse-" + this.className + '-' + this.model.id);
+			
+			this.toggleEl.attr("href", "#collapse-" + this.className 
+				+ '-' + (this.model.id || this.model.attributes.featureCollection._id));
+			this.collapseEl.attr("id", "collapse-" + this.className 
+				+ '-' + (this.model.id || this.model.attributes.featureCollection._id));
+
+		
 			// toggle initial state of accordion group
 			var enabled = this.model.isEnabled();
-			if (enabled) {
-				this.collapseEl.addClass('in');
-			} else {
-				this.toggleEl.addClass('collapsed');
-			}
 			this.collapseEl.on('show', function() {
 				if (!self.model.isEnabled()) {
 					self.model.toggleEnabled(true);
 				}
 			});
 
-			this.$('.status').toggle(enabled);
-			this.$('.admin-control').toggle(app.isMapAdmin());
+			if (!this.model.parentMap) {
+				this.$('.layer-tools').remove();
+				this.$('.status').remove();
+			} else {
+				this.$('.status').toggle(enabled);
+				if (!app.isMapAdmin()) {
+					this.$('.admin-control').remove();
+				}
+			}
+
 			this.$('.details').hide();
 			this.populateFromModel(true);
 
 			return this;
 	    },
 
-	    expand: function()
+	    expand: function(animate)
 	    {
-	    	if (!this.collapseEl.is('.in')) {
-		    	this.collapseEl.collapse('toggle');
-		    	// class not set by Bootstrap if toggled like this
-				this.toggleEl.removeClass('collapsed');
+	    	if (animate || animate == undefined) {
+		    	if (!this.collapseEl.is('.in')) {
+			    	this.collapseEl.collapse('show');
+		    	}
+	    	} else {
+	    		this.collapseEl.addClass('in');
 	    	}
+	    	// class not set by Bootstrap if toggled like this
+			this.toggleEl.removeClass('collapsed');
 	    	return this;
 	    },
 
-	    collapse: function()
+	    collapse: function(animate)
 	    {
+	    	if (animate || animate == undefined) {
 	    	if (this.collapseEl.is('.in')) {
-		    	this.collapseEl.collapse('toggle');
-		    	// class not set by Bootstrap if toggled like this
-				this.toggleEl.addClass('collapsed');
+	    		this.collapseEl.collapse('hide');
 	    	}
+	    	} else {
+	    		this.collapseEl.addClass('collapse');
+	    	}
+	    	// class not set by Bootstrap if toggled like this
+			this.toggleEl.addClass('collapsed');
 	    	return this;
 	    },
 
@@ -225,7 +243,9 @@ define([
 	    	if (this.legendView) {
 	    		this.legendView.$el.remove();
 	    	} else {
-				this.legendView = new LegendView({model: this.model});
+				this.legendView = new LegendView(_.extend({},
+					this.legendViewOptions, 
+					{model: this.model}));
 	    	}
 			if (!this.model.canDisplayValues()) return;	
 			this.$('.legend').append(this.legendView.el);
@@ -248,19 +268,23 @@ define([
 
 		updateEnabled: function(animate)
 		{
+			var enabled = this.model.isEnabled(),
+				d = animate || animate == undefined ? 'fast' : 0;
+
 	    	if (this.legendView) {
 				this.legendView.removePopover();
 			}
-			var enabled = this.model.isEnabled(),
-				d = animate || animate == undefined ? 'fast' : 0;
-			$(this.el).toggleClass('enabled', enabled);
-			$(this.el).toggleClass('disabled', !enabled);
+
+			this.$el.toggleClass('enabled', enabled);
+			this.$el.toggleClass('disabled', !enabled);
+			this.$('.toggle-layer').toggleClass('active', enabled);
 			if (enabled) {
 				this.$('.status').slideDown(d);
 			} else {
 				this.$('.status').slideUp(d);
 			}
-			if (!enabled) {
+
+			if (!enabled || !this.expandContent) {
 				this.collapse();
 			} else {
 				this.expand();
@@ -302,10 +326,10 @@ define([
 
 			if (description) {
 				this.$('.description').html(description);
-				this.$('.layer-details').show();
+				this.$('.show-layer-details').show();
 			} else {
 				this.$('.description').hide();
-				this.$('.panel-controls .layer-details').hide();
+				this.$('.show-layer-details').hide();
 			}
 
 			if (source || (collectionAttrs && collectionAttrs.sync)) {
@@ -339,7 +363,7 @@ define([
 
 		showLayerEditorClicked: function(event)
 		{
-			this.vent.trigger('showMapLayerEditor', this.model);
+			this.model.trigger('showMapLayerEditor');
 			return false;
 		},
 

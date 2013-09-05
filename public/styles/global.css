@@ -1,41 +1,3 @@
-@font-face {
-    font-family: 'Vit';
-    src: url('../assets/type/vit.eot');
-    src: url('../assets/type/vit.eot?#iefix') format('embedded-opentype'),
-         url('../assets/type/vit.woff') format('woff'),
-         url('../assets/type/vit.ttf') format('truetype'),
-         url('../assets/type/vit.svg#Vit') format('svg');
-    font-weight: bold;
-    font-style: normal;
-}
-
-/*@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Oswald Regular'), local('Oswald-Regular'), url(http://themes.googleusercontent.com/static/fonts/oswald/v7/qs_6LdoYjCitupC9judWT-vvDin1pK8aKteLpeZ5c0A.woff) format('woff');
-}
-
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Oswald Bold'), local('Oswald-Bold'), url(http://themes.googleusercontent.com/static/fonts/oswald/v7/dI-qzxlKVQA6TUC5RKSb37O3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
-}*/
-
-@font-face {
-  font-family: 'Oxygen';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Oxygen'), local('Oxygen-Regular'), url(http://themes.googleusercontent.com/static/fonts/oxygen/v2/wtnQihq4aKLdY8pCM6qpG-vvDin1pK8aKteLpeZ5c0A.woff) format('woff');
-}
-@font-face {
-  font-family: 'Oxygen';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Oxygen Bold'), local('Oxygen-Bold'), url(http://themes.googleusercontent.com/static/fonts/oxygen/v2/fSUtikcZd7PHZK0t2hzTebO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
-}
-
 .element-template {
 	display: none;
 }
@@ -67,7 +29,7 @@ a {
 }
 
 .micro {
-	font-size: 11px;
+	font-size: 12px;
 }
 
 a:link.accordion-toggle {
@@ -79,13 +41,6 @@ p {
   font-size:10pt;
   font-weight: normal;
   line-height: 18px;
-}
-
-h2, .homepage h1 {
-	font-family: Vit, sans-serif;
-	font-style: normal;
-	font-weight: 700;
-	line-height:38px;
 }
 
 .state-indicator {
@@ -101,61 +56,12 @@ h2, .homepage h1 {
 	left:50%;
 }
 
-h1, .homepage h2,
-h3, .modal h2,
-label.title, .box.title {
-/*	font-family: OswaldLight,sans-serif;*/
-	font-family: "AlternateGothicFSNo3", sans-serif;
-	
-	font-size:15pt;
-	font-weight: bold;
-	color: #353535;
+form.well, .panel .well {
+	margin: 0;
 }
 
-label.title {
-	font-size:12pt;
-	color:#999;
-}
-
-fieldset p, fieldset table {
-	margin-bottom: .5em;
-}
-
-h4, h5, .condensed {
-/*	font-family: OswaldBold, sans-serif;*/
-	font-family: "AlternateGothicFSNo3", sans-serif;
-}
-
-h4 {
-	font-weight: bold;
-}
-
-input, textarea {
-	color:#000;
-	font-size: 14px;
-	border: 1px solid #cbd0d7;
-	border-right: 1px line #eee;
-	-webkit-border-radius:7px;
-	-moz-border-radius:7px;
-	border-radius:7px;
-	padding: 10px;
-	box-shadow:inset 1px 1px 1px 0px rgba(100,100,100,0.2);
-	resize: none;
-	font-family: inherit;
-}
-
-input:focus, textarea:focus {
-	outline: none;
-	border: 1px solid #5eb6e4;
-	box-shadow: 0 0 10px #5eb6e4;
-}
-
-input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
-	color: #AAA;
-}
-
-input:-moz-placeholder, textarea:-moz-placeholder {
-	color: #AAA;
+.modal-body .nav-tabs, .panel .nav-tabs {
+	margin-bottom: 15px;
 }
 
 .snap {
@@ -196,24 +102,54 @@ fieldset.two-column input {
 	background-color: #00C9FF !important;
 }
 
-.navbar .nav .inactive > a, .navbar .nav .inactive > a:hover {
-  color: #aaa;
-  cursor: pointer;
-  background: transparent !important;
-}
-
 #map_canvas img {
 	/* reset a bootstrap setting that conflicts with OpenStreetMap */
 	max-width: none !important;
 }
 
-input.text.large {
+/*input.text.large {
 	font-size: 18px;
 	height: 40px;
 	color: #999;
-}
+}*/
 
 .popover {
 	/* for popover in modal dialogs */
 	z-index: 1100 !important;
 }
+
+input.color-picker {
+	width: 70px;
+	display: inline-block;
+}
+
+.drag-handle {
+	cursor: move;
+}
+
+.btn-default {
+	background-color: #f8f8f8;
+}
+
+.urls .form-control {
+	cursor: pointer;
+} 
+
+.form-control.map-admin-url, .form-control.has-error {
+	background-color: #ffece5;	
+}
+
+.form-control.map-url {
+	background-color: #e7ffe5;
+}
+
+.button-height {
+	line-height: 34px;
+}
+
+@media screen and (min-width: 900px) {
+  .modal-dialog.large {
+    width: 80%;
+  }
+}
+

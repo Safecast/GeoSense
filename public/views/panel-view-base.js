@@ -10,8 +10,9 @@ define([
 
 	var PanelViewBase = Backbone.View.extend({
 
-	    tagName: 'panel',
-	    draggable: undefined,
+	    className: 'panel panel-default',
+	    draggable: true,
+	    subViewContainer: '.panel-body',
 
 	    initialize: function(options) 
 	    {
@@ -19,22 +20,21 @@ define([
 		    this.vent = options.vent;
 		},
 
-		setPanelState: function(expand) {
+		updatePanelState: function(expand) 
+		{
 			var self = this;
 			if (expand == null) {
 				expand = $(self.el).is('.collapsed');
 			} 
 
-			if (!expand) {
-				$(self.el).addClass('collapsed');
-			} else {
-				$(self.el).removeClass('collapsed');
-			}
+			self.$el.toggleClass('collapsed', !expand);
 
-			if ($(self.el).is('.collapsed')) {
-				self.$('.panel-body').hide('fast');
+			if (self.$el.is('.collapsed')) {
+				self.$('.panel-body').slideUp('fast');
+				self.$('.panel-footer').slideUp('fast');
 			} else {
-				self.$('.panel-body').show('fast');
+				self.$('.panel-body').slideDown('fast');
+				self.$('.panel-footer').slideDown('fast');
 			}
 
 			return this;
@@ -78,14 +78,36 @@ define([
 
 		show: function(duration, complete) 
 		{
+			this.trigger('panel:show', this);
+			if (this.$el.is('.panel-stick-left')) {
+				this.$el.hide().toggle('slide', duration, complete);
+				return this;
+			}
 			this.$el.show(duration, complete);
 			return this;
 		},
 
 		hide: function(duration, complete)
 		{
+			this.trigger('panel:hide', this);
+			if (this.$el.is('.panel-stick-left')) {
+				this.$el.show().toggle('slide', duration, complete);
+				return this;
+			}
 			this.$el.hide(duration, complete);
 			return this;
+		},
+
+		close: function(duration, complete)
+		{
+			var self = this;
+			this.trigger('panel:close', self);
+			this.hide('fast', function() {
+				self.detach();
+				if (complete) {
+					complete();
+				}
+			})
 		},
 
 		attachTo: function(parentElement)
@@ -104,47 +126,64 @@ define([
 			var self = this;
 
 			if (this.isDraggable()) {
+				var handle = this.$('.panel-heading');
+				handle.addClass('drag-handle');
+				this.$el.addClass('panel-draggable');
 				this.$el.draggable({
 					start: function() {
 						//$(this).css('right', 'auto');
 						$(this).css('bottom', 'auto');
 					},
-					handle: this.$('.panel-header'),
+					drag: function() {
+						// TODO: implement proper panel management
+						/*if ($(this).position().left != 0) {
+							$(this).removeClass('panel-stick-left');
+							$(this).css('top', '11px');
+						}*/
+					},
+					handle: handle,
 					stop: function() {
 						var el = this,
 							right = $(this).position().left + $(this).outerWidth();
+						
+						// TODO: implement proper panel management
+						/*if ($(this).position().left == 0) {
+							$(this).addClass('panel-stick-left');
+							$(el).css('left', '');
+							$(el).css('right', '');
+							$(el).css('top', '');
+							$(el).css('bottom', '');
+						}*/
+
 						$('.snap.right').each(function() {
 							if (right == $(this).position().left) {
 								//console.log(this, $(this).position());
 								// re-dock to right edge
-								$(el).css('left', 'auto');
+								$(el).css('left', '');
 							}
 						});
 					},
 
-					snap: ".snap, .panel", snapMode: "outer"
+					snap: ".snap, .panel", snapMode: "outer",
+					snapTolerance: 10
 				});
 				this.$el.css('position', 'absolute'); // draggable sets it to relative
 			}
 			
-			this.$('a.panel-extend').click(function() {
+			this.$('.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			
 				if ($(self.el).is('.extended')) {
-					self.setPanelState(true);
+					self.updatePanelState(true);
 				}
 				self.trigger('panel:resize', self);
-				return false;
 			});
 
-			this.$('a.panel-collapse').click(function() {
-				self.setPanelState();	
-				return false;
+			this.$('.panel-collapse').click(function() {
+				self.updatePanelState();
 			})
 
-			this.$('a.panel-close').click(function() {
-				self.detach();
-				self.trigger('panel:close', self);
-				return false;
+			this.$('.panel-close').click(function() {
+				self.close('fast');
 			});
 
 	        return this;
@@ -156,9 +195,9 @@ define([
 			this.$el.detach();
 		},
 
-		appendSubView: function(view)
+		appendSubView: function(view, container)
 		{
-			this.$('.accordion').append(view.el);
+			this.$(container || this.subViewContainer).append(view.el);
 			if (view.setSuperView) {
 				view.setSuperView(this);
 			}
