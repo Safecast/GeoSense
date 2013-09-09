@@ -55,8 +55,7 @@ define([
 	    render: function() 
 	    {
 	    	var self = this;
-
-			$(this.el).html(this.template());	
+	  		SetupView.__super__.render.call(this);
 			
 			this.$('.map-url, .map-admin-url').click(function() {
 				$(this).select();
@@ -79,7 +78,7 @@ define([
 				});
 			});
 
-			$(this.el).on('hidden', function() {
+			$(this.el).on('hidden.bs.modal', function() {
 				app.navigate(app.genMapURI(null));
 			});
 

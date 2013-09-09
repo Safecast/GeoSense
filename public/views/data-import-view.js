@@ -359,9 +359,7 @@ define([
 	    render: function() 
 	    {
 	    	var self = this;
-
-			$(this.el).html(this.template());
-			var self = this;
+			DataImportView.__super__.render.call(this);
 
 			this.spinner = this.$('.spinner').html(new Spinner({radius:6,length:0,width:6,color:'#333',lines:7,speed:1.5}).spin().el).hide();
 			this.setStep('source');					

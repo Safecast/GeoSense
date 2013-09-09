@@ -78,11 +78,19 @@
 .map-style-dark #main-viewport .panel {
 	background-color: rgba(50, 50, 50, .9);
 	border-color: #333;
-	color: #efefef;
+	color: #ddd;
+}
+
+.map-style-dark #main-viewport .panel .text h1 {
+	color: white;
 }
 
 .map-style-dark #main-viewport .panel .text a, .map-style-dark #main-viewport .panel .nav a {
 	color: #bbb;
+}
+
+.map-style-dark #main-viewport .panel text {
+
 }
 
 .map-style-dark #main-viewport .panel-heading, .map-style-dark #main-viewport .panel-footer {

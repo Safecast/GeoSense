@@ -19,6 +19,7 @@ define([
 
 	    events: {
 			'submit form.search, keypress form.search .search-query': 'searchClicked',
+			'click button.remove-query': 'removeQueryClicked'
 	    },
 
 	  	subViewContainer: '.collections-list',
@@ -37,6 +38,7 @@ define([
 			var self = this;
 			DataLibraryView.__super__.render.call(this);
 			this.on('panel:show', function() {
+		    	this.$(this.subViewContainer).empty();
 				setTimeout(function() {
 					if (!self.hasSearchQuery) {
 						self.fetchDataCollections();
@@ -51,12 +53,14 @@ define([
 			this.$('form.search .search-query').keyup(function() {
 				//self.searchClicked();
 			});
+	    	this.$('button.remove-query').hide();
 	        return this;
 	    },
 
 	    searchClicked: function(event)
 	    {
 	    	var query = this.$('.search-query').val();
+	    	this.$('button.remove-query').toggle(query != '');
 	    	if (true/*this.prevQuery != query*/) {
 		    	this.fetchDataCollections({q: query});
 		    	this.prevQuery = query;
@@ -65,7 +69,14 @@ define([
 	    	return false;
 	    },
 
-	    featureCollectionReset: function(collection) {
+	    removeQueryClicked: function(event)
+	    {
+	    	console.log('remove');
+	    	this.$('.search-query').val('');
+	    },
+
+	    featureCollectionReset: function(collection) 
+	    {
 	    	this.$(this.subViewContainer).empty();
 	    	var self = this;
 	    	this.$('form.search .help-block').text(
@@ -82,6 +93,7 @@ define([
             	mapLayerView.expandContent = false;
             	mapLayerView.legendViewOptions.autoHide = false;
 	            self.appendSubView(mapLayerView.render());
+	            mapLayerView.$el.hide().slideDown('fast');
 			});
 			
 			self.$('.map-layer').draggable({

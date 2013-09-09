@@ -37,6 +37,14 @@ define([
 			return this;
 	    },
 
+	    customPopulateFromModel: function() 
+	    {
+	    	var input = this.$('.model-input[name="viewOptions.baselayerOpacity"]');
+	    	if (input.val() == '') {
+		    	input.val('1');
+	    	}
+	    },
+
 	    modelInputChanged: function(event) 
 	    {
 	    	app.setViewOptions(expandObj(this.getValuesFromModelInputs()).viewOptions);

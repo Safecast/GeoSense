@@ -28,11 +28,6 @@
 	display: inline-block;
 }
 
-.drop-zone
-{
-	z-index:996;
-}
-
 .header-view
 {
 	position:absolute;
