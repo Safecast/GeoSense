@@ -71,6 +71,17 @@ define([
 	    	$('.popover').remove();
 	    },
 
+	    getDisplayUnit: function(valFormatter)
+	    {
+	    	if (this.isDisplayingCounts()) {
+	    		return this.model.getDisplay('itemTitlePlural');
+	    	}
+	    	if (!valFormatter) {
+	    		valFormatter = this.model.getValFormatter();
+	    	}
+	    	return valFormatter.unit;
+	    },
+
 		render: function()
 		{	
 			var self = this,
@@ -80,24 +91,26 @@ define([
 			this.removePopover();
 
 			var valFormatter = this.model.getValFormatter(),
-				unit = !this.isDisplayingCounts() ? valFormatter.unit : this.model.getDisplay('itemTitlePlural'),
+				unit = this.getDisplayUnit(valFormatter),
 				schemes = this.model.getLayerOptions().colorSchemes,
 				scheme = this.model.getColorScheme();
 
 			if (unit) {
-				var formatItems = [];
-				var formatters = this.model.getValFormatters();
-				var ul = this.$('.unit ul');
+				var formatItems = [],
+					formatters = this.model.getValFormatters(),
+					ul = this.$('.unit ul'),
+					hasToggleFormatters = !this.isDisplayingCounts() && formatters.length > 1,
+					num = hasToggleFormatters ? formatters.length : 1;
 				ul.html('');
-				for (var i = 0; i < formatters.length; i++) {
+				for (var i = 0; i < num; i++) {
 					var f = formatters[i];
 					var li = '<li class="unit-item' 
-						+ (formatters.length > 1 && f == valFormatter ? ' active' : '') 
+						+ (hasToggleFormatters && f == valFormatter ? ' active' : '') 
 						+ '">'
-						+ (formatters.length > 1 ? '<a href="#" class="unit-toggle" data-index="' + 
+						+ (hasToggleFormatters ? '<a href="#" class="unit-toggle" data-index="' + 
 							i + '">' : '<span>')
-						+ '<strong>' + unit + '</strong>'
-						+ (formatters.length > 1 ? '</a>' : '</span>')
+						+ '<strong>' + this.getDisplayUnit(f) + '</strong>'
+						+ (hasToggleFormatters ? '</a>' : '</span>')
 						+ '</li>';
 					var li = $(li);
 					ul.append(li);

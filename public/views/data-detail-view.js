@@ -152,7 +152,7 @@ define([
 						return a;
 					}) : __('Value')),
 				'unit': valFormatter.unit,
-				'itemTitlePlural': mapLayer.getDisplay('itemTitlePlural') || __('samples'),
+				'itemTitlePlural': mapLayer.getDisplay('itemTitlePlural'),
 			};
 
 			var rows = [];

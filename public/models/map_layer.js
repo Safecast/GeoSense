@@ -64,9 +64,9 @@ define([
         {
             var options = this.attributes.layerOptions,
                 collection = this.attributes.featureCollection,
-                defaults = collection ? collection.defaults : {};
+                defaults = collection ? collection.defaults : {},
 
-                return options
+                ret = options
                     && options[attrName] 
                     && (typeof(options[attrName]) != 'string' || options[attrName].length) ?
                         options[attrName]
@@ -75,6 +75,12 @@ define([
                         : defaults ?
                             defaults[attrName]
                                 : null;
+
+            if (!ret && attrName == 'itemTitlePlural') {
+                ret = __('samples');
+            }
+            
+            return ret;
         },
 
         initialize: function(attributes, options) 
