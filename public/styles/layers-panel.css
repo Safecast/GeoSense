@@ -47,7 +47,7 @@
 
 .layers-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
 	margin: 2px !important;
-	padding: 1px 8px 1px 8px !important;
+	padding: 1px 6px 1px 6px !important;
 	display: block;
 	white-space: nowrap;
 	-webkit-border-radius: 3px;
@@ -55,12 +55,8 @@
 	border-radius: 3px;
 }
 
-.layers-panel .unit.box {
-	margin-top: 2px;
-}
-
 .layers-panel .unit.box, .layers-panel .color-bar .segment {
-	height: 28px;
+	height: 26px;
 }
 
 .layers-panel .legend .unit .nav-pills a:hover {
