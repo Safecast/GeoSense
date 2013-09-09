@@ -22,6 +22,12 @@ Modifies the JSON object to be sent to the client as GeoJSON
 var toGeoJSON = function(obj) 
 {
     delete obj.bounds2d;
+    if (obj.bbox && !obj.bbox.length && obj.geometry.type == 'Point') {
+        obj.bbox = [
+            obj.geometry.coordinates[0], obj.geometry.coordinates[1], 
+            obj.geometry.coordinates[0], obj.geometry.coordinates[1]
+        ];
+    }
     return obj;
 };
 
