@@ -5,8 +5,9 @@ define([
 	'config',
 	'utils',
 	'text!templates/data-import.html',
-	'views/modal-view'
-], function($, _, Backbone, config, utils, templateHtml, ModalView) {
+	'views/modal-view',
+	'moment'
+], function($, _, Backbone, config, utils, templateHtml, ModalView, moment) {
     "use strict";
 
 	var DataImportView = ModalView.extend({
@@ -555,7 +556,7 @@ define([
 										if (val) {
 											out = new Date(val);
 											if (out) {
-												out = out.format(locale.formats.DATE_TIME);
+												out = moment(out).format(locale.formats.DATE_TIME);
 											}
 										}
 								}

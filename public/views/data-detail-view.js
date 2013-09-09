@@ -5,8 +5,9 @@ define([
 	'config',
 	'utils',
 	'text!templates/data-detail.html',
-	'views/panel-view-base'
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
+	'views/panel-view-base',
+	'moment'
+], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, moment) {
     "use strict";
 
 	var DataDetailView = PanelViewBase.extend({
@@ -107,18 +108,21 @@ define([
 				if (Array.isArray(value)) {
 					return value.join(', ');
 				}
-				if (value.min == value.max) return getValue(value.min, formatter);
+				var minValue = getValue(value.min, formatter),
+					maxValue = getValue(value.max, formatter);
+				if (minValue == maxValue) return minValue;
 				var minMax = formatter.minMaxFormat || __('%(min)s to %(max)s');
 				return __(minMax).format({
-						min: getValue(value.min, formatter),
-						max: getValue(value.max, formatter)
+						min: minValue,
+						max: maxValue
 					});
 			};
 
 			var formatters = {
 				date: {
 					format: function(value) {
-						var value = value instanceof Date ? value : new Date(value);
+						//var value = value instanceof Date ? value : new Date(value);
+						var value = moment(value);
 						return value.format(layerOptions.datetimeFormat || locale.formats.DATE_SHORT);
 					}
 				},

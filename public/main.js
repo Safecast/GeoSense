@@ -13,7 +13,8 @@ require.config({
         openlayers: 'lib/openlayers/OpenLayers-2.12/OpenLayers',
         cloudmade: 'lib/openlayers/cloudmade',
         stamen: 'lib/openlayers/stamen',
-        backbone_super: 'lib/backbone_super/backbone_super'
+        backbone_super: 'lib/backbone_super/backbone_super',
+        moment: 'lib/moment/moment.min'
   	},
 
     shim: {

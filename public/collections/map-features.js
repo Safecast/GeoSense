@@ -3,8 +3,9 @@ define([
 	'underscore',
 	'backbone',
 	'models/geo-feature',
-	'parsers/index'
-], function($, _, Backbone, GeoFeature, Parser) {
+	'parsers/index',
+	'moment'
+], function($, _, Backbone, GeoFeature, Parser, moment) {
     "use strict";
 
 	var MapFeatures = Backbone.Collection.extend({
@@ -57,8 +58,8 @@ define([
 			/* Example queryParams for time-based:
 
 				queryParams.t = 'w';
-				queryParams.from = fromDate.format('%Y-%m-%d');
-				queryParams.to = toDate.format('%Y-%m-%d');
+				queryParams.from = moment(fromDate).format('YYYY-MM-DD');
+				queryParams.to = moment(toDate).format('YYYY-MM-DD');
 
 			for a bounding box with zoom:
 
