@@ -9,7 +9,8 @@ define([
 	'views/histogram-view',
 	'views/legend-view',
 	'lib/color-gradient/color-gradient',
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, ColorGradient) {
+	'moment'
+], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, ColorGradient, moment) {
     "use strict";
 
 	var MapLayerView = Backbone.View.extend({
@@ -352,7 +353,7 @@ define([
 				}
     			if (collectionAttrs.sync) {
 					source += ' <span class="updated micro">(' + __('updated %(date)s', {
-						date: new Date(
+						date: moment(
 							collectionAttrs.reduce ? 
 							(collectionAttrs.updatedAt < collectionAttrs.lastReducedAt || !collectionAttrs.lastReducedAt ?
 								collectionAttrs.updatedAt : collectionAttrs.lastReducedAt) 
