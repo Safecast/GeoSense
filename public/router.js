@@ -6,6 +6,7 @@ define([
     'views/header-view',
     'views/setup-view',
     'views/map-ol-view',
+    'views/help-panel-view',
     'views/layers-panel-view',
     'views/data-detail-view',
     'views/map-info-view',
@@ -19,7 +20,7 @@ define([
     'models/map',
     'models/map_layer'
 ], function($, _, Backbone, HomepageView, HeaderView, 
-    SetupView, MapOLView, LayersPanelView, DataDetailView,
+    SetupView, MapOLView, HelpPanelView, LayersPanelView, DataDetailView,
     MapInfoView, BaselayerEditorView, MapLayerEditorView,
     MapLayerView, DataLibraryView, DataImportView,
     ModalView, ShareView,
@@ -177,7 +178,8 @@ define([
                 if (this.firstLoad) {
                     this.firstLoad = false;
                     this.homepageView = new HomepageView();
-                    $('#app').append(this.homepageView.render().el);
+                    $('#app').append(this.homepageView.el);
+                    this.homepageView.render();
                 } else {
                     window.location.reload(true);           
                 }
@@ -345,9 +347,12 @@ define([
                 var snap = $('<div class="snap top" /><div class="snap right" />');
                 this.$mainEl.append(snap);
 
-                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
-                this.attachPanelView(this.layersPanelView);
+                this.helpPanelView  = new HelpPanelView().render();
+                if (!this.map.attributes.layers.length && this.isMapAdmin()) {
+                    this.attachPanelView(this.helpPanelView).hide().show('fast');
+                }
 
+                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
                 this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
             },
 
@@ -374,7 +379,6 @@ define([
             {
                 var self = this;
 
-                console.log('initMapLayer', model.id);
                 this.mapLayersById[model.id] = model;
                 // do not fetch features yet if we are waiting for mapViewReady
                 if (this.mapLayerSubViewsAttached) {
@@ -432,6 +436,9 @@ define([
 
             attachSubViewsForMapLayer: function(model, animate)
             {
+                if (!this.layersPanelView.isAttached) {
+                    this.attachPanelView(this.layersPanelView).hide().show();
+                }
                 console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'));
                 var mapLayerView = new MapLayerView({model: model, vent: this.vent}).render();
                 this.layersPanelView.appendSubView(mapLayerView);
@@ -777,6 +784,7 @@ define([
                 layer.save({}, {
                     success: function(model, response, options) {
                         console.log('new map layer saved', model);
+                        self.layersPanelView.show('fast');
                     },
                     error: function(model, xhr, options) {
                         console.error('failed to save new map layer');

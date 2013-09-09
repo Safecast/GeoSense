@@ -13,6 +13,8 @@ define([
 	    className: 'panel panel-default',
 	    draggable: true,
 	    subViewContainer: '.panel-body',
+	    showEffect: 'fadeIn',
+	    hideEffect: 'fadeOut',
 
 	    initialize: function(options) 
 	    {
@@ -79,22 +81,30 @@ define([
 		show: function(duration, complete) 
 		{
 			this.trigger('panel:show', this);
+			if (!duration) {
+				this.$el.show();
+				return this;
+			}
 			if (this.$el.is('.panel-stick-left')) {
 				this.$el.hide().toggle('slide', duration, complete);
 				return this;
 			}
-			this.$el.show(duration, complete);
+			this.$el[this.showEffect](duration, complete);
 			return this;
 		},
 
 		hide: function(duration, complete)
 		{
 			this.trigger('panel:hide', this);
+			if (!duration) {
+				this.$el.hide();
+				return this;
+			}
 			if (this.$el.is('.panel-stick-left')) {
 				this.$el.show().toggle('slide', duration, complete);
 				return this;
 			}
-			this.$el.hide(duration, complete);
+			this.$el[this.hideEffect](duration, complete);
 			return this;
 		},
 
@@ -116,6 +126,12 @@ define([
 			if (this.isDraggable()) {
 				this.$el.draggable('option', 'containment', parentElement);
 			}
+            if (this.$el.is('.panel-center')) {
+                this.$el.css({
+                	left: Math.max(15, $(parentElement).innerWidth() / 2 - this.$el.outerWidth() / 2) + 'px',
+                	top: Math.max(15, $(parentElement).innerHeight() / 2 - this.$el.outerHeight() / 2 * 1.5) + 'px'
+                });
+            }
 			this.isAttached = true;
 			return this;
 		},
@@ -195,9 +211,14 @@ define([
 			this.$el.detach();
 		},
 
+		getContainer: function(container)
+		{
+			return this.$(container || this.subViewContainer);
+		},
+
 		appendSubView: function(view, container)
 		{
-			this.$(container || this.subViewContainer).append(view.el);
+			this.getContainer(container).append(view.el);
 			if (view.setSuperView) {
 				view.setSuperView(this);
 			}

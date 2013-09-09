@@ -21,8 +21,10 @@ define([
 	    },
 
 	    render: function() {
-			$(this.el).html(this.template());		
-	        return this;
+			this.$el.html(this.template())
+				.attr('tabindex', -1)
+				.modal({keyboard: true, show: false});
+			return this;
 	    },
 
 		setTitle: function(string)

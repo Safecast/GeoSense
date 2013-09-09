@@ -31,6 +31,7 @@ define([
 	    render: function() {
 			$(this.el).html(this.template());
 			this.$('.alert').hide();
+			this.$('.map-title').focus();
 	        return this;
 	    },
 
@@ -80,11 +81,12 @@ define([
 			var self = this;
 
 			var postData = {
-				title: this.$('#appendedPrependedInput').val()
+				title: this.$('.map-title').val()
 			};
 
 			if (!postData.title || postData.title == '') {	
 				this.$('#errorMessage').show();
+				this.$('.map-title').focus();
 			} else {
 				console.log('creating map', postData);
 				new Map().save(postData, {

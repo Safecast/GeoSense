@@ -1,6 +1,10 @@
+.homepage .navbar-brand {
+  padding: 13px 15px;
+}
+
 .homepage .app-title {
   font-weight: 700;
-  font-size: 153px;
+  font-size: 100px;
   color: white;
   line-height: 140px;
   margin-top: 40px;
@@ -8,6 +12,10 @@
 
 .homepage .jumbotron {
 	color: white;
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+  background: #333 url(../assets/homepage-topotexture-dark.jpg);
+  margin: 0;
 }
 
 .homepage .jumbotron form {
@@ -16,10 +24,6 @@
 
 .homepage .jumbotron h2 {
 	color: #999;
-}
-
-.homepage .jumbotron {
-  background: #333;
 }
 
 .homepage .jumbotron table {
@@ -49,12 +53,6 @@
   margin: 30px 0;
 }
 
-/* Main marketing message and sign up button */
-.jumbotron {
-  text-align: center;
-  border-bottom: 1px solid #e5e5e5;
-}
-
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   /* Remove the padding we set earlier */
@@ -71,5 +69,8 @@
   /* Remove the bottom border on the jumbotron for visual effect */
   .jumbotron {
     border-bottom: 0;
+  }
+  .homepage .app-title {
+    font-size: 130px;
   }
 }

@@ -20,8 +20,8 @@ define([
 			'click #postFacebook' : 'postFacebookClicked',
 			'click #postTwitter' : 'postTwitterClicked',
 			'click .map-tool.setup' : 'setupButtonClicked',
-			'click .map-tool.add-data' : 'addDataButtonClicked',
-			'click .map-tool.upload' : 'uploadButtonClicked',
+			'click .map-tool.data-library' : 'dataLibraryButtonClicked',
+			'click .map-tool.data-import' : 'dataImportButtonClicked',
 			'click .map-tool.timeline' : 'timelineButtonClicked',
 			'click #mapView a' : 'mapViewToggleClicked',
 			'click #viewBase .dropdown-menu a' : 'viewBaseToggleClicked',
@@ -126,15 +126,15 @@ define([
 			evt.preventDefault();
 		},
 
-		addDataButtonClicked: function(evt)
+		dataImportButtonClicked: function(evt)
 		{
-			app.toggleDataLibrary();
+			app.toggleDataImport();
 			evt.preventDefault();
 		},
 
-		uploadButtonClicked: function(evt)
+		dataLibraryButtonClicked: function(evt)
 		{
-			app.toggleDataImport();
+			app.toggleDataLibrary();
 			evt.preventDefault();
 		},
 

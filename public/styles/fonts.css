@@ -81,3 +81,20 @@ h4, h5, .condensed {
 b, strong {
   font-weight: 700;
 }
+
+.text h1 {
+  font-size: 25px;
+}
+
+.text h1:first-child {
+  margin-top: 0;
+}
+
+.text .btn-lg {
+  text-align: left;
+  width: 100%;
+}
+
+.btn-lg .glyphicon {
+  margin-right: .5em;
+}

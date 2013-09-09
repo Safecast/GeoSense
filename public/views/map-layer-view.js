@@ -15,6 +15,8 @@ define([
 	var MapLayerView = Backbone.View.extend({
 
 		className: 'map-layer',
+	    showEffect: 'slideDown',
+	    hideEffect: 'slideUp',
 
 	    events: {
 			'click .toggle-layer': 'toggleLayerClicked',
@@ -213,13 +215,22 @@ define([
 
 	    hide: function(duration)
 	    {
-	    	this.$el.hide(duration);
+	    	if (!duration) {
+		    	this.$el.hide();
+		    	return this;
+	    	}
+	    	this.$el[this.hideEffect](duration);
 	    	return this;
 	    },
 
 	    show: function(duration)
 	    {
-	    	this.$el.show(duration);
+	    	console.log('show', duration);
+	    	if (!duration) {
+		    	this.$el.show();
+		    	return this;
+	    	}
+	    	this.$el[this.showEffect](duration);
 	    	return this;
 	    },
 
@@ -285,9 +296,9 @@ define([
 			}
 
 			if (!enabled || !this.expandContent) {
-				this.collapse();
+				this.collapse(animate);
 			} else {
-				this.expand();
+				this.expand(animate);
 			}
 
 			this.$('.layer-extents').toggle(enabled 
