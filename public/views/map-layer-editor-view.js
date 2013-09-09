@@ -165,8 +165,9 @@ define([
 			this.$('.model-numeric').toggle(this.model.isNumeric());
 	    },
 
-		populateFieldInputs: function()
+		customInitModelInputs: function()
 		{
+			// initializes field name selects
 	    	var self = this,
 	    		fields = this.model.getFeatureCollectionAttr('fields', []);
 			this.$('select.field-names').each(function() {
@@ -184,7 +185,6 @@ define([
 	    customPopulateFromModel: function()
 	    {
 			this.updateFromModel();
-			this.populateFieldInputs();
 			this.$('.panel-header .title').text(this.model.get('layerOptions.title'));
 			this.populateColorSchemes();
 			this.setButtonState(false, false);

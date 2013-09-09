@@ -17,6 +17,9 @@ define([
 				}
 				self.modelInputs[name].push(this);
 			});
+			if (this.customInitModelInputs) {
+				self.customInitModelInputs();
+			}
 		},
 
 		populateModelInputs: function() 
