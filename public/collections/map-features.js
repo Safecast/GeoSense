@@ -104,9 +104,19 @@ define([
 	    {
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
 			var parsed = this.parser.parse(resp, xhr);
-	    	this.counts = parsed.counts || {};
+	    	this.extraAttributes = parsed.extraAttributes;
 	    	return parsed.features;
 	    },
+
+        getCounts: function()
+        {
+            return this.extraAttributes.counts;
+        },
+
+        gridSize: function()
+        {
+        	return this.extraAttributes.gridSize;
+        }
 				
 	});
 

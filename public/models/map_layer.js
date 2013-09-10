@@ -163,11 +163,6 @@ define([
             this.trigger('toggle:colorScheme', this);
         },
 
-        getCounts: function()
-        {
-            return this.featureCollection.counts;
-        },
-
         isNumeric: function()
         {
             var x = this.getFeatureCollectionAttr('extremes', {}),

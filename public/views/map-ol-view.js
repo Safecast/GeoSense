@@ -384,7 +384,7 @@ define([
                     });
                     break;
                 case FeatureType.SQUARE_TILES:
-                    if (!layerOptions.featureTypeFallback || model.attributes.geometry.type != 'Point') {
+                    if (!layerOptions.featureTypeFallback || collection.gridSize()) {
                         geometry = this.formats.geoJSON.parseGeometry({
                             type: 'Polygon',
                             coordinates: [model.getBox()]

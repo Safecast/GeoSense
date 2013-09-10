@@ -94,9 +94,10 @@ define([
 		    		case DataStatus.COMPLETE:
 		    			if (this.model.isEnabled()) {
 		    				if (featureCollection.initiallyFetched) {
+		    					var c = featureCollection.getCounts();
 								status = __('%(number)i of %(total)i', {
-									number: formatLargeNumber(featureCollection.counts.original),
-									total: formatLargeNumber(featureCollection.counts.full)
+									number: formatLargeNumber(c.original),
+									total: formatLargeNumber(c.full)
 								});
 								var url = featureCollection.url();
 								if (this.model.attributes.featureCollection) {

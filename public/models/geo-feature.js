@@ -33,6 +33,12 @@ define([
 
         getSize: function() 
         {
+            if (this.attributes.geometry.type == 'Point') {
+                var gridSize = this.collection.mapLayer.featureCollection.gridSize();
+                if (gridSize) {
+                    return gridSize;
+                }
+            }
             return [
                 this.attributes.bbox[2] - this.attributes.bbox[0],
                 this.attributes.bbox[3] - this.attributes.bbox[1]
@@ -55,7 +61,7 @@ define([
                 options = l.getLayerOptions(),
                 attrMap = this.collection.mapLayer.getOption('attrMap', {}),
                 extremes = l.getMappedExtremes(),
-                counts = l.getCounts(),
+                counts = l.featureCollection.getCounts(),
                 val = this.getNumericVal(),
                 maxVal = extremes.numeric ? extremes.numeric.max : NaN,
                 minVal = extremes.numeric ? extremes.numeric.min : NaN;
