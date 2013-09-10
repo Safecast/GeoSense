@@ -47,11 +47,13 @@ define([
 			});
 
 			if (!app.isMapAdmin()) {
+				console.log('remove');
 				this.$('.admin-tool').remove();
 			} 
 
-			this.$('ul.nav').each(function() {
-				if ($('li', this).length == 0) {
+			this.$('.nav').each(function() {
+				console.log('LI---',$('li', this).length, this);
+				if ($('li, button', this).length == 0) {
 					$(this).remove();
 				}
 			});
