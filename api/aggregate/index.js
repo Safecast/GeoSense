@@ -108,7 +108,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 
 	console.success('*** MapReduce with types:', params.types.join(', '));
 	if (params.zoom) {
-		console.log('*** zoom levels:', params.zoom);
+		console.info('*** zoom levels:', params.zoom);
 	}
 	Job.findOne({status: config.JobStatus.ACTIVE, type: config.JobType.REDUCE}, function(err, job) {
 		if (job && job.status != config.JobStatus.IDLE) {
@@ -129,7 +129,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 		GeoFeatureCollection.findOne({_id: params.featureCollectionId})
 			.populate('defaults')
 			.exec(function(err, collection) {
-				if (!utils.validateExistingCollection(err, collection, callback)) return;
+				if (!utils.validateExistingCollection(err, collection, callback, params.force)) return;
 				job.save(function(err, job) {
 
 					var opts = {};
@@ -361,6 +361,7 @@ AggregateAPI.prototype.cli = {
 			callback(false, help, true);
 		}
 	}
+
 }
 
 module.exports = AggregateAPI;

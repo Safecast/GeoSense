@@ -207,24 +207,22 @@ exports.exitCallback = function(err, data, showHelp) {
     process.exit(0);
 };
 
-exports.validateExistingCollection = function(err, collection, callback)
+exports.validateExistingCollection = function(err, collection, callback, force)
 {
     if (err || !collection) {
         if (!err) {
-            err = new Error('feature collection not found');
+            err = new Error('Collection not found');
         }
         if (callback) {
-            console.error(err.message);
             callback(err);
         } else {
             throw err;
         }
         return false;
     }
-    if (collection.status == config.DataStatus.IMPORTING || collection.status == config.DataStatus.REDUCING) {
-        var err = new Error('Collection is currently busy');
+    if (!force && (collection.status == config.DataStatus.IMPORTING || collection.status == config.DataStatus.REDUCING)) {
+        var err = new Error('Collection is currently busy.');
         if (callback) {
-            console.error(err.message);
             callback(err);
         } else {
             throw err;
