@@ -17,44 +17,7 @@ describe('Safecast', function() {
 	});
 
 	var importCollection,
-		transform = [
-			/*{
-				'to': 'source',
-				'from': ['*'],
-				'type': 'Object'
-			},*/
-			{
-				'to': 'geometry.coordinates',
-				'from': ['Longitude', 'Latitude'],
-				'type': 'LngLat',
-				'options': {
-					'skipZero': true
-				}
-			},
-			{
-				'to': 'properties.val',
-				'from': 'Value',
-				'type': 'Number',
-				'options': {
-					'min': 0,
-					'max': 25000
-				}
-			},
-			{
-				'to': 'properties.datetime',
-				'from': 'Captured Time',
-				'type': 'Date',
-				'options': {
-					'skipFuture': true
-				}
-			},
-			{
-				'to': 'incrementor',
-				'type': 'Date',
-				'from': 'Uploaded Time',
-			}
-
-		];
+		transform = require('./data/safecast_transform');
 
 	it('should import the first Safecast CSV dump', function(done) {
 		api.import.import({

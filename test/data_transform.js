@@ -57,6 +57,28 @@ describe('DataTransform', function() {
 		}
 	]);
 
+	var sourceToFilter = {
+		'array1': [1, 2, 3, 0, 4, 5, 0, 6]
+	};
+
+	var dataTransformFiltered = new transform.DataTransform([
+		{
+			'to': 'array1',
+			'from': 'array1',
+			'type': 'Array',
+			'options': {
+				'filters': ['notZero', 'isEven', 'lte:4']
+			}
+		},
+		{
+			'to': 'number',
+			'set': '1',
+			'options': {
+				'filters': ['isEven']
+			}
+		}
+	]);
+
 	dataTransform.on('data', function(model, transformed) {
 		it('should convert [Lat,Lng] to [Lng,Lat]', function() {
 			assert.deepEqual(model.get('xy'), [11, 10]);
@@ -77,20 +99,26 @@ describe('DataTransform', function() {
 		it('should return an array of all items', function() {
 			assert.deepEqual(model.get('array2'), [source.coordinates]);
 		});
+	});
 
-		it('should correctly apply filters', function() {
-			var arr = [1, 2, 3, 0, 4, 5, 0, 6];
-			assert.deepEqual(
-				transform.filterValue(arr, ['notZero', 'isEven', 'lte,4']),
-				[2, 4]
-			);
-			assert.equal(
-				transform.filterValue(1, ['isEven']),
-				undefined
-			);
-		});
+	it('should correctly apply filters', function() {
+		assert.deepEqual(
+			transform.filterValue(sourceToFilter.array1, dataTransformFiltered.descripts[0].options.filters),
+			[2, 4]
+		);
+		assert.equal(
+			transform.filterValue(1, dataTransformFiltered.descripts[1].options.filters),
+			undefined
+		);
+	});
+
+	dataTransformFiltered.on('data', function(model, transformed) {
+		assert.equal(model, null);
+		assert.deepEqual(transformed.array1, [2, 4]);
+		assert.deepEqual(transformed.number, { message: 'Not even: 1', error: true } );
 	});
 
 	dataTransform.transform(PseudoModel(source), PseudoModel);
+	dataTransformFiltered.transform(PseudoModel(sourceToFilter), PseudoModel);
 
 });
