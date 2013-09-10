@@ -726,12 +726,18 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							if (propertyTypes[key] == undefined) {
 								propertyTypes[key] = propertyType;
 							} else {
+
 								// if the property type is inconsistent, set to false (except: 
 								// if one was a Date and the other was a string, then reset to string,
 								// since some random strings parse as Date)
-								if (propertyTypes[key] != propertyType) {
-									propertyTypes[key] = propertyTypes[key] == 'Date' || propertyType == 'Date' ?
-										'string' : false;
+								if (propertyTypes[key] != propertyType && !transform.Filter.isEmpty(saveModel.properties[key])) {
+									
+									if ((propertyType == 'string' && ['Number', 'Date'].indexOf(propertyTypes[key]) != -1)
+										|| (propertyTypes[key] == 'string' && ['Number', 'Date'].indexOf(propertyType) != -1)) {
+											propertyTypes[key] = 'string';										
+									} else {
+										propertyTypes[key] = false;										
+									}
 								}
 							}
 						}
