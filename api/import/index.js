@@ -703,7 +703,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					    	self.readStream.pause();
 				    	}
 						saveModel.importJob = job;
-						saveModel.set(toCollectionField, collection);
 
 						// determine extremes of all properties
 						if (!extremes.properties) {
@@ -841,8 +840,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	};
 
 	var ToSaveModel, // created on the fly when collection _id known
-		ToCollectionModel = models.GeoFeatureCollection,
-		toCollectionField = 'featureCollection';
+		ToCollectionModel = models.GeoFeatureCollection;
 
 	if (!params.append) {
 		if (!params.dry) {
