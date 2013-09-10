@@ -50,6 +50,12 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
+			this.$('ul.nav').each(function() {
+				if ($('li:visible', this).length == 0) {
+					$(this).remove();
+				}
+			});
+
 	        return this;
 	    },
 
