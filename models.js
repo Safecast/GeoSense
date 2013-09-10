@@ -187,7 +187,7 @@ GeoFeatureSchema.pre('save', function(next) {
 });
 
 
-var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: String}, null, null, null, {
+var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: String}, null, {geoIndexField: 'value.geometry'}, null, {
     value: geogoose.models.geoJSONFeatureDefinition
 });
 

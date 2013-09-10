@@ -91,34 +91,18 @@ var getCenter = function(bounds)
     ];
 }
 
-/*
-Mongo currently doesn't handle the transition around the dateline (x = +-180)
-Thus, if the bounds contain the dateline, we need to query for the box to 
-the left and the box to the right of it. 
-*/
 var adjustBboxForQuery = function(b)
 {
-    if (b[0] < -180) {
-        boxes = [
-            [[180 + b[0] % 180, b[1]], [179.9999999999999, b[3]]],
-            [[-180, b[1]], [b[2], b[3]]]
-        ];
-    } else if (b[2] > 180) {
-        boxes = [
-            [[b[0], b[1]], [179.9999999999999, b[3]]],
-            [[-180, b[1]], [-180 + b[2] % 180, b[3]]]
-        ];
-    } else if (b[0] > b[2]) {
-        boxes = [
-            [[b[0], b[1]], [179.9999999999999, b[3]]],
-            [[-180, b[1]], [b[2], b[3]]]
-        ];
-    } else {
-        boxes = [
-            [[b[0], b[1]], [b[2], b[3]]]
-        ];
-    }
-    return boxes;
+    return [{
+        type: 'Polygon',
+        coordinates: [[
+            [b[0], b[1]],
+            [b[2], b[1]],
+            [b[2], b[3]],
+            [b[0], b[3]],
+            [b[0], b[1]]
+        ]]
+    }];
 }
 
 module.exports = {
