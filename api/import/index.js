@@ -1007,7 +1007,34 @@ ImportAPI.prototype.cli = {
 				callback(err);
 			});
 		}
+	},
+
+	'reset-collection': function(params, callback, showHelp) 
+	{
+		var help = "Usage: node manage.js reset-collection [params]\n"
+			+ "\nResets the status for a collection that is left busy to 'Complete', for instance after an aggregation operation was forcefully cancelled.\n"
+
+		if (!showHelp && utils.connectDB()) {
+			if (params._.length) {
+				params.featureCollectionId = params._[1];
+			}
+			models.GeoFeatureCollection.findOne({_id: params.featureCollectionId}).exec(function(err, collection) {
+				if (!utils.validateExistingCollection(err, collection, callback, true)) return;
+				if (!err && collection) {
+					console.info('Existing collection:', params.featureCollectionId);
+					models.GeoFeatureCollection.update({_id: params.featureCollectionId}, {$set: {status: 'C', progress: null}}, function(err, collection) {
+						if (!err) {
+							console.success('Collection reset:', params.featureCollectionId);
+						}
+						callback(err);
+					});
+					return;
+				}
+				callback(err);
+			});
+		}
 	}
+
 }
 
 
