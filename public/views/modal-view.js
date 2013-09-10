@@ -29,12 +29,12 @@ define([
 
 		setTitle: function(string)
 		{
-			this.$('.modal-header .title').html(string);
+			this.$('.modal-title').html(string);
 		},
 		
 		setBody: function(string)
 		{
-			this.$('.modal-body .body').html(string);
+			this.$('.modal-body').html(string);
 		},
 	  
 	  	show: function() 
