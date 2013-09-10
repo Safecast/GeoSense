@@ -541,7 +541,7 @@ define([
 							if (isError) {
 								tdclass = 'conversion-error';
 								switch (val.name){
-									case 'ValueSkippedWarning':
+									case 'FilterWarning':
 										out = val.message;
 										break;
 									default:

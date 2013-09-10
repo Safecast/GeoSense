@@ -4,8 +4,6 @@ var geogoose = require('../'),
 
 describe('GeoFeature', function() {
 
-	assert(process.env.DB_URI, 'process.env.DB_URI is not defined');
-
 	before(function() {
 		mongoose.connect(process.env.DB_URI);
 	});
@@ -21,12 +19,13 @@ describe('GeoFeature', function() {
 			if (!coordinates.length) {
 				done();
 			} else {
+				var c = coordinates.shift();
 				new GeoFeature({
-					type: "Point",
+					type: "Feature",
 				    featureCollection: featureCollection,
 				    geometry: {
-				        type: "Point", 
-				        coordinates: coordinates.shift()
+				        type: (c.length == 2 ? "Point" : "LineString"), 
+				        coordinates: c
 				    }
 				}).save(function(err) {
 					if (err) throw err;
@@ -45,8 +44,8 @@ describe('GeoFeature', function() {
 	it('should find 3 features, and the coordinates should be correct', function(done) {
 		GeoFeature.find(function(err, features) {
 			assert.equal(features.length, 3);
-			assert.deepEqual(features[0].bbox.toObject(), [0, -359, 0, -359]);
-			assert.deepEqual(features[0].bounds2d.toObject(), [[0, 1], [0, 1]]);
+			assert.deepEqual(features[0].toGeoJSON().bbox, [0, -359, 0, -359]);
+			assert.deepEqual(features[0].bounds2d.toObject(), [0, 1]);
 			done();
 		});
 	});
