@@ -30,11 +30,11 @@ define([
 	    		{fields: ['properties.description', 'properties.summary'], label: false, class: 'box text-body muted'},
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
 
-	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'muted'},
-	    		{fields: ['%(numeric)s.max'], label: __('peak'), class: 'muted'},
-	    		{fields: ['%(numeric)s.min'], label: __('minimum'), class: 'muted'},
-	    		{fields: ['%(numeric)s.avg'], label: __('average'), class: 'muted'},
-	    		{fields: ['%(numeric)s.stddev'], label: __('std. deviation'), class: 'muted'}
+	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'micro muted'},
+	    		{fields: ['%(numeric)s.max'], label: __('peak'), class: 'micro muted'},
+	    		{fields: ['%(numeric)s.min'], label: __('minimum'), class: 'micro muted'},
+	    		{fields: ['%(numeric)s.avg'], label: __('average'), class: 'micro muted'},
+	    		{fields: ['%(numeric)s.stddev'], label: __('std. deviation'), class: 'micro muted'}
 	    	];
 	    },
 
@@ -135,7 +135,7 @@ define([
 			};
 
 			formatters.icon.minMaxFormat = __('%(min)s %(max)s');
-			formatters.date.minMaxFormat = formatters.numeric.minMaxFormat = __('%(min)s–%(max)s');
+			formatters.date.minMaxFormat = formatters.numeric.minMaxFormat = __('%(min)s – %(max)s');
 
 			var fieldSubst = !layerOptions.attrMap ? {} : {
 				'numeric': layerOptions.attrMap.numeric,

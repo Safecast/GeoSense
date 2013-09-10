@@ -636,6 +636,11 @@ define([
                 return this.adminRoute && this.map.attributes.admin; 
             },
 
+            adjustViewport: function()
+            {
+                this.$mainEl.css('top', $('header').outerHeight() + 'px');
+            },
+
             render: function() 
             {
                 console.log('main render');
@@ -653,6 +658,11 @@ define([
                 this.$mainEl = $('<div id="main-viewport"></div>');
                 this.mainEl = this.$mainEl[0];
                 $('#app').append(this.mainEl);
+
+                $(window).on('resize', function() {
+                    self.adjustViewport();
+                });
+                this.adjustViewport();
 
                 //this.chatView = new ChatView({vent: this.vent});
                 //$('#app').append(this.chatView.render().el);

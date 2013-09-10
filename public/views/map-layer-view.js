@@ -32,6 +32,7 @@ define([
 		    this.template = _.template(templateHtml);
 		    this.legendViewOptions = {};
 		    this.expandContent = true;
+		    this.expandLayerDetails = false;
 
 		    this.listenTo(this.model, 'change', this.modelChanged);
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
@@ -180,8 +181,8 @@ define([
 				}
 			}
 
-			this.$('.details').hide();
 			this.populateFromModel(true);
+			this.$('.details').toggle(this.expandLayerDetails);
 
 			return this;
 	    },
@@ -336,8 +337,9 @@ define([
 				source = this.model.getDisplay('source'),
 				sourceUrl = this.model.getDisplay('sourceUrl');
 
+			this.$('.description').html(description);
 			if (description) {
-				this.$('.description').html(description);
+				this.$('.description').show();
 				this.$('.show-layer-details').show();
 			} else {
 				this.$('.description').hide();
