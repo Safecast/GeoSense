@@ -30,7 +30,7 @@
 }
 
 .panel .box {
-	background-color:rgba(50, 50, 50,.5);
+	background-color:rgba(190, 190, 190, .5);
 }
 
 /* Bootstrap */
@@ -330,7 +330,6 @@
 .panel .box {
 	padding: 5px 8px 6px 8px;
 	margin-top: 4px;
-	background-color:rgba(150,150,150,.5);
 	/*background-color:rgba(50,50,50,.3);*/
 	border-radius: 4px;
 	-moz-border-radius:4px;

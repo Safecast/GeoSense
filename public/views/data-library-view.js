@@ -91,6 +91,7 @@ define([
 					}),
 	            	mapLayerView = new MapLayerView({model: mapLayer});
             	mapLayerView.expandContent = false;
+            	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;
 	            self.appendSubView(mapLayerView.render());
 	            mapLayerView.$el.hide().slideDown('fast');

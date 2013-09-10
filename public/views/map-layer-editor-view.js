@@ -276,7 +276,7 @@ define([
 		showAdvancedChanged: function(event)
 		{
 			this.$('.show-advanced').toggleClass('active');
-			this.setButtonState();
+			this.setButtonState(null, true);
 			return false;
 		},
 
@@ -306,8 +306,7 @@ define([
 	    	}
 	    	this.hideColorGenerator();
 
-	    	var duration = animated || animated == undefined ? 
-	    		'fast' : null,
+	    	var duration = animated ? 'fast' : null,
 	    		showAdvanced = this.$('.show-advanced').is('.active');
 
 			this.$('.advanced').each(function() {

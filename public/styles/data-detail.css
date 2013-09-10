@@ -2,6 +2,10 @@
 	width: 240px;
 }
 
+.panel.data-detail .panel-body {
+	overflow: hidden;
+}
+
 .panel.data-detail.extended, .panel.extended .accordion-group {
 	width: 444px;
 }
@@ -39,6 +43,10 @@
 	overflow: hidden;
 }
 
+.panel.data-detail .detail-label .micro, .panel.data-detail .detail-value .micro {
+	line-height: 1.25em;
+}
+
 .panel.data-detail .detail-value .muted {
 /*	color: #bbb;*/
 }
@@ -66,14 +74,14 @@
 	font-size: 28px;
 	line-height: 35px;
 	font-weight: bold;
-	margin-bottom: .25em;
+	margin: .25em 0 .25em 0;
 }
 
 .panel.data-detail .detail-value .large {
 	font-size: 35px;
 	line-height: 35px;
 	font-weight: bold;
-	margin-bottom: .25em;
+	margin: .25em 0 .25em 0;
 }
 
 .panel.data-detail .arrow-down-center {
