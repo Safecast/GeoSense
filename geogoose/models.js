@@ -119,12 +119,21 @@ GeoFeatureSchemaMiddleware.pre = {
 
 GeoFeatureSchemaStatics.geoIndexField = 'geometry';
 
-GeoFeatureSchemaStatics.within = function(geometry) 
+GeoFeatureSchemaStatics.geoWithin = function(geometry) 
 {
     if (!this.schema.statics.geoIndexField) {
         throw new Error('Schema has no geoIndexField defined');
     };
-    var condition = {$geoWithin: geometry};
+    var condition = {$geoWithin: {$geometry: geometry}};
+    return this.where(this.schema.statics.geoIndexField, condition);
+}
+
+GeoFeatureSchemaStatics.geoIntersects = function(geometry) 
+{
+    if (!this.schema.statics.geoIndexField) {
+        throw new Error('Schema has no geoIndexField defined');
+    };
+    var condition = {$geoIntersects: {$geometry: geometry}};
     return this.where(this.schema.statics.geoIndexField, condition);
 }
 
