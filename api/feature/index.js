@@ -98,13 +98,15 @@ var FeatureAPI = function(app)
 					zoom = config.GRID_SIZES.length - 1;
 				}
 
-                var tileSize = config.GRID_SIZES[zoom-3],
+                var tileSize = config.GRID_SIZES[zoom],
 					mapReduceOpts = {
 						tileSize: (featureCollection.tile && featureCollection.tile.length ? tileSize : undefined)
 					},
-					extraAttrs = { counts: {
-						full: 0, original: 0, max: 0, result: 0
-					}};
+					extraAttrs = { 
+						counts: {
+							full: 0, original: 0, max: 0, result: 0
+						}						
+					};
 
 				if (['yearly', 'weekly', 'hourly'].indexOf(timeGrid) != -1) {
 					mapReduceOpts.timeGrid = timeGrid;
@@ -126,6 +128,10 @@ var FeatureAPI = function(app)
                 		|| (featureCollection.timebased && datetimeAttr),
                 	FeatureModel = featureCollection.getFeatureModel(),
 			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel;
+
+			    if (isMapReduced) {
+					extraAttrs.gridSize = [tileSize, tileSize];
+			    }
 
 			    if (isMapReduced && mapReduceOpts.timeGrid) {
 			    	switch (mapReduceOpts.timeGrid) {
