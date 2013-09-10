@@ -98,7 +98,7 @@ var FeatureAPI = function(app)
 					zoom = config.GRID_SIZES.length - 1;
 				}
 
-                var tileSize = config.GRID_SIZES[zoom],
+                var tileSize = config.GRID_SIZES[zoom-3],
 					mapReduceOpts = {
 						tileSize: (featureCollection.tile && featureCollection.tile.length ? tileSize : undefined)
 					},
@@ -182,7 +182,7 @@ var FeatureAPI = function(app)
                     		return;
                 	}
 					FindFeatureModel
-						.within(boxes.shift())
+						.geoIntersects(boxes.shift())
 						.find(filterQuery)
 						.setOptions(queryOptions)
 						.select(queryFields)
