@@ -51,7 +51,7 @@ define([
 			} 
 
 			this.$('ul.nav').each(function() {
-				if ($('li:visible', this).length == 0) {
+				if ($('li', this).length == 0) {
 					$(this).remove();
 				}
 			});
