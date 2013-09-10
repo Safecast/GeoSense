@@ -190,7 +190,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 										}
 									},
 									tileIndexes = {
-										'bounds2d': '2d'
+										'geometry': '2dsphere'
 									};
 								if (attrMap.numeric) {
 									tileIndexes[attrMap.numeric] = 1;
