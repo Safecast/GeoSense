@@ -166,7 +166,7 @@ var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({
     count: Number   
 });
 
-GeoFeatureSchema.methods.toGeoJSON = function(extraAttrs)
+/*GeoFeatureSchema.methods.toGeoJSON = function(extraAttrs)
 {
     var obj = this.toJSON();
     if (extraAttrs) obj = _.extend(obj, extraAttrs);
@@ -174,7 +174,7 @@ GeoFeatureSchema.methods.toGeoJSON = function(extraAttrs)
     delete obj.source;
     delete obj.geocoded;
     return geogoose.util.toGeoJSON(obj);
-};
+};*/
 
 GeoFeatureSchema.plugin(useTimestamps);
 
