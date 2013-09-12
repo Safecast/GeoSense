@@ -91,9 +91,9 @@ var getCenter = function(bounds)
     ];
 }
 
-var adjustBboxForQuery = function(b)
+var polygonFromBbox = function(b)
 {
-    return [{
+    return {
         type: 'Polygon',
         coordinates: [[
             [b[0], b[1]],
@@ -102,7 +102,7 @@ var adjustBboxForQuery = function(b)
             [b[0], b[3]],
             [b[0], b[1]]
         ]]
-    }];
+    };
 }
 
 module.exports = {
@@ -111,6 +111,6 @@ module.exports = {
     getBounds: getBounds,
     bboxFromBounds: bboxFromBounds,
     boundsFromBbox: boundsFromBbox,
-    adjustBboxForQuery: adjustBboxForQuery
+    polygonFromBbox: polygonFromBbox
 };
 

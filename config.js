@@ -62,8 +62,8 @@ var config = {
 	},
 
 	TILE_DEFAULT: 'Rect',
-	MIN_FEATURES_TILE: 1,//2000,
-	MIN_FEATURES_LIMIT: 1,//300,
+	MIN_FEATURES_TILE: 2000,
+	MIN_FEATURES_LIMIT: 300,
 
 	DataStatus: {
 		IMPORTING: 'I',

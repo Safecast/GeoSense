@@ -124,8 +124,8 @@ GeoFeatureSchemaStatics.geoWithin = function(geometry)
     if (!this.schema.statics.geoIndexField) {
         throw new Error('Schema has no geoIndexField defined');
     };
-    var condition = {$geoWithin: {$geometry: geometry}};
-    return this.where(this.schema.statics.geoIndexField, condition);
+    var c = {$geoWithin: {$geometry: geometry}};
+    return this.where(this.schema.statics.geoIndexField, c);
 }
 
 GeoFeatureSchemaStatics.geoIntersects = function(geometry) 
@@ -133,8 +133,8 @@ GeoFeatureSchemaStatics.geoIntersects = function(geometry)
     if (!this.schema.statics.geoIndexField) {
         throw new Error('Schema has no geoIndexField defined');
     };
-    var condition = {$geoIntersects: {$geometry: geometry}};
-    return this.where(this.schema.statics.geoIndexField, condition);
+    var c = {$geoIntersects: {$geometry: geometry}};
+    return this.where(this.schema.statics.geoIndexField, c);
 }
 
 function GeoFeatureSchema(extraDefinition, extraMethods, extraStatics, extraMiddleware, basicDefinition)

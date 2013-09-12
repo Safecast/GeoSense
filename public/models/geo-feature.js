@@ -33,12 +33,6 @@ define([
 
         getSize: function() 
         {
-            if (this.attributes.geometry.type == 'Point') {
-                var gridSize = this.collection.mapLayer.featureCollection.gridSize();
-                if (gridSize) {
-                    return gridSize;
-                }
-            }
             return [
                 this.attributes.bbox[2] - this.attributes.bbox[0],
                 this.attributes.bbox[3] - this.attributes.bbox[1]
@@ -47,8 +41,13 @@ define([
 
         getBox: function()
         {
-            var size = this.getSize(),
-                hw = size[0] / 2.0,
+            var size, gridSize = this.collection.mapLayer.featureCollection.gridSize();
+            if (this.attributes.geometry.type == 'Point' && gridSize) {
+                size = gridSize;
+            } else {
+                size = this.getSize();
+            }
+            var hw = size[0] / 2.0,
                 hh = size[1] / 2.0,
                 c = this.getCenter(),
                 e = c[0] - hw, s = c[1] - hh, w = c[0] + hw, n = c[1] + hh;
