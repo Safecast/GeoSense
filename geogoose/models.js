@@ -18,7 +18,7 @@ var geoJSONFeatureCollectionDefinition = {
     geoJSONFeatureDefinition = {
         type: {type: String, enum: ["Feature"], index: 1},
         geometry: {
-            type: {type: String, enum: ["Point", "LineString", "Polygon"]},
+            type: {type: String, enum: ["Point", "LineString", "Polygon"], regexp: 'asd'},
             coordinates: {type: Array },
         },
         bbox: {type: Array},
