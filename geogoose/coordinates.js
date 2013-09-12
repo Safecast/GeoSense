@@ -105,12 +105,27 @@ var polygonFromBbox = function(b)
     };
 }
 
+var polygonFromBounds = function(b)
+{
+    return {
+        type: 'Polygon',
+        coordinates: [[
+            b[0],
+            [b[1][0], b[0][1]],
+            [b[1][0], b[1][1]],
+            [b[0][0], b[1][1]],
+            b[0]
+        ]]
+    };
+}
+
 module.exports = {
     overflow: overflow,
     coordinates2d: coordinates2d,
     getBounds: getBounds,
     bboxFromBounds: bboxFromBounds,
     boundsFromBbox: boundsFromBbox,
-    polygonFromBbox: polygonFromBbox
+    polygonFromBbox: polygonFromBbox,
+    polygonFromBounds: polygonFromBounds
 };
 

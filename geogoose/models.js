@@ -21,11 +21,14 @@ var geoJSONFeatureCollectionDefinition = {
             type: {type: String, enum: ["Point", "LineString", "Polygon"], regexp: 'asd'},
             coordinates: {type: Array },
         },
+        sourceGeometry: mongoose.Schema.Types.Mixed,
         bbox: {type: Array},
         properties: mongoose.Schema.Types.Mixed,
     },
     GeoFeatureCollectionSchemaMethods = {}, GeoFeatureCollectionSchemaStatics = {}, GeoFeatureCollectionSchemaMiddleware = {},
-    GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {}, GeoFeatureSchemaMiddleware = {};
+    GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {
+        complexGeometryTypes: ["MultiPoint", "MultiLineString", "MultiPolygon"]
+    }, GeoFeatureSchemaMiddleware = {};
 
 
 GeoFeatureCollectionSchemaMiddleware.pre = {
@@ -95,12 +98,34 @@ function GeoFeatureCollectionSchema(extraDefinition, extraMethods, extraStatics,
 GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs) 
 {
     var obj = this.toJSON();
-    delete obj.featureCollection;
+    if (obj.sourceGeometry) {
+        obj.geometry = obj.sourceGeometry;
+        delete obj.sourceGeometry;
+    }
     if (extraAttrs) obj = _.extend(obj, extraAttrs);
     return util.toGeoJSON(obj);
 };
 
 GeoFeatureSchemaMiddleware.pre = {
+
+    validate: function(next) {
+        if (!this.schema.statics.geoIndexField) {
+            throw new Error('Schema has no geoIndexField defined');
+        };
+
+        var geometryTypes = this.schema.paths[this.schema.statics.geoIndexField + '.type'].enumValues,
+            complexGeometryTypes = this.schema.statics.complexGeometryTypes,
+            geometryType = this[this.schema.statics.geoIndexField].type;
+        if ((-1 == geometryTypes.indexOf(geometryType))
+            && (-1 != complexGeometryTypes.indexOf(geometryType))) {
+                console.warn('Converting geometry to 2dsphere indexable bounds');
+                this.sourceGeometry = _.clone(this.geometry);
+                this.geometry = coordinates.polygonFromBounds(getBounds(this.geometry.coordinates));
+        }
+
+        if (next) next();
+    },
+
     save: function(next) {
         if (!this.type) this.type = 'Feature';
         if (!this.geometry || !this.geometry.type || !this.geometry.coordinates || !this.geometry.coordinates.length) {
