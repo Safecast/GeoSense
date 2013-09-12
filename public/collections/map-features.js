@@ -23,6 +23,7 @@ define([
 			this.queryParams = options.queryParams ? $.extend({}, options.queryParams) : {};
 			this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 			this.urlFormat = options.urlFormat;
+			this.extraAttributes = {};
 			if (!options.parser) {
 				this.parser = new Parser.GeoJSON(this);
 			} else {

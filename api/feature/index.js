@@ -86,16 +86,17 @@ var FeatureAPI = function(app)
 					timeGrid = urlObj.query.t,
 					strDate = urlObj.query.d,
 					date,
-					boxes,
 					features = [],
 					datetimeAttr = mapLayer.layerOptions && mapLayer.layerOptions.attrMap ? 
 						mapLayer.layerOptions.attrMap.datetime : null;
 
 				// adjust zoom						
-				if (isNaN(zoom) || zoom < 0) {
+				if (isNaN(zoom)) {
 					zoom = 0;
-				} else if (zoom >= config.GRID_SIZES.length) {
-					zoom = config.GRID_SIZES.length - 1;
+				} else {
+					var adjustZoom = 0;
+					var zoom = Math.max(0, Math.min(
+						Object.keys(config.GRID_SIZES).length, zoom + adjustZoom));
 				}
 
                 var tileSize = config.GRID_SIZES[zoom],
@@ -112,24 +113,39 @@ var FeatureAPI = function(app)
 					mapReduceOpts.timeGrid = timeGrid;
 				}
 
-				// adjust bbox and split into boxes if it wraps the dateline 
-				// since MongoDB can't currently handle that
+				var isMapReduced = (mapReduceOpts.tileSize 
+                		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
+                		|| (featureCollection.timebased && datetimeAttr),
+                	FeatureModel = featureCollection.getFeatureModel(),
+			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel,
+			        findQueue;
+                
                 if (bbox && bbox.length == 4) {
                 	bbox = bbox.map(function(c, i) {
                         return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
                 	});
-                	boxes = bbox.some(isNaN) ? 
-                		null : coordinates.adjustBboxForQuery(bbox);
+                	if (!bbox.some(isNaN)) {
+                		console.info('Finding with $geoIntersects');
+                		var bboxW = bbox[2] - bbox[0];
+	                	if (Math.abs(bboxW) > 180) {
+	                		console.warn('bbox is wider than 180°, splitting it in two');
+	                		findQueue = [
+	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0], bbox[1], bbox[0] + bboxW / 2, bbox[3]])),
+	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0] + bboxW / 2, bbox[1], bbox[2], bbox[3]])),
+	                		];
+	                	} else {
+	                		findQueue = [
+	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox(bbox)),
+	                		];
+	                	}
+                	}
+                }
+                if (!findQueue) {
+                	findQueue = [FindFeatureModel.where()];
                 }
 
-                var manyBoxes = boxes && boxes.length > 1,
-                	isMapReduced = (mapReduceOpts.tileSize 
-                		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
-                		|| (featureCollection.timebased && datetimeAttr),
-                	FeatureModel = featureCollection.getFeatureModel(),
-			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel;
-
-			    if (isMapReduced) {
+                var manyQueries = findQueue.length > 1;
+			    if (isMapReduced && mapReduceOpts.tileSize) {
 					extraAttrs.gridSize = [tileSize, tileSize];
 			    }
 
@@ -150,9 +166,17 @@ var FeatureAPI = function(app)
 		    		filterQuery['value.' + datetimeAttr + '.min'] = date;
 			    }
 
-                console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes, ', mapReduceOpts: ', mapReduceOpts);
+                console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ' manyQueries:', manyQueries, ', mapReduceOpts: ', mapReduceOpts);
 
                 var sendFeatures = function(features) {
+            		if (manyQueries) {
+            			var ids = {};
+            			features = features.filter(function(feature) {
+            				var exists = ids[feature._id];
+            				ids[feature._id] = true;
+            				return !exists;
+            			});
+            		}
             		extraAttrs.counts.result = features.length;
             		if (isMapReduced) {
             			// this is the result of a MapReduce: determine counts
@@ -173,22 +197,13 @@ var FeatureAPI = function(app)
             		res.send(featureCollection.toGeoJSON(extraAttrs));
             	};
 
-                var dequeueBoxAndFind = function() {
-                	if (!boxes.length 
+                var dequeueFind = function() {
+                	if (!findQueue.length 
                 		|| (queryOptions.limit != undefined && queryOptions.limit <= 0)) {
-	                		if (manyBoxes) {
-	                			var ids = {};
-	                			features = features.filter(function(feature) {
-	                				var exists = ids[feature._id];
-	                				ids[feature._id] = true;
-	                				return !exists;
-	                			});
-	                		}
                     		sendFeatures(features);
                     		return;
                 	}
-					FindFeatureModel
-						.geoIntersects(boxes.shift())
+                	findQueue.shift()
 						.find(filterQuery)
 						.setOptions(queryOptions)
 						.select(queryFields)
@@ -199,19 +214,7 @@ var FeatureAPI = function(app)
 							if (queryOptions.limit) {
 								queryOptions.limit -= found.length;
 							}
-							dequeueBoxAndFind();
-						});
-                };
-
-                var findWithoutBox = function() {
-					FindFeatureModel
-						.find(filterQuery)
-						.setOptions(queryOptions)
-						.select(queryFields)
-						.exec(function(err, found) {
-							if (handleDbOp(req, res, err, true)) return;
-							console.log('Found features:', found.length);
-							sendFeatures(found);
+							dequeueFind();
 						});
                 };
 
@@ -219,11 +222,7 @@ var FeatureAPI = function(app)
 					if (handleDbOp(req, res, err, true)) return;
 					extraAttrs.counts.full = count;
 					console.info('full count: ', count);
-                    if (boxes){
-	                    dequeueBoxAndFind();
-                    } else {
-                    	findWithoutBox();
-                    }
+                    dequeueFind();
 				});
 
 			});

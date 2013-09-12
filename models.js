@@ -193,8 +193,11 @@ var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: Stri
 
 GeoFeatureMapReducedSchema.methods.toGeoJSON = function(extraAttrs)
 {
-    var obj = this.toJSON().value;
-    obj._id = this.get('_id').toString();
+    var obj = this.toJSON().value,
+        _id = this.get('_id');
+    if (_id) {
+        obj._id = _id.toString();
+    }
     if (extraAttrs) obj = _.extend(obj, extraAttrs);
     return geogoose.util.toGeoJSON(obj);
 };

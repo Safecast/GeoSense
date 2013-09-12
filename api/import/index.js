@@ -567,9 +567,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							return;
 						}
 
-				    	if (self.readStream) {
+				    	if (parser.readStream) {
 					    	debugStats('resume');
-					    	self.readStream.resume();
+					    	parser.readStream.resume();
 					    }
 					}
 				}
@@ -652,7 +652,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 						} else {
 							if (!fieldNames) {
-								//console.log(data);
 								fieldNames = Object.keys(data);
 							}
 							doc = data;
@@ -696,11 +695,11 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					}
 
 					if (doSave) {
-				    	if (self.readStream) {
+				    	if (parser.readStream) {
 				    		// unless paused, incoming data will pile up since saving
 				    		// is slow. pausing the readStream until all are saved keeps 
 				    		// memory consumption low.
-					    	self.readStream.pause();
+					    	parser.readStream.pause();
 				    	}
 						saveModel.importJob = job;
 
@@ -800,7 +799,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			    	}
 			    	if (this.readStream && this.readStream.destroy) {
 			    		console.warn('*** destroying readStream');
-				    	this.readStream.destroy();
+				    	parser.readStream.destroy();
 			    	}
 
 			    	console.error('Parser error during import, aborting...', err);
