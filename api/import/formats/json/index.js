@@ -6,7 +6,7 @@ module.exports = {
 
     Parser: function(parse) 
     {
-        var parser = JSONStream.parse(parse || [true]);
+        var parser = JSONStream.parse(parse || [true, true]); // "anything inside of anything"
         parser.fromStream = function(stream) {
             this.readStream = stream;
             stream.pipe(this);
