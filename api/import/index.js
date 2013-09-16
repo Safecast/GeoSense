@@ -582,7 +582,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						} else {
 							numSaved++;
 							if (model.geometry.coordinates && model.geometry.coordinates.length) {
-								bounds = coordinates.getBounds([model.bounds2d, bounds]);
+								bounds = coordinates.getBounds([model.getBounds(), bounds]);
 							}
 						}
 

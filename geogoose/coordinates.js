@@ -22,7 +22,7 @@ var overflow = function(val, max)
 
 /*
 Returns [x,y] so that both coordinates are >= -180 and < 180, 
-suitable for MongoDB 2d indexes.
+suitable for MongoDB 2d indexes (now deprecated).
 */
 var coordinates2d = function(x, y) 
 {
@@ -34,17 +34,15 @@ var coordinates2d = function(x, y)
 Gets bounding box [[west, south], [east, north]] for coordinates, which can
 be a n-dimensional array of coordinates, such as [11,12] or 
 [[[11,12],[13,14]]] etc.
-
-If the second parameter is true, the final coordinates will be overflown
-so that they are >= -180 and < 180, suitable for MongoDB 2d indexes.
 */
-var getBounds = function(coordinates, overflow180, returnPoint) 
+var getBounds = function(coordinates, returnPoint) 
 {
     if (!isArray(coordinates) || !coordinates.length) {
         return;
     } else if (!isArray(coordinates[0])) {
         coordinates = [coordinates];
     }
+    var dimensions = 0;
     var bounds = arrayReduce.call(coordinates, function(a, b) {
         if (!isArray(b)) return a;
         var bmax, bmin;
@@ -56,14 +54,21 @@ var getBounds = function(coordinates, overflow180, returnPoint)
             bmax = bmin = b;
         }
         if (bmin.length < 2 || bmax.length < 2) return a;
-        if (overflow180) {
+        /*if (overflow180) {
             bmin = coordinates2d(bmin); bmax = coordinates2d(bmax);
+        }*/
+        var ret = [[],[]];
+        dimensions = Math.max(dimensions, b.length);
+        for (var i = dimensions - 1; i >= 0; i--) {
+            ret[0][i] = Math.min(bmin[i], a[0][i]);
+            ret[1][i] = Math.max(bmax[i], a[1][i]);
         }
-        return [
+        return ret;
+        /*return [
             [Math.min(bmin[0], a[0][0]), Math.min(bmin[1], a[0][1])],
             [Math.max(bmax[0], a[1][0]), Math.max(bmax[1], a[1][1])]
-        ];
-    }, [[Infinity, Infinity], [-Infinity, -Infinity]]);
+        ];*/
+    }, [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]]);
     if (returnPoint && bounds[0][0] == bounds[1][0] && bounds[0][1] == bounds[1][1]) {
         return bounds[0];
     }

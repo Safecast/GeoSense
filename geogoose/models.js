@@ -8,9 +8,9 @@ var mongoose = require('mongoose'),
 
 var geoJSONFeatureCollectionDefinition = {
         type: {type: String, required: true, enum: ['FeatureCollection'], default: 'FeatureCollection'},
-        geometry: {
+        bounds: {
             type: {type: String, enum: ["Polygon"]},
-            coordinates: {type: Array },
+            coordinates: {type: Array},
         },
         bbox: {type: Array},
         properties: mongoose.Schema.Types.Mixed,
@@ -18,8 +18,8 @@ var geoJSONFeatureCollectionDefinition = {
     geoJSONFeatureDefinition = {
         type: {type: String, enum: ["Feature"], index: 1},
         geometry: {
-            type: {type: String, enum: ["Point", "LineString", "Polygon"], regexp: 'asd'},
-            coordinates: {type: Array },
+            type: {type: String, enum: ["Point", "LineString", "Polygon"]},
+            coordinates: {type: Array},
         },
         sourceGeometry: mongoose.Schema.Types.Mixed,
         bbox: {type: Array},
@@ -34,34 +34,39 @@ var geoJSONFeatureCollectionDefinition = {
 GeoFeatureCollectionSchemaMiddleware.pre = {
     save: function(next) {
 
-        // TODO: Save bbox / geometry for GeoFeatureColletion (also see api/import for correctly determining bounds)
-        /*if (this.bbox && this.bbox.length) {
-            // Store 2d-indexable bounds >= -180 and < 180
-            var bounds = getBounds(boundsFromBbox(this.bbox));
-            this.geometry = {
-                type: "Polygon",
-                coordinates: [[bounds]]
-            }
-        }*/
+        if (this.bbox && this.bbox.length) {
+            this.bounds = coordinates.polygonFromBbox(this.bbox);
+        } else {
+            this.bounds = undefined;
+        }
 
         if (next) next();
     }
 };
 
+GeoFeatureCollectionSchemaStatics.geoIndexField = 'bounds';
+
 GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
 {
-    var obj = util.toGeoJSON(this.toJSON());
-    delete obj.importParams;
+    var obj = {
+        _id: this._id,
+        type: this.get('type'),
+        properties: util.fieldsToObject(this, ['title', 'createdAt', 'updatedAt']),
+        bbox: this.get('bbox')
+    };
+
     if (extraAttrs) {
-        for (var k in extraAttrs) {
-            obj[k] = extraAttrs[k];
+        obj.properties = _.extend(obj.properties, extraAttrs.properties);
+        if (extraAttrs.features) {
+            obj.features = extraAttrs.features.map(function(feature) {
+                return feature.toGeoJSON();
+            });
+        }
+        if (extraAttrs.bbox) {
+            obj.bbox = extraAttrs.bbox;
         }
     }
-    if (obj.features) {
-        obj.features = obj.features.map(function(feature) {
-            return feature.toGeoJSON();
-        });
-    }
+
     return obj;
 };
 
@@ -91,20 +96,50 @@ function GeoFeatureCollectionSchema(extraDefinition, extraMethods, extraStatics,
         }
     }
 
+    if (schema.statics.geoIndexField) {
+        var index = {};
+        index[schema.statics.geoIndexField] = '2dsphere';
+        schema.index(index);
+    };
+
     return schema;
 }
 
 
 GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs) 
 {
-    var obj = this.toJSON();
-    if (obj.sourceGeometry) {
-        obj.geometry = obj.sourceGeometry;
-        delete obj.sourceGeometry;
+    var obj = {
+        _id: (this._id && this._id.toString ? this._id.toString() : this._id),
+        type: this.get('type'),
+        properties: this.get('properties')
+    };
+
+    if (this.sourceGeometry) {
+        obj.geometry = this.get('sourceGeometry');
+    } else {
+        obj.geometry = this.get('geometry');
     }
-    if (extraAttrs) obj = _.extend(obj, extraAttrs);
-    return util.toGeoJSON(obj);
+    if (this.bbox && this.bbox.length) {
+        obj.bbox = this.get('bbox');
+    }
+    if (extraAttrs) {
+        obj = _.extend(obj, extraAttrs);
+        console.log(obj);
+    }
+    return obj;
 };
+
+GeoFeatureSchemaMethods.getBounds = function(fromCoordinates) {
+    if (fromCoordinates || fromCoordinates == undefined || !this.bbox) {
+        return getBounds(this.geometry.coordinates);
+    }
+    if (this.bbox) {
+        return coordinates.boundsFromBbox(this.bbox);
+    }
+    if (this.geometry.type == 'Point') {
+        return [this.geometry.coordinates, this.geometry.coordinates];
+    }
+}
 
 GeoFeatureSchemaMiddleware.pre = {
 
@@ -116,9 +151,10 @@ GeoFeatureSchemaMiddleware.pre = {
         var geometryTypes = this.schema.paths[this.schema.statics.geoIndexField + '.type'].enumValues,
             complexGeometryTypes = this.schema.statics.complexGeometryTypes,
             geometryType = this[this.schema.statics.geoIndexField].type;
+
         if ((-1 == geometryTypes.indexOf(geometryType))
             && (-1 != complexGeometryTypes.indexOf(geometryType))) {
-                console.warn('Converting geometry to 2dsphere indexable bounds');
+                console.warn('Converting complex geometry to 2dsphere indexable bounds');
                 this.sourceGeometry = _.clone(this.geometry);
                 this.geometry = coordinates.polygonFromBounds(getBounds(this.geometry.coordinates));
         }
@@ -131,9 +167,9 @@ GeoFeatureSchemaMiddleware.pre = {
         if (!this.geometry || !this.geometry.type || !this.geometry.coordinates || !this.geometry.coordinates.length) {
             this.geometry = undefined;
         }
-        if (this.geometry.coordinates && this.geometry.coordinates.length) {
-            var bounds = getBounds(this.geometry.coordinates);
-            if (this.geometry.type != 'Point') {
+        if (this.geometry.type != 'Point' && this.geometry.coordinates && this.geometry.coordinates.length) {
+            var bounds = this._bounds || this.getBounds(true);
+            if (bounds) {
                 // GeoJSON specifies a one-dimensional array for the bbox
                 this.bbox = bboxFromBounds(bounds);
             }

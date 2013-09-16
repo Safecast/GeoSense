@@ -12,10 +12,7 @@ define([
 	{
 		return {
 			features: this.collection._super('parse', [resp.features, xhr]),
-			extraAttributes: {
-				counts: resp.counts || {},
-				gridSize: resp.gridSize
-			}
+			properties: resp.properties
 		};
 	};
 

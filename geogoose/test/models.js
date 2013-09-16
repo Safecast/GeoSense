@@ -16,21 +16,6 @@ describe('GeoFeature', function() {
 		GeoFeature = featureCollection.getFeatureModel();
 
 	it('should create three GeoFeatures', function(done) {
-		new GeoFeature({
-			type: "Features",
-		    geometry: {
-		        type: "MultiPolygon", 
-		        coordinates: []
-		    }
-		}).save(function(err) {
-			if (err) throw err;
-			dequeueSave(coordinates);
-		});
-	});
-
-	return;
-
-	it('should create three GeoFeatures', function(done) {
 		var dequeueSave = function(coordinates) {
 			if (!coordinates.length) {
 				done();
@@ -39,7 +24,9 @@ describe('GeoFeature', function() {
 				new GeoFeature({
 					type: "Feature",
 				    geometry: {
-				        type: (c.length == 2 ? "Point" : "LineString"), 
+				        type: typeof c[0] == 'number' ? "Point" :
+				        	typeof c[0][0] == 'number' ? "LineString"
+				        	: 'Polygon', 
 				        coordinates: c
 				    }
 				}).save(function(err) {
@@ -50,37 +37,37 @@ describe('GeoFeature', function() {
 		};
 
 		dequeueSave([
-			[0, -359],
-			[[100, 100], [0, 90]],
-			[[100, 90], [101, 90], [99, -1]]
+			[0, -80],
+			[[100, 80], [0, 90]],
+			[[[10, -50], [0, 0], [10, 0], [10, -50]]]
 		]);
 	});
 
-	it('should find 3 features, and the coordinates should be correct', function(done) {
+	it('should find 3 features, and return the correct GeoJSON representation', function(done) {
 		GeoFeature.find(function(err, features) {
 			assert.equal(features.length, 3);
-			assert.deepEqual(features[0].toGeoJSON().bbox, [0, -359, 0, -359]);
-			//assert.deepEqual(features[0].bounds2d.toObject(), [0, 1]);
+			// TODO: fails, why?
+			//assert.deepEqual(features[0].get('geometry.coordinates'), [0, -359]);
+
+			assert.equal(JSON.stringify(features[0].toGeoJSON()), 
+				'{"_id":"' + features[0]._id + '","type":"Feature","geometry":{"coordinates":[0,-80],"type":"Point"}}')
+			assert.equal(JSON.stringify(features[1].toGeoJSON()), 
+				'{"_id":"' + features[1]._id + '","type":"Feature","geometry":{"coordinates":[[100,80],[0,90]],"type":"LineString"},"bbox":[0,80,100,90]}')
+			assert.equal(JSON.stringify(features[2].toGeoJSON()), 
+				'{"_id":"' + features[2]._id + '","type":"Feature","geometry":{"coordinates":[[[10,-50],[0,0],[10,0],[10,-50]]],"type":"Polygon"},"bbox":[0,-50,10,0]}')
 			done();
 		});
 	});
 
-	var found;
-	it('should find a subset using a 2D index on bounds2d and sort them by createdAt', function(done) {
-		var bbox = [-1, -100, 100, 1.1];
-		GeoFeature.geoWithin(coordinates.polygonFromBbox(bbox))
+	it('should find a subset within a Polygon sort them by createdAt', function(done) {
+		var bbox = [-1, -80, 100, 1];
+		GeoFeature.geoIntersects(coordinates.polygonFromBbox(bbox))
 			.sort({'createdAt': -1})
-			.exec(function(err, result) {
+			.exec(function(err, docs) {
 				if (err) throw err;
-				assert.equal(result.length, 2);
-				found = result;
+				assert.equal(docs.length, 2);
 				done();
 			});
-	});
-
-	it('should return the correct flat bbox for two-dimensional bounds when converted to GeoJSON', function() {
-		assert.deepEqual(found[0].toGeoJSON().bbox, [99, -1, 101, 90]);
-		assert.deepEqual(found[1].toGeoJSON().bbox, [0, -359, 0, -359]);
 	});
 
 	after(function() {
