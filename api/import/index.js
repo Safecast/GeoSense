@@ -614,6 +614,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				{
 			    	var self = this;
 					if (ended) return;
+					if (typeof data != 'object') return;
 
 					if (parser.readStream && parser.readStream.response && parser.readStream.response.statusCode != 200) {
 						var err = new errors.HTTPError(null, parser.readStream.response.statusCode);

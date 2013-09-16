@@ -46,7 +46,8 @@ define([
 				}, 250); // wait for slide
 				self.$('.search-query').trigger('click');
 			});
-			$('body').append('<div class="drop-zone" id="dropZone"><h3 class="instruction">DROP HERE</h3></div>');
+			this.dropZone = $('<div class="drop-zone" id="dropZone"><h3 class="instruction">DROP HERE</h3></div>');
+			$('body').append(this.dropZone);
 			this.$('form.search .search-query').on('click', function() {
 				$(this).select();
 			});
@@ -99,20 +100,21 @@ define([
 			
 			self.$('.map-layer').draggable({
 				revert: 'invalid',
-				stack: '#dropZone',
+				stack: this.dropZone,
 				start: function(event, ui) { 
-					$('#dropZone').addClass('visible');
+					self.dropZone.addClass('visible');
+					self.dropZone.css('left', self.$el.outerWidth() + 'px');
 					ui.helper.css('width', $(this).outerWidth() + 'px');
 					ui.helper.addClass('drag-helper');
 				},
 				helper: 'clone',
 				appendTo: self.$el,
 				stop: function(event, ui) {
-					$('#dropZone').removeClass('visible');
+					self.dropZone.removeClass('visible');
 				}
 			});
 
-			$('#dropZone').droppable( {
+			this.dropZone.droppable( {
 		    	accept: '.map-layer',
 		    	hoverClass: '',
 		    	drop: self.dataDrop
@@ -122,6 +124,7 @@ define([
 		fetchDataCollections: function(params) {	
 			var self = this;	
 			this.dataCollectionsFetched = true;
+			this.$('form.search .help-block').text(__('loading…'));
 			this.collection.fetch({
 				data: params,
 				success: function(collection, response, options) {
