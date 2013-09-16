@@ -23,7 +23,7 @@ define([
 			this.queryParams = options.queryParams ? $.extend({}, options.queryParams) : {};
 			this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 			this.urlFormat = options.urlFormat;
-			this.extraAttributes = {};
+			this.properties = {};
 			if (!options.parser) {
 				this.parser = new Parser.GeoJSON(this);
 			} else {
@@ -105,18 +105,18 @@ define([
 	    {
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
 			var parsed = this.parser.parse(resp, xhr);
-	    	this.extraAttributes = parsed.extraAttributes;
+	    	this.properties = parsed.properties;
 	    	return parsed.features;
 	    },
 
         getCounts: function()
         {
-            return this.extraAttributes.counts;
+            return this.properties.counts;
         },
 
         gridSize: function()
         {
-        	return this.extraAttributes.gridSize;
+        	return this.properties.gridSize;
         }
 				
 	});

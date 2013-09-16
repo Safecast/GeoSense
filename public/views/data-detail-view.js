@@ -30,7 +30,7 @@ define([
 	    		{fields: ['properties.description', 'properties.summary'], label: false, class: 'box text-body muted'},
 	    		{fields: ['properties.$other'], label: '%(field)s', class: 'text-body muted'},
 
-	    		{fields: ['count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'micro muted'},
+	    		{fields: ['properties.count'], label: __('no. of %(itemTitlePlural)s'), formatter: 'numeric', class: 'micro muted'},
 	    		{fields: ['%(numeric)s.max'], label: __('peak'), class: 'micro muted'},
 	    		{fields: ['%(numeric)s.min'], label: __('minimum'), class: 'micro muted'},
 	    		{fields: ['%(numeric)s.avg'], label: __('average'), class: 'micro muted'},
@@ -89,8 +89,7 @@ define([
 	    	var mapLayer = model.collection.mapLayer,
 				layerOptions = mapLayer.getLayerOptions(),
 				layout = mapLayer.getDisplay('detailLayout') || this.defaultLayout,
-				valFormatter = mapLayer.getValFormatter(),
-				displayedFields = {};
+				valFormatter = mapLayer.getValFormatter();
 
 			var isDate = function(value) {
 				return value instanceof Date;
@@ -156,6 +155,13 @@ define([
 			};
 
 			var rows = [];
+
+			var displayedFields = layout.reduce(function(r, row) {
+				_.each(row.fields, function(fieldName) {
+					r[fieldName] = true;
+				});
+				return r;
+			}, {});
 
 			_.each(layout, function(row) {
 				var content = [];

@@ -24,6 +24,9 @@ define([
         
         getCenter: function() 
         {
+            if (this.attributes.geometry.type == 'Point') {
+                return this.attributes.geometry.coordinates;
+            }
             var size = this.getSize();
             return [
                 this.attributes.bbox[0] + size[0] / 2, 
@@ -33,6 +36,9 @@ define([
 
         getSize: function() 
         {
+            if (this.attributes.geometry.type == 'Point') {
+                return [0, 0];
+            }
             return [
                 this.attributes.bbox[2] - this.attributes.bbox[0],
                 this.attributes.bbox[3] - this.attributes.bbox[1]
@@ -69,7 +75,7 @@ define([
                 val = val.avg;
             }
 
-            var count = this.attributes.count || 1,
+            var count = this.attributes.properties ? this.attributes.properties.count || 1 : 1,
                 normVal = (val - minVal) / (maxVal - minVal),
                 normCount = count / counts.max,
                 color,

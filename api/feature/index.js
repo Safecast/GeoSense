@@ -104,9 +104,11 @@ var FeatureAPI = function(app)
 						tileSize: (featureCollection.tile && featureCollection.tile.length ? tileSize : undefined)
 					},
 					extraAttrs = { 
-						counts: {
-							full: 0, original: 0, max: 0, result: 0
-						}						
+						properties: {
+							counts: {
+								full: 0, original: 0, max: 0, result: 0
+							}						
+						}
 					};
 
 				if (['yearly', 'weekly', 'hourly'].indexOf(timeGrid) != -1) {
@@ -124,7 +126,9 @@ var FeatureAPI = function(app)
                 	bbox = bbox.map(function(c, i) {
                         return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
                 	});
-                	if (!bbox.some(isNaN)) {
+                	if (bbox.some(isNaN)) {
+                		bbox = null;
+                	} else {
                 		console.info('Finding with $geoIntersects');
                 		var bboxW = bbox[2] - bbox[0];
 	                	if (Math.abs(bboxW) > 180) {
@@ -134,6 +138,7 @@ var FeatureAPI = function(app)
 	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0] + bboxW / 2, bbox[1], bbox[2], bbox[3]])),
 	                		];
 	                	} else {
+	                		console.log(JSON.stringify(coordinates.polygonFromBbox(bbox)));
 	                		findQueue = [
 	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox(bbox)),
 	                		];
@@ -146,7 +151,7 @@ var FeatureAPI = function(app)
 
                 var manyQueries = findQueue.length > 1;
 			    if (isMapReduced && mapReduceOpts.tileSize) {
-					extraAttrs.gridSize = [tileSize, tileSize];
+					extraAttrs.properties.gridSize = [tileSize, tileSize];
 			    }
 
 			    if (isMapReduced && mapReduceOpts.timeGrid) {
@@ -177,7 +182,7 @@ var FeatureAPI = function(app)
             				return !exists;
             			});
             		}
-            		extraAttrs.counts.result = features.length;
+            		extraAttrs.properties.counts.result = features.length;
             		if (isMapReduced) {
             			// this is the result of a MapReduce: determine counts
                 		features.reduce(function(a, b) {
@@ -185,14 +190,18 @@ var FeatureAPI = function(app)
                 			a.max = Math.max(a.max, v.count);
                 			a.original += v.count;
                 			return a;
-                		}, extraAttrs.counts);
+                		}, extraAttrs.properties.counts);
+
             		} else {
             			// this is the original collection
-						extraAttrs.counts.max = extraAttrs.counts.result;
-						extraAttrs.counts.original = extraAttrs.counts.result;                    			
+						extraAttrs.properties.counts.max = extraAttrs.properties.counts.result;
+						extraAttrs.properties.counts.original = extraAttrs.properties.counts.result;                    			
             		}
 
             		extraAttrs.features = features;
+            		if (bbox) {
+	            		extraAttrs.bbox = bbox;
+            		}
             		console.success('Sending features:', features.length);
             		res.send(featureCollection.toGeoJSON(extraAttrs));
             	};
@@ -207,12 +216,12 @@ var FeatureAPI = function(app)
 						.find(filterQuery)
 						.setOptions(queryOptions)
 						.select(queryFields)
-						.exec(function(err, found) {
+						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, true)) return;
-							console.log('Found features:', found.length);
-							features = features.concat(found);
+							console.success('Found features:', docs.length);
+							features = features.concat(docs);
 							if (queryOptions.limit) {
-								queryOptions.limit -= found.length;
+								queryOptions.limit -= docs.length;
 							}
 							dequeueFind();
 						});
@@ -220,7 +229,7 @@ var FeatureAPI = function(app)
 
 				utils.modelCount(FeatureModel, filterQuery, function(err, count) {
 					if (handleDbOp(req, res, err, true)) return;
-					extraAttrs.counts.full = count;
+					extraAttrs.properties.counts.full = count;
 					console.info('full count: ', count);
                     dequeueFind();
 				});
