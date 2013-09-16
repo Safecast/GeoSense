@@ -328,6 +328,9 @@ define([
                     visibleMapArea.zoom = zoom;
                 }
 
+                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
+                this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
+
                 this.mapView = new viewClass({
                     vent: self.vent,
                     visibleMapArea: visibleMapArea
@@ -342,7 +345,7 @@ define([
                 this.$mainEl.append(mapEl);
                 this.mapView.renderMap(viewBase, viewStyle);
 
-                this.viewOptionsChanged(this.mapView);
+                //this.viewOptionsChanged(this.mapView);
 
                 var snap = $('<div class="snap top" /><div class="snap right" />');
                 this.$mainEl.append(snap);
@@ -351,9 +354,6 @@ define([
                 if (!this.map.attributes.layers.length && this.isMapAdmin()) {
                     this.attachPanelView(this.helpPanelView).hide().show('fast');
                 }
-
-                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
-                this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
             },
 
             mapViewReady: function() 
@@ -556,6 +556,7 @@ define([
                         $('#viewBaselayer').hide();
                     }   
 
+                    this.baselayerEditorView.$('.form-group.opacity').toggle(this.mapView.viewBase != 'blank');
                 }
             },
 
