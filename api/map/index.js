@@ -2,6 +2,10 @@ var config = require('../../config.js'),
 	models = require("../../models.js"),
 	permissions = require("../../permissions.js"),
 	utils = require("../../utils.js"),
+	apiUtil = require('../util'),
+	prepareMapResult = apiUtil.prepareMapResult,
+	prepareMapLayerResult = apiUtil.prepareMapLayerResult,
+	sortByPosition = apiUtil.sortByPosition,
 	uuid = require('node-uuid'),
 	md5 = require('MD5'),
 	url = require('url'),
@@ -48,45 +52,6 @@ var MapAPI = function(app)
 				});
 		});
 
-		var sortByPosition = function(arr) 
-		{
-			return arr.sort(function(a, b) { return a.position - b.position });
-		}
-
-		var prepareMapResult = function(req, map) 
-		{
-			var m = {
-				admin: permissions.canAdminMap(req, map)
-			};
-			var obj = map.toObject();
-			for (var k in obj) {
-				if (m.admin || (k != 'email' && k != 'adminslug')) {
-					m[k] = obj[k];
-				}
-				if (k == 'layers') {
-					for (var i = 0; i < m[k].length; i++) {
-						m[k][i] = prepareLayerResult(req, m[k][i], map);
-					}
-					m[k] = sortByPosition(m[k]);
-				}
-			}
-			return m;
-		}
-
-		var prepareLayerResult = function (req, layer, map) 
-		{
-			// if this is called by prepareMapResult, the layer's toObject() 
-			// was already called.
-			var layer = layer.toObject ?
-				layer.toObject() : layer;
-
-			if (!permissions.canAdminMap(req, map)) {
-				delete layer.featureCollection.importParams;
-			}
-
-			return layer;
-		};
-
 		// Returns a specific map by publicslug
 		app.get('/api/map/:publicslug', function(req, res){
 			Map.findOne({publicslug: req.params.publicslug})
@@ -97,7 +62,6 @@ var MapAPI = function(app)
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 					var preparedMap = prepareMapResult(req, map);
-					console.log(preparedMap);
 			       	res.send(preparedMap);
 				});
 		});
