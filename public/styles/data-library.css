@@ -1,3 +1,11 @@
+#main-viewport .panel.data-library {
+	width: 300px;
+}
+
+#main-viewport .panel.data-library.extended {
+	width: 474px;
+}
+
 .panel.data-library.panel-stick-left .panel-scrollable-container {
 	margin-top: 115px;
 	border-top: 1px rgba(128, 128, 128, .4) solid;
@@ -38,7 +46,7 @@
 	position:absolute;
 	top:0px;
 	bottom:0px;
-	left:270px;
+	left:300px;
 	right:0px;
 	background-color:red;
 	
@@ -55,10 +63,10 @@
 .drop-zone.visible
 {
 	opacity:1;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
+	-webkit-transition: opacity .3s linear;
+    -moz-transition: opacity .3s linear;
+    -o-transition: opacity .3s linear;
+    -ms-transition: opacity .3s linear;
 }
 
 .drop-zone .instruction

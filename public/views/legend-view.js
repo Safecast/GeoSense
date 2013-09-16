@@ -109,7 +109,7 @@ define([
 						+ '">'
 						+ (hasToggleFormatters ? '<a href="#" class="unit-toggle" data-index="' + 
 							i + '">' : '<span>')
-						+ '<strong>' + this.getDisplayUnit(f) + '</strong>'
+						+ this.getDisplayUnit(f)
 						+ (hasToggleFormatters ? '</a>' : '</span>')
 						+ '</li>';
 					var li = $(li);
