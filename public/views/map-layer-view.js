@@ -182,9 +182,10 @@ define([
 			});
 
 			if (!this.model.parentMap) {
-				this.$('.layer-tools').remove();
+				this.$('.map-tool').remove();
 				this.$('.collapse-content').prepend(this.$('.status').remove());
 			} else {
+				this.$('.library-tool').remove();
 				this.$('.status').toggle(enabled);
 				if (!app.isMapAdmin()) {
 					this.$('.admin-control').remove();
@@ -197,10 +198,15 @@ define([
 			return this;
 	    },
 
+	    isExpanded: function()
+	    {
+			return this.collapseEl.is('.in');
+	    },
+
 	    expand: function(animate)
 	    {
 	    	if (animate || animate == undefined) {
-		    	if (!this.collapseEl.is('.in')) {
+		    	if (!this.isExpanded()) {
 			    	this.collapseEl.collapse('show');
 		    	}
 	    	} else {
@@ -214,9 +220,9 @@ define([
 	    collapse: function(animate)
 	    {
 	    	if (animate || animate == undefined) {
-	    	if (this.collapseEl.is('.in')) {
-	    		this.collapseEl.collapse('hide');
-	    	}
+		    	if (this.isExpanded()) {
+		    		this.collapseEl.collapse('hide');
+		    	}
 	    	} else {
 	    		this.collapseEl.addClass('collapse');
 	    	}
@@ -300,7 +306,9 @@ define([
 
 			this.$el.toggleClass('enabled', enabled);
 			this.$el.toggleClass('disabled', !enabled);
-			this.$('.toggle-layer').toggleClass('active', enabled);
+			if (this.model.parentMap) {
+				this.$('.toggle-layer').toggleClass('active', enabled);
+			}
 			if (enabled) {
 				this.$('.status').slideDown(d);
 			} else {
@@ -381,6 +389,14 @@ define([
 
 		toggleLayerClicked: function(event)
 		{
+			if (!this.model.parentMap) {
+				if (!this.isExpanded()) {
+					this.expand();
+				} else {
+					this.collapse();
+				}
+				return false;
+			}
 			this.model.toggleEnabled(!this.model.isEnabled());
 			return false;
 		},

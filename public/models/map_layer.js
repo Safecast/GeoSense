@@ -76,8 +76,10 @@ define([
                             defaults[attrName]
                                 : null;
 
-            if (!ret && attrName == 'itemTitlePlural') {
-                ret = __('samples');
+            if (!ret && attrName == 'itemTitle') {
+                ret = __('feature');
+            } else if (!ret && attrName == 'itemTitlePlural') {
+                ret = __('features');
             }
             
             return ret;

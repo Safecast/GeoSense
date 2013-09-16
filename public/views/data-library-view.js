@@ -19,7 +19,8 @@ define([
 
 	    events: {
 			'submit form.search, keypress form.search .search-query': 'searchClicked',
-			'click button.remove-query': 'removeQueryClicked'
+			'click button.remove-query': 'removeQueryClicked',
+			'click button.add-layer': 'addLayerButtonClicked'
 	    },
 
 	  	subViewContainer: '.collections-list',
@@ -136,9 +137,16 @@ define([
 			});
 		},
 		
-		dataDrop: function (event, ui ) {
-		  	var draggable = ui.draggable;
-			app.saveNewMapLayer(draggable.attr('data-feature-collection-id'));
+		dataDrop: function(event, ui ) {
+		  	var id = ui.draggable.attr('data-feature-collection-id');
+			app.saveNewMapLayer(id);
+		},
+
+		addLayerButtonClicked: function(event)
+		{
+			var id = $(event.currentTarget).closest('.map-layer').attr('data-feature-collection-id');
+			app.saveNewMapLayer(id);
+			return false;
 		},
 		
 	});
