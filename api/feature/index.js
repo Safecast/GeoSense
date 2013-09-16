@@ -71,10 +71,29 @@ var FeatureAPI = function(app)
 				.populate('modifiedBy')
 				.exec(function(err, collections) {
 					if (handleDbOp(req, res, err, collections)) return;
-			    	var results = collections.map(function(collection) {
-			    		return apiUtil.prepareFeatureCollectionResult(req, collection);
+			    	var countQueue = collections.map(function(collection) {
+		    			return collection;
 			    	});
-			    	res.send(results);
+			    	
+			    	var dequeueCount = function() {
+			    		if (!countQueue.length) {
+				    		res.send(collections.map(function(collection) {
+					    		return apiUtil.prepareFeatureCollectionResult(req, collection, null, collection.extraAttrs);
+				    		}));
+					    	return;
+			    		}
+						var collection = countQueue.shift();
+			    		collection.getFeatureModel().count(function(err, c) {
+							if (handleDbOp(req, res, err, true)) return;
+							collection.extraAttrs = {
+								counts: {
+									full: c
+								}
+							};
+							dequeueCount();
+			    		});
+			    	};
+			    	dequeueCount();
 				});
 		});
 
@@ -231,7 +250,7 @@ var FeatureAPI = function(app)
 						});
                 };
 
-				utils.modelCount(FeatureModel, filterQuery, function(err, count) {
+				FeatureModel.count(filterQuery, function(err, count) {
 					if (handleDbOp(req, res, err, true)) return;
 					extraAttrs.properties.counts.full = count;
 					console.info('full count: ', count);

@@ -83,6 +83,11 @@ define([
             return ret;
         },
 
+        getCounts: function()
+        {
+            return this.attributes.featureCollection.counts;
+        },
+
         initialize: function(attributes, options) 
         {
             var self = this,

@@ -233,34 +233,6 @@ exports.validateExistingCollection = function(err, collection, callback, force)
     return true;
 }
 
-
-
-// TODO: Due to a mongodb bug, counting is really slow even if there is 
-// an index: https://jira.mongodb.org/browse/SERVER-1752
-// To address this we currently cache the count for as long 
-// as the server is running, but mongodb 2.3 should fix this issue.
-var COUNT_CACHE = {};
-exports.modelCount = function(model, query, callback) {
-    console.log('counting', query);
-
-    cacheKey = model.modelName + '-';
-    for (var k in query) {
-        cacheKey += k + '-' + query[k];
-    }
-
-    if (!COUNT_CACHE[cacheKey]) {
-        model.count(query, function(err, count) {
-            if (!err) {
-                COUNT_CACHE[cacheKey] = count;
-            }           
-            callback(err, count);
-        });
-    } else {
-        console.log('cached count '+cacheKey+': '+COUNT_CACHE[cacheKey]);
-        callback(false, COUNT_CACHE[cacheKey]);
-    }
-}
-
 // port of http://stackoverflow.com/a/25486
 exports.slugify = function(title)
 {

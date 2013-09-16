@@ -1,4 +1,5 @@
-var permissions = require('../permissions');
+var permissions = require('../permissions'),
+	_ = require('cloneextend');
 
 var sortByPosition = function(arr) 
 {
@@ -25,13 +26,16 @@ var prepareMapResult = function(req, map)
 	return m;
 };
 
-var prepareFeatureCollectionResult = function(req, featureCollection, map)
+var prepareFeatureCollectionResult = function(req, featureCollection, map, extraAttrs)
 {
 	var obj = featureCollection.toObject ? 
 		featureCollection.toObject() : featureCollection;
 	if (!map || !permissions.canAdminMap(req, map)) {
 		delete obj.importParams;
 		delete obj.fields;
+	}
+	if (extraAttrs) {
+		obj = _.extend(obj, extraAttrs);
 	}
 	return obj;
 };
