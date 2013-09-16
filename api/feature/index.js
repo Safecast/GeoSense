@@ -2,6 +2,7 @@ var config = require('../../config'),
 	models = require('../../models'),
 	permissions = require('../../permissions'),
 	utils = require('../../utils'),
+	apiUtil = require('../util'),
 	coordinates = require('../../geogoose/').coordinates,
 	errors = require('../../errors'),
 	url = require('url'),
@@ -70,7 +71,10 @@ var FeatureAPI = function(app)
 				.populate('modifiedBy')
 				.exec(function(err, collections) {
 					if (handleDbOp(req, res, err, collections)) return;
-			    	res.send(collections);
+			    	var results = collections.map(function(collection) {
+			    		return apiUtil.prepareFeatureCollectionResult(req, collection);
+			    	});
+			    	res.send(results);
 				});
 		});
 
