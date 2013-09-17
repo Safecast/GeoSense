@@ -76,11 +76,18 @@ define([
                             defaults[attrName]
                                 : null;
 
-            if (!ret && attrName == 'itemTitlePlural') {
-                ret = __('samples');
+            if (!ret && attrName == 'itemTitle') {
+                ret = __('feature');
+            } else if (!ret && attrName == 'itemTitlePlural') {
+                ret = __('features');
             }
             
             return ret;
+        },
+
+        getCounts: function()
+        {
+            return this.attributes.featureCollection.counts;
         },
 
         initialize: function(attributes, options) 
@@ -161,11 +168,6 @@ define([
             delete this._colorGradient;
             this.sessionOptions.colorSchemeIndex = index;
             this.trigger('toggle:colorScheme', this);
-        },
-
-        getCounts: function()
-        {
-            return this.featureCollection.counts;
         },
 
         isNumeric: function()

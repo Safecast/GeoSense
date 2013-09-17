@@ -19,7 +19,7 @@
 	background-color: rgba(255, 255, 255, .25);
 	box-shadow: 0px 1px 10px rgba(0, 0, 0, .15);
 	border: 1px solid rgba(128,128,128,.3);
-	cursor: pointer;
+	cursor: move;
 	z-index: 0;
 	margin: 0 0 .25em 0;
 	padding: .5em 1em .5em 1em;
@@ -27,7 +27,7 @@
 
 .data-library .map-layer.drag-helper {	
 	box-shadow: 0px 1px 10px rgba(0, 0, 0, .35);
-	z-index: 1000;
+	z-index: 999;
 }
 
 .data-library .map-layer:hover {
@@ -42,7 +42,7 @@
 
 .drop-zone
 {
-	z-index:999;
+	z-index:998;
 	position:absolute;
 	top:0px;
 	bottom:0px;

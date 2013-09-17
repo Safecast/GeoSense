@@ -1,5 +1,6 @@
 var	models = require('../models'),
 	api = new require('../api')(),
+	coordinates = require('../geogoose/coordinates'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	config = require('../config'),
 	assert = require('assert'),
@@ -30,8 +31,7 @@ describe('GeoJSON', function() {
 		}, null, null, function(err, collection) {
 			if (err) throw err;
 			//console.log(collection);
-			assert.deepEqual(collection.bbox.toObject(), [-180, -55.71, 179.96, 83.57 ]);
-			assert.deepEqual(collection.bounds2d.toObject(), [[-180, -55.71], [179.96, 83.57]]);
+			assert.deepEqual(collection.bbox.toObject(), [-180, -55.71, 180, 83.57 ]);
 			ImportedModel = collection.getFeatureModel();
 			done();
 		});
@@ -43,7 +43,7 @@ describe('GeoJSON', function() {
 		ImportedModel.findOne({'properties.name': 'Switzerland'}, function(err, result) {
 				if (err) throw err;
 				assert(result);
-				assert.deepEqual(result.toGeoJSON().bbox, [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
+				assert.deepEqual(result.bbox.toObject(), [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
 				done();
 		});
 
@@ -51,14 +51,33 @@ describe('GeoJSON', function() {
 
 	it('should find countries within a box', function(done) {
 
-		ImportedModel.within([[1,40],[11,48]]).sort({'properties.name': 1}).exec(function(err, result) {
+		ImportedModel.geoWithin(coordinates.polygonFromBbox([1,40,11,48])).sort({'properties.name': 1}).exec(function(err, result) {
+			if (err) throw err;
+			assert(result.length);
+			var countries = result.map(function(val) { return val.properties.name; });
+			assert.deepEqual(countries, [ 
+				'Andorra',
+				'Liechtenstein',
+				'Monaco',
+				'Switzerland' 
+			]);
+			done();
+		});
+
+	});
+
+	it('should find countries intersecting a box', function(done) {
+
+		ImportedModel.geoIntersects(coordinates.polygonFromBbox([1,40,11,48])).sort({'properties.name': 1}).exec(function(err, result) {
 			if (err) throw err;
 			assert(result.length);
 			var countries = result.map(function(val) { return val.properties.name; });
 			assert.deepEqual(countries, [ 
 				'Andorra',
 				'Austria',
+				'France',
 				'Germany',
+				'Italy',
 				'Liechtenstein',
 				'Monaco',
 				'Spain',

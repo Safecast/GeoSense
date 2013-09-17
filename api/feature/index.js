@@ -71,10 +71,30 @@ var FeatureAPI = function(app)
 				.populate('modifiedBy')
 				.exec(function(err, collections) {
 					if (handleDbOp(req, res, err, collections)) return;
-			    	var results = collections.map(function(collection) {
-			    		return apiUtil.prepareFeatureCollectionResult(req, collection);
+			    	var countQueue = collections.map(function(collection) {
+		    			return collection;
 			    	});
-			    	res.send(results);
+			    	console.log('found collections: '+collections.length);
+			    	
+			    	var dequeueCount = function() {
+			    		if (!countQueue.length) {
+				    		res.send(collections.map(function(collection) {
+					    		return apiUtil.prepareFeatureCollectionResult(req, collection, null, collection.extraAttrs);
+				    		}));
+					    	return;
+			    		}
+						var collection = countQueue.shift();
+			    		collection.getFeatureModel().count(function(err, c) {
+							if (handleDbOp(req, res, err, true)) return;
+							collection.extraAttrs = {
+								counts: {
+									full: c
+								}
+							};
+							dequeueCount();
+			    		});
+			    	};
+			    	dequeueCount();
 				});
 		});
 
@@ -82,7 +102,7 @@ var FeatureAPI = function(app)
 		{
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var urlObj = url.parse(req.url, true),
-					filterQuery = {},
+					filterQuery = {geometry: {$ne: undefined}},
 					queryFields = null,
 					queryOptions = {'limit': config.MAX_RESULT_COUNT},
 					zoom = parseInt(urlObj.query.z) || 0,
@@ -90,46 +110,73 @@ var FeatureAPI = function(app)
 					timeGrid = urlObj.query.t,
 					strDate = urlObj.query.d,
 					date,
-					boxes,
 					features = [],
 					datetimeAttr = mapLayer.layerOptions && mapLayer.layerOptions.attrMap ? 
 						mapLayer.layerOptions.attrMap.datetime : null;
 
 				// adjust zoom						
-				if (isNaN(zoom) || zoom < 0) {
+				if (isNaN(zoom)) {
 					zoom = 0;
-				} else if (zoom >= config.GRID_SIZES.length) {
-					zoom = config.GRID_SIZES.length - 1;
+				} else {
+					var adjustZoom = 0;
+					var zoom = Math.max(0, Math.min(
+						Object.keys(config.GRID_SIZES).length, zoom + adjustZoom));
 				}
 
                 var tileSize = config.GRID_SIZES[zoom],
 					mapReduceOpts = {
 						tileSize: (featureCollection.tile && featureCollection.tile.length ? tileSize : undefined)
 					},
-					extraAttrs = { counts: {
-						full: 0, original: 0, max: 0, result: 0
-					}};
+					extraAttrs = { 
+						properties: {
+							counts: {
+								full: 0, original: 0, max: 0, result: 0
+							}						
+						}
+					};
 
 				if (['yearly', 'weekly', 'hourly'].indexOf(timeGrid) != -1) {
 					mapReduceOpts.timeGrid = timeGrid;
 				}
 
-				// adjust bbox and split into boxes if it wraps the dateline 
-				// since MongoDB can't currently handle that
+				var isMapReduced = (mapReduceOpts.tileSize 
+                		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
+                		|| (featureCollection.timebased && datetimeAttr),
+                	FeatureModel = featureCollection.getFeatureModel(),
+			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel,
+			        findQueue;
+                
                 if (bbox && bbox.length == 4) {
                 	bbox = bbox.map(function(c, i) {
                         return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
                 	});
-                	boxes = bbox.some(isNaN) ? 
-                		null : coordinates.adjustBboxForQuery(bbox);
+                	if (bbox.some(isNaN)) {
+                		bbox = null;
+                	} else {
+                		console.info('Finding with $geoIntersects');
+                		var bboxW = bbox[2] - bbox[0];
+	                	if (Math.abs(bboxW) > 180) {
+	                		console.warn('bbox is wider than 180°, splitting it in two');
+	                		findQueue = [
+	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0], bbox[1], bbox[0] + bboxW / 2, bbox[3]])),
+	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0] + bboxW / 2, bbox[1], bbox[2], bbox[3]])),
+	                		];
+	                	} else {
+	                		console.log(JSON.stringify(coordinates.polygonFromBbox(bbox)));
+	                		findQueue = [
+	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox(bbox)),
+	                		];
+	                	}
+                	}
+                }
+                if (!findQueue) {
+                	findQueue = [FindFeatureModel.where()];
                 }
 
-                var manyBoxes = boxes && boxes.length > 1,
-                	isMapReduced = (mapReduceOpts.tileSize 
-                		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
-                		|| (featureCollection.timebased && datetimeAttr),
-                	FeatureModel = featureCollection.getFeatureModel(),
-			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel;
+                var manyQueries = findQueue.length > 1;
+			    if (isMapReduced && mapReduceOpts.tileSize) {
+					extraAttrs.properties.gridSize = [tileSize, tileSize];
+			    }
 
 			    if (isMapReduced && mapReduceOpts.timeGrid) {
 			    	switch (mapReduceOpts.timeGrid) {
@@ -148,10 +195,18 @@ var FeatureAPI = function(app)
 		    		filterQuery['value.' + datetimeAttr + '.min'] = date;
 			    }
 
-                console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ', boxes:', boxes, ' manyBoxes:', manyBoxes, ', mapReduceOpts: ', mapReduceOpts);
+                console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ' manyQueries:', manyQueries, ', mapReduceOpts: ', mapReduceOpts);
 
                 var sendFeatures = function(features) {
-            		extraAttrs.counts.result = features.length;
+            		if (manyQueries) {
+            			var ids = {};
+            			features = features.filter(function(feature) {
+            				var exists = ids[feature._id];
+            				ids[feature._id] = true;
+            				return !exists;
+            			});
+            		}
+            		extraAttrs.properties.counts.result = features.length;
             		if (isMapReduced) {
             			// this is the result of a MapReduce: determine counts
                 		features.reduce(function(a, b) {
@@ -159,69 +214,48 @@ var FeatureAPI = function(app)
                 			a.max = Math.max(a.max, v.count);
                 			a.original += v.count;
                 			return a;
-                		}, extraAttrs.counts);
+                		}, extraAttrs.properties.counts);
+
             		} else {
             			// this is the original collection
-						extraAttrs.counts.max = extraAttrs.counts.result;
-						extraAttrs.counts.original = extraAttrs.counts.result;                    			
+						extraAttrs.properties.counts.max = extraAttrs.properties.counts.result;
+						extraAttrs.properties.counts.original = extraAttrs.properties.counts.result;                    			
             		}
 
             		extraAttrs.features = features;
+            		if (bbox) {
+	            		extraAttrs.bbox = bbox;
+            		}
             		console.success('Sending features:', features.length);
             		res.send(featureCollection.toGeoJSON(extraAttrs));
             	};
 
-                var dequeueBoxAndFind = function() {
-                	if (!boxes.length 
+                var dequeueFind = function() {
+                	if (!findQueue.length 
                 		|| (queryOptions.limit != undefined && queryOptions.limit <= 0)) {
-	                		if (manyBoxes) {
-	                			var ids = {};
-	                			features = features.filter(function(feature) {
-	                				var exists = ids[feature._id];
-	                				ids[feature._id] = true;
-	                				return !exists;
-	                			});
-	                		}
                     		sendFeatures(features);
                     		return;
                 	}
-					FindFeatureModel
-						.within(boxes.shift())
+                	findQueue.shift()
 						.find(filterQuery)
 						.setOptions(queryOptions)
 						.select(queryFields)
-						.exec(function(err, found) {
+						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, true)) return;
-							console.log('Found features:', found.length);
-							features = features.concat(found);
+							console.success('Found features:', docs.length);
+							features = features.concat(docs);
 							if (queryOptions.limit) {
-								queryOptions.limit -= found.length;
+								queryOptions.limit -= docs.length;
 							}
-							dequeueBoxAndFind();
+							dequeueFind();
 						});
                 };
 
-                var findWithoutBox = function() {
-					FindFeatureModel
-						.find(filterQuery)
-						.setOptions(queryOptions)
-						.select(queryFields)
-						.exec(function(err, found) {
-							if (handleDbOp(req, res, err, true)) return;
-							console.log('Found features:', found.length);
-							sendFeatures(found);
-						});
-                };
-
-				utils.modelCount(FeatureModel, filterQuery, function(err, count) {
+				FeatureModel.count(filterQuery, function(err, count) {
 					if (handleDbOp(req, res, err, true)) return;
-					extraAttrs.counts.full = count;
+					extraAttrs.properties.counts.full = count;
 					console.info('full count: ', count);
-                    if (boxes){
-	                    dequeueBoxAndFind();
-                    } else {
-                    	findWithoutBox();
-                    }
+                    dequeueFind();
 				});
 
 			});

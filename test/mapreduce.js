@@ -2,12 +2,14 @@ var	models = require('../models'),
 	config = require('../config'),
 	api = new require('../api')(),
 	utils = require('../utils'),
+	coordinates = require('../geogoose/coordinates'),
 	EmitKey = require('../api/aggregate/mapreduce_abstraction').EmitKey,
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	assert = require('assert'),
 	mongoose = require('mongoose');
 
 describe('MapReduce', function() {
+
 	var featureCollection, GeoFeature,
 		generateCount = 1024,
 		normalZoom = 1,
@@ -17,6 +19,56 @@ describe('MapReduce', function() {
 			numeric: 'properties.numVal',
 			datetime: 'properties.date'
 		};
+
+	var rect = new EmitKey.Tile.Rect(3,2);
+
+	it('should return a Point for the center of the tile for original Point', function() {
+		var emit = rect.get({
+			type: 'Point',
+			coordinates: [11,12]
+		});
+		assert.deepEqual(emit, ["3,6",{"type":"Point","coordinates":[10.5,13]}]);
+	});
+
+	it('should return a LineString from start to end for original LineString', function() {
+		emit = rect.get({
+			type: 'LineString',
+			coordinates: [[15,16], [11,12]]
+		});
+		assert.deepEqual(emit, ["5,8,3,6",{"type":"LineString","coordinates":[[16.5,17],[10.5,13]]}]);
+	});
+
+	it('should return the reversed LineString original reversed LineString', function() {
+		emit = rect.get({
+			type: 'LineString',
+			coordinates: [[11,12], [15,16]]
+		});
+		assert.deepEqual(emit, ["3,6,5,8",{"type":"LineString","coordinates":[[10.5,13],[16.5,17]]}]);
+	});
+
+	it('should return a Polygon for original closed LineString', function() {
+		emit = rect.get({
+			type: 'LineString',
+			coordinates: [[11,12], [15,16], [11,12]]
+		});
+		assert.deepEqual(emit, ["3,6,5,8",{"type":"Polygon","coordinates":[[[9,12],[18,12],[18,18],[9,18],[9,12]]]}]);
+	});
+
+	it('should return a Polygon for original Polygon', function() {
+		emit = rect.get({
+			type: 'Polygon',
+			coordinates: [[[11,12], [15,16]]]
+		});
+		assert.deepEqual(emit, ["3,6,5,8",{"type":"Polygon","coordinates":[[[9,12],[18,12],[18,18],[9,18],[9,12]]]}]);
+	});
+
+	it('should return the same Polygon for original reversed Polygon', function() {
+		emit = rect.get({
+			type: 'Polygon',
+			coordinates: [[[15,16], [11,12]]]
+		});
+		assert.deepEqual(emit, ["3,6,5,8",{"type":"Polygon","coordinates":[[[9,12],[18,12],[18,18],[9,18],[9,12]]]}]);
+	});
 
 	before(function(done) {
 		mongoose.connect(config.DB_URI);
@@ -48,7 +100,7 @@ describe('MapReduce', function() {
 						type: 'Point',
 						coordinates: [x, y]
 					},
-					type: 'Point',
+					type: 'Feature',
 					properties: {
 						numVal: x * y,
 						x: x,
@@ -155,7 +207,9 @@ describe('MapReduce', function() {
 	it('should find features at the next zoom level within one quarter of its area, resulting in one feature', function(done) {
 		featureCollection.getMapReducedFeatureModel({tileSize: config.GRID_SIZES[normalZoom + 1]})
 			// $within $box is inclusive -- hence subtract very small number from northeast of box
-			.within([[0, 0], [config.GRID_SIZES[normalZoom] / 2 - .00000001, config.GRID_SIZES[normalZoom] / 2 - .00000001]])
+			.geoWithin(coordinates.polygonFromBbox(
+				[0, 0, config.GRID_SIZES[normalZoom] / 2 - .00000001, config.GRID_SIZES[normalZoom] / 2 - .00000001]
+			))
 			.exec(function(err, features) {
 				if (err) throw err;
 				assert.equal(features.length, 1);
