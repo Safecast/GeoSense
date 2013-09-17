@@ -74,6 +74,7 @@ var FeatureAPI = function(app)
 			    	var countQueue = collections.map(function(collection) {
 		    			return collection;
 			    	});
+			    	console.log('found collections: '+collections.length);
 			    	
 			    	var dequeueCount = function() {
 			    		if (!countQueue.length) {
@@ -101,7 +102,7 @@ var FeatureAPI = function(app)
 		{
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var urlObj = url.parse(req.url, true),
-					filterQuery = {},
+					filterQuery = {geometry: {$ne: undefined}},
 					queryFields = null,
 					queryOptions = {'limit': config.MAX_RESULT_COUNT},
 					zoom = parseInt(urlObj.query.z) || 0,

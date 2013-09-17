@@ -8,7 +8,6 @@ define([
 
 	var GeoFeatureCollections = Backbone.Collection.extend({
 
-		//model: MapLayer,
 		fetchType: null,
 
 		url: function() {

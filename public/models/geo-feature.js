@@ -24,7 +24,7 @@ define([
         
         getCenter: function() 
         {
-            if (this.attributes.geometry.type == 'Point') {
+            if (!this.attributes.bbox || !this.attributes.bbox.length) {
                 return this.attributes.geometry.coordinates;
             }
             var size = this.getSize();
@@ -36,7 +36,7 @@ define([
 
         getSize: function() 
         {
-            if (this.attributes.geometry.type == 'Point') {
+            if (!this.attributes.bbox || !this.attributes.bbox.length) {
                 return [0, 0];
             }
             return [

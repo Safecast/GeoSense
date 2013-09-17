@@ -160,7 +160,6 @@ Map.schema.plugin(useTimestamps);
 
 
 var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({
-    geocoded: {type: Boolean, default: false, required: true},
     incrementor: mongoose.Schema.Types.Mixed,
     source: mongoose.Schema.Types.Mixed,
 });
@@ -168,15 +167,6 @@ var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({
 var AdHocGeoFeature = geogoose.util.adHocModel('AdHocGeoFeature', GeoFeatureSchema);
 
 GeoFeatureSchema.plugin(useTimestamps);
-
-GeoFeatureSchema.pre('save', function(next) {
-    this.geocoded = this.bounds2d && this.bounds2d.length;
-    if (this.geocoded && !this.geometry.type) {
-        this.geometry.type = 'Point';
-    }
-    next();
-});
-
 
 var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: String}, null, {geoIndexField: 'value.geometry'}, null, {
     value: _.extend({count: Number}, geogoose.models.geoJSONFeatureDefinition)
