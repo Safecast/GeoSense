@@ -1,5 +1,6 @@
 var	models = require('../models'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
+	coordinates = require('../geogoose/coordinates'),
 	config = require('../config'),
 	format = require('../api/import/formats/geojson'),
 	assert = require('assert'),
@@ -56,24 +57,43 @@ describe('GeoJSON raw', function() {
 	it('should find Switzerland by name', function(done) {
 
 		GeoFeature.findOne({'properties.name': 'Switzerland'}, function(err, result) {
-			if (err) throw err;
-			assert(result);
-			assert.deepEqual(result.toGeoJSON().bbox, [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
-			done();
+				if (err) throw err;
+				assert(result);
+				assert.deepEqual(result.bbox.toObject(), [ 5.970000000000001,45.839999999999996, 10.47,47.71 ]);
+				done();
 		});
 
 	});
 
 	it('should find countries within a box', function(done) {
 
-		GeoFeature.within([[1,40],[11,48]]).sort({'properties.name': 1}).exec(function(err, result) {
+		GeoFeature.geoWithin(coordinates.polygonFromBbox([1,40,11,48])).sort({'properties.name': 1}).exec(function(err, result) {
+			if (err) throw err;
+			assert(result.length);
+			var countries = result.map(function(val) { return val.properties.name; });
+			assert.deepEqual(countries, [ 
+				'Andorra',
+				'Liechtenstein',
+				'Monaco',
+				'Switzerland' 
+			]);
+			done();
+		});
+
+	});
+
+	it('should find countries intersecting a box', function(done) {
+
+		GeoFeature.geoIntersects(coordinates.polygonFromBbox([1,40,11,48])).sort({'properties.name': 1}).exec(function(err, result) {
 			if (err) throw err;
 			assert(result.length);
 			var countries = result.map(function(val) { return val.properties.name; });
 			assert.deepEqual(countries, [ 
 				'Andorra',
 				'Austria',
+				'France',
 				'Germany',
+				'Italy',
 				'Liechtenstein',
 				'Monaco',
 				'Spain',
