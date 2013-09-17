@@ -124,7 +124,6 @@ GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs)
     }
     if (extraAttrs) {
         obj = _.extend(obj, extraAttrs);
-        console.log(obj);
     }
     return obj;
 };
