@@ -12,17 +12,13 @@ define([
 
 		model: GeoFeature,
 		
-		comparator: function(point) 
-		{
-			return point.get('datetime');
-		},
-		
 		initialize: function(models, options) 
 		{
 			this.mapLayer = options.mapLayer;
 			this.queryParams = options.queryParams ? $.extend({}, options.queryParams) : {};
 			this.urlParams = options.urlParams ? $.extend({}, options.urlParams) : {};
 			this.urlFormat = options.urlFormat;
+			this.properties = {};
 			if (!options.parser) {
 				this.parser = new Parser.GeoJSON(this);
 			} else {
@@ -64,7 +60,7 @@ define([
 			for a bounding box with zoom:
 
 				queryParams.b = [W, S, N, E]
-				queryParams.z = 1..20
+				queryParams.z = 0..19
 
 			*/
 
@@ -74,7 +70,9 @@ define([
 				if (bounds) {
 					queryParams.b = [bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]];
 				}
-				queryParams.z = this.urlParams.zoom;
+				if (this.urlParams.zoom != undefined) {
+					queryParams.z = this.urlParams.zoom;
+				}
 			};
 
 			return this.mapLayer.url() + '/features' 
@@ -104,9 +102,19 @@ define([
 	    {
 			this.initiallyFetched = this.visibleMapAreaFetched = true;
 			var parsed = this.parser.parse(resp, xhr);
-	    	this.counts = parsed.counts || {};
+	    	this.properties = parsed.properties;
 	    	return parsed.features;
 	    },
+
+        getCounts: function()
+        {
+            return this.properties.counts;
+        },
+
+        gridSize: function()
+        {
+        	return this.properties.gridSize;
+        }
 				
 	});
 

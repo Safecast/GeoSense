@@ -8,48 +8,65 @@ var mongoose = require('mongoose'),
 
 var geoJSONFeatureCollectionDefinition = {
         type: {type: String, required: true, enum: ['FeatureCollection'], default: 'FeatureCollection'},
-        bounds2d: {type: Array, index: '2d'},
+        bounds: {
+            type: {type: String, enum: ["Polygon"]},
+            coordinates: {type: Array},
+        },
         bbox: {type: Array},
         properties: mongoose.Schema.Types.Mixed,
     },
     geoJSONFeatureDefinition = {
-        type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection", "Feature", "FeatureCollection"], index: 1},
-        bounds2d: {type: Array, index: '2d'},
-        bbox: {type: Array},
+        type: {type: String, enum: ["Feature"], index: 1},
         geometry: {
-            type: {type: String, /*required: true,*/ enum: ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"], index: 1},
-            coordinates: {type: Array, /*required: true, index: 1*/}
+            type: {type: String, enum: ["Point", "LineString", "Polygon"]},
+            coordinates: {type: Array},
         },
+        sourceGeometry: mongoose.Schema.Types.Mixed,
+        bbox: {type: Array},
         properties: mongoose.Schema.Types.Mixed,
     },
     GeoFeatureCollectionSchemaMethods = {}, GeoFeatureCollectionSchemaStatics = {}, GeoFeatureCollectionSchemaMiddleware = {},
-    GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {}, GeoFeatureSchemaMiddleware = {};
+    GeoFeatureSchemaMethods = {}, GeoFeatureSchemaStatics = {
+        complexGeometryTypes: ["MultiPoint", "MultiLineString", "MultiPolygon"]
+    }, GeoFeatureSchemaMiddleware = {};
 
 
 GeoFeatureCollectionSchemaMiddleware.pre = {
     save: function(next) {
+
         if (this.bbox && this.bbox.length) {
-            // Store 2d-indexable bounds >= -180 and < 180
-            this.bounds2d = getBounds(boundsFromBbox(this.bbox), true, true);
+            this.bounds = coordinates.polygonFromBbox(this.bbox);
+        } else {
+            this.bounds = undefined;
         }
+
         if (next) next();
     }
 };
 
+GeoFeatureCollectionSchemaStatics.geoIndexField = 'bounds';
+
 GeoFeatureCollectionSchemaMethods.toGeoJSON = function(extraAttrs)
 {
-    var obj = util.toGeoJSON(this.toJSON());
-    delete obj.importParams;
+    var obj = {
+        _id: this._id,
+        type: this.get('type'),
+        properties: util.fieldsToObject(this, ['title', 'createdAt', 'updatedAt']),
+        bbox: this.get('bbox')
+    };
+
     if (extraAttrs) {
-        for (var k in extraAttrs) {
-            obj[k] = extraAttrs[k];
+        obj.properties = _.extend(obj.properties, extraAttrs.properties);
+        if (extraAttrs.features) {
+            obj.features = extraAttrs.features.map(function(feature) {
+                return feature.toGeoJSON();
+            });
+        }
+        if (extraAttrs.bbox) {
+            obj.bbox = extraAttrs.bbox;
         }
     }
-    if (obj.features) {
-        obj.features = obj.features.map(function(feature) {
-            return feature.toGeoJSON();
-        });
-    }
+
     return obj;
 };
 
@@ -78,54 +95,115 @@ function GeoFeatureCollectionSchema(extraDefinition, extraMethods, extraStatics,
             schema[method](evt, middleware[method][evt]);
         }
     }
+
+    if (schema.statics.geoIndexField) {
+        var index = {};
+        index[schema.statics.geoIndexField] = '2dsphere';
+        schema.index(index);
+    };
+
     return schema;
 }
 
 
 GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs) 
 {
-    var obj = this.toJSON();
-    delete obj.featureCollection;
-    if (extraAttrs) obj = _.extend(obj, extraAttrs);
-    return util.toGeoJSON(obj);
+    var obj = {
+        _id: (this._id && this._id.toString ? this._id.toString() : this._id),
+        type: this.get('type'),
+        properties: this.get('properties')
+    };
+
+    if (this.sourceGeometry) {
+        obj.geometry = this.get('sourceGeometry');
+    } else {
+        obj.geometry = this.get('geometry');
+    }
+    if (this.bbox && this.bbox.length) {
+        obj.bbox = this.get('bbox');
+    }
+    if (extraAttrs) {
+        obj = _.extend(obj, extraAttrs);
+    }
+    return obj;
 };
 
+GeoFeatureSchemaMethods.getBounds = function(fromCoordinates) {
+    if (fromCoordinates || fromCoordinates == undefined || !this.bbox) {
+        return getBounds(this.geometry.coordinates);
+    }
+    if (this.bbox) {
+        return coordinates.boundsFromBbox(this.bbox);
+    }
+    if (this.geometry.type == 'Point') {
+        return [this.geometry.coordinates, this.geometry.coordinates];
+    }
+}
+
 GeoFeatureSchemaMiddleware.pre = {
+
+    validate: function(next) {
+        if (!this.schema.statics.geoIndexField) {
+            throw new Error('Schema has no geoIndexField defined');
+        };
+
+        var geometryTypes = this.schema.paths[this.schema.statics.geoIndexField + '.type'].enumValues,
+            complexGeometryTypes = this.schema.statics.complexGeometryTypes,
+            geometryType = this[this.schema.statics.geoIndexField].type;
+
+        if ((-1 == geometryTypes.indexOf(geometryType))
+            && (-1 != complexGeometryTypes.indexOf(geometryType))) {
+                console.warn('Converting complex geometry to 2dsphere indexable bounds');
+                this.sourceGeometry = _.clone(this.geometry);
+                this.geometry = coordinates.polygonFromBounds(getBounds(this.geometry.coordinates));
+        }
+
+        if (next) next();
+    },
+
     save: function(next) {
         if (!this.type) this.type = 'Feature';
-        if (this.geometry.coordinates && this.geometry.coordinates.length) {
-            var bounds = getBounds(this.geometry.coordinates);
-            if (this.geometry.type != 'Point') {
+        if (!this.geometry || !this.geometry.type || !this.geometry.coordinates || !this.geometry.coordinates.length) {
+            this.geometry = undefined;
+        }
+        if (this.geometry.type != 'Point' && this.geometry.coordinates && this.geometry.coordinates.length) {
+            var bounds = this._bounds || this.getBounds(true);
+            if (bounds) {
                 // GeoJSON specifies a one-dimensional array for the bbox
                 this.bbox = bboxFromBounds(bounds);
             }
-            // Store 2d-indexable bounds >= -180 and < 180
-            this.bounds2d = getBounds(bounds, true, true);
         }
         if (next) next();
     }
 };
 
-GeoFeatureSchemaStatics.within = function(coordinates) 
+GeoFeatureSchemaStatics.geoIndexField = 'geometry';
+
+GeoFeatureSchemaStatics.geoWithin = function(geometry) 
 {
-    if (!this.schema.geoIndexField) {
+    if (!this.schema.statics.geoIndexField) {
         throw new Error('Schema has no geoIndexField defined');
     };
-    var condition = {$within:
-        Array.isArray(coordinates) ? 
-            {$box: coordinates} 
-        : coordinates
+    var c = {$geoWithin: {$geometry: geometry}};
+    return this.where(this.schema.statics.geoIndexField, c);
+}
+
+GeoFeatureSchemaStatics.geoIntersects = function(geometry) 
+{
+    if (!this.schema.statics.geoIndexField) {
+        throw new Error('Schema has no geoIndexField defined');
     };
-    return this.where(this.schema.geoIndexField, condition);
+    var c = {$geoIntersects: {$geometry: geometry}};
+    return this.where(this.schema.statics.geoIndexField, c);
 }
 
 function GeoFeatureSchema(extraDefinition, extraMethods, extraStatics, extraMiddleware, basicDefinition)
 {
     var schema = new mongoose.Schema(_.cloneextend(basicDefinition || geoJSONFeatureDefinition, extraDefinition || {}));        
     schema.methods = _.clone(GeoFeatureSchemaMethods);
-    _.add(schema.methods, extraMethods);
+    _.extend(schema.methods, extraMethods);
     schema.statics = _.clone(GeoFeatureSchemaStatics);
-    _.add(schema.statics, extraStatics);
+    _.extend(schema.statics, extraStatics);
     var middleware = _.cloneextend(GeoFeatureSchemaMiddleware, extraMiddleware || {});
     for (var method in middleware) {
         for (var evt in middleware[method]) {
@@ -133,15 +211,13 @@ function GeoFeatureSchema(extraDefinition, extraMethods, extraStatics, extraMidd
         }
     }
 
-    // determine which field to use for 2d index queries:
-    schema.indexes().forEach(function(index) {
-        for (var k in index[0]) {
-            if (index[0][k] == '2d') {
-                schema.geoIndexField = k;
-                break;
-            }
-        }
-    });
+    if (!schema.statics.geoIndexField) {
+        throw new Error('Schema has no geoIndexField defined');
+    };
+
+    var index = {};
+    index[schema.statics.geoIndexField] = '2dsphere';
+    schema.index(index);
 
     return schema;
 }

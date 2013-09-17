@@ -93,14 +93,24 @@ define([
 		    	switch (this.model.getDataStatus()) {
 		    		case DataStatus.COMPLETE:
 		    			if (this.model.isEnabled()) {
-		    				if (featureCollection.initiallyFetched) {
-								status = __('%(number)i of %(total)i', {
-									number: formatLargeNumber(featureCollection.counts.original),
-									total: formatLargeNumber(featureCollection.counts.full)
-								});
-								var url = featureCollection.url();
-								if (this.model.attributes.featureCollection) {
-									status += '&nbsp;&nbsp;<a target="_blank" class="muted download-collection ' + this.model.attributes.featureCollection._id +'" href="' 
+		    				var c = featureCollection.initiallyFetched ? 
+		    					featureCollection.getCounts() : this.model.getCounts();
+		    				if (c) {
+		    					if (formatLargeNumber(c.original) != undefined) {
+									status = __('%(number)i of %(total)i', {
+										number: formatLargeNumber(c.original),
+										total: formatLargeNumber(c.full)
+									});
+		    					} else {
+									status = (c.full > 1 ? __('%(total)i %(itemTitlePlural)s') : __('%(total)i %(itemTitle)s')).format({
+										total: formatLargeNumber(c.full),
+										itemTitle: this.model.getDisplay('itemTitle'),
+										itemTitlePlural: this.model.getDisplay('itemTitlePlural'),
+									});
+		    					}
+								if (featureCollection.initiallyFetched) {
+									var url = featureCollection.url();
+									status += '&nbsp;&nbsp;<a target="_blank" class="muted download-collection"'+'" href="' 
 										+ url + '"><span class="glyphicon glyphicon-download muted"></span></a>';		
 								}
 							} else {

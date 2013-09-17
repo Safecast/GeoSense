@@ -92,6 +92,7 @@ define([
 						layerOptions: model.attributes.defaults
 					}),
 	            	mapLayerView = new MapLayerView({model: mapLayer});
+	            mapLayer.isEnabled = function() { return true; };
             	mapLayerView.expandContent = false;
             	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;

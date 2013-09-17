@@ -12,7 +12,7 @@ define([
 	{
 		return {
 			features: this.collection._super('parse', [resp.features, xhr]),
-			counts: resp.counts
+			properties: resp.properties
 		};
 	};
 

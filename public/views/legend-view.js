@@ -205,7 +205,7 @@ define([
 					isNumeric = this.model.isNumeric(),
 					isCounts = this.isDisplayingCounts(),
 					hasCountsGtZero = false,
-					counts = this.model.getCounts(),
+					counts = this.model.featureCollection.getCounts(),
 					mag = !counts ? 0 : counts.max > 10000 ? 1000	
 						: counts.max > 100 ? 100
 						: 1,

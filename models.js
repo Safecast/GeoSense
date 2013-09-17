@@ -160,43 +160,24 @@ Map.schema.plugin(useTimestamps);
 
 
 var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({
-    geocoded: {type: Boolean, default: false, required: true},
     incrementor: mongoose.Schema.Types.Mixed,
     source: mongoose.Schema.Types.Mixed,
-    count: Number   
 });
 
-GeoFeatureSchema.methods.toGeoJSON = function(extraAttrs)
-{
-    var obj = this.toJSON();
-    if (extraAttrs) obj = _.extend(obj, extraAttrs);
-    delete obj.featureCollection;
-    delete obj.source;
-    delete obj.geocoded;
-    return geogoose.util.toGeoJSON(obj);
-};
+var AdHocGeoFeature = geogoose.util.adHocModel('AdHocGeoFeature', GeoFeatureSchema);
 
 GeoFeatureSchema.plugin(useTimestamps);
 
-GeoFeatureSchema.pre('save', function(next) {
-    this.geocoded = this.bounds2d && this.bounds2d.length;
-    if (this.geocoded && !this.geometry.type) {
-        this.geometry.type = 'Point';
-    }
-    next();
-});
-
-
-var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: String}, null, null, null, {
-    value: geogoose.models.geoJSONFeatureDefinition
+var GeoFeatureMapReducedSchema = new geogoose.models.GeoFeatureSchema({_id: String}, null, {geoIndexField: 'value.geometry'}, null, {
+    value: _.extend({count: Number}, geogoose.models.geoJSONFeatureDefinition)
 });
 
 GeoFeatureMapReducedSchema.methods.toGeoJSON = function(extraAttrs)
 {
-    var obj = this.toJSON().value;
-    obj._id = this.get('_id').toString();
-    if (extraAttrs) obj = _.extend(obj, extraAttrs);
-    return geogoose.util.toGeoJSON(obj);
+    var reduced = this.get('value'),
+        doc = new AdHocGeoFeature(reduced);
+    return doc.toGeoJSON(_.extend({properties: {count: reduced.count}}, _.extend(
+        {_id: this._id}, extraAttrs)));
 };
 
 
