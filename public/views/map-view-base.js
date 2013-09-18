@@ -14,6 +14,7 @@ define([
         initialize: function(options) 
         {
             this.layers = [];
+            this.redrawQueue = [];
             this.vent = options.vent;
 
             if (options.visibleMapArea) {
@@ -55,8 +56,14 @@ define([
                 app.navigate(app.genMapURIForVisibleArea(visibleMapArea));
             }
             this.visibleAreaChangedInitially = false;
-            console.log('visibleAreaChanged');
-            this.trigger('visibleAreaChanged');
+
+            self.redrawQueue.push(setTimeout(function() {
+                console.log('visibleAreaChanged');
+                self.trigger('visibleAreaChanged');
+            }, 250));
+            for (var i = self.redrawQueue.length; i > 1; i--) {
+                clearTimeout(self.redrawQueue.shift());
+            }
         },
 
         /**
