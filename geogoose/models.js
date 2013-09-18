@@ -128,11 +128,9 @@ GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs)
     return obj;
 };
 
-GeoFeatureSchemaMethods.getBounds = function(fromCoordinates) {
-    if (fromCoordinates || fromCoordinates == undefined || !this.bbox) {
-        return getBounds(this.geometry.coordinates);
-    }
-    if (this.bbox) {
+GeoFeatureSchemaMethods.getBounds = function() 
+{
+    if (this.bbox && this.bbox.length) {
         return coordinates.boundsFromBbox(this.bbox);
     }
     if (this.geometry.type == 'Point') {
@@ -167,10 +165,11 @@ GeoFeatureSchemaMiddleware.pre = {
             this.geometry = undefined;
         }
         if (this.geometry.type != 'Point' && this.geometry.coordinates && this.geometry.coordinates.length) {
-            var bounds = this._bounds || this.getBounds(true);
-            if (bounds) {
-                // GeoJSON specifies a one-dimensional array for the bbox
-                this.bbox = bboxFromBounds(bounds);
+            if (!this.bbox || !this.bbox.length) {
+                var bounds = getBounds(this.geometry.coordinates);
+                if (bounds) {
+                    this.bbox = bboxFromBounds(bounds);
+                }
             }
         }
         if (next) next();
