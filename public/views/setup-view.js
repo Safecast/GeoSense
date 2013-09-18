@@ -52,6 +52,12 @@ define([
 			this.$('.map-admin-url').val(app.genAdminURL());
 	    },
 
+	    focusEmail: function()
+	    {
+			self.$('#tab-setup-author').trigger('click');
+			self.$('input.email').focus();
+	    },
+
 	    render: function() 
 	    {
 	    	var self = this;
@@ -62,8 +68,7 @@ define([
 			});
 			
 			this.$(".enter-email").click(function() {
-				self.$('#tab-setup-author').trigger('click');
-				self.$('input.email').focus();
+				self.focusEmail();
 				return false;
 			});
 
@@ -106,6 +111,7 @@ define([
 			this.model.save(postData, {
 				success: function(model, response, options) {
 					self.close();
+					self.trigger('map:saved');
 					self.$('#saveCloseButton').attr('disabled', false);
 					self.mapInfoChanged = false;
 				},

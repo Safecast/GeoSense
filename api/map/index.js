@@ -159,7 +159,7 @@ var MapAPI = function(app)
 						var split = map.host.split('://');
 						map.host = split.pop();
 					} else {
-						delete map.SMTP_HOST;
+						map.host = undefined;
 					}
 
 					if (map.linkURL && map.linkURL != '') {
@@ -173,16 +173,21 @@ var MapAPI = function(app)
 						map.twitter = split.pop();
 					}
 
-					email = req.body['createdBy.email'];
-					var prevEmail = req.body.createdBy ? req.body.createdBy.email : null;
+					var email;
+					if (req.body.createdBy) {
+						email = req.body.createdBy.email;
+					}
 
-					if (email && email != '' && (!map.createdBy || map.createdBy.email != email)) {
-						var user;
+					if (email != undefined && ((!map.createdBy && email != '') || map.createdBy)) {
+						var user, prevEmail;
 						if (map.createdBy) {
+							console.log('Saving email address to user:', email)
 							user = map.createdBy;
 						} else {
+							console.log('Creating new user:', email)
 							user = new User();
 						}				
+						prevEmail = user.get('email');
 						user.email = email;
 						user.save(function(err, user) {
 							if (err && err.errors.email) {
@@ -191,16 +196,17 @@ var MapAPI = function(app)
 							if (handleDbOp(req, res, err, user, 'user')) return;
 							map.createdBy = map.modifiedBy = user;
 							map.save(function(err, map) {
-								console.success('map saved', err);
+								console.success('map updated', err);
 								if (handleDbOp(req, res, err, map, 'map')) return;
 
 								// find again since createdBy and modifiedBy won't be populated after map.save()
-								Map.findOne({_id: req.params.mapid})
+								Map.findOne({_id: map._id})
 									.populate('layers.featureCollection')
 									.populate('layers.layerOptions')
 									.populate('createdBy')
 									.populate('modifiedBy')
 									.exec(function(err, map) {
+										console.log('--put', err, map)
 										if (handleDbOp(req, res, err, map, 'map')) return;
 									 	res.send(prepareMapResult(req, map));
 									 	if (prevEmail != user.email && config.SMTP_HOST) {

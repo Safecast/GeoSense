@@ -350,6 +350,7 @@ define([
                 var snap = $('<div class="snap top" /><div class="snap right" />');
                 this.$mainEl.append(snap);
 
+                console.log('help panel init');
                 this.helpPanelView  = new HelpPanelView().render();
                 if (!this.map.attributes.layers.length && this.isMapAdmin()) {
                     this.attachPanelView(this.helpPanelView).hide().show('fast');
