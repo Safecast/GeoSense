@@ -38,7 +38,6 @@ define([
 
 	    detectPageLimit: function()
 	    {
-	    	console.log(this.$scrollable, this.$scrollable.height());
 			return Math.ceil(this.$scrollable.height() / this.resultHeight / 10) * 10;
 	    },
 
@@ -93,13 +92,7 @@ define([
 				}
 			});
 
-			this.dropZone = $('<div class="drop-zone" id="dropZone"><h3 class="instruction">DROP HERE</h3></div>');
-			$('body').append(this.dropZone);
-			this.dropZone.droppable( {
-		    	accept: '.map-layer',
-		    	hoverClass: '',
-		    	drop: self.dataDrop
-		    } );	
+			this.$dropZone = self.$('.drop-zone').remove();
 
 			this.$('form.search .search-query').on('click', function() {
 				$(this).select();
@@ -131,6 +124,7 @@ define([
 	    	this.searchParams.q = query;
 	    	this.$('button.remove-query').toggle(query != '');
 	    	this.fetchResults(this.searchParams);
+	    	self.$('.search-query').focus();
 
 	    	return false;
 	    },
@@ -162,17 +156,24 @@ define([
 
 				mapLayerView.$el.draggable({
 					revert: 'invalid',
-					stack: self.dropZone,
+					stack: self.$dropZone,
 					start: function(event, ui) { 
-						self.dropZone.addClass('visible');
-						self.dropZone.css('left', self.$el.outerWidth() + 'px');
+						self.$dropZone
+							.css({'left': self.$el.outerWidth() + 'px', 'z-index': 999})
+							.droppable( {
+						    	accept: '.map-layer',
+						    	hoverClass: 'hover',
+						    	drop: self.dataDrop
+						    });
+						$('#main-viewport').append(self.$dropZone);
+						self.$dropZone.addClass('visible');
 						ui.helper.css('width', $(this).outerWidth() + 'px');
 						ui.helper.addClass('drag-helper');
 					},
 					helper: 'clone',
 					appendTo: self.$el,
 					stop: function(event, ui) {
-						self.dropZone.removeClass('visible');
+						self.$dropZone.removeClass('visible').remove();
 					}
 				});
 
@@ -228,7 +229,8 @@ define([
 			});
 		},
 		
-		dataDrop: function(event, ui ) {
+		dataDrop: function(event, ui ) 
+		{
 		  	var id = ui.draggable.attr('data-feature-collection-id');
 			app.saveNewMapLayer(id);
 		},

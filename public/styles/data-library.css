@@ -42,15 +42,14 @@
 
 .drop-zone
 {
-	z-index:998;
+	z-index:999;
 	position:absolute;
 	top:0px;
 	bottom:0px;
 	left:300px;
 	right:0px;
-	background-color:red;
 	
-	background-color:rgba(0,0,0,.2);
+	background-color:rgba(25, 25, 25, .6);
 	box-shadow:inset 0px 0px 500px rgba(0, 0, 0, 1);
 	margin:auto;
 	
@@ -63,10 +62,10 @@
 .drop-zone.visible
 {
 	opacity:1;
-	-webkit-transition: opacity .3s linear;
-    -moz-transition: opacity .3s linear;
-    -o-transition: opacity .3s linear;
-    -ms-transition: opacity .3s linear;
+	-webkit-transition: opacity 1.3s linear;
+    -moz-transition: opacity 1.3s linear;
+    -o-transition: opacity 1.3s linear;
+    -ms-transition: opacity 1.3s linear;
 }
 
 .drop-zone .instruction
@@ -77,9 +76,18 @@
 	font-size:40pt;
 	margin-left:-80px;
 	margin-top:-25px;
-	color:#FFF;
+	color:#ccc;
 	opacity:1;
 	text-shadow: 0px 1px 3px rgba(0, 0, 0, .2);
+	text-transform: uppercase;
+	-webkit-transition: color .2s linear;
+    -moz-transition: color .2s linear;
+    -o-transition: color .2s linear;
+    -ms-transition: color .2s linear;
+}
+
+.drop-zone.hover .instruction {
+	color:#fff;
 }
 
 .data-library .status {
