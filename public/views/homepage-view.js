@@ -92,7 +92,7 @@ define([
 				new Map().save(postData, {
 					success: function(model, response, options) {
 						console.log('new map created');
-						window.location.href = model.publicAdminUrl() + '/setup';
+						window.location.href = model.publicAdminUrl();
 					},
 					error: function(model, xhr, options) {
 						console.error('failed to create a new map');

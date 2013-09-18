@@ -147,3 +147,6 @@ input.color-picker {
   }
 }
 
+button .glyphicon-ok.pull-right {
+	margin-right: 0;
+}
