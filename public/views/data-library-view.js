@@ -8,8 +8,9 @@ define([
 	'models/map_layer',
 	'views/panel-view-base',
 	'views/map-layer-view',
+	'mixins/spinner-mixin',
 	'collections/geo-feature-collections'
-], function($, _, Backbone, config, utils, templateHtml, MapLayer, PanelViewBase, MapLayerView, GeoFeatureCollections) {
+], function($, _, Backbone, config, utils, templateHtml, MapLayer, PanelViewBase, MapLayerView, SpinnerMixin, GeoFeatureCollections) {
     "use strict";
 
 	var DataLibraryView = PanelViewBase.extend({
@@ -118,6 +119,8 @@ define([
 					}, 250));
 			});
 
+			this.initSpinner(this.$('.state-indicator'));
+
 	        return this;
 	    },
 
@@ -193,16 +196,18 @@ define([
 	    	return this.$(this.subViewContainer).children().length;
 	    },
 
-		fetchResults: function(params, success, error) {	
+		fetchResults: function(params, success, error) 
+		{	
 			var self = this;	
 			self.isLoading = true;
+			self.showSpinner();
 			this.dataCollectionsFetched = true;
-			//this.$('form.search .help-block').text(__('loading…'));
 			console.log('fetchResults', params);
 			this.collection.fetch({
 				data: params,
 				success: function(collection, response, options) {
 					self.isLoading = false;
+					self.hideSpinner();
 		    		if (!collection.length || collection.length < self.searchParams.l) {
 			    		self.isLastPage = true;
 		    		}
@@ -215,6 +220,7 @@ define([
 				error: function(collection, response, options) {
 					console.error('failed to fetch collections');
 					self.isLoading = false;
+					self.hideSpinner();
 					if (error) {
 						error(collection, response, options);
 					}
@@ -235,6 +241,8 @@ define([
 		},
 		
 	});
+
+	_.extend(DataLibraryView.prototype, SpinnerMixin);
 
 	return DataLibraryView;
 });

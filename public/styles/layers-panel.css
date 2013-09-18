@@ -79,9 +79,10 @@
 }
 
 .layers-panel .status .state-indicator {
+	width: 16px;
 	height: 16px;
 	position: absolute;
-	right: 0px;
+	right: 2px;
 	top: 3px;
 }
 
