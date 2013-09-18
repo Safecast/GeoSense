@@ -151,7 +151,7 @@ define([
 
 			this.initColorPicker(this.$('.model-input.color-picker'));
 
-			this.$('.has-tooltip').tooltip({ delay: 0, animation: false });
+			this.$('.has-tooltip').tooltip({ delay: 0, container: 'body' });
 			this.$('.show-preview').addClass('active');
 
 			return this;
