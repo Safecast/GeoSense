@@ -113,7 +113,7 @@ var FeatureAPI = function(app)
 		{
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var urlObj = url.parse(req.url, true),
-					filterQuery = {geometry: {$ne: undefined}},
+					filterQuery = {'geometry': {$ne: undefined}},
 					queryFields = null,
 					queryOptions = {'limit': config.MAX_RESULT_COUNT},
 					zoom = parseInt(urlObj.query.z) || 0,
@@ -203,6 +203,7 @@ var FeatureAPI = function(app)
 			    		err = new errors.ValidationError("invalid date: " + strDate);
 			    	}
 		    		if (handleDbOp(req, res, err, true)) return;
+		    		// TODO: might conflict with counts
 		    		filterQuery['value.' + datetimeAttr + '.min'] = date;
 			    }
 
@@ -263,6 +264,13 @@ var FeatureAPI = function(app)
                 };
 
 				FeatureModel.count(filterQuery, function(err, count) {
+					if (isMapReduced) {
+						// adapt filterQuery to MapReduce collection
+						Object.keys(filterQuery).forEach(function(key) {
+							filterQuery['value.' + key] = filterQuery[key];
+							delete filterQuery[key];
+						});
+					}
 					if (handleDbOp(req, res, err, true)) return;
 					extraAttrs.properties.counts.full = count;
 					console.info('full count: ', count);
