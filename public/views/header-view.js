@@ -87,6 +87,13 @@ define([
 			} else {
 				this.$('#authorLink').hide();
 			}
+
+			this.$('a.admin-map')
+				.attr('href', app.genAdminURL())
+				.toggle(!app.isMapAdmin());
+			this.$('a.public-map')
+				.attr('href', app.genPublicURL())
+				.toggle(app.isMapAdmin());
 		},
 
 		mapViewToggleClicked: function(evt)
