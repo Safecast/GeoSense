@@ -32,7 +32,7 @@ describe('findExtremes', function() {
 		assert.deepEqual(round(ex1), {sum: 1540, min: 170, max: 600, count: 4, diff: 106900});
 	});
 
-	it('should work with a scalar and a number of strings', function() {
+	it('should work with another scalar', function() {
 		ex3 = utils.findExtremes(430, ex2);
 		assert.deepEqual(round(ex3), {sum: 1970, min: 170, max: 600, count: 5, diff: 108520});
 	});
