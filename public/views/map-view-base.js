@@ -108,7 +108,7 @@ define([
         {   
             var self = this;
             collection.each(function(model) {
-                self.featureAdd(model);
+                self.featureAdd(model, collection, options);
             });
             self.drawLayer(collection.mapLayer);
         },
