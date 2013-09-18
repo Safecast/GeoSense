@@ -56,16 +56,27 @@ var FeatureAPI = function(app)
 		app.get('/api/featurecollections', function(req, res)
 		{
 			var urlObj = url.parse(req.url, true),
-				filterQuery = {$and: [{active: true}, {status: config.DataStatus.COMPLETE}]};
+				page = parseInt(req.query.p),
+				page = isNaN(page) ? 0 : page,
+				limit = parseInt(req.query.l),
+				limit = isNaN(limit) ? 20 : Math.max(1, Math.min(40, limit)),
+				filterQuery = {$and: [{active: true}, {status: config.DataStatus.COMPLETE}]},
+				query;
+			
 			if (urlObj.query.q && typeof urlObj.query.q == 'string') {
-				var rx = {$regex: '.*' + urlObj.query.q + '.*', $options: 'i'};
+				query = urlObj.query.q;
+				var rx = {$regex: '.*' + query + '.*', $options: 'i'};
 				filterQuery.$or = [
 					{title: rx},
 					{tags: rx}
 				];
 			}
+			console.log('Finding feature collections, query:', query, ', limit:', limit, ', page:', page);
+
 			GeoFeatureCollection.find(filterQuery)
 				.sort({title: 1})
+				.limit(limit)
+				.skip(page * limit)
 				.populate('defaults')
 				.populate('createdBy')
 				.populate('modifiedBy')

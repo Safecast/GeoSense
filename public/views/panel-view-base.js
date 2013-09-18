@@ -80,44 +80,62 @@ define([
 
 		show: function(duration, complete) 
 		{
+			var self = this,
+				shownCallback = function() {
+					self.trigger('panel:shown', this);
+					if (complete) {
+						complete();
+					}
+				};
 			this.trigger('panel:show', this);
 			if (!duration) {
 				this.$el.show();
+				shownCallback();
 				return this;
 			}
 			if (this.$el.is('.panel-stick-left')) {
-				this.$el.hide().toggle('slide', duration, complete);
+				this.$el.hide().toggle('slide', duration, shownCallback);
 				return this;
 			}
-			this.$el[this.showEffect](duration, complete);
+			this.$el[this.showEffect](duration, shownCallback);
 			return this;
 		},
 
 		hide: function(duration, complete)
 		{
+			var self = this,
+				hiddenCallback = function() {
+					self.trigger('panel:hidden', this);
+					if (complete) {
+						complete();
+					}
+				};
 			this.trigger('panel:hide', this);
 			if (!duration) {
 				this.$el.hide();
+				hiddenCallback();
 				return this;
 			}
 			if (this.$el.is('.panel-stick-left')) {
-				this.$el.show().toggle('slide', duration, complete);
+				this.$el.show().toggle('slide', duration, hiddenCallback);
 				return this;
 			}
-			this.$el[this.hideEffect](duration, complete);
+			this.$el[this.hideEffect](duration, hiddenCallback);
 			return this;
 		},
 
 		close: function(duration, complete)
 		{
-			var self = this;
+			var self = this,
+				closedCallback = function() {
+					self.trigger('panel:closed');
+					self.detach();
+					if (complete) {
+						complete();
+					}
+				};
 			this.trigger('panel:close', self);
-			this.hide('fast', function() {
-				self.detach();
-				if (complete) {
-					complete();
-				}
-			})
+			this.hide(duration, closedCallback);
 		},
 
 		attachTo: function(parentElement)

@@ -26,29 +26,80 @@ define([
 	  	subViewContainer: '.collections-list',
 	    prevQuery: '',
 	    dataCollectionsFetched: false,
-	    hasSearchQuery: false,
 
 	    initialize: function(options) {
 		    this.template = _.template(templateHtml);
 		    this.collection = new GeoFeatureCollections();
-		    this.listenTo(this.collection, 'reset', this.featureCollectionReset);
+		    this.lastPage = true;
+		    this.searchParams = {p: 0};
+		    this.resultHeight = 30;
+	    },
+
+	    detectPageLimit: function()
+	    {
+	    	console.log(this.$scrollable, this.$scrollable.height());
+			return Math.ceil(this.$scrollable.height() / this.resultHeight / 10) * 10;
+	    },
+
+	    resetPageParams: function()
+	    {
+	    	this.isLastPage = false;
+	    	this.searchParams.p = 0;
+			this.searchParams.l = this.detectPageLimit();
+	    },
+
+	    updateAfterScrolled: function(evt)
+	    {
+	    	var delta = this.$scrollable.scrollTop() 
+	    		+ this.$scrollable.height() - this.$scrollContent.height();
+	    	if (delta > -50) {
+    			this.loadNextPage();
+	    	}
+	    },
+
+	    loadNextPage: function(event) 
+	    {
+	    	if (this.isLoading || this.isLastPage) return;
+	    	var self = this;
+	    	this.searchParams.p++;
+	    	console.log('loadNextPage', this.searchParams);
+	    	this.fetchResults(this.searchParams, function(collection, response, options) {
+	    		self.updateFeatureCollectionList(false);
+	    	});
 	    },
 
 	    render: function() 
 	    {
 			var self = this;
 			DataLibraryView.__super__.render.call(this);
-			this.on('panel:show', function() {
-		    	this.$(this.subViewContainer).empty();
+			this.on('panel:shown', function() {
 				setTimeout(function() {
-					if (!self.hasSearchQuery) {
-						self.fetchDataCollections();
+					if (!self.searchParams.q || self.searchParams.q == '') {
+				    	self.resetPageParams();
+				    	self.$(self.subViewContainer).empty();
+						self.fetchResults(self.searchParams);
 					}
 				}, 250); // wait for slide
-				self.$('.search-query').trigger('click');
+				self.$('.search-query').focus();
 			});
+
+			$(window).on('resize', function() {
+				if (self.isLoading) return;
+				var l = self.detectPageLimit();
+				if (!self.isLastPage && self.numResults() < l) {
+					self.searchParams.l = l;
+					self.fetchResults(self.searchParams);
+				}
+			});
+
 			this.dropZone = $('<div class="drop-zone" id="dropZone"><h3 class="instruction">DROP HERE</h3></div>');
 			$('body').append(this.dropZone);
+			this.dropZone.droppable( {
+		    	accept: '.map-layer',
+		    	hoverClass: '',
+		    	drop: self.dataDrop
+		    } );	
+
 			this.$('form.search .search-query').on('click', function() {
 				$(this).select();
 			});
@@ -56,36 +107,44 @@ define([
 				//self.searchClicked();
 			});
 	    	this.$('button.remove-query').hide();
+
+	    	this.$scrollContent = this.$(this.subViewContainer);
+	    	this.$scrollable = this.$scrollContent.parent();
+			this.$scrollable.on('scroll', function(evt) {
+			    clearTimeout($.data(this, 'scrollTimer'));
+				$.data(this, 'scrollTimer', setTimeout(function() {
+						// detect when user hasn't scrolled in 250ms, then
+				        self.updateAfterScrolled(evt);
+					}, 250));
+			});
+
 	        return this;
 	    },
 
 	    searchClicked: function(event)
 	    {
 	    	var query = this.$('.search-query').val();
+	    	this.resetPageParams();
+	    	this.searchParams.q = query;
 	    	this.$('button.remove-query').toggle(query != '');
-	    	if (true/*this.prevQuery != query*/) {
-		    	this.fetchDataCollections({q: query});
-		    	this.prevQuery = query;
-		    	this.hasSearchQuery = query != '';
-	    	}
+	    	this.fetchResults(this.searchParams);
+
 	    	return false;
 	    },
 
 	    removeQueryClicked: function(event)
 	    {
-	    	console.log('remove');
 	    	this.$('.search-query').val('');
 	    },
 
-	    featureCollectionReset: function(collection) 
+	    updateFeatureCollectionList: function(emptyFirst) 
 	    {
-	    	this.$(this.subViewContainer).empty();
-	    	var self = this;
-	    	this.$('form.search .help-block').text(
-	    		collection.length == 1 ?  
-	    		__('%(num)s collection found', {num: collection.length})
-	    		: __('%(num)s collections found', {num: collection.length})
-	    	);
+	    	var self = this,
+	    		collection = this.collection;
+	    	if (emptyFirst) {
+		    	this.$(this.subViewContainer).empty();
+	    	}
+
 			collection.each(function(model, index) { 
 				var mapLayer = new MapLayer({
 						featureCollection: model.attributes,
@@ -97,42 +156,68 @@ define([
             	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;
 	            self.appendSubView(mapLayerView.render());
+
+				mapLayerView.$el.draggable({
+					revert: 'invalid',
+					stack: self.dropZone,
+					start: function(event, ui) { 
+						self.dropZone.addClass('visible');
+						self.dropZone.css('left', self.$el.outerWidth() + 'px');
+						ui.helper.css('width', $(this).outerWidth() + 'px');
+						ui.helper.addClass('drag-helper');
+					},
+					helper: 'clone',
+					appendTo: self.$el,
+					stop: function(event, ui) {
+						self.dropZone.removeClass('visible');
+					}
+				});
+
 	            mapLayerView.$el.hide().slideDown('fast');
 			});
-			
-			self.$('.map-layer').draggable({
-				revert: 'invalid',
-				stack: this.dropZone,
-				start: function(event, ui) { 
-					self.dropZone.addClass('visible');
-					self.dropZone.css('left', self.$el.outerWidth() + 'px');
-					ui.helper.css('width', $(this).outerWidth() + 'px');
-					ui.helper.addClass('drag-helper');
-				},
-				helper: 'clone',
-				appendTo: self.$el,
-				stop: function(event, ui) {
-					self.dropZone.removeClass('visible');
-				}
-			});
 
-			this.dropZone.droppable( {
-		    	accept: '.map-layer',
-		    	hoverClass: '',
-		    	drop: self.dataDrop
-		    } );	
+			var numResults = this.numResults();
+			if (!this.isLastPage) {
+				numResults += '+';
+			}
+
+	    	this.$('form.search .help-block').text(
+	    		numResults == 1 ?  
+	    		__('%(num)s collection found', {num: numResults})
+	    		: __('%(num)s collections found', {num: numResults})
+	    	);
 	    },
 
-		fetchDataCollections: function(params) {	
+	    numResults: function() 
+	    {
+	    	return this.$(this.subViewContainer).children().length;
+	    },
+
+		fetchResults: function(params, success, error) {	
 			var self = this;	
+			self.isLoading = true;
 			this.dataCollectionsFetched = true;
-			this.$('form.search .help-block').text(__('loading…'));
+			//this.$('form.search .help-block').text(__('loading…'));
+			console.log('fetchResults', params);
 			this.collection.fetch({
 				data: params,
 				success: function(collection, response, options) {
+					self.isLoading = false;
+		    		if (!collection.length || collection.length < self.searchParams.l) {
+			    		self.isLastPage = true;
+		    		}
+					if (success) {
+						success(collection, response, options);
+					} else {
+						self.updateFeatureCollectionList(true);
+					}
 				},
 				error: function(collection, response, options) {
 					console.error('failed to fetch collections');
+					self.isLoading = false;
+					if (error) {
+						error(collection, response, options);
+					}
 				}
 			});
 		},
