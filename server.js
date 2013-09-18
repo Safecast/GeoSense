@@ -7,7 +7,8 @@ var application_root = __dirname,
   	utils = require('./utils.js'),
   	permissions = require('./permissions.js'),
   	ejs = require('ejs'),
-    console = require('./ext-console');
+    console = require('./ext-console'),
+    _ = require('cloneextend');
 
 var templates;
 var app = express();
@@ -43,17 +44,25 @@ app.configure(function() {
 var API = require('./api');
 new API(app);
 
+var getRenderVars = function(req, vars) {
+	var vars = _.extend({
+		nodeEnv: process.env.NODE_ENV,
+		config: config,
+		user: req.session.user
+	}, vars);
+	return vars;
+}
+
+
 function serveHome(req, res)
 {
 	if (!config.LIMITED_PROD_ACCESS) {
 		// TODO: make sure the 'static' home page is served.
 		// currently, requesting /admin/existing-map without admin privileges 
 		// would still serve that map (in non-admin mode).
-		res.end(ejs.render(templates['public/base.html'], {
-			nodeEnv: process.env.NODE_ENV,
-			config: config,
+		res.end(ejs.render(templates['public/base.html'], getRenderVars(req, {
 			mapSlugByHost: false
-		}));
+		})));
 	} else {
 		// home page on production server is disabled for now
 		res.send('', 403);
@@ -90,11 +99,9 @@ function staticRoute(req, res, slug, admin)
 			req.session.user = map.createdBy;
 			console.warn('Implicitly authenticated user:', req.session.user);
 		}
-		res.end(ejs.render(templates['public/base.html'], {
-			nodeEnv: process.env.NODE_ENV,
-			config: config,
+		res.end(ejs.render(templates['public/base.html'], getRenderVars(req, {
 			mapSlugByHost: (routingByHost ? map.publicslug : false)
-		}));
+		})));
 	}
 
 	console.info('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
