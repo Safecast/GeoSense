@@ -8,9 +8,10 @@ define([
 	'views/panel-view-base',
 	'views/histogram-view',
 	'views/legend-view',
+	'mixins/spinner-mixin',
 	'lib/color-gradient/color-gradient',
 	'moment'
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, ColorGradient, moment) {
+], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, SpinnerMixin, ColorGradient, moment) {
     "use strict";
 
 	var MapLayerView = Backbone.View.extend({
@@ -41,22 +42,6 @@ define([
 			this.listenTo(this.model.featureCollection, 'request', this.layerFeaturesRequest);
 			this.listenTo(this.model.featureCollection, 'error', this.layerFeaturesRequestError);
 			this.listenTo(this.model.featureCollection, 'sync', this.layerFeaturesSynced);
-	    },
-
-	    showSpinner: function()
-	    {
-	    	if (!this.spinner.is(':visible')) {
-	    		this.spinner.css({opacity: 0}).show();	
-	    	}
-			this.spinner.stop().animate({opacity: 1}, 50);
-	    },
-
-	    hideSpinner: function()
-	    {
-	    	var self = this;
-			this.spinner.stop().fadeOut(300, function() {
-				//self.spinner.hide();
-			});
 	    },
 
 	    layerFeaturesRequest: function(model, xhr, options)
@@ -160,7 +145,7 @@ define([
 
 			var stateIndicator = this.$('.state-indicator');
 			if (stateIndicator.length) {
-				this.spinner = stateIndicator.html(new Spinner({radius:4,length:0,width:4,color:'#888',lines:7,speed:1.5}).spin().el).hide();
+				this.initSpinner(stateIndicator);
 			}
 			
 			// set up accordion group
@@ -427,6 +412,8 @@ define([
 
 
 	});
+
+	_.extend(MapLayerView.prototype, SpinnerMixin);
 
 	return MapLayerView;
 });

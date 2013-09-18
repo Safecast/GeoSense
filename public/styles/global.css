@@ -42,9 +42,6 @@ p {
 
 .state-indicator {
 	display: relative;
-	margin-right: 2px;
-	width: 16px;
-	height: 16px;
 }
 
 .state-indicator .spinner {
