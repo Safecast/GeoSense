@@ -366,10 +366,6 @@ define([
 
         featureAdd: function(model, collection, options)  
         {
-            // TODO: For some reason, collection and options are not passed
-            // to this event handler -- check Backbone docs
-            var collection = model.collection;
-
             var attrs = model.getRenderAttributes(),
                 layerOptions = collection.mapLayer.attributes.layerOptions,
                 geometry;
