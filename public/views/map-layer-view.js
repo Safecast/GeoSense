@@ -179,6 +179,7 @@ define([
 
 			this.populateFromModel(true);
 			this.$('.details').toggle(this.expandLayerDetails);
+			this.$('.has-tooltip').tooltip({ delay: 200, container: 'body' });
 
 			return this;
 	    },
