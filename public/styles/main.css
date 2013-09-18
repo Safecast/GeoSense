@@ -89,7 +89,7 @@
 }
 
 #main-viewport .panel {
-	z-index: 999;
+	z-index: 900;
 }
 
 
