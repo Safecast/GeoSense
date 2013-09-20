@@ -67,7 +67,7 @@ define([], function() {
         }
     };
 
-    ColorGradient.prototype.interpolation.default = 'lerpRGB';
+    ColorGradient.prototype.interpolation.default = 'threshold';
 
     /*
     * Returns integer color for gradient at position p between 0.0 and 1.0 with an 
