@@ -711,31 +711,37 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						for (var key in saveModel.properties) {
 							extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
 							// determine type for each property as long as it remains constant
-							var propertyType = Array.isArray(saveModel.properties[key]) ? 'array'
+							var propertyType = saveModel.properties[key] == null || saveModel.properties[key] == undefined ? null 
+								: Array.isArray(saveModel.properties[key]) ? 'array'
 								: typeof saveModel.properties[key];
-							// try to cast Date
+
 							if (propertyType == 'string') {
+								// try to cast Number
 								if (transform.Filter.isDecimal(saveModel.properties[key])) {
 									propertyType = 'Number';
+								// try to cast Date
 								} else if (transform.Filter.isValidDate(saveModel.properties[key], false)) {
 									propertyType = 'Date';
 								}
 							}
-							// if this is the first time we encounter the property
-							if (propertyTypes[key] == undefined) {
-								propertyTypes[key] = propertyType;
-							} else {
 
-								// if the property type is inconsistent, set to false (except: 
-								// if one was a Date and the other was a string, then reset to string,
-								// since some random strings parse as Date)
-								if (propertyTypes[key] != propertyType && !transform.Filter.isEmpty(saveModel.properties[key])) {
-									
-									if ((propertyType == 'string' && ['Number', 'Date'].indexOf(propertyTypes[key]) != -1)
-										|| (propertyTypes[key] == 'string' && ['Number', 'Date'].indexOf(propertyType) != -1)) {
-											propertyTypes[key] = 'string';										
-									} else {
-										propertyTypes[key] = false;										
+							if (propertyType) {
+								// if this is the first time we encounter the property
+								if (propertyTypes[key] == undefined) {
+									propertyTypes[key] = propertyType;
+								} else {
+
+									// if the property type is inconsistent, set to false (except: 
+									// if one was a Date and the other was a string, then reset to string,
+									// since some random strings parse as Date)
+									if (propertyTypes[key] != propertyType && !transform.Filter.isEmpty(saveModel.properties[key])) {
+										
+										if ((propertyType == 'string' && ['Number', 'Date'].indexOf(propertyTypes[key]) != -1)
+											|| (propertyTypes[key] == 'string' && ['Number', 'Date'].indexOf(propertyType) != -1)) {
+												propertyTypes[key] = 'string';										
+										} else {
+											propertyTypes[key] = false;										
+										}
 									}
 								}
 							}
