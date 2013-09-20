@@ -429,7 +429,7 @@ exports.deleteUndefined = function(obj)
  */
 exports.findExtremes = function(value, previous) {
     var map = function(el) {
-            if (typeof el == 'object' &&  
+            if (el && typeof el == 'object' &&  
                 (el.min != undefined || el.max != undefined)) return el;
             if (typeof el != 'number') {
                 return {
