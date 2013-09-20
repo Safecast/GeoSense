@@ -585,6 +585,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								bounds = coordinates.getBounds([model.getBounds(), bounds]);
 							}
 						}
+						console.log('---saved', JSON.stringify(result.properties));
 
 				    	debugStats('on save', 'success', (model ? model.get('_id') : ''));
 						numSaving--;
@@ -709,19 +710,25 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							extremes.properties = {};
 						}
 						for (var key in saveModel.properties) {
-							extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
 							// determine type for each property as long as it remains constant
 							var propertyType = saveModel.properties[key] == null || saveModel.properties[key] == undefined ? null 
 								: Array.isArray(saveModel.properties[key]) ? 'array'
 								: typeof saveModel.properties[key];
 
+							// String coercion: when detecting decimals or dates, cast and store them as these types
+							// so that extremes are calculated correctly and they can actually be used for quantitative
+							// or date comparison.
 							if (propertyType == 'string') {
 								// try to cast Number
 								if (transform.Filter.isDecimal(saveModel.properties[key])) {
 									propertyType = 'Number';
+									saveModel.set('properties.' + key, transform.Cast.Number(saveModel.properties[key]));
+									//console.warn('Coercing value to Number');
 								// try to cast Date
 								} else if (transform.Filter.isValidDate(saveModel.properties[key], false)) {
 									propertyType = 'Date';
+									saveModel.set('properties.' + key, transform.Cast.Date(saveModel.properties[key]));
+									//console.warn('Coercing value to Date');
 								}
 							}
 
@@ -745,6 +752,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 									}
 								}
 							}
+
+							// determine extremes of property
+							extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
 						}
 						// determine extremes of all incrementor
 						if (incrementor) {
