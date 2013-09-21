@@ -553,7 +553,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						func = 'log';
 					}
 					if ((force /*|| config.DEBUG*/) || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
-						console[func].apply(console, ['* '+collection.get('_id')+': '+pos, (info ? info : ''), '[ numRead: ' + numRead + ' | numSaving: '+numSaving + ' | numSaved: '+numSaved+(headerValues.totalCount ? '/'+headerValues.totalCount : '')+' | numSkipped: '+numSkipped + ' ]']);
+						console[func].apply(console, ['* '+collection.get('_id')+': '+pos, (info ? info : ''), '| numRead: ' + numRead + ' | numSaved: '+numSaved+(headerValues.totalCount ? '/'+headerValues.totalCount : '')+' | numSkipped: '+numSkipped + ' | numSaving: '+numSaving + ' |']);
 					}
 				};
 
@@ -586,7 +586,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 						}
 
-				    	debugStats('on save', 'success', (model ? model.get('_id') : ''));
+				    	debugStats('on save', 'success', '');
 						numSaving--;
 				    	postSave(self);
 
