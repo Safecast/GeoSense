@@ -217,12 +217,13 @@ define([
 					self.$('.to-field').addClass('highlight');
 				},
 				stop: function(event, ui) {
-					console.log('* draggable stop');
+					//console.log('* draggable stop');
 					self.preventSortableEvents = false;
 					self.removePopover();
 
 					self.$('.to-field').removeClass('highlight');
 					self.$('.to-data .from-field').removeClass('half-opacity');
+					$(ui.helper).addClass('mapped');
 					self.updateHandleStates();
 
 					self.updateDescripts();
@@ -257,11 +258,15 @@ define([
 				stop: function(event, ui) {
 					if (self.preventSortableEvents) return;
 					self.removePopover();
-					console.log('* sortable stop');
+					//console.log('* sortable stop');
 					// prevent double loading since dropping from draggable into the sortable
 					// will also fire this event, but draggable.stop fires later than this one.
 					self.updateDescripts();
 					self.loadImportPreview();
+				},
+				receive: function(event, ui) {
+					//console.log('* sortable receive');
+					$('.from-field', this).addClass('mapped');
 				}
 			});
 		},

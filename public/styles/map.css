@@ -64,20 +64,20 @@
 {
 	cursor:pointer;
 	opacity:.9;	
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
+	-webkit-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    -o-transition: all .3s ease;
+    -ms-transition: all .3s ease;
 }
 
 .olControlPanZoomBar
 {
 	margin-top:10px;
 	margin-left:10px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
+	-webkit-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    -o-transition: all .3s ease;
+    -ms-transition: all .3s ease;
 }
 
 .with-sidebar .olControlPanZoomBar {
