@@ -553,7 +553,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						func = 'log';
 					}
 					if ((force /*|| config.DEBUG*/) || (func == 'warn' || func == 'error') || (pos == 'on save' && numSaved > 0 && numSaved % 1000 == 0) || (pos == 'on data' && numRead % 1000 == 0)) {
-						console[func].apply(console, ['* '+collection.get('_id')+' '+pos, (info ? info : ''), '-- stats: numRead: ' + numRead + ', numSaving: '+numSaving + ', numSaved: '+numSaved+(headerValues.totalCount ? ' of '+headerValues.totalCount : '')+', numSkipped: '+numSkipped]);
+						console[func].apply(console, ['* '+collection.get('_id')+': '+pos, (info ? info : ''), '[ numRead: ' + numRead + ' | numSaving: '+numSaving + ' | numSaved: '+numSaved+(headerValues.totalCount ? '/'+headerValues.totalCount : '')+' | numSkipped: '+numSkipped + ' ]']);
 					}
 				};
 
@@ -585,7 +585,6 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								bounds = coordinates.getBounds([model.getBounds(), bounds]);
 							}
 						}
-						console.log('---saved', JSON.stringify(result.properties));
 
 				    	debugStats('on save', 'success', (model ? model.get('_id') : ''));
 						numSaving--;
@@ -723,12 +722,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								if (transform.Filter.isDecimal(saveModel.properties[key])) {
 									propertyType = 'Number';
 									saveModel.set('properties.' + key, transform.Cast.Number(saveModel.properties[key]));
-									//console.warn('Coercing value to Number');
+									console.warn('Coercing ' + key + ' to Number');
 								// try to cast Date
 								} else if (transform.Filter.isValidDate(saveModel.properties[key], false)) {
 									propertyType = 'Date';
 									saveModel.set('properties.' + key, transform.Cast.Date(saveModel.properties[key]));
-									//console.warn('Coercing value to Date');
+									console.warn('Coercing ' + key + ' to Date');
 								}
 							}
 
