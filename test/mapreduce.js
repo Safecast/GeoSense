@@ -1,9 +1,10 @@
 var	models = require('../models'),
 	config = require('../config'),
 	api = new require('../api')(),
-	utils = require('../utils'),
 	coordinates = require('../geogoose/coordinates'),
-	EmitKey = require('../api/aggregate/mapreduce_abstraction').EmitKey,
+	abstraction = require('../api/aggregate/mapreduce_abstraction'),
+	Mapper = abstraction.Mapper,
+	findExtremes = abstraction.util.findExtremes,
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	assert = require('assert'),
 	mongoose = require('mongoose');
@@ -20,10 +21,10 @@ describe('MapReduce', function() {
 			datetime: 'properties.date'
 		};
 
-	var rect = new EmitKey.Tile.Rect(3,2);
+	var rect = new Mapper.Tile.Rect(3,2);
 
 	it('should return a Point for the center of the tile for original Point', function() {
-		var emit = rect.get({
+		var emit = rect.map({
 			type: 'Point',
 			coordinates: [11,12]
 		});
@@ -31,7 +32,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should return a LineString from start to end for original LineString', function() {
-		emit = rect.get({
+		emit = rect.map({
 			type: 'LineString',
 			coordinates: [[15,16], [11,12]]
 		});
@@ -39,7 +40,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should return the reversed LineString original reversed LineString', function() {
-		emit = rect.get({
+		emit = rect.map({
 			type: 'LineString',
 			coordinates: [[11,12], [15,16]]
 		});
@@ -47,7 +48,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should return a Polygon for original closed LineString', function() {
-		emit = rect.get({
+		emit = rect.map({
 			type: 'LineString',
 			coordinates: [[11,12], [15,16], [11,12]]
 		});
@@ -55,7 +56,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should return a Polygon for original Polygon', function() {
-		emit = rect.get({
+		emit = rect.map({
 			type: 'Polygon',
 			coordinates: [[[11,12], [15,16]]]
 		});
@@ -63,7 +64,7 @@ describe('MapReduce', function() {
 	});
 
 	it('should return the same Polygon for original reversed Polygon', function() {
-		emit = rect.get({
+		emit = rect.map({
 			type: 'Polygon',
 			coordinates: [[[15,16], [11,12]]]
 		});
@@ -113,7 +114,7 @@ describe('MapReduce', function() {
 				days++;
 
 				for (var key in feature.properties) {
-					featureCollection.extremes.properties[key] = utils.findExtremes(feature.properties[key], featureCollection.extremes.properties[key]);
+					featureCollection.extremes.properties[key] = findExtremes(feature.properties[key], featureCollection.extremes.properties[key]);
 				}
 
 				features.push(feature);

@@ -8,7 +8,7 @@ var	models = require("../../models.js"),
 	utils = require('../../utils.js'),
 	abstraction = require('./mapreduce_abstraction'),
 	runMapReduce = abstraction.runMapReduce,
-	EmitKey = abstraction.EmitKey,
+	Mapper = abstraction.Mapper,
 	getAttr = abstraction.getAttr,
 	console = require('../../ext-console.js'),
 	_ = require('cloneextend');
@@ -23,13 +23,13 @@ for (var k in config.MAPREDUCE_SETTINGS.DB_OPTIONS) {
 	opts[k] = config.MAPREDUCE_SETTINGS.DB_OPTIONS[k];
 }
 
-var runMapReduceForFeatureCollection = function(collection, emitKeys, opts, callback) 
+var runMapReduceForFeatureCollection = function(collection, mappers, opts, callback) 
 {
 	var collectionName = collection.getFeatureModel().collection.name;
 	var info = ['r', collectionName];
-	for (var k in emitKeys) {
-		if (emitKeys[k].name) {
-			info.push(emitKeys[k].name);
+	for (var k in mappers) {
+		if (mappers[k].name) {
+			info.push(mappers[k].name);
 		}
 	}
 	var outputCollectionName = info.join('_');
@@ -62,7 +62,7 @@ var runMapReduceForFeatureCollection = function(collection, emitKeys, opts, call
 	}
 
 	var callRunMapReduce = function() {
-		runMapReduce(collectionName, outputCollectionName, emitKeys, opts, callback);	
+		runMapReduce(collectionName, outputCollectionName, mappers, opts, callback);	
 	}; 
 
 	if (opts.removeFirst) {
@@ -203,22 +203,22 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 									&& (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
 
 									mr('*** MapReduce for tiles at zoom = ' + g + ' ***', makeObj(
-										//'featureCollection', new EmitKey.Copy(), 
-										geometryAttr, new EmitKey.Tile[collection.tile](gridSize, gridSize, {index: false})),
+										//'featureCollection', new Mapper.Copy(), 
+										geometryAttr, new Mapper.Tile[collection.tile](gridSize, gridSize, {index: false})),
 										{ events: tileEvents, indexes: tileIndexes }
 									);
 								}
 
 								// Initialize MapReduce for time-based tiles
 								if (attrMap.datetime) {
-									for (var timebase in EmitKey.Time) {
+									for (var timebase in Mapper.Time) {
 										if (params.types.indexOf('tile-' + timebase.toLowerCase()) != -1) {
 											tileIndexes[attrMap.datetime] = '1';
 
 											mr('*** MapReduce for ' + timebase.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
-												//'featureCollection', new EmitKey.Copy(), 
-												geometryAttr, new EmitKey.Tile.Rect(gridSize, gridSize, {index: false}), 
-												attrMap.datetime, new EmitKey.Time[timebase]()),
+												//'featureCollection', new Mapper.Copy(), 
+												geometryAttr, new Mapper.Tile.Rect(gridSize, gridSize, {index: false}), 
+												attrMap.datetime, new Mapper.Time[timebase]()),
 												{ events: tileEvents, indexes: tileIndexes }
 											);
 										}
@@ -229,11 +229,11 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 
 						// Initialize MapReduce for time-based overall
 						if (attrMap.datetime) {
-							for (var timebase in EmitKey.Time) {
+							for (var timebase in Mapper.Time) {
 								if (params.types.indexOf(timebase.toLowerCase()) != -1) {
 									mr('*** MapReduce for ' + timebase.toLowerCase() + ' overall ***', makeObj(
-										//'featureCollection', new EmitKey.Copy(), 
-										attrMap.datetime, new EmitKey.Time[timebase]()),
+										//'featureCollection', new Mapper.Copy(), 
+										attrMap.datetime, new Mapper.Time[timebase]()),
 										{ events: null, indexes: null }
 									);
 								}
@@ -248,8 +248,8 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
 								}
 								mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
-										//'featureCollection', new EmitKey.Copy(), 
-										attrMap.numeric, new EmitKey.Histogram(
+										//'featureCollection', new Mapper.Copy(), 
+										attrMap.numeric, new Mapper.Histogram(
 											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
 										{ events: null, indexes: null }
 									);
@@ -274,7 +274,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 								});
 							} else {
 								var args = mapReduceArguments.shift(),
-									emitKeys = {};
+									mappers = {};
 								// the first element is a comment
 								console.info(args[0]);
 								runMapReduceForFeatureCollection.call(this, collection, args[1], _.cloneextend(opts, args[2]), function(err, res) {

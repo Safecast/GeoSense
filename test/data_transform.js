@@ -18,7 +18,7 @@ describe('DataTransform', function() {
 	var source = {
 		'lat': 10,
 		'lng': ' 11.0',
-		'coordinates': ' 180,  185 ',
+		'coordinates': ' 180,  85 ',
 		'isodate': '1980-01-'
 	};
 
@@ -84,8 +84,8 @@ describe('DataTransform', function() {
 			assert.deepEqual(model.get('xy'), [11, 10]);
 		});
 
-		it('should convert "Lng,Lat" to [Lng,Lat] and clamp the numbers to -180 <= n < 180', function() {
-			assert.deepEqual(model.get('coordinates'), [-180, -175]);
+		it('should convert "Lng,Lat" to [Lng,Lat]', function() {
+			assert.deepEqual(model.get('coordinates'), [180, 85]);
 		});
 
 		it('should cast numeric fields to numbers and return an object', function() {
@@ -93,7 +93,7 @@ describe('DataTransform', function() {
 		});
 
 		it('should return an array of numbers extracted from a comma-separated string', function() {
-			assert.deepEqual(model.get('array1'), [180, 185]);
+			assert.deepEqual(model.get('array1'), [180, 85]);
 		});
 
 		it('should return an array of all items', function() {

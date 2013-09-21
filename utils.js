@@ -416,77 +416,6 @@ exports.deleteUndefined = function(obj)
     return obj;
 }
 
-/**
- * Destructively finds the extremes in an array of values, and returns
- * an extremes object containing min, max, count, sum, diff (for numbers) or
- * min, max, count (for other types).
- *
- * If passed an extremes object as second parameter, the merged extremes will
- * be returned.
- *
- * You can pass the extremes object returned by this function to setStats(),
- * which will set average, variance and standard deviation.
- */
-exports.findExtremes = function(value, previous) {
-    var map = function(el) {
-            if (el && typeof el == 'object' &&  
-                (el.min != undefined || el.max != undefined)) return el;
-            if (typeof el != 'number') {
-                return {
-                    min: el,
-                    max: el,
-                    count: 1
-                }
-            } else {
-                return {
-                    min: el,
-                    max: el,
-                    count: 1,
-                    sum: el,
-                    diff: 0
-                }
-            }
-        },
-        arr = isArray(value) ? value : [value],
-        reduce = function(a, b) {
-            if (!a) return b;
-            if (typeof b.sum != 'number') {
-                delete a.sum;
-                delete a.diff;
-            } else {
-                // inspired by https://gist.github.com/RedBeard0531/1886960:
-                var delta = a.sum / a.count - b.sum / b.count; // a.mean - b.mean
-                var weight = (a.count * b.count) / (a.count + b.count);
-                a.diff += b.diff + delta * delta * weight;
-                a.sum += b.sum;
-            }
-            a.min = a.min == undefined || b.min < a.min ? b.min : a.min;
-            a.max = a.max == undefined || b.max > a.max ? b.max : a.max;
-            a.count = isNaN(a.count) ? b.count : a.count + b.count;
-            return a;
-        };
-
-    //return arr.map(map).reduce(reduce, previous || {});
-    return arrayReduce.call(arrayMap.call(arr, map), reduce, previous || null);
-};
-
-/**
- * Destructively sets average, variance and standard deviation on an object containing 
- * extremes as determined by findExtremes.
- */
-exports.setStats = function(extremes) {
-    if (typeof extremes.sum == 'number') {
-        extremes.avg = extremes.sum / extremes.count;
-        extremes.variance = extremes.diff / extremes.count;
-        extremes.stddev = Math.sqrt(extremes.variance);
-    } else {
-        delete extremes.avg;
-        delete extremes.variance;
-        delete extremes.stddev;
-    }
-    return extremes;
-}
-
 exports.callbackOrThrow = function(err, callback)
 {
     if (err) {
@@ -498,4 +427,3 @@ exports.callbackOrThrow = function(err, callback)
         throw err;
     }
 };
-

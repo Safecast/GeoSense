@@ -5,6 +5,7 @@ var config = require('../../config'),
 	coordinates = require("../../geogoose").coordinates,
 	permissions = require("../../permissions"),
 	utils = require("../../utils"),
+	findExtremes = require('../aggregate/mapreduce_abstraction/util').findExtremes,
 	errors = require('../../errors'),
 	BasicError = errors.BasicError,
 	ValidationError = errors.ValidationError,
@@ -18,7 +19,7 @@ var config = require('../../config'),
 	path = require('path'),
 	console = require('../../ext-console.js'),
 	AggregateAPI = require('../aggregate'),
-	scopeFunctions = require('../aggregate/mapreduce_abstraction/keys').scopeFunctions;
+	scopeFunctions = require('../aggregate/mapreduce_abstraction').scopeFunctions;
 
 var LayerOptions = models.LayerOptions,
 	handleDbOp = utils.handleDbOp;
@@ -753,11 +754,11 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 
 							// determine extremes of property
-							extremes.properties[key] = utils.findExtremes(saveModel.properties[key], extremes.properties[key]);
+							extremes.properties[key] = findExtremes(saveModel.properties[key], extremes.properties[key]);
 						}
 						// determine extremes of all incrementor
 						if (incrementor) {
-							extremes.incrementor = utils.findExtremes(incrementor, extremes.incrementor);
+							extremes.incrementor = findExtremes(incrementor, extremes.incrementor);
 						}
 
 						numSaving++;
