@@ -72,14 +72,18 @@ define([
 	    {
 			var self = this;
 			DataLibraryView.__super__.render.call(this);
+			this.on('panel:show', function() {
+				if (!self.searchParams.q || self.searchParams.q == '') {
+			    	self.$(self.subViewContainer).empty();
+			    }
+		    });
 			this.on('panel:shown', function() {
-				setTimeout(function() {
-					if (!self.searchParams.q || self.searchParams.q == '') {
+				if (!self.searchParams.q || self.searchParams.q == '') {
+					setTimeout(function() {
 				    	self.resetPageParams();
-				    	self.$(self.subViewContainer).empty();
 						self.fetchResults(self.searchParams);
-					}
-				}, 250); // wait for slide
+					}, 250); // wait for slide
+				}
 				self.$('.search-query').focus();
 			});
 
@@ -153,13 +157,14 @@ define([
             	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;
 	            self.appendSubView(mapLayerView.render());
+	            mapLayerView.render().$el.addClass('box');
 
 				mapLayerView.$el.draggable({
 					revert: 'invalid',
-					stack: self.$dropZone,
+					//stack: self.$dropZone,
 					start: function(event, ui) { 
 						self.$dropZone
-							.css({'left': self.$el.outerWidth() + 'px', 'z-index': 999})
+							.css({'left': self.$el.outerWidth() + 'px'})
 							.droppable( {
 						    	accept: '.map-layer',
 						    	hoverClass: 'hover',
@@ -167,7 +172,7 @@ define([
 						    });
 						$('#main-viewport').append(self.$dropZone);
 						self.$dropZone.addClass('visible');
-						ui.helper.css('width', $(this).outerWidth() + 'px');
+						ui.helper.css({'width': $(this).outerWidth() + 'px'});
 						ui.helper.addClass('drag-helper');
 					},
 					helper: 'clone',

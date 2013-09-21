@@ -1,5 +1,6 @@
 #main-viewport .panel.data-library {
 	width: 300px;
+	z-index:999;
 }
 
 #main-viewport .panel.data-library.extended {
@@ -12,28 +13,21 @@
 }
 
 .data-library .map-layer {	
-	border-radius:7px;
-	-moz-border-radius:7px;
-	-webkit-border-radius:7px;
-
-	background-color: rgba(255, 255, 255, .25);
-	box-shadow: 0px 1px 10px rgba(0, 0, 0, .15);
-	border: 1px solid rgba(128,128,128,.3);
+	border: 1px solid transparent;
 	cursor: move;
-	z-index: 0;
-	margin: 0 0 .25em 0;
 	padding: .5em 1em .5em 1em;
 }
 
 .data-library .map-layer.drag-helper {	
 	box-shadow: 0px 1px 10px rgba(0, 0, 0, .35);
-	z-index: 999;
+}
+
+.data-library .map-layer.drag-helper .btn-group {
+	display: none;
 }
 
 .data-library .map-layer:hover {
-	box-shadow: 0px 1px 12px rgba(0, 0, 0, .2);
-	border: 1px solid #44bbee;
-	z-index: 1100;
+	border: 1px rgba(128, 128, 128, .4) solid;
 }
 
 .data-library .model-title {
@@ -42,7 +36,7 @@
 
 .drop-zone
 {
-	z-index:999;
+	z-index:900;
 	position:absolute;
 	top:0px;
 	bottom:0px;
@@ -56,38 +50,42 @@
 	opacity:0;
 
 	pointer-events:none;
-
+	-webkit-transition: opacity 1.3s ease;
+    -moz-transition: opacity 1.3s ease;
+    -o-transition: opacity 1.3s ease;
+    -ms-transition: opacity 1.3s ease;
 }
 
 .drop-zone.visible
 {
 	opacity:1;
-	-webkit-transition: opacity 1.3s linear;
-    -moz-transition: opacity 1.3s linear;
-    -o-transition: opacity 1.3s linear;
-    -ms-transition: opacity 1.3s linear;
+}
+
+.drop-zone .instruction-wrapper {
+	position:absolute; 
+	top:50%;
+	left:50%;
 }
 
 .drop-zone .instruction
 {
-	position:absolute; 
-	top:50%;
-	left:50%;
-	font-size:40pt;
-	margin-left:-80px;
-	margin-top:-25px;
-	color:#ccc;
-	opacity:1;
+	font-size:50px;
+	margin-left: -150px;
+	margin-top: -40px;
+	width: 300px;
+	height: 80px;
+	text-align: center;
+	color:#fff;
 	text-shadow: 0px 1px 3px rgba(0, 0, 0, .2);
 	text-transform: uppercase;
-	-webkit-transition: color .2s linear;
-    -moz-transition: color .2s linear;
-    -o-transition: color .2s linear;
-    -ms-transition: color .2s linear;
+	-webkit-transition: font-size .2s ease;
+    -moz-transition: font-size .2s ease;
+    -o-transition: font-size .2s ease;
+    -ms-transition: font-size .2s ease;
 }
 
 .drop-zone.hover .instruction {
-	color:#fff;
+	font-size:55px;
 }
 
 .data-library .status {
@@ -101,133 +99,3 @@
 	right: 2px;
 	top: 0px;
 }
-
-/*
-.data-library
-{
-	display:none;
-	z-index:1100;
-	position:absolute;
-	top:0px;
-	bottom:0px;
-	left:-300px;
-	width:300px;
-	box-shadow:  2px 0px 3px rgba(0, 0, 0, .2);
-	background-color: #fdfdfd;
-}
-
-.data-library .backdrop {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	z-index: 0;
-}
-
-.data-library .content {
-	position: relative;
-}
-
-.data-library #closeDatalibrary {
-	margin: 0;
-}
-
-.data-library .instructions
-{
-	width: 100%;
-	color: #888;
-	margin-top: 1em;
-	text-align: center;
-	font-style: italic;
-	
-}
-
-.data-library .data-search {
-	width: 100%;
-	text-align:center;
-}
-
-.data-library .data-search input {
-	width: 250px;
-}
-
-.data-library .well
-{
-	width: 260px;
-	margin: 10px;
-	padding: 10px;
-}
-
-.data-library .well > button
-{
-	margin-bottom: 10px;
-	height: 34px;
-	width: 100%;
-}
-
-.data-library .data-container {
-}
-
-.data-library .data-container .data-item {	
-	margin-bottom:10px;
-	border-radius:7px;
-	-moz-border-radius:7px;
-	-webkit-border-radius:7px;
-
-	padding: 1em;	
-	background-color:white;
-	box-shadow: 0px 1px 10px rgba(0, 0, 0, .15);
-	border:1px solid rgba(0,0,0,.2);
-	cursor:pointer;
-	z-index: 0;
-}
-
-.data-library .data-container .data-item:last-child {	
-	margin-bottom: 0;
-}
-
-.data-library .data-container .data-item:hover {
-	
-	box-shadow: 0px 1px 12px rgba(0, 0, 0, .2);
-	border:1px solid #44bbee;
-	z-index: 1100;
-}
-
-.data-library .data-container .data-item .data-icon
-{
-	float:left;
-	width:23px;
-	height:20px;
-	background-image:url('../assets/data-library-drag.png');
-}
-
-.data-library .data-container .data-item .data-count {
-	margin-left: 23px;
-}
-
-.data-library .data-container .data-item .data-title
-{
-	float:left;
-	margin-left:10px;
-	color:#888;
-	font-size: 20px;
-	color: black;
-}
-
-.data-library p, .data-library h5 {
-	margin: .5em 0 .5em 0;
-}
-
-.data-library p:last-child, .data-library h5:last-child {
-	margin-bottom: 0;
-}
-
-.data-library .drop-zone
-{
-
-}
-
-.data-library .data-container .data-item .ui-draggable.hidden
-{
-	background-color:red;
-}
-*/

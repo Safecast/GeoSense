@@ -62,8 +62,8 @@
 
 .data-import-view .table-container {
 	overflow: auto;
-	height: 150px;
-	overflow: scroll;
+	height: 190px;
+	overflow: auto;
 }
 
 .data-import-view form h4 {
@@ -92,7 +92,6 @@
 	white-space: nowrap;
 	max-width: 120px;
 	overflow: hidden;
-	height: 18px;
 	text-align: right;
 	text-shadow:rgba(50,50,50,.5) 1px 1px 1px;
 	box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, .2);
@@ -128,21 +127,21 @@
 .data-import-view .from-field .remove {
 	opacity: .75;
 	display: none;
+	margin-right: 3px;
 }
 
-.data-import-view .to-field .from-field {
-}
-
-.data-import-view .to-field .from-field .remove {
+.data-import-view .from-field.mapped .remove {
+	color: #fff;
 	display: inline-block;
 }
 
 .data-import-view table .well {
 	display: block;
-	min-height: 28px;
+	min-height: 40px;
 	margin: 0 0 .5em 0;
 	padding: 2px;
 	border-color: #ddd;
+	background: none;
 }
 
 .data-import-view .to-field .from-field {
@@ -157,15 +156,12 @@
 	display:none;
 }
 
-.data-import-view label.title {
-    font-size: 18px;
-}
-
 .data-import-view .label {
     font-size: 12px;
     font-weight: bold;
     color: #ffffff;
-    padding: .25em .5em .25em .5em;
+    padding: .3em .7em .35em;
+    line-height: 20px;
 }
 
 .data-import-view .modal.large
