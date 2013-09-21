@@ -27,7 +27,7 @@ suitable for MongoDB 2d indexes (now deprecated).
 var coordinates2d = function(x, y) 
 {
     var c = isArray(x) ? x : [x,y];
-    return [overflow(c[0], 180), overflow(c[1], 180)];
+    return [overflow(c[0], 180), overflow(c[1], 90)];
 };
 
 /*
