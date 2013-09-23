@@ -8,8 +8,6 @@ define([
 
 	var GeoFeatureCollections = Backbone.Collection.extend({
 
-		fetchType: null,
-
 		url: function() {
 			return window.BASE_URL + 'api/featurecollections' + (this.fetchType ? '/' + this.fetchType : '');
 		},
@@ -19,8 +17,6 @@ define([
 			return this;
 		},
 
-		//model: Map
-		
 	});
 
 	return GeoFeatureCollections;

@@ -21,6 +21,13 @@ define([
             return attrMap.numeric ?
                 this.get(attrMap.numeric) : undefined;
         },
+
+        getDatetimeVal: function()
+        {
+            var attrMap = this.collection.mapLayer.getOption('attrMap', {});
+            return attrMap.datetime ?
+                this.get(attrMap.datetime) : undefined;
+        },
         
         getCenter: function() 
         {
@@ -59,8 +66,8 @@ define([
                 e = c[0] - hw, s = c[1] - hh, w = c[0] + hw, n = c[1] + hh;
             return [ [w,s], [e,s], [e,n], [w,n] ];
         },
-		
-		getRenderAttributes: function()
+
+		getRenderAttributes: function(attrName)
 		{
             var l = this.collection.mapLayer,
                 options = l.getLayerOptions(),
@@ -77,7 +84,7 @@ define([
 
             var count = this.attributes.properties ? this.attributes.properties.count || 1 : 1,
                 normVal = (val - minVal) / (maxVal - minVal),
-                normCount = count / counts.max,
+                normCount = count / (counts ? counts.max : 1),
                 color,
                 size;
 
@@ -104,7 +111,7 @@ define([
                     break;
             };
 
-            return {
+            var attrs = {
                 color: color,
                 darkerColor: multRGB(color, .75),
                 model: this,
@@ -115,6 +122,10 @@ define([
                 },
                 size: size
             };
+            if (!attrName) {
+                return attrs;
+            }
+            return attrs[attrName];
 
 		}
 	});

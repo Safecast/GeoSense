@@ -9,7 +9,7 @@ var	models = require("../../models.js"),
 	abstraction = require('./mapreduce_abstraction'),
 	runMapReduce = abstraction.runMapReduce,
 	Mapper = abstraction.Mapper,
-	getAttr = abstraction.getAttr,
+	getAttr = abstraction.scopeFunctions.getAttr,
 	console = require('../../ext-console.js'),
 	_ = require('cloneextend');
 
@@ -181,6 +181,23 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 							console.warn('*** incremental reduction of points created > '+collection.lastReducedAt);
 						}
 
+						// Initialize MapReduce for histograms
+						for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
+							if (attrMap.numeric && params.types.indexOf('histogram') != -1) {
+								console.log('----', getAttr)
+								var numericExtremes = getAttr(collection.extremes, attrMap.numeric);
+								if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
+									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
+								}
+								mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
+										//'featureCollection', new Mapper.Copy(), 
+										attrMap.numeric, new Mapper.Histogram(
+											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
+										{ events: null, indexes: {'bin': 1}, extremes: [attrMap.numeric], copy: "bin" }
+									);
+							}
+						}
+
 						if (collection.tile) {
 							for (var g in config.GRID_SIZES) {
 								var gridSize = config.GRID_SIZES[g],
@@ -239,23 +256,6 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 								}
 							}
 						}
-
-						// Initialize MapReduce for histograms
-						for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
-							if (attrMap.numeric && params.types.indexOf('histogram') != -1) {
-								var numericExtremes = getAttr(collection.extremes, attrMap.numeric);
-								if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
-									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
-								}
-								mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
-										//'featureCollection', new Mapper.Copy(), 
-										attrMap.numeric, new Mapper.Histogram(
-											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
-										{ events: null, indexes: null }
-									);
-							}
-						}
-
 
 						var dequeueMapReduceCall = function() 
 						{

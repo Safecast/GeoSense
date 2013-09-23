@@ -42,13 +42,8 @@ define([
 	  		var self = this;
 	        $(this.el).modal('show');
 			$(this.el).on('hidden', function() {
-				self.detach();
+				self.remove();
 			});
-	  	},
-
-	  	detach: function()
-	  	{
-			$(self.el).detach();
 	  	},
 
 	    close: function()

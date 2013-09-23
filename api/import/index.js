@@ -640,7 +640,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					    	numSkipped++;
 					    	return;
 						}
-						if (params.max && numImport - params.skip > params.max) {
+						if (params.max && numImport - params.skip - numSkipped > params.max) {
 					    	debugStats('reached limit, ending', 'success', null, true);
 							ended = true;
 							self.end();

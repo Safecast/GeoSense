@@ -6,7 +6,7 @@ define([
 	'utils',
 	'text!templates/map-layer.html',
 	'views/panel-view-base',
-	'views/histogram-view',
+	'views/graphs/histogram-view',
 	'views/legend-view',
 	'mixins/spinner-mixin',
 	'lib/color-gradient/color-gradient',
@@ -23,6 +23,7 @@ define([
 	    events: {
 			'click .toggle-layer': 'toggleLayerClicked',
 			'click .show-layer-editor': 'showLayerEditorClicked',
+			'click .show-layer-graphs': 'showLayerGraphsClicked',
 			'click .show-layer-details': 'showLayerDetailsClicked',
 			'click .show-layer-extents': 'showLayerExtentsClicked',
 			'click .move-layer ': function() { return false; }
@@ -32,8 +33,9 @@ define([
 	    {
 		    this.template = _.template(templateHtml);
 		    this.legendViewOptions = {};
-		    this.expandContent = true;
+		    this.expandContent;
 		    this.expandLayerDetails = false;
+			this.subViewsRendered = false;
 
 		    this.listenTo(this.model, 'change', this.modelChanged);
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
@@ -61,6 +63,11 @@ define([
 	    	this.isLoading = false;
 	    	this.updateStatus();
 	    },	    
+
+	    disableGraphs: function() 
+	    {
+	    	this.$('.show-layer-graphs').remove()
+	    },
 
 	    updateStatus: function(status) 
 	    {
@@ -142,6 +149,7 @@ define([
 			this.$el.html(this.template());
 			this.$el.attr('data-id', this.model.id);
 			this.$el.attr('data-feature-collection-id', this.model.attributes.featureCollection._id);
+			this.$('.has-tooltip').tooltip({container: 'body'});
 
 			var stateIndicator = this.$('.state-indicator');
 			if (stateIndicator.length) {
@@ -160,7 +168,13 @@ define([
 		
 			// toggle initial state of accordion group
 			var enabled = this.model.isEnabled();
-			this.collapseEl.on('show', function() {
+			if (this.expandContent == undefined) {
+				this.expandContent = enabled;
+			}
+			this.collapseEl.on('show.bs.collapse', function() {
+		    	if (!self.subViewsRendered) {
+		    		self.renderSubViews();
+		    	}
 				if (!self.model.isEnabled()) {
 					self.model.toggleEnabled(true);
 				}
@@ -180,7 +194,7 @@ define([
 				}
 			}
 
-			this.populateFromModel(true);
+			this.populateFromModel(this.expandContent);
 			this.$('.details').toggle(this.expandLayerDetails);
 			this.$('.has-tooltip').tooltip({ delay: 200, container: 'body' });
 
@@ -201,6 +215,7 @@ define([
 	    	} else {
 	    		this.collapseEl.addClass('in');
 	    	}
+
 	    	// class not set by Bootstrap if toggled like this
 			this.toggleEl.removeClass('collapsed');
 	    	return this;
@@ -243,17 +258,23 @@ define([
 
 	    renderHistogram: function()
 	    {
-	    	if (this.histogramView) {
-	    		this.histogramView.$el.remove();
-	    	} else {
-				this.histogramView = new HistogramView({model: this.model});
+	    	var self = this;
+	    	this.$('.graphs').hide();
+	    	if (!this.histogramView) {
+				this.histogramView = new HistogramView(
+					{model: this.model, collection: this.model.histogram, renderAxes: false});
+				this.listenTo(this.histogramView, 'graph:render', function() {
+					this.$('.graphs').slideDown('fast');
+				});
 	    	}
 			if (!this.model.canDisplayValues()
 				|| !this.model.isNumeric()
 				|| !this.model.getLayerOptions().histogram) return;
 			
-			this.$('.graphs').append(this.histogramView.el);
-			this.histogramView.render().delegateEvents();
+			setTimeout(function() {
+				self.$('.graphs').append(self.histogramView.el);
+				self.histogramView.render().renderGraph();
+			}, 500);
 	    },
 
 	    renderLegend: function()
@@ -326,12 +347,18 @@ define([
 				|| this.model.hasChanged('layerOptions.histogram'));
 		},
 
+		renderSubViews: function() 
+		{
+			this.renderHistogram();
+			this.renderLegend();
+			this.subViewsRendered = true;
+		},
+
 	    populateFromModel: function(renderSubViews)
 	    {
 	    	this.updateEnabled(false);
             if (renderSubViews) {
-				this.renderHistogram();
-				this.renderLegend();
+            	this.renderSubViews();
 			}
 			this.updateStatus();
 			this.$('.model-title').text(this.model.getDisplay('title'));
@@ -395,6 +422,12 @@ define([
 		showLayerEditorClicked: function(event)
 		{
 			this.model.trigger('showMapLayerEditor');
+			return false;
+		},
+
+		showLayerGraphsClicked: function(event)
+		{
+			this.model.trigger('showMapLayerGraphs');
 			return false;
 		},
 

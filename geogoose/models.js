@@ -116,7 +116,7 @@ GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs)
 
     if (this.sourceGeometry) {
         obj.geometry = this.get('sourceGeometry');
-    } else {
+    } else if (this.geometry && this.geometry.type) {
         obj.geometry = this.get('geometry');
     }
     if (this.bbox && this.bbox.length) {

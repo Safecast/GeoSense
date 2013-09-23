@@ -16,6 +16,9 @@ define([
     'views/data-import-view',
     'views/modal-view',
     'views/share-view',
+    'views/graphs-panel-view',
+    'views/graphs/timeline-scatter-plot-view',
+    'views/graphs/histogram-view',
     'models/map',
     'models/map_layer',
     'text!templates/help/about.html'
@@ -23,7 +26,7 @@ define([
     SetupView, MapOLView, HelpPanelView, LayersPanelView, DataDetailView,
     MapInfoView, BaselayerEditorView, MapLayerEditorView,
     MapLayerView, DataLibraryPanelView, DataImportView,
-    ModalView, ShareView,
+    ModalView, ShareView, GraphsPanelView, TimelineScatterPlotView, HistogramView,
     Map, MapLayer,
     aboutHtml) {
         "use strict";
@@ -96,11 +99,7 @@ define([
                 this.isRendered = false;
                 this.mapLayerSubViewsAttached = false;
                 this.mapLayerEditorViews = {};
-
-                this.settingsVisible = true;
-                this.graphVisible = false;
-                this.dataLibraryVisible = false;
-                this.chatVisible = false;
+                this.graphsPanelViews = {};
 
                 this.vent = _.extend({}, Backbone.Events);
                 this.adminRoute = false;
@@ -408,6 +407,9 @@ define([
                 this.listenTo(model, 'showMapLayerEditor', function() {
                     this.showMapLayerEditor(model);
                 });
+                this.listenTo(model, 'showMapLayerGraphs', function() {
+                    this.showMapLayerGraphs(model);
+                });
 
                 this.listenTo(model, 'destroy', function() {
                     self.stopListening(model);
@@ -448,7 +450,7 @@ define([
                 if (!this.layersPanelView.isAttached) {
                     this.attachPanelView(this.layersPanelView).hide().show();
                 }
-                console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'));
+                console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'), model);
                 var mapLayerView = new MapLayerView({model: model, vent: this.vent}).render();
                 this.layersPanelView.appendSubView(mapLayerView);
                 if (animate) {
@@ -457,6 +459,26 @@ define([
                 this.mapView.attachLayer(model);
                 if (model.limitFeatures()) {
                     model.featureCollection.setVisibleMapArea(this.mapView.getVisibleMapArea());
+                }
+
+                if (model.isTimeBased() || model.histogram) {
+                    var graphsPanelView = new GraphsPanelView(
+                        {model: model, collection: model.featureCollection}).render();
+                    if (model.isTimeBased) {
+                        graphsPanelView.addGraphView('timeline', 
+                            new TimelineScatterPlotView(
+                                {model: model, collection: model.featureCollection}).render(), 
+                            __('Timeline'));
+                    }
+                    if (model.histogram) {
+                        graphsPanelView.addGraphView('histogram', 
+                            new HistogramView(
+                                {model: model, collection: model.histogram}).render(), 
+                            __('Histogram'));
+                    }
+                    this.graphsPanelViews[model.id] = graphsPanelView;
+                } else {
+                    mapLayerView.disableGraphs();
                 }
             },
 
@@ -750,6 +772,25 @@ define([
                     .snapToView(this.layersPanelView, 'left', true)
                     .hide()
                     .show('fast');
+            },
+
+            showMapLayerGraphs: function(model)
+            {
+                var self = this,
+                    layerId = model.id;
+                _.each(this.graphsPanelViews, function(view, id) {
+                    if (layerId == id) {
+                        if (!view.isAttached) {
+                            self.attachPanelView(view).hide();
+                        }
+                        view.show('fast');
+                    } else {
+                        setTimeout(function() {
+                            view.hide('fast');
+                        }, 250);
+                        
+                    }
+                });
             },
 
             showMapLayerEditor: function(model)

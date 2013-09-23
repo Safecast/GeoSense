@@ -92,7 +92,7 @@ define([
 				shownCallback();
 				return this;
 			}
-			if (this.$el.is('.panel-stick-left')) {
+			if (this.$el.is('.panel-anchor-left')) {
 				this.$el.hide().toggle('slide', duration, shownCallback);
 				return this;
 			}
@@ -115,7 +115,7 @@ define([
 				hiddenCallback();
 				return this;
 			}
-			if (this.$el.is('.panel-stick-left')) {
+			if (this.$el.is('.panel-anchor-left')) {
 				this.$el.show().toggle('slide', duration, hiddenCallback);
 				return this;
 			}
@@ -170,7 +170,7 @@ define([
 					drag: function() {
 						// TODO: implement proper panel management
 						/*if ($(this).position().left != 0) {
-							$(this).removeClass('panel-stick-left');
+							$(this).removeClass('panel-anchor-left');
 							$(this).css('top', '11px');
 						}*/
 					},
@@ -181,7 +181,7 @@ define([
 						
 						// TODO: implement proper panel management
 						/*if ($(this).position().left == 0) {
-							$(this).addClass('panel-stick-left');
+							$(this).addClass('panel-anchor-left');
 							$(el).css('left', '');
 							$(el).css('right', '');
 							$(el).css('top', '');
@@ -219,8 +219,21 @@ define([
 				self.close('fast');
 			});
 
+			this.windowResized = function() {
+				if (self.$el.is('.panel-anchor-left, .panel-anchor-bottom')) {
+					self.trigger('panel:resize', self);
+				}
+			};
+			$(window).on('resize', this.windowResized);
+
 	        return this;
 	    },
+
+		remove: function() 
+		{
+    		$(window).off('resize', this.windowResized);
+	    	PanelViewBase.__super__.remove.apply(this, arguments);
+  		},
 
 		detach: function() 
 		{

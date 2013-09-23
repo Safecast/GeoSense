@@ -1,0 +1,38 @@
+.panel-heading .btn-group.graph-toggles {
+}
+
+.panel-heading .panel-nav {
+	right: 100px;
+}
+
+.panel.graphs .graph {
+	height: 200px;
+	width: 100%;
+}
+
+.panel.graphs.extended .graph {
+	height: 400px;
+}
+
+text.label {
+	font-weight: normal;
+}
+
+.axis path,
+.axis line {
+    fill: transparent;
+    stroke: #999;
+    shape-rendering: crispEdges;
+}
+ 
+.axis text {
+    font-size: 11px;
+}
+ 
+.circle {
+    opacity: .5;
+}
+
+.crisp {
+	shape-rendering: crispEdges;
+}

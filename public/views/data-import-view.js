@@ -395,10 +395,10 @@ define([
 			});
 	    },
 
-	    detach: function()
+	    remove: function()
 	    {
 	    	this.removePopover();
-			return DataImportView.__super__.detach.call(this);
+			return DataImportView.__super__.remove.apply(this, arguments);
 	    },
 
 	    setStep: function(step)
