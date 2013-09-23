@@ -10,11 +10,29 @@ define([
     
 	var Map = Backbone.DeepModel.extend({
 		
-		idAttribute: "publicslug",
+		idAttribute: "slug",
 		urlRoot: window.BASE_URL + 'api/map',
 
-		publicAdminUrl: function() {
-			return BASE_URL + 'admin/' + this.attributes.publicslug;
+		adminUri: function(options) 
+		{
+			return 'admin/' + this.publicUri(options);
+		},
+
+		publicUri: function(options)
+		{
+			var o = options || {};
+			return this.attributes.slug 
+				+ (o.viewName ? '/' + o.viewName : '');
+		},
+
+		adminUrl: function(options) 
+		{
+			return BASE_URL + this.adminUri(options);
+		},
+
+		publicUrl: function(options)
+		{
+			return BASE_URL + this.publicUri(options);
 		},
 
 		newLayerInstance: function(attributes, options) {

@@ -2,7 +2,8 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-], function($, _, Backbone) {
+	'spin'
+], function($, _, Backbone, Spinner) {
 
 	var SpinnerMixin = {
 
@@ -12,6 +13,7 @@ define([
 	    		this.$spinner.css({opacity: 0}).show();	
 	    	}
 			this.$spinner.stop().animate({opacity: 1}, 50);
+			return this;
 	    },
 
 	    hideSpinner: function()
@@ -20,6 +22,13 @@ define([
 			this.$spinner.stop().fadeOut(300, function() {
 				//self.$spinner.hide();
 			});
+			return this;
+	    },
+
+	    initLargeSpinner: function(container, settings)
+	    {
+	    	return this.initSpinner(container, _.extend(
+	    		{radius: 10, width: 10}, settings));
 	    },
 
 	    initSpinner: function(container, settings)
@@ -35,6 +44,7 @@ define([
 			this.$spinner = $(new Spinner(settings).spin().el)
 				.hide();
 			$(container).append(this.$spinner);
+			return this;
 	    }
 
 	};

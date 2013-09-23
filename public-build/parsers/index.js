@@ -1,1 +1,0 @@
-define(["jquery","underscore","backbone","parsers/geojson","parsers/twitter"],function(e,t,n,r,i){return{GeoJSON:r,Twitter:i}});

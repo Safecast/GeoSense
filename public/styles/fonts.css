@@ -11,7 +11,7 @@
 }
 */
 
-@import url(http://fonts.googleapis.com/css?family=Oxygen:300,700|Oswald:400|Roboto+Slab:300,700);
+@import url(http://fonts.googleapis.com/css?family=Oxygen:300,700|Roboto+Slab:100,700|Roboto+Condensed:400);
 
 body, select, textarea, p, input, button {
   font-family: "Oxygen", sans-serif;
@@ -20,7 +20,8 @@ body, select, textarea, p, input, button {
 
 .app-title {
   font-family: "Roboto Slab";
-  font-weight: 400;
+  font-weight: 100;
+  font-size: 14px;
 }
 
 .navbar-inverse .navbar-brand {
@@ -31,16 +32,19 @@ h1,
 h3, .modal h2,
 label, .box.title, header .map-title, .panel-heading, 
 .title {
-/*  font-family: OswaldLight,sans-serif;*/
-  font-family: "Oswald", sans-serif;
+  font-family: "Roboto Condensed", sans-serif;
   font-weight: 400;
   
-  font-size:13px;
+  font-size:15px;
   color:#666;
 }
 
 .muted {
   color:#999;
+}
+
+.micro {
+  font-size: 12px;
 }
 
 header a, header a:hover, header a:focus {
@@ -49,13 +53,13 @@ header a, header a:hover, header a:focus {
 }
 
 header .map-title {
-  font-size: 21px;
+  font-size: 22px;
   padding-left: 5px;
   color: white;
 }
 
-.collapsible-heading, .collapsible-heading a, .heading, .homepage h2 {
-  font-family: "Oswald", sans-serif;
+.collapsible-heading, .collapsible-heading a, .heading, .page h2 {
+  font-family: "Roboto Condensed", sans-serif;
   font-weight: 400;
   font-size: 18px;
   line-height: 25px;
@@ -68,13 +72,12 @@ header .map-title {
 }
 
 label, .hint-toggle {
-  font-size: 13px;
+  font-size: 14px;
   color:#666;
 }
 
 h4, h5, .condensed {
-/*  font-family: OswaldBold, sans-serif;*/
-  font-family: "Oswald", sans-serif;
+  font-family: "Roboto Condensed", sans-serif;
   font-weight: 400;
 }
 

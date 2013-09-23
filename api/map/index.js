@@ -22,9 +22,11 @@ var Point = models.Point,
 
 var MapAPI = function(app) 
 {
+	var self = this;
+	
 	if (app) {
 		// Returns a list of maps
-		app.get('/api/maps(\/latest|\/featured)' , function(req, res){
+		app.get('/api/maps(\/latest|\/featured|\/user)' , function(req, res){
 			var query = {status: config.MapStatus.PUBLIC};
 			var options = {};
 			switch (req.params[0]) {
@@ -37,6 +39,15 @@ var MapAPI = function(app)
 						query.featured = {$gt: 0};
 					}
 					options.sort = {'featured': -1};
+					options.limit = 10;		
+					break;
+				case '/user':
+					if (req.user) {
+						query.createdBy = req.user._id;
+						options.sort = {'createdAt': -1};
+					} else {
+						res.send('permission denied', 403);
+					}
 					break;
 			}
 			Map.find(query, null, options)
@@ -52,13 +63,9 @@ var MapAPI = function(app)
 				});
 		});
 
-		// Returns a specific map by publicslug
-		app.get('/api/map/:publicslug', function(req, res){
-			Map.findOne({publicslug: req.params.publicslug})
-				.populate('layers.featureCollection')
-				.populate('layers.layerOptions')
-				.populate('createdBy')
-				.populate('modifiedBy')
+		// Returns a specific map by slug
+		app.get('/api/map/:slug', function(req, res) {
+			self.findMap({slug: req.params.slug, active: true})
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 					var preparedMap = prepareMapResult(req, map);
@@ -77,7 +84,8 @@ var MapAPI = function(app)
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map')) return;
 					permissions.canAdminMap(req, map, true);
-					req.session.user = map.createdBy;
+					// TODO log user in
+					//req.session.user = map.createdBy;
 			       	res.send(prepareMapResult(req, map));
 				});
 		});
@@ -94,6 +102,7 @@ var MapAPI = function(app)
 			var collections = {};
 			var slugCounter = 1;
 
+			console.log(req.body);
 			var map = new Map({
 				title: req.body.title,
 				description: '',
@@ -101,21 +110,24 @@ var MapAPI = function(app)
 				collections: collections,
 			});	
 
-			map.createdBy = map.modifiedBy = req.session.user;
+			if (req.user) {
+				console.log('User:',req.user);
+				map.createdBy = map.modifiedBy = req.user._id;
+			}
 
 			var makeUniqueSlugAndSave = function() 
 			{
-				map.publicslug = utils.slugify(req.body.title) + (slugCounter > 1 ? '-' + slugCounter : '');
-				if (map.publicslug.match(config.RESERVED_URI)) {
+				map.slug = utils.slugify(req.body.title) + (slugCounter > 1 ? '-' + slugCounter : '');
+				if (map.slug.match(config.RESERVED_URI)) {
 					slugCounter++;
 					makeUniqueSlugAndSave();
 					return;
 				}
-			    console.log('post new map, looking for existing slug "'+map.publicslug+'"')
-				Map.findOne({publicslug: map.publicslug}, function(err, existingMap) {
+			    console.log('post new map, looking for existing slug "'+map.slug+'"')
+				Map.findOne({slug: map.slug}, function(err, existingMap) {
 					if (handleDbOp(req, res, err, true)) return;
 					if (existingMap) {
-						console.log('publicslug "' + map.publicslug + '" exists, increasing counter');
+						console.log('slug "' + map.slug + '" exists, increasing counter');
 						slugCounter++;
 						makeUniqueSlugAndSave();
 					} else {
@@ -123,7 +135,11 @@ var MapAPI = function(app)
 						map.save(function(err, map) {
 							if (handleDbOp(req, res, err, map, 'map')) return;
 							permissions.canAdminMap(req, map, true);
-						 	res.send(prepareMapResult(req, map));
+						 	if (req.xhr) {
+						 		res.send(prepareMapResult(req, map));
+						 	} else {
+						 		res.redirect('/admin/' +map.slug);
+						 	}
 						});
 					}
 				});
@@ -133,9 +149,9 @@ var MapAPI = function(app)
 		});
 
 		// Updates a map 
-		app.put('/api/map/:publicslug', function(req, res)
+		app.put('/api/map/:slug', function(req, res)
 		{
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')
@@ -213,7 +229,7 @@ var MapAPI = function(app)
 											console.log('emailing info to user');
 										 	utils.sendEmail(user.email, 'Your map URLs', 'urls', {
 										 		adminUrl: config.BASE_URL + 'admin/' + map.adminslug,
-										 		publicUrl: config.BASE_URL + map.publicslug
+										 		publicUrl: config.BASE_URL + map.slug
 										 	});
 									 	}
 									});
@@ -233,9 +249,9 @@ var MapAPI = function(app)
 		});
 
 		// Deletes a map
-		app.delete('/api/map/:publicslug', function(req, res)
+		app.delete('/api/map/:slug', function(req, res)
 		{
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
@@ -255,9 +271,9 @@ var MapAPI = function(app)
 		});
 
 		// Returns map layer
-		app.get('/api/map/:publicslug/layer/:layerId', function(req, res)
+		app.get('/api/map/:slug/layer/:layerId', function(req, res)
 		{
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
@@ -276,14 +292,14 @@ var MapAPI = function(app)
 		});
 
 		// Updates options for a map layer
-		app.put('/api/map/:publicslug/layer/:layerId', function(req, res)
+		app.put('/api/map/:slug/layer/:layerId', function(req, res)
 		{
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-					console.log('updating layer ' + req.body._id + ' for map '+map.publicslug);
+					console.log('updating layer ' + req.body._id + ' for map '+map.slug);
 					var mapLayer = map.layers.id(req.params.layerId);
 					// check if found
 					if (handleDbOp(req, res, false, mapLayer, 'map layer')) return;
@@ -362,12 +378,12 @@ var MapAPI = function(app)
 		});
 
 		// Creates a new map layer from a point collection
-		app.post('/api/map/:publicslug/layer', function(req, res)
+		app.post('/api/map/:slug/layer', function(req, res)
 		{
 			if (!req.body.featureCollection) {
 				res.send('no feature collection specified', 403);
 			}
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
@@ -424,9 +440,9 @@ var MapAPI = function(app)
 		});
 
 		// Deletes a map layer from a map
-		app.delete('/api/map/:publicslug/layer/:layerId', function(req, res)
+		app.delete('/api/map/:slug/layer/:layerId', function(req, res)
 		{
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.exec(function(err, map) {
@@ -443,6 +459,14 @@ var MapAPI = function(app)
 			  	});
 		});
 	}
+};
+
+MapAPI.prototype.findMap = function(query) {
+	return Map.findOne(query)
+		.populate('layers.featureCollection')
+		.populate('layers.layerOptions')
+		.populate('createdBy')
+		.populate('modifiedBy');
 };
 
 module.exports = MapAPI;
