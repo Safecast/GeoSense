@@ -4,32 +4,29 @@ define([
 	'backbone',
 	'config',
 	'utils',
-	'text!templates/data-library.html',
 	'models/map_layer',
 	'views/panel-view-base',
 	'views/map-layer-view',
 	'mixins/spinner-mixin',
 	'collections/geo-feature-collections'
-], function($, _, Backbone, config, utils, templateHtml, MapLayer, PanelViewBase, MapLayerView, SpinnerMixin, GeoFeatureCollections) {
+], function($, _, Backbone, config, utils, MapLayer, PanelViewBase, MapLayerView, SpinnerMixin, GeoFeatureCollections) {
     "use strict";
 
 	var DataLibraryView = PanelViewBase.extend({
 
-		className: 'panel panel-default panel-stick-left panel-scrollable layers-panel data-library',
 		draggable: false,
 
 	    events: {
 			'submit form.search, keypress form.search .search-query': 'searchClicked',
 			'click button.remove-query': 'removeQueryClicked',
-			'click button.add-layer': 'addLayerButtonClicked'
 	    },
 
 	  	subViewContainer: '.collections-list',
 	    prevQuery: '',
 	    dataCollectionsFetched: false,
 
-	    initialize: function(options) {
-		    this.template = _.template(templateHtml);
+	    initialize: function(options) 
+	    {
 		    this.collection = new GeoFeatureCollections();
 		    this.lastPage = true;
 		    this.searchParams = {p: 0};
@@ -46,6 +43,7 @@ define([
 	    	this.isLastPage = false;
 	    	this.searchParams.p = 0;
 			this.searchParams.l = this.detectPageLimit();
+			return this;
 	    },
 
 	    updateAfterScrolled: function(evt)
@@ -72,31 +70,6 @@ define([
 	    {
 			var self = this;
 			DataLibraryView.__super__.render.call(this);
-			this.on('panel:show', function() {
-				if (!self.searchParams.q || self.searchParams.q == '') {
-			    	self.$(self.subViewContainer).empty();
-			    }
-		    });
-			this.on('panel:shown', function() {
-				if (!self.searchParams.q || self.searchParams.q == '') {
-					setTimeout(function() {
-				    	self.resetPageParams();
-						self.fetchResults(self.searchParams);
-					}, 250); // wait for slide
-				}
-				self.$('.search-query').focus();
-			});
-
-			$(window).on('resize', function() {
-				if (self.isLoading) return;
-				var l = self.detectPageLimit();
-				if (!self.isLastPage && self.numResults() < l) {
-					self.searchParams.l = l;
-					self.fetchResults(self.searchParams);
-				}
-			});
-
-			this.$dropZone = self.$('.drop-zone').remove();
 
 			this.$('form.search .search-query').on('click', function() {
 				$(this).select();
@@ -104,7 +77,6 @@ define([
 			this.$('form.search .search-query').keyup(function() {
 				//self.searchClicked();
 			});
-	    	this.$('button.remove-query').hide();
 
 	    	this.$scrollContent = this.$(this.subViewContainer);
 	    	this.$scrollable = this.$scrollContent.parent();
@@ -117,6 +89,18 @@ define([
 			});
 
 			this.initSpinner(this.$('.state-indicator'));
+			this.$removeQueryParent = this.$('button.remove-query').parent();
+			this.$removeQueryButton = this.$('button.remove-query').remove();
+
+			if (!app.currentUser()) {
+				this.$('.nav-tabs li[data-type="user"]').removeClass('active')
+					.remove();
+				this.$('.nav-tabs li[data-type="public"]').addClass('active');
+			}
+
+			this.$('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
+				self.searchClicked();
+			});
 
 	        return this;
 	    },
@@ -126,7 +110,11 @@ define([
 	    	var query = this.$('.search-query').val();
 	    	this.resetPageParams();
 	    	this.searchParams.q = query;
-	    	this.$('button.remove-query').toggle(query != '');
+	    	if (query != '') {
+	    		this.$removeQueryParent.append(this.$removeQueryButton);
+	    	} else {
+	    		this.$removeQueryButton.remove();
+	    	}
 	    	this.fetchResults(this.searchParams);
 	    	self.$('.search-query').focus();
 
@@ -157,31 +145,7 @@ define([
             	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;
 	            self.appendSubView(mapLayerView.render());
-	            mapLayerView.render().$el.addClass('box');
-
-				mapLayerView.$el.draggable({
-					revert: 'invalid',
-					//stack: self.$dropZone,
-					start: function(event, ui) { 
-						self.$dropZone
-							.css({'left': self.$el.outerWidth() + 'px'})
-							.droppable( {
-						    	accept: '.map-layer',
-						    	hoverClass: 'hover',
-						    	drop: self.dataDrop
-						    });
-						$('#main-viewport').append(self.$dropZone);
-						self.$dropZone.addClass('visible');
-						ui.helper.css({'width': $(this).outerWidth() + 'px'});
-						ui.helper.addClass('drag-helper');
-					},
-					helper: 'clone',
-					appendTo: self.$el,
-					stop: function(event, ui) {
-						self.$dropZone.removeClass('visible').remove();
-					}
-				});
-
+	            self.mapLayerViewPostRender(mapLayerView);
 	            mapLayerView.$el.hide().slideDown('fast');
 			});
 
@@ -197,6 +161,10 @@ define([
 	    	);
 	    },
 
+	    mapLayerViewPostRender: function(mapLayerView)
+	    {
+	    },
+
 	    numResults: function() 
 	    {
 	    	return this.$(this.subViewContainer).children().length;
@@ -208,6 +176,7 @@ define([
 			self.isLoading = true;
 			self.showSpinner();
 			this.dataCollectionsFetched = true;
+	    	params.t = this.$('.nav-tabs .active').attr('data-type');
 			console.log('fetchResults', params);
 			this.collection.fetch({
 				data: params,
@@ -232,6 +201,8 @@ define([
 					}
 				}
 			});
+
+			return this;
 		},
 		
 		dataDrop: function(event, ui ) 

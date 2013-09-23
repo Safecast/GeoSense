@@ -4,8 +4,7 @@ define([
 	'backbone',
 	'config',
 	'utils',
-	'text!templates/homepage.html',
-], function($, _, Backbone, config, utils, templateHtml) {
+], function($, _, Backbone, config, utils) {
     "use strict";
 
 	var PanelViewBase = Backbone.View.extend({

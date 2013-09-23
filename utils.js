@@ -123,7 +123,7 @@ exports.smartBoolean = function(value) {
 
 exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
 {
-    fs.readFile('template/email/' + bodyTemplate + '.txt', function(err, data) {
+    fs.readFile('templates/email/' + bodyTemplate + '.txt', function(err, data) {
         if (err) throw err;
         if (!callback) {
             callback = function() {};
@@ -146,8 +146,13 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
     });
 }
 
-function sendError(res, err) {
-    res.send(err, err.statusCode || 500);
+function serveError(req, res, err) 
+{
+    if (req.xhr) {
+        res.send(err, err.statusCode || 500);
+    } else {
+        res.send('error 500 page');
+    }
 }
 
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
@@ -160,21 +165,21 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
                 if (!config.DEBUG) {
                     err = new HTTPError('Internal Server Error', 500);
                 }
-                sendError(res, err);
+                serveError(req, res, err);
                 break;
             case 'ValidationError':
                 err = new errors.ValidationError(err.msg, err.errors);
             case 'HTTPError':
                 // certain error messages should be available to client:
-                sendError(res, err);
+                serveError(req, res, err);
                 break;
         }
         return true;
     } else if (!op) {
-        sendError(res, new HTTPError((name ? name + ' ' : '') + 'not found', 404));
+        serveError(req, res, new HTTPError((name ? name + ' ' : '') + 'not found', 404));
         return true;
     } else if (permissionCallback && !permissionCallback(req, op)) {
-        sendError(res, new HTTPError('permission denied', 403));
+        serveError(req, res, new HTTPError('permission denied', 403));
         return true;
     }
 
@@ -427,3 +432,30 @@ exports.callbackOrThrow = function(err, callback)
         throw err;
     }
 };
+
+exports.capFirst = function(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+};
+
+exports.friendlyErrorMessages = function(err)
+{
+    if (err.name == 'ValidationError') {
+        var messages = [],
+            keys = Object.keys(err.errors);
+        for (var i = 0; i < keys.length; i++) {
+            var vErr = err.errors[keys[i]],
+                fieldName = exports.capFirst(vErr.path),
+                message;
+            switch (vErr.type) {
+                case 'required':
+                    message = fieldName + ' is required.';
+                    break;
+                default:
+                    message = fieldName + ' is not valid.';
+            }
+            messages.push(message);
+        }
+        return messages;
+    }
+}

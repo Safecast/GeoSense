@@ -68,9 +68,9 @@ var PointAPI = function(app)
 			});
 		});
 
-		app.get('/api/map/:publicslug/layer/:layerId/features', function(req, res) 
+		app.get('/api/map/:slug/layer/:layerId/features', function(req, res) 
 		{
-			Map.findOne({publicslug: req.params.publicslug})
+			Map.findOne({slug: req.params.slug})
 				.populate('layers.featureCollection')
 				.populate('layers.layerOptions')
 				.populate('createdBy')

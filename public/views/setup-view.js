@@ -48,8 +48,8 @@ define([
 				}
 			});
 
-			this.$('.map-url').val(app.genPublicURL());
-			this.$('.map-admin-url').val(app.genAdminURL());
+			this.$('.map-url').val(this.model.publicUrl());
+			this.$('.map-admin-url').val(this.model.adminUrl());
 	    },
 
 	    focusEmail: function()

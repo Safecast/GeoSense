@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Control.Scale=OpenLayers.Class(OpenLayers.Control,{element:null,geodesic:!1,initialize:function(e,t){OpenLayers.Control.prototype.initialize.apply(this,[t]),this.element=OpenLayers.Util.getElement(e)},draw:function(){return OpenLayers.Control.prototype.draw.apply(this,arguments),this.element||(this.element=document.createElement("div"),this.div.appendChild(this.element)),this.map.events.register("moveend",this,this.updateScale),this.updateScale(),this.div},updateScale:function(){var e;if(this.geodesic===!0){var t=this.map.getUnits();if(!t)return;var n=OpenLayers.INCHES_PER_UNIT;e=(this.map.getGeodesicPixelSize().w||1e-6)*n.km*OpenLayers.DOTS_PER_INCH}else e=this.map.getScale();if(!e)return;e>=9500&&e<=95e4?e=Math.round(e/1e3)+"K":e>=95e4?e=Math.round(e/1e6)+"M":e=Math.round(e),this.element.innerHTML=OpenLayers.i18n("Scale = 1 : ${scaleDenom}",{scaleDenom:e})},CLASS_NAME:"OpenLayers.Control.Scale"});

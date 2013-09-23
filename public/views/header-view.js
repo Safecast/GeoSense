@@ -50,6 +50,14 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
+			var user = app.currentUser();
+			if (user) {
+				this.$('.user-name').text(user.email);
+				this.$('.logged-out').addClass('hidden');
+			} else {
+				this.$('.logged-in').addClass('hidden');
+			}
+
 			this.$('.nav').each(function() {
 				if ($('li, button', this).length == 0) {
 					$(this).remove();
@@ -70,13 +78,15 @@ define([
 		
 	    populateFromModel: function()
 	    {
+			var appTitle = this.$('.app-title');
+			appTitle.attr('href', window.BASE_URL);
+
 			var mapInfo = this.model.attributes;
 			var title = this.$('.map-title');
 			title.text(mapInfo.title);
 			title.attr('href', app.genPublicURL());
 			title.click(function() {
-				console.log(app.getDefaultVisibleMapArea());
-				app.mapView.setVisibleMapArea(app.getDefaultVisibleMapArea());
+				app.navigate(app.map.publicUri(), {trigger: true});
 				return false;
 			});
 
@@ -87,6 +97,13 @@ define([
 			} else {
 				this.$('#authorLink').hide();
 			}
+
+			this.$('a.admin-map')
+				.attr('href', this.model.adminUrl())
+				.toggleClass('hidden', app.isMapAdmin());
+			this.$('a.public-map')
+				.attr('href', this.model.publicUrl())
+				.toggleClass('hidden', !app.isMapAdmin());
 		},
 
 		mapViewToggleClicked: function(evt)
@@ -94,7 +111,7 @@ define([
 			var link = evt.currentTarget;
 			var mapViewName = link.href.split('#')[1];
 			if (mapViewName != app.mapViewName) {
-				app.navigate(app.genMapURI(mapViewName), {trigger: true});
+				app.navigate(app.map.publicUri({viewName: mapViewName}), {trigger: true});
 			}
 			evt.preventDefault();
 		},

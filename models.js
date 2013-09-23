@@ -4,7 +4,8 @@ var config = require('./config'),
     mongoose = require('mongoose'),
     mongooseTypes = require("mongoose-types"),
     _ = require('cloneextend'),
-    util = require('util');
+    util = require('util'),
+    bcrypt = require('bcrypt');
 
 var useTimestamps = function (schema, options) {
     schema.add({
@@ -24,12 +25,26 @@ var useTimestamps = function (schema, options) {
 mongooseTypes.loadTypes(mongoose);
 //useTimestamps = mongooseTypes.useTimestamps;
 
-var User = mongoose.model('User', new mongoose.Schema({
+var UserSchema = new mongoose.Schema({
     name: String,
-    email: {type: mongoose.SchemaTypes.Email, required: true}   
-}));
+    email: {type: mongoose.SchemaTypes.Email, required: true, unique: true},
+    password: {type: String, required: true}
+});
 
-User.schema.plugin(useTimestamps);
+UserSchema.plugin(useTimestamps);
+
+UserSchema.pre('save', function(next) {
+    var salt = bcrypt.genSaltSync(10);
+    this.password = bcrypt.hashSync(this.password, salt);
+    next();
+});
+
+UserSchema.methods.validPassword = function(password)
+{
+    return bcrypt.compareSync(password, this.password);
+};
+
+var User = mongoose.model('User', UserSchema);
 
 var Job = mongoose.model('Job', new mongoose.Schema({
     createdAt: Date,
@@ -126,9 +141,10 @@ var Map = mongoose.model('Map', new mongoose.Schema({
     twitter: String,
     displayInfo: Boolean,
     adminslug: {type: String, required: true, index: {unique: true}},
-    publicslug: {type: String, required: true, index: {unique: true}},
+    slug: {type: String, required: true, index: {unique: true}},
     host: {type: String, required: false, index: {unique: true, sparse: true}},
     featured: {type: Number, default: 0}, 
+    previewImage: String,
     initialArea: {
         center: [Number, Number],
         zoom: Number
