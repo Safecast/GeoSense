@@ -19,6 +19,11 @@
 #main-viewport .panel {
 	background-color: rgba(240, 240, 240, .9);
 	box-shadow: 0px 5px 20px 0px rgba(0, 0, 0, .4);
+	color: #333;
+}
+
+.map-style-dark #main-viewport .panel text {
+	fill: #333;
 }
 
 #main-viewport .panel .text a, #main-viewport .panel .nav a {
@@ -75,10 +80,15 @@
 /* dark theme */
 
 /* Bootstrap */
+
 .map-style-dark #main-viewport .panel {
 	background-color: rgba(50, 50, 50, .9);
 	border-color: #333;
 	color: #ddd;
+}
+
+.map-style-dark #main-viewport .panel text {
+	fill: #ddd;
 }
 
 .map-style-dark #main-viewport .panel .text h1 {
@@ -222,16 +232,15 @@
 /* /dark theme */
 
 
-#main-viewport .panel-heading {
-	white-space: nowrap;
-} 
+
+/* panel management */
 
 .panel.panel-draggable {
 	top: 15px;
 	right: 15px;
 }
 
-.panel.panel-stick-left .panel-scrollable-container {
+.panel.panel-anchor-left .panel-scrollable-container {
 	overflow: auto;
 	position: absolute;
 	top: 0px;
@@ -246,10 +255,46 @@
 	width: 444px;
 }
 
-.panel-heading .btn-group {
+#main-viewport .panel.panel-anchor-left {
+	position: absolute;
+	height: auto;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	border-radius: 0;
+}
+
+#main-viewport .panel.panel-anchor-bottom {
+	width: auto;
+	top: auto;
+	right: 0px;
+	left: 0px;
+	bottom: 0px;
+	border-bottom-left-radius: 0;
+	-moz-border-bottom-left-radius: 0;
+	-webkit-border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	-moz-border-bottom-right-radius: 0;
+	-webkit-border-bottom-right-radius: 0;
+}
+
+/* /panel management */
+
+
+
+#main-viewport .panel-heading {
+	white-space: nowrap;
+} 
+
+.panel-heading .btn-toolbar {
 	position: absolute;
 	right: 15px;
 	top: 8px;
+}
+
+.panel-heading .btn-group.text-buttons button {
+	padding-left: 1em;
+	padding-right: 1em;
 }
 
 .panel .panel-footer {
@@ -267,15 +312,6 @@
 .panel .panel-footer .main-buttons .btn + .btn {
   margin-bottom: 0;
   margin-left: 5px;
-}
-
-.panel.panel-stick-left {
-	position: absolute;
-	height: auto;
-	top: 0px;
-	left: 0px;
-	bottom: 0px;
-	border-radius: 0;
 }
 
 .panel .collapse-toggle .in-out {
@@ -336,3 +372,28 @@
 	-webkit-border-radius:4px;
 }
 
+#main-viewport .panel .nav-pills-inline {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: inline-block !important;
+}
+
+#main-viewport .panel .nav-pills-inline a, #main-viewport .panel .nav-pills-inline span {
+	margin: 2px !important;
+	padding: 1px 6px 1px 6px !important;
+	display: block;
+	white-space: nowrap;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+#main-viewport .panel .nav-pills-inline a:hover {
+	color: white !important;
+	background-color: #333;
+}
+
+#main-viewport .panel .nav-pills-inline .active a, #main-viewport .panel .nav-pills-inline .active a:hover, #main-viewport .panel .nav-pills-inline .active span {
+	color: white !important;
+	background-color: #666;
+}

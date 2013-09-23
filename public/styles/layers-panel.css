@@ -32,41 +32,12 @@
 	padding-bottom: 0;
 }
 
-.layers-panel .legend .unit .nav-pills {
-    margin: 0 auto !important;
-    padding: 0 !important;
-    display: inline-block !important;
-}
-
 .layers-panel .legend .caret {
 	border-top-color: #fff !important;
 }
 
-.layers-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
-}
-
-.layers-panel .legend .unit .nav-pills a, .unit .nav-pills .unit-item span {
-	margin: 2px !important;
-	padding: 1px 6px 1px 6px !important;
-	display: block;
-	white-space: nowrap;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-}
-
 .layers-panel .unit.box, .layers-panel .color-bar .segment {
 	height: 26px;
-}
-
-.layers-panel .legend .unit .nav-pills a:hover {
-	color: white !important;
-	background-color: #333;
-}
-
-.layers-panel .legend .unit .nav-pills .active a, .layers-panel .legend .unit .nav-pills .active a:hover, .unit .nav-pills .active span {
-	color: white !important;
-	background-color: #666;
 }
 
 .layers-panel .map-layer .status {

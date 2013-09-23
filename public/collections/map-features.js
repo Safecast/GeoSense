@@ -27,7 +27,7 @@ define([
 			this.initiallyFetched = this.visibleMapAreaFetched = false;
 			this.on('error', function() {
 				this.initiallyFetched = false;
-			})
+			});
 		},
 
 		canFetch: function() 

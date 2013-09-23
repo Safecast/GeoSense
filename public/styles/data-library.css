@@ -6,7 +6,7 @@
 	width: 474px;
 }
 
-.panel.data-library.panel-stick-left .panel-scrollable-container {
+.panel.data-library.panel-anchor-left .panel-scrollable-container {
 	margin-top: 180px;
 	border-top: 1px rgba(128, 128, 128, .4) solid;
 }

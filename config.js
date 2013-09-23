@@ -46,7 +46,7 @@ var config = {
 		limit: 2000
 	},
 
-	HISTOGRAM_SIZES: [222], //, 100, 30],
+	HISTOGRAM_SIZES: [200], //, 100, 30],
 
 	MIN_CROP_DISTRIBUTION_RATIO: 10000, // if max > min * r --> crop histogram
 

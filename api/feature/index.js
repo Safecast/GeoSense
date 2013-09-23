@@ -45,11 +45,33 @@ var FeatureAPI = function(app)
 			GeoFeatureCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: config.DataStatus.IMPORTING}]})
 				.populate('defaults')
 				.exec(function(err, featureCollection) {
-					if (!err && featureCollection) {
-						res.send(featureCollection);
-					} else {
-						res.send('collection not found', 404);
-					}
+					if (handleDbOp(req, res, err, featureCollection, 'feature collection')) return;
+					res.send(featureCollection);
+				});
+		});
+
+		app.get('/api/featurecollection/:id/histogram', function(req, res) {
+			GeoFeatureCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: config.DataStatus.IMPORTING}]})
+				.populate('defaults')
+				.exec(function(err, featureCollection) {
+					if (handleDbOp(req, res, err, featureCollection, 'feature collection')) return;
+					var	mapReduceOpts = {histogram: config.HISTOGRAM_SIZES[0]},
+						FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts);
+	
+					console.log('Loading histogram for', FindFeatureModel.collection.name);
+					FindFeatureModel.find()
+						.sort({'doc.value.bin': 1})
+						.exec(function(err, docs) {
+							if (handleDbOp(req, res, err, docs.length)) return;
+							res.send(docs.map(function(doc) {
+								console.log(doc);
+								console.log(doc);
+								var extraAttrs = {properties: {bin: doc.get('value.bin')}};
+								doc._id = undefined;
+								console.log(extraAttrs);
+								return doc.toGeoJSON(extraAttrs);
+							}));
+						});
 				});
 		});
 
@@ -287,14 +309,6 @@ var FeatureAPI = function(app)
 
 			});
         });
-
-		app.get('/api/map/:slug/layer/:layerId/histogram', function(req, res) {
-			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
-				var	mapReduceOpts = {},
-					FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts);
-				
-			});
-		});
 
     }
 };

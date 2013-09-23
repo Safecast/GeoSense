@@ -3,10 +3,11 @@ define([
     'underscore',
     'backbone',
     'collections/map-features',
+    'collections/histogram',
     'lib/color-gradient/color-gradient',
     'deepextend',
     'deepmodel',
-], function($, _, Backbone, MapFeatures, ColorGradient) {
+], function($, _, Backbone, MapFeatures, Histogram, ColorGradient) {
     "use strict";
 
     var MapLayer = Backbone.DeepModel.extend({
@@ -98,6 +99,9 @@ define([
             this.parentMap = options.parentMap;
             if (this.attributes.featureCollection) {
                 this.featureCollection = new MapFeatures([], {mapLayer: this});
+                if (this.getOption('histogram') && this.isNumeric()) {
+                    this.histogram = new Histogram([], {mapLayer: this});
+                }
             } else {
                 var feed = this.getLayerOptions().feed;
                 this.featureCollection = new MapFeatures([], {mapLayer: this, 
@@ -105,6 +109,7 @@ define([
                     parser: feed ? feed.parser : ''
                 });
             }
+
             this.valFormatters = [];
 
             this.sessionOptions = _.extend(options.sessionOptions || {}, {
@@ -177,6 +182,15 @@ define([
                 numAttr = attrMap.numeric;
             return numAttr != undefined 
                 && getAttr(x, numAttr) != undefined;
+        },
+
+        isTimeBased: function()
+        {
+            var x = this.getFeatureCollectionAttr('extremes', {}),
+                attrMap = this.getOption('attrMap', {}),
+                datetimeAttr = attrMap.datetime;
+            return datetimeAttr != undefined 
+                && getAttr(x, datetimeAttr) != undefined;
         },
 
         getMappedExtremes: function()

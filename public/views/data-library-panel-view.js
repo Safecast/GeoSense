@@ -11,7 +11,7 @@ define([
 
 	var DataLibraryPanelView = DataLibraryView.extend({
 
-		className: 'panel panel-default panel-stick-left panel-scrollable layers-panel data-library',
+		className: 'panel panel-default panel-anchor-left panel-scrollable layers-panel data-library',
 		draggable: false,
 
 	    events: {

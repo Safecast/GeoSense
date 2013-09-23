@@ -28,6 +28,10 @@ html, body {
   padding-top:20px;
 } 
 
+.page .jumbotron label {
+  color: #888;
+}
+
 footer .dot {
   display: inline-block;
   margin: 0 15px;
