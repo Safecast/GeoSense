@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GeoSense</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <link rel="apple-touch-icon" href="<%= config.BASE_URL %>assets/touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="<%= config.BASE_URL %>lib/bootstrap/assets/js/html5shiv.js"></script>
+      <script src="<%= config.BASE_URL %>lib/bootstrap/assets/js/respond.min.js"></script>
+    <![endif]-->
+
+    <% if (mapSlugByHost != '') { %><script type="text/javascript">window.MAP_SLUG = '<%= mapSlugByHost %>';</script><% } %>
+    <% if (user) { %><script type="text/javascript">window.USER = <%- JSON.stringify(user) %>;</script><% } %>
+    <% if (map) { %><script type="text/javascript">window.MAP = <%- map %>;</script><% } %>
+    <script type="text/javascript">window.BASE_URL = '<%= config.BASE_URL %>';</script>
+    <link href="<%= config.BASE_URL %>styles/main.css" media="all" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="center-spinner" style="position:fixed;top:50%;left:50%;z-index:999"></div>
+    <script src="<%= config.BASE_URL %>lib/spin/spin.min.js"></script>
+    <script>document.getElementById('center-spinner').appendChild(new Spinner({radius:25,length:0,width:8,color:'#888'}).spin().el);</script>
+    <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+    <script data-main="<%= config.BASE_URL %>main" src="<%= config.BASE_URL %>lib/require/require-jquery.js"></script>
+  </body>
+</html>

@@ -1,0 +1,207 @@
+body.page {
+  color: #5a5a5a;
+
+  padding-top: 50px;
+}
+
+
+/* flushing footer to bottom */
+
+html, body {
+  height: 100%;
+}
+
+.page #wrap {
+  min-height: 100%;
+}
+
+.page #main {
+  overflow:auto;
+  padding-bottom:150px; /* this needs to be bigger than footer height*/
+}
+
+.page footer {
+  position: relative;
+  margin-top: -100px; /* negative value of footer height */
+  height: 100px;
+  clear:both;
+  padding-top:20px;
+} 
+
+footer .dot {
+  display: inline-block;
+  margin: 0 15px;
+}
+
+.page .well {
+  margin-top: 15px;
+}
+
+.page .navbar-brand {
+  padding: 13px 15px;
+}
+
+.page .app-title {
+  font-weight: 700;
+  font-size: 60px;
+}
+
+.page .app-title, .page .app-title a {
+  color: white;
+  text-decoration: none;
+}
+
+.page .jumbotron {
+	color: white;
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+  background: #333 url(../assets/homepage-topotexture-dark.jpg);
+  line-height: 1;
+  padding: 24px 0;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.page.home .jumbotron {
+  margin-bottom: 70px;
+}
+
+.page .jumbotron form {
+	margin: 40px 0 20px 0;
+} 
+
+.page .jumbotron h2 {
+	color: #aaa;
+  font-size: 16px;
+  margin-bottom: 18px;
+  white-space: nowrap;
+}
+
+.page .jumbotron form.login {
+  width: 250px;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+form.login .btn {
+  display: block;
+  margin: 30px auto 0 auto;
+
+}
+
+.page .jumbotron .container {
+  max-width: 750px; 
+}
+
+.page .container {
+  max-width: 970px; 
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+
+@media (min-width: 768px) {
+  .col-lg-3 {
+    width: 25%;
+    float: left;
+  }
+  .col-lg-4 {
+    width: 33.33333333333333%;
+    float: left;
+  }
+}
+
+.page h2 {
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+/* MARKETING CONTENT
+-------------------------------------------------- */
+
+/* Center align the text within the three columns below the carousel */
+.marketing .col-lg-4 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.page h3, .page h3 a {
+  font-size: 32px;
+  color: #5a5a5a;
+}
+.marketing .col-lg-4 p {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+
+/* Featurettes
+------------------------- */
+
+.featurettes-headline h2 {
+  text-align: center;
+  margin: -10px 0 30px 0;
+  font-size: 19px;
+}
+
+.featurette-divider {
+  margin: 30px 0; /* Space out the Bootstrap <hr> more */
+}
+
+/* Thin out the marketing headings */
+.featurette-heading {
+  line-height: 1;
+  margin-top: 0;
+}
+
+.featurette-image {
+  width: 290px;
+  height: 290px;
+  background: #efefef;
+} 
+
+.featurettes {
+  min-height: 100px;
+}
+
+
+/* RESPONSIVE CSS
+-------------------------------------------------- */
+
+@media (min-width: 768px) {
+
+   /* Navbar positioning foo */
+  .page .navbar-wrapper {
+    margin-top: 20px;
+  }
+  /* The navbar becomes detached from the top, so we round the corners */
+  .page .navbar-wrapper .navbar {
+    border-radius: 4px;
+  }
+
+  .featurette-heading {
+    font-size: 50px;
+  }
+
+  .page.home .app-title {
+    font-size: 120px;
+  }
+
+  .page .jumbotron h2 {
+    font-size: 22px;
+  }
+
+}
+
+
+.page .panel-scrollable-container {
+  overflow: auto;
+  height: 300px;
+  padding-right: 10px;
+}
+
+
+body.dashboard .navbar-nav .user-dashboard {
+  display: none;
+}
+

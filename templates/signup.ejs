@@ -1,0 +1,35 @@
+<div class="jumbotron">
+    <div class="container">
+        <h1 class="app-title"><a href="/">GeoSense</a></h1>
+        <h2>Create an Account</h2>
+        <% if (messages.info) { %>
+            <% for (var i = 0; i < messages.info.length; i++) {%>
+                <div class="alert alert-info"><%= messages.info[i] %></div>
+            <% } %>
+        <% } %>
+        <% if (messages.error) { %>
+            <% for (var i = 0; i < messages.error.length; i++) {%>
+                <div class="alert alert-warning"><%= messages.error[i] %></div>
+            <% } %>
+        <% } %>
+
+        <form class="login" action="/signup" method="POST">
+            <div class="form-group">
+                <label>Email address</label>
+                <input class="form-control input-lg" type="text" name="email" value="<% if (typeof email != 'undefined') { %><%= email %><% } %>" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input class="form-control input-lg" type="password" name="password" value="<% if (typeof password != 'undefined') { %><%= password %><% } %>" />
+            </div>
+            <div class="form-group">
+                <label>Confirm password</label>
+                <input class="form-control input-lg" type="password" name="confirmPassword" value="<% if (typeof confirmPassword != 'undefined') { %><%= confirmPassword %><% } %>" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create my account" class="btn btn-success btn-lg" />
+            </div>
+            <a class="btn btn-link" href="/login">I already have an account</a>
+        </form>
+    </div>
+</div>

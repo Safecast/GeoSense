@@ -169,6 +169,9 @@ define([
 			if (!this.model.parentMap) {
 				this.$('.map-tool').remove();
 				this.$('.collapse-content').prepend(this.$('.status').remove());
+				if (!app || !app.mapView) {
+					this.$('.library-map-tool').remove();
+				}
 			} else {
 				this.$('.library-tool').remove();
 				this.$('.status').toggle(enabled);
@@ -333,7 +336,9 @@ define([
 			this.updateStatus();
 			this.$('.model-title').text(this.model.getDisplay('title'));
 
-			this.$('.admin-control.layer-editor').toggle(app.isMapAdmin()
+			this.$('.admin-control.layer-editor').toggle(
+				this.model.parentMap
+				&& app.isMapAdmin()
 				&& this.model.getDataStatus() == DataStatus.COMPLETE);
 
 			var collectionAttrs = this.model.attributes.featureCollection,

@@ -1,7 +1,3 @@
-define([], function() {
-	return {};
-});
-
 var locale = {
 	ABBR_MONTH_NAMES: [
 		'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -17,3 +13,7 @@ var locale = {
 		
 	}
 };
+
+define([], function() {
+	return locale;
+});

@@ -5,7 +5,7 @@
 
 @import url("fonts.css");
 @import url("global.css");
-@import url("homepage.css");
+@import url("site.css");
 @import url("header.css");
 @import url("data-detail.css");
 @import url("map.css");
@@ -15,14 +15,6 @@
 @import url("data-library.css");
 @import url("data-import.css");
 
-#home 
-{
-	overflow-y:scroll;
-}
-
-#app {
-	
-}
 
 .icon {
 	display: inline-block;
@@ -104,124 +96,3 @@ body.modal-open{
 	margin-right:0px!important;
 }
 
-
-/**/
-
-
-
-/*
-@import url("global.css");
-@import url("panels.css");
-@import url("../assets/type/alternategothicfs_no3/stylesheet.css");
-
-@import url("homepage.css");
-@import url("header.css");
-@import url("map.css");
-@import url("map-gl.css");
-@import url("data-import.css");
-@import url("sidebar.css");
-
-@import url("chat.css");
-@import url("data-library.css");
-@import url("graph.css");
-@import url("layers-panel.css");
-@import url("data-detail.css");
-@import url("map-layer-editor.css");
-
-@import url("jquery.miniColors.css");
-@import url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css");
-/*@import url("jquery-ui-1.8.16.custom.css");*/
-/*@import url("../lib/bootstrap/css/bootstrap.css");
-@import url("../lib/bootstrap/css/bootstrap-responsive.css");
-
-@import url("../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css");
-
-@import url("../lib/colorpicker/css/colorpicker.css");
-
-@import url("modal.css");*/
-
-/*
-
-body, select, textarea, p, input, button {
-	font-family: "Oxygen", sans-serif;
-}
-
-#home 
-{
-	overflow-y:scroll;
-}
-
-#app {
-	
-}
-
-.drop-zone
-{
-	z-index:996;
-}
-
-.header-view
-{
-	position:absolute;
-	top:0;
-	left:0;
-	right:0;
-	height:50px;
-}
-
-.graph-view
-{
-	z-index:998;
-}
-
-.sidebar-view
-{
-	z-index:997;
-	position:absolute;
-	top:50px;
-	left:0px;
-	width:400px;
-	bottom:0px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
-}
-.sidebar-view .settings-tab
-{
-	z-index:999;
-}
-
-.sidebar-view .data-library
-{
-	z-index:998;
-}
-
-.sidebar-view.visible
-{
-	left:-400px;
-	-webkit-transition: all .3s linear;
-    -moz-transition: all .3s linear;
-    -o-transition: all .3s linear;
-    -ms-transition: all .3s linear;
-}
-
-#main-viewport
-{
-	position: absolute;
-	top: 50px;
-	left: 0px;
-	right: 0px;
-	bottom: 0px;	
-	overflow: hidden;
-}
-
-#main-viewport .map-view {
-	z-index: 900;
-}
-
-#main-viewport .panel {
-	z-index: 1000;
-}
-
-*/

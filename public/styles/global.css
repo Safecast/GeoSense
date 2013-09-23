@@ -4,9 +4,6 @@
 
 
 body {
-	background-color:#edeeee;
-	/*font-family: Helvetica, Helvetica Neue, Arial, sans-serif;*/
-	text-align: left;
 	/* Disable text selection globally */
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -28,10 +25,6 @@ a {
 	-moz-opacity:.80 !important; filter:alpha(opacity=80) !important; opacity:.80 !important; 
 }
 
-.micro {
-	font-size: 12px;
-}
-
 a:link.accordion-toggle {
 	text-decoration: none;
 }
@@ -50,11 +43,15 @@ p {
 	left:50%;
 }
 
+.object-list .spinner {
+	margin: 0 auto;
+}
+
 form.well, .panel .well {
 	margin: 0;
 }
 
-.modal-body .nav-tabs, .panel .nav-tabs {
+.modal-body .nav-tabs, .panel .nav-tabs, .page .nav-tabs {
 	margin-bottom: 15px;
 }
 
@@ -149,4 +146,24 @@ input.color-picker {
 
 button .glyphicon-ok.pull-right {
 	margin-right: 0;
+}
+
+.table td:last-child, .table th:last-child {
+	text-align: right;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.well h2 {
+	margin-top: 0;
+}
+
+.col-title {
+  width: 80%;
+}
+
+.col-date {
+  white-space: nowrap;
 }

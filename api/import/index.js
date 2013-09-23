@@ -323,8 +323,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			});
 		}
 
-		if (req && req.session) {
-			collection.createdBy = collection.modifiedBy = req.session.user;
+		if (req && req.user) {
+			collection.createdBy = collection.modifiedBy = req.user._id;
 		}
 
 		var collectionSave = !params.dry ?

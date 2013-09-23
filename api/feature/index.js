@@ -19,7 +19,7 @@ var FeatureAPI = function(app)
 {
 	var retrieveLayer = function(req, res, callback) 
 	{
-		Map.findOne({publicslug: req.params.publicslug})
+		Map.findOne({slug: req.params.slug})
 			.populate('layers.featureCollection')
 			.populate('layers.layerOptions')
 			.populate('createdBy')
@@ -61,7 +61,8 @@ var FeatureAPI = function(app)
 				limit = parseInt(req.query.l),
 				limit = isNaN(limit) ? 20 : Math.max(1, Math.min(40, limit)),
 				filterQuery = {$and: [{active: true}, {status: config.DataStatus.COMPLETE}]},
-				query;
+				query,
+				type = ['user', 'public'].indexOf(urlObj.query.t) != -1 ? urlObj.query.t : 'public';
 			
 			if (urlObj.query.q && typeof urlObj.query.q == 'string') {
 				query = urlObj.query.q;
@@ -71,7 +72,14 @@ var FeatureAPI = function(app)
 					{tags: rx}
 				];
 			}
-			console.log('Finding feature collections, query:', query, ', limit:', limit, ', page:', page);
+
+			switch (type) {
+				case 'user':
+					filterQuery.createdBy = req.user;
+					break;
+			}
+
+			console.log('Finding ' + type + ' feature collections, query:', query, ', limit:', limit, ', page:', page);
 
 			GeoFeatureCollection.find(filterQuery)
 				.sort({title: 1})
@@ -109,7 +117,7 @@ var FeatureAPI = function(app)
 				});
 		});
 
-		app.get('/api/map/:publicslug/layer/:layerId/features', function(req, res) 
+		app.get('/api/map/:slug/layer/:layerId/features', function(req, res) 
 		{
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var urlObj = url.parse(req.url, true),
@@ -280,7 +288,7 @@ var FeatureAPI = function(app)
 			});
         });
 
-		app.get('/api/map/:publicslug/layer/:layerId/histogram', function(req, res) {
+		app.get('/api/map/:slug/layer/:layerId/histogram', function(req, res) {
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var	mapReduceOpts = {},
 					FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts);

@@ -1,1 +1,0 @@
-(function(e){var t=window.EYE=function(){var t={init:[]};return{init:function(){e.each(t.init,function(e,t){t.call()})},extend:function(e){for(var t in e)e[t]!=undefined&&(this[t]=e[t])},register:function(e,n){t[n]||(t[n]=[]),t[n].push(e)}}}();e(t.init)})(jQuery);
