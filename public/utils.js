@@ -373,7 +373,7 @@ function genMapURL(mapInfo, opts, admin)
 	} else {
 		var base = BASE_URL.replace(/\/$/, '');
 	}
-	return base + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'publicslug' : 'adminslug'));
+	return base + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'slug' : 'adminslug'));
 };
 
 if (!Array.isArray) {

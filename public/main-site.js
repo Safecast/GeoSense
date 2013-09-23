@@ -15,6 +15,7 @@ require.config({
         stamen: 'lib/openlayers/stamen',
         backbone_super: 'lib/backbone_super/backbone_super',
         moment: 'lib/moment/moment.min',
+        holder: 'lib/holder/holder.min',
         spin: 'lib/spin/spin.min'
   	},
 
@@ -52,20 +53,16 @@ require.config({
 });
 
 require([
+	// Load our app module and pass it to our definition function
     'jquery',
     'underscore',
     'backbone',
-    'map-router',
+    'site-router',
     'jqueryui',
     'bootstrap',
     'backbone_super',
-    'lib/jquery/jquery.color',
-    'lib/jquery/jquery.glowing',
-    'lib/jquery/jquery.miniColors.min',
-    'lib/colorpicker/js/colorpicker',
-    'locale',
-], function($, _, Backbone, App, ui) {
-    var app;
-    App.initialize();
+    'locale'
+], function($, _, Backbone, App) {
+	App.initialize();
 });
 

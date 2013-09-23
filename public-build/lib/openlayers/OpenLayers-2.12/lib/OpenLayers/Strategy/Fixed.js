@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Strategy.Fixed=OpenLayers.Class(OpenLayers.Strategy,{preload:!1,activate:function(){return OpenLayers.Strategy.prototype.activate.apply(this,arguments)?(this.layer.events.on({refresh:this.load,scope:this}),this.layer.visibility==1||this.preload?this.load():this.layer.events.on({visibilitychanged:this.load,scope:this}),!0):!1},deactivate:function(){var e=OpenLayers.Strategy.prototype.deactivate.call(this);return e&&this.layer.events.un({refresh:this.load,visibilitychanged:this.load,scope:this}),e},load:function(e){var t=this.layer;t.events.triggerEvent("loadstart"),t.protocol.read(OpenLayers.Util.applyDefaults({callback:OpenLayers.Function.bind(this.merge,this,t.map.getProjectionObject()),filter:t.filter},e)),t.events.un({visibilitychanged:this.load,scope:this})},merge:function(e,t){var n=this.layer;n.destroyFeatures();var r=t.features;if(r&&r.length>0){if(!e.equals(n.projection)){var i;for(var s=0,o=r.length;s<o;++s)i=r[s].geometry,i&&i.transform(n.projection,e)}n.addFeatures(r)}n.events.triggerEvent("loadend")},CLASS_NAME:"OpenLayers.Strategy.Fixed"});

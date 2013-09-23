@@ -9,7 +9,7 @@
 
 .layers-panel .collapsible-heading .btn-group {
 	position: absolute;
-	top: 1px;
+	top: 2px;
 	right: 0px;
 }
 
@@ -125,7 +125,7 @@
 }
 
 .layers-panel .color-bar.condensed li .segment {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .layers-panel .color-bar li:first-child .segment {

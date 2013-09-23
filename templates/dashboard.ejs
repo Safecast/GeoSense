@@ -1,0 +1,36 @@
+<div class="jumbotron">
+    <div class="container">
+        <h1 class="app-title"><a href="/">GeoSense</a></h1>
+        <h2>Dashboard</h2>
+    </div>
+</div>
+<div class="container">
+	<div class="row">
+	  <div class="col-lg-6">
+	    <h3>Your Maps</h3>
+	    <div class="user-maps"></div>
+	  </div><!-- /.col-lg-6 -->
+	  <div class="col-lg-6">
+	    <h3>Create a Map</h3>
+        <form class="create-map" method="POST" action="/api/map">
+            <div class="map-title alert alert-warning hidden">
+                Please give your map a title.
+            </div>
+            <div class="input-group">
+                <input class="form-control input-lg map-title" placeholder="What should we call your map?" type="text" name="title">
+                <span class="input-group-btn">
+                    <button id="createMap" class="btn btn-primary btn-lg" type="submit">Create Map!</span></button>
+                </span>
+            </div>
+        </form>     
+	  </div><!-- /.col-lg-6 -->
+	</div><!-- /.row -->
+    <hr>
+    <div class="row">
+      <div class="col-lg-6">
+        <h3>Data Library</h3>
+        <div class="data-collections">
+        </div>
+      </div><!-- /.col-lg-6 -->
+    </div><!-- /.row -->
+</div>

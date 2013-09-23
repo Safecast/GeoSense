@@ -4,9 +4,8 @@ define([
     'backbone',
     'config',
     'utils',
-    'text!templates/homepage.html',
     'lib/color-gradient/color-gradient'
-], function($, _, Backbone, config, utils, templateHtml, ColorGradient) {
+], function($, _, Backbone, config, utils, ColorGradient) {
     "use strict";
 
     var MapViewBase = Backbone.View.extend({
