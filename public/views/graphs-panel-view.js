@@ -39,7 +39,7 @@ define([
 	    		_.each(self.graphViews, function(view, viewKey) {
 	    			view.fillExtents();
 	    		});
-	    		if (self.graphView) {
+	    		if (self.graphView && self.$el.is(':visible')) {
 	    			if (self.graphView.graphRendered) {
 		    			self.graphView.redrawGraph();
 	    			} else {
