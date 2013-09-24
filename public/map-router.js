@@ -691,15 +691,10 @@ define([
                 $(window).on('resize', function() {
                     self.adjustViewport();
                 });
-                this.adjustViewport();
-
-                //this.chatView = new ChatView({vent: this.vent});
-                //$('#app').append(this.chatView.render().el);
-
-                //this.graphView = new GraphView({vent: this.vent});
-                //$('#app').append(this.graphView.render().el);
-                
-                $('body').css("overflow","hidden");
+                // wait for "next tick" to adjust viewport since toolbars might be wrapping
+                setTimeout(function() {
+                    self.adjustViewport();
+                }, 0);
 
                 // TODO: Detect embed 
                 if (window.location.href.indexOf('4D4R0IjQJYzGP0m') != -1) {
