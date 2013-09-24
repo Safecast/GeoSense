@@ -167,3 +167,56 @@ button .glyphicon-ok.pull-right {
 .col-date {
   white-space: nowrap;
 }
+
+.collapse-toggle .in-out {
+	margin-left: -14px;
+	width: 14px;
+	height: 14px;
+	display: inline-block;
+	background-image: url(../assets/collapse-in-out.png);
+	background-position: 0 top;
+	-moz-opacity:.75; filter:alpha(opacity=50); opacity:.50; 
+}
+
+.collapse-toggle:hover .in-out {
+	-moz-opacity:1; filter:alpha(opacity=100); opacity:1; 
+}
+
+.collapse-toggle.collapsed .in-out {
+	background-position: 16px top;
+}
+
+.box {
+	padding: 5px 8px 6px 8px;
+	margin-top: 4px;
+	/*background-color:rgba(50,50,50,.3);*/
+	border-radius: 4px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	background-color:rgba(220, 220, 220, .6);
+}
+
+.nav-pills-inline {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: inline-block !important;
+}
+
+.nav-pills-inline a, .nav-pills-inline span {
+	margin: 2px !important;
+	padding: 1px 6px 1px 6px !important;
+	display: block;
+	white-space: nowrap;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.nav-pills-inline a:hover {
+	color: white !important;
+	background-color: #333;
+}
+.nav-pills-inline .active a, .nav-pills-inline .active a:hover, .nav-pills-inline .active span {
+	color: white !important;
+	background-color: #666;
+}

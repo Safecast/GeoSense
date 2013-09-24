@@ -69,9 +69,11 @@ define([
 						self.$objects.append($el);
 					});
 					if (collection.length) {
+						self.$('.no-objects').addClass('hidden');
 						self.$('.objects-container')
 							.removeClass('hidden').hide().fadeIn('fast');
 					} else {
+						self.$('.objects-container').addClass('hidden');
 						self.$('.no-objects')
 							.removeClass('hidden').hide().fadeIn('fast');
 					}

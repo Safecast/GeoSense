@@ -168,6 +168,10 @@ form.login .btn {
   min-height: 100px;
 }
 
+.featurette:last-child hr {
+  display: none;
+}
+
 
 /* RESPONSIVE CSS
 -------------------------------------------------- */
