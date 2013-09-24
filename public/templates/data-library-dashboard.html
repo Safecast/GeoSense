@@ -1,25 +1,34 @@
-<div class="tab-content">
-  <div class="tab-pane active">
-    <form class="search">
-    	<div class="input-group">
-      		<input type="text" class="form-control search-query" placeholder="Search data library">
-      		<span class="input-group-btn">
-        		<button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-        		<button class="btn btn-default remove-query" type="submit"><span class="glyphicon glyphicon-remove"></span></button>
-      		</span>
-    	</div>
-    	<div class="status">
-          <p class="help-block muted">&nbsp;</p>
-          <div class="state-indicator"></div>
-        </div>
-    </form>
-  </div>
-</div>
+<form class="search">
+	<div class="input-group">
+  		<input type="text" class="form-control search-query" placeholder="Search data library">
+  		<span class="input-group-btn">
+    		<button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+    		<button class="btn btn-default remove-query" type="submit"><span class="glyphicon glyphicon-remove"></span></button>
+  		</span>
+	</div>
+	<div class="status">
+      <p class="help-block muted"><span class="status-message"></span>&nbsp;</p>
+      <div class="state-indicator"></div>
+    </div>
+</form>
 
 <ul class="nav nav-tabs">
-  <li class="active" data-type="public"><a href="#home" data-toggle="tab">Public collections</a></li>
-  <li data-type="user"><a href="#home" data-toggle="tab">My collections</a></li>
+  <li class="active" data-type="public"><a href="#public-collections" data-toggle="tab">Public collections</a></li>
+  <li data-type="user"><a href="#user-collections" data-toggle="tab">My collections</a></li>
 </ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="public-collections">
+    <div class="hidden alert alert-info no-objects">  
+      No matching data collections found.
+    </div>
+  </div>
+  <div class="tab-pane" id="user-collections">
+    <div class="hidden alert alert-info no-objects">  
+      You don't have any matching data collections.
+    </div>
+  </div>
+</div>
 
 <div class="panel-scrollable-container">
 	<div class="panel-scrollable-content collections-list">

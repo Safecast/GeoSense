@@ -4,7 +4,7 @@ define([
 	'backbone',
 	'config',
 	'utils',
-	'text!templates/data-library.html',
+	'text!templates/data-library-panel.html',
 	'views/data-library-view'
 ], function($, _, Backbone, config, utils, templateHtml, DataLibraryView) {
     "use strict";
@@ -72,10 +72,9 @@ define([
 	    	var self = this;
 			mapLayerView.$el.draggable({
 				revert: 'invalid',
-				stack: self.$dropZone,
 				start: function(event, ui) { 
 					self.$dropZone
-						.css({'left': self.$el.outerWidth() + 'px', 'z-index': 999})
+						.css({'left': self.$el.outerWidth() + 'px'})
 						.droppable( {
 					    	accept: '.map-layer',
 					    	hoverClass: 'hover',

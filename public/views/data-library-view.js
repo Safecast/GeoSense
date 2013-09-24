@@ -7,9 +7,11 @@ define([
 	'models/map_layer',
 	'views/panel-view-base',
 	'views/map-layer-view',
+	'mixins/scroll-paginator-mixin',
 	'mixins/spinner-mixin',
 	'collections/geo-feature-collections'
-], function($, _, Backbone, config, utils, MapLayer, PanelViewBase, MapLayerView, SpinnerMixin, GeoFeatureCollections) {
+], function($, _, Backbone, config, utils, MapLayer, PanelViewBase, MapLayerView, 
+	ScrollPaginatorMixin, SpinnerMixin, GeoFeatureCollections) {
     "use strict";
 
 	var DataLibraryView = PanelViewBase.extend({
@@ -28,31 +30,6 @@ define([
 	    initialize: function(options) 
 	    {
 		    this.collection = new GeoFeatureCollections();
-		    this.lastPage = true;
-		    this.searchParams = {p: 0};
-		    this.resultHeight = 30;
-	    },
-
-	    detectPageLimit: function()
-	    {
-			return Math.ceil(this.$scrollable.height() / this.resultHeight / 10) * 10;
-	    },
-
-	    resetPageParams: function()
-	    {
-	    	this.isLastPage = false;
-	    	this.searchParams.p = 0;
-			this.searchParams.l = this.detectPageLimit();
-			return this;
-	    },
-
-	    updateAfterScrolled: function(evt)
-	    {
-	    	var delta = this.$scrollable.scrollTop() 
-	    		+ this.$scrollable.height() - this.$scrollContent.height();
-	    	if (delta > -50) {
-    			this.loadNextPage();
-	    	}
 	    },
 
 	    loadNextPage: function(event) 
@@ -60,7 +37,6 @@ define([
 	    	if (this.isLoading || this.isLastPage) return;
 	    	var self = this;
 	    	this.searchParams.p++;
-	    	console.log('loadNextPage', this.searchParams);
 	    	this.fetchResults(this.searchParams, function(collection, response, options) {
 	    		self.updateFeatureCollectionList(false);
 	    	});
@@ -78,15 +54,8 @@ define([
 				//self.searchClicked();
 			});
 
-	    	this.$scrollContent = this.$(this.subViewContainer);
-	    	this.$scrollable = this.$scrollContent.parent();
-			this.$scrollable.on('scroll', function(evt) {
-			    clearTimeout($.data(this, 'scrollTimer'));
-				$.data(this, 'scrollTimer', setTimeout(function() {
-						// detect when user hasn't scrolled in 250ms, then
-				        self.updateAfterScrolled(evt);
-					}, 250));
-			});
+			this.initScrollable(this.$(this.subViewContainer).parent(),
+				this.$(this.subViewContainer), 30);
 
 			this.initSpinner(this.$('.state-indicator'));
 			this.$removeQueryParent = this.$('button.remove-query').parent();
@@ -154,7 +123,7 @@ define([
 				numResults += '+';
 			}
 
-	    	this.$('form.search .help-block').text(
+	    	this.$('.status-message').text(
 	    		numResults == 1 ?  
 	    		__('%(num)s collection found', {num: numResults})
 	    		: __('%(num)s collections found', {num: numResults})
@@ -177,12 +146,20 @@ define([
 			self.showSpinner();
 			this.dataCollectionsFetched = true;
 	    	params.t = this.$('.nav-tabs .active').attr('data-type');
-			console.log('fetchResults', params);
 			this.collection.fetch({
 				data: params,
 				success: function(collection, response, options) {
 					self.isLoading = false;
 					self.hideSpinner();
+
+					if (!collection.length) {
+						self.$('.no-objects')
+							.removeClass('hidden').hide().fadeIn('fast');
+					} else {
+						self.$('.no-objects')
+							.addClass('hidden');
+					}
+
 		    		if (!collection.length || collection.length < self.searchParams.l) {
 			    		self.isLastPage = true;
 		    		}
@@ -205,21 +182,9 @@ define([
 			return this;
 		},
 		
-		dataDrop: function(event, ui ) 
-		{
-		  	var id = ui.draggable.attr('data-feature-collection-id');
-			app.saveNewMapLayer(id);
-		},
-
-		addLayerButtonClicked: function(event)
-		{
-			var id = $(event.currentTarget).closest('.map-layer').attr('data-feature-collection-id');
-			app.saveNewMapLayer(id);
-			return false;
-		},
-		
 	});
 
+	_.extend(DataLibraryView.prototype, ScrollPaginatorMixin);
 	_.extend(DataLibraryView.prototype, SpinnerMixin);
 
 	return DataLibraryView;
