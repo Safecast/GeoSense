@@ -95,7 +95,7 @@ define([
             // var extent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508);
             //this.map.setOptions({restrictedExtent: extent});
 
-            this.map.addControls([new OpenLayers.Control.PanZoomBar(),
+            this.map.addControls([new OpenLayers.Control.Zoom(),
                 new OpenLayers.Control.Navigation() /*, new OpenLayers.Control.KeyboardDefaults()*/]);
 
             this.updateViewBase(viewBase, viewStyle);

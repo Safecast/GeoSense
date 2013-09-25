@@ -21,75 +21,8 @@
 	height:100%;
 }
 
-/*.data
-{
-	width:10px;
-	height:10px;
-	background-color:red;
-	border-radius:10px;
-	opacity:.5;
-	box-shadow: 0 0 10px red;
-}*/
-
-.zoom-buttons
-{
-	position:absolute;
-	left:15px;
-	top:15px;
-	z-index:999;
-}
-
-.zoom-buttons .zoom-out
-{
-	float:left;
-	width:35px;
-	height:34px;
-	background-image:url('../assets/zoom-out.png');
-	background-repeat:no-repeat;
-	opacity:.6;	
-}
-
-.zoom-buttons .zoom-in
-{
-	float:right;
-	width:36px;
-	height:34px;
-	background-image:url('../assets/zoom-in.png');
-	background-repeat:no-repeat;
-	opacity:.6;
-	
-}
-
-.zoom-buttons .zoom-out:hover, .zoom-in:hover
-{
-	cursor:pointer;
-	opacity:.9;	
-	-webkit-transition: all .3s ease;
-    -moz-transition: all .3s ease;
-    -o-transition: all .3s ease;
-    -ms-transition: all .3s ease;
-}
-
-.olControlPanZoomBar
-{
-	margin-top:10px;
-	margin-left:10px;
-	-webkit-transition: all .3s ease;
-    -moz-transition: all .3s ease;
-    -o-transition: all .3s ease;
-    -ms-transition: all .3s ease;
-}
-
-.with-sidebar .olControlPanZoomBar {
-	margin-top: 60px;
-}
-
-.sidebar-visible .olControlPanZoomBar {
-	margin-left: 410px;
-}
-
 .olControlScaleLineTop, .olControlScaleLineBottom {
-	border-color: #444 !important;
+	border-color: #888 !important;
 }
 
 .olControlScaleLine {
@@ -97,4 +30,14 @@
 	bottom: 20px !important;
 	left: auto !important;
 	color: #888 !important;
+}
+
+div.olControlZoom a {
+    padding: 4px !important;
+    width: 30px !important;
+    height: 30px !important;
+    background: rgba(200, 200, 200, 0.5) !important;
+}
+div.olControlZoom a:hover {
+    background: rgba(160, 160, 160, 0.8) !important;
 }
