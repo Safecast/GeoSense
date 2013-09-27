@@ -20,7 +20,7 @@ define([
     'views/graphs/timeline-scatter-plot-view',
     'views/graphs/histogram-view',
     'models/map',
-    'models/map_layer',
+    'models/map-layer',
     'text!templates/help/about.html'
 ], function($, _, Backbone, HeaderView, 
     SetupView, MapOLView, HelpPanelView, LayersPanelView, DataDetailView,
@@ -43,6 +43,9 @@ define([
                 ":slug": "mapRoute",
                 ":slug/:view": "mapRoute",
                 ":slug/:view/:pos": "mapRoute",
+                "s/:slug": "mapRoute",
+                "s/:slug/:view": "mapRoute",
+                "s/:slug/:view/:pos": "mapRoute",
             },
 
             byHostRoutes: {
@@ -53,11 +56,6 @@ define([
                 "": "mapRouteByHost",
                 ":view": "mapRouteByHost",
                 ":view/:pos": "mapRouteByHost",
-            },
-
-            currentUser: function()
-            {
-                return window.USER;
             },
 
             getRoutes: function() 
@@ -78,14 +76,6 @@ define([
                     ]);
                 }
                 return routes;
-            },
-
-            setUIReady: function()
-            {
-                // remove site loading indicator
-                $('#center-spinner').hide('fast', function() {
-                    $(this).remove();
-                });
             },
 
             initialize: function() 
@@ -173,9 +163,7 @@ define([
                     if (zoom) {
                         visibleMapArea.zoom = zoom;
                     }
-                    console.log('set to ', visibleMapArea);
                     this.mapView.setVisibleMapArea(visibleMapArea);
-                    this.mapView.visibleAreaChanged(this.mapView.getVisibleMapArea());
                 }
             },
 
@@ -197,74 +185,15 @@ define([
                 return this.mapAdminRoute(window.MAP_SLUG, viewName, pos);
             },
 
-            genMapViewParam: function(mapViewName)
-            {
-                if (!mapViewName || mapViewName == 'map') {
-                    var addBase = this.mapView.viewBase && this.mapView.viewBase != DEFAULT_MAP_VIEW_BASE;
-                    var addStyle = addBase || (this.mapView.viewStyle && this.mapView.viewStyle != this.mapView.defaultViewStyle);
-                    mapViewName = this.mapViewName
-                        + (addStyle || addBase ? ':' : '')
-                        + (addBase ? this.mapView.viewBase + ':' : '')
-                        + (addStyle ? (this.mapView.viewStyle ? this.mapView.viewStyle : 'default') : '');
-                }
-                return mapViewName;
-            },
 
-            getCurrentViewOptions: function() {
-                var opts = $.extend(this.sessionOptions.viewOptions, {
-                    viewName: this.mapViewName,
-                    viewBase: this.mapView.viewBase,
-                    viewStyle: this.mapView.viewStyle
+            // initialization and rendering
+
+            setUIReady: function()
+            {
+                // remove site loading indicator
+                $('#center-spinner').hide('fast', function() {
+                    $(this).remove();
                 });
-                return opts;
-            },
-
-            genMapURI: function(mapViewName, opts, admin)
-            {
-                var admin = (admin || admin == undefined) && this.adminRoute;
-                mapViewName = this.genMapViewParam(mapViewName);
-
-                return genMapURI(this.map.attributes, mapViewName, opts, admin, this.routingByHost ? false : 'slug');
-            },
-
-            genPublicURL: function(forVisibleMapArea)
-            {
-                return genMapURL(this.map.attributes, (forVisibleMapArea ? this.getURIOptsForVisibleMapArea() : false), false);
-            },
-
-            getURIOptsForVisibleMapArea: function(visibleMapArea)
-            {
-                if (!visibleMapArea) {
-                    var visibleMapArea = this.mapView.getVisibleMapArea();
-                }
-                var opts = {
-                    x: visibleMapArea.center[0],
-                    y: visibleMapArea.center[1],
-                    zoom: visibleMapArea.zoom,
-                    mapViewName: this.genMapViewParam('map')
-                };
-                var defaults = {
-                    x: (this.map.attributes.initialArea.center.length ? this.map.attributes.initialArea.center[0] : 0),
-                    y: (this.map.attributes.initialArea.center.length ? this.map.attributes.initialArea.center[1] : 0),
-                    zoom: (this.map.attributes.initialArea.zoom != undefined ? this.map.attributes.initialArea.zoom : 0)
-                };
-                if (defaults.x != opts.x || defaults.y != opts.y || defaults.zoom != opts.zoom) {
-                    return opts;
-                }
-                return {
-                    mapViewName: opts.mapViewName
-                };
-            },
-
-            genMapURIForVisibleArea: function(visibleMapArea)
-            {
-                return app.genMapURI(null, this.getURIOptsForVisibleMapArea(visibleMapArea));
-            },
-
-            genAdminURL: function()
-            {
-                return genMapURL(this.map.attributes, false, true);
-
             },
 
             loadAndInitMap: function(slug, mapViewName, center, zoom, viewBase, viewStyle)
@@ -378,6 +307,11 @@ define([
                 }, 200);
             },
 
+            isMapAdmin: function()
+            {
+                return this.adminRoute && this.map.attributes.admin; 
+            },
+
             getMapLayer: function(layerId)
             {
                 return this.mapLayersById[layerId];
@@ -458,16 +392,16 @@ define([
                 }
                 this.mapView.attachLayer(model);
                 if (model.limitFeatures()) {
-                    model.featureCollection.setVisibleMapArea(this.mapView.getVisibleMapArea());
+                    model.mapFeatures.setVisibleMapArea(this.mapView.getVisibleMapArea());
                 }
 
                 if (model.isTimeBased() || model.histogram) {
                     var graphsPanelView = new GraphsPanelView(
-                        {model: model, collection: model.featureCollection}).render();
-                    if (model.isTimeBased) {
+                        {model: model, collection: model.mapFeatures}).render();
+                    if (model.isTimeBased()) {
                         graphsPanelView.addGraphView('timeline', 
                             new TimelineScatterPlotView(
-                                {model: model, collection: model.featureCollection}).render(), 
+                                {model: model, collection: model.mapFeatures}).render(), 
                             __('Timeline'));
                     }
                     if (model.histogram) {
@@ -494,29 +428,165 @@ define([
                 }
             },
 
-            visibleMapAreaChanged: function()
-            {
-                var area = this.mapView.getVisibleMapArea();
-                _.each(this.mapLayersById, function(mapLayer) {
-                    if (mapLayer.limitFeatures()) {
-                        // this will result in featureCollection.isCurrent() returning false
-                        mapLayer.featureCollection.setVisibleMapArea(area);
-                    }
-                });
-                this.fetchMapFeatures();
-            },
-
             fetchMapFeatures: function()
             {
                 _.each(this.mapLayersById, function(mapLayer) {
                     // only fetch features for enabled and non-current layers
                     if (mapLayer.isEnabled() && mapLayer.canDisplayValues()
-                        && mapLayer.featureCollection.canFetch()
-                        && !mapLayer.featureCollection.isCurrent()) {
+                        && mapLayer.mapFeatures.canFetch()
+                        && !mapLayer.mapFeatures.isCurrent()) {
                             console.log('Fetching features for', mapLayer.id, mapLayer.getDisplay('title'));
-                            mapLayer.featureCollection.fetch();
+                            mapLayer.mapFeatures.fetch();
                     }
                 });
+            },
+
+            adjustViewport: function()
+            {
+                this.$mainEl.css('top', $('header').outerHeight() + 'px');
+            },
+
+            render: function() 
+            {
+                var self = this;
+
+                window.document.title = this.map.get('title') + ' – GeoSense';
+
+                if (this.isEmbedded) {
+                    $('body').addClass('embed');    
+                }
+
+                this.headerView = new HeaderView({vent: this.vent, model: this.map});
+                $('#app').append(this.headerView.render().el);
+
+                this.$mainEl = $('<div id="main-viewport"></div>');
+                this.mainEl = this.$mainEl[0];
+                $('#app').append(this.mainEl);
+
+                $(window).on('resize', function() {
+                    self.adjustViewport();
+                });
+                // wait for "next tick" to adjust viewport since toolbars might be wrapping
+                setTimeout(function() {
+                    self.adjustViewport();
+                }, 0);
+
+                // TODO: Detect embed 
+                if (window.location.href.indexOf('4D4R0IjQJYzGP0m') != -1) {
+                    $('body').addClass("embed");
+                }
+                
+                if (this.isMapAdmin()) {
+                    this.setupView = new SetupView({model: this.map}).render();
+                    if (this.setupRoute) {
+                        this.showSetupView();
+                    }
+                }
+                
+                self.isRendered = true;
+            },
+
+
+            // geocoding
+
+            geocode: function(address, callback)
+            {               
+                // TODO move to app
+                var self = this;
+                
+                var geocoder = new google.maps.Geocoder();
+                geocoder.geocode({'address': address}, callback);
+            },
+
+            zoomToAddress: function(address)
+            {
+                var self = this;
+                this.geocode(address, function(results, status) {
+                    if (status != google.maps.GeocoderStatus.OK) {
+                        alert("Unable to find address: " + address);
+                        return;
+                    }
+                    var viewport = results[0].geometry.viewport,
+                        sw = viewport.getSouthWest(),
+                        ne = viewport.getNorthEast();
+                    self.mapView.zoomToExtent([sw.lng(), sw.lat(), ne.lng(), ne.lat()]);
+                    $('.search-query').blur();
+                });
+            },
+
+
+            // URL helpers
+
+            genMapViewParam: function(mapViewName)
+            {
+                if (!mapViewName || mapViewName == 'map') {
+                    var addBase = this.mapView.viewBase && this.mapView.viewBase != DEFAULT_MAP_VIEW_BASE;
+                    var addStyle = addBase || (this.mapView.viewStyle && this.mapView.viewStyle != this.mapView.defaultViewStyle);
+                    mapViewName = this.mapViewName
+                        + (addStyle || addBase ? ':' : '')
+                        + (addBase ? this.mapView.viewBase + ':' : '')
+                        + (addStyle ? (this.mapView.viewStyle ? this.mapView.viewStyle : 'default') : '');
+                }
+                return mapViewName;
+            },
+
+            getCurrentViewOptions: function() {
+                var opts = $.extend(this.sessionOptions.viewOptions, {
+                    viewName: this.mapViewName,
+                    viewBase: this.mapView.viewBase,
+                    viewStyle: this.mapView.viewStyle
+                });
+                return opts;
+            },
+
+            currentMapUriOptions: function(visibleMapArea)
+            {
+                var opts = {
+                    x: visibleMapArea.center[0],
+                    y: visibleMapArea.center[1],
+                    zoom: visibleMapArea.zoom,
+                    view: this.genMapViewParam('map')
+                };
+                var defaults = {
+                    x: (this.map.attributes.initialArea.center.length ? this.map.attributes.initialArea.center[0] : 0),
+                    y: (this.map.attributes.initialArea.center.length ? this.map.attributes.initialArea.center[1] : 0),
+                    zoom: (this.map.attributes.initialArea.zoom != undefined ? this.map.attributes.initialArea.zoom : 0)
+                };
+                if (defaults.x != opts.x || defaults.y != opts.y || defaults.zoom != opts.zoom) {
+                    return opts;
+                }
+                return {
+                    mapViewName: opts.view
+                };
+            },
+
+            currentMapUri: function()
+            {
+                var opts = this.currentMapUriOptions(this.mapView.getVisibleMapArea());
+                return this.isMapAdmin() ? this.map.adminUri(opts) : this.map.publicUri(opts);
+            },
+
+            currentPublicMapUrl: function()
+            {
+                var opts = this.currentMapUriOptions(this.mapView.getVisibleMapArea());
+                return this.map.publicUrl(opts);
+            },
+
+
+            // Map and map style events 
+
+            visibleMapAreaChanged: function(mapView, area)
+            {
+                console.log('! app.visibleAreaChanged', area);
+                this.navigate(this.currentMapUri(), {trigger: false});
+
+                _.each(this.mapLayersById, function(mapLayer) {
+                    if (mapLayer.limitFeatures()) {
+                        // this will result in mapFeatures.isCurrent() returning false
+                        mapLayer.mapFeatures.setVisibleMapArea(area);
+                    }
+                });
+                this.fetchMapFeatures();
             },
 
             getDefaultVisibleMapArea: function()
@@ -531,7 +601,6 @@ define([
                 }
                 return visibleMapArea;
             },
-
 
             viewOptionsChanged: function(view)
             {
@@ -595,7 +664,7 @@ define([
             {
                 this.vent.trigger('updateViewStyle', viewStyle);
                 if (navigate || navigate == undefined) {
-                    app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
+                    app.navigate(app.currentMapUri(), {trigger: false});
                 }
                 this.setViewOptions();
             },
@@ -604,7 +673,7 @@ define([
             {
                 this.vent.trigger('updateViewBase', viewBase);
                 if (navigate || navigate == undefined) {
-                    app.navigate(app.genMapURIForVisibleArea(), {trigger: false});
+                    app.navigate(app.currentMapUri(), {trigger: false});
                 }
                 this.setViewOptions();
             },
@@ -620,6 +689,44 @@ define([
                     this.mapView.updateViewOptions(opts);
                 }
             },
+
+            featureSelect: function(model, mapFeature)    
+            {
+                var self = this;
+                if (!SHOW_DETAIL_DATA_ON_MAP) {
+                    if (!this.dataDetailView) {
+                        this.dataDetailView = new DataDetailView().render();
+                    }
+                    if (!this.dataDetailView.isAttached) {
+                        this.attachPanelView(this.dataDetailView);
+                        this.dataDetailView.snapToView(this.layersPanelView, 'left', true)
+                            .hide().show('fast');
+                    }
+                    this.dataDetailView.setPanelState(true);
+                    this.dataDetailView.setModel(model);
+                    this.dataDetailView.show();
+                } else {
+                    var dataDetailView = new DataDetailView();
+                    dataDetailView.render();
+                    dataDetailView.setModel(model);
+                    dataDetailView.on('panel:close', function() {
+                        self.mapView.destroyPopupForFeature(mapFeature);
+                    });
+                    var el = dataDetailView.el;
+                    this.mapView.setPopupForFeature(mapFeature, el);
+                }
+            },
+
+            featureUnselect: function(model, mapFeature)
+            {
+                if (this.dataDetailView) {
+                    this.dataDetailView.hide();
+                }
+                this.mapView.destroyPopupForFeature(mapFeature);
+            },
+
+
+            // UI components 
 
             showMapInfo: function() 
             {
@@ -660,105 +767,12 @@ define([
                 this.setupView.show();  
             },
             
-            isMapAdmin: function()
-            {
-                return this.adminRoute && this.map.attributes.admin; 
-            },
-
-            adjustViewport: function()
-            {
-                this.$mainEl.css('top', $('header').outerHeight() + 'px');
-            },
-
-            render: function() 
-            {
-                console.log('main render');
-                var self = this;
-
-                window.document.title = this.map.get('title') + ' – GeoSense';
-
-                if (this.isEmbedded) {
-                    $('body').addClass('embed');    
-                }
-
-                this.headerView = new HeaderView({vent: this.vent, model: this.map});
-                $('#app').append(this.headerView.render().el);
-
-                this.$mainEl = $('<div id="main-viewport"></div>');
-                this.mainEl = this.$mainEl[0];
-                $('#app').append(this.mainEl);
-
-                $(window).on('resize', function() {
-                    self.adjustViewport();
-                });
-                // wait for "next tick" to adjust viewport since toolbars might be wrapping
-                setTimeout(function() {
-                    self.adjustViewport();
-                }, 0);
-
-                // TODO: Detect embed 
-                if (window.location.href.indexOf('4D4R0IjQJYzGP0m') != -1) {
-                    $('body').addClass("embed");
-                }
-                
-                if (this.isMapAdmin()) {
-                    this.setupView = new SetupView({model: this.map}).render();
-                    if (this.setupRoute) {
-                        this.showSetupView();
-                    }
-                }
-                
-                self.isRendered = true;
-            },
-
-            getURLParameter:function(name) 
-            {
-                return decodeURI(
-                    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-                );
-            },
-
             toggleDataImport: function() 
             {
                 if (!this.dataImportView) {
                     this.dataImportView = new DataImportView({vent: this.vent}).render();
                 }
                 this.dataImportView.show();
-            },
-
-            featureSelect: function(model, mapFeature)    
-            {
-                var self = this;
-                if (!SHOW_DETAIL_DATA_ON_MAP) {
-                    if (!this.dataDetailView) {
-                        this.dataDetailView = new DataDetailView().render();
-                    }
-                    if (!this.dataDetailView.isAttached) {
-                        this.attachPanelView(this.dataDetailView);
-                        this.dataDetailView.snapToView(this.layersPanelView, 'left', true)
-                            .hide().show('fast');
-                    }
-                    this.dataDetailView.setPanelState(true);
-                    this.dataDetailView.setModel(model);
-                    this.dataDetailView.show();
-                } else {
-                    var dataDetailView = new DataDetailView();
-                    dataDetailView.render();
-                    dataDetailView.setModel(model);
-                    dataDetailView.on('panel:close', function() {
-                        self.mapView.destroyPopupForFeature(mapFeature);
-                    });
-                    var el = dataDetailView.el;
-                    this.mapView.setPopupForFeature(mapFeature, el);
-                }
-            },
-
-            featureUnselect: function(model, mapFeature)
-            {
-                if (this.dataDetailView) {
-                    this.dataDetailView.hide();
-                }
-                this.mapView.destroyPopupForFeature(mapFeature);
             },
 
             showBaselayerEditor: function() 
@@ -843,31 +857,6 @@ define([
                         console.error('failed to save new map layer');
                     }
                 }); 
-            },
-
-            geocode: function(address, callback)
-            {               
-                // TODO move to app
-                var self = this;
-                
-                var geocoder = new google.maps.Geocoder();
-                geocoder.geocode({'address': address}, callback);
-            },
-
-            zoomToAddress: function(address)
-            {
-                var self = this;
-                this.geocode(address, function(results, status) {
-                    if (status != google.maps.GeocoderStatus.OK) {
-                        alert("Unable to find address: " + address);
-                        return;
-                    }
-                    var viewport = results[0].geometry.viewport,
-                        sw = viewport.getSouthWest(),
-                        ne = viewport.getNorthEast();
-                    self.mapView.zoomToExtent([sw.lng(), sw.lat(), ne.lng(), ne.lat()]);
-                    $('.search-query').blur();
-                });
             }
 
         });
@@ -879,7 +868,7 @@ define([
                 root: window.BASE_URL.replace(/^(.*:\/\/)?[^\/]*\/?/, ''), // strip host and port and beginning /
                 silent: false
             })) {
-                $('#app').html('page not found');
+                window.location.href = window.BASE_URL + '404';
             }
         };
 

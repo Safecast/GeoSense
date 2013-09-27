@@ -2,7 +2,7 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'models/map_layer',
+	'models/map-layer',
 ], function($, _, Backbone, MapLayer) {
     "use strict";
 

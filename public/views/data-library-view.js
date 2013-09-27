@@ -4,13 +4,15 @@ define([
 	'backbone',
 	'config',
 	'utils',
-	'models/map_layer',
+	'permissions',
+	'models/map-layer',
 	'views/panel-view-base',
 	'views/map-layer-view',
 	'mixins/scroll-paginator-mixin',
 	'mixins/spinner-mixin',
 	'collections/geo-feature-collections'
-], function($, _, Backbone, config, utils, MapLayer, PanelViewBase, MapLayerView, 
+], function($, _, Backbone, config, utils, permissions,
+	MapLayer, PanelViewBase, MapLayerView, 
 	ScrollPaginatorMixin, SpinnerMixin, GeoFeatureCollections) {
     "use strict";
 
@@ -61,7 +63,7 @@ define([
 			this.$removeQueryParent = this.$('button.remove-query').parent();
 			this.$removeQueryButton = this.$('button.remove-query').remove();
 
-			if (!app.currentUser()) {
+			if (!permissions.currentUser()) {
 				this.$('.nav-tabs li[data-type="user"]').removeClass('active')
 					.remove();
 				this.$('.nav-tabs li[data-type="public"]').addClass('active');
@@ -113,7 +115,7 @@ define([
             	mapLayerView.expandContent = false;
             	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;
-	            self.appendSubView(mapLayerView.render());
+	            self.appendSubView(mapLayerView).render();
 	            self.mapLayerViewPostRender(mapLayerView);
 	            mapLayerView.$el.hide().slideDown('fast');
 			});

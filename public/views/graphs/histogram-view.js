@@ -27,20 +27,7 @@ define([
 		renderGraph: function() 
 		{
 			var self = this;
-			if (!this.collection) return this;
-			if (!this.collection.models.length) {
-		    	if (!this.collection.fetched) {
-			    	console.log('Fetching histogram for '+this.model.id+' '+this.model.getDisplay('title'));
-			    	console.log(this.collection.url());
-			    	this.collection.fetch({
-			    		success: function() {
-			    			self.show();
-			    		}
-			    	});
-			    	this.collection.fetched = true;
-		    	}
-		    	return this;
-		    }
+			if (!this.collection.length) return this;
 
 		    HistogramView.__super__.renderGraph.apply(this, arguments);
 

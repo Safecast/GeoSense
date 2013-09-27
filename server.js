@@ -1,4 +1,5 @@
 var application_root = __dirname,
+  	apiUtil = require('./api/util'),
 	config = require("./config.js"),
 	path = require("path"),
 	express = require("express"),
@@ -15,6 +16,21 @@ var application_root = __dirname,
 
 var templates;
 var app = express();
+
+var	clientErrorHandler = function(err, req, res, next) 
+{
+	if (req.xhr) {
+		if (!config.DEBUG) {
+			res.send(500, { error: 'An error occurred on the server' });
+		} else {
+			res.send(500, err.toString());
+		}
+	} else if (!config.DEBUG) {
+		serveError(req, res, 500)
+	} else {
+		next(err);
+	}
+}
 
 app.configure(function() {
 	var staticDir = __dirname 
@@ -48,26 +64,21 @@ app.configure(function() {
 	  	}	
 	));
 	passport.serializeUser(function(user, done) {
-        done(null, JSON.stringify(user.toJSON()));
+        done(null, user._id.toString());
     });
-
-    passport.deserializeUser(function(json, done) {
-        done(null, new models.User(JSON.parse(json)));
-    });  	
-
+	passport.deserializeUser(function(id, done) {
+		models.User.findById(id, function(err, user) {
+	    	done(err, user);
+	  	});
+	});
 	app.use(passport.initialize());
 	app.use(passport.session());
 
   	app.use(app.router);
+	app.use(clientErrorHandler);
   	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 
-	// TODO: Proper error handling with friendly error pages
-	function errorHandler(err, req, res, next) {
-		console.error(err.stack);
-		res.send(500, 'Something broke!');
-	}
-	app.use(errorHandler);
-  	
+ 	
   	app.set('views', path.join(application_root, "views"));
 });
 
@@ -83,7 +94,7 @@ var getRenderVars = function(req, vars) {
 		bodyClass: undefined,
 		nodeEnv: process.env.NODE_ENV,
 		config: config,
-		user: req.user,
+		user: (req.user ? req.user.toJSONSelf() : undefined),
 		messages: req.flashMessages
 	}, vars);
 
@@ -92,7 +103,6 @@ var getRenderVars = function(req, vars) {
 
 var API = require('./api');
 new API(app);
-
 
 var renderPage = function(req, res, page, vars)
 {
@@ -103,8 +113,13 @@ var renderPage = function(req, res, page, vars)
 		vars.bodyClass = 'page';
 	}
 	return ejs.render(templates['templates/base.ejs'], getRenderVars(req, _.extend(vars, {
-		content: ejs.render(templates['templates/' + page + '.ejs'], getRenderVars(req, vars))
+		content: renderFragment(req, res, page, vars)
 	})));
+};
+
+var renderFragment = function(req, res, page, vars)
+{
+	return ejs.render(templates['templates/' + page + '.ejs'], getRenderVars(req, vars));
 };
 
 var serveMap = function(req, res, map, admin, routingByHost) {
@@ -129,45 +144,31 @@ var serveError = function(req, res, status)
 	res.send(renderPage(req, res, status, {bodyClass: 'error page'}), status);
 };
 
-var requireLogin = function(req, res, next) 
-{
-    if (req.isAuthenticated()) {
-        next();
-    } else {
-        res.redirect("login");
-    }
-}
-
-app.get('/', function(req, res) 
-{
-	if (!config.LIMITED_PROD_ACCESS) {
-		serveHome(req, res);
-	} else {
-		// home page on production server is disabled for now
-		res.send('', 403);
-	}
-});
-
-app.get('/dashboard', [requireLogin], function(req, res) {
-   	res.end(renderPage(req, res, 'dashboard', {bodyClass: 'dashboard page'}));
-});
-
-app.get('/about', function(req, res) {
-   	res.end(renderPage(req, res, 'html', {bodyClass: 'about page marketing', 
-   		title: 'Project Background', html: ejs.render(templates['public/templates/help/about.html'])}));
-});
-
-
 app.get('/login', function(req, res)
 {
-	res.end(renderPage(req, res, 'login'));
+	res.end(renderPage(req, res, 'login', {
+		next: req.query.next
+	}));
 });
 
-app.post('/login',
-	passport.authenticate('local', { successRedirect: 'dashboard',
-    	failureRedirect: 'login',
-        failureFlash: true })
-);
+app.post('/login', function(req, res, next) {
+	var redir = req.body.next && req.body.next ? 
+		req.body.next : undefined;
+	passport.authenticate('local', function(err, user, info) {
+	    if (err) { 
+	    	return next(err); 
+	    }
+	    if (!user) { 
+	    	return res.redirect('/login' + (redir ? '?next=' + redir : '')); 
+	    }
+	    req.logIn(user, function(err) {
+	    	if (err) { 
+				return next(err); 
+			}
+			return res.redirect((redir ? redir : 'dashboard'));
+	    });
+	})(req, res, next);
+});
 
 app.get('/signup', function(req, res)
 {
@@ -190,6 +191,7 @@ app.post('/signup', function(req, res, next)
 							req.flash('error', messages[i]);							
 						}
 					} else if (err.code == 11000) {
+						console.error(err);
 						req.flash('error', 'A user with this email address already exists.');
 					} else {
 						req.flash('error', 'Error creating user account.');
@@ -209,106 +211,93 @@ app.post('/signup', function(req, res, next)
 
 app.get('/logout', function(req, res) {
 	req.logout();
-	res.redirect('');
+	res.redirect('login');
 });
 
-app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)/, function(req, res) 
-	{
-		var slug = req.params[0];
-		api.map.findMap({slug: slug, active: true})
-			.exec(function(err, map) {
-				if (err) {
-					throw err;
-				} else if (!map) {
-					return serveError(req, res, 404);
-				} else if (!permissions.canAdminMap(req, map)) {
-					return serveError(req, res, 403);
-				}
-
-				req.session.user = map.createdBy;
-				console.warn('Implicitly authenticated user:', req.session.user);
-
-				serveMap(req, res, map);
-			});
-	});
-
-app.get(/\/([a-zA-Z0-9\-\_]+)/, function(req, res) 
+app.get('/', function(req, res) 
 {
-	var slug = req.params[0];
-	api.map.findMap({slug: slug, active: true})
+	if (!config.LIMITED_PROD_ACCESS) {
+		serveHome(req, res);
+	} else {
+		// home page on production server is disabled for now
+		serveError(req, res, 403);
+	}
+});
+
+app.get('/dashboard', [permissions.requireLogin], function(req, res) {
+   	res.end(renderPage(req, res, 'dashboard', {bodyClass: 'dashboard page'}));
+});
+
+app.get('/about', function(req, res) {
+   	res.end(renderPage(req, res, 'html', {bodyClass: 'about page marketing', 
+   		title: 'Project Background', html: ejs.render(templates['public/templates/help/about.html'])}));
+});
+
+app.get('/contact', function(req, res) {
+   	res.end(renderPage(req, res, 'html', {bodyClass: 'about page marketing', 
+   		title: 'Contact us', html: renderFragment(req, res, 'contact')}));
+});
+
+app.get('/legal:privacy-policy', function(req, res) {
+   	res.end(renderPage(req, res, 'html', {bodyClass: 'about page', 
+   		title: 'Privacy Policy', html: renderFragment(req, res, 'privacy')}));
+});
+
+app.get('/legal:terms', function(req, res) {
+   	res.end(renderPage(req, res, 'html', {bodyClass: 'about page', 
+   		title: 'Terms of Use', html: renderFragment(req, res, 'terms')}));
+});
+
+app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)/, [/*permissions.requireLogin*/], function(req, res) 
+{
+	req.params.slug = req.params[0];
+	apiUtil.findMapForRequest(req)
 		.exec(function(err, map) {
 			if (err) {
 				throw err;
 			} else if (!map) {
+				return serveError(req, res, 404);
+			} else if (!permissions.canAdminMap(req, map)) {
+				return res.redirect('login?next=' + req.url);
+			}
+
+			req.session.user = map.createdBy;
+			console.warn('Implicitly authenticated user:', req.session.user);
+
+			serveMap(req, res, map);
+		});
+});
+
+app.get(/^\/s\/([a-zA-Z0-9\-\_]+)/, function(req, res) 
+{
+	req.params.secretSlug = req.params[0];
+	apiUtil.findMapForRequest(req)
+		.exec(function(err, map) {
+			if (err) {
+				throw err;
+			} else if (!map || !permissions.canViewMap(req, map)) {
 				return serveError(req, res, 404);
 			}
 			serveMap(req, res, map);
 		});
 });
 
-
-
-
-/*
-
-
-/*function serveHome(req, res)
+app.get(/^\/([a-zA-Z0-9\-\_]+)/, function(req, res) 
 {
-	if (!config.LIMITED_PROD_ACCESS) {
-		// TODO: make sure the 'static' home page is served.
-		// currently, requesting /admin/existing-map without admin privileges 
-		// would still serve that map (in non-admin mode).
-		res.end(ejs.render(templates['public/base.ejs'], {
-			nodeEnv: process.env.NODE_ENV,
-			config: config,
-			mapSlugByHost: false
-		}));
-	} else {
-		// home page on production server is disabled for now
-		res.send('', 403);
-		res.end();
-	}
-}
-
-
-//app.get('/', serveHome);
-
-// Admin Route
-
-app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, res)
-{
-	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {
-		if (utils.handleDbOp(req, res, err, map, 'map')) return;
-		permissions.canAdminMap(req, map, true);
-		var url = '/admin/' + map.slug + req.params[1];
-		res.writeHead(302, {
-			'Location': url
+	req.params.slug = req.params[0];
+	apiUtil.findMapForRequest(req)
+		.exec(function(err, map) {
+			if (err) {
+				throw err;
+			} else if (!map || !permissions.canViewMap(req, map)) {
+				return serveError(req, res, 404);
+			}
+			serveMap(req, res, map);
 		});
-		res.end();
-	});
 });
 
-// Static Route
-
-function staticRoute(req, res, slug, admin)
-{
-	var serveMap = function(err, map, routingByHost) {
-		if (utils.handleDbOp(req, res, err, map, 'map', (admin ? permissions.canAdminMap : null))) return;
-		console.success('serving map: '+map.slug+', admin: '+admin);
-		if (admin) {
-			req.session.user = map.createdBy;
-			console.warn('Implicitly authenticated user:', req.session.user);
-		}
-		res.end(ejs.render(templates['public/base.ejs'], {
-			nodeEnv: process.env.NODE_ENV,
-			config: config,
-			mapSlugByHost: (routingByHost ? map.slug : false)
-		}));
-	}
-
-	console.info('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
-
-	if (slug) {
+/*
+if (slug) {
 		// For any hosts other than the default hosts, passing a slug is not allowed
 		// so that requests like <my-custom-host>/<somebody-else's-slug> are blocked.
 		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) == -1) {
@@ -339,38 +328,7 @@ function staticRoute(req, res, slug, admin)
 	}
 }
 
-
-// routingByHost routes without slug. 
-
-// matches /admin[/view:options][/x,y,z]
-app.get(/^\/admin(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, null, true)
-});
-
-// matches /[view:options][/x,y,z]
-app.get(/^\/((globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, null, false)
-});
-
-
-// regular routes including slug
-
-// matches /admin/slug/[/view:options][/x,y,z]
-app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, req.params[0], true)
-});
-
-// matches /slug/[/view:options][/x,y,z]
-app.get(/^\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, req.params[0], false)
-});
-
 */
-
 
 // Connect DB, load templates and start listening
 
@@ -390,9 +348,13 @@ utils.connectDB(function() {
 			'templates/map.ejs', 
 			'templates/signup.ejs', 
 			'templates/login.ejs', 
+			'templates/500.ejs',
 			'templates/404.ejs',
 			'templates/403.ejs',
 			'templates/html.ejs',
+			'templates/privacy.ejs',
+			'templates/terms.ejs',
+			'templates/contact.ejs',
 			'public/templates/help/about.html'		
 		], __dirname, function(err, contents) {
 		    if (err) {
@@ -405,132 +367,3 @@ utils.connectDB(function() {
 		});
 }, false);
 
-process.on('uncaughtException', function(err) {
-	// TODO: notify admin
-	console.error(err.stack);
-	if (config.DEV) {
-		throw err;
-	}
-});
-
-
-
-/*
-
-
-
-//app.get('/', serveHome);
-
-// Admin Route
-
-app.get(/^\/admin\/([A-Za-z0-9\+\/]{24})(|\/(|globe|map|setup))/, function(req, res)
-{
-	models.Map.findOne({adminslug: req.params[0], active: true}, function(err, map) {
-		if (utils.handleDbOp(req, res, err, map, 'map')) return;
-		permissions.canAdminMap(req, map, true);
-		var url = '/admin/' + map.slug + req.params[1];
-		res.writeHead(302, {
-			'Location': url
-		});
-		res.end();
-	});
-});
-
-// Static Route
-
-function staticRoute(req, res, slug, admin)
-{
-
-	console.info('Requesting slug:', slug, '-- admin:', admin, '-- host:', req.headers.host);
-
-	if (slug) {
-		// For any hosts other than the default hosts, passing a slug is not allowed
-		// so that requests like <my-custom-host>/<somebody-else's-slug> are blocked.
-		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) == -1) {
-			res.send('', 403);
-			res.end();
-			return;
-		}
- 		// Try to find map by slug
-		models.Map.findOne({slug: slug, active: true}, function(err, map) {
-			serveMap(err, map);
-		});
-	} else {
-		// Serve the home page
-		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) != -1) {
-			serveHome(req, res);
-			return;
-		}
-		// Try to find map by host
-		models.Map.findOne({host: req.headers.host, active: true}, function(err, map) {
-			// Serve the home page if there is no map with that host
-			if (!err && !map) {
-				serveHome(req, res);
-				return;
-			}
-			// Otherwise serve the map
-			serveMap(err, map, true);
-		});
-	}
-}
-
-
-// routingByHost routes without slug. 
-
-// matches /admin[/view:options][/x,y,z]
-app.get(/^\/admin(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, null, true)
-});
-
-// matches /[view:options][/x,y,z]
-app.get(/^\/((globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, null, false)
-});
-
-
-// regular routes including slug
-
-// matches /admin/slug/[/view:options][/x,y,z]
-app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, req.params[0], true)
-});
-
-// matches /slug/[/view:options][/x,y,z]
-app.get(/^\/([a-zA-Z0-9\-\_]+)(\/(globe|map|setup)(:[^\/]*)?)?(\/[0-9\-\.,]*)?$/, function(req, res) 
-{
-	return staticRoute(req, res, req.params[0], false)
-});
-
-
-// Connect DB, load templates and start listening
-
-if (!config.BASE_URL) {
-	console.error('config.BASE_URL is not defined');
-} else {
-	console.info('Base URL:', config.BASE_URL);
-}
-console.info('Environment:', process.env.NODE_ENV);
-
-utils.connectDB(function() {
-	utils.loadFiles(['public/base.ejs'], __dirname, function(err, contents) {
-	    if (err) {
-	    	throw err;
-	    } else {
-	        templates = contents;
-			app.listen(config.SERVER_PORT, config.SERVER_HOST);
-			console.success('Web server running at http://' + config.SERVER_HOST + ':' + config.SERVER_PORT + "/");
-	    }
-	});
-}, false);
-
-process.on('uncaughtException', function(err) {
-	// TODO: notify admin
-	console.error(err.stack);
-	if (config.DEV) {
-		throw err;
-	}
-});
-*/

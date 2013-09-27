@@ -5,7 +5,9 @@ var config = require('./config'),
     mongooseTypes = require("mongoose-types"),
     _ = require('cloneextend'),
     util = require('util'),
-    bcrypt = require('bcrypt');
+    bcrypt = require('bcrypt'),
+    uuid = require('node-uuid');
+
 
 var useTimestamps = function (schema, options) {
     schema.add({
@@ -21,6 +23,9 @@ var useTimestamps = function (schema, options) {
       next();
     });
 };
+
+var SharingType = {type: String, enum: [config.SharingType.PRIVATE, config.SharingType.WORLD], 
+    default: config.SharingType.DEFAULT};
 
 mongooseTypes.loadTypes(mongoose);
 //useTimestamps = mongooseTypes.useTimestamps;
@@ -43,6 +48,22 @@ UserSchema.methods.validPassword = function(password)
 {
     return bcrypt.compareSync(password, this.password);
 };
+
+UserSchema.methods.toJSON = function() 
+{
+    var obj = {
+        _id: this._id.toString(),
+        name: this.get('name')
+    };  
+    return obj;
+}
+
+UserSchema.methods.toJSONSelf = function() 
+{
+    var obj = this.toJSON();  
+    obj.email = this.get('email');
+    return obj;
+}
 
 var User = mongoose.model('User', UserSchema);
 
@@ -131,16 +152,17 @@ var MapLayerSchema = new mongoose.Schema({
 });
 
 
-var Map = mongoose.model('Map', new mongoose.Schema({
+var MapSchema = new mongoose.Schema({
     active: {type: Boolean, default: true},
     title: {type: String, required: true},
+    sharing: SharingType,
     description: String,
     author: String,
     linkURL: String,
     linkTitle: String,
     twitter: String,
     displayInfo: Boolean,
-    adminslug: {type: String, required: true, index: {unique: true}},
+    secretSlug: {type: String, index: {unique: true, sparse: true}},
     slug: {type: String, required: true, index: {unique: true}},
     host: {type: String, required: false, index: {unique: true, sparse: true}},
     featured: {type: Number, default: 0}, 
@@ -165,14 +187,24 @@ var Map = mongoose.model('Map', new mongoose.Schema({
     updatedAt: Date,
     tour: {
         steps: [{
-        layers: [Number],
-        title: String,
-        body: String
+            layers: [Number],
+            title: String,
+            body: String
         }]
     }
-}));
+});
 
-Map.schema.plugin(useTimestamps);
+MapSchema.plugin(useTimestamps);
+
+MapSchema.pre('save', function(next) {
+    if (!this.secretSlug) {
+        this.secretSlug = uuid.v1().toString();
+        console.log(this.secretSlug);
+    }
+    next();
+});
+
+var Map = mongoose.model('Map', MapSchema);
 
 
 var GeoFeatureSchema = new geogoose.models.GeoFeatureSchema({
@@ -196,13 +228,13 @@ GeoFeatureMapReducedSchema.methods.toGeoJSON = function(extraAttrs)
         {_id: this._id}, extraAttrs)));
 };
 
-
 var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema({
     title: {type: String, index: 1},
     tags: [{type: String, index: 1}],
     description: String,
     source: String,
     unit: String,
+    sharing: SharingType,
     sourceFieldNames: {type: Array, default: []},
     fields: {type: Array},
     extremes: { type: mongoose.Schema.Types.Mixed, /*index: 1,*/ default: {} },

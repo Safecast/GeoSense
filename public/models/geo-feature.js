@@ -54,7 +54,7 @@ define([
 
         getBox: function()
         {
-            var size, gridSize = this.collection.mapLayer.featureCollection.gridSize();
+            var size, gridSize = this.collection.mapLayer.mapFeatures.gridSize();
             if (this.attributes.geometry.type == 'Point' && gridSize) {
                 size = gridSize;
             } else {
@@ -73,7 +73,7 @@ define([
                 options = l.getLayerOptions(),
                 attrMap = this.collection.mapLayer.getOption('attrMap', {}),
                 extremes = l.getMappedExtremes(),
-                counts = l.featureCollection.getCounts(),
+                counts = l.mapFeatures.getCounts(),
                 val = this.getNumericVal(),
                 maxVal = extremes.numeric ? extremes.numeric.max : NaN,
                 minVal = extremes.numeric ? extremes.numeric.min : NaN;

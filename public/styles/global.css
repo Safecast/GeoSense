@@ -126,11 +126,11 @@ input.color-picker {
 	cursor: pointer;
 } 
 
-.form-control.map-admin-url, .form-control.has-error {
+.form-control.secret-url, .form-control.has-error {
 	background-color: #ffece5;	
 }
 
-.form-control.map-url {
+.form-control.public-url {
 	background-color: #e7ffe5;
 }
 
@@ -161,10 +161,10 @@ button .glyphicon-ok.pull-right {
 }
 
 .col-title {
-  width: 80%;
+  width: 60%;
 }
 
-.col-date {
+.col-date, .col-buttons {
   white-space: nowrap;
 }
 
@@ -220,3 +220,15 @@ button .glyphicon-ok.pull-right {
 	color: white !important;
 	background-color: #666;
 }
+
+.in-place-input {
+	background: #f8f8f8;
+}
+
+/*.glyphicon.is-public {
+	color: #5cb85c;
+}
+
+.glyphicon.is-private {
+	color: #d9534f;
+}*/

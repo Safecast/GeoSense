@@ -19,7 +19,8 @@ define([
 			'click #saveCloseButton' : 'saveClicked',
 			'click #cancelButton' : 'cancelClicked',
 			'click #savePositionButton': 'savePositionClicked',
-			'click #saveViewOptionsButton': 'saveViewClicked'
+			'click #saveViewOptionsButton': 'saveViewClicked',
+			'click .sharing-toggle': 'sharingToggleClicked',
 	    },
 
 	    initialize: function(options) 
@@ -48,8 +49,33 @@ define([
 				}
 			});
 
-			this.$('.map-url').val(this.model.publicUrl());
-			this.$('.map-admin-url').val(this.model.adminUrl());
+			this.updateSharingToggles(this.model.attributes.sharing);
+			this.$('.public-url').val(this.model.publicUrl({secret: false}));
+			this.$('.secret-url').val(this.model.publicUrl({secret: true}));
+
+			self.setMapInfoChanged(false);
+	    },
+
+	    updateSharingToggles: function(sharing)
+	    {
+	    	switch (sharing) {
+	    		case SharingType.PRIVATE:
+	    			this.$('.is-private').show();
+	    			this.$('.is-public').hide();
+	    			break;
+	    		case SharingType.WORLD:
+	    			this.$('.is-public').show();
+	    			this.$('.is-private').hide();
+	    			break;
+	    	}
+	    	this.$('.model-input[name=sharing]').val(sharing);
+	    },
+
+	    sharingToggleClicked: function(evt)
+	    {
+	    	this.updateSharingToggles($(evt.currentTarget).attr('data-value'));
+	    	this.setMapInfoChanged(true);
+	    	return false;
 	    },
 
 	    focusEmail: function()
@@ -63,7 +89,7 @@ define([
 	    	var self = this;
 	  		SetupView.__super__.render.call(this);
 			
-			this.$('.map-url, .map-admin-url').click(function() {
+			this.$('.urls input').click(function() {
 				$(this).select();
 			});
 			
@@ -72,24 +98,37 @@ define([
 				return false;
 			});
 
-			this.modelFieldInputs = this.$('form.map-setup .form-control');
-			this.$('#cancelButton').hide();
+			this.modelFieldInputs = this.$('form.map-setup .model-input');
 
 			this.modelFieldInputs.each(function() {
 				$(this).on('change keydown', function() {
-					self.mapInfoChanged = true;
-					self.$('#cancelButton').show();
-					self.$('#saveCloseButton').text(__('Save and Close'));
+					self.setMapInfoChanged(true);
 				});
+			});
+			this.$('#map-sharing button').on('click', function() {
+				self.setMapInfoChanged(true);
 			});
 
 			$(this.el).on('hidden.bs.modal', function() {
-				app.navigate(app.genMapURI(null));
+				app.navigate(app.currentMapUri(null));
 			});
 
 			this.populateFromModel();
 			
 	        return this;
+	    },
+
+	    setMapInfoChanged: function(status)
+	    {
+	    	var self = this;
+			self.mapInfoChanged = status;
+			if (status) {
+				self.$('#cancelButton').text(__('Cancel'));
+			} else {
+				self.$('#cancelButton').text(__('Close'));
+			}
+			self.$('#saveCloseButton').attr('disabled', !status);
+			this.$('#saveCloseButton').attr('disabled', !status);
 	    },
 
 		saveClicked: function(event) 
@@ -109,11 +148,11 @@ define([
 			self.modelFieldInputs.removeClass('has-error');
 
 			this.model.save(postData, {
+				patch: true,
 				success: function(model, response, options) {
 					self.close();
 					self.trigger('map:saved');
-					self.$('#saveCloseButton').attr('disabled', false);
-					self.mapInfoChanged = false;
+					self.setMapInfoChanged(false);
 				},
 				error: function(model, xhr, options) {
 					var data = $.parseJSON(xhr.responseText);
@@ -147,6 +186,7 @@ define([
 			this.$('#savePositionButton').attr('disabled', true);
 
 			this.model.save(postData, {
+				patch: true,
 				success: function(model, response, options) {
 					//self.$('#savePositionButton').attr('disabled', false);
 				},
@@ -175,6 +215,7 @@ define([
 			this.$('#saveViewOptionsButton').attr('disabled', true);
 
 			this.model.save(postData, {
+				patch: true,
 				success: function(model, response, options) {
 					//self.$('#saveViewOptionsButton').attr('disabled', false);
 				},
@@ -193,7 +234,6 @@ define([
 
 		cancelClicked: function(event) 
 		{
-			this.populateFromModel();
 			this.close();
 			return false;
 		},
@@ -225,6 +265,7 @@ define([
 
 	  	show: function() 
 	  	{
+			this.populateFromModel();
 			this.initialAreaChanged = app.mapView && !_.isEqual(this.model.attributes.initialArea, 
 				this.getInitialMapArea());
 			this.viewOptionsChanged = app.mapView && !_.isEqual(this.model.attributes.viewOptions, 

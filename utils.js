@@ -148,7 +148,7 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
 
 function serveError(req, res, err) 
 {
-    if (req.xhr) {
+    if (req.xhr || config.DEBUG) {
         res.send(err, err.statusCode || 500);
     } else {
         res.send('error 500 page');

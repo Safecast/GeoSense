@@ -24,7 +24,6 @@ define([
         renderMap: function(viewBase, viewStyle) 
         {
             if (this.initialVisibleMapArea) {
-                this.visibleAreaChangedInitially = true;
                 this.setVisibleMapArea(this.initialVisibleMapArea);
             }
             return this;
@@ -49,16 +48,10 @@ define([
 
         visibleAreaChanged: function(visibleMapArea)
         {
+            console.log('* mapView.visibleAreaChanged');
             var self = this;
-            if (!this.visibleAreaChangedInitially) {
-                // TODO move to app
-                app.navigate(app.genMapURIForVisibleArea(visibleMapArea));
-            }
-            this.visibleAreaChangedInitially = false;
-
             self.redrawQueue.push(setTimeout(function() {
-                console.log('visibleAreaChanged');
-                self.trigger('visibleAreaChanged');
+                self.trigger('visibleAreaChanged', this, visibleMapArea);
             }, 250));
             for (var i = self.redrawQueue.length; i > 1; i--) {
                 clearTimeout(self.redrawQueue.shift());
@@ -75,16 +68,13 @@ define([
             this.listenTo(model, 'toggle:enabled', this.layerToggled);
             this.listenTo(model, 'change', this.layerChanged);
             this.listenTo(model, 'toggle:colorScheme', this.layerChanged);
-            var c = model.featureCollection;
-            this.listenTo(c, {
-                reset: this.featureReset
-            });
-            this.listenTo(c, 'add', this.featureAdd);
-            this.listenTo(c, 'remove', this.featureRemove);
-            this.listenTo(c, 'change', this.featureChange);
+            this.listenTo(model.mapFeatures, 'reset', this.featureReset);
+            this.listenTo(model.mapFeatures, 'add', this.featureAdd);
+            this.listenTo(model.mapFeatures, 'remove', this.featureRemove);
+            this.listenTo(model.mapFeatures, 'change', this.featureChange);
             this.listenTo(model, 'destroy', this.destroyLayer);
 
-            this.featureReset(model.featureCollection);
+            this.featureReset(model.mapFeatures);
         },
 
         layerToggled: function(model)
@@ -103,7 +93,7 @@ define([
         {
             this.layers.splice(this.layers.indexOf(model), 1);
             this.stopListening(model);
-            this.stopListening(model.featureCollection);
+            this.stopListening(model.mapFeatures);
         },
 
         /**

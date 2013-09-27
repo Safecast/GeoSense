@@ -58,7 +58,7 @@ header .map-title {
   color: white;
 }
 
-.collapsible-heading, .collapsible-heading a, .heading, .page h2 {
+.collapsible-heading, .collapsible-heading a, .heading, .page h2, .object-list .model-title {
   font-family: "Roboto Condensed", sans-serif;
   font-weight: 400;
   font-size: 18px;
@@ -85,8 +85,13 @@ b, strong {
   font-weight: 700;
 }
 
-.text h1 {
+.text h1, .text-xl, .icon-xl {
   font-size: 25px;
+  line-height: 34px;
+}
+
+.icon-xl {
+  margin: 0 .5em .5em 0;
 }
 
 .text h1:first-child {
@@ -100,4 +105,8 @@ b, strong {
 
 .btn-lg .glyphicon {
   margin-right: .5em;
+}
+
+.popover-content {
+  color: #666;
 }

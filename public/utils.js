@@ -81,19 +81,6 @@ function autoFormatNumber(c)
 	return c;
 }
 
-function getURLParameter(paramName) {
-  var searchString = window.location.search.substring(1),
-      i, val, params = searchString.split("&");
-
-  for (i=0;i<params.length;i++) {
-    val = params[i].split("=");
-    if (val[0] == paramName) {
-      return unescape(val[1]);
-    }
-  }
-  return null;
-}
-
 function genQueryString(params, name) {
 	var url = '';
 	if (params instanceof Array) {
@@ -348,36 +335,16 @@ function circleToGeoJSON(ctr, xRadius, yRadius, numSegments, internalProjection,
     };
 }
 
-function genMapURI(mapInfo, mapViewName, opts, admin, slugField)
-{
-	var uri = (admin ? '/admin' : '') 
-		+ (slugField ? '/' + mapInfo[slugField] : '') 
-		+ (mapViewName && mapViewName != '' ? '/' + mapViewName : '');
-	
-	if (opts) {
-    	if (opts.x != undefined && opts.y != undefined) {
-	    	uri += '/%(x)s,%(y)s';
-	    	if (opts.zoom != undefined) {
-	    		uri += ',%(zoom)s';
-	    	}
-    	}
-	}
-	return uri.format(opts);
-}
-
-function genMapURL(mapInfo, opts, admin)
-{
-	var customHost = !DEV && !admin && mapInfo.host && mapInfo.host != '';
-	if (customHost) {
-		var base = 'http://' + mapInfo.host;
-	} else {
-		var base = BASE_URL.replace(/\/$/, '');
-	}
-	return base + genMapURI(mapInfo, opts ? opts.mapViewName : null, opts, admin, customHost ? false : (!admin ? 'slug' : 'adminslug'));
-};
-
 if (!Array.isArray) {
   Array.isArray = function (vArg) {
     return Object.prototype.toString.call(vArg) === "[object Array]";
   };
+}
+
+function maxWords(str, max) {
+	var words = str.split(' ');
+	if (words.length > max) {
+		return words.splice(0, max).join(' ') + '…';
+	}
+	return str;
 }
