@@ -28,7 +28,7 @@ var ImportAPI = function(app)
 {
 	var self = this;
 	if (app) {
-		app.post('/api/import/', function(req, res) {
+		app.post('/api/import/', [permissions.requireLogin], function(req, res) {
 			// TODO: hack because cloneextend sometimes throws error
 			// http://stackoverflow.com/questions/16585209/node-js-object-object-has-no-method-hasownproperty			
 			req.body = JSON.parse(JSON.stringify(req.body));

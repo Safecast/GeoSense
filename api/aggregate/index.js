@@ -184,7 +184,6 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 						// Initialize MapReduce for histograms
 						for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
 							if (attrMap.numeric && params.types.indexOf('histogram') != -1) {
-								console.log('----', getAttr)
 								var numericExtremes = getAttr(collection.extremes, attrMap.numeric);
 								if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
 									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;

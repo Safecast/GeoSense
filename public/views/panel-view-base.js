@@ -252,6 +252,7 @@ define([
 			if (view.setSuperView) {
 				view.setSuperView(this);
 			}
+			return view;
 		}		
 
 	});	

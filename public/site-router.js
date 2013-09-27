@@ -19,11 +19,6 @@ define([
                 'signup': 'focusFirstInput'
             },
 
-            currentUser: function()
-            {
-                return window.USER;
-            },
-
             focusFirstInput: function()
             {
                 var $input = $('input');

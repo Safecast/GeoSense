@@ -22,7 +22,7 @@ define([
 	    	this.template = _.template(templateHtml);
 		    this.listenTo(this.model, 'toggle:valFormatter', this.valFormatterChanged);
 		    this.listenTo(this.model, 'toggle:colorScheme', this.colorSchemeChanged);
-		    this.listenTo(this.model.featureCollection, 'reset', this.countsChanged);
+		    this.listenTo(this.model.mapFeatures, 'reset', this.countsChanged);
 			this.hasBeenVisible = false;
 			this.autoHide = options.autoHide != undefined ? options.autoHide : this.autoHide;
 	    },
@@ -205,7 +205,7 @@ define([
 					isNumeric = this.model.isNumeric(),
 					isCounts = this.isDisplayingCounts(),
 					hasCountsGtZero = false,
-					counts = this.model.featureCollection.getCounts(),
+					counts = this.model.mapFeatures.getCounts(),
 					mag = !counts ? 0 : counts.max > 10000 ? 1000	
 						: counts.max > 100 ? 100
 						: 1,

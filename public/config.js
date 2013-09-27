@@ -61,6 +61,13 @@ var UnitFormat = {
 	LEGEND: '%(value)s'
 }
 
+var SharingType = {
+	PRIVATE: 'P',
+	WORLD: 'W'
+};
+
+SharingType.DEFAULT = SharingType.PRIVATE;
+
 var COLOR_GRADIENT_STEP = null; // 1 / 500.0;
 
 var DEFAULT_FEATURE_OPACITY = .75,
@@ -92,6 +99,7 @@ if (!IS_BROWSER) {
 		MapStatus: MapStatus,
 		FeatureType: FeatureType,
 		ColorType: ColorType,
+		SharingType: SharingType
 	};
 } else {
 	// Browser: define console.log if undefined

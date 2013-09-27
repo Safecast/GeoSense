@@ -4,8 +4,9 @@ define([
 	'backbone',
 	'config',
 	'utils',
+	'permissions',
 	'text!templates/header.html',
-], function($, _, Backbone, config, utils, templateHtml) {
+], function($, _, Backbone, config, utils, permissions, templateHtml) {
     "use strict";
 
 	var HeaderView = Backbone.View.extend({
@@ -27,7 +28,8 @@ define([
 			'click #viewBase .dropdown-menu a' : 'viewBaseToggleClicked',
 			'click .view-style a' : 'viewStyleToggleClicked',
 			'click #customizeViewOptions': 'customizeViewOptionsClicked',
-			'click .search-form button': 'searchClicked'
+			'click .search-form button': 'searchClicked',
+			'click .map-title': 'mapTitleClicked'
 	    },
 
 	    initialize: function(options) 
@@ -50,7 +52,7 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
-			var user = app.currentUser();
+			var user = permissions.currentUser();
 			if (user) {
 				this.$('.user-name').text(user.email);
 				this.$('.logged-out').addClass('hidden');
@@ -67,7 +69,7 @@ define([
 	        return this;
 	    },
 
-		searchClicked: function(event)
+		searchClicked: function(evt)
 		{
 			var address = this.$('.search-query').val();
 			if (address != '') {
@@ -75,20 +77,23 @@ define([
 			}
 			return false;
 		},
+
+		mapTitleClicked: function(evt)
+		{
+			var uri = app.isMapAdmin() ? app.map.adminUri() : app.map.publicUri();
+			app.navigate(uri, {trigger: true});
+			return false;
+		},
 		
 	    populateFromModel: function()
 	    {
-			var appTitle = this.$('.app-title');
+			var appTitle = this.$('.app-title'),
+				mapInfo = this.model.attributes,
+				title = this.$('.map-title'),
+				url = app.isMapAdmin() ? app.map.adminUrl() : app.map.publicUrl();
 			appTitle.attr('href', window.BASE_URL);
-
-			var mapInfo = this.model.attributes;
-			var title = this.$('.map-title');
 			title.text(mapInfo.title);
-			title.attr('href', app.genPublicURL());
-			title.click(function() {
-				app.navigate(app.map.publicUri(), {trigger: true});
-				return false;
-			});
+			title.attr('href', url);
 
 			if (mapInfo.linkURL) {
 				this.$('#authorLink').show();
@@ -183,7 +188,7 @@ define([
 		{
 			var mapInfo = this.model.attributes,
 				tweet = {},
-				url = app.genPublicURL(true);
+				url = app.map.publicUrl(true);
 			tweet.url = url;
 			tweet.text = __('Check out the %(title)s map:', {
 				url: url,
@@ -202,7 +207,7 @@ define([
 		{
 			var mapInfo = this.model.attributes,
 				url = 'http://www.facebook.com/sharer.php?u='
-			url += encodeURIComponent(app.genPublicURL(true));
+			url += encodeURIComponent(window.location.href);
 			url += '&t=' +encodeURIComponent(__('Check out the %(title)s map', {
 				title: mapInfo.title
 			}));

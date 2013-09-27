@@ -4,14 +4,18 @@ define([
 	'backbone',
 	'config',
 	'utils',
+	'permissions',
 	'text!templates/map-layer.html',
 	'views/panel-view-base',
 	'views/graphs/histogram-view',
 	'views/legend-view',
 	'mixins/spinner-mixin',
+	'mixins/in-place-editor-mixin',
 	'lib/color-gradient/color-gradient',
 	'moment'
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, HistogramView, LegendView, SpinnerMixin, ColorGradient, moment) {
+], function($, _, Backbone, config, utils, permissions, templateHtml, 
+	PanelViewBase, HistogramView, LegendView, SpinnerMixin, InPlaceEditorMixin, 
+	ColorGradient, moment) {
     "use strict";
 
 	var MapLayerView = Backbone.View.extend({
@@ -26,6 +30,7 @@ define([
 			'click .show-layer-graphs': 'showLayerGraphsClicked',
 			'click .show-layer-details': 'showLayerDetailsClicked',
 			'click .show-layer-extents': 'showLayerExtentsClicked',
+			'click .edit-collection': 'editCollectionClicked',
 			'click .move-layer ': function() { return false; }
 	    },
 
@@ -41,9 +46,28 @@ define([
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
 		    this.listenTo(this.model, 'destroy', this.remove);
 
-			this.listenTo(this.model.featureCollection, 'request', this.layerFeaturesRequest);
-			this.listenTo(this.model.featureCollection, 'error', this.layerFeaturesRequestError);
-			this.listenTo(this.model.featureCollection, 'sync', this.layerFeaturesSynced);
+			this.listenTo(this.model.mapFeatures, 'request', this.layerFeaturesRequest);
+			this.listenTo(this.model.mapFeatures, 'error', this.layerFeaturesRequestError);
+			this.listenTo(this.model.mapFeatures, 'sync', this.layerFeaturesSynced);
+
+			this.listenTo(this.model.featureCollection, 'sync', function() {
+				this.populateFromModel(false);
+			});
+	    },
+
+	    sharingToggleClicked: function(evt)
+	    {
+	    	this.$('.sharing-status').attr('disabled', true);
+	    	this.model.featureCollection.save(
+	    		{sharing: $(evt.currentTarget).attr('data-value')}, {patch: true});
+	    	this.hidePopovers();
+	    	return false;
+	    },
+
+	    hidePopovers: function()
+	    {
+			this.superView.$el.parent().find('.sharing-status').popover('hide');
+			this.superView.$el.parent().find('.popover').remove();
 	    },
 
 	    layerFeaturesRequest: function(model, xhr, options)
@@ -73,7 +97,7 @@ define([
 	    {
 	    	var countStatus = '',
 				progress = this.model.getFeatureCollectionAttr('progress'),
-				featureCollection = this.model.featureCollection;
+				mapFeatures = this.model.mapFeatures;
 
 			if (this.isLoading || this.model.getDataStatus() != DataStatus.COMPLETE) {
 		    	this.showSpinner();
@@ -85,8 +109,8 @@ define([
 		    	switch (this.model.getDataStatus()) {
 		    		case DataStatus.COMPLETE:
 		    			if (this.model.isEnabled()) {
-		    				var c = featureCollection.initiallyFetched ? 
-		    					featureCollection.getCounts() : this.model.getCounts();
+		    				var c = mapFeatures.initiallyFetched ? 
+		    					mapFeatures.getCounts() : this.model.getCounts();
 		    				if (c) {
 		    					if (formatLargeNumber(c.original) != undefined) {
 									status = __('%(number)i of %(total)i', {
@@ -100,8 +124,8 @@ define([
 										itemTitlePlural: this.model.getDisplay('itemTitlePlural'),
 									});
 		    					}
-								if (featureCollection.initiallyFetched) {
-									var url = featureCollection.url();
+								if (mapFeatures.initiallyFetched) {
+									var url = mapFeatures.url();
 									status += '&nbsp;&nbsp;<a target="_blank" class="muted download-collection"'+'" href="' 
 										+ url + '"><span class="glyphicon glyphicon-download muted"></span></a>';		
 								}
@@ -198,7 +222,24 @@ define([
 			this.$('.details').toggle(this.expandLayerDetails);
 			this.$('.has-tooltip').tooltip({ delay: 200, container: 'body' });
 
+			this.initInPlaceEditing();
+
 			return this;
+	    },
+
+	    initInPlaceEditing: function()
+	    {
+	    	var self = this;
+			this.on('inplace:enter', function() {
+				self.$('.edit-collection').tooltip('hide');
+				self.$('.edit-collection').attr('disabled', true);
+			});
+			this.on('inplace:changed', function(data) {
+				self.model.featureCollection.save(data, {patch: true});
+			});
+			this.on('inplace:exit', function() {
+				self.$('.edit-collection').attr('disabled', false);
+			});
 	    },
 
 	    isExpanded: function()
@@ -258,11 +299,14 @@ define([
 
 	    renderHistogram: function()
 	    {
+	    	if (!this.model.histogram) return;
+
 	    	var self = this;
 	    	this.$('.graphs').hide();
 	    	if (!this.histogramView) {
 				this.histogramView = new HistogramView(
 					{model: this.model, collection: this.model.histogram, renderAxes: false});
+				this.model.histogram.fetch();				
 				this.listenTo(this.histogramView, 'graph:render', function() {
 					this.$('.graphs').slideDown('fast');
 				});
@@ -292,6 +336,7 @@ define([
 	    },
 
 	    setSuperView: function(superView) {
+	    	this.superView = superView;
 			this.listenTo(superView, 'panel:resize', this.panelViewResized);
 	    },
 
@@ -335,11 +380,13 @@ define([
 				&& this.model.getBbox().length > 0);
 		},
 
-		modelChanged: function(model)
+		modelChanged: function(model, options)
 		{
+			if (options.patch) return; // wait for sync
 	    	if (this.legendView) {
 				this.legendView.removePopover();
 			}
+
 			this.populateFromModel(
 				this.model.hasChangedColors() 
 				|| this.model.hasChanged('featureCollection.status')
@@ -356,6 +403,8 @@ define([
 
 	    populateFromModel: function(renderSubViews)
 	    {
+	    	var self = this;
+
 	    	this.updateEnabled(false);
             if (renderSubViews) {
             	this.renderSubViews();
@@ -403,6 +452,50 @@ define([
 			} else {
 				this.$('.source').hide();
 			}
+
+			if (!this.model.parentMap) {
+				if (!permissions.canAdminModel(this.model.featureCollection)) {
+					this.$('.admin-control').remove();
+				} else {
+					var popoverTitle, popoverContent;
+					switch (this.model.attributes.featureCollection.sharing) {
+						case SharingType.PRIVATE:
+							this.$('.is-public').hide();
+							this.$('.is-private').show();
+							popoverTitle = __('This collection is private.');
+							popoverContent = 
+								'<p class="micro">' + __('Only you can use this data on your maps.') + '</p>'
+								+__('<a href="#" class="btn btn-warning btn-sm sharing-toggle" data-value="' + SharingType.WORLD +'"><span class="glyphicon glyphicon-globe"></span> Allow everybody to use collection</a>')
+							break;
+						case SharingType.WORLD:
+							this.$('.is-private').hide();
+							this.$('.is-public').show();
+							popoverTitle = __('This collection is public.');
+							popoverContent = 
+								'<p class="micro">' + __('Everybody can currently add this data to their own maps.') + '</p>'
+								+__('<a href="#" class="btn btn-danger btn-sm sharing-toggle make-private" data-value="' + SharingType.PRIVATE +'""><span class="glyphicon glyphicon-lock"></span> Make this collection private</a>')
+							break;
+					}
+
+					this.$('.sharing-status').popover('destroy');
+			    	this.$('.sharing-status').attr('disabled', false);
+					this.$('.sharing-status').popover({
+						animation: false,
+						content: popoverContent,
+						html: popoverContent,
+						title: popoverTitle,
+						container: self.superView.$el,
+					}).on('show.bs.popover', function(evt) {
+						self.hidePopovers();
+					}).on('shown.bs.popover', function(evt) {
+						$('.sharing-toggle').click(function(evt) {
+							return self.sharingToggleClicked(evt);
+						});
+						evt.stopPropagation();
+					});
+				}
+			}
+
 	    },
 
 		toggleLayerClicked: function(event)
@@ -447,12 +540,18 @@ define([
 				}
 			});
 			return false;
+		},
+
+		editCollectionClicked: function(evt)
+		{
+			this.toggleInPlaceEditMode();
 		}
 
 
 	});
 
 	_.extend(MapLayerView.prototype, SpinnerMixin);
+	_.extend(MapLayerView.prototype, InPlaceEditorMixin);
 
 	return MapLayerView;
 });

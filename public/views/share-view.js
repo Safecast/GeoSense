@@ -23,19 +23,20 @@ define([
 		render: function()
 		{
 			ShareView.__super__.render.call(this);
-			this.$(".public-url, .iframe").click(function() {
-			   $(this).select();
+			this.$(".map-url, .iframe").click(function() {
+				$(this).select();
 			});
 			return this;
 		},
 
 		show: function()
 		{
-			var url = app.genPublicURL(true);
-			this.$('.public-url').val(url);
+			var url = app.currentPublicMapUrl();
+			this.$('.map-url').val(url);
 			this.$('.iframe').val(
 				'<iframe width="920" height="640" frameborder="0" scrolling="auto" marginwidth="0" marginheight="0" src="%(url)s"></iframe>'
 				.format({url: url}));
+			this.$('.alert.private').toggle(app.map.isPrivate());
 			ShareView.__super__.show.call(this);
 		}
 

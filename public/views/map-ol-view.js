@@ -282,7 +282,7 @@ define([
             if (model.hasChanged('layerOptions.htmlRenderer')) {
                 this.destroyRenderLayer(model);
                 this.initRenderLayer(model);
-                this.featureReset(model.featureCollection);
+                this.featureReset(model.mapFeatures);
                 return;
             }
 
@@ -294,7 +294,7 @@ define([
                 || model.hasChanged('layerOptions.attrMap.featureSize') 
                 || model.hasChanged('layerOptions.attrMap.featureColor')) {
                     // console.log('* featureReset '+collection.mapLayer.id);
-                    this.featureReset(model.featureCollection);
+                    this.featureReset(model.mapFeatures);
             } else {
                 // console.log('* layer.redraw '+model.id);
                 layer.redraw();
@@ -491,6 +491,7 @@ define([
            
         setVisibleMapArea: function(area)
         {
+            console.log('set==>',area);
             var center = new OpenLayers.LonLat(area.center[0], area.center[1]);
             center.transform(this.externalProjection, this.internalProjection);    
             this.map.setCenter(center, area.zoom);      
@@ -753,6 +754,7 @@ define([
         initMapLayer: function(change)
         {
             ViewBase.osm.prototype.initMapLayer.call(this, false, window.BASE_URL + "/assets/blank.gif");
+            this.mapLayer.attribution = '';
         },
 
         mapStyles: {

@@ -70,13 +70,17 @@ footer .dot {
   margin-bottom: 70px;
 }
 
+.page.home .jumbotron h2 {
+  font-size: 18px
+}
+
 .page .jumbotron form {
 	margin: 40px 0 20px 0;
 } 
 
 .page .jumbotron h2 {
 	color: #aaa;
-  font-size: 16px;
+  font-size: 25px;
   margin-bottom: 18px;
   white-space: nowrap;
 }
@@ -138,6 +142,9 @@ form.login .btn {
   margin-right: 10px;
 }
 
+.popover-title {
+  font-size: 14px !important;
+}
 
 /* Featurettes
 ------------------------- */
@@ -159,8 +166,6 @@ form.login .btn {
 }
 
 .featurette-image {
-  width: 290px;
-  height: 290px;
   background: #efefef;
 } 
 
@@ -195,8 +200,8 @@ form.login .btn {
     font-size: 120px;
   }
 
-  .page .jumbotron h2 {
-    font-size: 22px;
+  .page.home .jumbotron h2 {
+    font-size: 25px;
   }
 
 }
@@ -205,7 +210,6 @@ form.login .btn {
 .page .panel-scrollable-container {
   overflow: auto;
   height: 300px;
-  padding-right: 10px;
 }
 
 

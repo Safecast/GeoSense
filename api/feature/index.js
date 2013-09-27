@@ -19,7 +19,7 @@ var FeatureAPI = function(app)
 {
 	var retrieveLayer = function(req, res, callback) 
 	{
-		Map.findOne({slug: req.params.slug})
+		apiUtil.findMapForRequest(req)
 			.populate('layers.featureCollection')
 			.populate('layers.layerOptions')
 			.populate('createdBy')
@@ -29,9 +29,10 @@ var FeatureAPI = function(app)
 				var mapLayer = map.layers.id(req.params.layerId),
 					featureCollection = mapLayer ? mapLayer.featureCollection : null;
 
-				if (!mapLayer || !featureCollection) {
-					res.send('map layer not found', 404);
-					return;
+				if (!mapLayer || !featureCollection 
+					|| !permissions.canViewFeatureCollection(req, map, featureCollection)) {
+						res.send('map layer not found', 404);
+						return;
 				} 
 
 				callback(map, mapLayer, featureCollection);
@@ -50,6 +51,28 @@ var FeatureAPI = function(app)
 				});
 		});
 
+		app.patch('/api/featurecollection/:id', [permissions.requireLogin], function(req, res)
+		{
+			var allowedFields = ['title', 'source', 'description', 'sharing'];
+			GeoFeatureCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: config.DataStatus.IMPORTING}]})
+				.populate('defaults')
+				.populate('createdBy')
+				.populate('modifiedBy')
+				.exec(function(err, featureCollection) {
+					if (handleDbOp(req, res, err, featureCollection, 'feature collection', permissions.canAdminModel)) return;
+
+					allowedFields.forEach(function(k) {
+						if (req.body[k] != undefined) {
+							featureCollection.set(k, req.body[k]);
+						}
+					});
+					featureCollection.save(function(err, featureCollection) {
+						if (handleDbOp(req, res, err, featureCollection, 'feature collection')) return;
+						res.send(featureCollection);
+					});
+				});
+		});
+
 		app.get('/api/featurecollection/:id/histogram', function(req, res) {
 			GeoFeatureCollection.findOne({_id: req.params.id, $or: [{active: true}, {status: config.DataStatus.IMPORTING}]})
 				.populate('defaults')
@@ -64,11 +87,8 @@ var FeatureAPI = function(app)
 						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, docs.length)) return;
 							res.send(docs.map(function(doc) {
-								console.log(doc);
-								console.log(doc);
 								var extraAttrs = {properties: {bin: doc.get('value.bin')}};
 								doc._id = undefined;
-								console.log(extraAttrs);
 								return doc.toGeoJSON(extraAttrs);
 							}));
 						});
@@ -98,6 +118,9 @@ var FeatureAPI = function(app)
 			switch (type) {
 				case 'user':
 					filterQuery.createdBy = req.user;
+					break;
+				case 'public':
+					filterQuery.sharing = config.SharingType.WORLD;
 					break;
 			}
 
@@ -139,7 +162,7 @@ var FeatureAPI = function(app)
 				});
 		});
 
-		app.get('/api/map/:slug/layer/:layerId/features', function(req, res) 
+		var mapFeaturesRoute = function(req, res) 
 		{
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var urlObj = url.parse(req.url, true),
@@ -308,7 +331,10 @@ var FeatureAPI = function(app)
 				});
 
 			});
-        });
+        };
+
+		app.get('/api/map/s/:secretSlug/layer/:layerId/features', mapFeaturesRoute);
+		app.get('/api/map/:slug/layer/:layerId/features', mapFeaturesRoute);
 
     }
 };

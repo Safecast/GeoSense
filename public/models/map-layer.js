@@ -2,12 +2,13 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'models/geo-feature-collection',
     'collections/map-features',
     'collections/histogram',
     'lib/color-gradient/color-gradient',
     'deepextend',
     'deepmodel',
-], function($, _, Backbone, MapFeatures, Histogram, ColorGradient) {
+], function($, _, Backbone, GeoFeatureCollection, MapFeatures, Histogram, ColorGradient) {
     "use strict";
 
     var MapLayer = Backbone.DeepModel.extend({
@@ -98,13 +99,19 @@ define([
                 
             this.parentMap = options.parentMap;
             if (this.attributes.featureCollection) {
-                this.featureCollection = new MapFeatures([], {mapLayer: this});
+                this.mapFeatures = new MapFeatures([], {mapLayer: this});
                 if (this.getOption('histogram') && this.isNumeric()) {
                     this.histogram = new Histogram([], {mapLayer: this});
                 }
+                this.featureCollection = new GeoFeatureCollection(this.attributes.featureCollection);
+                this.listenTo(this.featureCollection, 'sync change', function(model, options) {
+                    self.set({
+                        featureCollection: _.clone(this.featureCollection.attributes)
+                    }, options);
+                });
             } else {
                 var feed = this.getLayerOptions().feed;
-                this.featureCollection = new MapFeatures([], {mapLayer: this, 
+                this.mapFeatures = new MapFeatures([], {mapLayer: this, 
                     urlFormat: feed ? feed.url : '',
                     parser: feed ? feed.parser : ''
                 });
