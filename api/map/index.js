@@ -68,7 +68,7 @@ var MapAPI = function(app)
 		});
 
 		// Creates and returns a new map
-		app.post('/api/map', function(req, res)
+		app.post('/api/map', config.ANONYMOUS_MAP_CREATION ? [] : [permissions.requireLogin], function(req, res)
 		{
 			if (!permissions.canCreateMap(req)) {
 	            res.send('Cannot create map', 403);
@@ -109,7 +109,9 @@ var MapAPI = function(app)
 						console.log('saving map')
 						map.save(function(err, map) {
 							if (handleDbOp(req, res, err, map, 'map')) return;
-							permissions.allowSessionAdmin(req, map);
+							if (config.ANONYMOUS_MAP_CREATION && !req.user) {
+								permissions.allowSessionAdmin(req, map);
+							}
 						 	if (req.xhr) {
 						 		res.send(prepareMapResult(req, map));
 						 	} else {
