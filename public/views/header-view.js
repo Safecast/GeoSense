@@ -80,8 +80,7 @@ define([
 
 		mapTitleClicked: function(evt)
 		{
-			var uri = app.isMapAdmin() ? app.map.adminUri() : app.map.publicUri();
-			app.navigate(uri, {trigger: true});
+			app.resetMap();
 			return false;
 		},
 		

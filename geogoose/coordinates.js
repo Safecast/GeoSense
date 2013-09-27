@@ -110,6 +110,19 @@ var polygonFromBbox = function(b)
     };
 }
 
+var lineStringFromBbox = function(b)
+{
+    return {
+        type: 'LineString',
+        coordinates: [
+            [b[0], b[1]],
+            [b[2], b[1]],
+            [b[2], b[3]],
+            [b[0], b[3]],
+        ]
+    };
+}
+
 var polygonFromBounds = function(b)
 {
     return {
@@ -131,6 +144,7 @@ module.exports = {
     bboxFromBounds: bboxFromBounds,
     boundsFromBbox: boundsFromBbox,
     polygonFromBbox: polygonFromBbox,
+    lineStringFromBbox: lineStringFromBbox,
     polygonFromBounds: polygonFromBounds
 };
 

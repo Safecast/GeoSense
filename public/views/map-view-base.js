@@ -19,6 +19,7 @@ define([
             if (options.visibleMapArea) {
                 this.initialVisibleMapArea = options.visibleMapArea;
             }
+            console.log('INITIAL', this.initialVisibleMapArea);
         },
 
         renderMap: function(viewBase, viewStyle) 

@@ -9,7 +9,7 @@ var mongoose = require('mongoose'),
 var geoJSONFeatureCollectionDefinition = {
         type: {type: String, required: true, enum: ['FeatureCollection'], default: 'FeatureCollection'},
         bounds: {
-            type: {type: String, enum: ["Polygon"]},
+            type: {type: String, enum: ["LineString"]},
             coordinates: {type: Array},
         },
         bbox: {type: Array},
@@ -35,8 +35,9 @@ GeoFeatureCollectionSchemaMiddleware.pre = {
     save: function(next) {
 
         if (this.bbox && this.bbox.length) {
-            this.bounds = coordinates.polygonFromBbox(this.bbox);
+            this.bounds = coordinates.lineStringFromBbox(this.bbox);
         } else {
+            this.bbox = undefined;
             this.bounds = undefined;
         }
 

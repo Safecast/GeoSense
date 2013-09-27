@@ -104,6 +104,7 @@ var FeatureAPI = function(app)
 				limit = isNaN(limit) ? 20 : Math.max(1, Math.min(40, limit)),
 				filterQuery = {$and: [{active: true}, {status: config.DataStatus.COMPLETE}]},
 				query,
+				featureCountQuery = {geometry: {$ne: null}};
 				type = ['user', 'public'].indexOf(urlObj.query.t) != -1 ? urlObj.query.t : 'public';
 			
 			if (urlObj.query.q && typeof urlObj.query.q == 'string') {
@@ -148,7 +149,7 @@ var FeatureAPI = function(app)
 					    	return;
 			    		}
 						var collection = countQueue.shift();
-			    		collection.getFeatureModel().count(function(err, c) {
+			    		collection.getFeatureModel().count(featureCountQuery, function(err, c) {
 							if (handleDbOp(req, res, err, true)) return;
 							collection.extraAttrs = {
 								counts: {

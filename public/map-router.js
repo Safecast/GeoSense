@@ -90,15 +90,14 @@ define([
                 this.mapLayerSubViewsAttached = false;
                 this.mapLayerEditorViews = {};
                 this.graphsPanelViews = {};
+                this.mapChanged = false;
 
                 this.vent = _.extend({}, Backbone.Events);
                 this.adminRoute = false;
                 this.routingByHost = false;
 
                 this.listenTo(this.vent, 'viewOptionsChanged', this.viewOptionsChanged);
-
                 this.sessionOptions = {};
-
                 this.isEmbedded = window != window.top;
             }, 
 
@@ -201,8 +200,6 @@ define([
                 var self = this;
                 this.map.fetch({
                     success: function(model, response, options) {
-                        console.log('initMapInfo');
-                        console.log(self.map.attributes);
                         self.initMap();
                     },
                     error: function(model, xhr, options) {
@@ -572,13 +569,23 @@ define([
                 return this.map.publicUrl(opts);
             },
 
+            resetMap: function()
+            {
+                var uri = this.isMapAdmin() ? app.map.adminUri() : app.map.publicUri();
+                this.mapChanged = false;
+                this.navigate(uri, {trigger: true});
+            },
 
             // Map and map style events 
 
             visibleMapAreaChanged: function(mapView, area)
             {
                 console.log('! app.visibleAreaChanged', area);
-                this.navigate(this.currentMapUri(), {trigger: false});
+                
+                if (this.mapChanged) {
+                    this.navigate(this.currentMapUri(), {trigger: false});
+                }
+                this.mapChanged = true;
 
                 _.each(this.mapLayersById, function(mapLayer) {
                     if (mapLayer.limitFeatures()) {
@@ -868,7 +875,12 @@ define([
                 root: window.BASE_URL.replace(/^(.*:\/\/)?[^\/]*\/?/, ''), // strip host and port and beginning /
                 silent: false
             })) {
-                window.location.href = window.BASE_URL + '404';
+                var last = window.location.href.length - 1;
+                if (window.location.href[last] == '/') {
+                    window.location.href = window.location.href.substr(0, last);
+                } else {
+                    window.location.href = window.BASE_URL + '404';
+                }
             }
         };
 

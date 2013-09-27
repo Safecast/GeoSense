@@ -118,7 +118,7 @@ define([
 										total: formatLargeNumber(c.full)
 									});
 		    					} else {
-									status = (c.full > 1 ? __('%(total)i %(itemTitlePlural)s') : __('%(total)i %(itemTitle)s')).format({
+									status = (c.full != 1 ? __('%(total)i %(itemTitlePlural)s') : __('%(total)i %(itemTitle)s')).format({
 										total: formatLargeNumber(c.full),
 										itemTitle: this.model.getDisplay('itemTitle'),
 										itemTitlePlural: this.model.getDisplay('itemTitlePlural'),
@@ -288,7 +288,6 @@ define([
 
 	    show: function(duration)
 	    {
-	    	console.log('show', duration);
 	    	if (!duration) {
 		    	this.$el.show();
 		    	return this;
@@ -376,7 +375,7 @@ define([
 				this.expand(animate);
 			}
 
-			this.$('.layer-extents').toggle(enabled 
+			this.$('.show-layer-extents').toggle(enabled 
 				&& this.model.getBbox().length > 0);
 		},
 
