@@ -34,8 +34,8 @@ var prepareMapResult = function(req, map)
 			var layers = m[k],
 				outputLayers = [];
 			layers.forEach(function(layer) {
-				if (layer.featureCollection._id && permissions.canViewFeatureCollection(
-					req, map, layer.featureCollection)) {
+				if (layer.featureCollection && layer.featureCollection._id 
+					&& permissions.canViewFeatureCollection(req, map, layer.featureCollection)) {
 						outputLayers.push(prepareLayerResult(req, layer, map));
 				}
 			});

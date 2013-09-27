@@ -491,7 +491,6 @@ define([
            
         setVisibleMapArea: function(area)
         {
-            console.log('set==>',area);
             var center = new OpenLayers.LonLat(area.center[0], area.center[1]);
             center.transform(this.externalProjection, this.internalProjection);    
             this.map.setCenter(center, area.zoom);      
