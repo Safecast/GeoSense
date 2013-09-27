@@ -29,6 +29,10 @@
 		"cloneextend": "0.0.3",
 		"jsdom": "0.5.0",
 		"togeojson": "0.0.1",
-		"xml-stream": "0.x"
+		"xml-stream": "0.x",
+		"connect-flash": "0.1.x",
+		"bcrypt": "0.7.x",
+		"passport": "0.1.x",
+		"passport-local": "0.1.x"
   }
 }
