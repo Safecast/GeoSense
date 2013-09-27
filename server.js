@@ -91,6 +91,7 @@ var getRenderVars = function(req, vars) {
 		req.flashMessages = req.flash();
 	}
 	var vars = _.extend({
+		xhr: req.xhr,
 		bodyClass: undefined,
 		nodeEnv: process.env.NODE_ENV,
 		config: config,
@@ -112,7 +113,12 @@ var renderPage = function(req, res, page, vars)
 	if (!vars.bodyClass) {
 		vars.bodyClass = 'page';
 	}
-	return ejs.render(templates['templates/base.ejs'], getRenderVars(req, _.extend(vars, {
+	if (req.xhr) {
+		vars.bodyClass += ' xhr';
+	}
+	var template = !req.xhr ?
+		'templates/base.ejs' : 'templates/base-xhr.ejs';
+	return ejs.render(templates[template], getRenderVars(req, _.extend(vars, {
 		content: renderFragment(req, res, page, vars)
 	})));
 };
@@ -151,21 +157,43 @@ app.get('/login', function(req, res)
 	}));
 });
 
+var loginCallback = function(req, res, redir) 
+{
+	var end = function() {
+		if (req.xhr) {
+			return res.send(req.user.toJSONSelf());
+		}
+		return res.redirect((redir ? redir : 'dashboard'));
+	};
+	if (config.ANONYMOUS_MAP_CREATION) {
+		// Try to associate models that user created _before_ signup (stored in session)
+		// with the new user account
+		permissions.setUserForSessionAdminModels(req, end);
+	} else {
+		end();
+	}
+};
+
 app.post('/login', function(req, res, next) {
 	var redir = req.body.next && req.body.next ? 
 		req.body.next : undefined;
-	passport.authenticate('local', function(err, user, info) {
+	passport.authenticate('local', {
+		badRequestMessage: 'Please enter your credentials.'
+	}, function(err, user, info) {
 	    if (err) { 
 	    	return next(err); 
 	    }
 	    if (!user) { 
+	    	if (info && info.message) {
+				req.flash('error', info.message);
+			}
 	    	return res.redirect('/login' + (redir ? '?next=' + redir : '')); 
 	    }
 	    req.logIn(user, function(err) {
-	    	if (err) { 
+			if (err) { 
 				return next(err); 
 			}
-			return res.redirect((redir ? redir : 'dashboard'));
+			return loginCallback(req, res, redir);
 	    });
 	})(req, res, next);
 });
@@ -200,27 +228,21 @@ app.post('/signup', function(req, res, next)
 					return;
 				}
 				
-				req.logIn(user, function(err) {
-      				if (err) { return next(err); }
-      				// Try to associate models that user created _before_ signup (stored in session)
-      				// with the new user account
-      				var redir = function() {
-	      				return res.redirect('dashboard');
-      				};
-      				if (config.ANONYMOUS_MAP_CREATION) {
-	      				permissions.setUserForSessionAdminModels(req, redir);
-      				} else {
-      					redir();
-      				}
-    			});
+			    req.logIn(user, function(err) {
+					if (err) { 
+						return next(err); 
+					}
+					return loginCallback(req, res);
+			    });
 
 			});
 	}
 });
 
-app.get('/logout', function(req, res) {
+app.get('/logout', function(req, res) 
+{
 	req.logout();
-	res.redirect('login');
+	res.redirect(req.query.next || 'login');
 });
 
 app.get('/', function(req, res) 
@@ -348,6 +370,7 @@ utils.connectDB(function() {
 	utils.loadFiles(
 		[
 			'templates/base.ejs', 
+			'templates/base-xhr.ejs', 
 			'templates/home.ejs', 
 			'templates/dashboard.ejs', 
 			'templates/map.ejs', 

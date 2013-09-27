@@ -29,6 +29,7 @@ define([
 	    initialize: function(options) 
 	    {
 		    this.template = _.template(templateHtml);	
+		    DataImportView.__super__.initialize.apply(this, arguments);
 			this.vent = options.vent;
 			this.responseData = null;
 			this.dataTitle = '';

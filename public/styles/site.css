@@ -66,6 +66,12 @@ footer .dot {
   margin-bottom: 15px;
 }
 
+.page.xhr .jumbotron {
+  margin: 0;
+  padding: 15px 0 0 0;
+  border: none;
+}
+
 .page.home .jumbotron {
   margin-bottom: 70px;
 }

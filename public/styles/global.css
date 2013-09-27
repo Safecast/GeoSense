@@ -225,6 +225,18 @@ button .glyphicon-ok.pull-right {
 	background: #f8f8f8;
 }
 
+.login-signup .modal-body {
+	padding: 0;
+}
+
+.login-signup .modal-footer, .login-signup .modal-header {
+	margin: 0;
+	border: none;
+}
+
+.login-signup .modal-content {
+}
+
 /*.glyphicon.is-public {
 	color: #5cb85c;
 }

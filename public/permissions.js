@@ -5,6 +5,14 @@ define([], function() {
 		return window.USER;
 	};
 
+	var setUser = function(user)
+	{
+		window.USER = user;
+		if (app.headerView) {
+			app.headerView.updateUser();
+		}
+	};
+
 	var canAdminModel = function(model) 
 	{
 		var u = currentUser() || {};
@@ -14,6 +22,7 @@ define([], function() {
 
 	return {
 		currentUser: currentUser,
-		canAdminModel: canAdminModel
+		canAdminModel: canAdminModel,
+		setUser: setUser
 	};
 });

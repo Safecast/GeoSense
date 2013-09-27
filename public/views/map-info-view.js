@@ -18,8 +18,8 @@ define([
 
 	    initialize: function(options) 
 	    {    	
-	    	MapInfoView.__super__.initialize.call(this, options);
 		    this.template = _.template(templateHtml);
+	    	MapInfoView.__super__.initialize.call(this, options);
 		    this.listenTo(this.model, 'sync', this.populateFromModel);
 		},
 

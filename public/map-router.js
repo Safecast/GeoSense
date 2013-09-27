@@ -2,6 +2,8 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'permissions',
+    'views/login-signup-view',
     'views/header-view',
     'views/setup-view',
     'views/map-ol-view',
@@ -22,9 +24,9 @@ define([
     'models/map',
     'models/map-layer',
     'text!templates/help/about.html'
-], function($, _, Backbone, HeaderView, 
-    SetupView, MapOLView, HelpPanelView, LayersPanelView, DataDetailView,
-    MapInfoView, BaselayerEditorView, MapLayerEditorView,
+], function($, _, Backbone, permissions, LoginSignupView,
+    HeaderView, SetupView, MapOLView, HelpPanelView, LayersPanelView, 
+    DataDetailView, MapInfoView, BaselayerEditorView, MapLayerEditorView,
     MapLayerView, DataLibraryPanelView, DataImportView,
     ModalView, ShareView, GraphsPanelView, TimelineScatterPlotView, HistogramView,
     Map, MapLayer,
@@ -769,6 +771,16 @@ define([
                 modalView.show();
             },
 
+            showSignup: function()
+            {
+                new LoginSignupView().showSignup();
+            },
+
+            showLogin: function()
+            {
+                new LoginSignupView().showLogin();
+            },
+
             showSetupView: function() 
             {
                 this.setupView.show();  
@@ -776,6 +788,10 @@ define([
             
             toggleDataImport: function() 
             {
+                if (!permissions.currentUser()) {
+                    this.showSignup();
+                    return;
+                }
                 if (!this.dataImportView) {
                     this.dataImportView = new DataImportView({vent: this.vent}).render();
                 }
