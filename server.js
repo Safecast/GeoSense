@@ -202,7 +202,16 @@ app.post('/signup', function(req, res, next)
 				
 				req.logIn(user, function(err) {
       				if (err) { return next(err); }
-      				return res.redirect('dashboard');
+      				// Try to associate models that user created _before_ signup (stored in session)
+      				// with the new user account
+      				var redir = function() {
+	      				return res.redirect('dashboard');
+      				};
+      				if (config.ANONYMOUS_MAP_CREATION) {
+	      				permissions.setUserForSessionAdminModels(req, redir);
+      				} else {
+      					redir();
+      				}
     			});
 
 			});
@@ -260,10 +269,6 @@ app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)/, [/*permissions.requireLogin*/], function
 			} else if (!permissions.canAdminMap(req, map)) {
 				return res.redirect('login?next=' + req.url);
 			}
-
-			req.session.user = map.createdBy;
-			console.warn('Implicitly authenticated user:', req.session.user);
-
 			serveMap(req, res, map);
 		});
 });

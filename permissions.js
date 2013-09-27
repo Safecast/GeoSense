@@ -1,31 +1,71 @@
 var config = require("./config"),
-	console = require('./ext-console');
+	console = require('./ext-console'),
+	models = require('./models');
 
 var canAdminMap = function(req, map) 
 {
-	return canAdminModel(req, map);
-	/*
-	if (!req.session.admin) {
-		req.session.admin = {};
-	}
-	if (status != null) {
-		req.session.admin[map._id] = status == true; 
-		console.log('set map admin: '+map._id+' = '+status);
-	} else {
-		if (!config.DEBUG || !config.DEBUG_CIRCUMVENT_PERMISSIONS) {
-			status = req.session.admin[map._id] == true;
-			console.log('is map admin: '+map._id+' == '+status);
-		} else {
-			status = true;
-			console.log('DEBUG on, is map admin: '+map._id+' == '+status);
-		}
-	}
-	return status;*/
+	return canAdminModel(req, map)
+		|| isSessionAdminAllowed(req, map);
 };
 
 var allowSessionAdmin = function(req, doc)
 {
+	if (!req.session.canAdminModels) {
+		req.session.canAdminModels = {};
+	}
+	req.session.canAdminModels[doc._id.toString()] = doc.constructor.modelName;
+	console.warn('allwoSessionAdmin: ', doc.constructor.modelName, doc._id);
+};
 
+var isSessionAdminAllowed = function(req, doc)
+{
+	return req.session.canAdminModels != undefined &&
+		req.session.canAdminModels[doc._id.toString()] == doc.constructor.modelName;
+};
+
+var setUserForSessionAdminModels = function(req, callback)
+{
+	var modelNames = req.session.canAdminModels || {}
+		queue = Object.keys(modelNames);
+
+	if (!req.user) {
+		callback();
+		return;
+	}
+	console.info('Associating models with user', req.user._id, queue);
+
+	var dequeueUpdate = function(err) {
+		if (!queue.length) {
+			callback(err);
+			return;
+		}
+		var id = queue.shift(),
+			modelName = modelNames[id],
+			model = models[modelName];
+		model.findById(id, function(err, doc) {
+			if (err) {
+				console.error(err);
+			} else {
+				console.log(modelName, doc._id, doc.createdBy);
+			}
+			if (!err && doc && !doc.createdBy) {
+				doc.createdBy = req.user;
+				doc.save(function(err, doc) {
+					if (err) {
+						console.error(err);
+					} else {
+						delete req.session.canAdminModels[id];
+						console.success('Associated '+modelName+' '+doc._id+' with User '+doc.createdBy);
+					}
+					dequeueUpdate();
+				})
+				return;
+			}
+			dequeueUpdate();
+		});
+	};
+
+	dequeueUpdate();
 };
 
 var sameUser = function(u1, u2)
@@ -83,8 +123,9 @@ var requireLogin = function(req, res, next)
     	if (req.xhr) {
 	        res.redirect('login', 403);
     	} else {
+    		var nextUrl = req.method != 'POST' ? req.url : req.headers.referer;
     		// sending a 403 will result in browser displaying the "Forbidden. Redirecting to /login" message
-	        res.redirect('login?next=' + req.url);
+	        res.redirect('/login' + (nextUrl ? '?next=' + nextUrl : ''));
     	}
     }
 }
@@ -98,5 +139,6 @@ module.exports = {
 	canImportData: canImportData,
 	requireLogin: requireLogin,
 	sameUser: sameUser,
-	allowSessionAdmin: allowSessionAdmin
+	allowSessionAdmin: allowSessionAdmin,
+	setUserForSessionAdminModels: setUserForSessionAdminModels
 };
