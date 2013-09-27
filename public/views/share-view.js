@@ -17,6 +17,7 @@ define([
 
 	    initialize: function(options) {
 		    this.template = _.template(templateHtml);
+		    ShareView.__super__.initialize.apply(this, arguments);
 	    },
 		
 

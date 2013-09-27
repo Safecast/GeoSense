@@ -29,7 +29,10 @@ define([
 			'click .view-style a' : 'viewStyleToggleClicked',
 			'click #customizeViewOptions': 'customizeViewOptionsClicked',
 			'click .search-form button': 'searchClicked',
-			'click .map-title': 'mapTitleClicked'
+			'click .map-title': 'mapTitleClicked',
+			'click .user-signup': 'userSignupClicked',
+			'click .user-login': 'userLoginClicked',
+			'click .user-logout': 'userLogoutClicked'
 	    },
 
 	    initialize: function(options) 
@@ -52,13 +55,7 @@ define([
 				this.$('.admin-tool').remove();
 			} 
 
-			var user = permissions.currentUser();
-			if (user) {
-				this.$('.user-name').text(user.email);
-				this.$('.logged-out').addClass('hidden');
-			} else {
-				this.$('.logged-in').addClass('hidden');
-			}
+			this.updateUser();
 
 			this.$('.nav').each(function() {
 				if ($('li, button', this).length == 0) {
@@ -67,6 +64,19 @@ define([
 			});
 
 	        return this;
+	    },
+
+	    updateUser: function()
+	    {
+			var user = permissions.currentUser();
+			if (user) {
+				this.$('.user-name').text(user.email);
+				this.$('.logged-out').addClass('hidden');
+				this.$('.logged-in').removeClass('hidden');
+			} else {
+				this.$('.logged-in').addClass('hidden');
+				this.$('.logged-out').removeClass('hidden');
+			}
 	    },
 
 		searchClicked: function(evt)
@@ -213,14 +223,26 @@ define([
 			window.open('' + url, __('Share it on Facebook'), 'width=650,height=251,toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0');
 			evt.preventDefault();
 		},
-		
-		remove: function() 
+
+		userSignupClicked: function(evt) 
 		{
-			$(window).unbind();
-			$(this.el).remove();
-			return this;
+			app.showSignup();
+			evt.preventDefault();
 		},
-	  
+
+		userLoginClicked: function(evt) 
+		{
+			app.showLogin();
+			evt.preventDefault();
+		},
+
+		userLogoutClicked: function(evt)
+		{		
+			window.location.href = $(evt.currentTarget).attr('href') + 
+				'?next=' + this.model.publicUrl();
+
+			return evt.preventDefault();
+		}	  
 	});
 
 	return HeaderView;

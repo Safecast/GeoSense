@@ -16,14 +16,20 @@ define([
 	    events: {
 	    },
 
-	    initialize: function(options) {
-		    this.template = _.template(templateHtml);
+	    initialize: function(options) 
+	    {
+	    	if (!this.template) {
+			    this.template = _.template(templateHtml);
+	    	}
+		    this.modalOptions = _.extend(
+		    	{keyboard: true, show: false}, options ? options.modalOptions : {});
 	    },
 
-	    render: function() {
+	    render: function() 
+	    {
 			this.$el.html(this.template())
 				.attr('tabindex', -1)
-				.modal({keyboard: true, show: false});
+				.modal(this.modalOptions);
 			return this;
 	    },
 

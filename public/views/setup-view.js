@@ -26,6 +26,7 @@ define([
 	    initialize: function(options) 
 	    {
 		    this.template = _.template(templateHtml);	
+		    SetupView.__super__.initialize.apply(this, arguments);
 			this.mapInfoChanged = false;
 			this.initialAreaChanged = this.viewOptionsChanged = true;
 			this.listenTo(this.model, 'sync', this.populateFromModel);
