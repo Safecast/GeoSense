@@ -214,6 +214,7 @@ exports.exitCallback = function(err, data, showHelp) {
 
 exports.validateExistingCollection = function(err, collection, callback, force)
 {
+    console.log(err);
     if (err || !collection) {
         if (!err) {
             err = new Error('Collection not found');
@@ -438,7 +439,7 @@ exports.capFirst = function(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 };
 
-exports.friendlyErrorMessages = function(err)
+var friendlyErrorMessages = function(err)
 {
     if (err.name == 'ValidationError') {
         var messages = [],
@@ -458,4 +459,20 @@ exports.friendlyErrorMessages = function(err)
         }
         return messages;
     }
-}
+};
+exports.friendlyErrorMessages = friendlyErrorMessages;
+
+exports.errorToFlash = function(req, err)
+{
+    var messages = friendlyErrorMessages(err);
+    if (messages) {
+        for (var i = 0; i < messages.length; i++) {
+            req.flash('error', messages[i]);                            
+        }
+    } else if (err.code == 11000) {
+        console.error(err);
+        req.flash('error', 'A user with this email address already exists.');
+    } else {
+        req.flash('error', 'Error creating user account.');
+    }
+};
