@@ -93,22 +93,29 @@ define([
 						break;
 				}
 
-				this.$('.sharing-status').popover('destroy');
-		    	this.$('.sharing-status').attr('disabled', false);
-				this.$('.sharing-status').popover({
-					animation: false,
-					content: popoverContent,
-					html: popoverContent,
-					title: popoverTitle,
-					container: self.superView.$el,
-				}).on('show.bs.popover', function(evt) {
-					self.hidePopovers();
-				}).on('shown.bs.popover', function(evt) {
-					$('.sharing-toggle').click(function(evt) {
-						return self.sharingToggleClicked(evt);
+				var $trigger = this.$('.sharing-status');
+				$trigger.popover('destroy')
+		    		.attr('disabled', false)
+					.popover({
+						animation: false,
+						content: popoverContent,
+						html: popoverContent,
+						title: popoverTitle,
+						//container: self.superView.$el,
+						placement: function() {
+							if ($(window).innerWidth() - self.superView.$el.outerWidth() < 300) {
+								return 'left';
+							}
+							return 'right';
+						}
+					}).on('show.bs.popover', function(evt) {
+						self.hidePopovers();
+					}).on('shown.bs.popover', function(evt) {
+						$('.sharing-toggle').click(function(evt) {
+							return self.sharingToggleClicked(evt);
+						});
+						evt.stopPropagation();
 					});
-					evt.stopPropagation();
-				});
 			}
 	    },
 	

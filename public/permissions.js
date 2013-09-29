@@ -8,8 +8,8 @@ define([], function() {
 	var setUser = function(user)
 	{
 		window.USER = user;
-		if (app.headerView) {
-			app.headerView.updateUser();
+		if (app) {
+			app.trigger(user ? 'user:login' : 'user:logout');
 		}
 	};
 

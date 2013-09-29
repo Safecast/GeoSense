@@ -4,6 +4,7 @@ var application_root = __dirname,
 	path = require("path"),
 	express = require("express"),
   	mongoose = require('mongoose'),
+  	ValidationError = mongoose.Error.ValidationError,
   	models = require('./models.js'),
   	utils = require('./utils.js'),
   	flash = require('connect-flash'),
@@ -205,25 +206,31 @@ app.get('/signup', function(req, res)
 
 app.post('/signup', function(req, res, next)
 {
-	var data = {email: req.body.email, password: req.body.password, confirmPassword: req.body.confirmPassword};
-	if (data.password != data.confirmPassword) {
-		req.flash('error', 'Password does not match the confirm password.');
-		res.end(renderPage(req, res, 'signup', data));
-	} else {
-		new models.User(data)
-			.save(function(err, user) {
+	var data = {email: req.body.email, password: req.body.password, confirmPassword: req.body.confirmPassword},
+		newUser = models.User(data);
+
+	newUser.validate(function(err) {
+
+		var valid = !err;
+		if (!valid) {
+			utils.errorToFlash(req, err);
+		} 
+		if ((!err || !err.errors['password'])
+			&& data.password && data.password.length 
+			&& data.password != data.confirmPassword) {
+				req.flash('error', 'Password does not match the confirm password.');
+				valid = false;
+		}
+
+		if (!valid) {
+			res.end(renderPage(req, res, 'signup', data));
+			return;
+		}
+
+		if (valid) {
+			newUser.save(function(err, user) {
 				if (err) {
-					var messages = utils.friendlyErrorMessages(err);
-					if (messages) {
-						for (var i = 0; i < messages.length; i++) {
-							req.flash('error', messages[i]);							
-						}
-					} else if (err.code == 11000) {
-						console.error(err);
-						req.flash('error', 'A user with this email address already exists.');
-					} else {
-						req.flash('error', 'Error creating user account.');
-					}
+					utils.errorToFlash(req, err);
 					res.end(renderPage(req, res, 'signup', data));
 					return;
 				}
@@ -234,9 +241,10 @@ app.post('/signup', function(req, res, next)
 					}
 					return loginCallback(req, res);
 			    });
-
 			});
-	}
+		}
+	});
+
 });
 
 app.get('/logout', function(req, res) 

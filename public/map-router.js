@@ -456,6 +456,9 @@ define([
                 }
 
                 this.headerView = new HeaderView({vent: this.vent, model: this.map});
+                this.on('user:login', function() {
+                    self.headerView.updateUser();
+                });
                 $('#app').append(this.headerView.render().el);
 
                 this.$mainEl = $('<div id="main-viewport"></div>');

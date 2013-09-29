@@ -38,6 +38,10 @@ var UserSchema = new mongoose.Schema({
 
 UserSchema.plugin(useTimestamps);
 
+UserSchema.path('password').validate(function (value) {
+    return value.length >= 5;
+}, 'At least five characters are required.');
+
 UserSchema.pre('save', function(next) {
     var salt = bcrypt.genSaltSync(10);
     this.password = bcrypt.hashSync(this.password, salt);
