@@ -45,7 +45,7 @@ footer .dot {
   padding: 13px 15px;
 }
 
-.page .app-title {
+.page .jumbotron .app-title {
   font-weight: 700;
   font-size: 60px;
 }
@@ -183,6 +183,10 @@ form.login .btn {
   display: none;
 }
 
+.page .mit-logo {
+  margin-right: 20px;
+}
+
 
 /* RESPONSIVE CSS
 -------------------------------------------------- */
@@ -202,7 +206,7 @@ form.login .btn {
     font-size: 50px;
   }
 
-  .page.home .app-title {
+  .page.home .jumbotron .app-title {
     font-size: 120px;
   }
 

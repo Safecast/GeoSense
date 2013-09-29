@@ -484,6 +484,7 @@ define([
 						html: popoverContent,
 						title: popoverTitle,
 						container: self.superView.$el,
+						placement: "bottom"
 					}).on('show.bs.popover', function(evt) {
 						self.hidePopovers();
 					}).on('shown.bs.popover', function(evt) {
