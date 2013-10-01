@@ -30,12 +30,6 @@ var coordinates2d = function(x, y)
     return [overflow(c[0], 180), overflow(c[1], 90)];
 };
 
-var bbox2d = function(c) 
-{
-    return [overflow(c[0], 180), overflow(c[1], 90), 
-        overflow(c[2], 180), overflow(c[3], 90)];
-};
-
 /*
 Gets bounding box [[west, south], [east, north]] for coordinates, which can
 be a n-dimensional array of coordinates, such as [11,12] or 
@@ -143,15 +137,30 @@ var polygonFromBounds = function(b)
     };
 }
 
+var haversineDistance = function(p1, p2) 
+{
+    var lat1 = p1[1], lat2 = p2[1], lon1 = p1[0], lon2 = p2[0], 
+        toRad = Math.PI / 180;
+    var R = 6371000; // meters
+    var dLat = (lat2-lat1) * toRad;
+    var dLon = (lon2-lon1) * toRad; 
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    var d = R * c;
+    return d;
+}
+
 module.exports = {
     overflow: overflow,
     coordinates2d: coordinates2d,
-    bbox2d: bbox2d,
     getBounds: getBounds,
     bboxFromBounds: bboxFromBounds,
     boundsFromBbox: boundsFromBbox,
     polygonFromBbox: polygonFromBbox,
     lineStringFromBbox: lineStringFromBbox,
-    polygonFromBounds: polygonFromBounds
+    polygonFromBounds: polygonFromBounds,
+    haversineDistance: haversineDistance
 };
 

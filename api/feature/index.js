@@ -218,22 +218,30 @@ var FeatureAPI = function(app)
                 	if (bbox.some(isNaN)) {
                 		bbox = null;
                 	} else {
-                		console.info('Finding with $geoIntersects');
-                		var bboxW = bbox[2] - bbox[0];
-	                	if (Math.abs(bboxW) > 180) {
-	                		console.warn('bbox is wider than 180°, splitting it in two');
+                		var bboxW = Math.abs(bbox[2] - bbox[0]),
+                			bboxH = Math.abs(bbox[3] - bbox[1]);
+						// MongoDB manual: "Any geometry specified with GeoJSON to $geoIntersects queries, 
+						// must fit within a single hemisphere"
+	                	if (bboxW > 180 || bboxH > 90) {
+	                		/*
+							// TODO: this solution is still not reliable and won't find some features in the middle of the circle:
+							// just disabling filtering will at least not lose any features
+	                		console.warn('bbox is wider than 180°, using $near instead');
+                			var center = [bbox[0] + bboxW / 2, bbox[1] + bboxH / 2];
 	                		findQueue = [
-	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0], bbox[1], bbox[0] + bboxW / 2, bbox[3]])),
-	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0] + bboxW / 2, bbox[1], bbox[2], bbox[3]])),
-	                		];
+	                			FindFeatureModel.near({type: 'Point', coordinates: center}, 
+	                				coordinates.haversineDistance(center, [bbox[0], bbox[1]]))
+	                		];*/
 	                	} else {
-	                		console.log('A====>',bbox, 'B=====>',coordinates.bbox2d(bbox));
-	                		bbox = coordinates.bbox2d(bbox);
-	                		console.log(JSON.stringify(coordinates.polygonFromBbox(bbox)));
+	                		console.info('Finding with $geoIntersects');
+	                		var geometry = coordinates.polygonFromBbox(bbox);
+		                	geometry.coordinates[0] = geometry.coordinates[0].map(function(c) {
+		                		return coordinates.coordinates2d(c);
+		                	});
 	                		findQueue = [
-	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox(bbox)),
+	                			FindFeatureModel.geoIntersects(geometry)
 	                		];
-	                	}
+		                }
                 	}
                 }
                 if (!findQueue) {
@@ -274,6 +282,7 @@ var FeatureAPI = function(app)
             				return !exists;
             			});
             		}
+
             		extraAttrs.properties.counts.result = features.length;
             		if (isMapReduced) {
             			// this is the result of a MapReduce: determine counts

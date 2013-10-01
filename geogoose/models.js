@@ -197,6 +197,16 @@ GeoFeatureSchemaStatics.geoIntersects = function(geometry)
     return this.where(this.schema.statics.geoIndexField, c);
 }
 
+GeoFeatureSchemaStatics.near = function(geometry, maxDistance) 
+{
+    if (!this.schema.statics.geoIndexField) {
+        throw new Error('Schema has no geoIndexField defined');
+    };
+    var c = {$near: {$geometry: geometry, $maxDistance: maxDistance}};
+    console.log(c);
+    return this.where(this.schema.statics.geoIndexField, c);
+}
+
 function GeoFeatureSchema(extraDefinition, extraMethods, extraStatics, extraMiddleware, basicDefinition)
 {
     var schema = new mongoose.Schema(_.cloneextend(basicDefinition || geoJSONFeatureDefinition, extraDefinition || {}));        
