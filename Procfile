@@ -1,2 +1,2 @@
-web: node server.js
-clock: node clock.js
+web: node app.js
+clock: node app.js
