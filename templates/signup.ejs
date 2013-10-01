@@ -5,14 +5,18 @@
         <% } %>
         <h2>Create an Account</h2>
         <% if (messages.info) { %>
+            <div class="alert alert-info">
             <% for (var i = 0; i < messages.info.length; i++) {%>
-                <div class="alert alert-info"><%= messages.info[i] %></div>
+                <%= messages.info[i] %><br>
             <% } %>
+            </div>
         <% } %>
         <% if (messages.error) { %>
+            <div class="alert alert-warning">
             <% for (var i = 0; i < messages.error.length; i++) {%>
-                <div class="alert alert-warning"><%= messages.error[i] %></div>
+                <%= messages.error[i] %><br>
             <% } %>
+            </div>
         <% } %>
 
         <form class="login" action="/signup" method="POST">
