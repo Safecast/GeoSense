@@ -286,7 +286,7 @@ define([
 
                 if (this.isMapAdmin()) {
                     this.helpPanelView  = new HelpPanelView().render();
-                    if (!this.map.attributes.layers.length && this.isMapAdmin()) {
+                    if (!this.map.attributes.layers.length || !permissions.currentUser()) {
                         this.attachPanelView(this.helpPanelView).hide().show('fast');
                     }
                 }
@@ -456,7 +456,12 @@ define([
                 }
 
                 this.headerView = new HeaderView({vent: this.vent, model: this.map});
+                this.mapWasCreatedAnonymously = !this.map.createdBy;
                 this.on('user:login', function() {
+                    if (self.mapWasCreatedAnonymously) {
+                        self.map.attributes.createdBy = permissions.currentUser();
+                        console.log('Setting map user', self.map.attributes.createdBy);
+                    }
                     self.headerView.updateUser();
                 });
                 $('#app').append(this.headerView.render().el);
@@ -784,9 +789,12 @@ define([
                 new LoginSignupView().showLogin();
             },
 
-            showSetupView: function() 
+            showSetupView: function(activeTab) 
             {
                 this.setupView.show();  
+                if (activeTab) {
+                    this.setupView.focusTab(activeTab);
+                }
             },
             
             toggleDataImport: function() 
@@ -873,6 +881,7 @@ define([
                 // success will before before attributes are set, hence wait for sync:
                 layer.once('sync', function() { 
                     self.initMapLayer(layer, true);
+                    self.trigger('layer:added', layer);
                 });
                 layer.save({}, {
                     success: function(model, response, options) {
