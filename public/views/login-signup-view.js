@@ -12,7 +12,7 @@ define([
 	//var MapInfoView = PanelViewBase.extend({
 	var LoginSignupView = ModalView.extend({
 
-		className: 'modal fade login-signup',
+		className: 'modal fade modal-inverse login-signup',
 	    events: {
 	    	'click .modal-body a': 'linkClicked',
 	    	'submit .modal-body form': 'formSubmitted'

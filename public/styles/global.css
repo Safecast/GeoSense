@@ -225,17 +225,33 @@ button .glyphicon-ok.pull-right {
 	background: #f8f8f8;
 }
 
+.modal-inverse .modal-content {
+	background-color: red;
+	color: #fff;
+	border-color: #444;
+	background-color: rgba(50, 50, 50, 1);
+}
+
+.modal-inverse .modal-header {
+	border-bottom-color: #444;
+}
+
+.modal-inverse .modal-footer {
+	border-top-color: #444;
+}
+
+.modal-inverse .close {
+  color: #fff;
+}
+
 .login-signup .modal-body {
 	padding: 0;
 }
 
 .login-signup .modal-footer, .login-signup .modal-header {
 	margin: 0;
-	border: none;
 }
 
-.login-signup .modal-content {
-}
 
 /*.glyphicon.is-public {
 	color: #5cb85c;
@@ -244,3 +260,4 @@ button .glyphicon-ok.pull-right {
 .glyphicon.is-private {
 	color: #d9534f;
 }*/
+
