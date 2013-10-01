@@ -30,7 +30,8 @@ describe('GeoJSON', function() {
 			format: 'geojson'
 		}, null, null, function(err, collection) {
 			if (err) throw err;
-			//console.log(collection);
+			console.log(collection.extremes);
+			console.log(collection.fields[4]);
 			assert.deepEqual(collection.bbox.toObject(), [-180, -55.71, 180, 83.57 ]);
 			ImportedModel = collection.getFeatureModel();
 			done();
