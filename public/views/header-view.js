@@ -112,12 +112,14 @@ define([
 				this.$('#authorLink').hide();
 			}
 
+			// This link will always be visible for anonymously created maps,
+			// but lead to login form if session user has no permissin to edit
 			this.$('a.admin-map')
 				.attr('href', this.model.adminUrl())
-				.toggleClass('hidden', app.isMapAdmin());
+				.parent().toggleClass('hidden', app.isMapAdmin() || (!permissions.canAdminModel(this.model) && this.model.attributes.createdBy != undefined));
 			this.$('a.public-map')
 				.attr('href', this.model.publicUrl())
-				.toggleClass('hidden', !app.isMapAdmin());
+				.parent().toggleClass('hidden', !app.isMapAdmin());
 		},
 
 		mapViewToggleClicked: function(evt)

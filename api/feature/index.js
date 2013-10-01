@@ -227,6 +227,8 @@ var FeatureAPI = function(app)
 	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox([bbox[0] + bboxW / 2, bbox[1], bbox[2], bbox[3]])),
 	                		];
 	                	} else {
+	                		console.log('A====>',bbox, 'B=====>',coordinates.bbox2d(bbox));
+	                		bbox = coordinates.bbox2d(bbox);
 	                		console.log(JSON.stringify(coordinates.polygonFromBbox(bbox)));
 	                		findQueue = [
 	                			FindFeatureModel.geoIntersects(coordinates.polygonFromBbox(bbox)),
