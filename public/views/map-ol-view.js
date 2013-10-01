@@ -276,7 +276,7 @@ define([
             this.featureLayers[model.id].setVisibility(model.isEnabled());
         },
 
-        layerChanged: function(model)
+        layerChanged: function(model, options)
         {
             var layer = this.featureLayers[model.id];
             if (model.hasChanged('layerOptions.htmlRenderer')) {

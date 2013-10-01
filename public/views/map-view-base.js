@@ -65,9 +65,13 @@ define([
 
         attachLayer: function(model)
         {
+            var self = this;
             this.layers.push(model);
             this.listenTo(model, 'toggle:enabled', this.layerToggled);
-            this.listenTo(model, 'change', this.layerChanged);
+            this.listenTo(model, 'change', function(model, options) {
+                if (options.poll) return;
+                self.layerChanged(model, options);
+            });
             this.listenTo(model, 'toggle:colorScheme', this.layerChanged);
             this.listenTo(model.mapFeatures, 'reset', this.featureReset);
             this.listenTo(model.mapFeatures, 'add', this.featureAdd);
@@ -82,7 +86,7 @@ define([
         {
         },
 
-        layerChanged: function(model)
+        layerChanged: function(model, options)
         {
         },
 
