@@ -30,6 +30,12 @@ var coordinates2d = function(x, y)
     return [overflow(c[0], 180), overflow(c[1], 90)];
 };
 
+var bbox2d = function(c) 
+{
+    return [overflow(c[0], 180), overflow(c[1], 90), 
+        overflow(c[2], 180), overflow(c[3], 90)];
+};
+
 /*
 Gets bounding box [[west, south], [east, north]] for coordinates, which can
 be a n-dimensional array of coordinates, such as [11,12] or 
@@ -140,6 +146,7 @@ var polygonFromBounds = function(b)
 module.exports = {
     overflow: overflow,
     coordinates2d: coordinates2d,
+    bbox2d: bbox2d,
     getBounds: getBounds,
     bboxFromBounds: bboxFromBounds,
     boundsFromBbox: boundsFromBbox,
