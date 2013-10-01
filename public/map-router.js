@@ -375,7 +375,7 @@ define([
                     self.pollForMapLayerStatus(model, POLL_INTERVAL);
                 });
                 // excplitly accept incomplete layers
-                model.fetch({data: {incomplete: true}});
+                model.fetch({data: {incomplete: true}, poll: true});
             },
 
             attachSubViewsForMapLayer: function(model, animate)

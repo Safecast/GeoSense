@@ -299,15 +299,16 @@ define([
 	    renderHistogram: function()
 	    {
 	    	if (!this.model.histogram) return;
-
 	    	var self = this;
-	    	this.$('.graphs').hide();
 	    	if (!this.histogramView) {
+		    	this.$('.graphs').hide();
 				this.histogramView = new HistogramView(
 					{model: this.model, collection: this.model.histogram, renderAxes: false});
-				this.model.histogram.fetch();				
+				this.model.histogram.fetch();
 				this.listenTo(this.histogramView, 'graph:render', function() {
-					this.$('.graphs').slideDown('fast');
+					if (!this.$('.graphs').is(':visible')) {
+						this.$('.graphs').slideDown('fast');
+					}
 				});
 	    	}
 			if (!this.model.canDisplayValues()
@@ -381,7 +382,7 @@ define([
 
 		modelChanged: function(model, options)
 		{
-			if (options.patch) return; // wait for sync
+			if (options.patch || options.poll) return; // wait for sync
 	    	if (this.legendView) {
 				this.legendView.removePopover();
 			}

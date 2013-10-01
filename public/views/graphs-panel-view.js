@@ -30,6 +30,7 @@ define([
 		    
 		    this.on('panel:resize', this.adjustAndRedrawGraphs);
 		    this.on('panel:show', this.adjustAndRedrawGraphs);
+		    this.listenTo(this.model, 'change', this.modelChanged);
 		},
 
 		adjustAndRedrawGraphs: function() 
@@ -55,11 +56,23 @@ define([
 		render: function()
 		{
 			GraphsPanelView.__super__.render.call(this);
-			this.$('.model-title').text(this.model.getDisplay('title'));
+			this.populateFromModel();
 			this.$graphToggles = this.$('.graph-toggles');
 			this.$graphToggleTemplate = $('.element-template', this.$graphToggles)
 				.remove().removeClass('element-template');
 			return this;
+		},
+
+		modelChanged: function(model, options)
+		{
+			if (options.poll) return;
+			this.adjustAndRedrawGraphs();
+			this.populateFromModel();
+		},
+
+		populateFromModel: function()
+		{
+			this.$('.model-title').text(this.model.getDisplay('title'));
 		},
 
 		addGraphView: function(key, view, title)

@@ -62,8 +62,9 @@ define([
 		    this.colorSchemeIndex = this.model.getLayerOptions().colorSchemeIndex || 0;
 	    },
 
-	    modelSynced: function(model)
+	    modelSynced: function(model, resp, options)
 	    {
+	    	if (options.poll) return;
 			if (this.model.hasChanged('layerOptions')) {
 			    // TODO this will overwrite unsaved changes:
 				this.populateFromModel();	
