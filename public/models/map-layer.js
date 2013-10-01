@@ -104,6 +104,9 @@ define([
                     this.histogram = new Histogram([], {mapLayer: this});
                 }
                 this.featureCollection = new GeoFeatureCollection(this.attributes.featureCollection);
+                this.on('sync', function() {
+                    self.featureCollection.set(self.attributes.featureCollection);
+                });
                 this.listenTo(this.featureCollection, 'sync change', function(model, options) {
                     self.set({
                         featureCollection: _.clone(this.featureCollection.attributes)

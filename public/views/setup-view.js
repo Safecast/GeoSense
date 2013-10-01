@@ -12,7 +12,7 @@ define([
 	var SetupView = ModalView.extend({
 
 	    tagName: 'div',
-		className: 'setup-view modal fade',
+		className: 'setup-view modal ',
 		
 	    events: {
 			'click #deleteMapButton' : 'deleteMapClicked',
@@ -79,10 +79,17 @@ define([
 	    	return false;
 	    },
 
-	    focusEmail: function()
+	    focusTab: function(sel)
 	    {
-			self.$('#tab-setup-author').trigger('click');
-			self.$('input.email').focus();
+			self.$(sel).trigger('click');
+			// select first empty input
+			var inputs = self.$('.tab-pane.active').find('input, textarea');
+			for (var i = 0; i < inputs.length; i++) {
+				if (!$(inputs[i]).val()) {
+					$(inputs[i]).focus();
+					return;
+				}
+			}
 	    },
 
 	    render: function() 
