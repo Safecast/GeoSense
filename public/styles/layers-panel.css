@@ -57,17 +57,6 @@
 	top: 3px;
 }
 
-.layers-panel .model-title {
-	display: inline-block;
-	max-width: 60%;
-	overflow: hidden;
-	white-space: nowrap;
-}
-
-.layers-panel.extended .model-title {
-	max-width: 80%;
-}
-
 .layers-panel .color-bar {
 	list-style: none;
 	padding: 0;
