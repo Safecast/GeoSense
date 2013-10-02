@@ -12,7 +12,7 @@ define([
 	var SetupView = ModalView.extend({
 
 	    tagName: 'div',
-		className: 'setup-view modal ',
+		className: 'setup-view modal fade',
 		
 	    events: {
 			'click #deleteMapButton' : 'deleteMapClicked',
