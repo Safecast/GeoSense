@@ -336,3 +336,13 @@
 	margin: 0;
 }
 
+.panel .model-title {
+	display: inline-block;
+	max-width: 60%;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.panel.extended .model-title {
+	max-width: 80%;
+}
