@@ -7,6 +7,7 @@ var config = require('../../config'),
 	errors = require('../../errors'),
 	url = require('url'),
 	console = require('../../ext-console.js'),
+	getAttr = require('../aggregate/mapreduce_abstraction').scopeFunctions.getAttr,
 	mongoose = require('mongoose'),
 	_ = require('cloneextend'),
 	moment = require('moment');
@@ -78,19 +79,33 @@ var FeatureAPI = function(app)
 				.populate('defaults')
 				.exec(function(err, featureCollection) {
 					if (handleDbOp(req, res, err, featureCollection, 'feature collection')) return;
-					var	mapReduceOpts = {histogram: config.HISTOGRAM_SIZES[0]},
-						FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts);
+					var	numBins = config.HISTOGRAM_SIZES[0],
+						mapReduceOpts = {histogram: numBins},
+						attrMap = featureCollection.defaults.attrMap,
+						FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts),
+						numericExtremes = getAttr(featureCollection.extremes, attrMap.numeric),
+						binSize = (numericExtremes.max - numericExtremes.min) / numBins;
 	
 					console.log('Loading histogram for', FindFeatureModel.collection.name);
 					FindFeatureModel.find()
-						.sort({'doc.value.bin': 1})
+						.sort({'_id': 1})
 						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, docs.length)) return;
-							res.send(docs.map(function(doc) {
-								var extraAttrs = {properties: {bin: doc.get('value.bin')}};
-								doc._id = undefined;
-								return doc.toGeoJSON(extraAttrs);
-							}));
+							var result = {
+								properties: {
+									numBins: numBins,
+									binSize: binSize
+								}, 
+								items: docs.map(function(doc) {
+									var value = doc.get('value');
+									return {
+										bin: Number(doc._id),
+										count: value.count,
+										properties: value.properties
+									}
+								})
+							};
+							res.send(result);
 						});
 				});
 		});

@@ -48,9 +48,7 @@ var config = {
 		limit: 2000
 	},
 
-	HISTOGRAM_SIZES: [200], //, 100, 30],
-
-	MIN_CROP_DISTRIBUTION_RATIO: 10000, // if max > min * r --> crop histogram
+	HISTOGRAM_SIZES: [80],
 
 	// Reserve certain URIs and do not allow them for slugs without modification, such as:
 	// "admin", short words, short numbers, base64 uuids 

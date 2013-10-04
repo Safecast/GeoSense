@@ -108,6 +108,10 @@ form.login .btn {
   max-width: 750px; 
 }
 
+.page.error .message {
+  padding: 20px 0 50px 0;
+}
+
 .page .container {
   max-width: 970px; 
   padding-left: 15px;

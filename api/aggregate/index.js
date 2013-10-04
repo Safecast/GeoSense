@@ -11,7 +11,7 @@ var	models = require("../../models.js"),
 	Mapper = abstraction.Mapper,
 	getAttr = abstraction.scopeFunctions.getAttr,
 	console = require('../../ext-console.js'),
-	_ = require('cloneextend');
+	_ = require('underscore');
 
 var GeoFeatureCollection = models.GeoFeatureCollection,
 	Job = models.Job,
@@ -91,7 +91,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 	if (!params) {
 		params = {};
 	} else {
-		params = _.cloneextend(params);
+		params = _.clone(params);
 	}
 	if (params.zoom && !Array.isArray(params.zoom)) {
 		params.zoom = [params.zoom];
@@ -145,7 +145,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 					var incremental = collection.lastReducedAt && !params.rebuild;
 					opts.removeFirst = !incremental;
 
-					if (!opts.aggregates) {
+					if (opts.aggregates == undefined) {
 						opts.aggregates = ['properties.*'];
 					}
 
@@ -192,7 +192,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 										//'featureCollection', new Mapper.Copy(), 
 										attrMap.numeric, new Mapper.Histogram(
 											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
-										{ events: null, indexes: {'bin': 1}, extremes: [attrMap.numeric], copy: "bin" }
+										{ events: null, indexes: {'bin': 1}, aggregates: false, copy: "bin"}
 									);
 							}
 						}
@@ -276,7 +276,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 									mappers = {};
 								// the first element is a comment
 								console.info(args[0]);
-								runMapReduceForFeatureCollection.call(this, collection, args[1], _.cloneextend(opts, args[2]), function(err, res) {
+								runMapReduceForFeatureCollection.call(this, collection, args[1], _.extend(_.clone(opts), args[2]), function(err, res) {
 									if (err) {
 										console.error('*** error during MapReduce ***')
 										callback(err);									

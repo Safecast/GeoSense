@@ -214,7 +214,6 @@ exports.exitCallback = function(err, data, showHelp) {
 
 exports.validateExistingCollection = function(err, collection, callback, force)
 {
-    console.log(err);
     if (err || !collection) {
         if (!err) {
             err = new Error('Collection not found');

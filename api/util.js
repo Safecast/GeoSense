@@ -51,7 +51,7 @@ var prepareFeatureCollectionResult = function(req, featureCollection, map, extra
 		featureCollection.toJSON() : featureCollection;
 	if (!map || !permissions.canAdminModel(req, featureCollection)) {
 		delete obj.importParams;
-		delete obj.fields;
+		//delete obj.fields;
 	}
 	if (extraAttrs) {
 		obj = _.extend(obj, extraAttrs);

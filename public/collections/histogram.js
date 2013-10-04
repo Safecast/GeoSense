@@ -20,7 +20,13 @@ define([
                 + this.mapLayer.attributes.featureCollection._id
                 + '/histogram';
 		},
-	
+
+	    parse: function(resp, xhr) 
+	    {
+	    	this.properties = resp.properties;
+	    	return resp.items;
+	    },
+
 	});
 
 	return Histogram;

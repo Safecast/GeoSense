@@ -11,10 +11,12 @@ define([
 	'views/legend-view',
 	'mixins/spinner-mixin',
 	'mixins/in-place-editor-mixin',
+	'mixins/timeout-queue-mixin',
 	'lib/color-gradient/color-gradient',
 	'moment'
 ], function($, _, Backbone, config, utils, permissions, templateHtml, 
-	PanelViewBase, HistogramView, LegendView, SpinnerMixin, InPlaceEditorMixin, 
+	PanelViewBase, HistogramView, LegendView, 
+	SpinnerMixin, InPlaceEditorMixin, TimeoutQueueMixin,
 	ColorGradient, moment) {
     "use strict";
 
@@ -31,6 +33,7 @@ define([
 			'click .show-layer-details': 'showLayerDetailsClicked',
 			'click .show-layer-extents': 'showLayerExtentsClicked',
 			'click .edit-collection': 'editCollectionClicked',
+			'click .histogram': 'histogramClicked',
 			'click .move-layer ': function() { return false; }
 	    },
 
@@ -41,6 +44,7 @@ define([
 		    this.expandContent;
 		    this.expandLayerDetails = false;
 			this.subViewsRendered = false;
+			this.createTimeoutQueue('redrawGraphs', 250);
 
 		    this.listenTo(this.model, 'change', this.modelChanged);
 		    this.listenTo(this.model, 'toggle:enabled', this.updateEnabled);
@@ -195,10 +199,11 @@ define([
 			if (this.expandContent == undefined) {
 				this.expandContent = enabled;
 			}
+			this.collapseEl.on('hide.bs.collapse', function() {
+				self.trigger('collapse');
+			});
 			this.collapseEl.on('show.bs.collapse', function() {
-		    	if (!self.subViewsRendered) {
-		    		self.renderSubViews();
-		    	}
+				self.trigger('expand');
 				if (!self.model.isEnabled()) {
 					self.model.toggleEnabled(true);
 				}
@@ -302,23 +307,19 @@ define([
 	    	var self = this;
 	    	if (!this.histogramView) {
 		    	this.$('.graphs').hide();
+				this.listenToOnce(this.model.histogram, 'sync', function() {
+					if (this.isExpanded()) {
+						this.$('.graphs').slideDown('fast');
+					} else {
+						this.$('.graphs').show();
+					}
+					this.histogramView.renderGraph();
+				});
 				this.histogramView = new HistogramView(
 					{model: this.model, collection: this.model.histogram, renderAxes: false});
-				this.model.histogram.fetch();
-				this.listenTo(this.histogramView, 'graph:render', function() {
-					if (!this.$('.graphs').is(':visible')) {
-						this.$('.graphs').slideDown('fast');
-					}
-				});
+
+				this.$('.graphs').append(self.histogramView.el);
 	    	}
-			if (!this.model.canDisplayValues()
-				|| !this.model.isNumeric()
-				|| !this.model.getLayerOptions().histogram) return;
-			
-			setTimeout(function() {
-				self.$('.graphs').append(self.histogramView.el);
-				self.histogramView.render().renderGraph();
-			}, 500);
 	    },
 
 	    renderLegend: function()
@@ -335,15 +336,19 @@ define([
 			this.legendView.render().delegateEvents();
 	    },
 
-	    setSuperView: function(superView) {
+	    setSuperView: function(superView) 
+	    {
 	    	this.superView = superView;
 			this.listenTo(superView, 'panel:resize', this.panelViewResized);
 	    },
 
 		panelViewResized: function(panelView) 
 		{
+			var self = this;
 			if (this.histogramView) {
-				this.histogramView.render();
+				this.queueTimeout('redrawGraphs', function() {
+					self.histogramView.fillExtents().redrawGraphIfVisible();
+				});
 			}
 	    	if (this.legendView) {
 				this.legendView.removePopover();
@@ -354,6 +359,10 @@ define([
 		{
 			var enabled = this.model.isEnabled(),
 				d = animate || animate == undefined ? 'fast' : 0;
+
+	    	if (enabled && !self.subViewsRendered) {
+	    		this.renderSubViews();
+	    	}
 
 	    	if (this.legendView) {
 				this.legendView.removePopover();
@@ -376,6 +385,7 @@ define([
 				this.expand(animate);
 			}
 
+			this.$('.show-layer-graphs').attr('disabled', !enabled);
 			this.$('.show-layer-extents').toggle(enabled 
 				&& this.model.getBbox().length > 0);
 		},
@@ -399,6 +409,17 @@ define([
 			this.renderHistogram();
 			this.renderLegend();
 			this.subViewsRendered = true;
+		},
+
+		remove: function()
+		{
+			if (this.histogramView) {
+				this.histogramView.remove();
+			}
+			if (this.legendView) {
+				this.legendView.remove();
+			}
+			MapLayerView.__super__.remove.apply(this, arguments);
 		},
 
 	    populateFromModel: function(renderSubViews)
@@ -546,13 +567,21 @@ define([
 		editCollectionClicked: function(evt)
 		{
 			this.toggleInPlaceEditMode();
-		}
+		},
+
+		histogramClicked: function(evt)
+		{	
+			if (this.model.parentMap) {
+				app.showMapLayerGraphs(this.model).toggleGraphView('histogram');
+			}
+		},
 
 
 	});
 
 	_.extend(MapLayerView.prototype, SpinnerMixin);
 	_.extend(MapLayerView.prototype, InPlaceEditorMixin);
+    _.extend(MapLayerView.prototype, TimeoutQueueMixin);
 
 	return MapLayerView;
 });

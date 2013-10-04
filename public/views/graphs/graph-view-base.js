@@ -20,45 +20,94 @@ define([
 	    	} else {
 				this.graphMargins = {top: 0, right: 0, bottom: 0, left: 0};
 	    	}
-			this.graphWidth = undefined;
-			this.graphHeight = undefined;
+			this.viewWidth = undefined;
+			this.viewHeight = undefined;
 			this.graphRendered = false;
 			if (this.collection) {
 				this.listenTo(this.collection, 'sync', function() {
-					if (self.$el.is(':visible')) {
-						self.renderGraph();
-					}
+					self.redrawGraphIfVisible();
 				});
 			}
 	    },
 
 	    fillExtents: function()
 	    {
-	    	this.$el.css({
-	    		width: this.$el.parent().innerWidth() + 'px',
-	    	});
-
-			this.graphWidth = this.$el.innerWidth();
-		    this.graphHeight = this.$el.innerHeight();
+	    	var parentWidth = this.$el.parent().innerWidth();
+	    	if (parentWidth) {
+		    	this.$el.css({
+		    		width: this.$el.parent().innerWidth() + 'px'
+		    	});
+	    	}
+			this.setViewSize(this.$el.innerWidth(), this.$el.innerHeight());
 	    	return this;
+	    },
+
+	    setViewSize: function(width, height)
+	    {
+	    	this.viewWidth = width;
+	    	this.viewHeight = height;
+		    this.graphWidth = this.viewWidth - this.graphMargins.left - this.graphMargins.right;
+		    this.graphHeight = this.viewHeight - this.graphMargins.top - this.graphMargins.bottom;
 	    },
 
 	    appendSVG: function()
 	    {
-			return d3.select(this.el)
-				.append("svg")
-			    .attr("width", this.graphWidth)
-			    .attr("height", this.graphHeight);
+			return d3.select(this.el).append("svg")
+			    .attr("width", this.viewWidth)
+			    .attr("height", this.viewHeight)
+			    .append("g")
+    				.attr("transform", "translate(" + this.graphMargins.left + "," + this.graphMargins.top + ")");
 		},
 
 	    getXRange: function()
 	    {
-	    	return [this.graphMargins.left, this.graphWidth - this.graphMargins.right];
+	    	return [0, this.graphWidth];
 	    },
 
 	    getYRange: function()
 	    {
-	    	return [this.graphHeight - this.graphMargins.bottom, this.graphMargins.top];
+	    	return [this.graphHeight, 0];
+	    },
+
+	    appendXAxis: function(xAxis, title) 
+	    {
+			return this.svg.append("g")
+			    .attr("class", "axis")
+			    .attr("transform", "translate(0, " + this.graphHeight + ")")
+			    .call(xAxis)
+				.append("text")
+					.attr("class", "label")
+					.attr("x", this.graphWidth)
+					.attr("y", -6)
+					.style("text-anchor", "end")
+					.text(title);
+	    },
+
+	    appendYAxis: function(yAxis, title) 
+	    {
+			return this.svg.append("g")
+			    .attr("class", "axis")
+			    .call(yAxis)
+				.append("text")
+					.attr("class", "label")
+					.attr("x", 10)
+					.attr("y", -6)
+					.style("text-anchor", "left")
+					.text(title)
+	    },
+
+	    showTooltip: function(element, title)
+	    {
+	    	var self = this;
+			$(element)
+				.tooltip({
+					title: title,
+					container: self.$el,
+				})
+				.tooltip('show')
+				.on('hidden.bs.tooltip', function() {
+					$(element).off().tooltip('destroy');
+				});
 	    },
 
 		render: function()
@@ -69,22 +118,36 @@ define([
 
 		renderGraph: function()
 		{
-			console.log('Rendering graph for '+this.model.id+' '+this.model.getDisplay('title'));
+			if (!this.__suppressLog) {
+	            console.log('Rendering graph for ', this.model.id, this.model.getDisplay('title'));
+			}
 		    this.trigger('graph:render');
 		    this.graphRendered = true;
-			if (!this.graphWidth) {
+			if (!this.viewWidth) {
 				this.fillExtents();
 			}
 			this.$el.empty();
 			this.svg = this.appendSVG();
+			return this;
 		},
 
 		redrawGraph: function()
 		{
-			console.log('Redrawing graph for '+this.model.id+' '+this.model.getDisplay('title'));
+            console.log('Redrawing graph for ', this.model.id, this.model.getDisplay('title'));
 		    this.trigger('graph:redraw');
+		    this.__suppressLog = true;
 			this.renderGraph();
+		    this.__suppressLog = false;
+			return this;
 		},
+
+	    redrawGraphIfVisible: function()
+	    {
+			if (this.$el.is(':visible')) {
+				this.redrawGraph();
+			}
+			return this;
+	    },
 
 		show: function() 
 		{

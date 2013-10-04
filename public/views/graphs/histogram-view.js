@@ -26,63 +26,47 @@ define([
 
 		renderGraph: function() 
 		{
-			var self = this;
-			if (!this.collection.length) return this;
+			var self = this,
+				valFormatter = this.model.getValFormatter();
 
 		    HistogramView.__super__.renderGraph.apply(this, arguments);
 
-			var numBins = 222,
+			var numBins = this.collection.properties.numBins, 
+				binSize = this.collection.properties.binSize, 
 				data = this.collection.models,
 				extremes = this.model.getMappedExtremes(),
-				getBin = function(d) { 
-					return d.attributes.properties.bin;
-				},
 				getCount = function(d) { 
-					return d.attributes.properties.count || 0;
+					return d.attributes.count || 0;
 				},
 				getVal = function(d) { 
-					var val = d.getNumericVal();
-					return val.avg ? val.avg : val;
-				};
+					var v = d.getNumericVal();
+						v = v.avg ? v.avg : v;
+					return v;
+				},
+				yExtent = d3.extent(data, getCount),
+				yScale = yExtent[0] / yExtent[1] < 1 / 10000 ? 'log' : 'linear';
 
 			var	x = d3.scale.linear()
 			    	.range(this.getXRange())
-			    	//.domain(d3.extent(data, getBin)),
 			    	.domain([extremes.numeric.min, extremes.numeric.max]),
-				y = d3.scale.linear()
+				y = d3.scale[yScale]()
 			    	.range(this.getYRange())
-			    	.domain(d3.extent(data, getCount));
+			    	.domain(d3.extent(data, getCount)),
+			    binWidth = this.graphWidth / numBins;
 
 			if (this.renderAxes) {
 				var xAxis = d3.svg.axis()
 					    .scale(x)
-					    //.ticks(d3.time.years, 10)
-					    .orient("bottom"),
+					    .orient("bottom")
+					    .tickFormat(function(v) {
+					    	return valFormatter.format(v);
+				    	}),
 					yAxis = d3.svg.axis()
 				    	.scale(y)
 				    	.orient("left");
 
-				this.svg.append("g")
-				    .attr("class", "axis")
-				    .attr("transform", "translate(0, "+(this.graphHeight - this.graphMargins.bottom)+")")
-				    .call(xAxis)
-					.append("text")
-					      .attr("class", "label")
-					      .attr("x", this.graphWidth - this.graphMargins.right)
-					      .attr("y", -6)
-					      .style("text-anchor", "end")
-					      .text(this.model.getDisplay('unit'));
-
-				this.svg.append("g")
-				    .attr("class", "axis")
-				    .attr("transform", "translate("+(this.graphMargins.left)+", 0)")
-				    .call(yAxis)
-					.append("text")
-					      .attr("class", "label")
-					      .attr("x", 0)
-					      .attr("y", 12)
-					      .style("text-anchor", "left")
-						  .text(this.model.getDisplay('itemTitlePlural'))				    
+				this.appendXAxis(xAxis, valFormatter.unit);
+				this.appendYAxis(yAxis, this.model.getDisplay('itemTitlePlural'));
 			}
 			
 			this.svg.selectAll("rect")
@@ -93,13 +77,25 @@ define([
 			    	})
 			    	.attr("y", function(d, i) { return y(getCount(d)) })
 			     	.attr("height", function(d, i) { 
-			     		return self.graphHeight - y(getCount(d)) - self.graphMargins.bottom;
+			     		return self.graphHeight - y(getCount(d));
 			     	})
-			     	.attr("width", this.graphWidth / numBins)
+			     	.attr("width", binWidth)
 			     	.attr("class", "crisp")
 			     	.style("fill", function(d, i) {
 			     		return d.getRenderAttributes('color');
-			     	});
+			     	})
+        		.on('mouseover', function(d) {
+        			var _this = this,
+        				count = getCount(d),
+        				min = getVal(d),
+        				max = min + binSize;
+		        	self.showTooltip(this, __('%(count)s %(title)s between %(min)s–%(max)s', {
+						count: autoFormatNumber(count),
+						title: count != 1 ? self.model.getDisplay('itemTitlePlural') : self.model.getDisplay('itemTitle'),
+						min: valFormatter.format(min),
+						max: valFormatter.format(max),
+					}));
+        		});
 
 			return this;
 		},

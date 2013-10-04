@@ -29,11 +29,15 @@ define([
 	    {
 			var self = this;
 			DataLibraryPanelView.__super__.render.call(this);
+			this.on('panel:show', function() {
+				if (!self.searchParams.q || self.searchParams.q == '') {
+		    		self.removeSubViews('');
+				}
+			});
 			this.on('panel:shown', function() {
 				setTimeout(function() {
 					if (!self.searchParams.q || self.searchParams.q == '') {
 				    	self.resetPageParams();
-				    	self.$(self.subViewContainer).empty();
 						self.fetchResults(self.searchParams);
 					}
 				}, 250); // wait for slide
