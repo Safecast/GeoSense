@@ -5,8 +5,9 @@ define([
 	'config',
 	'utils',
 	'text!templates/graphs-panel.html',
-	'views/panel-view-base'
-], function($, _, Backbone, config, utils, templateHtml, PanelViewBase) {
+	'views/panel-view-base',
+    'mixins/timeout-queue-mixin'
+], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, TimeoutQueueMixin) {
     "use strict";
 
 	var GraphsPanelView = PanelViewBase.extend({
@@ -24,19 +25,22 @@ define([
 
 	    	var self = this; 	
 		    this.template = _.template(templateHtml);	
-		    this.redrawQueue = [];
+		    this.createTimeoutQueue('redraw', 250);
 		    this.graphViews = {};
 		    this.graphView; 
 		    
 		    this.on('panel:resize', this.adjustAndRedrawGraphs);
 		    this.on('panel:show', this.adjustAndRedrawGraphs);
 		    this.listenTo(this.model, 'change', this.modelChanged);
+	    	this.listenTo(this.model, 'toggle:valFormatter', function() {
+	    		self.adjustAndRedrawGraphs();
+	    	});
 		},
 
 		adjustAndRedrawGraphs: function() 
 		{
 			var self = this;
-	    	self.redrawQueue.push(setTimeout(function() {
+	    	this.queueTimeout('redraw', function() {
 	    		_.each(self.graphViews, function(view, viewKey) {
 	    			view.fillExtents();
 	    		});
@@ -47,10 +51,7 @@ define([
 		    			self.graphView.renderGraph();
 	    			}
 	    		}
-	    	}, 250));
-	    	for (var i = self.redrawQueue.length; i > 1; i--) {
-	    		clearTimeout(self.redrawQueue.shift());
-	    	}
+	    	});
 		},
 
 		render: function()
@@ -99,7 +100,6 @@ define([
 		toggleGraphView: function(key)
 		{
 			if (key) {
-				console.log('toggle graph view:', key);
 				this.graphView = this.graphViews[key];
 			}
 			$('button', this.$graphToggles).each(function() {
@@ -117,6 +117,8 @@ define([
 		}
 
 	});
+
+    _.extend(GraphsPanelView.prototype, TimeoutQueueMixin);
 
 	return GraphsPanelView;
 });

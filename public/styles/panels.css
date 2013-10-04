@@ -4,15 +4,6 @@
 	margin: 0;
 }
 
-.panel .arrow-down {
-	width: 0; 
-	height: 0; 
-	z-index: 1000;
-	border-left: 20px solid transparent;
-	border-right: 20px solid transparent;
-	border-top: 20px solid;
-}
-
 
 /* default theme */
 
@@ -282,23 +273,24 @@
 
 
 
+#main-viewport .panel-body, #main-viewport .panel-footer {
+	padding: 15px 13px 15px 15px;
+}
+
 #main-viewport .panel-heading {
+	padding: 10px 13px 10px 15px;
 	white-space: nowrap;
 } 
 
 .panel-heading .btn-toolbar {
 	position: absolute;
-	right: 15px;
+	right: 13px;
 	top: 9px;
 }
 
 .panel-heading .btn-group.text-buttons button {
 	padding-left: 1em;
 	padding-right: 1em;
-}
-
-.panel .panel-footer {
-	padding: 15px 15px;
 }
 
 .panel .panel-footer .btn-group {
@@ -345,4 +337,14 @@
 
 .panel.extended .model-title {
 	max-width: 80%;
+}
+
+.panel .arrow-down {
+	width: 0; 
+	height: 0; 
+	z-index: 1000;
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	border-top-width: 20px;
+	border-top-style: solid;
 }

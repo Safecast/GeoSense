@@ -1,7 +1,9 @@
-var	Mapper = require('../api/aggregate/mapreduce_abstraction').Mapper,
+var	abstraction = require('../api/aggregate/mapreduce_abstraction'),
+	Mapper = abstraction.Mapper,
+	findExtremes = abstraction.scopeFunctions.findExtremes,
 	assert = require('assert');
 
-describe('MapReduce', function() {
+describe('Mappers', function() {
 
 	// TODO: add more tests, but based on GeoJSON geometry only
 
@@ -37,4 +39,35 @@ describe('MapReduce', function() {
 		}]);
 	});
 
+	it('should create a histogram', function() {
+		var histogram = new Mapper.Histogram(0, 100, 3);
+			values = [0, 10, 30.329999, 33.34, 50, 75, 80, 85, 100];
+			reduced = values.map(function(value) {
+			var key = histogram.map(value);
+			return {
+				bin: key[0],
+				count: 1,
+				value: key[1]
+			};
+		}).reduce(function(previous, current) {
+			if (!previous[current.bin]) {
+				previous[current.bin] = {count: current.count};
+			} else {
+				previous[current.bin].count += current.count;
+			}
+			previous[current.bin].value = findExtremes(current.value, previous[current.bin].value);
+			return previous;
+		}, {});
+
+		assert.equal(3, reduced[0].count);
+		assert.equal(2, reduced[1].count);
+		assert.equal(4, reduced[2].count);
+
+		assert.equal(40.329999, reduced[0].value.sum);
+		assert.equal(83.34, reduced[1].value.sum);
+		assert.equal(340, reduced[2].value.sum);
+	});
+
 });
+
+

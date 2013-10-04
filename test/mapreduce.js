@@ -163,7 +163,7 @@ describe('MapReduce', function() {
 		});
 	});
 
-	it('should run MapReduce at the size of the area where features where generated, resulting in 1 single feature', function(done) {
+	it('should run MapReduce at the size of the area where features were generated, resulting in 1 single feature', function(done) {
 		api.aggregate.aggregate({
 			featureCollectionId: featureCollection._id.toString(),
 			zoom: normalZoom,

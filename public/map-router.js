@@ -70,6 +70,10 @@ define([
                     console.log('route by slug');
                     r = this.defaultRoutes;
                 }
+                /*
+                return _.map(r, function(route, key) {
+                    return [key, route];
+                });*/
                 var routes = [];
                 for (var k in r) {
                     routes.unshift([
@@ -321,6 +325,7 @@ define([
                 var self = this;
 
                 this.mapLayersById[model.id] = model;
+                model.initCollections();
                 // do not fetch features yet if we are waiting for mapViewReady
                 if (this.mapLayerSubViewsAttached) {
                     this.attachSubViewsForMapLayer(model, animate);
@@ -328,13 +333,14 @@ define([
                 }
 
                 this.listenTo(model, 'toggle:enabled', function() {
-                    self.fetchMapFeatures();                
-                    // wait for animations to complete before fetching
-                    /*if (model.isEnabled()) {
+                    if (model.isEnabled()) {
                         setTimeout(function() {
+                            // wait for animations to complete before fetching
                             self.fetchMapFeatures();                
                         }, 300);
-                    }*/
+                    } else {
+                        self.hideMapLayerGraphs(model);
+                    }
                 });
 
                 this.listenTo(model, 'showMapLayerEditor', function() {
@@ -383,7 +389,7 @@ define([
                 if (!this.layersPanelView.isAttached) {
                     this.attachPanelView(this.layersPanelView).hide().show();
                 }
-                console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'), model);
+                console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'));
                 var mapLayerView = new MapLayerView({model: model, vent: this.vent}).render();
                 this.layersPanelView.appendSubView(mapLayerView);
                 if (animate) {
@@ -410,6 +416,21 @@ define([
                             __('Histogram'));
                     }
                     this.graphsPanelViews[model.id] = graphsPanelView;
+                    //this.showMapLayerGraphs(model);
+
+                    var fetchGraphs = function() {
+                        setTimeout(function() {
+                            model.fetchGraphs();
+                        }, 500);
+                    };
+
+                    if (model.isEnabled()) {
+                        fetchGraphs();
+                    } else {
+                        model.once('toggle:enabled', function() {
+                            fetchGraphs();
+                        });
+                    }
                 } else {
                     mapLayerView.disableGraphs();
                 }
@@ -590,8 +611,6 @@ define([
 
             visibleMapAreaChanged: function(mapView, area)
             {
-                console.log('! app.visibleAreaChanged', area);
-                
                 if (this.mapChanged) {
                     this.navigate(this.currentMapUri(), {trigger: false});
                 }
@@ -817,6 +836,14 @@ define([
                     .show('fast');
             },
 
+            hideMapLayerGraphs: function(model)
+            {
+                if (this.graphsPanelViews[model.id]) {
+                    this.graphsPanelViews[model.id].hide('fast');
+                }
+                return this.graphsPanelViews[model.id];
+            },
+
             showMapLayerGraphs: function(model)
             {
                 var self = this,
@@ -834,6 +861,7 @@ define([
                         
                     }
                 });
+                return this.graphsPanelViews[model.id];
             },
 
             showMapLayerEditor: function(model)
@@ -861,6 +889,7 @@ define([
                         }
                     }
                 }
+                return this.mapLayerEditorViews[layerId];
             },
 
             attachPanelView: function(panelView)

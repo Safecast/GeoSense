@@ -4,8 +4,9 @@ define([
     'backbone',
     'config',
     'utils',
+    'mixins/timeout-queue-mixin',
     'lib/color-gradient/color-gradient'
-], function($, _, Backbone, config, utils, ColorGradient) {
+], function($, _, Backbone, config, utils, TimeoutQueueMixin, ColorGradient) {
     "use strict";
 
     var MapViewBase = Backbone.View.extend({
@@ -13,13 +14,12 @@ define([
         initialize: function(options) 
         {
             this.layers = [];
-            this.redrawQueue = [];
+            this.createTimeoutQueue('visibleArea', 250);
             this.vent = options.vent;
 
             if (options.visibleMapArea) {
                 this.initialVisibleMapArea = options.visibleMapArea;
             }
-            console.log('INITIAL', this.initialVisibleMapArea);
         },
 
         renderMap: function(viewBase, viewStyle) 
@@ -49,14 +49,10 @@ define([
 
         visibleAreaChanged: function(visibleMapArea)
         {
-            console.log('* mapView.visibleAreaChanged');
             var self = this;
-            self.redrawQueue.push(setTimeout(function() {
+            this.queueTimeout('visibleArea', function() {
                 self.trigger('visibleAreaChanged', this, visibleMapArea);
-            }, 250));
-            for (var i = self.redrawQueue.length; i > 1; i--) {
-                clearTimeout(self.redrawQueue.shift());
-            }
+            });
         },
 
         /**
@@ -127,6 +123,8 @@ define([
         },
 
     });
+
+    _.extend(MapViewBase.prototype, TimeoutQueueMixin);
 
     return MapViewBase;
 });

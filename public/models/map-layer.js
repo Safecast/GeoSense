@@ -92,12 +92,16 @@ define([
             return this.attributes.featureCollection.counts;
         },
 
-        initialize: function(attributes, options) 
+        fetchGraphs: function()
         {
-            var self = this,
-                options = options || {};
-                
-            this.parentMap = options.parentMap;
+            if (this.histogram) {
+                this.histogram.fetch();
+            }
+        },
+
+        initCollections: function()
+        {
+            var self = this;
             if (this.attributes.featureCollection) {
                 this.mapFeatures = new MapFeatures([], {mapLayer: this});
                 if (this.getOption('histogram') && this.isNumeric()) {
@@ -119,7 +123,15 @@ define([
                     parser: feed ? feed.parser : ''
                 });
             }
+            return this;
+        },
 
+        initialize: function(attributes, options) 
+        {
+            var self = this,
+                options = options || {};
+                
+            this.parentMap = options.parentMap;
             this.valFormatters = [];
 
             this.sessionOptions = _.extend(options.sessionOptions || {}, {
@@ -274,6 +286,7 @@ define([
             var s = this.getDataStatus();
             return s == DataStatus.COMPLETE
                 || s == DataStatus.UNREDUCED_INC
+                || s == DataStatus.REDUCING
                 || s == DataStatus.REDUCING_INC
                 || s == DataStatus.IMPORTING_INC;
         },

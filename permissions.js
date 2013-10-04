@@ -45,8 +45,6 @@ var setUserForSessionAdminModels = function(req, callback)
 		model.findById(id, function(err, doc) {
 			if (err) {
 				console.error(err);
-			} else {
-				console.log(modelName, doc._id, doc.createdBy);
 			}
 			if (!err && doc && !doc.createdBy) {
 				doc.createdBy = req.user;

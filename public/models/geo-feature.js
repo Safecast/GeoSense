@@ -13,6 +13,11 @@ define([
 
         initialize: function() 
         {
+            var self = this;
+            this.on('change', function() {
+                delete self._renderAttrs;
+                console.log('delete');
+            });
         },
 
         getNumericVal: function()
@@ -69,63 +74,66 @@ define([
 
 		getRenderAttributes: function(attrName)
 		{
-            var l = this.collection.mapLayer,
-                options = l.getLayerOptions(),
-                attrMap = this.collection.mapLayer.getOption('attrMap', {}),
-                extremes = l.getMappedExtremes(),
-                counts = l.mapFeatures.getCounts(),
-                val = this.getNumericVal(),
-                maxVal = extremes.numeric ? extremes.numeric.max : NaN,
-                minVal = extremes.numeric ? extremes.numeric.min : NaN;
+            if (!this._renderAttrs) {
+                var l = this.collection.mapLayer,
+                    options = l.getLayerOptions(),
+                    attrMap = this.collection.mapLayer.getOption('attrMap', {}),
+                    extremes = l.getMappedExtremes(),
+                    counts = l.mapFeatures.getCounts(),
+                    val = this.getNumericVal(),
+                    maxVal = extremes.numeric ? extremes.numeric.max : NaN,
+                    minVal = extremes.numeric ? extremes.numeric.min : NaN;
 
-            if (val && val.avg != null) {
-                val = val.avg;
+                if (val && val.avg != null) {
+                    val = val.avg;
+                }
+
+                var count = this.attributes.properties ? this.attributes.properties.count || 1 : 1,
+                    normVal = (val - minVal) / (maxVal - minVal),
+                    normCount = count / (counts ? counts.max : 1),
+                    color,
+                    size;
+
+                switch (options.colorType) {
+                    default:
+                        switch (attrMap.featureColor) {
+                            case 'count':
+                                color = l.colorAt(normCount);
+                                break;
+                            default:
+                            case 'val.avg':
+                                color = l.colorAt(!isNaN(normVal) ? normVal : 0);
+                                break;
+                        }
+                }
+
+                switch (attrMap.featureSize) {
+                    default:
+                    case 'count':
+                        size = normCount;
+                        break;
+                    case '$numeric.avg':
+                        size = normVal;
+                        break;
+                };
+
+                this._renderAttrs = {
+                    color: color,
+                    darkerColor: multRGB(color, .75),
+                    model: this,
+                    data: {
+                        val: val,
+                        normVal: normVal,
+                        count: count,
+                    },
+                    size: size
+                };
             }
 
-            var count = this.attributes.properties ? this.attributes.properties.count || 1 : 1,
-                normVal = (val - minVal) / (maxVal - minVal),
-                normCount = count / (counts ? counts.max : 1),
-                color,
-                size;
-
-            switch (options.colorType) {
-                default:
-                    switch (attrMap.featureColor) {
-                        case 'count':
-                            color = l.colorAt(normCount);
-                            break;
-                        default:
-                        case 'val.avg':
-                            color = l.colorAt(!isNaN(normVal) ? normVal : 0);
-                            break;
-                    }
-            }
-
-            switch (attrMap.featureSize) {
-                default:
-                case 'count':
-                    size = normCount;
-                    break;
-                case '$numeric.avg':
-                    size = normVal;
-                    break;
-            };
-
-            var attrs = {
-                color: color,
-                darkerColor: multRGB(color, .75),
-                model: this,
-                data: {
-                    val: val,
-                    normVal: normVal,
-                    count: count,
-                },
-                size: size
-            };
             if (!attrName) {
-                return attrs;
+                return this._renderAttrs;
             }
-            return attrs[attrName];
+            return this._renderAttrs[attrName];
 
 		}
 	});

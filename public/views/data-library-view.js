@@ -31,6 +31,7 @@ define([
 
 	    initialize: function(options) 
 	    {
+	    	DataLibraryView.__super__.initialize.apply(this, arguments);
 		    this.collection = new GeoFeatureCollections();
 	    },
 
@@ -97,24 +98,35 @@ define([
 	    	this.$('.search-query').val('');
 	    },
 
+		removeSubViews: function(statusText)
+		{
+	    	DataLibraryView.__super__.removeSubViews.apply(this, arguments);	    	
+			this.$('.status-message').text(statusText);
+		},    
+
 	    updateFeatureCollectionList: function(emptyFirst) 
 	    {
 	    	var self = this,
 	    		collection = this.collection;
 	    	if (emptyFirst) {
-		    	this.$(this.subViewContainer).empty();
+	    		this.removeSubViews();
 	    	}
 
 			collection.each(function(model, index) { 
 				var mapLayer = new MapLayer({
 						featureCollection: model.attributes,
 						layerOptions: model.attributes.defaults
-					}),
+					}).initCollections(),
 	            	mapLayerView = new MapLayerView({model: mapLayer});
 	            mapLayer.isEnabled = function() { return true; };
             	mapLayerView.expandContent = false;
             	mapLayerView.expandLayerDetails = true;
             	mapLayerView.legendViewOptions.autoHide = false;
+            	mapLayerView.once('expand', function() {
+            		setTimeout(function() {
+            			mapLayer.fetchGraphs();
+            		}, 500);
+            	});
 	            self.appendSubView(mapLayerView).render();
 	            self.mapLayerViewPostRender(mapLayerView);
 	            mapLayerView.$el.hide().slideDown('fast');

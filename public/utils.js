@@ -115,7 +115,7 @@ $.fn.uiToggle = function(opts) {
 	var ret = this.each(function() {
 		var visible = this;
 		$(this).slideToggle(opts);
-		inactive = inactive && $._data(this, 'fxshow').hidden;					
+		inactive = inactive && $._data(this, 'fxshow') && $._data(this, 'fxshow').hidden;					
 	});
 	if (!inactive && opts.show) {
 		opts.show();
@@ -196,20 +196,27 @@ function ValFormatter(format)
 	this.unit = format.unit;
 }
 
-ValFormatter.prototype.format = function(val)
+ValFormatter.prototype.convert = function(val)
 {
+	var v = val;	
 	if (this.eq && this.eq != '') {
 		var eq = this.eq.format({
-			'val': val
+			'val': v
 		});
-		val = mathEval(eq);
+		v = mathEval(eq);
 	}
+	return v;
+}
+
+ValFormatter.prototype.format = function(val)
+{
+	var v = this.convert(val);
 	if (this.formatStr) {
 		return this.formatStr.format({
-			'val': val
+			'val': v
 		});
 	}
-	return autoFormatNumber(val);
+	return autoFormatNumber(v);
 }
 
 /**

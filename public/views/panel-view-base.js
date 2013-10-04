@@ -19,6 +19,7 @@ define([
 	    {
 	    	var options = options || {};
 		    this.vent = options.vent;
+		    this.subViews = [];
 		},
 
 		updatePanelState: function(expand) 
@@ -176,11 +177,16 @@ define([
 					},
 					handle: handle,
 					stop: function() {
-						var el = this,
-							right = $(this).position().left + $(this).outerWidth();
+						var $el = $(this),
+							pos = $el.position();
+						pos.right = pos.left + $(this).outerWidth();
 						
+						if (pos.top < 0) {
+							$el.css('top', '0px');
+						}
+
 						// TODO: implement proper panel management
-						/*if ($(this).position().left == 0) {
+						/*if (pos.left == 0) {
 							$(this).addClass('panel-anchor-left');
 							$(el).css('left', '');
 							$(el).css('right', '');
@@ -189,10 +195,10 @@ define([
 						}*/
 
 						$('.snap.right').each(function() {
-							if (right == $(this).position().left) {
+							if (pos.right == $(this).position().left) {
 								//console.log(this, $(this).position());
 								// re-dock to right edge
-								$(el).css('left', '');
+								$el.css('left', '');
 							}
 						});
 					},
@@ -252,8 +258,17 @@ define([
 			if (view.setSuperView) {
 				view.setSuperView(this);
 			}
+			this.subViews.push(view);
 			return view;
-		}		
+		},
+
+		removeSubViews: function()
+		{
+			while (this.subViews.length) {
+				var view = this.subViews.pop().remove();
+			}
+		}
+
 
 	});	
 
