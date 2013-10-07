@@ -146,12 +146,12 @@ exports.sendEmail = function(to, subject, bodyTemplate, replacements, callback)
     });
 }
 
-function serveError(req, res, err) 
+var serveError = function(err, req, res) 
 {
-    if (req.xhr || config.DEBUG) {
-        res.send(err, err.statusCode || 500);
+    if (!config.DEBUG) {
+        res.send(err.statusCode || 500, err.statusCode ? err : { error: 'An error occurred on the server' });
     } else {
-        res.send('error 500 page');
+        res.send(err.statusCode || 500, err);
     }
 }
 
@@ -160,26 +160,31 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
     if (err) {
         console.error('Error', err);
         switch (err.name) {
+            case 'CastError':
+                if (err.type == 'ObjectId') {
+                    serveError(new HTTPError((name ? name + ' ' : '') + 'not found', 404), req, res);
+                    break;
+                }
             default:
                 // if not in DEBUG mode, most error messages should be hidden from client: 
                 if (!config.DEBUG) {
                     err = new HTTPError('Internal Server Error', 500);
                 }
-                serveError(req, res, err);
+                serveError(err, req, res);
                 break;
             case 'ValidationError':
                 err = new errors.ValidationError(err.msg, err.errors);
             case 'HTTPError':
                 // certain error messages should be available to client:
-                serveError(req, res, err);
+                serveError(err, req, res);
                 break;
         }
         return true;
     } else if (!op) {
-        serveError(req, res, new HTTPError((name ? name + ' ' : '') + 'not found', 404));
+        serveError(new HTTPError((name ? name + ' ' : '') + 'not found', 404), req, res);
         return true;
     } else if (permissionCallback && !permissionCallback(req, op)) {
-        serveError(req, res, new HTTPError('permission denied', 403));
+        serveError(new HTTPError('permission denied', 403), req, res);
         return true;
     }
 

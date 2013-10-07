@@ -18,19 +18,20 @@ var application_root = __dirname,
 var templates;
 var app = express();
 
-var	clientErrorHandler = function(err, req, res, next) 
+var clientErrorHandler = function(err, req, res, next) 
 {
-	if (req.xhr) {
-		if (!config.DEBUG) {
-			res.send(500, { error: 'An error occurred on the server' });
-		} else {
-			res.send(500, err.toString());
-		}
-	} else if (!config.DEBUG) {
-		serveError(req, res, 500)
-	} else {
-		next(err);
-	}
+    console.error('errorHandler', err);
+    if (req.xhr) {
+        if (!config.DEBUG) {
+            res.send(err.statusCode || 500, { error: 'An error occurred on the server' });
+        } else {
+            res.send(500, err);
+        }
+    } else if (!config.DEBUG) {
+        serveError(req, res, err.statusCode || 500)
+    } else {
+        next(err);
+    }
 }
 
 app.configure(function() {
@@ -328,6 +329,7 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)/, function(req, res)
 		});
 });
 
+
 /*
 if (slug) {
 		// For any hosts other than the default hosts, passing a slug is not allowed
@@ -400,3 +402,8 @@ utils.connectDB(function() {
 		});
 }, false);
 
+/*
+process.on('uncaughtException', function (err) {
+    console.error('uncaughtException', err);
+});
+*/

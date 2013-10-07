@@ -4,7 +4,7 @@ var DEV = typeof process != 'undefined' && process.env.NODE_ENV == 'development'
 var config = {
 
 	DEV: DEV,
-	DEBUG: DEV,	
+	DEBUG: true,	
 	VERBOSE: false,
 	DEBUG_MAPREDUCE: DEV && 0,
 	LIMITED_PROD_ACCESS: !DEV,
