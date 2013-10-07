@@ -14,8 +14,12 @@
 	color: #333;
 }
 
-.map-style-dark #main-viewport .panel text {
+#main-viewport .panel text {
 	fill: #333;
+}
+
+#main-viewport .panel text.contrast {
+	text-shadow: 1px 1px rgba(255, 255, 255, .9);
 }
 
 #main-viewport .panel .text a, #main-viewport .panel .nav a {
@@ -80,6 +84,10 @@
 
 .map-style-dark #main-viewport .panel text {
 	fill: #ddd;
+}
+
+.map-style-dark #main-viewport .panel text.contrast {
+	text-shadow: 1px 1px rgba(0, 0, 0, .9);
 }
 
 .map-style-dark #main-viewport .panel .text h1 {
