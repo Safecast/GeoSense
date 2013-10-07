@@ -339,7 +339,7 @@
 .panel .model-title {
 	display: inline-block;
 	max-width: 60%;
-	overflow: hidden;
+	/*overflow: hidden;*/ /*TODO: causes extra vertical spacing in Chrome 30.0.1599.69 and possibly others?*/
 	white-space: nowrap;
 }
 
