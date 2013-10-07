@@ -55,21 +55,6 @@ define([
 			    	.range(this.getYRange())
 			    	.domain(d3.extent(data, getYVal));
 
-			if (this.renderAxes) {
-				var xAxis = d3.svg.axis()
-					    .scale(x)
-					    .orient("bottom"),
-					yAxis = d3.svg.axis()
-				    	.scale(y)
-				    	.tickFormat(function(d,i) {
-				    		return autoFormatNumber(d);
-				    	})
-				    	.orient("left");
-
-				this.appendXAxis(xAxis);
-			   	this.appendYAxis(yAxis, valFormatter.unit);
-			}
-
 			this.svg.selectAll("circle")
         		.data(data)
         		.enter().append("circle")
@@ -88,6 +73,20 @@ define([
 		        	self.showTooltip(this, formatYVal(getYVal(d)));
         		});
 
+			if (this.renderAxes) {
+				var xAxis = d3.svg.axis()
+					    .scale(x)
+					    .orient("bottom"),
+					yAxis = d3.svg.axis()
+				    	.scale(y)
+				    	.tickFormat(function(d,i) {
+				    		return autoFormatNumber(d);
+				    	})
+				    	.orient("left");
+
+				this.appendXAxis(xAxis);
+			   	this.appendYAxis(yAxis, valFormatter.unit);
+			}
 
 			return this;
 		}
