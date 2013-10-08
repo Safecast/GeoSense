@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Format.WMSCapabilities.v1_1_1_WMSC=OpenLayers.Class(OpenLayers.Format.WMSCapabilities.v1_1_1,{version:"1.1.1",profile:"WMSC",readers:{wms:OpenLayers.Util.applyDefaults({VendorSpecificCapabilities:function(e,t){t.vendorSpecific={tileSets:[]},this.readChildNodes(e,t.vendorSpecific)},TileSet:function(e,t){var n={srs:{},bbox:{},resolutions:[]};this.readChildNodes(e,n),t.tileSets.push(n)},Resolutions:function(e,t){var n=this.getChildValue(e).split(" ");for(var r=0,i=n.length;r<i;r++)n[r]!=""&&t.resolutions.push(parseFloat(n[r]))},Width:function(e,t){t.width=parseInt(this.getChildValue(e))},Height:function(e,t){t.height=parseInt(this.getChildValue(e))},Layers:function(e,t){t.layers=this.getChildValue(e)},Styles:function(e,t){t.styles=this.getChildValue(e)}},OpenLayers.Format.WMSCapabilities.v1_1_1.prototype.readers.wms)},CLASS_NAME:"OpenLayers.Format.WMSCapabilities.v1_1_1_WMSC"});

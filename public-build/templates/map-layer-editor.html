@@ -1,0 +1,379 @@
+<div class="panel-heading">
+    Layer: <span class="model-title"></span>
+    <div class="btn-toolbar">
+        <div class="btn-group btn-group-xs">
+            <button type="button" class="btn btn-default panel-collapse"><span class="glyphicon glyphicon-minus-sign"></span></button>
+            <!--<button type="button" class="btn btn-default panel-extend"><span class="glyphicon glyphicon-plus-sign"></span></button>-->
+            <button type="button" class="btn btn-default panel-close"><span class="glyphicon glyphicon-remove-sign"></span></button>
+        </div>
+    </div>
+</div>
+<div class="panel-body">
+
+    <form class="tabbable"> 
+        <ul class="nav nav-tabs nav-justified">
+            <li class="active"><a href="#layer-features" data-toggle="tab" class="has-tooltip" data-original-title="Map Features"><span class="icon-large icon-map-marker half-opacity"></span></a></li>
+            <li><a href="#layer-colors" data-toggle="tab" class="has-tooltip" data-original-title="Colors"><span class="icon-large icon-brush half-opacity"></span></a></li>
+            <li><a href="#layer-stroke" data-toggle="tab" class="has-tooltip" data-original-title="Stroke"><span class="icon-large icon-vector-path-curve half-opacity"></span></a></li>
+            <li><a href="#layer-data" data-toggle="tab" class="has-tooltip" data-original-title="Data"><span class="icon-large icon-table half-opacity"></span></a></li>
+            <li><a href="#layer-info" data-toggle="tab" class="has-tooltip" data-original-title="Layer Info"><span class="icon-large icon-info-sign half-opacity"></span></a></li>
+        </ul>
+
+        <div class="tab-content">
+
+            <fieldset class="tab-pane active" id="layer-features">
+                <input class="model-input" name="layerOptions.featureType" type="hidden" />
+                <div class="features">
+                    <div class="form-group">
+                        <label>Feature Type</label>
+                        <div class="btn-group model-input" data-name="layerOptions.featureType" data-toggle="buttons-radio">
+                            <button class="btn btn-default feature-type points" value="P"><i class="icon icon-feature-type has-tooltip" data-original-title="Points" data-placement="bottom"></i></button>
+                            <button class="btn btn-default feature-type square-tiles" value="ST"><i class="icon icon-feature-type has-tooltip" data-original-title="Tiles" data-placement="bottom"></i></button>
+                            <button class="btn btn-default feature-type bubbles" value="B"><i class="icon icon-feature-type has-tooltip" data-original-title="Bubbles" data-placement="bottom"></i></button>
+                            <button class="btn btn-default feature-type shapes" value="S"><i class="icon icon-feature-type has-tooltip" data-original-title="Shapes" data-placement="bottom"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <label for="">Opacity</label>  
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input class="form-control input-sm number model-input" name="layerOptions.opacity" type="text" placeholder="auto" />
+                                </div>
+                                <div class="col-md-9">
+                                    <span class="slider pull-left" data-field="layerOptions.opacity"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-settings ST advanced">
+                        <div class="form-group">
+                            <label class="checkbox">
+                                <input class="model-input" name="layerOptions.featureTypeFallback" type="checkbox" checked="checked"> Fall back to original shape if not tiled
+                            </label>
+                        </div>
+                    </div>
+                    <div class="feature-settings B clearfix">
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label for="">Minimum feature size</label>  
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input class="form-control input-sm number model-input" name="layerOptions.minFeatureSize" type="text" placeholder="auto" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <span class="slider pull-left" data-field="layerOptions.minFeatureSize" data-min="1" data-max="300"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-settings B P clearfix">
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label for="">Feature size</label>  
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input class="form-control input-sm number model-input" name="layerOptions.featureSize" type="text" placeholder="auto" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <span class="slider pull-left" data-field="layerOptions.featureSize" data-min="1" data-max="300"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-settings B">
+                        <div class="form-group">
+                            <label>Size relative to</label>
+                            <select class="form-control model-input input-sm" name="layerOptions.attrMap.featureSize">
+                                <option value="count">sample size</option>
+                                <option value="$numeric.avg">average value</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="advanced">
+                    <div class="divider"></div>
+                    <div class="form-group">
+                        <label>Renderer</label>
+                        <select class="form-control model-input input-sm" name="layerOptions.htmlRenderer">
+                            <option value="SVG">SVG (recommended)</option>
+                            <option value="Canvas">Canvas</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="tab-pane" id="layer-colors">
+
+                <div class="form-group color-schemes input-append input-group">
+                    <input class="form-control color-scheme-name" type="text">
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                        <ul class="dropdown-menu pull-right">
+                            <li class="add-color-scheme"><a href="#"><i class="glyphicon glyphicon-plus"></i> Add new color scheme</a></li>
+                            <li class="delete-color-scheme"><a href="#"><i class="glyphicon glyphicon-trash"></i> Delete this color scheme</a></li>
+                            <li class="divider"></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="color-scheme">
+                    <table class="color-palette form-group">
+                        <thead>
+                            <th><label>Color</label></th>
+                            <th><label>Position <a href="#" class="hint-toggle half-opacity" data-target="position"><i class="glyphicon glyphicon-question-sign"></i></a></label></th>
+                            <th class="advanced"><label>Interpolation</label></th>
+                        </thead>
+                        <tbody>
+                            <tr class="element-template" data-id="">
+                                <td class="color"><input name="color" type="text" class="form-control color-picker input-sm" size="7" placeholder="hex color" value="" /></td>
+                                <td class="position"><input name="position" type="text" class="form-control number input-sm" size="6" placeholder="position" value="" /></td>
+                                <td class="advanced">
+                                    <select name="form-control interpolation input-sm" class="min-width">
+                                        <option value="lerpRGB">linear</option>
+                                        <option value="threshold">threshold</option>
+                                    </select>
+                                </td>
+                                <td class="controls">
+                                    <button class="btn btn-default btn-sm muted remove-color" href="#"><span class="glyphicon glyphicon-remove"></span></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="form-group">
+                        <button class="btn btn-default add-color"><i class="glyphicon glyphicon-plus"></i> Add</button>
+                        <div class="pull-right">
+                            <button data-content-selector=".popover-color-generator" data-title="Color Scheme Generator" data-placement="right" class="btn btn-default show-color-generator has-popover pull-right">Generate…</button>
+                        </div>
+                        <div class="pull-right">
+                            <a href="#" class="hint-toggle half-opacity button-height" data-target="color-generator" data-placement="left"><i class="glyphicon glyphicon-question-sign"></i></a>&nbsp;
+                        </div>
+                    </div>
+
+                    <p class="help-block hint position">
+                        The position of a color determines which values it will be used for. You can use both <strong>absolute values</strong> for positions; or you can use <strong>percentages</strong> to define values in relation to your value range (for instance <strong>50%</strong> meaning your median value.)
+                    </p>
+                    <p class="help-block hint color-generator">
+                        Generates intermediate colors automatically. You can either start with <strong>one base color</strong>; or start with <strong>two colors</strong> to define the start and end of your color scheme.
+                    </p>
+                    <p class="help-block hint datetimeFormat">
+                        <a href="http://momentjs.com/docs/#/displaying/format/">See documentation</a> on how to format dates.
+                    </p>
+
+                    <div class="popover-color-generator">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="radio">
+                                    <input type="radio" name="colorSchemeType" value="sequential" checked> sequential
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="colorSchemeType" value="diverging"> diverging
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="colorSchemeType" value="qualitative"> qualitative
+                                </label>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="">Steps</label>  
+                                    <input class="form-control input-sm number" name="colorSchemeSteps" type="text" value="5" />
+                                </span>
+                            </div>
+                        </div>
+                        <div class="clearfix">
+                            <button class="btn btn-default hide-color-generator pull-left">Cancel</button>
+                            <button class="btn btn-warning generate-colors pull-right">Generate</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="advanced">
+                    <div class="divider"></div>
+                    <div class="form-group">
+                        <label>Map color to</label>
+                        <select class="form-control model-input input-sm" name="layerOptions.attrMap.featureColor">
+                            <option value="">(default)</option>
+                            <option value="count">sample size</option>
+                            <option value="val.avg">average value</option>
+                        </select>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="form-group">
+                        <label>Label color</label>
+                        <div>
+                            <input class="form-control color-picker model-input input-sm" name="layerOptions.colorLabelColor" type="text" placeholder="auto" />
+                        </div>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <fieldset class="tab-pane" id="layer-stroke">
+                <div class="form-group">
+                    <label>Stroke color</label>
+                    <div>
+                        <input class="form-control color-picker model-input input-sm" name="layerOptions.strokeColor" type="text" placeholder="auto" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <label for="">Stroke width</label>  
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input class="form-control input-sm number model-input" name="layerOptions.strokeWidth" type="text" placeholder="auto" />
+                            </div>
+                            <div class="col-md-9">
+                                <span class="slider pull-left" data-field="layerOptions.strokeWidth" data-min="1" data-max="30"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <label for="">Stroke opacity</label>  
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input class="form-control input-sm number model-input" name="layerOptions.strokeOpacity" type="text" placeholder="auto" />
+                            </div>
+                            <div class="col-md-9">
+                                <span class="slider pull-left" data-field="layerOptions.strokeOpacity"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group advanced">
+                    <label>Line cap (requires SVG)</label>
+                    <select class="form-control model-input input-sm" name="layerOptions.strokeLinecap">
+                        <option value="round">round</option>
+                        <option value="square">square</option>
+                        <option value="butt">butt</option>
+                    </select>
+                </div>
+                <div class="form-group advanced">
+                    <label>Dash style (requires SVG)</label>
+                    <select class="form-control model-input input-sm" name="layerOptions.strokeDashstyle">
+                        <option value="solid">solid</option>
+                        <option value="dot">dot</option>
+                        <option value="dash">dash</option>
+                        <option value="dashdot">dashdot</option>
+                        <option value="longdash">longdash</option>
+                        <option value="longdashdot">longdashdot</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset class="tab-pane" id="layer-data">
+                <div class="form-group">
+                    <label>Use numeric values from</label>
+                    <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.numeric" data-type="Number">
+                        <option value="">(pick a number field)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Use date/time values from</label>
+                    <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.datetime" data-type="Date">
+                        <option value="">(pick a date field)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date/time format <a href="#" class="hint-toggle half-opacity" data-target="datetimeFormat"><i class="glyphicon glyphicon-question-sign"></i></a></label>
+                    <input class="form-control model-input input-sm" name="layerOptions.datetimeFormat" type="text" placeholder="for instance: YYYY-MM-DD HH:mm" />
+                </div>
+                <div class="form-group">
+                    <label>Label features using</label>
+                    <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.label" data-type="">
+                        <option value="">(pick a field)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Group features by</label>
+                    <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.group" data-type="">
+                        <option value="">(pick a field)</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset class="tab-pane" id="layer-info">
+                <!--<label>Visibility</label>-->
+                <div class="form-group">
+                    <label class="checkbox">
+                        <input class="model-input layer-toggle" name="layerOptions.enabled" type="checkbox" checked="checked"> This layer is switched on by default
+                    </label>
+                    <!-- TODO:
+                    <label class="checkbox">
+                        <input class="model-input" name="layerOptions.public" type="checkbox" checked="checked"> This layer is public.
+                    </label>
+                    -->
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="title">Title</label> 
+                            <input class="form-control model-input" name="layerOptions.title" type="text" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="unit">Unit</label> 
+                            <input class="form-control model-input" name="layerOptions.unit" type="text" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label> 
+                    <textarea class="form-control model-input" name="layerOptions.description" rows="4"></textarea>
+                </div>
+                <div class="form-group model-numeric">
+                    <label class="checkbox">
+                        <input class="model-input" name="layerOptions.histogram" type="checkbox" checked="checked"> Display histogram for this layer
+                    </label>
+                </div>
+                <div class="divider"></div>
+                <div class="pull-left">
+                    <button class="btn btn-danger destroy">Remove Layer</button>
+                </div>
+                <div class="advanced pull-right">
+                    <button data-content-selector=".settings-export" data-title="Export or Import Settings" data-placement="right" class="btn btn-default import-export has-popover">Export/Import…</button>
+                </div>
+
+                <div class="settings-export">
+                    <div class="form-group">
+                        <textarea name="settings-json" class="form-control"></textarea>
+                    </div>
+                    <div class="clearfix">
+                        <button class="import-settings btn btn-warning generate-colors pull-right">Import</button>
+                    </div>
+                </div>
+
+            </fieldset>
+
+        </div>
+    </form>
+
+    <div class="element-template select-dropdown form-group input-append input-group">
+        <input class="form-control" type="text" readonly style="cursor: pointer">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu pull-right">
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<div class="panel-footer">
+
+<div class="btn-group" data-toggle="buttons-checkbox">
+  <button type="button" class="btn btn-default btn-sm show-preview">Preview</button>
+  <button type="button" class="btn btn-default btn-sm show-advanced"><i class="glyphicon glyphicon-cog half-opacity has-tooltip" data-original-title="Advanced Settings"></i></button>
+</div>    
+
+    <div class="pull-right main-buttons">
+        <button class="btn btn-default undo">Undo</button>
+        <button class="btn save btn-primary">Save Layer</button>
+    </div>
+</div>

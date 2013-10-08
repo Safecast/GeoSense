@@ -1,0 +1,1 @@
+define([],function(){var e=function(){return window.USER},t=function(e){window.USER=e,app&&app.trigger(e?"user:login":"user:logout")},n=function(e,t){if(!e||!t)return!1;var n=e._id!=undefined?e._id:e,r=t._id!=undefined?t._id:t;return n.toString()==r.toString()},r=function(t){return n(e()||{},t.attributes.createdBy)};return{currentUser:e,sameUser:n,canAdminModel:r,setUser:t}});

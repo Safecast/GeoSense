@@ -1,0 +1,1 @@
+define(["jquery","underscore","backbone","config","utils","text!templates/data-library-dashboard.html","views/data-library-view"],function(e,t,n,r,i,s,o){var u=o.extend({className:"layers-panel data-library",initialize:function(e){u.__super__.initialize.apply(this,arguments),this.template=t.template(s)}});return u});

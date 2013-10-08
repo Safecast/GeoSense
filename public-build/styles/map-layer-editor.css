@@ -1,0 +1,100 @@
+#main-viewport .panel.map-layer-editor {
+	width: 320px;
+}
+#main-viewport .panel.map-layer-editor.extended {
+	width: 444px;
+}
+.map-layer-editor .panel-header h3 {
+	max-width: 70%;
+	overflow: hidden;
+}
+.map-layer-editor .tab-content {
+	overflow: visible;
+}
+.map-layer-editor .radio.inline {
+	white-space: nowrap;
+	margin-right: 1em;
+}
+.map-layer-editor button.feature-type {
+	width:70px;
+	height:60px;
+	background-repeat:no-repeat;
+}
+.map-layer-editor .icon.icon-feature-type {
+	background-image: url('../assets/feature-type-icons.png');
+	width: 50px;
+	height: 50px;
+}
+.map-layer-editor .input-append.btn-group input {
+	width: 245px;
+}
+.map-layer-editor .btn.feature-type.points .icon-feature-type {
+	background-position: 0px 0%;
+}
+.map-layer-editor .btn.feature-type.points:hover .icon-feature-type, .btn.feature-type.points.active .icon-feature-type {
+	background-position: 0px 100%;
+}
+.map-layer-editor .btn.feature-type.square-tiles .icon-feature-type {
+	background-position: -50px 0%;
+}
+.map-layer-editor .btn.feature-type.square-tiles:hover .icon-feature-type, .btn.feature-type.square-tiles.active .icon-feature-type {
+	background-position: -50px 100%;
+}
+.map-layer-editor .btn.feature-type.bubbles .icon-feature-type {
+	background-position: -100px 0%;
+}
+.map-layer-editor .btn.feature-type.bubbles:hover .icon-feature-type, .btn.feature-type.bubbles.active .icon-feature-type {
+	background-position: -100px 100%;
+}
+.map-layer-editor .btn.feature-type.shapes .icon-feature-type {
+	background-position: -150px 0%;
+}
+.map-layer-editor .btn.feature-type.shapes:hover .icon-feature-type, .btn.feature-type.shapes.active .icon-feature-type {
+	background-position: -150px 100%;
+}
+.map-layer-editor button.feature-type:hover, .map-layer-editor button.feature-type.active {
+	
+}
+.map-layer-editor button.feature-type.active {
+	
+}
+.panel .slider {
+	width: 95%;
+	margin-top: 10px;
+}
+.map-layer-editor td .map-layer-editor {
+	padding: inherit .5em inherit 0;
+}
+.map-layer-editor input.text, .map-layer-editor textarea.text {
+	width: 95%;
+}
+.map-layer-editor label.pull-left {
+	margin: 5px 1em 9px 0;
+}
+.map-layer-editor table.color-palette thead th {
+	white-space: nowrap;
+}
+.map-layer-editor table.color-palette td:first-child {
+	padding-right: 1px;
+}
+.map-layer-editor table.color-palette td {
+	white-space: nowrap;
+	padding-right: 5px;
+}
+.map-layer-editor table.color-palette td.position {
+	width: 80%;
+}
+.map-layer-editor table.color-palette td.position input {
+	width: 100%;
+}
+.map-layer-editor table.color-palette td.controls {
+	padding-right: 0;
+	text-align: right;
+	width: 20%;
+}
+.map-layer-editor .popover-content {
+	width: 200px;
+}
+.color-generator .radio {
+	margin: 0;
+}
