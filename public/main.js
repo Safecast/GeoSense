@@ -10,7 +10,7 @@ require.config({
         locale: 'locale/locale.en',
         deepextend: 'lib/backbone-deep-model/lib/underscore.mixin.deepExtend',
         deepmodel: 'lib/backbone-deep-model/src/deep-model',
-        openlayers: 'lib/openlayers/OpenLayers-2.12/OpenLayers',
+        openlayers: 'lib/openlayers/OpenLayers-2.13.1/OpenLayers',
         cloudmade: 'lib/openlayers/cloudmade',
         stamen: 'lib/openlayers/stamen',
         backbone_super: 'lib/backbone_super/backbone_super',

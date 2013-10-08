@@ -11,8 +11,6 @@
 }
 */
 
-@import url(http://fonts.googleapis.com/css?family=Oxygen:300,700|Roboto+Slab:100,700|Roboto+Condensed:400);
-
 body, select, textarea, p, input, button {
   font-family: "Oxygen", sans-serif;
   font-weight: 300;

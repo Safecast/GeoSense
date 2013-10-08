@@ -259,89 +259,89 @@ lib/jquery-ui/development-bundle/themes/ui-lightness/minified/jquery.ui.theme.mi
 ----------------
 lib/jquery-ui/development-bundle/themes/ui-lightness/minified/jquery.ui.theme.min.css
 
-lib/openlayers/OpenLayers-2.12/apidoc_config/OL.css
+lib/openlayers/OpenLayers-2.13.1/apidoc_config/OL.css
 ----------------
-lib/openlayers/OpenLayers-2.12/apidoc_config/OL.css
+lib/openlayers/OpenLayers-2.13.1/apidoc_config/OL.css
 
-lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/1.css
+lib/openlayers/OpenLayers-2.13.1/doc/apidocs/styles/1.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/1.css
+lib/openlayers/OpenLayers-2.13.1/doc/apidocs/styles/1.css
 
-lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/2.css
+lib/openlayers/OpenLayers-2.13.1/doc/apidocs/styles/2.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/2.css
+lib/openlayers/OpenLayers-2.13.1/doc/apidocs/styles/2.css
 
-lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/main.css
+lib/openlayers/OpenLayers-2.13.1/doc/apidocs/styles/main.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc/apidocs/styles/main.css
+lib/openlayers/OpenLayers-2.13.1/doc/apidocs/styles/main.css
 
-lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/1.css
+lib/openlayers/OpenLayers-2.13.1/doc/devdocs/styles/1.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/1.css
+lib/openlayers/OpenLayers-2.13.1/doc/devdocs/styles/1.css
 
-lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/2.css
+lib/openlayers/OpenLayers-2.13.1/doc/devdocs/styles/2.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/2.css
+lib/openlayers/OpenLayers-2.13.1/doc/devdocs/styles/2.css
 
-lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/main.css
+lib/openlayers/OpenLayers-2.13.1/doc/devdocs/styles/main.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc/devdocs/styles/main.css
+lib/openlayers/OpenLayers-2.13.1/doc/devdocs/styles/main.css
 
-lib/openlayers/OpenLayers-2.12/doc_config/OL.css
+lib/openlayers/OpenLayers-2.13.1/doc_config/OL.css
 ----------------
-lib/openlayers/OpenLayers-2.12/doc_config/OL.css
+lib/openlayers/OpenLayers-2.13.1/doc_config/OL.css
 
-lib/openlayers/OpenLayers-2.12/examples/mobile-wmts-vienna.css
+lib/openlayers/OpenLayers-2.13.1/examples/mobile-wmts-vienna.css
 ----------------
-lib/openlayers/OpenLayers-2.12/examples/mobile-wmts-vienna.css
+lib/openlayers/OpenLayers-2.13.1/examples/mobile-wmts-vienna.css
 
-lib/openlayers/OpenLayers-2.12/examples/style.css
+lib/openlayers/OpenLayers-2.13.1/examples/style.css
 ----------------
-lib/openlayers/OpenLayers-2.12/examples/style.css
+lib/openlayers/OpenLayers-2.13.1/examples/style.css
 
-lib/openlayers/OpenLayers-2.12/examples/style.mobile-jq.css
+lib/openlayers/OpenLayers-2.13.1/examples/style.mobile-jq.css
 ----------------
-lib/openlayers/OpenLayers-2.12/examples/style.mobile-jq.css
+lib/openlayers/OpenLayers-2.13.1/examples/style.mobile-jq.css
 
-lib/openlayers/OpenLayers-2.12/lib/Firebug/firebug.css
+lib/openlayers/OpenLayers-2.13.1/lib/Firebug/firebug.css
 ----------------
-lib/openlayers/OpenLayers-2.12/lib/Firebug/firebug.css
+lib/openlayers/OpenLayers-2.13.1/lib/Firebug/firebug.css
 
-lib/openlayers/OpenLayers-2.12/tests/Test.AnotherWay.css
+lib/openlayers/OpenLayers-2.13.1/tests/Test.AnotherWay.css
 ----------------
-lib/openlayers/OpenLayers-2.12/tests/Test.AnotherWay.css
+lib/openlayers/OpenLayers-2.13.1/tests/Test.AnotherWay.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/google.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/google.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/google.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/google.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/google.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/google.tidy.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/google.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/google.tidy.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/ie6-style.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/ie6-style.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/ie6-style.tidy.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/ie6-style.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/ie6-style.tidy.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/style.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/style.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.mobile.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.mobile.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.mobile.tidy.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/style.mobile.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.mobile.tidy.css
 
-lib/openlayers/OpenLayers-2.12/theme/default/style.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.tidy.css
 ----------------
-lib/openlayers/OpenLayers-2.12/theme/default/style.tidy.css
+lib/openlayers/OpenLayers-2.13.1/theme/default/style.tidy.css
 
 styles/data-detail.css
 ----------------
@@ -387,7 +387,6 @@ styles/main.css
 ----------------
 styles/../lib/bootstrap/dist/css/bootstrap.css
 styles/jquery.miniColors.css
-styles/../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css
 styles/fonts.css
 styles/global.css
 styles/site.css
@@ -441,7 +440,7 @@ text!templates/data-detail.html
 views/panel-view-base.js
 lib/moment/moment.min.js
 views/data-detail-view.js
-lib/openlayers/OpenLayers-2.12/OpenLayers.js
+lib/openlayers/OpenLayers-2.13.1/OpenLayers.js
 lib/openlayers/cloudmade.js
 lib/openlayers/stamen.js
 views/map-ol-view.js

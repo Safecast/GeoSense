@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Layer.OSM=OpenLayers.Class(OpenLayers.Layer.XYZ,{name:"OpenStreetMap",url:["http://a.tile.openstreetmap.org/${z}/${x}/${y}.png","http://b.tile.openstreetmap.org/${z}/${x}/${y}.png","http://c.tile.openstreetmap.org/${z}/${x}/${y}.png"],attribution:"&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",sphericalMercator:!0,wrapDateLine:!0,tileOptions:null,initialize:function(e,t,n){OpenLayers.Layer.XYZ.prototype.initialize.apply(this,arguments),this.tileOptions=OpenLayers.Util.extend({crossOriginKeyword:"anonymous"},this.options&&this.options.tileOptions)},clone:function(e){return e==null&&(e=new OpenLayers.Layer.OSM(this.name,this.url,this.getOptions())),e=OpenLayers.Layer.XYZ.prototype.clone.apply(this,[e]),e},CLASS_NAME:"OpenLayers.Layer.OSM"});
