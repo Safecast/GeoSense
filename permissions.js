@@ -121,7 +121,8 @@ var requireLogin = function(req, res, next)
     	if (req.xhr) {
 	        res.redirect(config.BASE_URL + 'login', 403);
     	} else {
-    		var nextUrl = req.method != 'POST' ? req.url : req.headers.referer;
+    		var nextUrl = config.BASE_URL + (req.method != 'POST' || !req.headers.referer ? 
+    			req.url : req.headers.referer);
     		// sending a 403 will result in browser displaying the "Forbidden. Redirecting to /login" message
 	        res.redirect(config.BASE_URL + 'login' + (nextUrl ? '?next=' + nextUrl : ''));
     	}
