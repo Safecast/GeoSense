@@ -2,15 +2,15 @@
       <div class="container">
           <h1 class="app-title">GeoSense</h1>
           <h2>Create and share beautiful geospatial visualizations</h2>
-          <form class="create-map" method="POST" action="/api/map">
+          <form class="create-map" method="POST" action="<%= config.BASE_URL %>api/map">
               <div class="map-title alert alert-warning hidden">
                   Please give your map a title.
               </div>
               <div class="input-group">
-                      <input class="form-control input-lg map-title" placeholder="What should we call your map?" type="text" name="title">
-                      <span class="input-group-btn">
-                          <button id="createMap" class="btn btn-primary btn-lg" type="submit">Create Map!</span></button>
-                      </span>
+                <input class="form-control input-lg map-title" placeholder="What should we call your map?" type="text" name="title">
+                <span class="input-group-btn">
+                    <button id="createMap" class="btn btn-primary btn-lg" type="submit">Create Map!</span></button>
+                </span>
               </div>
           </form>     
       </div>
