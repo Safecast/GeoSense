@@ -33,6 +33,7 @@
 		"connect-flash": "0.1.x",
 		"bcrypt": "0.7.x",
 		"passport": "0.1.x",
-		"passport-local": "0.1.x"
+		"passport-local": "0.1.x",
+		"underscore": "1.5.2"
   }
 }
