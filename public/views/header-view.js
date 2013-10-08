@@ -44,7 +44,9 @@ define([
 
 	    render: function() 
 	    {
-			$(this.el).html(this.template());
+			$(this.el).html(this.template({
+		    	config: {BASE_URL: BASE_URL}
+		    }));
 			this.populateFromModel();
 			
 			this.$('.search-query').click(function() {
