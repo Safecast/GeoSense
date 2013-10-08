@@ -392,7 +392,10 @@ define([
 
 		modelChanged: function(model, options)
 		{
-			if (options.patch || options.poll) return; // wait for sync
+			if (options.patch || options.poll) {
+				this.updateStatus();
+				return; // wait for sync for complete update
+			}
 	    	if (this.legendView) {
 				this.legendView.removePopover();
 			}
