@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Layer.UTFGrid=OpenLayers.Class(OpenLayers.Layer.XYZ,{isBaseLayer:!1,projection:new OpenLayers.Projection("EPSG:900913"),useJSONP:!1,tileClass:OpenLayers.Tile.UTFGrid,initialize:function(e){OpenLayers.Layer.Grid.prototype.initialize.apply(this,[e.name,e.url,{},e]),this.tileOptions=OpenLayers.Util.extend({utfgridResolution:this.utfgridResolution},this.tileOptions)},createBackBuffer:function(){},clone:function(e){return e==null&&(e=new OpenLayers.Layer.UTFGrid(this.getOptions())),e=OpenLayers.Layer.Grid.prototype.clone.apply(this,[e]),e},getFeatureInfo:function(e){var t=null,n=this.getTileData(e);return n&&n.tile&&(t=n.tile.getFeatureInfo(n.i,n.j)),t},getFeatureId:function(e){var t=null,n=this.getTileData(e);return n.tile&&(t=n.tile.getFeatureId(n.i,n.j)),t},CLASS_NAME:"OpenLayers.Layer.UTFGrid"});

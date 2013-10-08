@@ -88,7 +88,8 @@ define([
                         }
                         self.visibleAreaChanged(self.getVisibleMapArea());
                     },
-                }
+                },
+                theme: window.BASE_URL + 'lib/openlayers/OpenLayers-2.13.1/theme/default/style.css'
             }); 
 
             // TODO: should limit vertically, but not horizontally?

@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Marker.Box=OpenLayers.Class(OpenLayers.Marker,{bounds:null,div:null,initialize:function(e,t,n){this.bounds=e,this.div=OpenLayers.Util.createDiv(),this.div.style.overflow="hidden",this.events=new OpenLayers.Events(this,this.div),this.setBorder(t,n)},destroy:function(){this.bounds=null,this.div=null,OpenLayers.Marker.prototype.destroy.apply(this,arguments)},setBorder:function(e,t){e||(e="red"),t||(t=2),this.div.style.border=t+"px solid "+e},draw:function(e,t){return OpenLayers.Util.modifyDOMElement(this.div,null,e,t),this.div},onScreen:function(){var e=!1;if(this.map){var t=this.map.getExtent();e=t.containsBounds(this.bounds,!0,!0)}return e},display:function(e){this.div.style.display=e?"":"none"},CLASS_NAME:"OpenLayers.Marker.Box"});
