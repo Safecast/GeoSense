@@ -31,12 +31,12 @@ define([
 		    this.template = _.template(templateHtml);	
 		    DataImportView.__super__.initialize.apply(this, arguments);
 			this.vent = options.vent;
-			this.responseData = null;
 			this.dataTitle = '';
 			this.dataDescription = '';
 			this.maxPreview = 30;
 			this.inspectedSource;
 			this.fromFieldColors = ['#a52a2a', '#f89406', '#46a546', '#62cffc', '#ff7f50', '#87ceeb', '#daa520', '#b8860b', '#c43c35', '#556b2f'];
+			this.requests = [];
 
 			this.defaultDescripts = [
 				{to: 'geometry.coordinates', type: 'LatLng', label: 'coordinates', options: {}, allowedTypes: ['LatLng', 'LngLat']},
@@ -71,8 +71,9 @@ define([
 			this.$('.import-run').attr('disabled', !this.canImport());
 	    },
 
-	    sourceSubmitButtonClicked: function() 
+	    sourceSubmitButtonClicked: function(evt) 
 	    {
+	    	evt.preventDefault();
 	    	var self = this;
 	    	if (!this.canImport()) return false;
 			this.runImport({inspect: true, max: this.maxPreview}, {
@@ -87,7 +88,6 @@ define([
 					}
 				}
 			});
-			return false;
 	    },
 
 	    filetypeButtonClicked: function(event) 
@@ -289,9 +289,9 @@ define([
 				title: 'Transform',
 				content: el,
 				html: true,
-				container: 'body',
+				container: self.$el,
 				animation: false
-			}).on('shown', function(evt) {
+			}).on('shown.bs.popover', function(evt) {
 				$(this).addClass('active');
 				var trigger = this;
 
@@ -316,7 +316,7 @@ define([
 					}
 				});
 
-			}).on('hidden', function(evt) {
+			}).on('hidden.bs.popover', function(evt) {
 				$(this).removeClass('active');
 				return false;
 			}).click(function(evt) {
@@ -475,16 +475,11 @@ define([
 			this.setAlert();
 			this.setLoading(true);
 
-			if (this.request) {
-//				this.request.abort();
-			}
-
-			this.request = $.ajax({
+			this.requests.push($.ajax({
 				type: 'POST',
 				url: window.BASE_URL + 'api/import/',
 				data: params,
 				success: function(responseData) {
-					console.log('import response', responseData);
 					self.setLoading(false);
 					if (params.preview) {
 						self.updateImportPreview(responseData.items);
@@ -494,27 +489,33 @@ define([
 					}
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
+					if (jqXHR.__aborted) return;
 					self.setLoading(false);
-					var data = $.parseJSON(jqXHR.responseText),
-						errors = data && data.errors ? data.errors : data.error ? {'': data} : null;
-					console.error('import failed', errors);
-					var lis = '';
-					if (errors) {
-						for (var k in errors) {
-							lis += '<li>' + errors[k].message + '</li>';
-						}
-						if (!options.silent) {
-							self.setAlert('<ul>' + lis + '</ul>', 'Import failed with the following errors:');
+					if (jqXHR.responseText) {
+						var data = $.parseJSON(jqXHR.responseText),
+							errors = data && data.errors ? data.errors : data.error ? {'': data} : null;
+						var lis = '';
+						if (errors) {
+							for (var k in errors) {
+								lis += '<li>' + errors[k].message + '</li>';
+							}
+							if (!options.silent) {
+								self.setAlert('<ul>' + lis + '</ul>', 'Import failed with the following errors:');
+							}
 						}
 					}
 					if (params.preview) {
 						self.updateImportPreview([]);
 					}
-					if (options.error) {
-						options.error(responseData);
-					}
 				}
-			});
+			}));
+
+			while (this.requests.length > 1) {
+				var xhr = this.requests.shift();
+				xhr.__aborted = true;
+			}
+
+
 		},
 
 		setLoading: function(isLoading)
