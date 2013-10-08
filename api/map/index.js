@@ -29,19 +29,19 @@ var MapAPI = function(app)
 			var options = {};
 			switch (req.params[0]) {
 				case '/latest':
+					query.active = true;
+					query.sharing = config.SharingType.WORLD;
 					options.sort = {'createdAt': -1};
 					options.limit = 20;		
-					options.active = true;
-					options.sharing = config.SharingType.WORLD;
 					break;
 				case '/featured':
 					if (!config.DEBUG) {
 						query.featured = {$gt: 0};
 					}
+					query.active = true;
+					query.sharing = config.SharingType.WORLD;
 					options.sort = {'featured': -1, 'createdAt': -1};
 					options.limit = 10;		
-					options.active = true;
-					options.sharing = config.SharingType.WORLD;
 					break;
 				case '/user':
 					if (req.user) {
