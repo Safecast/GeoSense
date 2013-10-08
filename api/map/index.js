@@ -115,7 +115,7 @@ var MapAPI = function(app)
 						 	if (req.xhr) {
 						 		res.send(prepareMapResult(req, map));
 						 	} else {
-						 		res.redirect('admin/' +map.slug);
+						 		res.redirect(config.BASE_URL + 'admin/' + map.slug);
 						 	}
 						});
 					}

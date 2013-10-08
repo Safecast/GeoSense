@@ -162,7 +162,7 @@ var loginCallback = function(req, res, redir)
 		if (req.xhr) {
 			return res.send(req.user.toJSONSelf());
 		}
-		return res.redirect((redir ? redir : 'dashboard'));
+		return res.redirect((redir ? redir : config.BASE_URL + 'dashboard'));
 	};
 	if (config.ANONYMOUS_MAP_CREATION) {
 		// Try to associate models that user created _before_ signup (stored in session)
@@ -186,7 +186,7 @@ app.post('/login', function(req, res, next) {
 	    	if (info && info.message) {
 				req.flash('error', info.message);
 			}
-	    	return res.redirect('/login' + (redir ? '?next=' + redir : '')); 
+	    	return res.redirect(config.BASE_URL + 'login' + (redir ? '?next=' + redir : '')); 
 	    }
 	    req.logIn(user, function(err) {
 			if (err) { 
@@ -248,7 +248,7 @@ app.post('/signup', function(req, res, next)
 app.get('/logout', function(req, res) 
 {
 	req.logout();
-	res.redirect(req.query.next || 'login');
+	res.redirect(req.query.next || config.BASE_URL + 'login');
 });
 
 app.get('/', function(req, res) 
@@ -295,7 +295,7 @@ app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)/, config.ANONYMOUS_MAP_CREATION ? [] : [pe
 			} else if (!map) {
 				return serveError(req, res, 404);
 			} else if (!permissions.canAdminMap(req, map)) {
-				return res.redirect('login?next=' + req.url);
+				return res.redirect(config.BASE_URL + 'login?next=' + req.url);
 			}
 			serveMap(req, res, map);
 		});
