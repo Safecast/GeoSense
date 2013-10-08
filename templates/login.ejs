@@ -19,7 +19,7 @@
             </div>
         <% } %>
 
-        <form class="login" action="/login" method="POST">
+        <form class="login" action="<%= config.BASE_URL %>login" method="POST">
             <div class="form-group">
                 <label>Email address</label>
                 <input class="form-control input-lg" type="text" name="email" value="<% if (typeof email != 'undefined') { %><%= email %><% } %>" />
