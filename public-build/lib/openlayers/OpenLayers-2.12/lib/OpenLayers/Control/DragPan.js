@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Control.DragPan=OpenLayers.Class(OpenLayers.Control,{type:OpenLayers.Control.TYPE_TOOL,panned:!1,interval:1,documentDrag:!1,kinetic:null,enableKinetic:!1,kineticInterval:10,draw:function(){if(this.enableKinetic){var e={interval:this.kineticInterval};typeof this.enableKinetic=="object"&&(e=OpenLayers.Util.extend(e,this.enableKinetic)),this.kinetic=new OpenLayers.Kinetic(e)}this.handler=new OpenLayers.Handler.Drag(this,{move:this.panMap,done:this.panMapDone,down:this.panMapStart},{interval:this.interval,documentDrag:this.documentDrag})},panMapStart:function(){this.kinetic&&this.kinetic.begin()},panMap:function(e){this.kinetic&&this.kinetic.update(e),this.panned=!0,this.map.pan(this.handler.last.x-e.x,this.handler.last.y-e.y,{dragging:!0,animate:!1})},panMapDone:function(e){if(this.panned){var t=null;this.kinetic&&(t=this.kinetic.end(e)),this.map.pan(this.handler.last.x-e.x,this.handler.last.y-e.y,{dragging:!!t,animate:!1});if(t){var n=this;this.kinetic.move(t,function(e,t,r){n.map.pan(e,t,{dragging:!r,animate:!1})})}this.panned=!1}},CLASS_NAME:"OpenLayers.Control.DragPan"});

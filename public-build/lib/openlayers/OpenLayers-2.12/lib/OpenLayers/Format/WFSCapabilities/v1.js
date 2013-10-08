@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Format.WFSCapabilities.v1=OpenLayers.Class(OpenLayers.Format.XML,{namespaces:{wfs:"http://www.opengis.net/wfs",xlink:"http://www.w3.org/1999/xlink",xsi:"http://www.w3.org/2001/XMLSchema-instance",ows:"http://www.opengis.net/ows"},defaultPrefix:"wfs",read:function(e){typeof e=="string"&&(e=OpenLayers.Format.XML.prototype.read.apply(this,[e]));var t=e;e&&e.nodeType==9&&(e=e.documentElement);var n={};return this.readNode(e,n),n},readers:{wfs:{WFS_Capabilities:function(e,t){this.readChildNodes(e,t)},FeatureTypeList:function(e,t){t.featureTypeList={featureTypes:[]},this.readChildNodes(e,t.featureTypeList)},FeatureType:function(e,t){var n={};this.readChildNodes(e,n),t.featureTypes.push(n)},Name:function(e,t){var n=this.getChildValue(e);if(n){var r=n.split(":");t.name=r.pop(),r.length>0&&(t.featureNS=this.lookupNamespaceURI(e,r[0]))}},Title:function(e,t){var n=this.getChildValue(e);n&&(t.title=n)},Abstract:function(e,t){var n=this.getChildValue(e);n&&(t["abstract"]=n)}}},CLASS_NAME:"OpenLayers.Format.WFSCapabilities.v1"});

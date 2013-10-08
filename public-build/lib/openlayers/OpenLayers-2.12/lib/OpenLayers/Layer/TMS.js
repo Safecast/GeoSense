@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2012 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Layer.TMS=OpenLayers.Class(OpenLayers.Layer.Grid,{serviceVersion:"1.0.0",layername:null,type:null,isBaseLayer:!0,tileOrigin:null,serverResolutions:null,zoomOffset:0,initialize:function(e,t,n){var r=[];r.push(e,t,{},n),OpenLayers.Layer.Grid.prototype.initialize.apply(this,r)},clone:function(e){return e==null&&(e=new OpenLayers.Layer.TMS(this.name,this.url,this.getOptions())),e=OpenLayers.Layer.Grid.prototype.clone.apply(this,[e]),e},getURL:function(e){e=this.adjustBounds(e);var t=this.getServerResolution(),n=Math.round((e.left-this.tileOrigin.lon)/(t*this.tileSize.w)),r=Math.round((e.bottom-this.tileOrigin.lat)/(t*this.tileSize.h)),i=this.getServerZoom(),s=this.serviceVersion+"/"+this.layername+"/"+i+"/"+n+"/"+r+"."+this.type,o=this.url;return OpenLayers.Util.isArray(o)&&(o=this.selectUrl(s,o)),o+s},setMap:function(e){OpenLayers.Layer.Grid.prototype.setMap.apply(this,arguments),this.tileOrigin||(this.tileOrigin=new OpenLayers.LonLat(this.map.maxExtent.left,this.map.maxExtent.bottom))},CLASS_NAME:"OpenLayers.Layer.TMS"});

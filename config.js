@@ -7,7 +7,7 @@ var config = {
 	DEBUG: true,	
 	VERBOSE: false,
 	DEBUG_MAPREDUCE: DEV && 0,
-	LIMITED_PROD_ACCESS: !DEV,
+	LIMITED_PROD_ACCESS: false,//!DEV,
 
 	CLOCK_PROCESS_RUN_TIME: '0 10 * * * *',
 

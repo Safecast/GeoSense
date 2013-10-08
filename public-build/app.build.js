@@ -1,0 +1,1 @@
+({appDir:"./",baseUrl:"./",dir:"../public-build",paths:{jquery:"empty:"},mainConfigFile:"main.js",modules:[{name:"main"}]});
