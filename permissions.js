@@ -106,12 +106,12 @@ var canViewFeatureCollection = function(req, map, featureCollection)
 var canCreateMap = function(req) 
 {
 	return !config.LIMITED_PROD_ACCESS;
-}
+};
 
 var canImportData = function(req) 
 {
 	return !config.LIMITED_PROD_ACCESS;
-}
+};
 
 var requireLogin = function(req, res, next) 
 {
@@ -127,7 +127,18 @@ var requireLogin = function(req, res, next)
 	        res.redirect(config.BASE_URL + 'login' + (nextUrl ? '?next=' + nextUrl : ''));
     	}
     }
-}
+};
+
+var authenticateWithEmailAndPassword = function(email, password, done) 
+{
+	models.User.findOne({ email: email }, function(err, user) {
+		if (err) { return done(err); }
+		if (!user || !user.validPassword(password)) {
+			return done(null, false, { message: 'Incorrect email address or password.' });
+		}
+		return done(null, user);
+    });
+};	
 
 module.exports = {
 	canAdminMap: canAdminMap,
@@ -139,5 +150,6 @@ module.exports = {
 	requireLogin: requireLogin,
 	sameUser: sameUser,
 	allowSessionAdmin: allowSessionAdmin,
-	setUserForSessionAdminModels: setUserForSessionAdminModels
+	setUserForSessionAdminModels: setUserForSessionAdminModels,
+	authenticateWithEmailAndPassword: authenticateWithEmailAndPassword
 };

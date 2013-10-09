@@ -324,8 +324,13 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 			});
 		}
 
-		if (req && req.user) {
+		if (params.user) {
+			collection.createdBy = collection.modifiedBy = params.user;
+		} else if (req && req.user) {
 			collection.createdBy = collection.modifiedBy = req.user._id;
+		}
+		if (collection.createdBy) {
+			console.info('* createdBy: ', collection.createdBy.toString());
 		}
 
 		var collectionSave = !params.dry ?
@@ -972,7 +977,8 @@ function getImportParams(params)
 		interval: params.interval,
 		bounds: params.bounds,
 		aggregate: (params.aggregate ? params.aggregate && params.aggregate != 'off' : undefined),
-		fields: (params.fields ? JSON.parse(params.fields) : undefined) // precedence over converter
+		fields: (params.fields ? JSON.parse(params.fields) : undefined), // precedence over converter
+		user: params.user
 	});
 }
 

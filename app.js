@@ -54,16 +54,7 @@ app.configure(function() {
 			usernameField: 'email',
 	    	passwordField: 'password'
 	    },
-		function(email, password, done) {
-			console.log('authenticating:', email);
-	    	models.User.findOne({ email: email }, function(err, user) {
-				if (err) { return done(err); }
-				if (!user || !user.validPassword(password)) {
-					return done(null, false, { message: 'Incorrect email address or password.' });
-				}
-				return done(null, user);
-		    });
-	  	}	
+	    permissions.authenticateWithEmailAndPassword
 	));
 	passport.serializeUser(function(user, done) {
         done(null, user._id.toString());
