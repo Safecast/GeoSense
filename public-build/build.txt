@@ -386,6 +386,7 @@ styles/layers-panel.css
 styles/main.css
 ----------------
 styles/../lib/bootstrap/dist/css/bootstrap.css
+styles/../lib/bootstrap-glyphicons/css/bootstrap.icon-large-mod.css
 styles/jquery.miniColors.css
 styles/fonts.css
 styles/global.css
