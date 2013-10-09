@@ -15,6 +15,16 @@ var isArray = Array.isArray,
 
 exports.connectDB = function(callback, exitProcessOnError) 
 {
+    if (mongoose.connection.base.connections.length) {
+        var conn = mongoose.connection.base.connections[0];
+        if (conn._hasOpened) {
+            if (callback) {
+                callback();
+            }
+            return conn;
+        }
+    }
+
     mongoose.connection.on('open', function (ref) {
         console.success('Connected to mongoDB server.');
         if (callback) {
@@ -203,13 +213,14 @@ exports.import = function(into, mod) {
     return mod;
 }
 
-exports.exitCallback = function(err, data, showHelp) {
+exports.exitCallback = function(err, data, showHelp, throwErr) {
     if (showHelp) {
         console.info(data);
     }
     if (err) {
         console.error(err.message);
-        if (config.DEV) {
+        if (throwErr == undefined) throwErr = config.DEV;
+        if (throwErr) {
             throw(err);
         }
         process.exit(1);

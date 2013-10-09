@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 var path = require('path'),
+	read = require('read'),
+	permissions = require("./permissions.js"),
 	config = require("./config.js"),
 	models = require('./models.js'),
 	optimist = require('optimist'),
@@ -36,7 +38,83 @@ if (!module.parent) {
 
 		help += "\n\nCommands:\n  " + commands.join("\n  ") + "\n";
 		console.info(help);
+		utils.exitCallback();
+	};
+
+	var runAuthenticatedCliCommand = function(args)
+	{
+		var username, password, attempts = 0, maxAttempts = 3;
+		if (args.user && args.user !== true) {
+			username = args.user;
+		} else if (args.u && args.u !== true) {
+			username = args.u;
+		}
+
+		delete args.u; 
+		delete args.user;
+
+		var authAndRun = function() {
+			permissions.authenticateWithEmailAndPassword(username, password, function(err, user, opts) {
+				attempts++;
+				if (err) {
+					utils.exitCallback(err, null, false, false);
+				} else if (!user) {
+					if (attempts < maxAttempts) {
+						askPassword(authAndRun);
+					} else {
+						utils.exitCallback(new Error(opts.message), null, false, false);
+					}
+				} else {
+					args.user = user.get('_id').toString();
+					runCliCommand(args);
+				}
+			});
+		};
+
+		var askUsername = function(callback) {
+			read({prompt: 'Username/email address: '}, function(err, answer, isDefault) {
+				if (err) {
+					utils.exitCallback();
+				}
+				console.log(answer);
+				username = answer;
+				if (username) {
+					callback();
+				} else {
+					askUsername(callback);
+				}
+			});
+		};
+
+		var askPassword = function(callback) {
+			read({prompt: username + '\'s password: ', silent: true}, function(err, answer, isDefault) {
+				if (err) {
+					utils.exitCallback();
+				}
+				password = answer;
+				if (password) {
+					callback();
+				} else {
+					askPassword(callback);
+				}
+			});
+		};
+
+		if (!username) {
+			askUsername(function() {
+				askPassword(authAndRun);
+			})
+		} else {
+			askPassword(authAndRun);
+		}
+	};
+
+	if (args.user != undefined || args.u != undefined) {
+		utils.connectDB(function() {
+			runAuthenticatedCliCommand(args);
+		});
+	} else {
+		runCliCommand(args);
 	}
-	
-	runCliCommand(args);
+
 }
