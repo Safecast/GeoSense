@@ -15,7 +15,7 @@ var config = require('../../config'),
 	fs = require('fs'),
   	mongoose = require('mongoose'),
 	url = require('url'),
-	_ = require('cloneextend'),
+	_ = require('underscore'),
 	path = require('path'),
 	console = require('../../ext-console.js'),
 	AggregateAPI = require('../aggregate'),
@@ -156,7 +156,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		params = params || {},
 		dataCallbacks = dataCallbacks || {};
 
-	var defaults = {
+	var defaultParams = {
 		url: null, path: null, stream: null,
 		format: null,
 		max: 0,
@@ -169,144 +169,146 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		gridSize: null
 	};
 
-	var params = _.cloneextend(defaults, params);
+	var params = _.extend(_.clone(defaultParams), params),
+		ToCollectionModel = models.GeoFeatureCollection;
 
-	if (!params.format) {
-		if (params.path) {
-			params.format = params.path.split('.').pop();
-		} else if (params.url) {
-			params.format = params.url.split('.').pop();
-		}
-	}
-
-	if (utils.isEmpty(params.max)) {
-		params.max = defaults.max;
-	}
-	if (utils.isEmpty(params.skip)) {
-		params.skip = defaults.skip;
-	}
-	if (utils.isEmpty(params.interval)) {
-		params.interval = defaults.interval;
-	}
-	if (params.from) {
-		params.from = new Date(params.from);
-	}
-	if (params.to) {
-		params.to = new Date(params.to);
-	}
-	if (utils.isEmpty(params.url) && utils.isEmpty(params.path)) {
-		var err = new Error('must specify url or path');
-		if (callback) {
-			callback(err);
-			return;
-		}
-		throw err;
-	}
-	if (typeof params.format != 'string') {
-		var err = new Error('invalid format');
-		if (callback) {
-			callback(err);
-			return;
-		}
-		throw err;
-	}
-
-	if (params.bounds) {
-		if (typeof params.bounds == 'string') {
-			var b = params.bounds.split(',');
-			params.bounds = [[parseFloat(b[0]), parseFloat(b[1])], [parseFloat(b[2]), parseFloat(b[3])]];
-		}
-		if (params.bounds.length < 2 || params.bounds[0].length < 2 || params.bounds[1].length > 2
-			|| isNaN(params.bounds[0][0]) || isNaN(params.bounds[0][1]) || isNaN(params.bounds[1][0]) || isNaN(params.bounds[1][1])) {
-				var err = new Error('invalid bounds: ' + params.bounds);
-				if (callback) {
-					callback(err);
-					return;
-				}
-				throw err;
-		} 
-	}
-
-	var formatModule, format, parser, dataTransform;
-
-	if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
-		formatModule = './formats/' + params.format;
-	} else {
-		formatModule = params.format;
-	}
-	console.log('*** Loading format: '+params.format, formatModule);
-	try {
-		format = require(formatModule);
-	} catch(err) {
-		if (callback) {
-			if (err.code == 'MODULE_NOT_FOUND') {
-				err = new Error('Unknown format: ' + params.format);
+	var runImport = function(params, collection, collectionDefaults) 
+	{
+		if (!params.format) {
+			if (params.path) {
+				params.format = params.path.split('.').pop();
+			} else if (params.url) {
+				params.format = params.url.split('.').pop();
 			}
-			callback(err);
-			return;
 		}
-		throw err;
-	}
 
-	if (!format.Parser) {
-		var err = new Error('format module does not export `Parser`');
-		if (callback) {
-			callback(err);
-			return;
+		if (utils.isEmpty(params.max)) {
+			params.max = defaultParams.max;
 		}
-		throw err;
-	}
-    parser = format.Parser();
-
-    dataTransform = new transform.DataTransform(format.transform, {strict: !params.dry});
-    dataTransform.verbose = config.DEBUG && config.VERBOSE;
-	var customTransform;
-    if (params.transform) {
-    	if (typeof params.transform != 'object') {
-			var transformModule = params.transform;
-			console.log('* Loading transform: '+params.transform);
-			try {
-				customTransform = require(transformModule);
-			} catch(err) {
-				if (callback) {
-					if (err.code == 'MODULE_NOT_FOUND') {
-						err = new Error('Unknown transform: ' + params.transform);
-					}
-					callback(err);
-					return;
-				}
-				throw err;
-			}
-    	} else {
-    		customTransform = params.transform;
-    	}
-    	console.log('* custom transform', customTransform);
-    	try {
-    		var customTransform = new transform.DataTransform(customTransform);
-    	} catch (err) {
+		if (utils.isEmpty(params.skip)) {
+			params.skip = defaultParams.skip;
+		}
+		if (utils.isEmpty(params.interval)) {
+			params.interval = defaultParams.interval;
+		}
+		if (params.from) {
+			params.from = new Date(params.from);
+		}
+		if (params.to) {
+			params.to = new Date(params.to);
+		}
+		if (utils.isEmpty(params.url) && utils.isEmpty(params.path)) {
+			var err = new Error('must specify url or path');
 			if (callback) {
 				callback(err);
 				return;
 			}
 			throw err;
-    	}
-    	dataTransform.addFields(customTransform.descripts);
-    }
+		}
+		if (typeof params.format != 'string') {
+			var err = new Error('invalid format');
+			if (callback) {
+				callback(err);
+				return;
+			}
+			throw err;
+		}
 
-    if (params.layerOptions) {
-    	if (typeof params.layerOptions != 'object') {
-			console.log('* Loading layerOptions: '+params.layerOptions);
-    		params.layerOptions = JSON.parse(fs.readFileSync(params.layerOptions));
-	    	console.log('* layerOptions:', params.layerOptions);
-    	}
-    }
+		if (params.bounds) {
+			if (typeof params.bounds == 'string') {
+				var b = params.bounds.split(',');
+				params.bounds = [[parseFloat(b[0]), parseFloat(b[1])], [parseFloat(b[2]), parseFloat(b[3])]];
+			}
+			if (params.bounds.length < 2 || params.bounds[0].length < 2 || params.bounds[1].length > 2
+				|| isNaN(params.bounds[0][0]) || isNaN(params.bounds[0][1]) || isNaN(params.bounds[1][0]) || isNaN(params.bounds[1][1])) {
+					var err = new Error('invalid bounds: ' + params.bounds);
+					if (callback) {
+						callback(err);
+						return;
+					}
+					throw err;
+			} 
+		}
 
-	var importCount = 0,
-		fieldNames,
-		FIRST_ROW_IS_HEADER = params.format == 'csv';
+		var formatModule, format, parser, dataTransform;
 
-	var runImport = function(collection) 
-	{
+		if (params.format.match(REGEX_IS_REGULAR_MODULE)) {
+			formatModule = './formats/' + params.format;
+		} else {
+			formatModule = params.format;
+		}
+		console.log('*** Loading format: '+params.format, formatModule);
+		try {
+			format = require(formatModule);
+		} catch(err) {
+			if (callback) {
+				if (err.code == 'MODULE_NOT_FOUND') {
+					err = new Error('Unknown format: ' + params.format);
+				}
+				callback(err);
+				return;
+			}
+			throw err;
+		}
+
+		if (!format.Parser) {
+			var err = new Error('format module does not export `Parser`');
+			if (callback) {
+				callback(err);
+				return;
+			}
+			throw err;
+		}
+	    parser = format.Parser();
+
+	    dataTransform = new transform.DataTransform(format.transform, {strict: !params.dry});
+	    dataTransform.verbose = config.DEBUG && config.VERBOSE;
+		var customTransform;
+
+	    if (params.transform) {
+	    	if (typeof params.transform != 'object') {
+				var transformModule = params.transform;
+				console.log('* Loading transform: '+params.transform);
+				try {
+					customTransform = require(transformModule);
+				} catch(err) {
+					if (callback) {
+						if (err.code == 'MODULE_NOT_FOUND') {
+							err = new Error('Unknown transform: ' + params.transform);
+						}
+						callback(err);
+						return;
+					}
+					throw err;
+				}
+	    	} else {
+	    		customTransform = params.transform;
+	    	}
+	    	console.log('* custom transform', customTransform);
+	    	try {
+	    		var customTransform = new transform.DataTransform(customTransform);
+	    	} catch (err) {
+				if (callback) {
+					callback(err);
+					return;
+				}
+				throw err;
+	    	}
+	    	dataTransform.addFields(customTransform.descripts);
+	    }
+
+	    if (params.layerOptions) {
+	    	if (typeof params.layerOptions != 'object') {
+				console.log('* Loading layerOptions: '+params.layerOptions);
+	    		params.layerOptions = JSON.parse(fs.readFileSync(params.layerOptions));
+		    	console.log('* layerOptions:', params.layerOptions);
+	    	}
+	    }
+
+		var importCount = 0,
+			fieldNames,
+			FIRST_ROW_IS_HEADER = params.format == 'csv';
+
 		var sendItems,
 			ToSaveModel = collection.getFeatureModel(),
 			headerValues = {};
@@ -319,7 +321,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		}
 
 		if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
-			collection.importParams = _.cloneextend(params, {
+			collection.importParams = _.extend(_.clone(params), {
 				transform: customTransform ? customTransform.descripts : null
 			});
 		}
@@ -347,6 +349,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 				}
 				return;
 			}
+			collectionDefaults = collectionDefaults;
 
 	    	var newCollectionId = collection.get('_id');
 	    	if (!params.dry) {
@@ -392,7 +395,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					if (parserErr) {
 				    	debugStats('*** finalized with error ***', 'warn', null, true);
 						if (!params.dry && !params.append) {
-							defaults.remove(function(err) {
+							collectionDefaults.remove(function(err) {
 								collection.remove(function(err) {
 									utils.callbackOrThrow(parserErr, callback);
 								});
@@ -405,12 +408,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
 					collection.extremes = extremes;
 					collection.markModified('extremes');
-					if (!defaults.attrMap || !defaults.attrMap.numeric) {
-						collection.defaults.histogram = false;
+					if (!collectionDefaults.attrMap || !collectionDefaults.attrMap.numeric) {
+						collectionDefaults.histogram = false;
 					}
 
 					collection.sourceFieldNames = fieldNames;
-					collection.fields = _.cloneextend(dataTransform.fields);
+					collection.fields = _.clone(dataTransform.fields);
 
 					// for constant property field types, add them to collection.fields
 					var transformFieldNames = dataTransform.fields.map(function(f) {
@@ -439,7 +442,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					}
 					if (numSaved >= config.MIN_FEATURES_TILE && !collection.tile) {
 						collection.tile = config.TILE_DEFAULT;
-						defaults.featureType = config.FeatureType.SQUARE_TILES;
+						collectionDefaults.featureType = config.FeatureType.SQUARE_TILES;
 					}
 					if (collection.limitFeatures == undefined) {
 						collection.limitFeatures = numSaved >= config.MIN_FEATURES_LIMIT;
@@ -451,24 +454,24 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					// determine default field mappings by finding first 
 					// Number and Date field and collection.fields
 					if (!params.append) {
-						if (!defaults.attrMap) {
-							defaults.attrMap = {};
+						if (!collectionDefaults.attrMap) {
+							collectionDefaults.attrMap = {};
 						}
 						var fieldNames = collection.fields.map(function(field) { return field.name });
 						// check if default label fields exist and use first
 						config.DEFAULT_LABEL_FIELDS.every(function(fieldName) {
 							var f = 'properties.' + fieldName;
 							if (fieldNames.indexOf(f) != -1) {
-								defaults.attrMap.label = f;
+								collectionDefaults.attrMap.label = f;
 								return false;
 							}
 							return true;
 						});
 						// otherwise use first String field
-						if (!defaults.attrMap.label) {
+						if (!collectionDefaults.attrMap.label) {
 							collection.fields.every(function(field) {
 								if (field.type == 'String') {
-									defaults.attrMap.label = field.name;
+									collectionDefaults.attrMap.label = field.name;
 									return false;
 								}
 								return true;
@@ -477,7 +480,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						// use first Numeric field
 						collection.fields.every(function(field) {
 							if (field.type == 'Number' && getAttr(extremes, field.name)) {
-								defaults.attrMap.numeric = field.name;
+								collectionDefaults.attrMap.numeric = field.name;
 								return false;
 							}
 							return true;
@@ -485,7 +488,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 						// use first Date field
 						collection.fields.every(function(field) {
 							if (field.type == 'Date' && getAttr(extremes, field.name)) {
-								defaults.attrMap.datetime = field.name;
+								collectionDefaults.attrMap.datetime = field.name;
 								return false;
 							}
 							return true;
@@ -493,8 +496,17 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 					}
 
 					var defaultsSave = !params.dry && !params.append ?
-						defaults.save : function(callback) { callback(false, defaults) };
-					defaultsSave.call(defaults, function(err, defaults) {
+						collectionDefaults.save : function(callback) { callback(false, collectionDefaults) };
+
+					if (format.defaults) {
+						for (var k in format.defaults) {
+							if (collectionDefaults.get(k) == undefined) {
+								collectionDefaults.set(k, format.defaults[k]);
+							}
+						}
+					}
+
+					defaultsSave.call(collectionDefaults, function(err, collectionDefaults) {
 						if (err) {
 							console.error(err.message);
 							if (callback) {
@@ -861,48 +873,65 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		});
 	};
 
-	var ToSaveModel, // created on the fly when collection _id known
-		ToCollectionModel = models.GeoFeatureCollection;
-
 	if (!params.append) {
-		if (!params.dry) {
-			console.info('*** Creating new collection ***');
-		}
-		var defs = _.cloneextend(config.LAYER_OPTIONS_DEFAULTS, format.defaults || {});
-		if (params.layerOptions) {
-			defs = _.cloneextend(defs, params.layerOptions);
-		}
-		var defaults = new LayerOptions(defs);
-
-		var defaultsSave = !params.dry ?
-			defaults.save : function(callback) { callback(false, defaults) };
-		defaultsSave.call(defaults, function(err, defaults) {
-			if (err) {
-				console.error(err.message);
-				if (callback) {
-					callback(err);
-				}
-				return;
+		var makeDefaultsAndImport = function(params, defaultLayerOptions) {
+			if (!params.dry) {
+				console.info('*** Creating new collection ***');
 			}
-			var filename = params.url || params.path,
-				titlefy = function(s) {
-					var s = unescape(s).replace(/_/g, ' ');
-      				return s.substr(0, 1).toUpperCase() + s.substring(1);
-    			};
-			runImport(new ToCollectionModel({
-				defaults: defaults._id,
-				title: params.title || titlefy(path.basename(filename, path.extname(filename))),
-				description: params.description,
-				unit: "",
-				progress: 0,
-			}));
-		});
+			var defs = _.clone(defaultLayerOptions);
+			if (params.layerOptions) {
+				defs = _.extend(defs, params.layerOptions);
+			}
+			var collectionDefaults = new LayerOptions(defs);
+
+			var defaultsSave = !params.dry ?
+				collectionDefaults.save : function(callback) { callback(false, collectionDefaults) };
+			defaultsSave.call(collectionDefaults, function(err, collectionDefaults) {
+				if (err) {
+					console.error(err.message);
+					if (callback) {
+						callback(err);
+					}
+					return;
+				}
+				var filename = params.url || params.path,
+					titlefy = function(s) {
+						var s = unescape(s).replace(/_/g, ' ');
+	      				return s.substr(0, 1).toUpperCase() + s.substring(1);
+	    			};
+
+				runImport(params, new ToCollectionModel({
+					defaults: collectionDefaults,
+					title: params.title || titlefy(path.basename(filename, path.extname(filename))),
+					description: params.description,
+					unit: "",
+					progress: 0,
+				}), collectionDefaults);
+			});
+		};
+
+		if (!params.like) {
+			makeDefaultsAndImport(params, _.clone(config.LAYER_OPTIONS_DEFAULTS));
+		} else {
+			console.info('*** Importing like collection:', params.like);
+			ToCollectionModel.findById(params.like)
+				.populate('defaults')
+				.exec(function(err, likeCollection) {
+					if (!utils.validateExistingCollection(err, likeCollection, callback)) return;
+					var likeDefaults = likeCollection.defaults.toObject();
+					delete likeDefaults._id; delete likeDefaults.__v;
+					var mergedParams = _.extend(_.clone(likeCollection.importParams), params);
+					makeDefaultsAndImport(mergedParams, likeDefaults);
+				});
+		}
 
 	} else {
-		console.info('*** Appending to collection ***', params.append);
-		ToCollectionModel.findOne({_id: params.append}, function(err, collection) {
-			if (!utils.validateExistingCollection(err, collection, callback)) return;
-			runImport(collection);
+		console.info('*** Appending to collection:', params.append);
+		ToCollectionModel.findById(params.append)
+			.populate('defaults')
+			.exec(function(err, collection) {
+				if (!utils.validateExistingCollection(err, collection, callback)) return;
+				runImport(params, collection, collection.defaults);
 		});
 	}
 }
@@ -922,7 +951,7 @@ ImportAPI.prototype.sync = function(params, req, res, callback)
 			delete originalParams.url;
 			delete originalParams.path;
 		}
-		var importParams = _.cloneextend(originalParams, params);
+		var importParams = _.extend(_.clone(originalParams), params);
 		importParams.incremental = true;
 		self.import(importParams, req, res, callback);
 	});
@@ -978,7 +1007,8 @@ function getImportParams(params)
 		bounds: params.bounds,
 		aggregate: (params.aggregate ? params.aggregate && params.aggregate != 'off' : undefined),
 		fields: (params.fields ? JSON.parse(params.fields) : undefined), // precedence over converter
-		user: params.user
+		user: params.user,
+		like: params.like
 	});
 }
 
@@ -1026,9 +1056,10 @@ ImportAPI.prototype.cli = {
 				if (!err) {
 					console.success('Existing collections:', docs.length);
 					docs.forEach(function(doc) {
-						var dump = {_id: doc._id, title: doc.title, status: doc.status,
+						var dump = {title: doc.title, status: doc.status,
 							createdAt: doc.createdAt, updatedAt: doc.updatedAt, lastReducedAt: doc.lastReducedAt};
-						console.log('*', dump);
+						console.info('Collection: ' + doc._id);
+						console.log(dump);
 					});
 				}
 				callback(err);
