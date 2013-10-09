@@ -76,7 +76,6 @@ if (!module.parent) {
 				if (err) {
 					utils.exitCallback();
 				}
-				console.log(answer);
 				username = answer;
 				if (username) {
 					callback();
