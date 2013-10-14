@@ -16,7 +16,6 @@ define([
             var self = this;
             this.on('change', function() {
                 delete self._renderAttrs;
-                console.log('delete');
             });
         },
 
@@ -72,9 +71,11 @@ define([
             return [ [w,s], [e,s], [e,n], [w,n] ];
         },
 
-		getRenderAttributes: function(attrName)
+		getRenderAttr: function(attrName, defaultValue)
 		{
+            // attrs already cached? if not, calculate them:
             if (!this._renderAttrs) {
+
                 var l = this.collection.mapLayer,
                     options = l.getLayerOptions(),
                     attrMap = this.collection.mapLayer.getOption('attrMap', {}),
@@ -118,20 +119,26 @@ define([
                 };
 
                 this._renderAttrs = {
+                    size: size,
                     color: color,
-                    darkerColor: multRGB(color, .75),
                     model: this,
                     data: {
                         val: val,
                         normVal: normVal,
                         count: count,
-                    },
-                    size: size
+                    }
                 };
             }
 
+            // return all attrs if no attrName passed, 
             if (!attrName) {
                 return this._renderAttrs;
+            }
+
+            // or return one attr with an optional callback or default value if it is undefined
+            if (this._renderAttrs[attrName] == undefined && defaultValue != undefined) {
+                this._renderAttrs[attrName] = typeof defaultValue == 'function' ?
+                    defaultValue() : defaultValue;
             }
             return this._renderAttrs[attrName];
 

@@ -190,8 +190,11 @@ define([
                 getColor: function(feature) {
                     return feature.attributes.color;
                 },
-                getDarkerColor: function(feature) {
-                    return feature.attributes.darkerColor;
+                getStrokeColor: function(feature) {
+                    var m = feature.attributes.model;
+                    return m.getRenderAttr('strokeColor', function() {
+                        return strokeForColor(m.getRenderAttr('color'))
+                    });
                 },
                 getBubbleRadius: function(feature) {
                     if (isNaN(feature.attributes.size)) {
@@ -224,7 +227,7 @@ define([
                 default:
                 case FeatureType.POINTS:
                     defaultStyle = _.extend(defaultStyle, {
-                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
                         strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
                         strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
                     });
@@ -232,7 +235,7 @@ define([
 
                 case FeatureType.SQUARE_TILES:
                     defaultStyle = _.extend(defaultStyle, {
-                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
                         strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
                         strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
                     });
@@ -249,7 +252,7 @@ define([
                 case FeatureType.BUBBLES:
                     defaultStyle = _.extend(defaultStyle, {
                         pointRadius: '${getBubbleRadius}',
-                        strokeColor: or(layerOptions.strokeColor, '${getDarkerColor}'),
+                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
                         strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
                         strokeOpacity: or(layerOptions.strokeOpacity, opacity * .5)
                     });
@@ -367,7 +370,7 @@ define([
 
         featureAdd: function(model, collection, options)  
         {
-            var attrs = model.getRenderAttributes(),
+            var attrs = model.getRenderAttr(),
                 layerOptions = collection.mapLayer.attributes.layerOptions,
                 geometry;
 

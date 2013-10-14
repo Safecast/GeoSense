@@ -67,7 +67,7 @@ define([
 			     	.attr("width", binWidth)
 			     	.attr("class", "crisp")
 			     	.style("fill", function(d, i) {
-			     		return d.getRenderAttributes('color');
+			     		return d.getRenderAttr('color');
 			     	})
         		.on('mouseover', function(d) {
         			var _this = this,
@@ -80,6 +80,14 @@ define([
 						min: valFormatter.format(min),
 						max: valFormatter.format(max),
 					}));
+					d3.select(this)
+						.style('fill', d.getRenderAttr('hightlightColor', function() {
+							return highlightForColor(d.getRenderAttr('color'));
+						}));
+        		})
+        		.on('mouseout', function(d) {
+					d3.select(this)
+						.style('fill', d.getRenderAttr('color'));
         		});
 
 			if (this.renderAxes) {

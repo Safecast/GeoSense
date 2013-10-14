@@ -22,21 +22,19 @@
 	    </div>
 	</form>
 
-	<ul class="nav nav-tabs">
-	  <li class="active" data-type="public"><a href="#public-collections" data-toggle="tab">Public collections</a></li>
-	  <li data-type="user"><a href="#user-collections" data-toggle="tab">My collections</a></li>
+	<ul class="type-toggles nav nav-pills nav-pills-muted nav-justified">
+	  <li class="active" data-type="public"><a class="btn-sm" href="#public-collections" data-toggle="pill">Public collections</a></li>
+	  <li data-type="user"><a class="btn-sm" href="#user-collections" data-toggle="pill">My collections</a></li>
 	</ul>
 
-	<div class="tab-content">
-	  <div class="tab-pane active" id="public-collections">
-	    <div class="hidden alert alert-info no-objects">  
-	      No matching data collections found.
-	    </div>
+	<div class="active" id="public-collections">
+	  <div class="hidden alert alert-info no-objects public">  
+	    No matching data collections found.
 	  </div>
-	  <div class="tab-pane" id="user-collections">
-	    <div class="hidden alert alert-info no-objects">  
-	      You don't have any matching data collections.
-	    </div>
+	</div>
+	<div id="user-collections">
+	  <div class="hidden alert alert-info no-objects user">  
+	    You don't have any matching data collections.
 	  </div>
 	</div>
 

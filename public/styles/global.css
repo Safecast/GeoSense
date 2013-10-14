@@ -202,7 +202,7 @@ button .glyphicon-ok.pull-right {
     display: inline-block !important;
 }
 
-.nav-pills-inline a, .nav-pills-inline span {
+.nav-pills-inline li > a, .nav-pills-inline li > span {
 	margin: 2px !important;
 	padding: 1px 6px 1px 6px !important;
 	display: block;
@@ -212,12 +212,12 @@ button .glyphicon-ok.pull-right {
 	border-radius: 3px;
 }
 
-.nav-pills-inline a:hover {
-	color: white !important;
-	background-color: #333;
+.nav-pills-muted > li > a:hover {
+	color: #333 !important;
+	background-color: #ccc;
 }
-.nav-pills-inline .active a, .nav-pills-inline .active a:hover, .nav-pills-inline .active span {
-	color: white !important;
+.nav-pills-muted > li.active > a, .nav-pills-muted > li.active > a:hover, .nav-pills-muted > li.active > span {
+	color: #fff !important;
 	background-color: #666;
 }
 

@@ -60,17 +60,26 @@ define([
         		.enter().append("circle")
 	        		.attr("class", "dot")
 	        		.attr("fill", function(d) {
-	        			return d.getRenderAttributes().color;
+	        			return d.getRenderAttr().color;
 	        		})
 	        		.attr("stroke", function(d) {
-	        			return d.getRenderAttributes().darkerColor;
+	        			return d.getRenderAttr('strokeColor', function() {
+							return strokeForColor(d.getRenderAttr('color'));
+	        			});
 	        		})
 	        		.attr("cx", function (d) { return x(getXVal(d)); })
 	        		.attr("cy", function (d) { return y(getYVal(d)); })
 	        		.attr("r", function (d) { return 3.5; })
         		.on('mouseover', function(d) {
-        			var _this = this;
 		        	self.showTooltip(this, formatYVal(getYVal(d)));
+					d3.select(this)
+						.style('fill', d.getRenderAttr('hightlightColor', function() {
+							return highlightForColor(d.getRenderAttr('color'));
+						}));
+        		})
+        		.on('mouseout', function(d) {
+					d3.select(this)
+						.style('fill', d.getRenderAttr('color'));
         		});
 
 			if (this.renderAxes) {
