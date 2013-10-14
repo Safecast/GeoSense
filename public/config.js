@@ -70,6 +70,14 @@ SharingType.DEFAULT = SharingType.PRIVATE;
 
 var COLOR_GRADIENT_STEP = null; // 1 / 500.0;
 
+var highlightForColor = function(color) {
+	return multRGB(color, 1.15);
+};
+
+var strokeForColor = function(color) {
+	return multRGB(color, .75);
+};
+
 var DEFAULT_FEATURE_OPACITY = .75,
 	MIN_BUBBLE_SIZE = 8,
 	MAX_BUBBLE_SIZE = 60,

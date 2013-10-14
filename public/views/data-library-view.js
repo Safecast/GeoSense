@@ -65,12 +65,12 @@ define([
 			this.$removeQueryButton = this.$('button.remove-query').remove();
 
 			if (!permissions.currentUser()) {
-				this.$('.nav-tabs li[data-type="user"]').removeClass('active')
+				this.$('.type-toggles li[data-type="user"]').removeClass('active')
 					.remove();
-				this.$('.nav-tabs li[data-type="public"]').addClass('active');
+				this.$('.type-toggles li[data-type="public"]').addClass('active');
 			}
 
-			this.$('a[data-toggle="tab"]').on('shown.bs.tab', function(evt) {
+			this.$('.type-toggles > li > a').on('shown.bs.tab', function(evt) {
 				self.searchClicked();
 			});
 
@@ -159,19 +159,17 @@ define([
 			self.isLoading = true;
 			self.showSpinner();
 			this.dataCollectionsFetched = true;
-	    	params.t = this.$('.nav-tabs .active').attr('data-type');
+	    	params.t = this.$('.type-toggles .active').attr('data-type');
 			this.collection.fetch({
 				data: params,
 				success: function(collection, response, options) {
 					self.isLoading = false;
 					self.hideSpinner();
 
+					self.$('.no-objects').addClass('hidden');
 					if (!collection.length) {
-						self.$('.no-objects')
+						self.$('.no-objects.'+params.t)
 							.removeClass('hidden').hide().fadeIn('fast');
-					} else {
-						self.$('.no-objects')
-							.addClass('hidden');
 					}
 
 		    		if (!collection.length || collection.length < self.searchParams.l) {

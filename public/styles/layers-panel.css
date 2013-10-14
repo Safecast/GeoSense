@@ -33,7 +33,7 @@
 }
 
 .layers-panel .legend .caret {
-	border-top-color: #fff !important;
+	border-top-color: #888 !important;
 }
 
 .layers-panel .unit.box, .layers-panel .color-bar .segment {
