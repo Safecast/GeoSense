@@ -47,6 +47,12 @@ define([
             return opts[name];
         },
 
+        getNumericField: function()
+        {
+            var attrMap = this.getOption('attrMap', {});
+            return attrMap.numeric;
+        },
+
         limitFeatures: function()
         {
             return this.getFeatureCollectionAttr('limitFeatures', true);

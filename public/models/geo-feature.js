@@ -21,9 +21,9 @@ define([
 
         getNumericVal: function()
         {
-            var attrMap = this.collection.mapLayer.getOption('attrMap', {});
-            return attrMap.numeric ?
-                this.get(attrMap.numeric) : undefined;
+            var field = this.collection.mapLayer.getNumericField();
+            return field ?
+                this.get(field) : undefined;
         },
 
         getDatetimeVal: function()
