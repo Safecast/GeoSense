@@ -9,7 +9,7 @@ define([
 	var GeoFeatureCollections = Backbone.Collection.extend({
 
 		url: function() {
-			return window.BASE_URL + 'api/featurecollections' + (this.fetchType ? '/' + this.fetchType : '');
+			return BASE_URL + 'api/featurecollections' + (this.fetchType ? '/' + this.fetchType : '');
 		},
 
 		forType: function(fetchType) {

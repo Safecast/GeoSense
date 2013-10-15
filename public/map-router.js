@@ -60,10 +60,10 @@ define([
                 ":view/:pos": "mapRouteByHost",
             },
 
-            getRoutes: function() 
+            getRoutes: function(isCustomHost) 
             {
                 var r;
-                if (window.MAP_SLUG) {
+                if (isCustomHost) {
                     console.log('route by custom host');
                     r = this.byHostRoutes;
                 } else {
@@ -84,14 +84,17 @@ define([
                 return routes;
             },
 
-            initialize: function() 
+            initialize: function(mapAttributes, isCustomHost) 
             {
                 var self = this;
-                _.each(this.getRoutes(), function(route) {
+                _.each(this.getRoutes(isCustomHost), function(route) {
                     self.route.apply(self, route);
                 });
 
-                this.map = null;
+                if (mapAttributes) {
+                    this.map = new Map(mapAttributes);
+                    this.map.isCustomHost = isCustomHost;
+                }
                 this.isRendered = false;
                 this.mapLayerSubViewsAttached = false;
                 this.mapLayerEditorViews = {};
@@ -149,14 +152,9 @@ define([
                     // Initialize map view
                     console.log('slug:', slug, 'mapViewName:', mapViewName, 'viewBase:', viewBase, 'viewStyle:', viewStyle, 'center:', center, 'zoom:', zoom);
                     if (!this.map) {
-                        if (window.MAP) {
-                            console.log('Using global MAP object');
-                            this.map = new Map(window.MAP);
-                        } else {
-                            this.map = new Map({slug: slug});
-                            this.loadAndInitMap(slug, mapViewName, center, zoom, viewBase, viewStyle);
-                            return;
-                        }
+                        this.map = new Map({slug: slug});
+                        this.loadAndInitMap(slug, mapViewName, center, zoom, viewBase, viewStyle);
+                        return;
                     }
                     this.initMap(mapViewName, center, zoom, viewBase, viewStyle);
                 } else {
@@ -181,13 +179,13 @@ define([
             mapRouteByHost: function(viewName, pos) 
             {
                 this.routingByHost = true;
-                return this.mapRoute(window.MAP_SLUG, viewName, pos);
+                return this.mapRoute(null, viewName, pos);
             },
 
             mapAdminRouteByHost: function(viewName, pos) 
             {
                 this.routingByHost = true;
-                return this.mapAdminRoute(window.MAP_SLUG, viewName, pos);
+                return this.mapAdminRoute(null, viewName, pos);
             },
 
 
@@ -680,7 +678,7 @@ define([
                             li.push('<li class="view-base' + (key == self.mapView.viewBase ? ' active' : '') + '">'
                                 + '<a href="#' + key + '">' 
                                 + '<span class="view-base-thumb"' + (key != 'blank' ? ' style="background: url(' 
-                                + window.BASE_URL + '/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
+                                + BASE_URL + '/assets/baselayer-thumbs/' + key + '.png)"' : '') + '></span>'
                                 + '<span class="view-base-caption">' + cls.providerName + '</span>'
                                 + '</a></li>');
                         }
@@ -925,23 +923,26 @@ define([
 
         });
 
-        var initialize = function() {
-            window.app = new MapRouter();
+        var initialize = function(mapAttributes, isCustomHost) {
+            return new MapRouter(mapAttributes, isCustomHost);
+        };
+        var start = function() {
             if (!Backbone.history.start({
                 pushState: true,
-                root: window.BASE_URL.replace(/^(.*:\/\/)?[^\/]*\/?/, ''), // strip host and port and beginning /
+                root: BASE_URL.replace(/^(.*:\/\/)?[^\/]*\/?/, ''), // strip host and port and beginning /
                 silent: false
             })) {
                 var last = window.location.href.length - 1;
                 if (window.location.href[last] == '/') {
                     window.location.href = window.location.href.substr(0, last);
                 } else {
-                    window.location.href = window.BASE_URL + '404';
+                    window.location.href = BASE_URL + '404';
                 }
             }
         };
 
         return {
-            initialize: initialize
+            initialize: initialize,
+            start: start
         };  
 });

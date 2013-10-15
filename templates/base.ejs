@@ -4,19 +4,17 @@
     <title>GeoSense</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-    <link rel="apple-touch-icon" href="<%= config.BASE_URL %>assets/touch-icon.png" />
+    <link rel="apple-touch-icon" href="<%= BASE_URL %>assets/touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-        <script src="<%= config.BASE_URL %>lib/bootstrap/assets/js/html5shiv.js"></script>
-        <script src="<%= config.BASE_URL %>lib/bootstrap/assets/js/respond.min.js"></script>
+        <script src="<%= BASE_URL %>lib/bootstrap/assets/js/html5shiv.js"></script>
+        <script src="<%= BASE_URL %>lib/bootstrap/assets/js/respond.min.js"></script>
     <![endif]-->
 
-    <% if (user) { %><script type="text/javascript">window.USER = <%- JSON.stringify(user) %>;</script><% } %>
-    <script type="text/javascript">window.BASE_URL = '<%= config.BASE_URL %>';</script>
-    <link href="<%= config.BASE_URL %>styles/main.css" media="all" rel="stylesheet" type="text/css"/>
+    <link href="<%= BASE_URL %>styles/main.css" media="all" rel="stylesheet" type="text/css"/>
     </head>
 </html>
 <body<% if (bodyClass) { %> class="<%= bodyClass %>"<% } %>>
@@ -30,8 +28,8 @@
           <span class="icon-bar"></span>
         </button>
         <div class="navbar-brand">
-          <a class="mit-logo" href="http://www.mit.edu"><img src="<%= config.BASE_URL %>assets/homepage-mit.png"></a>
-          <a class="app-title" href="<%= config.BASE_URL %>"><span class="app-title">GeoSense</a> <a class="map-title"></a>
+          <a class="mit-logo" href="http://www.mit.edu"><img src="<%= BASE_URL %>assets/homepage-mit.png"></a>
+          <a class="app-title" href="<%= BASE_URL %>"><span class="app-title">GeoSense</a> <a class="map-title"></a>
         </div>
         </div>
       <div class="navbar-collapse collapse">
@@ -40,9 +38,9 @@
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                    <li><a href="<%= config.BASE_URL %>about">Project Background</a></li>
+                    <li><a href="<%= BASE_URL %>about">Project Background</a></li>
                     <li><a href="http://github.com/Safecast/GeoSense">GitHub Repository</a></li>
-                    <li><a href="<%= config.BASE_URL %>contact">Contact us</a></li>
+                    <li><a href="<%= BASE_URL %>contact">Contact us</a></li>
                 </ul>
             </li>
         </ul>
@@ -51,14 +49,14 @@
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> <%= user.email %> <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                    <li class="logged-in"><a href="<%= config.BASE_URL %>dashboard" class="user-dashboard">Dashboard</a></li>
-                    <li class="logged-in"><a href="<%= config.BASE_URL %>logout" class="user-logout">Log out</a></li>
+                    <li class="logged-in"><a href="<%= BASE_URL %>dashboard" class="user-dashboard">Dashboard</a></li>
+                    <li class="logged-in"><a href="<%= BASE_URL %>logout" class="user-logout">Log out</a></li>
                 </ul>
             </li>
         <% } else { %>
-            <li><a href="<%= config.BASE_URL %>signup">Sign up</a></li>
+            <li><a href="<%= BASE_URL %>signup">Sign up</a></li>
             <li class="divider"></li>
-            <li><a href="<%= config.BASE_URL %>login">Log in</a></li>
+            <li><a href="<%= BASE_URL %>login">Log in</a></li>
         <% } %>
         </ul>
       </div><!--/.nav-collapse -->
@@ -77,7 +75,7 @@
       <hr>
       <p class="pull-right"><a href="#">Back to top</a></p>
       <p class="pull-left">
-        <a href="http://media.mit.edu">A Media Lab project</a><span class="dot">&middot;</span><a href="<%= config.BASE_URL %>about">About</a><span class="dot">&middot;</span><a href="<%= config.BASE_URL %>legal:privacy-policy">Privacy</a><span class="dot">&middot;</span><a href="<%= config.BASE_URL %>legal:terms">Terms</a></p>
+        <a href="http://media.mit.edu">A Media Lab project</a><span class="dot">&middot;</span><a href="<%= BASE_URL %>about">About</a><span class="dot">&middot;</span><a href="<%= BASE_URL %>legal:privacy-policy">Privacy</a><span class="dot">&middot;</span><a href="<%= BASE_URL %>legal:terms">Terms</a></p>
       </div>
     </footer>
 
@@ -85,7 +83,19 @@
 
 
 
-
-  <script data-main="<%= config.BASE_URL %>main-site" src="<%= config.BASE_URL %>lib/require/require-jquery.js"></script>
+  <script src="<%= BASE_URL %>lib/require/require-jquery.js"></script>
+  <script>
+    // globals
+    var app, BASE_URL = "<%= BASE_URL %>"; 
+    (function() {
+        require.config({
+            baseUrl: BASE_URL
+        });
+        require(['main-site', 'permissions'], function(App, permissions) {
+            <% if (user) { %>permissions.setUser(<%- JSON.stringify(user) %>);<% } %>
+            app = App.initialize();
+        });
+    }());
+  </script>
 
 </body>

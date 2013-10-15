@@ -8,7 +8,7 @@ define([
 	var GeoFeatureCollection = Backbone.Model.extend({
 		
 		idAttribute: "_id",
-		urlRoot: window.BASE_URL + 'api/featurecollection',
+		urlRoot: BASE_URL + 'api/featurecollection',
 
 	});
 

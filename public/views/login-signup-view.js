@@ -21,18 +21,18 @@ define([
 	    initialize: function() 
 	    {
 	    	LoginSignupView.__super__.initialize.apply(this, arguments);
-			this.startUrl = window.BASE_URL + 'signup';
+			this.startUrl = BASE_URL + 'signup';
 	    },
 
 	    showSignup: function()
 	    {
-			this.render().getPage(window.BASE_URL + 'signup');
+			this.render().getPage(BASE_URL + 'signup');
 			this.show();
 	    },
 
 	    showLogin: function()
 	    {
-			this.render().getPage(window.BASE_URL + 'login');
+			this.render().getPage(BASE_URL + 'login');
 			this.show();
 	    },
 

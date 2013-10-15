@@ -1,7 +1,7 @@
 <div class="jumbotron">
     <div class="container">
         <% if (!xhr) { %>
-        <h1 class="app-title"><a href="<%= config.BASE_URL %>">GeoSense</a></h1>
+        <h1 class="app-title"><a href="<%= BASE_URL %>">GeoSense</a></h1>
         <% } %>
         <h2>Create an Account</h2>
         <% if (messages.info) { %>
@@ -19,7 +19,7 @@
             </div>
         <% } %>
 
-        <form class="login" action="<%= config.BASE_URL %>signup" method="POST">
+        <form class="login" action="<%= BASE_URL %>signup" method="POST">
             <div class="form-group">
                 <label>Email address</label>
                 <input class="form-control input-lg" type="text" name="email" value="<% if (typeof email != 'undefined') { %><%= email %><% } %>" />
@@ -35,7 +35,7 @@
             <div class="form-group">
                 <input type="submit" value="Create my Account" class="btn btn-success btn-lg" />
             </div>
-            <a class="btn btn-link" href="<%= config.BASE_URL %>login">I already have an account</a>
+            <a class="btn btn-link" href="<%= BASE_URL %>login">I already have an account</a>
         </form>
     </div>
 </div>

@@ -52,7 +52,7 @@ require.config({
 
 });
 
-require([
+define([
 	// Load our app module and pass it to our definition function
     'jquery',
     'underscore',
@@ -63,6 +63,6 @@ require([
     'backbone_super',
     'locale'
 ], function($, _, Backbone, App) {
-	App.initialize();
+	return App;
 });
 
