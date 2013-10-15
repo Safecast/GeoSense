@@ -31,6 +31,7 @@ define([
 		    TimelineScatterPlotView.__super__.renderGraph.apply(this, arguments);
 
 			var data = this.collection.models,
+				yLabel = valFormatter.unit || (this.model.getNumericField() || '').split('.').pop(),
 				getXVal = function(d) { 
 					var v = d.getDatetimeVal(), 
 						v = v.min != undefined ? v.min : v
@@ -42,9 +43,9 @@ define([
 					return valFormatter.convert(v);
 				},
 				formatYVal = function(v) {
-					return __('%(unit)s: %(value)s', {
+					return __('%(label)s: %(value)s', {
 						value: valFormatter.format(v),
-						unit: valFormatter.unit
+						label: yLabel 
 					});
 				};
 
@@ -94,7 +95,7 @@ define([
 				    	.orient("left");
 
 				this.appendXAxis(xAxis);
-			   	this.appendYAxis(yAxis, valFormatter.unit);
+			   	this.appendYAxis(yAxis, yLabel);
 			}
 
 			return this;

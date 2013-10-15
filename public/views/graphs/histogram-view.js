@@ -34,6 +34,8 @@ define([
 			var numBins = this.collection.properties.numBins, 
 				binSize = this.collection.properties.binSize, 
 				data = this.collection.models,
+				xLabel = valFormatter.unit || (this.model.getNumericField() || '').split('.').pop(),
+				yLabel = this.model.getDisplay('itemTitlePlural'),
 				extremes = this.model.getMappedExtremes(),
 				getCount = function(d) { 
 					return d.attributes.count || 0;
@@ -101,8 +103,8 @@ define([
 				    	.scale(y)
 				    	.orient("left");
 
-				this.appendXAxis(xAxis, valFormatter.unit);
-				this.appendYAxis(yAxis, this.model.getDisplay('itemTitlePlural'));
+				this.appendXAxis(xAxis, xLabel);
+				this.appendYAxis(yAxis, yLabel);
 			}
 
 			return this;
