@@ -11,11 +11,11 @@ define([
 	var Map = Backbone.DeepModel.extend({
 		
 		idAttribute: 'slug',
-		urlRoot: window.BASE_URL + 'api/map',
+		urlRoot: BASE_URL + 'api/map',
 
 		url: function()
 		{
-			return this.urlRoot + '/' + this.publicUri();
+			return this.urlRoot + '/' + this.publicUri({omitSlug: false});
 		},
 
 		isPrivate: function()
@@ -25,8 +25,9 @@ define([
 
 		adminUri: function(options) 
 		{
-			return 'admin/' + this.publicUri(_.extend(
+			var publicUri = this.publicUri(_.extend(
 				{slug: this.attributes.slug}, options));
+			return 'admin' + (publicUri != '' ? '/' + publicUri : '');
 		},
 
 		publicUri: function(options)
@@ -34,10 +35,12 @@ define([
 			var o = options || {},
 				secret = o.secret != undefined ? 
 					o.secret : this.isPrivate(),
-				uri = (o.slug ? o.slug : 
-						secret ? 
-							's/' + this.attributes.secretSlug : this.attributes.slug)
-					+ (o.view ? '/' + o.view : '');
+				uri = (!this.isCustomHost || (o.omitSlug != undefined && !o.omitSlug) ? 
+						(o.slug ? o.slug : 
+							secret ? 
+								's/' + this.attributes.secretSlug : this.attributes.slug) 
+						+ (o.view ? '/' + o.view : '') : '')
+					+ (o.view ? o.view : '');
 
 			if (o.x != undefined && o.y != undefined) {
 		    	uri += '/' + (o.x || 0) + ',' + (o.y || 0);

@@ -1,13 +1,15 @@
 define([], function() {
+
+	var __user;
 	
 	var currentUser = function() 
 	{
-		return window.USER;
+		return __user;
 	};
 
 	var setUser = function(user)
 	{
-		window.USER = user;
+		__user = user;
 		if (app) {
 			app.trigger(user ? 'user:login' : 'user:logout');
 		}

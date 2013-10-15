@@ -51,7 +51,7 @@ require.config({
 
 });
 
-require([
+define([
     'jquery',
     'underscore',
     'backbone',
@@ -64,8 +64,7 @@ require([
     'lib/jquery/jquery.miniColors.min',
     'lib/colorpicker/js/colorpicker',
     'locale',
-], function($, _, Backbone, App, ui) {
-    var app;
-    App.initialize();
+], function($, _, Backbone, App) {
+    return App;
 });
 

@@ -73,18 +73,22 @@ app.configure(function() {
 });
 
 var API = require('./api'),
-	apiUtil = require('./api/util');
+	apiUtil = require('./api/util'),
+	isCustomHost = apiUtil.isCustomHost,
 	api = new API(app);
 
 var getRenderVars = function(req, vars) {
 	if (!req.flashMessages) {
 		req.flashMessages = req.flash();
 	}
+
 	var vars = _.extend({
 		xhr: req.xhr,
 		bodyClass: undefined,
 		nodeEnv: process.env.NODE_ENV,
 		config: config,
+		BASE_URL: isCustomHost(req) ?
+			'http://' + req.headers.host + '/' : config.BASE_URL,
 		user: (req.user ? req.user.toJSONSelf() : undefined),
 		messages: req.flashMessages
 	}, vars);
@@ -118,22 +122,44 @@ var renderFragment = function(req, res, page, vars)
 	return ejs.render(templates['templates/' + page + '.ejs'], getRenderVars(req, vars));
 };
 
-var serveMap = function(req, res, map, admin, routingByHost) {
-	console.success('serving map: '+map.slug+', admin: '+admin);
-	if (admin) {
-		req.user = map.createdBy.toJSON();
-		console.warn('Implicitly authenticated user:', req.session.user);
-	}
-	res.end(ejs.render(templates['templates/map.ejs'], getRenderVars(req, {
-		mapSlugByHost: (routingByHost ? map.slug : false),
+var serveMap = function(req, res, map) {
+	console.success('serving map:', map.slug);
+	var vars = getRenderVars(req, {
+		IS_CUSTOM_HOST: isCustomHost(req),
 		map: JSON.stringify(apiUtil.prepareMapResult(req, map))
-	})));
+	});
+	res.end(ejs.render(templates['templates/map.ejs'], vars));
+};
+
+var adminMap = function(req, res, err, map) {
+	if (err) {
+		throw err;
+	} else if (!map) {
+		return serveError(req, res, 404);
+	} else if (!permissions.canAdminMap(req, map)) {
+		return res.redirect(config.BASE_URL + 'login?next=' + req.url);
+	}
+	serveMap(req, res, map);
+};
+
+var viewMap = function(req, res, err, map) {
+	if (err) {
+		throw err;
+	} else if (!map || !permissions.canViewMap(req, map)) {
+		return serveError(req, res, 404);
+	}
+	serveMap(req, res, map);
 };
 
 var serveHome = function(req, res)
 {
-	res.end(renderPage(req, res, 'home', {bodyClass: 'home page'}));
-}
+	if (config.LIMITED_PROD_ACCESS) {
+		// home page on production server is disabled for now
+		serveError(req, res, 403);
+	} else {
+		res.end(renderPage(req, res, 'home', {bodyClass: 'home page'}));
+	}
+};
 
 var serveError = function(req, res, status)
 {
@@ -242,16 +268,6 @@ app.get('/logout', function(req, res)
 	res.redirect(req.query.next || config.BASE_URL + 'login');
 });
 
-app.get('/', function(req, res) 
-{
-	if (!config.LIMITED_PROD_ACCESS) {
-		serveHome(req, res);
-	} else {
-		// home page on production server is disabled for now
-		serveError(req, res, 403);
-	}
-});
-
 app.get('/dashboard', [permissions.requireLogin], function(req, res) {
    	res.end(renderPage(req, res, 'dashboard', {bodyClass: 'dashboard page'}));
 });
@@ -276,86 +292,63 @@ app.get('/legal:terms', function(req, res) {
    		title: 'Terms of Use', html: renderFragment(req, res, 'terms')}));
 });
 
+app.get('/', function(req, res) 
+{
+	if (isCustomHost(req)) {
+		apiUtil.findMapForRequest(req).exec(function(err, map) {
+			if (err || map) {
+				viewMap(req, res, err, map);	
+			} else {
+				serveHome(req, res);
+			}
+		});
+		return;
+	}
+
+	serveHome(req, res);
+});
+
+app.get('/admin', function(req, res) 
+{
+	if (isCustomHost(req)) {
+		apiUtil.findMapForRequest(req).exec(function(err, map) {
+			adminMap(req, res, err, map);
+		});
+	} else {
+		serveError(req, res, 404);
+	}
+});
+
 app.get(/^\/admin\/([a-zA-Z0-9\-\_]+)/, config.ANONYMOUS_MAP_CREATION ? [] : [permissions.requireLogin], function(req, res) 
 {
-	req.params.slug = req.params[0];
-	apiUtil.findMapForRequest(req)
-		.exec(function(err, map) {
-			if (err) {
-				throw err;
-			} else if (!map) {
-				return serveError(req, res, 404);
-			} else if (!permissions.canAdminMap(req, map)) {
-				return res.redirect(config.BASE_URL + 'login?next=' + req.url);
-			}
-			serveMap(req, res, map);
-		});
+	if (!isCustomHost(req)) {
+		req.params.slug = req.params[0];
+	}
+	apiUtil.findMapForRequest(req).exec(function(err, map) {
+		adminMap(req, res, err, map);
+	});
 });
 
 app.get(/^\/s\/([a-zA-Z0-9\-\_]+)/, function(req, res) 
 {
 	req.params.secretSlug = req.params[0];
-	apiUtil.findMapForRequest(req)
-		.exec(function(err, map) {
-			if (err) {
-				throw err;
-			} else if (!map || !permissions.canViewMap(req, map)) {
-				return serveError(req, res, 404);
-			}
-			serveMap(req, res, map);
-		});
+	apiUtil.findMapForRequest(req).exec(function(err, map) {
+		viewMap(req, res, err, map);
+	});
 });
 
 app.get(/^\/([a-zA-Z0-9\-\_]+)/, function(req, res) 
 {
-	req.params.slug = req.params[0];
-	apiUtil.findMapForRequest(req)
-		.exec(function(err, map) {
-			if (err) {
-				throw err;
-			} else if (!map || !permissions.canViewMap(req, map)) {
-				return serveError(req, res, 404);
-			}
-			serveMap(req, res, map);
-		});
+	if (!isCustomHost(req)) {
+		req.params.slug = req.params[0];
+	}
+	apiUtil.findMapForRequest(req).exec(function(err, map) {
+		viewMap(req, res, err, map);
+	});
 });
 
 
-/*
-if (slug) {
-		// For any hosts other than the default hosts, passing a slug is not allowed
-		// so that requests like <my-custom-host>/<somebody-else's-slug> are blocked.
-		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) == -1) {
-			res.send('', 403);
-			res.end();
-			return;
-		}
- 		// Try to find map by slug
-		models.Map.findOne({slug: slug, active: true}, function(err, map) {
-			serveMap(err, map);
-		});
-	} else {
-		// Serve the home page
-		if (config.DEFAULT_HOSTS.indexOf(req.headers.host) != -1) {
-			serveHome(req, res);
-			return;
-		}
-		// Try to find map by host
-		models.Map.findOne({host: req.headers.host, active: true}, function(err, map) {
-			// Serve the home page if there is no map with that host
-			if (!err && !map) {
-				serveHome(req, res);
-				return;
-			}
-			// Otherwise serve the map
-			serveMap(err, map, true);
-		});
-	}
-}
-
-*/
-
-// Connect DB, load templates and start listening
+// Connect to DB, load templates and start listening
 
 if (!config.BASE_URL) {
 	console.error('config.BASE_URL is not defined');

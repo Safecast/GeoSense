@@ -3,11 +3,25 @@ var models = require('../models'),
 	config = require('../config'),
 	_ = require('cloneextend');
 
+var isCustomHost = function(req) {
+	return config.DEFAULT_HOSTS.indexOf(req.headers.host) == -1;
+};
+
 var findMapForRequest = function(req, q)
 {
-	var query = req.params.secretSlug != undefined ? 
-		{secretSlug: req.params.secretSlug} : {slug: req.params.slug};
-	return models.Map.findOne(_.extend(query, q))
+	var query = {};
+	if (req.params.secretSlug != undefined) {
+		query.secretSlug = req.params.secretSlug;
+	} else if (req.params.slug != undefined) {
+		query.slug = req.params.slug;
+	} else if (isCustomHost(req)) {
+		query.host = req.headers.host;
+	} else {
+		throw new Error('Insufficient params to find map');
+	}
+	query = _.extend(query, q);
+	console.log('findMapForRequest', query);
+	return models.Map.findOne(query)
 		.populate('layers.featureCollection')
 		.populate('layers.layerOptions')
 		.populate('createdBy')
@@ -71,6 +85,7 @@ var prepareLayerResult = function(req, layer, map)
 };
 
 module.exports = {
+	isCustomHost: isCustomHost,
 	findMapForRequest: findMapForRequest,
 	sortByPosition: sortByPosition,
 	prepareMapResult: prepareMapResult,

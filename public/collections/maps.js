@@ -11,7 +11,7 @@ define([
 		fetchType: null,
 
 		url: function() {
-			return window.BASE_URL + 'api/maps' + (this.fetchType ? '/' + this.fetchType : '');
+			return BASE_URL + 'api/maps' + (this.fetchType ? '/' + this.fetchType : '');
 		},
 
 		forType: function(fetchType) {

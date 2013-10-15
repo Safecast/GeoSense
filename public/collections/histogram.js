@@ -16,7 +16,7 @@ define([
 		},
 
 		url: function() {
-			return window.BASE_URL + 'api/featurecollection/' 
+			return BASE_URL + 'api/featurecollection/' 
                 + this.mapLayer.attributes.featureCollection._id
                 + '/histogram';
 		},

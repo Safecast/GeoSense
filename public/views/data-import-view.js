@@ -477,7 +477,7 @@ define([
 
 			this.requests.push($.ajax({
 				type: 'POST',
-				url: window.BASE_URL + 'api/import/',
+				url: BASE_URL + 'api/import/',
 				data: params,
 				success: function(responseData) {
 					self.setLoading(false);

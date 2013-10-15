@@ -40,6 +40,8 @@ define([
 		    this.template = _.template(templateHtml);
 			this.vent = options.vent;	
 			this.listenTo(this.model, 'sync', this.populateFromModel);
+			this.listenTo(app, 'user:login', this.populateFromModel);
+			this.listenTo(app, 'user:logout', this.populateFromModel);
 	    },
 
 	    render: function() 
@@ -102,7 +104,7 @@ define([
 				mapInfo = this.model.attributes,
 				title = this.$('.map-title'),
 				url = app.isMapAdmin() ? app.map.adminUrl() : app.map.publicUrl();
-			appTitle.attr('href', window.BASE_URL);
+			appTitle.attr('href', BASE_URL);
 			title.text(mapInfo.title);
 			title.attr('href', url);
 

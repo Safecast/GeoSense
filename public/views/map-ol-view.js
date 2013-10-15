@@ -36,7 +36,7 @@ define([
             this.externalProjection = new OpenLayers.Projection("EPSG:4326"); // aka WGS 84
             this.internalProjection = null; // determined by baselayer -- usually EPSG:900913
 
-            OpenLayers.ImgPath = window.BASE_URL + "/assets/openlayers-light/";   
+            OpenLayers.ImgPath = BASE_URL + "/assets/openlayers-light/";   
             this.featureLayers = {};
         },
 
@@ -89,7 +89,7 @@ define([
                         self.visibleAreaChanged(self.getVisibleMapArea());
                     },
                 },
-                theme: window.BASE_URL + 'lib/openlayers/OpenLayers-2.13.1/theme/default/style.css'
+                theme: BASE_URL + 'lib/openlayers/OpenLayers-2.13.1/theme/default/style.css'
             }); 
 
             // TODO: should limit vertically, but not horizontally?
@@ -756,7 +756,7 @@ define([
         providerName: 'Blank',
         initMapLayer: function(change)
         {
-            ViewBase.osm.prototype.initMapLayer.call(this, false, window.BASE_URL + "/assets/blank.gif");
+            ViewBase.osm.prototype.initMapLayer.call(this, false, BASE_URL + "/assets/blank.gif");
             this.mapLayer.attribution = '';
         },
 
