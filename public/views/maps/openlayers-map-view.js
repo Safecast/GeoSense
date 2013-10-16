@@ -48,11 +48,8 @@ define([
             OpenLayersMapView.__super__.initialize.call(this, options);
             this.template = _.template(templateHtml);
         
-            _.bindAll(this, "updateViewStyle");
-            options.vent.bind("updateViewStyle", this.updateViewStyle);
-
-            _.bindAll(this, "updateViewBase");
-            options.vent.bind("updateViewBase", this.updateViewBase);
+            this.on('update:style', this.updateViewStyle);
+            this.on('update:base', this.updateViewBase);
 
             this.externalProjection = new OpenLayers.Projection("EPSG:4326"); // aka WGS 84
             this.internalProjection = null; // determined by baselayer -- usually EPSG:900913
@@ -491,7 +488,7 @@ define([
             this.defaultViewStyle = this.baselayer.defaultMapStyle;
             this.map.addLayer(this.baselayer.mapLayer);
 
-            this.vent.trigger('viewOptionsChanged', this);
+            this.trigger('view:optionschanged', this);
         },
 
         updateViewStyle: function(styleName)
@@ -499,7 +496,7 @@ define([
             if (this.baselayer.setMapStyle) {
                 if (this.baselayer.setMapStyle(styleName)) {
                     this.viewStyle = this.baselayer.mapStyle;
-                    this.vent.trigger('viewOptionsChanged', this);
+                    this.trigger('view:optionschanged', this);
                 }
             }
         },

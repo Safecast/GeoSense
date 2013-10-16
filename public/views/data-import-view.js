@@ -30,7 +30,6 @@ define([
 	    {
 		    this.template = _.template(templateHtml);	
 		    DataImportView.__super__.initialize.apply(this, arguments);
-			this.vent = options.vent;
 			this.dataTitle = '';
 			this.dataDescription = '';
 			this.maxPreview = 30;

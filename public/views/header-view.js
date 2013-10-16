@@ -38,7 +38,6 @@ define([
 	    initialize: function(options) 
 	    {
 		    this.template = _.template(templateHtml);
-			this.vent = options.vent;	
 			this.listenTo(this.model, 'sync', this.populateFromModel);
 			this.listenTo(app, 'user:login', this.populateFromModel);
 			this.listenTo(app, 'user:logout', this.populateFromModel);

@@ -57,7 +57,7 @@ define([
 	    		var featureCollectionId = app.mapInfo.layers[i].featureCollection._id;
 	    		var el = this.$('.data-legend.' + featureCollectionId);
 	    		var visible = (stepInfo.layers.indexOf(i) != -1);
-	    		this.vent.trigger('toggleLayerVisibility', featureCollectionId, visible, true);
+	    		//layer.trigger('toggle:enabled'...
 	    	}
 		},
 
