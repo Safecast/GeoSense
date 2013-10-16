@@ -420,8 +420,6 @@ define([
 	    {
 	    	var self = this;
 
-	    	console.log('* populateFromModel '+this.model.hasGraphs());
-
 			this.$('.model-title').text(this.model.getDisplay('title'));
 			this.$('.layer-tools').replaceWith(this.$layerTools.clone());
 	    	this.updateEnabled(false);

@@ -93,7 +93,7 @@ fieldset.two-column input {
 	background-color: #00C9FF !important;
 }
 
-#map_canvas img {
+#map img {
 	/* reset a bootstrap setting that conflicts with OpenStreetMap */
 	max-width: none !important;
 }

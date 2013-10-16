@@ -1,20 +1,41 @@
+require.config({
+    paths: {
+        openlayers: 'lib/openlayers/OpenLayers-2.13.1/OpenLayers',
+        openlayers_cloudmade: 'lib/openlayers/cloudmade',
+        openlayers_stamen: 'lib/openlayers/stamen',
+    },
+
+    shim: {
+        'openlayers': {
+            exports: 'OpenLayers'
+        },
+        'openlayers_cloudmade': {
+            deps: ['openlayers']
+        },
+        'openlayers_stamen': {
+            deps: ['openlayers']
+        },
+    }
+
+});
+
 define([
     'jquery',
     'underscore',
     'backbone',
     'config',
     'utils',
-    'text!templates/map-ol.html',
-    'views/map-view-base',
+    'text!templates/map.html',
+    'views/maps/map-view-base',
     'views/data-detail-view',
     'openlayers',
-    'cloudmade',
-    'stamen'
+    'openlayers_cloudmade',
+    'openlayers_stamen'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase, DataDetailView, OpenLayers) {
     "use strict";
 
     var Geometry = OpenLayers.Geometry;
-    var MapOLView = MapViewBase.extend({
+    var OpenLayersMapView = MapViewBase.extend({
 
         tagName: 'div',
         className: 'map-view',
@@ -24,7 +45,7 @@ define([
         
         initialize: function(options) 
         {
-            MapOLView.__super__.initialize.call(this, options);
+            OpenLayersMapView.__super__.initialize.call(this, options);
             this.template = _.template(templateHtml);
         
             _.bindAll(this, "updateViewStyle");
@@ -75,7 +96,7 @@ define([
         {                                       
             var self = this;
             this.map = new OpenLayers.Map({
-                div: "map_canvas",
+                div: "map",
                 displayProjection: this.externalProjection,
                 //numZoomLevels: MAP_NUM_ZOOM_LEVELS,
                 scope: this,
@@ -118,7 +139,7 @@ define([
                 })
             };
 
-            MapOLView.__super__.renderMap.call(this, viewBase, viewStyle);
+            OpenLayersMapView.__super__.renderMap.call(this, viewBase, viewStyle);
             return this;
         },
 
@@ -171,7 +192,7 @@ define([
         attachLayer: function(model)
         {
             this.initRenderLayer(model);
-            MapOLView.__super__.attachLayer.call(this, model);
+            OpenLayersMapView.__super__.attachLayer.call(this, model);
         },
 
         getStyleMapForLayer: function(model)
@@ -353,7 +374,7 @@ define([
         destroyLayer: function(model) 
         {
             this.destroyRenderLayer(model);
-            MapOLView.__super__.destroyLayer.call(this, model);
+            OpenLayersMapView.__super__.destroyLayer.call(this, model);
             // TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
             /*this.featureLayers[model.id].destroy();*/
         },
@@ -365,7 +386,7 @@ define([
         featureReset: function(collection, options) 
         {
             this.destroyFeaturesForLayer(collection.mapLayer);
-            MapOLView.__super__.featureReset.call(this, collection, options);
+            OpenLayersMapView.__super__.featureReset.call(this, collection, options);
         },        
 
         featureAdd: function(model, collection, options)  
@@ -511,7 +532,7 @@ define([
     });
 
 
-    var Baselayer = MapOLView.prototype.Baselayer = OpenLayers.Class(
+    var Baselayer = OpenLayersMapView.prototype.Baselayer = OpenLayers.Class(
     {
         initialize: function(map, mapView, mapStyle)
         {
@@ -561,7 +582,7 @@ define([
     });
 
 
-    var ViewBase = MapOLView.prototype.ViewBase = {};
+    var ViewBase = OpenLayersMapView.prototype.ViewBase = {};
 
     ViewBase.gm = OpenLayers.Class(Baselayer,
     {
@@ -767,5 +788,5 @@ define([
 
     });
 
-    return MapOLView;
+    return OpenLayersMapView;
 });

@@ -2,7 +2,10 @@ var IS_BROWSER = this.Document && true;
 
 if (IS_BROWSER) {
 	define([], function() {
-		return {};
+		var conf = {
+			MAP_VIEW_MODULES: ['views/maps/openlayers-map-view']
+		};
+		return conf;
 	});
 }
 

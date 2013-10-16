@@ -2,11 +2,11 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'config',
     'permissions',
     'views/login-signup-view',
     'views/header-view',
     'views/setup-view',
-    'views/map-ol-view',
     'views/help-panel-view',
     'views/layers-panel-view',
     'views/data-detail-view',
@@ -24,8 +24,8 @@ define([
     'models/map',
     'models/map-layer',
     'text!templates/help/about.html'
-], function($, _, Backbone, permissions, LoginSignupView,
-    HeaderView, SetupView, MapOLView, HelpPanelView, LayersPanelView, 
+], function($, _, Backbone, config, permissions, LoginSignupView,
+    HeaderView, SetupView, HelpPanelView, LayersPanelView, 
     DataDetailView, MapInfoView, BaselayerEditorView, MapLayerEditorView,
     MapLayerView, DataLibraryPanelView, DataImportView,
     ModalView, ShareView, GraphsPanelView, TimelineScatterPlotView, HistogramView,
@@ -148,6 +148,8 @@ define([
                     }
                 }
 
+                this.render();
+
                 if (!this.mapView) {
                     // Initialize map view
                     console.log('slug:', slug, 'mapViewName:', mapViewName, 'viewBase:', viewBase, 'viewStyle:', viewStyle, 'center:', center, 'zoom:', zoom);
@@ -229,29 +231,25 @@ define([
 
             initMapView: function(mapViewName, center, zoom, viewBase, viewStyle) 
             {
-                var self = this;
-
-                if (!self.isRendered) {
-                    self.render(mapViewName);
-                }
+                var self = this,
+                    viewModule;
 
                 this.mapViewName = mapViewName;
                     
                 if (this.mapView) {
                     this.mapView.remove();
-                    this.mapView = null;
+                    this.stopListening(this.mapView);
+                    delete this.mapView;
                 }
 
                 switch (this.mapViewName) {
                     default:
                     case 'map':
-                        var viewClass = MapOLView;
+                        viewModule = config.MAP_VIEW_MODULES[0];
                         this.mapViewName = 'map';
                         break;
-                    case 'globe':
-                        var viewClass = MapGLView;
-                        break;
-                }       
+                }
+
                 $('.map-view-toggle').each(function() {
                     $(this).toggleClass('active', $(this).hasClass(self.mapViewName));
                 });
@@ -264,34 +262,21 @@ define([
                     visibleMapArea.zoom = zoom;
                 }
 
-                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
-                this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
+                require([viewModule], function(MapView) {
+                    self.mapView = new MapView({
+                        vent: self.vent,
+                        visibleMapArea: visibleMapArea
+                    });
 
-                this.mapView = new viewClass({
-                    vent: self.vent,
-                    visibleMapArea: visibleMapArea
-                });
+                    self.listenTo(self.mapView, 'visibleAreaChanged', self.visibleMapAreaChanged);
+                    self.listenTo(self.mapView, 'feature:select', self.featureSelect);
+                    self.listenTo(self.mapView, 'feature:unselect', self.featureUnselect);
+                    self.listenTo(self.mapView, 'view:ready', self.mapViewReady);
 
-                this.listenTo(this.mapView, 'visibleAreaChanged', this.visibleMapAreaChanged);
-                this.listenTo(this.mapView, 'feature:select', this.featureSelect);
-                this.listenTo(this.mapView, 'feature:unselect', this.featureUnselect);
-                this.listenTo(this.mapView, 'view:ready', this.mapViewReady);
-
-                var mapEl = this.mapView.render().el;
-                this.$mainEl.append(mapEl);
-                this.mapView.renderMap(viewBase, viewStyle);
-
-                //this.viewOptionsChanged(this.mapView);
-
-                var snap = $('<div class="snap top" /><div class="snap right" />');
-                this.$mainEl.append(snap);
-
-                if (this.isMapAdmin()) {
-                    this.helpPanelView  = new HelpPanelView().render();
-                    if (!this.map.attributes.layers.length || !permissions.currentUser()) {
-                        this.attachPanelView(this.helpPanelView).hide().show('fast');
-                    }
-                }
+                    var mapEl = self.mapView.render().el;
+                    self.$mainEl.append(mapEl);
+                    self.mapView.renderMap(viewBase, viewStyle);
+                });              
             },
 
             mapViewReady: function() 
@@ -500,15 +485,23 @@ define([
                     self.adjustViewport();
                 }, 0);
 
-                // TODO: Detect embed 
-                if (window.location.href.indexOf('4D4R0IjQJYzGP0m') != -1) {
-                    $('body').addClass("embed");
-                }
-                
                 if (this.isMapAdmin()) {
                     this.setupView = new SetupView({model: this.map}).render();
                     if (this.setupRoute) {
                         this.showSetupView();
+                    }
+                }
+
+                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
+                this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
+
+                var snap = $('<div class="snap top" /><div class="snap right" />');
+                self.$mainEl.append(snap);
+
+                if (this.isMapAdmin()) {
+                    this.helpPanelView  = new HelpPanelView().render();
+                    if (!this.map.attributes.layers.length || !permissions.currentUser()) {
+                        this.attachPanelView(this.helpPanelView).hide().show('fast');
                     }
                 }
                 
@@ -603,7 +596,7 @@ define([
 
             resetMap: function()
             {
-                var uri = this.isMapAdmin() ? app.map.adminUri() : app.map.publicUri();
+                var uri = this.isMapAdmin() ? this.map.adminUri() : this.map.publicUri();
                 this.mapChanged = false;
                 this.navigate(uri, {trigger: true});
             },
@@ -701,7 +694,7 @@ define([
             {
                 this.vent.trigger('updateViewStyle', viewStyle);
                 if (navigate || navigate == undefined) {
-                    app.navigate(app.currentMapUri(), {trigger: false});
+                    this.navigate(this.currentMapUri(), {trigger: false});
                 }
                 this.setViewOptions();
             },
@@ -710,7 +703,7 @@ define([
             {
                 this.vent.trigger('updateViewBase', viewBase);
                 if (navigate || navigate == undefined) {
-                    app.navigate(app.currentMapUri(), {trigger: false});
+                    this.navigate(this.currentMapUri(), {trigger: false});
                 }
                 this.setViewOptions();
             },

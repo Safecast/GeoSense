@@ -72,7 +72,7 @@ fieldset.two-column input {
 .progress-striped .bar {
 	background-color: #00C9FF !important;
 }
-#map_canvas img {
+#map img {
 	
 	max-width: none !important;
 }
@@ -154,7 +154,7 @@ button .glyphicon-ok.pull-right {
     padding: 0 !important;
     display: inline-block !important;
 }
-.nav-pills-inline a, .nav-pills-inline span {
+.nav-pills-inline li > a, .nav-pills-inline li > span {
 	margin: 2px !important;
 	padding: 1px 6px 1px 6px !important;
 	display: block;
@@ -163,12 +163,12 @@ button .glyphicon-ok.pull-right {
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 }
-.nav-pills-inline a:hover {
-	color: white !important;
-	background-color: #333;
+.nav-pills-muted > li > a:hover {
+	color: #333 !important;
+	background-color: #ccc;
 }
-.nav-pills-inline .active a, .nav-pills-inline .active a:hover, .nav-pills-inline .active span {
-	color: white !important;
+.nav-pills-muted > li.active > a, .nav-pills-muted > li.active > a:hover, .nav-pills-muted > li.active > span {
+	color: #fff !important;
 	background-color: #666;
 }
 .in-place-input {

@@ -27,6 +27,9 @@
 .data-library .map-layer.drag-helper {	
 	box-shadow: 0px 1px 10px rgba(0, 0, 0, .35);
 }
+.data-library .nav-pills {
+	margin-bottom: 15px;
+}
 .data-library .map-layer.drag-helper .btn-group {
 	display: none;
 }
