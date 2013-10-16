@@ -221,6 +221,11 @@ define([
                 && getAttr(x, datetimeAttr) != undefined;
         },
 
+        hasGraphs: function() 
+        {
+            return this.isTimeBased() || this.histogram != undefined;
+        },
+
         getMappedExtremes: function()
         {
             var x = this.getFeatureCollectionAttr('extremes', {}),

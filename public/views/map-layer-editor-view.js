@@ -64,7 +64,7 @@ define([
 
 	    modelSynced: function(model, resp, options)
 	    {
-	    	if (options.poll) return;
+	    	if (options.poll || options.complete) return;
 			if (this.model.hasChanged('layerOptions')) {
 			    // TODO this will overwrite unsaved changes:
 				this.populateFromModel();	
@@ -153,17 +153,25 @@ define([
 			this.initColorPicker(this.$('.model-input.color-picker'));
 
 			this.$('.has-tooltip').tooltip({ delay: 0, container: 'body' });
-			this.$('.show-preview').addClass('active');
+			
+			if (this.model.canDisplayValues()) {
+				this.$('.show-preview').addClass('active');
+			}
 
 			return this;
 	    },
 
-	    updateFromModel: function()
+	    updateFromModel: function(model, options)
 	    {
 	    	// do not populate form on model change since that breaks
 	    	// things like the colorpicker 
 			this.$('.model-title').text(this.model.getDisplay('title'));
 			this.$('.model-numeric').toggle(this.model.isNumeric());
+			this.$('.show-preview').attr('disabled', !this.model.canDisplayValues());
+
+			if (options && options.complete && this.model.canDisplayValues()) {
+				this.$('.show-preview').addClass('active');
+			}
 	    },
 
 		customInitModelInputs: function()
