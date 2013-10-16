@@ -56,6 +56,21 @@ define([
 			    	.domain(d3.extent(data, getCount)),
 			    binWidth = this.graphWidth / numBins;
 
+			if (this.renderAxes) {
+				var xAxis = d3.svg.axis()
+					    .scale(x)
+					    .orient("bottom")
+					    .tickFormat(function(v) {
+					    	return valFormatter.format(v);
+				    	}),
+					yAxis = d3.svg.axis()
+				    	.scale(y)
+				    	.orient("left");
+
+				this.appendXAxis(xAxis, xLabel);
+				this.appendYAxis(yAxis, yLabel);
+			}
+
 			this.svg.selectAll("rect")
 					.data(data)
 				.enter().append("rect")
@@ -91,21 +106,6 @@ define([
 					d3.select(this)
 						.style('fill', d.getRenderAttr('color'));
         		});
-
-			if (this.renderAxes) {
-				var xAxis = d3.svg.axis()
-					    .scale(x)
-					    .orient("bottom")
-					    .tickFormat(function(v) {
-					    	return valFormatter.format(v);
-				    	}),
-					yAxis = d3.svg.axis()
-				    	.scale(y)
-				    	.orient("left");
-
-				this.appendXAxis(xAxis, xLabel);
-				this.appendYAxis(yAxis, yLabel);
-			}
 
 			return this;
 		},

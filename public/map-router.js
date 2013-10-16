@@ -374,7 +374,12 @@ define([
                         // if now complete, fetch features
                         self.fetchMapFeatures();
                     }
-                    if (model.getDataStatus() == DataStatus.COMPLETE) return;
+                    if (model.getDataStatus() == DataStatus.COMPLETE) {
+                        // trigger change event without poll: true for views that are 
+                        // only doing limited updates during polling
+                        model.trigger('change', model, {complete: true});
+                        return;
+                    }
                     // otherwise, retry in a bit
                     self.pollForMapLayerStatus(model, POLL_INTERVAL);
                 });
@@ -398,7 +403,7 @@ define([
                     model.mapFeatures.setVisibleMapArea(this.mapView.getVisibleMapArea());
                 }
 
-                if (model.isTimeBased() || model.histogram) {
+                if (model.hasGraphs()) {
                     var graphsPanelView = new GraphsPanelView(
                         {model: model, collection: model.mapFeatures}).render();
                     if (model.isTimeBased()) {
@@ -429,8 +434,6 @@ define([
                             fetchGraphs();
                         });
                     }
-                } else {
-                    mapLayerView.disableGraphs();
                 }
             },
 

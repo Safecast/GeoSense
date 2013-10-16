@@ -92,11 +92,6 @@ define([
 	    	this.updateStatus();
 	    },	    
 
-	    disableGraphs: function() 
-	    {
-	    	this.$('.show-layer-graphs').remove()
-	    },
-
 	    updateStatus: function(status) 
 	    {
 	    	var countStatus = '',
@@ -193,7 +188,6 @@ define([
 			this.collapseEl.attr("id", "collapse-" + this.className 
 				+ '-' + (this.model.id || this.model.attributes.featureCollection._id));
 
-		
 			// toggle initial state of accordion group
 			var enabled = this.model.isEnabled();
 			if (this.expandContent == undefined) {
@@ -210,18 +204,16 @@ define([
 			});
 
 			if (!this.model.parentMap) {
-				this.$('.map-tool').remove();
+				this.$('.layer-tools .map-tool').remove();
 				this.$('.collapse-content').prepend(this.$('.status').remove());
 				if (!app || !app.mapView) {
-					this.$('.library-map-tool').remove();
+					this.$('.layer-tools .library-map-tool').remove();
 				}
 			} else {
-				this.$('.library-tool').remove();
+				this.$('.layer-tools .library-tool').remove();
 				this.$('.status').toggle(enabled);
-				if (!app.isMapAdmin()) {
-					this.$('.admin-control').remove();
-				}
 			}
+			this.$layerTools = this.$('.layer-tools').clone();
 
 			this.populateFromModel(this.expandContent);
 			this.$('.details').toggle(this.expandLayerDetails);
@@ -385,9 +377,8 @@ define([
 				this.expand(animate);
 			}
 
-			this.$('.show-layer-graphs').attr('disabled', !enabled);
-			this.$('.show-layer-extents').toggle(enabled 
-				&& this.model.getBbox().length > 0);
+			this.$('.layer-tools .show-layer-graphs').attr('disabled', !enabled);
+			this.$('.layer-tools .show-layer-extents').attr('disabled', !enabled);
 		},
 
 		modelChanged: function(model, options)
@@ -429,17 +420,15 @@ define([
 	    {
 	    	var self = this;
 
+	    	console.log('* populateFromModel '+this.model.hasGraphs());
+
+			this.$('.model-title').text(this.model.getDisplay('title'));
+			this.$('.layer-tools').replaceWith(this.$layerTools.clone());
 	    	this.updateEnabled(false);
             if (renderSubViews) {
             	this.renderSubViews();
 			}
 			this.updateStatus();
-			this.$('.model-title').text(this.model.getDisplay('title'));
-
-			this.$('.admin-control.layer-editor').toggle(
-				this.model.parentMap
-				&& app.isMapAdmin()
-				&& this.model.getDataStatus() == DataStatus.COMPLETE);
 
 			var collectionAttrs = this.model.attributes.featureCollection,
 				description = this.model.getDisplay('description'),
@@ -449,10 +438,9 @@ define([
 			this.$('.description').html(description);
 			if (description) {
 				this.$('.description').show();
-				this.$('.show-layer-details').show();
 			} else {
 				this.$('.description').hide();
-				this.$('.show-layer-details').hide();
+				this.$('.layer-tools .show-layer-details').remove();
 			}
 
 			if (source || (collectionAttrs && collectionAttrs.sync)) {
@@ -477,9 +465,21 @@ define([
 				this.$('.source').hide();
 			}
 
-			if (!this.model.parentMap) {
+			if (this.model.parentMap) {
+				if (!app.isMapAdmin()) {
+					this.$('.layer-tools .admin-control').remove();
+				} else if (!this.model.getDataStatus() == DataStatus.COMPLETE) {
+					this.$('.layer-tools .admin-control.layer-editor').remove();
+				}
+				if (!this.model.hasGraphs()) {
+					this.$('.layer-tools .show-layer-graphs').remove();
+				}
+				if (!this.model.getBbox().length) {
+					this.$('.layer-tools .show-layer-extents').remove();
+				}
+			} else {
 				if (!permissions.canAdminModel(this.model.featureCollection)) {
-					this.$('.admin-control').remove();
+					this.$('.layer-tools .admin-control').remove();
 				} else {
 					var popoverTitle, popoverContent;
 					switch (this.model.attributes.featureCollection.sharing) {

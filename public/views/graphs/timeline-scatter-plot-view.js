@@ -56,6 +56,21 @@ define([
 			    	.range(this.getYRange())
 			    	.domain(d3.extent(data, getYVal));
 
+			if (this.renderAxes) {
+				var xAxis = d3.svg.axis()
+					    .scale(x)
+					    .orient("bottom"),
+					yAxis = d3.svg.axis()
+				    	.scale(y)
+				    	.tickFormat(function(d,i) {
+				    		return autoFormatNumber(d);
+				    	})
+				    	.orient("left");
+
+				this.appendXAxis(xAxis);
+			   	this.appendYAxis(yAxis, yLabel);
+			}
+
 			this.svg.selectAll("circle")
         		.data(data)
         		.enter().append("circle")
@@ -82,21 +97,6 @@ define([
 					d3.select(this)
 						.style('fill', d.getRenderAttr('color'));
         		});
-
-			if (this.renderAxes) {
-				var xAxis = d3.svg.axis()
-					    .scale(x)
-					    .orient("bottom"),
-					yAxis = d3.svg.axis()
-				    	.scale(y)
-				    	.tickFormat(function(d,i) {
-				    		return autoFormatNumber(d);
-				    	})
-				    	.orient("left");
-
-				this.appendXAxis(xAxis);
-			   	this.appendYAxis(yAxis, yLabel);
-			}
 
 			return this;
 		}
