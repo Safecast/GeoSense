@@ -101,11 +101,9 @@ define([
                 this.graphsPanelViews = {};
                 this.mapChanged = false;
 
-                this.vent = _.extend({}, Backbone.Events);
                 this.adminRoute = false;
                 this.routingByHost = false;
 
-                this.listenTo(this.vent, 'viewOptionsChanged', this.viewOptionsChanged);
                 this.sessionOptions = {};
                 this.isEmbedded = window != window.top;
             }, 
@@ -264,14 +262,14 @@ define([
 
                 require([viewModule], function(MapView) {
                     self.mapView = new MapView({
-                        vent: self.vent,
                         visibleMapArea: visibleMapArea
                     });
 
-                    self.listenTo(self.mapView, 'visibleAreaChanged', self.visibleMapAreaChanged);
+                    self.listenTo(self.mapView, 'view:areachanged', self.visibleMapAreaChanged);
                     self.listenTo(self.mapView, 'feature:select', self.featureSelect);
                     self.listenTo(self.mapView, 'feature:unselect', self.featureUnselect);
                     self.listenTo(self.mapView, 'view:ready', self.mapViewReady);
+                    self.listenTo(self.mapView, 'view:optionschanged', self.viewOptionsChanged);
 
                     var mapEl = self.mapView.render().el;
                     self.$mainEl.append(mapEl);
@@ -326,10 +324,10 @@ define([
                     }
                 });
 
-                this.listenTo(model, 'showMapLayerEditor', function() {
+                this.listenTo(model, 'show:editor', function() {
                     this.showMapLayerEditor(model);
                 });
-                this.listenTo(model, 'showMapLayerGraphs', function() {
+                this.listenTo(model, 'show:graphs', function() {
                     this.showMapLayerGraphs(model);
                 });
 
@@ -378,7 +376,7 @@ define([
                     this.attachPanelView(this.layersPanelView).hide().show();
                 }
                 console.log('attachSubViewsForMapLayer', model.id, model.getDisplay('title'));
-                var mapLayerView = new MapLayerView({model: model, vent: this.vent}).render();
+                var mapLayerView = new MapLayerView({model: model}).render();
                 this.layersPanelView.appendSubView(mapLayerView);
                 if (animate) {
                     mapLayerView.hide().show('fast');
@@ -462,7 +460,7 @@ define([
                     $('body').addClass('embed');    
                 }
 
-                this.headerView = new HeaderView({vent: this.vent, model: this.map});
+                this.headerView = new HeaderView({model: this.map});
                 this.mapWasCreatedAnonymously = !this.map.createdBy;
                 this.on('user:login', function() {
                     if (self.mapWasCreatedAnonymously) {
@@ -492,7 +490,7 @@ define([
                     }
                 }
 
-                this.layersPanelView = new LayersPanelView({vent: this.vent}).render();
+                this.layersPanelView = new LayersPanelView({}).render();
                 this.baselayerEditorView = new BaselayerEditorView({model: this.map}).render();
 
                 var snap = $('<div class="snap top" /><div class="snap right" />');
@@ -692,7 +690,7 @@ define([
 
             setViewStyle: function(viewStyle, navigate)
             {
-                this.vent.trigger('updateViewStyle', viewStyle);
+                this.mapView.trigger('update:style', viewStyle);
                 if (navigate || navigate == undefined) {
                     this.navigate(this.currentMapUri(), {trigger: false});
                 }
@@ -701,7 +699,7 @@ define([
 
             setViewBase: function(viewBase, navigate)
             {
-                this.vent.trigger('updateViewBase', viewBase);
+                this.mapView.trigger('update:base', viewBase);
                 if (navigate || navigate == undefined) {
                     this.navigate(this.currentMapUri(), {trigger: false});
                 }
@@ -817,7 +815,7 @@ define([
                     return;
                 }
                 if (!this.dataImportView) {
-                    this.dataImportView = new DataImportView({vent: this.vent}).render();
+                    this.dataImportView = new DataImportView({}).render();
                 }
                 this.dataImportView.show();
             },
@@ -864,7 +862,6 @@ define([
                 var self = this;
                 if (!this.mapLayerEditorViews[layerId]) {
                     this.mapLayerEditorViews[layerId] = new MapLayerEditorView({
-                        vent: this.vent,
                         model: this.getMapLayer(layerId)
                     }).render();
                 }

@@ -537,13 +537,13 @@ define([
 
 		showLayerEditorClicked: function(event)
 		{
-			this.model.trigger('showMapLayerEditor');
+			this.model.trigger('show:editor');
 			return false;
 		},
 
 		showLayerGraphsClicked: function(event)
 		{
-			this.model.trigger('showMapLayerGraphs');
+			this.model.trigger('show:graphs');
 			return false;
 		},
 

@@ -18,7 +18,6 @@ define([
 	    initialize: function(options) 
 	    {
 	    	var options = options || {};
-		    this.vent = options.vent;
 		    this.subViews = [];
 		},
 

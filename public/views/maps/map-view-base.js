@@ -15,7 +15,6 @@ define([
         {
             this.layers = [];
             this.createTimeoutQueue('visibleArea', 250);
-            this.vent = options.vent;
 
             if (options.visibleMapArea) {
                 this.initialVisibleMapArea = options.visibleMapArea;
@@ -51,7 +50,7 @@ define([
         {
             var self = this;
             this.queueTimeout('visibleArea', function() {
-                self.trigger('visibleAreaChanged', this, visibleMapArea);
+                self.trigger('view:areachanged', this, visibleMapArea);
             });
         },
 
