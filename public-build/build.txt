@@ -371,10 +371,6 @@ styles/header.css
 ----------------
 styles/header.css
 
-styles/homepage.css
-----------------
-styles/homepage.css
-
 styles/jquery.miniColors.css
 ----------------
 styles/jquery.miniColors.css
@@ -422,8 +418,8 @@ main.js
 ----------------
 lib/underscore/underscore-min.js
 lib/backbone/backbone.js
-permissions.js
 config.js
+permissions.js
 utils.js
 lib/require/text.js
 text!templates/modal.html
@@ -433,23 +429,15 @@ text!templates/header.html
 views/header-view.js
 text!templates/setup.html
 views/setup-view.js
-text!templates/map-ol.html
-mixins/timeout-queue-mixin.js
-lib/color-gradient/color-gradient.js
-views/map-view-base.js
-text!templates/data-detail.html
-views/panel-view-base.js
-lib/moment/moment.min.js
-views/data-detail-view.js
-lib/openlayers/OpenLayers-2.13.1/OpenLayers.js
-lib/openlayers/cloudmade.js
-lib/openlayers/stamen.js
-views/map-ol-view.js
 text!templates/help-panel.html
 text!templates/help/index.html
+views/panel-view-base.js
 views/help-panel-view.js
 text!templates/layers-panel.html
 views/layers-panel-view.js
+text!templates/data-detail.html
+lib/moment/moment.min.js
+views/data-detail-view.js
 text!templates/map-info-modal.html
 views/map-info-view.js
 text!templates/baselayer-editor.html
@@ -457,6 +445,7 @@ mixins/model-editor-mixin.js
 mixins/editor-widgets-mixin.js
 views/baselayer-editor-view.js
 text!templates/map-layer-editor.html
+lib/color-gradient/color-gradient.js
 views/map-layer-editor-view.js
 text!templates/map-layer.html
 text!templates/histogram.html
@@ -468,6 +457,7 @@ views/legend-view.js
 lib/spin/spin.min.js
 mixins/spinner-mixin.js
 mixins/in-place-editor-mixin.js
+mixins/timeout-queue-mixin.js
 views/map-layer-view.js
 text!templates/data-library-panel.html
 models/geo-feature-collection.js
