@@ -11,21 +11,15 @@ define([
 
     var MapViewBase = Backbone.View.extend({
 
-        initialize: function(options) 
+        initialize: function(options)
         {
             this.layers = [];
             this.createTimeoutQueue('visibleArea', 250);
-
-            if (options.visibleMapArea) {
-                this.initialVisibleMapArea = options.visibleMapArea;
-            }
+            this.featureLayers = {};
         },
 
         renderMap: function(viewBase, viewStyle) 
         {
-            if (this.initialVisibleMapArea) {
-                this.setVisibleMapArea(this.initialVisibleMapArea);
-            }
             return this;
         },
 
@@ -35,15 +29,24 @@ define([
         getVisibleMapArea: function()
         {
             return {
-                bounds: null,
-                zoom: null
+                center: null,
+                zoom: null,
+                bounds: null
             };
         },
         
         /**
         * Required to be implemented by descendants.
         */
-        setVisibleMapArea: function(to) {
+        setVisibleMapArea: function(to) 
+        {
+        },
+
+        /**
+        * Required to be implemented by descendants.
+        */
+        zoomToExtent: function(bbox) 
+        {
         },
 
         visibleAreaChanged: function(visibleMapArea)
@@ -55,12 +58,41 @@ define([
         },
 
         /**
+        * Required to be implemented by descendants.
+        */
+        updateViewBase: function(viewBase, viewStyle)
+        {
+            this.trigger('view:optionschanged', this);
+        },
+
+        /**
+        * Required to be implemented by descendants.
+        */
+        updateViewStyle: function(styleName)
+        {       
+        },
+
+        /**
+        * Required to be implemented by descendants.
+        */
+        updateViewOptions: function(opts) 
+        {
+        },
+
+        /**
         * Map layer management
         */
 
         attachLayer: function(model)
         {
             var self = this;
+
+            var featureLayer = this.initFeatureLayer(model);
+            if (featureLayer) {
+                this.featureLayers[model.id] = featureLayer;
+                featureLayer.toggle(model.isEnabled());
+            }
+
             this.layers.push(model);
             this.listenTo(model, 'toggle:enabled', this.layerToggled);
             this.listenTo(model, 'change', function(model, options) {
@@ -68,24 +100,32 @@ define([
                 self.layerChanged(model, options);
             });
             this.listenTo(model, 'toggle:colorScheme', this.layerChanged);
-            this.listenTo(model.mapFeatures, 'reset', this.featureReset);
-            this.listenTo(model.mapFeatures, 'add', this.featureAdd);
-            this.listenTo(model.mapFeatures, 'remove', this.featureRemove);
-            this.listenTo(model.mapFeatures, 'change', this.featureChange);
             this.listenTo(model, 'destroy', this.destroyLayer);
 
-            this.featureReset(model.mapFeatures);
+            if (featureLayer) {
+                featureLayer.featureReset(featureLayer.collection);
+            }
+        },
+
+        initFeatureLayer: function(model)
+        {
+
+        },
+        
+        getFeatureLayer: function(model)
+        {
+            return this.featureLayers[model.id];
         },
 
         layerToggled: function(model)
         {
+            var featureLayer = this.getFeatureLayer(model);
+            if (featureLayer) {
+                featureLayer.toggle(model.isEnabled());
+            }
         },
 
         layerChanged: function(model, options)
-        {
-        },
-
-        drawLayer: function(model)
         {
         },
 
@@ -94,32 +134,13 @@ define([
             this.layers.splice(this.layers.indexOf(model), 1);
             this.stopListening(model);
             this.stopListening(model.mapFeatures);
-        },
 
-        /**
-        * Map feature collection events
-        */
-
-        featureReset: function(collection, options) 
-        {   
-            var self = this;
-            collection.each(function(model) {
-                self.featureAdd(model, collection, options);
-            });
-            self.drawLayer(collection.mapLayer);
-        },
-
-        featureAdd: function(model, collection, options)  
-        {
-        },
-
-        featureRemove: function(model, collection, options) 
-        {
-        },
-
-        featureChange: function(model, options)
-        {
-        },
+            var featureLayer = this.featureLayers[model.id];
+            if (featureLayer) {
+                featureLayer.destroy();
+            }
+            delete this.featureLayers[model.id];
+        }
 
     });
 

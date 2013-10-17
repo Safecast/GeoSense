@@ -261,9 +261,7 @@ define([
                 }
 
                 require([viewModule], function(MapView) {
-                    self.mapView = new MapView({
-                        visibleMapArea: visibleMapArea
-                    });
+                    self.mapView = new MapView();
 
                     self.listenTo(self.mapView, 'view:areachanged', self.visibleMapAreaChanged);
                     self.listenTo(self.mapView, 'feature:select', self.featureSelect);
@@ -274,6 +272,7 @@ define([
                     var mapEl = self.mapView.render().el;
                     self.$mainEl.append(mapEl);
                     self.mapView.renderMap(viewBase, viewStyle);
+                    self.mapView.setVisibleMapArea(visibleMapArea);
                 });              
             },
 
@@ -317,7 +316,7 @@ define([
                     if (model.isEnabled()) {
                         setTimeout(function() {
                             // wait for animations to complete before fetching
-                            self.fetchMapFeatures();                
+                            self.fetchMapFeatures();
                         }, 300);
                     } else {
                         self.hideMapLayerGraphs(model);

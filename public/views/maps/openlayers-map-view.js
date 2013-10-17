@@ -27,22 +27,212 @@ define([
     'utils',
     'text!templates/map.html',
     'views/maps/map-view-base',
+    'views/maps/feature-layer-base',
     'views/data-detail-view',
     'openlayers',
     'openlayers_cloudmade',
     'openlayers_stamen'
-], function($, _, Backbone, config, utils, templateHtml, MapViewBase, DataDetailView, OpenLayers) {
+], function($, _, Backbone, config, utils, templateHtml, MapViewBase, FeatureLayerBase, DataDetailView, OpenLayers) {
     "use strict";
 
     var Geometry = OpenLayers.Geometry;
+
+    var OpenLayersFeatureLayer = FeatureLayerBase.extend({
+        
+        initialize: function()
+        {
+            OpenLayersFeatureLayer.__super__.initialize.apply(this, arguments);           
+            var opts = this.model.getLayerOptions();
+            this.layer = new OpenLayers.Layer.Vector(this.model.id, {
+                renderers: [(opts.htmlRenderer && opts.htmlRenderer != '' ?
+                    opts.htmlRenderer : 'SVG'), 'SVG', 'VML', 'Canvas'],
+                wrapDateLine: true,
+                rendererOptions: { 
+                    //zIndexing: true
+                }, 
+            });
+        },
+
+        addTo: function(parent)
+        {
+            this.map = parent;
+            this.map.addLayers([this.layer]);            
+        },
+
+        draw: function()
+        {
+            this.layer.redraw();
+        },
+
+        toggle: function(state)
+        {
+            this.layer.setVisibility(state);
+        },
+
+        destroyFeatures: function()
+        {
+            this.trigger('destroy:features');
+            this.layer.destroyFeatures();
+        },
+
+        destroy: function()
+        {
+            this.destroyFeatures();
+            this.map.removeLayer(this.layer);
+        },
+
+        featureReset: function(collection, options)
+        {
+            var self = this;
+            this.destroyFeatures();
+            this.layer.addFeatures(_.map(collection.models, function(model) {
+                return self.modelToFeature(model, collection);
+            }));
+        },
+
+        featureAdd: function(model, collection, options)
+        {
+            this.layer.addFeature([this.modelToFeature(model, collection)]);
+        },
+
+        modelToFeature: function(model, collection)  
+        {
+            var attrs = model.getRenderAttr(),
+                layerOptions = collection.mapLayer.attributes.layerOptions,
+                geometry;
+
+            switch (layerOptions.featureType) {
+
+                case FeatureType.POINTS:
+                case FeatureType.BUBBLES:
+                    geometry = this.formats.geoJSON.parseGeometry({
+                        type: 'Point',
+                        coordinates: model.getCenter()
+                    });
+                    break;
+                case FeatureType.SQUARE_TILES:
+                    if (!layerOptions.featureTypeFallback || collection.gridSize()) {
+                        geometry = this.formats.geoJSON.parseGeometry({
+                            type: 'Polygon',
+                            coordinates: [model.getBox()]
+                        });
+                        break;
+                    }
+                case FeatureType.SHAPES:
+                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
+                    break;
+            }
+
+            return new OpenLayers.Feature.Vector(geometry, attrs);
+        },
+
+        initStyleMap: function()
+        { 
+            var self = this,
+                model = this.model,
+                layerOptions = model.getLayerOptions(),
+                or = function(val1, val2) {
+                    return (val1 || val1 == 0) && val1 != '' 
+                        && (typeof val1 == 'string' || val1 >= 0) ? val1 : val2;
+                },
+                opacity = layerOptions.opacity,
+                maxBubbleSize = or(layerOptions.featureSize, MAX_BUBBLE_SIZE),
+                minBubbleSize = Math.min(maxBubbleSize, or(layerOptions.minFeatureSize, MIN_BUBBLE_SIZE));
+
+            var context = {
+                getColor: function(feature) {
+                    return feature.attributes.color;
+                },
+                getStrokeColor: function(feature) {
+                    var m = feature.attributes.model;
+                    return m.getRenderAttr('strokeColor', function() {
+                        return strokeForColor(m.getRenderAttr('color'))
+                    });
+                },
+                getBubbleRadius: function(feature) {
+                    if (isNaN(feature.attributes.size)) {
+                        return minBubbleSize * .5;
+                    }
+                    return (minBubbleSize + feature.attributes.size * 
+                        (maxBubbleSize - minBubbleSize)) * .5;
+                }            
+            };
+
+            var defaultStyle = {
+                    pointRadius: or(layerOptions.featureSize * .5, DEFAULT_POINT_RADIUS),
+                    fillColor: '${getColor}',
+                    fillOpacity: opacity,
+                    strokeDashstyle: layerOptions.strokeDashstyle,
+                    strokeLinecap: layerOptions.strokeLinecap,
+                    graphicZIndex: 0,
+                    graphicName: null
+                };
+
+            switch (layerOptions.featureType) {
+
+                case FeatureType.GRAPHIC:
+                    defaultStyle = _.extend(defaultStyle, {
+                        externalGraphic: layerOptions.externalGraphic,
+                        graphicWidth: layerOptions.graphicWidth,
+                        graphicHeight: layerOptions.graphicHeight
+                    });                        
+
+                default:
+                case FeatureType.POINTS:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
+                    });
+                    break;
+
+                case FeatureType.SQUARE_TILES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
+                    });
+                    break;
+
+                case FeatureType.SHAPES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        strokeColor: or(layerOptions.strokeColor, '${getColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity),
+                    });
+                    break;
+                
+                case FeatureType.BUBBLES:
+                    defaultStyle = _.extend(defaultStyle, {
+                        pointRadius: '${getBubbleRadius}',
+                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
+                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
+                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .5)
+                    });
+                    break;
+            }
+
+            var selectStyle = {
+                    fillOpacity: (defaultStyle.fillOpacity == 1 ? .8 : Math.min(1, defaultStyle.fillOpacity * 1.5)),
+                    strokeOpacity: (defaultStyle.strokeOpacity == 1 ? .1 : Math.min(1, defaultStyle.strokeOpacity * 1.5)),
+                    //TODO: this is not having any effect
+                    graphicZIndex: 100
+                };
+
+            this.layer.styleMap = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style(defaultStyle, {context: context}),
+                'select': new OpenLayers.Style(selectStyle, {context: context})
+            });
+        }
+
+    });
+
+
     var OpenLayersMapView = MapViewBase.extend({
 
         tagName: 'div',
         className: 'map-view',
 
-        _addFeatures: {
-        },
-        
         initialize: function(options) 
         {
             OpenLayersMapView.__super__.initialize.call(this, options);
@@ -55,7 +245,6 @@ define([
             this.internalProjection = null; // determined by baselayer -- usually EPSG:900913
 
             OpenLayers.ImgPath = BASE_URL + "/assets/openlayers-light/";   
-            this.featureLayers = {};
         },
 
         getVisibleMapArea: function() 
@@ -67,7 +256,6 @@ define([
 
             var SW = new OpenLayers.Geometry.Point(extent.left, extent.bottom),
                 NE = new OpenLayers.Geometry.Point(extent.right, extent.top);
-            var radius = Math.sqrt(Math.pow((NE.x - SW.x) / 2, 2) + Math.pow((NE.y - SW.y) / 2, 2)) / 1000; // km
             SW.transform(this.internalProjection, this.externalProjection);
             NE.transform(this.internalProjection, this.externalProjection);
             var bounds = [[SW.x, SW.y],[NE.x, NE.y]];
@@ -79,7 +267,6 @@ define([
                 center: center,
                 zoom: zoom,
                 bounds: bounds,
-                radius: radius
             };
         },
 
@@ -186,140 +373,28 @@ define([
             this.selectControl.handlers.feature.stopDown = false;
         },
 
-        attachLayer: function(model)
-        {
-            this.initRenderLayer(model);
-            OpenLayersMapView.__super__.attachLayer.call(this, model);
-        },
-
-        getStyleMapForLayer: function(model)
-        { 
-            var self = this,
-                layerOptions = model.getLayerOptions(),
-                or = function(val1, val2) {
-                    return (val1 || val1 == 0) && val1 != '' 
-                        && (typeof val1 == 'string' || val1 >= 0) ? val1 : val2;
-                },
-                opacity = layerOptions.opacity,
-                maxBubbleSize = or(layerOptions.featureSize, MAX_BUBBLE_SIZE),
-                minBubbleSize = Math.min(maxBubbleSize, or(layerOptions.minFeatureSize, MIN_BUBBLE_SIZE));
-
-            var context = {
-                getColor: function(feature) {
-                    return feature.attributes.color;
-                },
-                getStrokeColor: function(feature) {
-                    var m = feature.attributes.model;
-                    return m.getRenderAttr('strokeColor', function() {
-                        return strokeForColor(m.getRenderAttr('color'))
-                    });
-                },
-                getBubbleRadius: function(feature) {
-                    if (isNaN(feature.attributes.size)) {
-                        return minBubbleSize * .5;
-                    }
-                    return (minBubbleSize + feature.attributes.size * 
-                        (maxBubbleSize - minBubbleSize)) * .5;
-                }            
-            };
-
-            var defaultStyle = {
-                    pointRadius: or(layerOptions.featureSize * .5, DEFAULT_POINT_RADIUS),
-                    fillColor: '${getColor}',
-                    fillOpacity: opacity,
-                    strokeDashstyle: layerOptions.strokeDashstyle,
-                    strokeLinecap: layerOptions.strokeLinecap,
-                    graphicZIndex: 0,
-                    graphicName: null
-                };
-
-            switch (layerOptions.featureType) {
-
-                case FeatureType.GRAPHIC:
-                    defaultStyle = _.extend(defaultStyle, {
-                        externalGraphic: layerOptions.externalGraphic,
-                        graphicWidth: layerOptions.graphicWidth,
-                        graphicHeight: layerOptions.graphicHeight
-                    });                        
-
-                default:
-                case FeatureType.POINTS:
-                    defaultStyle = _.extend(defaultStyle, {
-                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
-                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
-                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
-                    });
-                    break;
-
-                case FeatureType.SQUARE_TILES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
-                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
-                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .8)
-                    });
-                    break;
-
-                case FeatureType.SHAPES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        strokeColor: or(layerOptions.strokeColor, '${getColor}'),
-                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
-                        strokeOpacity: or(layerOptions.strokeOpacity, opacity),
-                    });
-                    break;
-                
-                case FeatureType.BUBBLES:
-                    defaultStyle = _.extend(defaultStyle, {
-                        pointRadius: '${getBubbleRadius}',
-                        strokeColor: or(layerOptions.strokeColor, '${getStrokeColor}'),
-                        strokeWidth: or(layerOptions.strokeWidth, DEFAULT_FEATURE_STROKE_WIDTH),
-                        strokeOpacity: or(layerOptions.strokeOpacity, opacity * .5)
-                    });
-                    break;
-            }
-
-            var selectStyle = {
-                    fillOpacity: (defaultStyle.fillOpacity == 1 ? .8 : Math.min(1, defaultStyle.fillOpacity * 1.5)),
-                    strokeOpacity: (defaultStyle.strokeOpacity == 1 ? .1 : Math.min(1, defaultStyle.strokeOpacity * 1.5)),
-                    //TODO: this is not having any effect
-                    graphicZIndex: 100
-                };
-
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style(defaultStyle, {context: context}),
-                'select': new OpenLayers.Style(selectStyle, {context: context})
-            });
-
-            return styleMap;
-        },
-
-
-        layerToggled: function(model)
-        {
-            this.featureLayers[model.id].setVisibility(model.isEnabled());
-        },
-
         layerChanged: function(model, options)
         {
-            var layer = this.featureLayers[model.id];
+            var featureLayer = this.getFeatureLayer(model);
             if (model.hasChanged('layerOptions.htmlRenderer')) {
-                this.destroyRenderLayer(model);
-                this.initRenderLayer(model);
-                this.featureReset(model.mapFeatures);
+                console.log('Creating layer with new renderer');
+                featureLayer.destroy();
+                this.featureLayers[model.id] = this.initFeatureLayer(model);
+                featureLayer.featureReset(model.mapFeatures);
+                // TODO: is not redrawing
                 return;
             }
 
-            layer.styleMap = this.getStyleMapForLayer(model);
+            featureLayer.initStyleMap();
             if (model.hasChangedColors()
                 || model.hasChanged('layerOptions.featureType')
                 || model.hasChanged('layerOptions.featureTypeFallback')
                 || model.hasChanged('layerOptions.attrMap.numeric') 
                 || model.hasChanged('layerOptions.attrMap.featureSize') 
                 || model.hasChanged('layerOptions.attrMap.featureColor')) {
-                    // console.log('* featureReset '+collection.mapLayer.id);
-                    this.featureReset(model.mapFeatures);
+                    featureLayer.featureReset(model.mapFeatures);
             } else {
-                // console.log('* layer.redraw '+model.id);
-                layer.redraw();
+                featureLayer.draw();
             }
         },
 
@@ -332,102 +407,20 @@ define([
             }
         },
 
-        initRenderLayer: function(model)
+        initFeatureLayer: function(model)
         {
             var self = this,
-                opts = model.getLayerOptions(),
-                layer = new OpenLayers.Layer.Vector(model.id, {
-                styleMap: this.getStyleMapForLayer(model),
-                renderers: [(opts.htmlRenderer && opts.htmlRenderer != '' ?
-                    opts.htmlRenderer : 'SVG'), 'SVG', 'VML', 'Canvas'],
-                wrapDateLine: true,
-                rendererOptions: { 
-                    //zIndexing: true
-                }, 
+                featureLayer = new OpenLayersFeatureLayer({model: model, collection: model.mapFeatures});
+            featureLayer.initStyleMap();
+            featureLayer.addTo(this.map);
+            featureLayer.formats = this.formats;
+            featureLayer.on('destroy:features', function() {
+                _.each(featureLayer.layer.features, function(feature) {
+                    self.destroyPopupForFeature(feature);
+                });
             });
-
-            this.featureLayers[model.id] = layer;
-            layer.setVisibility(model.isEnabled());
-            this.map.addLayers([layer]);
             this.initSelectControl();
-        },
-
-        destroyRenderLayer: function(model) 
-        {
-            this.destroyFeaturesForLayer(model);
-            this.map.removeLayer(this.featureLayers[model.id]);
-            delete this.featureLayers[model.id];
-        },
-
-        destroyFeaturesForLayer: function(model)
-        {
-            var self = this;
-            this.featureLayers[model.id].features.forEach(function(feature) {
-                self.destroyPopupForFeature(feature);
-            });
-            this.featureLayers[model.id].destroyFeatures();  
-        },
-
-        destroyLayer: function(model) 
-        {
-            this.destroyRenderLayer(model);
-            OpenLayersMapView.__super__.destroyLayer.call(this, model);
-            // TODO: Properly destroy layer, but there is currently a bug "cannot read property style of null [layer.div]"
-            /*this.featureLayers[model.id].destroy();*/
-        },
-
-        /**
-        * Map feature collection events.
-        */
-
-        featureReset: function(collection, options) 
-        {
-            this.destroyFeaturesForLayer(collection.mapLayer);
-            OpenLayersMapView.__super__.featureReset.call(this, collection, options);
-        },        
-
-        featureAdd: function(model, collection, options)  
-        {
-            var attrs = model.getRenderAttr(),
-                layerOptions = collection.mapLayer.attributes.layerOptions,
-                geometry;
-
-            switch (layerOptions.featureType) {
-
-                case FeatureType.POINTS:
-                case FeatureType.BUBBLES:
-                    geometry = this.formats.geoJSON.parseGeometry({
-                        type: 'Point',
-                        coordinates: model.getCenter()
-                    });
-                    break;
-                case FeatureType.SQUARE_TILES:
-                    if (!layerOptions.featureTypeFallback || collection.gridSize()) {
-                        geometry = this.formats.geoJSON.parseGeometry({
-                            type: 'Polygon',
-                            coordinates: [model.getBox()]
-                        });
-                        break;
-                    }
-                case FeatureType.SHAPES:
-                    geometry = this.formats.geoJSON.parseGeometry(model.attributes.geometry);
-                    break;
-            }
-
-            var feature = new OpenLayers.Feature.Vector(geometry, attrs);
-            
-            if (!this._addFeatures[collection.mapLayer.id]) {
-                this._addFeatures[collection.mapLayer.id] = [];
-            }
-            this._addFeatures[collection.mapLayer.id].push(feature);
-        },
-
-        featureRemove: function(model, collection, options) 
-        {
-        },
-
-        featureChange: function(model, options)
-        {
+            return featureLayer;
         },
 
         featureSelected: function(feature) 
