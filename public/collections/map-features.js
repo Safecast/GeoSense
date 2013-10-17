@@ -41,6 +41,7 @@ define([
 			if (this.urlFormat != undefined) {
 				options = _.extend(options, {dataType: 'jsonp'});
 			}
+			this.initiallyFetched = this.visibleMapAreaFetched = true;
 			return MapFeatures.__super__.fetch.call(this, options);
 		},
 
@@ -81,7 +82,9 @@ define([
 
 		setVisibleMapArea: function(visibleMapArea) 
 		{
-			var bounds = visibleMapArea.bounds;
+			var bounds = visibleMapArea.bounds,
+				prevUrlParams = _.clone(this.urlParams);
+			
 			this.urlParams = {
 				bounds: bounds,
 				zoom: visibleMapArea.zoom,
@@ -90,7 +93,7 @@ define([
 				radius: visibleMapArea.radius,
 				query: ''
 			};
-			this.visibleMapAreaFetched = false;
+			this.visibleMapAreaFetched = _.isEqual(prevUrlParams, this.urlParams);
 		},
 
 		isCurrent: function() 
@@ -100,7 +103,6 @@ define([
 
 	    parse: function(resp, xhr) 
 	    {
-			this.initiallyFetched = this.visibleMapAreaFetched = true;
 			var parsed = this.parser.parse(resp, xhr);
 	    	this.properties = parsed.properties;
 	    	return parsed.features;

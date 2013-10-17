@@ -3,7 +3,7 @@ var IS_BROWSER = this.Document && true;
 if (IS_BROWSER) {
 	define([], function() {
 		var conf = {
-			MAP_VIEW_MODULES: ['views/maps/openlayers-map-view']
+			MAP_VIEW_MODULES: ['views/maps/openlayers-map-view', 'views/maps/leaflet-d3-map-view']
 		};
 		return conf;
 	});
