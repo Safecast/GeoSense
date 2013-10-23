@@ -66,6 +66,44 @@ describe('Mappers', function() {
 		assert.equal(4, reduced[2].count);
 	});
 
+	it('should map coordinates to a grid cell for all 4 hemisphere cases', function() {
+		var gw = 0.005149841307876887, ghw = gw / 2,
+			tile = new Mapper.Tile.Rect(gw, gw),
+			c,
+			r;
+
+		// test with arbitrary coordinates for all four hemisphere cases
+
+		c = [-122.296831666667, 47.5767516666667];
+		r = tile.map({
+				type: 'Point',
+				coordinates: c
+			})[1].coordinates;
+		assert(c[0] >= r[0] - ghw && c[0] <= r[0] + ghw, c[1] >= r[1] - ghw && c[1] <= r[1] + ghw);
+
+		c = [114.18631, 22.592925];
+		r = tile.map({
+				type: 'Point',
+				coordinates: c
+			})[1].coordinates;
+		assert(c[0] >= r[0] - ghw && c[0] <= r[0] + ghw, c[1] >= r[1] - ghw && c[1] <= r[1] + ghw);
+
+		c = [122.296831666667, -47.5767516666667];
+		r = tile.map({
+				type: 'Point',
+				coordinates: c
+			})[1].coordinates;
+		assert(c[0] >= r[0] - ghw && c[0] <= r[0] + ghw, c[1] >= r[1] - ghw && c[1] <= r[1] + ghw);
+
+		c = [-114.18631, -22.592925];
+		r = tile.map({
+				type: 'Point',
+				coordinates: c
+			})[1].coordinates;
+		assert(c[0] >= r[0] - ghw && c[0] <= r[0] + ghw, c[1] >= r[1] - ghw && c[1] <= r[1] + ghw);
+
+	});
+
 });
 
 
