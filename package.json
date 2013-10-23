@@ -26,7 +26,6 @@
 		"cron": "1.0.1",
 		"node-compress": "0.1.0",
 		"time": "0.8.4",
-		"cloneextend": "0.0.3",
 		"jsdom": "0.5.0",
 		"togeojson": "0.0.1",
 		"xml-stream": "0.x",
@@ -34,7 +33,7 @@
 		"bcrypt": "0.7.x",
 		"passport": "0.1.x",
 		"passport-local": "0.1.x",
-		"underscore": "1.5.2",
+		"underscore": "1.5.x",
 		"read": "1.0.x"
   }
 }

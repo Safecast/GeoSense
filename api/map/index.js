@@ -7,8 +7,7 @@ var config = require('../../config.js'),
 	prepareLayerResult = apiUtil.prepareLayerResult,
 	sortByPosition = apiUtil.sortByPosition,
 	url = require('url'),
-	mongoose = require('mongoose'),
-	_ = require('cloneextend');
+	mongoose = require('mongoose');
 
 var Point = models.Point,
 	GeoFeatureCollection = models.GeoFeatureCollection,

@@ -63,7 +63,7 @@ describe('Safecast', function() {
 
 	it('should have skipped four records because of invalid values, and two others because their incrementor field was lower that that of already imported ones', function(done) {
 		// make sure the GeoFeatureCollection was actually saved
-		GeoFeatureCollection.findOne({_id: importCollection._id.toString()}, function(err, collection) {
+		GeoFeatureCollection.findById(importCollection._id, function(err, collection) {
 			if (err) throw err;
 			importCollection = collection;
 			importCollection.getFeatureModel().find(function(err, features) {

@@ -1,7 +1,7 @@
 var models = require('../models'),
 	permissions = require('../permissions'),
 	config = require('../config'),
-	_ = require('cloneextend');
+	_ = require('underscore');
 
 var isCustomHost = function(req) {
 	return config.DEFAULT_HOSTS.indexOf(req.headers.host) == -1;

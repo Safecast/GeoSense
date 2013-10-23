@@ -5,7 +5,7 @@ var	models = require('../models'),
 	format = require('../api/import/formats/geojson'),
 	assert = require('assert'),
 	mongoose = require('mongoose'),
-	_ = require('cloneextend');
+	_ = require('underscore');
 
 describe('GeoJSON raw', function() {
 	var featureCollection, GeoFeature;
@@ -31,7 +31,6 @@ describe('GeoJSON raw', function() {
 		var onData = function(data) {
 			var f = new GeoFeature(data, false);
 			f.featureCollection = featureCollection;
-			f.set('properties.original', _.clone(data));
 			f.save(function(err, result) {
 				if (err) throw err;
 				saved++;

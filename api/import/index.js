@@ -29,8 +29,7 @@ var ImportAPI = function(app)
 	var self = this;
 	if (app) {
 		app.post('/api/import/', [permissions.requireLogin], function(req, res) {
-			// TODO: hack because cloneextend sometimes throws error
-			// http://stackoverflow.com/questions/16585209/node-js-object-object-has-no-method-hasownproperty			
+			// TODO: hack because http://stackoverflow.com/questions/16585209/node-js-object-object-has-no-method-hasownproperty
 			req.body = JSON.parse(JSON.stringify(req.body));
 
 			if (!permissions.canImportData(req)) {
@@ -710,7 +709,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							&& (!datetime || !params.from || datetime >= params.from)
 							&& (!datetime || !params.to || datetime <= params.to)
 							&& (!params.incremental || !collection.extremes || collection.extremes.incrementor == undefined 
-								|| incrementor == undefined || incrementor > collection.extremes.incrementor.max);
+								|| incrementor == undefined || incrementor >= collection.extremes.incrementor.max);
 					}
 
 					if (doSave) {
@@ -740,12 +739,16 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 								if (transform.Filter.isDecimal(saveModel.properties[key])) {
 									propertyType = 'Number';
 									saveModel.set('properties.' + key, transform.Cast.Number(saveModel.properties[key]));
-									console.warn('Coercing ' + key + ' to Number');
+									if (config.VERBOSE) {
+										console.warn('Coercing ' + key + ' to Number');
+									}
 								// try to cast Date
 								} else if (transform.Filter.isValidDate(saveModel.properties[key], false)) {
 									propertyType = 'Date';
 									saveModel.set('properties.' + key, transform.Cast.Date(saveModel.properties[key]));
-									console.warn('Coercing ' + key + ' to Date');
+									if (config.VERBOSE) {
+										console.warn('Coercing ' + key + ' to Date');
+									}
 								}
 							}
 
