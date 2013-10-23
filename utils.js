@@ -3,7 +3,6 @@ var config = require('./config.js'),
     HTTPError = errors.HTTPError,
     mailer = require('mailer'),
     fs = require('fs'),
-    _ = require('cloneextend'),
     mongoose = require('mongoose'),
     console = require('./ext-console');
 

@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
     getBounds = coordinates.getBounds, 
     bboxFromBounds = coordinates.bboxFromBounds,
     boundsFromBbox = coordinates.boundsFromBbox,
-    _ = require('cloneextend');
+    _ = require('underscore');
 
 var geoJSONFeatureCollectionDefinition = {
         type: {type: String, required: true, enum: ['FeatureCollection'], default: 'FeatureCollection'},
@@ -85,12 +85,10 @@ GeoFeatureCollectionSchemaMethods.getFeatureModel = function(options)
 
 function GeoFeatureCollectionSchema(extraDefinition, extraMethods, extraStatics, extraMiddleware, basicDefinition)
 {
-    var schema = new mongoose.Schema(_.cloneextend(basicDefinition || geoJSONFeatureCollectionDefinition, extraDefinition || {}));
-    schema.methods = _.clone(GeoFeatureCollectionSchemaMethods);
-    _.add(schema.methods, extraMethods);
-    schema.statics = _.clone(GeoFeatureCollectionSchemaStatics);
-    _.add(schema.statics, extraStatics);
-    var middleware = _.cloneextend(GeoFeatureCollectionSchemaMiddleware, extraMiddleware || {});
+    var schema = new mongoose.Schema(_.extend(_.clone(basicDefinition || geoJSONFeatureCollectionDefinition), extraDefinition || {}));
+    schema.methods = _.extend(_.clone(GeoFeatureCollectionSchemaMethods), extraMethods);
+    schema.statics = _.extend(_.clone(GeoFeatureCollectionSchemaStatics), extraStatics);
+    var middleware = _.extend(_.clone(GeoFeatureCollectionSchemaMiddleware), extraMiddleware || {});
     for (var method in middleware) {
         for (var evt in middleware[method]) {
             schema[method](evt, middleware[method][evt]);
@@ -152,8 +150,8 @@ GeoFeatureSchemaMiddleware.pre = {
 
         if ((-1 == geometryTypes.indexOf(geometryType))
             && (-1 != complexGeometryTypes.indexOf(geometryType))) {
-                console.warn('Converting complex geometry to 2dsphere indexable bounds');
-                this.sourceGeometry = _.clone(this.geometry);
+                //console.warn('Converting complex geometry to 2dsphere indexable bounds');
+                this.sourceGeometry = _.clone(this.get('geometry'));
                 this.geometry = coordinates.polygonFromBounds(getBounds(this.geometry.coordinates));
         }
 
@@ -209,12 +207,12 @@ GeoFeatureSchemaStatics.near = function(geometry, maxDistance)
 
 function GeoFeatureSchema(extraDefinition, extraMethods, extraStatics, extraMiddleware, basicDefinition)
 {
-    var schema = new mongoose.Schema(_.cloneextend(basicDefinition || geoJSONFeatureDefinition, extraDefinition || {}));        
+    var schema = new mongoose.Schema(_.extend(_.clone(basicDefinition || geoJSONFeatureDefinition), extraDefinition || {}));        
     schema.methods = _.clone(GeoFeatureSchemaMethods);
     _.extend(schema.methods, extraMethods);
     schema.statics = _.clone(GeoFeatureSchemaStatics);
     _.extend(schema.statics, extraStatics);
-    var middleware = _.cloneextend(GeoFeatureSchemaMiddleware, extraMiddleware || {});
+    var middleware = _.extend(_.clone(GeoFeatureSchemaMiddleware), extraMiddleware || {});
     for (var method in middleware) {
         for (var evt in middleware[method]) {
             schema[method](evt, middleware[method][evt]);

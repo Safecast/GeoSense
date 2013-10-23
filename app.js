@@ -11,7 +11,7 @@ var application_root = __dirname,
   	permissions = require('./permissions.js'),
   	ejs = require('ejs'),
     console = require('./ext-console'),
-    _ = require('cloneextend'),
+    _ = require('underscore'),
 	passport = require('passport'),
   	LocalStrategy = require('passport-local').Strategy;
 
@@ -112,9 +112,9 @@ var renderPage = function(req, res, page, vars)
 	}
 	var template = !req.xhr ?
 		'templates/base.ejs' : 'templates/base-xhr.ejs';
-	return ejs.render(templates[template], getRenderVars(req, _.extend(vars, {
+	return ejs.render(templates[template], getRenderVars(req, _.extend({
 		content: renderFragment(req, res, page, vars)
-	})));
+	}, vars)));
 };
 
 var renderFragment = function(req, res, page, vars)

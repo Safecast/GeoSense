@@ -1,5 +1,4 @@
 var mongoose = require('mongoose'),
-    _ = require('cloneextend'),
     adHocModels = {};
 
 

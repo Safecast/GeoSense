@@ -9,7 +9,6 @@ var config = require('../../config'),
 	console = require('../../ext-console.js'),
 	getAttr = require('../aggregate/mapreduce_abstraction').scopeFunctions.getAttr,
 	mongoose = require('mongoose'),
-	_ = require('cloneextend'),
 	moment = require('moment');
 
 	Map = models.Map,

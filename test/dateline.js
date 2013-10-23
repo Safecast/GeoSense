@@ -4,8 +4,7 @@ var	models = require('../models'),
 	format = require('../api/import/formats/json'),
 	coordinates = require('../geogoose').coordinates,
 	assert = require('assert'),
-	mongoose = require('mongoose'),
-	_ = require('cloneextend');
+	mongoose = require('mongoose');
 
 describe('Dateline', function() {
 /*

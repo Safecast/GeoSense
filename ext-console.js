@@ -1,5 +1,5 @@
-var _ = require('cloneextend'),
-	consoleClone = _.extend({}, console),
+var _ = require('underscore'),
+	consoleClone = _.clone(console),
 	ansiColors = {
 	    red: '\033[31m',
 	    green: '\033[32m',
