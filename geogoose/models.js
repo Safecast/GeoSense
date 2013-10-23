@@ -122,7 +122,9 @@ GeoFeatureSchemaMethods.toGeoJSON = function(extraAttrs)
         obj.bbox = this.get('bbox');
     }
     if (extraAttrs) {
-        obj = _.extend(obj, extraAttrs);
+        for (var k in extraAttrs) {
+            _.extend(obj[k], extraAttrs[k]);
+        }
     }
     return obj;
 };
@@ -201,7 +203,6 @@ GeoFeatureSchemaStatics.near = function(geometry, maxDistance)
         throw new Error('Schema has no geoIndexField defined');
     };
     var c = {$near: {$geometry: geometry, $maxDistance: maxDistance}};
-    console.log(c);
     return this.where(this.schema.statics.geoIndexField, c);
 }
 
