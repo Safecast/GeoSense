@@ -21,7 +21,7 @@ define([
 		draggable: false,
 
 	    events: {
-			'submit form.search, keypress form.search .search-query': 'searchClicked',
+			'submit form.search, keypress form.search .search-query': 'searchLibrary',
 			'click button.remove-query': 'removeQueryClicked',
 	    },
 
@@ -31,8 +31,13 @@ define([
 
 	    initialize: function(options) 
 	    {
+	    	var self = this;
 	    	DataLibraryView.__super__.initialize.apply(this, arguments);
 		    this.collection = new GeoFeatureCollections();
+		    this.listenTo(app, 'user:login', function(model) {
+		    	self.render();
+		    	self.searchLibrary();
+		    });
 	    },
 
 	    loadNextPage: function(event) 
@@ -54,7 +59,7 @@ define([
 				$(this).select();
 			});
 			this.$('form.search .search-query').keyup(function() {
-				//self.searchClicked();
+				//self.searchLibrary();
 			});
 
 			this.initScrollable(this.$(this.subViewContainer).parent(),
@@ -71,13 +76,13 @@ define([
 			}
 
 			this.$('.type-toggles > li > a').on('shown.bs.tab', function(evt) {
-				self.searchClicked();
+				self.searchLibrary();
 			});
 
 	        return this;
 	    },
 
-	    searchClicked: function(event)
+	    searchLibrary: function(event)
 	    {
 	    	var query = this.$('.search-query').val();
 	    	this.resetPageParams();
