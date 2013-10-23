@@ -15,7 +15,7 @@ define([
 		draggable: false,
 
 	    events: {
-			'submit form.search, keypress form.search .search-query': 'searchClicked',
+			'submit form.search, keypress form.search .search-query': 'searchLibrary',
 			'click button.remove-query': 'removeQueryClicked',
 			'click button.add-layer': 'addLayerButtonClicked'
 	    },
