@@ -44,7 +44,8 @@ app.configure(function() {
 	  	app.use(express.compress());
   	}
 	app.use(express.methodOverride());
- 	app.use(express.bodyParser());
+ 	app.use(express.urlencoded());
+	app.use(express.json());
 	app.use(express.cookieParser());
 	app.use(express.session({ secret: "keyboard cat" }));	
 	app.use(flash());
@@ -347,6 +348,11 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)/, function(req, res)
 	});
 });
 
+if (!process.env.NODE_ENV) {
+	console.error('NODE_ENV is not defined');
+} else {
+	console.info('Environment:', process.env.NODE_ENV);
+}
 
 // Connect to DB, load templates and start listening
 
@@ -355,7 +361,6 @@ if (!config.BASE_URL) {
 } else {
 	console.info('Base URL:', config.BASE_URL);
 }
-console.info('Environment:', process.env.NODE_ENV);
 
 utils.connectDB(function() {
 	utils.loadFiles(
