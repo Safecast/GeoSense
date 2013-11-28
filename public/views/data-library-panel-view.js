@@ -32,6 +32,7 @@ define([
 			this.on('panel:show', function() {
 				if (!self.searchParams.q || self.searchParams.q == '') {
 		    		self.removeSubViews('');
+					self.$('.no-objects').addClass('hidden');
 				}
 			});
 			this.on('panel:shown', function() {
