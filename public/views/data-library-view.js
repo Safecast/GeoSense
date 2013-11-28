@@ -79,6 +79,8 @@ define([
 				self.searchLibrary();
 			});
 
+			this.$('.no-objects').addClass('hidden');
+
 	        return this;
 	    },
 
@@ -87,6 +89,7 @@ define([
 	    	var query = this.$('.search-query').val();
 	    	this.resetPageParams();
 	    	this.searchParams.q = query;
+			self.$('.no-objects').addClass('hidden');
 	    	if (query != '') {
 	    		this.$removeQueryParent.append(this.$removeQueryButton);
 	    	} else {
@@ -171,7 +174,6 @@ define([
 					self.isLoading = false;
 					self.hideSpinner();
 
-					self.$('.no-objects').addClass('hidden');
 					if (!collection.length) {
 						self.$('.no-objects.'+params.t)
 							.removeClass('hidden').hide().fadeIn('fast');

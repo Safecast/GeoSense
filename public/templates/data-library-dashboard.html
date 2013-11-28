@@ -1,3 +1,13 @@
+<div class="col-lg-6">
+
+<ul class="type-toggles nav nav-pills nav-pills-muted nav-justified">
+  <li class="active" data-type="public"><a class="btn-sm" href="#public-collections" data-toggle="pill">Public collections</a></li>
+  <li data-type="user"><a class="btn-sm" href="#user-collections" data-toggle="pill">My collections</a></li>
+</ul>
+
+</div>
+<div class="col-lg-6">
+
 <form class="search">
 	<div class="input-group">
   		<input type="text" class="form-control search-query" placeholder="Search data library">
@@ -12,10 +22,7 @@
     </div>
 </form>
 
-<ul class="type-toggles nav nav-pills nav-pills-muted nav-justified">
-  <li class="active" data-type="public"><a class="btn-sm" href="#public-collections" data-toggle="pill">Public collections</a></li>
-  <li data-type="user"><a class="btn-sm" href="#user-collections" data-toggle="pill">My collections</a></li>
-</ul>
+</div>
 
 <div class="active" id="public-collections">
   <div class="hidden alert alert-info no-objects public">  
@@ -29,6 +36,6 @@
 </div>
 
 <div class="panel-scrollable-container">
-	<div class="panel-scrollable-content collections-list">
+	<div class="container panel-scrollable-content collections-list">
 	</div>
 </div>
