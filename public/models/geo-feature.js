@@ -67,7 +67,7 @@ define([
             var hw = size[0] / 2.0,
                 hh = size[1] / 2.0,
                 c = this.getCenter(),
-                e = c[0] - hw, s = c[1] - hh, w = c[0] + hw, n = c[1] + hh;
+                w = c[0] - hw, s = c[1] - hh, e = c[0] + hw, n = c[1] + hh;
             return [ [w,s], [e,s], [e,n], [w,n] ];
         },
 

@@ -11,6 +11,8 @@ var config = {
 
 	CLOCK_PROCESS_RUN_TIME: '0 10 * * * *',
 
+	EXPENSIVE_OPERATION_CACHE_TIME: 60 * 60000,
+
 	// since dev server restarts frequently and sessions are lost, circumvent 
 	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,

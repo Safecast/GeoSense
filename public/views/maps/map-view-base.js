@@ -16,6 +16,13 @@ define([
             this.layers = [];
             this.createTimeoutQueue('visibleArea', 250);
             this.featureLayers = {};
+
+            this.on('feature:selected', function(mapLayer, model, feature) {
+                mapLayer.trigger('feature:selected', mapLayer, model, feature);
+            });
+            this.on('feature:unselected', function(mapLayer, model, feature) {
+                mapLayer.trigger('feature:unselected', mapLayer, model, feature);
+            });
         },
 
         renderMap: function(viewBase, viewStyle) 

@@ -24,7 +24,7 @@ define([
 			this.viewHeight = undefined;
 			this.graphRendered = false;
 			if (this.collection) {
-				this.listenTo(this.collection, 'sync', function() {
+				this.listenTo(this.collection, 'reset', function() {
 					self.redrawGraphIfVisible();
 				});
 			}
@@ -141,9 +141,14 @@ define([
 			return this;
 		},
 
+		graphVisible: function()
+		{
+			return this.$el.is(':visible');
+		},
+
 	    redrawGraphIfVisible: function()
 	    {
-			if (this.$el.is(':visible')) {
+			if (this.graphVisible()) {
 				this.redrawGraph();
 			}
 			return this;
@@ -151,10 +156,11 @@ define([
 
 		show: function() 
 		{
-			if (!this.$el.is(':visible')) {
-				this.redrawGraph();
+			if (!this.collection.visibleMapAreaFetched) {
+				this.collection.fetch();
 			}
 			this.$el.show();
+			this.redrawGraph();
 		},
 
 		hide: function() {

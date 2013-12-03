@@ -425,7 +425,12 @@ define([
 
         featureSelected: function(feature) 
         {
-            this.trigger('feature:select', feature.attributes.model, feature);
+            this.trigger('feature:selected', feature.attributes.model.collection.mapLayer, feature.attributes.model, feature);
+        },
+
+        featureUnselected: function(feature) 
+        {
+            this.trigger('feature:unselected', feature.attributes.model.collection.mapLayer, feature.attributes.model, feature);
         },
 
         setPopupForFeature: function(feature, el)
@@ -456,11 +461,6 @@ define([
                 feature.popup = null;
                 this.selectControl.unselect(feature);
             }
-        },
-
-        featureUnselected: function(feature) 
-        {
-            this.trigger('feature:unselect', feature.attributes.model, feature);
         },
 
         updateViewBase: function(viewBase, viewStyle)

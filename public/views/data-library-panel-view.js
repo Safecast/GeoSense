@@ -23,6 +23,15 @@ define([
 	    initialize: function(options) {
 	    	DataLibraryPanelView.__super__.initialize.apply(this, arguments);
 		    this.template = _.template(templateHtml);
+		    this.listenTo(app, 'featureCollection:added', this.refresh);
+	    },
+
+	    refresh: function()
+	    {
+			if (!this.searchParams.q || this.searchParams.q == '') {
+		    	this.resetPageParams();
+				this.fetchResults(this.searchParams);
+			}
 	    },
 
 	    render: function() 
@@ -37,10 +46,7 @@ define([
 			});
 			this.on('panel:shown', function() {
 				setTimeout(function() {
-					if (!self.searchParams.q || self.searchParams.q == '') {
-				    	self.resetPageParams();
-						self.fetchResults(self.searchParams);
-					}
+					self.refresh();
 				}, 250); // wait for slide
 				self.$('.search-query').focus();
 			});

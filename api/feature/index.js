@@ -188,6 +188,7 @@ var FeatureAPI = function(app)
 					bbox = urlObj.query.b,
 					timeGrid = urlObj.query.t,
 					strDate = urlObj.query.d,
+					returnOriginal = urlObj.query.o && Number(urlObj.query.o) != 0,
 					date,
 					features = [],
 					datetimeAttr = mapLayer.layerOptions && mapLayer.layerOptions.attrMap ? 
@@ -202,9 +203,10 @@ var FeatureAPI = function(app)
 						Object.keys(config.GRID_SIZES).length, zoom + adjustZoom));
 				}
 
-                var tileSize = config.GRID_SIZES[zoom],
+                var enableTiles = !returnOriginal && featureCollection.tile && featureCollection.tile.length,
+                	tileSize = enableTiles ? config.GRID_SIZES[zoom] : 0,
 					mapReduceOpts = {
-						tileSize: (featureCollection.tile && featureCollection.tile.length ? tileSize : undefined)
+						tileSize: (enableTiles ? tileSize : undefined)
 					},
 					extraAttrs = { 
 						properties: {
@@ -224,7 +226,7 @@ var FeatureAPI = function(app)
                 	FeatureModel = featureCollection.getFeatureModel(),
 			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel,
 			        findQueue;
-                
+
                 if (bbox && bbox.length == 4) {
                 	bbox = bbox.map(function(c, i) {
                         return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
@@ -247,11 +249,11 @@ var FeatureAPI = function(app)
 	                				coordinates.haversineDistance(center, [bbox[0], bbox[1]]))
 	                		];*/
 	                	} else {
-	                		console.info('Finding with $geoIntersects');
 	                		var geometry = coordinates.polygonFromBbox(bbox);
 		                	geometry.coordinates[0] = geometry.coordinates[0].map(function(c) {
 		                		return coordinates.coordinates2d(c);
 		                	});
+	                		console.info('Finding with $geoIntersects', JSON.stringify(geometry));
 	                		findQueue = [
 	                			FindFeatureModel.geoIntersects(geometry)
 	                		];
@@ -334,7 +336,9 @@ var FeatureAPI = function(app)
 						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, true)) return;
 							console.success('Found features:', docs.length);
-							features = features.concat(docs);
+							docs.forEach(function(doc) {
+								features.push(doc);
+							});
 							if (queryOptions.limit) {
 								queryOptions.limit -= docs.length;
 							}
@@ -342,7 +346,12 @@ var FeatureAPI = function(app)
 						});
                 };
 
-				FeatureModel.count(filterQuery, function(err, count) {
+                var cacheKey = FeatureModel.collection.name + JSON.stringify(filterQuery),
+                	countOp = function(callback) {
+                		FeatureModel.count(filterQuery, callback);
+                	};
+
+				utils.cachedOp(countOp, cacheKey, config.EXPENSIVE_OPERATION_CACHE_TIME, function(err, count) {
 					if (isMapReduced) {
 						// adapt filterQuery to MapReduce collection
 						Object.keys(filterQuery).forEach(function(key) {
@@ -364,5 +373,6 @@ var FeatureAPI = function(app)
 
     }
 };
+
 
 module.exports = FeatureAPI;

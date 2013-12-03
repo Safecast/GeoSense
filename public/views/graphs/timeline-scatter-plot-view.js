@@ -22,6 +22,25 @@ define([
 	    		options = _.extend({renderAxes: true}, options);
 	    	TimelineScatterPlotView.__super__.initialize.call(this, options);
 	    	this.template = _.template(templateHtml);
+
+	    	this.model.on('feature:selected', function(mapLayer, model) {
+                var collection = self.collection,
+                	box = model.getBox(),
+                    bounds = [box[0], box[2]];
+                collection.setVisibleMapArea({bounds: bounds});
+                collection.urlParams.original = true;
+                /*collection.once('reset', function() {
+                    console.log('fetched ', collection.length);
+                });*/
+                if (self.graphVisible()) {
+	                collection.fetch();
+                }
+	    	});
+
+	    	this.model.on('feature:unselected', function(mapLayer, model) {
+                var collection = self.collection;
+                collection.resetFrom(mapLayer.mapFeatures);
+	    	});
 	    },
 
 		renderGraph: function()

@@ -18,6 +18,8 @@ var application_root = __dirname,
 var templates;
 var app = express();
 
+asdasdasdasda = 1;
+
 var clientErrorHandler = function(err, req, res, next) 
 {
     console.error('errorHandler', err);

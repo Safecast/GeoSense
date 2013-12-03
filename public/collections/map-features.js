@@ -74,25 +74,27 @@ define([
 				if (this.urlParams.zoom != undefined) {
 					queryParams.z = this.urlParams.zoom;
 				}
+				if (this.urlParams.original) {
+					queryParams.o = this.urlParams.original = 1; 
+				}
 			};
 
 			return this.mapLayer.url() + '/features' 
 				+ '?' + genQueryString(_.extend(this.queryParams, queryParams));
 		},
 
+		resetFrom: function(collection)
+		{
+			this.reset(collection.models);
+			this.visibleMapAreaFetched = collection.visibleMapAreaFetched;
+            this.urlParams = _.clone(collection.urlParams);
+		},
+
 		setVisibleMapArea: function(visibleMapArea) 
 		{
-			var bounds = visibleMapArea.bounds,
-				prevUrlParams = _.clone(this.urlParams);
-			
-			this.urlParams = {
-				bounds: bounds,
-				zoom: visibleMapArea.zoom,
-				centerX: visibleMapArea.center[0],
-				centerY: visibleMapArea.center[1],
-				radius: visibleMapArea.radius,
-				query: ''
-			};
+			var prevUrlParams = _.clone(this.urlParams);
+			this.urlParams.bounds = visibleMapArea.bounds;
+			this.urlParams.zoom = visibleMapArea.zoom;
 			this.visibleMapAreaFetched = _.isEqual(prevUrlParams, this.urlParams);
 		},
 
