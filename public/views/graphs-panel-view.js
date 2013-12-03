@@ -81,6 +81,7 @@ define([
 			this.graphViews[key] = view;
 			var toggle = this.$graphToggleTemplate.clone()
 				.attr('data-value', key)
+				.data('view', view)
 				.text(title || key);
 			this.$graphToggles.append(toggle)
 			this.$('.graph-container').append(view.$el);
@@ -99,21 +100,28 @@ define([
 
 		toggleGraphView: function(key)
 		{
+			var self = this;
 			if (key) {
 				this.graphView = this.graphViews[key];
 			}
 			$('button', this.$graphToggles).each(function() {
-				$(this).toggleClass('active', $(this).attr('data-value') == key);
+				$(this).toggleClass('active', $(this).data('view') == self.graphView);
 			});
 			if (this.$el.is(':visible')) {
 				_.each(this.graphViews, function(view, viewKey) {
-					if (viewKey == key) {
+					if (view == self.graphView) {
 						view.show();
 					} else {
 						view.hide();
 					}
 				});
 			}
+		},
+
+		show: function()
+		{
+			GraphsPanelView.__super__.show.apply(this, arguments);
+			this.toggleGraphView();			
 		}
 
 	});

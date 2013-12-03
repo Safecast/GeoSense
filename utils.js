@@ -490,3 +490,20 @@ exports.errorToFlash = function(req, err)
         req.flash('error', 'Error creating user account.');
     }
 };
+
+var opCache = {};
+
+exports.cachedOp = function(op, key, time, callback) 
+{
+    var t = Date.now(),
+        cached = opCache[key];
+
+    if (cached && cached[0] >= t - time) {
+        return callback.apply(null, cached[1]);
+    }
+
+    op(function() {
+        opCache[key] = [t, arguments];
+        callback.apply(null, arguments);
+    });
+};

@@ -105,13 +105,24 @@ define([
             }
         },
 
+        createCollection: function(Cls)
+        {
+            return new Cls([], {mapLayer: this});
+        },
+
         initCollections: function()
         {
             var self = this;
             if (this.attributes.featureCollection) {
-                this.mapFeatures = new MapFeatures([], {mapLayer: this});
+                this.mapFeatures = this.createCollection(MapFeatures);
                 if (this.getOption('histogram') && this.isNumeric()) {
-                    this.histogram = new Histogram([], {mapLayer: this});
+                    this.histogram = this.createCollection(Histogram);
+                }
+                if (this.isTimeBased()) {
+                    this.timeline = this.createCollection(MapFeatures);
+                    this.listenTo(this.mapFeatures, 'reset add remove', function() {
+                        self.timeline.resetFrom(self.mapFeatures);
+                    });
                 }
                 this.featureCollection = new GeoFeatureCollection(this.attributes.featureCollection);
                 this.on('sync', function() {

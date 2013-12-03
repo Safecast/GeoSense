@@ -264,8 +264,6 @@ define([
                     self.mapView = new MapView();
 
                     self.listenTo(self.mapView, 'view:areachanged', self.visibleMapAreaChanged);
-                    self.listenTo(self.mapView, 'feature:select', self.featureSelect);
-                    self.listenTo(self.mapView, 'feature:unselect', self.featureUnselect);
                     self.listenTo(self.mapView, 'view:ready', self.mapViewReady);
                     self.listenTo(self.mapView, 'view:optionschanged', self.viewOptionsChanged);
 
@@ -360,6 +358,7 @@ define([
                         // trigger change event without poll: true for views that are 
                         // only doing limited updates during polling
                         model.trigger('change', model, {complete: true});
+                        self.trigger('featureCollection:added');
                         return;
                     }
                     // otherwise, retry in a bit
@@ -385,13 +384,16 @@ define([
                     model.mapFeatures.setVisibleMapArea(this.mapView.getVisibleMapArea());
                 }
 
+                this.listenTo(model, 'feature:selected', this.featureSelected);
+                this.listenTo(model, 'feature:unselected', this.featureUnselected);
+
                 if (model.hasGraphs()) {
                     var graphsPanelView = new GraphsPanelView(
                         {model: model, collection: model.mapFeatures}).render();
-                    if (model.isTimeBased()) {
+                    if (model.timeline) {
                         graphsPanelView.addGraphView('timeline', 
                             new TimelineScatterPlotView(
-                                {model: model, collection: model.mapFeatures}).render(), 
+                                {model: model, collection: model.timeline}).render(), 
                             __('Timeline'));
                     }
                     if (model.histogram) {
@@ -717,7 +719,7 @@ define([
                 }
             },
 
-            featureSelect: function(model, mapFeature)    
+            featureSelected: function(mapLayer, model, mapFeature)    
             {
                 var self = this;
                 if (!SHOW_DETAIL_DATA_ON_MAP) {
@@ -744,7 +746,7 @@ define([
                 }
             },
 
-            featureUnselect: function(model, mapFeature)
+            featureUnselected: function(mapLayer, model, mapFeature)
             {
                 if (this.dataDetailView) {
                     this.dataDetailView.hide();
