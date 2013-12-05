@@ -41,3 +41,5 @@ config-prod.js
 prod-scripts
 tmp/*
 TODO.txt
+
+.dropbox
