@@ -12,6 +12,7 @@ define([
 	var DataLibraryDashboardView = DataLibraryView.extend({
 
 		className: 'layers-panel data-library',
+	  	scrollableContainer: window,
 
 	    initialize: function(options) {
 	    	DataLibraryDashboardView.__super__.initialize.apply(this, arguments);

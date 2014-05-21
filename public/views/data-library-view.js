@@ -26,6 +26,7 @@ define([
 	    },
 
 	  	subViewContainer: '.collections-list',
+	  	scrollableContainer: '.panel-scrollable-container',
 	    prevQuery: '',
 	    dataCollectionsFetched: false,
 
@@ -62,7 +63,7 @@ define([
 				//self.searchLibrary();
 			});
 
-			this.initScrollable(this.$(this.subViewContainer).parent(),
+			this.initScrollable(this.scrollableContainer,
 				this.$(this.subViewContainer), 30);
 
 			this.initSpinner(this.$('.state-indicator'));
