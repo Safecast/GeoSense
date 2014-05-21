@@ -135,7 +135,7 @@ var FeatureAPI = function(app)
 					filterQuery.createdBy = req.user;
 					break;
 				case 'public':
-					filterQuery.sharing = config.SharingType.WORLD;
+					permissions.queryPublic(filterQuery);
 					break;
 			}
 

@@ -36,11 +36,21 @@ var sortByPosition = function(arr)
 var prepareMapResult = function(req, map) 
 {
 	var m = {
-		admin: permissions.canAdminMap(req, map)
-	};
-	var obj = map.toJSON();
+			admin: permissions.canAdminMap(req, map)
+		},
+		obj = map.toJSON(),
+		hiddenFields = [];
+
+	if (permissions.isPublic(map)) {
+		// secretSlug must stay undisclosed for public maps, since they might go 
+		// secret some day. For public maps, the secretSlug is not required on 
+		// the frontend, neither for owners nor for users.
+		hiddenFields.push('secretSlug');
+	}
+
 	for (var k in obj) {
-		if (m.admin || (k != 'email')) {
+		if (m.admin || (hiddenFields.indexOf(k) == -1)) {
+			console.log(k);
 			m[k] = obj[k];
 		}
 
