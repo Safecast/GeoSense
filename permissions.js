@@ -84,11 +84,22 @@ var canAdminModel = function (req, doc)
     return res;
 };
 
+var isPublic = function(obj) 
+{
+    return obj.sharing == config.SharingType.WORLD;
+}
+
+var queryPublic = function(query) 
+{
+    query.sharing = config.SharingType.WORLD;
+    return query;
+}
+
 var canViewMap = function (req, map) 
 {
     var userIsOwner = sameUser(req.user, map.createdBy);
     return (map.active || userIsOwner) &&
-        (map.sharing == config.SharingType.WORLD 
+        (isPublic(map) 
         || userIsOwner
         || (req.params && req.params.secretSlug != undefined 
             && req.params.secretSlug == map.secretSlug)
@@ -98,7 +109,7 @@ var canViewMap = function (req, map)
 var canViewFeatureCollection = function (req, map, featureCollection) 
 {
     return canViewMap(req, map)
-        && (featureCollection.sharing == config.SharingType.WORLD
+        && (isPublic(featureCollection)
         || sameUser(map.createdBy, featureCollection.createdBy)
         || canAdminModel(req, featureCollection));
 };
@@ -147,6 +158,8 @@ module.exports = {
     canViewFeatureCollection: canViewFeatureCollection,
     canCreateMap: canCreateMap,
     canImportData: canImportData,
+    isPublic: isPublic,
+    queryPublic: queryPublic,
     requireLogin: requireLogin,
     sameUser: sameUser,
     allowSessionAdmin: allowSessionAdmin,

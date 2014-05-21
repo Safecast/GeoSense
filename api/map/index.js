@@ -29,7 +29,7 @@ var MapAPI = function(app)
 			switch (req.params[0]) {
 				case '/latest':
 					query.active = true;
-					query.sharing = config.SharingType.WORLD;
+					permissions.queryPublic(query);
 					options.sort = {'createdAt': -1};
 					options.limit = 20;		
 					break;
@@ -38,7 +38,7 @@ var MapAPI = function(app)
 						query.featured = {$gt: 0};
 					}
 					query.active = true;
-					query.sharing = config.SharingType.WORLD;
+					permissions.queryPublic(query);
 					options.sort = {'featured': -1, 'createdAt': -1};
 					options.limit = 10;		
 					break;
