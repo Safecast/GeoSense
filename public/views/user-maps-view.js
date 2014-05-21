@@ -80,7 +80,7 @@ define([
 						this.$('.is-private').show();
 						popoverTitle = __('This map is private.');
 						popoverContent = 
-							'<p class="micro">' + __('You are the only one who can edit it, but people with the secret link can view it.') + '</p>'
+							'<p class="micro">' + __('You are the only one who can edit it, but it will be visible to people who have the <strong>secret link</strong>.') + '</p>'
 							+__('<a href="#" class="btn btn-warning btn-sm sharing-toggle" data-value="' + SharingType.WORLD +'"><span class="glyphicon glyphicon-i"></span> Allow everybody to view this map</a>')
 						break;
 					case SharingType.WORLD:
@@ -88,7 +88,7 @@ define([
 						this.$('.is-public').show();
 						popoverTitle = __('This map is public.');
 						popoverContent = 
-							'<p class="micro">' + __('You are the only one who can edit it, but everyone can view it.') + '</p>'
+							'<p class="micro">' + __('You are the only one who can edit it, but it will be <strong>publicly visible</strong> on the web.') + '</p>'
 							+__('<a href="#" class="btn btn-danger btn-sm sharing-toggle make-private" data-value="' + SharingType.PRIVATE +'""><span class="glyphicon glyphicon-lock"></span> Make this map private</a>')
 						break;
 				}

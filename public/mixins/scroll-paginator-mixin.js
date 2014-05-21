@@ -14,9 +14,11 @@ define([
 		    this.searchParams = {p: 0};
 		    this.resultHeight = resultHeight || 50;
 
-	    	this.$scrollable = $(scrollable);
-	    	this.$scrollContent = $(scrollContent);
-			this.$scrollable.on('scroll', function(evt) {
+	    	this.$scrollable = _.isString(scrollable) ? this.$(scrollable) : $(scrollable);
+	    	this.$scrollContent = _.isString(scrollContent) ? this.$(scrollContent) : $(scrollContent);
+
+			this.$scrollable.on('scroll resize', function(evt) {
+				console.log('scroll');
 			    clearTimeout($.data(this, 'scrollTimer'));
 				$.data(this, 'scrollTimer', setTimeout(function() {
 					// detect when user hasn't scrolled in 250ms, then
@@ -25,10 +27,19 @@ define([
 			});
 	    },
 
+	    scrollableHeight: function() {
+	    	var availableHeight = this.$scrollable.height();
+	    	if (!this.$scrollable.offset()) {
+	    		availableHeight -= this.$scrollContent.offset().top;
+	    	}
+	    	console.log('availableHeight', availableHeight);
+	    	return availableHeight;
+	    },
+
 	    detectPageLimit: function()
 	    {
 	    	// return number of items as a multiple of 10
-			return Math.ceil(this.$scrollable.height() / this.resultHeight / 10)
+			return Math.max(1, Math.ceil(this.scrollableHeight() / this.resultHeight / 10))
 				* 10;
 	    },
 
@@ -43,7 +54,8 @@ define([
 	    updateAfterScrolled: function(evt)
 	    {
 	    	var delta = this.$scrollable.scrollTop() 
-	    		+ this.$scrollable.height() - this.$scrollContent.height();
+	    		+ this.scrollableHeight() - this.$scrollContent.height();
+	    	console.log(delta);
 	    	if (delta > -50) {
 	    		if (!this.loadNextPage) {
 			    	console.error('View needs to implement loadNextPage()');
