@@ -50,7 +50,6 @@ var prepareMapResult = function(req, map)
 
 	for (var k in obj) {
 		if (m.admin || (hiddenFields.indexOf(k) == -1)) {
-			console.log(k);
 			m[k] = obj[k];
 		}
 

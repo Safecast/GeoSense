@@ -18,7 +18,6 @@ define([
 	    	this.$scrollContent = _.isString(scrollContent) ? this.$(scrollContent) : $(scrollContent);
 
 			this.$scrollable.on('scroll resize', function(evt) {
-				console.log('scroll');
 			    clearTimeout($.data(this, 'scrollTimer'));
 				$.data(this, 'scrollTimer', setTimeout(function() {
 					// detect when user hasn't scrolled in 250ms, then
@@ -32,7 +31,6 @@ define([
 	    	if (!this.$scrollable.offset()) {
 	    		availableHeight -= this.$scrollContent.offset().top;
 	    	}
-	    	console.log('availableHeight', availableHeight);
 	    	return availableHeight;
 	    },
 
@@ -55,7 +53,6 @@ define([
 	    {
 	    	var delta = this.$scrollable.scrollTop() 
 	    		+ this.scrollableHeight() - this.$scrollContent.height();
-	    	console.log(delta);
 	    	if (delta > -50) {
 	    		if (!this.loadNextPage) {
 			    	console.error('View needs to implement loadNextPage()');
