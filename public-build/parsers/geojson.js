@@ -1,1 +1,0 @@
-define(["jquery","underscore","backbone"],function(e,t,n){var r=function(e){this.collection=e};return r.prototype.parse=function(e,t){return{features:this.collection._super("parse",[e.features,t]),properties:e.properties}},r});

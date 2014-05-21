@@ -1,1 +1,0 @@
-function init(){var e=new OpenLayers.Map({div:"map",projection:new OpenLayers.Projection("EPSG:900913"),displayProjection:new OpenLayers.Projection("EPSG:4326"),layers:[new OpenLayers.Layer.OSM]});e.getCenter()||e.zoomToMaxExtent(),e.addControl(new OpenLayers.Control.Permalink({anchor:!0}))};

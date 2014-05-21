@@ -102,7 +102,7 @@ define([
                                 color = l.colorAt(normCount);
                                 break;
                             default:
-                            case 'val.avg':
+                            case '$numeric.avg':
                                 color = l.colorAt(!isNaN(normVal) ? normVal : 0);
                                 break;
                         }

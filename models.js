@@ -112,7 +112,7 @@ var LayerOptions = mongoose.model('LayerOptions', new mongoose.Schema({
     strokeLinecap: {type: String},
     attrMap: {
         featureSize: {type: String, enum: ['', '$numeric.avg', '$numeric.max', '$numeric.min', 'count']},
-        featureColor: {type: String},
+        featureColor: {type: String, enum: ['', '$numeric.avg', '$nominal']},
         numeric: {type: String},
         datetime: {type: String},
         label: {type: String},

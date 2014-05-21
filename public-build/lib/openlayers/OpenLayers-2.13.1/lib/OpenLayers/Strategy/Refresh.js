@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Strategy.Refresh=OpenLayers.Class(OpenLayers.Strategy,{force:!1,interval:0,timer:null,activate:function(){var e=OpenLayers.Strategy.prototype.activate.call(this);return e&&(this.layer.visibility===!0&&this.start(),this.layer.events.on({visibilitychanged:this.reset,scope:this})),e},deactivate:function(){var e=OpenLayers.Strategy.prototype.deactivate.call(this);return e&&(this.stop(),this.layer.events.un({visibilitychanged:this.reset,scope:this})),e},reset:function(){this.layer.visibility===!0?this.start():this.stop()},start:function(){this.interval&&typeof this.interval=="number"&&this.interval>0&&(this.timer=window.setInterval(OpenLayers.Function.bind(this.refresh,this),this.interval))},refresh:function(){this.layer&&this.layer.refresh&&typeof this.layer.refresh=="function"&&this.layer.refresh({force:this.force})},stop:function(){this.timer!==null&&(window.clearInterval(this.timer),this.timer=null)},CLASS_NAME:"OpenLayers.Strategy.Refresh"});

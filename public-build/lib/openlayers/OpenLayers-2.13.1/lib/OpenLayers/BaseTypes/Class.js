@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Class=function(){var e=arguments.length,t=arguments[0],n=arguments[e-1],r=typeof n.initialize=="function"?n.initialize:function(){t.prototype.initialize.apply(this,arguments)};if(e>1){var i=[r,t].concat(Array.prototype.slice.call(arguments).slice(1,e-1),n);OpenLayers.inherit.apply(null,i)}else r.prototype=n;return r},OpenLayers.inherit=function(e,t){var n=function(){};n.prototype=t.prototype,e.prototype=new n;var r,i,s;for(r=2,i=arguments.length;r<i;r++)s=arguments[r],typeof s=="function"&&(s=s.prototype),OpenLayers.Util.extend(e.prototype,s)},OpenLayers.Util=OpenLayers.Util||{},OpenLayers.Util.extend=function(e,t){e=e||{};if(t){for(var n in t){var r=t[n];r!==undefined&&(e[n]=r)}var i=typeof window.Event=="function"&&t instanceof window.Event;!i&&t.hasOwnProperty&&t.hasOwnProperty("toString")&&(e.toString=t.toString)}return e};

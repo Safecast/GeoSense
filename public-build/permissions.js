@@ -1,1 +1,0 @@
-define([],function(){var e,t=function(){return e},n=function(t){e=t,app&&app.trigger(t?"user:login":"user:logout")},r=function(e,t){if(!e||!t)return!1;var n=e._id!=undefined?e._id:e,r=t._id!=undefined?t._id:t;return n.toString()==r.toString()},i=function(e){return r(t()||{},e.attributes.createdBy)};return{currentUser:t,sameUser:r,canAdminModel:i,setUser:n}});

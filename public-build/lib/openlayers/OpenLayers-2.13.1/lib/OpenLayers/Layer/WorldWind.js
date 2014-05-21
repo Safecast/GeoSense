@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Layer.WorldWind=OpenLayers.Class(OpenLayers.Layer.Grid,{DEFAULT_PARAMS:{},isBaseLayer:!0,lzd:null,zoomLevels:null,initialize:function(e,t,n,r,i,s){this.lzd=n,this.zoomLevels=r;var o=[];o.push(e,t,i,s),OpenLayers.Layer.Grid.prototype.initialize.apply(this,o),this.params=OpenLayers.Util.applyDefaults(this.params,this.DEFAULT_PARAMS)},getZoom:function(){var e=this.map.getZoom(),t=this.map.getMaxExtent();return e-=Math.log(this.maxResolution/(this.lzd/512))/Math.log(2),e},getURL:function(e){e=this.adjustBounds(e);var t=this.getZoom(),n=this.map.getMaxExtent(),r=this.lzd/Math.pow(2,this.getZoom()),i=Math.floor((e.left-n.left)/r),s=Math.floor((e.bottom-n.bottom)/r);return this.map.getResolution()<=this.lzd/512&&this.getZoom()<=this.zoomLevels?this.getFullRequestString({L:t,X:i,Y:s}):OpenLayers.Util.getImageLocation("blank.gif")},CLASS_NAME:"OpenLayers.Layer.WorldWind"});

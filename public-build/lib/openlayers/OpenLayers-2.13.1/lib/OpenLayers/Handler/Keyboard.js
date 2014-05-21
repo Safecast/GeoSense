@@ -1,6 +1,0 @@
-/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
- * full list of contributors). Published under the 2-clause BSD license.
- * See license.txt in the OpenLayers distribution or repository for the
- * full text of the license. */
-
-OpenLayers.Handler.Keyboard=OpenLayers.Class(OpenLayers.Handler,{KEY_EVENTS:["keydown","keyup"],eventListener:null,observeElement:null,initialize:function(e,t,n){OpenLayers.Handler.prototype.initialize.apply(this,arguments),this.eventListener=OpenLayers.Function.bindAsEventListener(this.handleKeyEvent,this)},destroy:function(){this.deactivate(),this.eventListener=null,OpenLayers.Handler.prototype.destroy.apply(this,arguments)},activate:function(){if(OpenLayers.Handler.prototype.activate.apply(this,arguments)){this.observeElement=this.observeElement||document;for(var e=0,t=this.KEY_EVENTS.length;e<t;e++)OpenLayers.Event.observe(this.observeElement,this.KEY_EVENTS[e],this.eventListener);return!0}return!1},deactivate:function(){var e=!1;if(OpenLayers.Handler.prototype.deactivate.apply(this,arguments)){for(var t=0,n=this.KEY_EVENTS.length;t<n;t++)OpenLayers.Event.stopObserving(this.observeElement,this.KEY_EVENTS[t],this.eventListener);e=!0}return e},handleKeyEvent:function(e){this.checkModifiers(e)&&this.callback(e.type,[e])},CLASS_NAME:"OpenLayers.Handler.Keyboard"});
