@@ -507,3 +507,9 @@ exports.cachedOp = function(op, key, time, callback)
         callback.apply(null, arguments);
     });
 };
+
+// Trailing-slash-forgiving helper to construct full URLs used for redirects 
+// (which should contain full domain and path in case app is not running under /)
+exports.fullUrl = function(uri) {
+    return config.BASE_URL.replace(/\/$/, '') + '/' + (uri ? uri.replace(/^\//, '') : '');
+};

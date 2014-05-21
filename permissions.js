@@ -1,6 +1,7 @@
 var config = require("./config"),
     console = require('./ext-console'),
-    models = require('./models');
+    models = require('./models'),
+    utils = require('./utils');
 
 var canAdminMap = function (req, map) 
 {
@@ -126,13 +127,14 @@ var canImportData = function (req)
 
 var requireLogin = function (req, res, next) 
 {
+    console.log('--requireLogin');
     if (req.isAuthenticated()) {
         next();
     } else {
         if (req.xhr) {
             res.redirect(config.BASE_URL + 'login', 403);
         } else {
-            var nextUrl = config.BASE_URL + (req.method != 'POST' || !req.headers.referer ? 
+            var nextUrl = utils.fullUrl(req.method != 'POST' || !req.headers.referer ? 
                 req.url : req.headers.referer);
             // sending a 403 will result in browser displaying the "Forbidden. Redirecting to /login" message
             res.redirect(config.BASE_URL + 'login' + (nextUrl ? '?next=' + nextUrl : ''));
