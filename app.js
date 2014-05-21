@@ -138,7 +138,7 @@ var adminMap = function(req, res, err, map) {
     } else if (!map) {
         return serveError(req, res, 404);
     } else if (!permissions.canAdminMap(req, map)) {
-        return res.redirect(config.BASE_URL + 'login?next=' + req.url);
+        return res.redirect(config.BASE_URL + 'login?next=' + utils.fullUrl(req.url));
     }
     serveMap(req, res, map);
 };
@@ -192,8 +192,7 @@ var loginCallback = function(req, res, redir)
 };
 
 app.post('/login', function(req, res, next) {
-    var redir = req.body.next && req.body.next ? 
-        req.body.next : undefined;
+    var redir = req.body.next || undefined;
     passport.authenticate('local', {
         badRequestMessage: 'Please enter your credentials.'
     }, function(err, user, info) {
