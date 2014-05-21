@@ -25,7 +25,7 @@
                 <input class="model-input" name="layerOptions.featureType" type="hidden" />
                 <div class="features">
                     <div class="form-group">
-                        <label>Feature Type</label>
+                        <label data-for="">Feature Type</label>
                         <div class="btn-group model-input" data-name="layerOptions.featureType" data-toggle="buttons-radio">
                             <button class="btn btn-default feature-type points" value="P"><i class="icon icon-feature-type has-tooltip" data-original-title="Points" data-placement="bottom"></i></button>
                             <button class="btn btn-default feature-type square-tiles" value="ST"><i class="icon icon-feature-type has-tooltip" data-original-title="Tiles" data-placement="bottom"></i></button>
@@ -35,7 +35,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12">
-                            <label for="">Opacity</label>  
+                            <label data-for="">Opacity</label>  
                             <div class="row">
                                 <div class="col-md-3">
                                     <input class="form-control input-sm number model-input" name="layerOptions.opacity" type="text" placeholder="auto" />
@@ -56,7 +56,7 @@
                     <div class="feature-settings B clearfix">
                         <div class="form-group row">
                             <div class="col-md-12">
-                                <label for="">Minimum feature size</label>  
+                                <label data-for="">Minimum feature size</label>  
                                 <div class="row">
                                     <div class="col-md-3">
                                         <input class="form-control input-sm number model-input" name="layerOptions.minFeatureSize" type="text" placeholder="auto" />
@@ -71,7 +71,7 @@
                     <div class="feature-settings B P clearfix">
                         <div class="form-group row">
                             <div class="col-md-12">
-                                <label for="">Feature size</label>  
+                                <label data-for="">Feature size</label>  
                                 <div class="row">
                                     <div class="col-md-3">
                                         <input class="form-control input-sm number model-input" name="layerOptions.featureSize" type="text" placeholder="auto" />
@@ -85,7 +85,7 @@
                     </div>
                     <div class="feature-settings B">
                         <div class="form-group">
-                            <label>Size relative to</label>
+                            <label data-for="">Size relative to</label>
                             <select class="form-control model-input input-sm" name="layerOptions.attrMap.featureSize">
                                 <option value="count">sample size</option>
                                 <option value="$numeric.avg">average value</option>
@@ -97,7 +97,7 @@
                 <div class="advanced">
                     <div class="divider"></div>
                     <div class="form-group">
-                        <label>Renderer</label>
+                        <label data-for="">Renderer</label>
                         <select class="form-control model-input input-sm" name="layerOptions.htmlRenderer">
                             <option value="SVG">SVG (recommended)</option>
                             <option value="Canvas">Canvas</option>
@@ -123,9 +123,9 @@
                 <div class="color-scheme">
                     <table class="color-palette form-group">
                         <thead>
-                            <th><label>Color</label></th>
-                            <th><label>Position <a href="#" class="hint-toggle half-opacity" data-target="position"><i class="glyphicon glyphicon-question-sign"></i></a></label></th>
-                            <th class="advanced"><label>Interpolation</label></th>
+                            <th><label data-for="">Color</label></th>
+                            <th><label data-for="">Position <a href="#" class="hint-toggle half-opacity" data-target="position"><i class="glyphicon glyphicon-question-sign"></i></a></label></th>
+                            <th class="advanced"><label data-for="">Interpolation</label></th>
                         </thead>
                         <tbody>
                             <tr class="element-template" data-id="">
@@ -178,9 +178,8 @@
                                 </label>
                             </div>
                             <div class="col-md-6 form-group">
-                                <label for="">Steps</label>  
-                                    <input class="form-control input-sm number" name="colorSchemeSteps" type="text" value="5" />
-                                </span>
+                                <label data-for="">Steps</label>  
+                                <input class="form-control input-sm number" name="colorSchemeSteps" type="text" value="5" />
                             </div>
                         </div>
                         <div class="clearfix">
@@ -194,7 +193,7 @@
                 <div class="advanced">
                     <div class="divider"></div>
                     <div class="form-group">
-                        <label>Map color to</label>
+                        <label data-for="">Map color to</label>
                         <select class="form-control model-input input-sm" name="layerOptions.attrMap.featureColor">
                             <option value="">(default)</option>
                             <option value="count">sample size</option>
@@ -203,7 +202,7 @@
                     </div>
                     <div class="divider"></div>
                     <div class="form-group">
-                        <label>Label color</label>
+                        <label data-for="">Label color</label>
                         <div>
                             <input class="form-control color-picker model-input input-sm" name="layerOptions.colorLabelColor" type="text" placeholder="auto" />
                         </div>
@@ -214,14 +213,14 @@
 
             <fieldset class="tab-pane" id="layer-stroke">
                 <div class="form-group">
-                    <label>Stroke color</label>
+                    <label data-for="">Stroke color</label>
                     <div>
                         <input class="form-control color-picker model-input input-sm" name="layerOptions.strokeColor" type="text" placeholder="auto" />
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-md-12">
-                        <label for="">Stroke width</label>  
+                        <label data-for="">Stroke width</label>  
                         <div class="row">
                             <div class="col-md-3">
                                 <input class="form-control input-sm number model-input" name="layerOptions.strokeWidth" type="text" placeholder="auto" />
@@ -234,7 +233,7 @@
                 </div>
                 <div class="form-group row">
                     <div class="col-md-12">
-                        <label for="">Stroke opacity</label>  
+                        <label data-for="">Stroke opacity</label>  
                         <div class="row">
                             <div class="col-md-3">
                                 <input class="form-control input-sm number model-input" name="layerOptions.strokeOpacity" type="text" placeholder="auto" />
@@ -246,7 +245,7 @@
                     </div>
                 </div>
                 <div class="form-group advanced">
-                    <label>Line cap (requires SVG)</label>
+                    <label data-for="">Line cap (requires SVG)</label>
                     <select class="form-control model-input input-sm" name="layerOptions.strokeLinecap">
                         <option value="round">round</option>
                         <option value="square">square</option>
@@ -254,7 +253,7 @@
                     </select>
                 </div>
                 <div class="form-group advanced">
-                    <label>Dash style (requires SVG)</label>
+                    <label data-for="">Dash style (requires SVG)</label>
                     <select class="form-control model-input input-sm" name="layerOptions.strokeDashstyle">
                         <option value="solid">solid</option>
                         <option value="dot">dot</option>
@@ -268,29 +267,29 @@
 
             <fieldset class="tab-pane" id="layer-data">
                 <div class="form-group">
-                    <label>Use numeric values from</label>
+                    <label data-for="">Use numeric values from</label>
                     <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.numeric" data-type="Number">
                         <option value="">(pick a number field)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Use date/time values from</label>
+                    <label data-for="">Use date/time values from</label>
                     <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.datetime" data-type="Date">
                         <option value="">(pick a date field)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Date/time format <a href="#" class="hint-toggle half-opacity" data-target="datetimeFormat"><i class="glyphicon glyphicon-question-sign"></i></a></label>
+                    <label data-for="">Date/time format <a href="#" class="hint-toggle half-opacity" data-target="datetimeFormat"><i class="glyphicon glyphicon-question-sign"></i></a></label>
                     <input class="form-control model-input input-sm" name="layerOptions.datetimeFormat" type="text" placeholder="for instance: YYYY-MM-DD HH:mm" />
                 </div>
                 <div class="form-group">
-                    <label>Label features using</label>
+                    <label data-for="">Label features using</label>
                     <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.label" data-type="">
                         <option value="">(pick a field)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Group features by</label>
+                    <label data-for="">Group features by</label>
                     <select class="form-control model-input input-sm field-names" name="layerOptions.attrMap.group" data-type="">
                         <option value="">(pick a field)</option>
                     </select>
@@ -298,33 +297,27 @@
             </fieldset>
 
             <fieldset class="tab-pane" id="layer-info">
-                <!--<label>Visibility</label>-->
                 <div class="form-group">
                     <label class="checkbox">
                         <input class="model-input layer-toggle" name="layerOptions.enabled" type="checkbox" checked="checked"> This layer is switched on by default
                     </label>
-                    <!-- TODO:
-                    <label class="checkbox">
-                        <input class="model-input" name="layerOptions.public" type="checkbox" checked="checked"> This layer is public.
-                    </label>
-                    -->
                 </div>
                 <div class="row">
                     <div class="col-md-8">
                         <div class="form-group">
-                            <label for="title">Title</label> 
+                            <label data-for="">Title</label> 
                             <input class="form-control model-input" name="layerOptions.title" type="text" />
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="unit">Unit</label> 
+                            <label data-for="">Unit</label> 
                             <input class="form-control model-input" name="layerOptions.unit" type="text" />
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="description">Description</label> 
+                    <label data-for="">Description</label> 
                     <textarea class="form-control model-input" name="layerOptions.description" rows="4"></textarea>
                 </div>
                 <div class="form-group model-numeric">
