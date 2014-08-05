@@ -2,7 +2,7 @@ var	models = require('../models'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	config = require('../config'),
 	format = require('../api/import/formats/json'),
-	coordinates = require('../geogoose').coordinates,
+	coordinates = require('geogoose').coordinates,
 	assert = require('assert'),
 	mongoose = require('mongoose');
 

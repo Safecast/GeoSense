@@ -1,10 +1,10 @@
 // TODO: runImport should not handle req and res
 
 var config = require('../../config'),
-	models = require("../../models"),
-	coordinates = require("../../geogoose").coordinates,
-	permissions = require("../../permissions"),
-	utils = require("../../utils"),
+	models = require('../../models'),
+	coordinates = require('geogoose').coordinates,
+	permissions = require('../../permissions'),
+	utils = require('../../utils'),
 	findExtremes = require('../aggregate/mapreduce_abstraction/util').findExtremes,
 	errors = require('../../errors'),
 	BasicError = errors.BasicError,

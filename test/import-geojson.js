@@ -1,6 +1,6 @@
 var	models = require('../models'),
 	api = new require('../api')(),
-	coordinates = require('../geogoose/coordinates'),
+	coordinates = require('geogoose').coordinates,
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	config = require('../config'),
 	assert = require('assert'),

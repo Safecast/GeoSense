@@ -1,5 +1,5 @@
 var config = require('./config'),
-    geogoose = require('./geogoose'),
+    geogoose = require('geogoose'),
     console = require('./ext-console'),
     mongoose = require('mongoose'),
     mongooseTypes = require("mongoose-types"),
@@ -304,4 +304,3 @@ module.exports = {
     adHocModel: geogoose.util.adHocModel,
     cloneLayerOptionsDefaults: cloneLayerOptionsDefaults
 };
-

@@ -48,7 +48,7 @@ var setUserForSessionAdminModels = function (req, callback)
                 console.error(err);
             }
             if (!err && doc && !doc.createdBy) {
-                doc.createdBy = req.user;
+                doc.createdBy = req.user._id;
                 doc.save(function(err, doc) {
                     if (err) {
                         console.error(err);

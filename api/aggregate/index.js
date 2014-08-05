@@ -1,7 +1,7 @@
 // TODO: max parameter should take into account skipped records
 
-var	models = require("../../models.js"),
-	geogoose = require("../../geogoose"),
+var	models = require('../../models.js'),
+	geogoose = require('geogoose'),
 	Code = require('mongodb').Code,
 	mongoose = require('mongoose'),
 	config = require('../../config.js'),

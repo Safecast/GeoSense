@@ -1,6 +1,6 @@
 var	models = require('../models'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
-	coordinates = require('../geogoose/coordinates'),
+	coordinates = require('geogoose').coordinates,
 	config = require('../config'),
 	format = require('../api/import/formats/geojson'),
 	assert = require('assert'),

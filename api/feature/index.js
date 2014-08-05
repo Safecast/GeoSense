@@ -3,7 +3,7 @@ var config = require('../../config'),
 	permissions = require('../../permissions'),
 	utils = require('../../utils'),
 	apiUtil = require('../util'),
-	coordinates = require('../../geogoose/').coordinates,
+	coordinates = require('geogoose').coordinates,
 	errors = require('../../errors'),
 	url = require('url'),
 	console = require('../../ext-console.js'),
@@ -132,7 +132,7 @@ var FeatureAPI = function(app)
 
 			switch (type) {
 				case 'user':
-					filterQuery.createdBy = req.user;
+					filterQuery.createdBy = req.user._id;
 					break;
 				case 'public':
 					permissions.queryPublic(filterQuery);

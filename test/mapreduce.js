@@ -1,7 +1,7 @@
 var	models = require('../models'),
 	config = require('../config'),
 	api = new require('../api')(),
-	coordinates = require('../geogoose/coordinates'),
+	coordinates = require('geogoose').coordinates,
 	abstraction = require('../api/aggregate/mapreduce_abstraction'),
 	Mapper = abstraction.Mapper,
 	findExtremes = abstraction.util.findExtremes,
