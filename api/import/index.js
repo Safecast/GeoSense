@@ -9,8 +9,8 @@ var config = require('../../config'),
 	errors = require('../../errors'),
 	BasicError = errors.BasicError,
 	ValidationError = errors.ValidationError,
-	transform = require("./data_transform"),
-	getAttr = transform.util.getAttr,
+	transmeta = require("transmeta"),
+	getAttr = transmeta.util.getAttr,
 
 	fs = require('fs'),
   	mongoose = require('mongoose'),
@@ -260,7 +260,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 		}
 	    parser = format.Parser();
 
-	    dataTransform = new transform.DataTransform(format.transform, {strict: !params.dry});
+	    dataTransform = new transmeta.DataTransform(format.transform, {strict: !params.dry});
 	    dataTransform.verbose = config.DEBUG && config.VERBOSE;
 		var customTransform;
 

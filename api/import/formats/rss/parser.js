@@ -1,5 +1,5 @@
 var XML = require('../xml/parser'),
-	Cast = require('../../data_transform').Cast,
+	Cast = require('transmeta').Cast,
 	util = require('util');
 
 var RSS = function()

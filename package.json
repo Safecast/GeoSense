@@ -35,7 +35,8 @@
 		"passport-local": "0.1.x",
 		"underscore": ">=1.5",
 		"read": "1.0.x",
-		"geogoose": "git+https://git@github.com/samluescher/geogoose"
+		"geogoose": "git+https://git@github.com/samluescher/geogoose",
+		"transmeta": "git+https://git@github.com/samluescher/transmeta"
 	}
 }
 
