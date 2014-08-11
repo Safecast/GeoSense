@@ -5,7 +5,7 @@ var config = require('../../config'),
     coordinates = require('geogoose').coordinates,
     permissions = require('../../permissions'),
     utils = require('../../utils'),
-    findExtremes = require('../aggregate/mapreduce_abstraction/util').findExtremes,
+    findExtremes = require('rejuice').util.findExtremes,
     errors = require('../../errors'),
     BasicError = errors.BasicError,
     ValidationError = errors.ValidationError,
@@ -19,7 +19,7 @@ var config = require('../../config'),
     path = require('path'),
     console = require('../../ext-console.js'),
     AggregateAPI = require('../aggregate'),
-    scopeFunctions = require('../aggregate/mapreduce_abstraction').scopeFunctions;
+    setAttr = require('transmeta').util.setAttr;
 
 var LayerOptions = models.LayerOptions,
     handleDbOp = utils.handleDbOp;
@@ -127,7 +127,7 @@ var ImportAPI = function(app)
                         if (req.body.preview) {
                             var expanded = {};
                             for (var k in transformed) {
-                                scopeFunctions.setAttr(expanded, k, transformed[k]);
+                                setAttr(expanded, k, transformed[k]);
                             }
                             sendItems.push(expanded);
                         }
