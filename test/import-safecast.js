@@ -108,7 +108,7 @@ describe('Safecast', function() {
 		api.import.sync({
 			append: importCollection._id.toString(),
 			url: 'https://api.safecast.org/system/measurements.csv',
-			max: 100, // so as not to exceed default 2000ms timeout
+			max: 1000, // so as not to exceed default 2000ms timeout
 		}, null, null, function(err, collection) {
 			if (err) throw err;
 			importCollection = collection;

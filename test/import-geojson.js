@@ -23,15 +23,17 @@ describe('GeoJSON', function() {
 
 	var ImportedModel;
 
-	it('should import a GeoJSON file and save each Feature in the DB, determining the collection\'s bbox', function(done) {
+	it('should import a GeoJSON file and save each Feature in the DB, determining the collection\'s bbox and extremes', function(done) {
 
 		api.import.import({
 			path: 'test/data/internet_users_2005_choropleth_lowres.json',
 			format: 'geojson'
 		}, null, null, function(err, collection) {
 			if (err) throw err;
-			console.log(collection.extremes);
-			console.log(collection.fields[4]);
+			assert.deepEqual(collection.extremes, { properties: 
+			   { name: { min: '', max: 'Zimbabwe', count: 244 },
+				value: { min: 0.1, max: 76.2, count: 190, sum: 3659.4, diff: 78250.696 },
+				colour: { min: '#CCCCCC', max: '#FFFC01', count: 244 } } });
 			assert.deepEqual(collection.bbox.toObject(), [-180, -55.71, 180, 83.57 ]);
 			ImportedModel = collection.getFeatureModel();
 			done();
