@@ -88,7 +88,7 @@ var DEFAULT_FEATURE_OPACITY = .75,
 // cropDistribution == true
 var CROP_DISTRIBUTION_RATIO = 1 / 10;
 
-var DEFAULT_MAP_VIEW_BASE = 'gm';
+var DEFAULT_MAP_VIEW_BASE = 'blank';
 var DEFAULT_MAP_STYLE = 'dark';
 
 var DEFAULT_MAP_AREA = {

@@ -285,7 +285,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 	    	}
 	    	console.log('* custom transform', customTransform);
 	    	try {
-	    		var customTransform = new transform.DataTransform(customTransform);
+	    		var customTransform = new transmeta.DataTransform(customTransform);
 	    	} catch (err) {
 				if (callback) {
 					callback(err);
@@ -679,7 +679,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							doc.sourceId = doc.id;
 						}
 
-						var doc = new transform.Document(doc);
+						var doc = new transmeta.Document(doc);
 
 						if (dataCallbacks.data) {
 							dataCallbacks.data(false, doc);
@@ -736,16 +736,16 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							// or date comparison.
 							if (propertyType == 'string') {
 								// try to cast Number
-								if (transform.Filter.isDecimal(saveModel.properties[key])) {
+								if (transmeta.Filter.isDecimal(saveModel.properties[key])) {
 									propertyType = 'Number';
-									saveModel.set('properties.' + key, transform.Cast.Number(saveModel.properties[key]));
+									saveModel.set('properties.' + key, transmeta.Cast.Number(saveModel.properties[key]));
 									if (config.VERBOSE) {
 										console.warn('Coercing ' + key + ' to Number');
 									}
 								// try to cast Date
-								} else if (transform.Filter.isValidDate(saveModel.properties[key], false)) {
+								} else if (transmeta.Filter.isValidDate(saveModel.properties[key], false)) {
 									propertyType = 'Date';
-									saveModel.set('properties.' + key, transform.Cast.Date(saveModel.properties[key]));
+									saveModel.set('properties.' + key, transmeta.Cast.Date(saveModel.properties[key]));
 									if (config.VERBOSE) {
 										console.warn('Coercing ' + key + ' to Date');
 									}
@@ -753,7 +753,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 							}
 
 							if (propertyType) {
-								var isEmpty = transform.Filter.isEmpty(saveModel.properties[key]);
+								var isEmpty = transmeta.Filter.isEmpty(saveModel.properties[key]);
 								// if this is the first time we encounter the property
 								if (propertyTypes[key] == undefined) {
 									propertyTypes[key] = propertyType;

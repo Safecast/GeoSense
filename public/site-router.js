@@ -6,7 +6,6 @@ define([
     'views/user-maps-view',
     'views/data-library-dashboard-view',
     'models/map',
-    'holder'
 ], function($, _, Backbone, FeaturettesView, UserMapsView, DataLibraryDashboardView, Map) {
         "use strict";
         var SiteRouter = Backbone.Router.extend({

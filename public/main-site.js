@@ -1,12 +1,12 @@
 require.config({
-	paths: {
+    paths: {
         //jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.0.custom.min',
         jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.3.custom.min',
-    	underscore: 'lib/underscore/underscore-min',
-    	backbone: 'lib/backbone/backbone',
+        underscore: 'lib/underscore/underscore-min',
+        backbone: 'lib/backbone/backbone',
         bootstrap: 'lib/bootstrap/dist/js/bootstrap.min', 
         d3: 'lib/d3/d3.v2.min',
-    	text: 'lib/require/text',
+        text: 'lib/require/text',
         locale: 'locale/locale.en',
         deepextend: 'lib/backbone-deep-model/lib/underscore.mixin.deepExtend',
         deepmodel: 'lib/backbone-deep-model/src/deep-model',
@@ -15,9 +15,8 @@ require.config({
         stamen: 'lib/openlayers/stamen',
         backbone_super: 'lib/backbone_super/backbone_super',
         moment: 'lib/moment/moment.min',
-        holder: 'lib/holder/holder.min',
         spin: 'lib/spin/spin.min'
-  	},
+    },
 
     shim: {
         'spin': {
@@ -53,7 +52,7 @@ require.config({
 });
 
 define([
-	// Load our app module and pass it to our definition function
+    // Load our app module and pass it to our definition function
     'jquery',
     'underscore',
     'backbone',
@@ -63,6 +62,6 @@ define([
     'backbone_super',
     'locale'
 ], function($, _, Backbone, App) {
-	return App;
+    return App;
 });
 

@@ -83,6 +83,7 @@ define([
 
         featureReset: function(collection, options)
         {
+            console.log('featureReset');
             var self = this;
             this.destroyFeatures();
             this.layer.addFeatures(_.map(collection.models, function(model) {
