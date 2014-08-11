@@ -8,46 +8,48 @@ define([
 	'views/graphs/graph-view-base',
 	'd3',
 ], function($, _, Backbone, config, utils, templateHtml, GraphViewBase, d3) {
-    "use strict";
+	"use strict";
 
 	var TimelineScatterPlotView = GraphViewBase.extend({
 
 		className: 'graph scatter-plot',
-	    events: {
-	    },
+		scopes: [GraphScope.CURRENT_VIEW],
+		events: {
+		},
 
-	    initialize: function(options) 
-	    {
-	    	var self = this,
-	    		options = _.extend({renderAxes: true}, options);
-	    	TimelineScatterPlotView.__super__.initialize.call(this, options);
-	    	this.template = _.template(templateHtml);
+		initialize: function(options) 
+		{
+			var self = this,
+				options = _.extend({renderAxes: true}, options);
+			TimelineScatterPlotView.__super__.initialize.call(this, options);
+			this.template = _.template(templateHtml);
 
-	    	this.model.on('feature:selected', function(mapLayer, model) {
-                var collection = self.collection,
-                	box = model.getBox(),
-                    bounds = [box[0], box[2]];
-                collection.setVisibleMapArea({bounds: bounds});
-                collection.urlParams.original = true;
-                /*collection.once('reset', function() {
-                    console.log('fetched ', collection.length);
-                });*/
-                if (self.graphVisible()) {
-	                collection.fetch();
-                }
-	    	});
+			this.model.on('feature:selected', function(mapLayer, model) {
+				var collection = self.collection,
+					box = model.getBox(),
+					bounds = [box[0], box[2]];
+									
+				collection.setVisibleMapArea({bounds: bounds});
+				collection.urlParams.original = true;
+				/*collection.once('reset', function() {
+					console.log('fetched ', collection.length);
+				});*/
+				if (self.graphVisible()) {
+					collection.fetch();
+				}
+			});
 
-	    	this.model.on('feature:unselected', function(mapLayer, model) {
-                var collection = self.collection;
-                collection.resetFrom(mapLayer.mapFeatures);
-	    	});
-	    },
+			this.model.on('feature:unselected', function(mapLayer, model) {
+				var collection = self.collection;
+				collection.resetFrom(mapLayer.mapFeatures);
+			});
+		},
 
 		renderGraph: function()
 		{	
 			var self = this,
 				valFormatter = this.model.getValFormatter();
-		    TimelineScatterPlotView.__super__.renderGraph.apply(this, arguments);
+			TimelineScatterPlotView.__super__.renderGraph.apply(this, arguments);
 
 			var data = this.collection.models,
 				yLabel = valFormatter.unit || (this.model.getNumericField() || '').split('.').pop(),
@@ -69,53 +71,53 @@ define([
 				};
 
 			var x = d3.time.scale()
-			    	.range(this.getXRange())
-			    	.domain(d3.extent(data, getXVal)),
+					.range(this.getXRange())
+					.domain(d3.extent(data, getXVal)),
 				y = d3.scale.linear()
-			    	.range(this.getYRange())
-			    	.domain(d3.extent(data, getYVal));
+					.range(this.getYRange())
+					.domain(d3.extent(data, getYVal));
 
 			if (this.renderAxes) {
 				var xAxis = d3.svg.axis()
-					    .scale(x)
-					    .orient("bottom"),
+						.scale(x)
+						.orient("bottom"),
 					yAxis = d3.svg.axis()
-				    	.scale(y)
-				    	.tickFormat(function(d,i) {
-				    		return autoFormatNumber(d);
-				    	})
-				    	.orient("left");
+						.scale(y)
+						.tickFormat(function(d,i) {
+							return autoFormatNumber(d);
+						})
+						.orient("left");
 
 				this.appendXAxis(xAxis);
-			   	this.appendYAxis(yAxis, yLabel);
+				this.appendYAxis(yAxis, yLabel);
 			}
 
 			this.svg.selectAll("circle")
-        		.data(data)
-        		.enter().append("circle")
-	        		.attr("class", "dot")
-	        		.attr("fill", function(d) {
-	        			return d.getRenderAttr().color;
-	        		})
-	        		.attr("stroke", function(d) {
-	        			return d.getRenderAttr('strokeColor', function() {
+				.data(data)
+				.enter().append("circle")
+					.attr("class", "dot")
+					.attr("fill", function(d) {
+						return d.getRenderAttr().color;
+					})
+					.attr("stroke", function(d) {
+						return d.getRenderAttr('strokeColor', function() {
 							return strokeForColor(d.getRenderAttr('color'));
-	        			});
-	        		})
-	        		.attr("cx", function (d) { return x(getXVal(d)); })
-	        		.attr("cy", function (d) { return y(getYVal(d)); })
-	        		.attr("r", function (d) { return 3.5; })
-        		.on('mouseover', function(d) {
-		        	self.showTooltip(this, formatYVal(getYVal(d)));
+						});
+					})
+					.attr("cx", function (d) { return x(getXVal(d)); })
+					.attr("cy", function (d) { return y(getYVal(d)); })
+					.attr("r", function (d) { return 3.5; })
+				.on('mouseover', function(d) {
+					self.showTooltip(this, formatYVal(getYVal(d)));
 					d3.select(this)
 						.style('fill', d.getRenderAttr('hightlightColor', function() {
 							return highlightForColor(d.getRenderAttr('color'));
 						}));
-        		})
-        		.on('mouseout', function(d) {
+				})
+				.on('mouseout', function(d) {
 					d3.select(this)
 						.style('fill', d.getRenderAttr('color'));
-        		});
+				});
 
 			return this;
 		}

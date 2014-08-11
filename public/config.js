@@ -66,6 +66,11 @@ var SharingType = {
 	WORLD: 'W'
 };
 
+var GraphScope = {
+	OVERALL: 'overall',
+	CURRENT_VIEW: 'current-view'
+};
+
 SharingType.DEFAULT = SharingType.PRIVATE;
 
 var COLOR_GRADIENT_STEP = null; // 1 / 500.0;

@@ -121,6 +121,7 @@ define([
                 if (this.isTimeBased()) {
                     this.timeline = this.createCollection(MapFeatures);
                     this.listenTo(this.mapFeatures, 'reset add remove', function() {
+                        // just copy features to timeline on updates
                         self.timeline.resetFrom(self.mapFeatures);
                     });
                 }

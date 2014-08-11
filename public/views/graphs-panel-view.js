@@ -6,9 +6,9 @@ define([
 	'utils',
 	'text!templates/graphs-panel.html',
 	'views/panel-view-base',
-    'mixins/timeout-queue-mixin'
+	'mixins/timeout-queue-mixin'
 ], function($, _, Backbone, config, utils, templateHtml, PanelViewBase, TimeoutQueueMixin) {
-    "use strict";
+	"use strict";
 
 	var GraphsPanelView = PanelViewBase.extend({
 
@@ -16,42 +16,43 @@ define([
 		draggable: false,
 
 		events: {
-			'click .graph-toggles button': 'toggleGraphViewClicked'
+			'click .graph-toggles button': 'toggleGraphViewClicked',
+			'click .graph-scope-toggles button': 'toggleGraphScopeClicked'
 		},
 		
-	    initialize: function(options) 
-	    {   
-	    	GraphsPanelView.__super__.initialize.call(this, options);
+		initialize: function(options) 
+		{   
+			GraphsPanelView.__super__.initialize.call(this, options);
 
-	    	var self = this; 	
-		    this.template = _.template(templateHtml);	
-		    this.createTimeoutQueue('redraw', 250);
-		    this.graphViews = {};
-		    this.graphView; 
-		    
-		    this.on('panel:resize', this.adjustAndRedrawGraphs);
-		    this.on('panel:show', this.adjustAndRedrawGraphs);
-		    this.listenTo(this.model, 'change', this.modelChanged);
-	    	this.listenTo(this.model, 'toggle:valFormatter', function() {
-	    		self.adjustAndRedrawGraphs();
-	    	});
+			var self = this; 	
+			this.template = _.template(templateHtml);	
+			this.createTimeoutQueue('redraw', 250);
+			this.graphViews = {};
+			this.graphView; 
+			
+			this.on('panel:resize', this.adjustAndRedrawGraphs);
+			this.on('panel:show', this.adjustAndRedrawGraphs);
+			this.listenTo(this.model, 'change', this.modelChanged);
+			this.listenTo(this.model, 'toggle:valFormatter', function() {
+				self.adjustAndRedrawGraphs();
+			});
 		},
 
 		adjustAndRedrawGraphs: function() 
 		{
 			var self = this;
-	    	this.queueTimeout('redraw', function() {
-	    		_.each(self.graphViews, function(view, viewKey) {
-	    			view.fillExtents();
-	    		});
-	    		if (self.graphView && self.$el.is(':visible')) {
-	    			if (self.graphView.graphRendered) {
-		    			self.graphView.redrawGraph();
-	    			} else {
-		    			self.graphView.renderGraph();
-	    			}
-	    		}
-	    	});
+			this.queueTimeout('redraw', function() {
+				_.each(self.graphViews, function(view, viewKey) {
+					view.fillExtents();
+				});
+				if (self.graphView && self.$el.is(':visible')) {
+					if (self.graphView.graphRendered) {
+						self.graphView.redrawGraph();
+					} else {
+						self.graphView.renderGraph();
+					}
+				}
+			});
 		},
 
 		render: function()
@@ -61,6 +62,9 @@ define([
 			this.$graphToggles = this.$('.graph-toggles');
 			this.$graphToggleTemplate = $('.element-template', this.$graphToggles)
 				.remove().removeClass('element-template');
+
+			this.$graphScopeToggles = this.$('.graph-scope-toggles');
+
 			return this;
 		},
 
@@ -116,17 +120,37 @@ define([
 					}
 				});
 			}
+			$('button', this.$graphScopeToggles).each(function() {
+				$(this).attr('disabled', self.graphView.scopes.indexOf(
+					$(this).attr('data-value')) == -1);
+			});
+			if (self.graphView.scopes) {
+				this.toggleGraphScope(self.graphView.scopes[0]);
+			}
+		},
+
+		toggleGraphScopeClicked: function(evt)
+		{
+			this.toggleGraphScope($(evt.currentTarget).attr('data-value'));
+		},
+
+		toggleGraphScope: function(scope)
+		{
+			$('button', this.$graphScopeToggles).each(function() {
+				$(this).toggleClass('active', $(this).attr('data-value') == scope);
+			});
+
 		},
 
 		show: function()
 		{
 			GraphsPanelView.__super__.show.apply(this, arguments);
-			this.toggleGraphView();			
+			this.toggleGraphView();
 		}
 
 	});
 
-    _.extend(GraphsPanelView.prototype, TimeoutQueueMixin);
+	_.extend(GraphsPanelView.prototype, TimeoutQueueMixin);
 
 	return GraphsPanelView;
 });
