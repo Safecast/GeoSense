@@ -9,43 +9,43 @@ define([
 	'text!templates/help/index.html',
 	'views/panel-view-base',
 ], function($, _, Backbone, config, utils, permissions, templateHtml, indexHtml, PanelViewBase) {
-    "use strict";
+	"use strict";
 
 	var HelpPanelView = PanelViewBase.extend({
 
 		className: 'panel panel-default extended panel-scrollable panel-center help-panel',
-	  	subViewContainer: '.text',
+		subViewContainer: '.text',
 
-	    events: {
+		events: {
 			'click .map-tool.signup' : 'signupButtonClicked',
 			'click .map-tool.setup' : 'setupButtonClicked',
 			'click .map-tool.data-library' : 'dataLibraryButtonClicked',
 			'click .map-tool.data-import' : 'dataImportButtonClicked',
 			'click .map-tool.sharing' : 'sharingButtonClicked',
-	    },
+		},
 
-	    initialize: function(options) 
-	    {
-	    	var self = this;
-		    this.template = _.template(templateHtml);
-		    this.listenTo(app.setupView, 'map:saved', function(model) {
-		    	self.updateButtonStates();
-		    });
-		    this.listenTo(app, 'user:login', function(model) {
-		    	self.updateButtonStates();
-		    });
-		    this.listenTo(app, 'layer:added', function(model) {
-		    	self.updateButtonStates();
-		    });
-	    },
+		initialize: function(options) 
+		{
+			var self = this;
+			this.template = _.template(templateHtml);
+			this.listenTo(app.setupView, 'map:saved', function(model) {
+				self.updateButtonStates();
+			});
+			this.listenTo(app, 'user:login', function(model) {
+				self.updateButtonStates();
+			});
+			this.listenTo(app, 'layer:added', function(model) {
+				self.updateButtonStates();
+			});
+		},
 
-	    updateButtonStates: function()
-	    {
-	    	var self = this;
+		updateButtonStates: function()
+		{
+			var self = this;
 
 			this.$('.map-tool.signup .glyphicon-ok').toggle(this.hasUserAccount());
 			this.$('.map-tool.info .glyphicon-ok').toggle(this.hasDescription() && this.hasUserAccount());
-	    	this.$('.map-tool.data-import').attr('disabled', !self.hasUserAccount());
+			//this.$('.map-tool.data-import').attr('disabled', !self.hasUserAccount());
 			this.$('.map-tool.sharing .glyphicon-ok').toggle(!app.map.isPrivate());
 
 			this.$('.map-tool.data-import .glyphicon-ok').hide();
@@ -58,38 +58,38 @@ define([
 				}
 			});
 
-	    	if (self.hasUserAccount()) {
-		    	self.$('.step-signup button')
-		    		.removeClass('btn-danger')
-		    		.addClass('btn-primary');
-		    	if (self.$('.step-setup').is(':visible') || !self.$el.is(':visible')) {
-			    	self.$('.step-signup').hide();
-		    	}
-	    	} else {
-		    	self.$('.step-setup').toggle(!this.hasDescription());
-		    	self.$('.step-signup').toggle(this.hasDescription());
-	    	}
-	    },
+			if (self.hasUserAccount()) {
+				self.$('.step-signup button')
+					.removeClass('btn-danger')
+					.addClass('btn-primary');
+				if (self.$('.step-setup').is(':visible') || !self.$el.is(':visible')) {
+					self.$('.step-signup').hide();
+				}
+			} else {
+				self.$('.step-setup').toggle(!this.hasDescription());
+				self.$('.step-signup').toggle(this.hasDescription());
+			}
+		},
 
-	    hasUserAccount: function() 
-	    {
-	    	return permissions.canAdminModel(app.map);
-	    },
+		hasUserAccount: function() 
+		{
+			return permissions.canAdminModel(app.map);
+		},
 
-	    hasDescription: function() 
-	    {
-	    	return app.map.attributes.description 
-	    		&& app.map.attributes.description != '' ? true : false;
-	    },
+		hasDescription: function() 
+		{
+			return app.map.attributes.description 
+				&& app.map.attributes.description != '' ? true : false;
+		},
 
-	    render: function() 
-	    {
+		render: function() 
+		{
 			var self = this;
 			HelpPanelView.__super__.render.call(this);
 			this.getContainer().html(indexHtml);
 			this.updateButtonStates();
 			return this;
-	    },
+		},
 
 		signupButtonClicked: function(evt)
 		{
@@ -102,7 +102,7 @@ define([
 			app.showSetupView('#tab-setup-info');
 			evt.preventDefault();
 		},
-	    
+		
 		dataImportButtonClicked: function(evt)
 		{
 			app.toggleDataImport();
