@@ -124,7 +124,7 @@ var renderFragment = function(req, res, page, vars)
 };
 
 var serveMap = function(req, res, map) {
-    console.success('serving map:', map.slug);
+    console[console.success ? 'success' : 'info']('serving map:', map.slug);
     var vars = getRenderVars(req, {
         IS_CUSTOM_HOST: isCustomHost(req),
         map: JSON.stringify(apiUtil.prepareMapResult(req, map))
@@ -385,7 +385,7 @@ utils.connectDB(function() {
             } else {
                 templates = contents;
                 app.listen(config.SERVER_PORT, config.SERVER_HOST);
-                console.success('Web server running at http://' + config.SERVER_HOST + ':' + config.SERVER_PORT + "/");
+                console[console.success ? 'success' : 'info']('Web server running at http://' + config.SERVER_HOST + ':' + config.SERVER_PORT + "/");
             }
         });
 }, false);

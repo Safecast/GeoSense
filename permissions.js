@@ -54,7 +54,7 @@ var setUserForSessionAdminModels = function (req, callback)
                         console.error(err);
                     } else {
                         delete req.session.canAdminModels[id];
-                        console.success('Associated '+modelName+' '+doc._id+' with User '+doc.createdBy);
+                        console[console.success ? 'success' : 'info']('Associated '+modelName+' '+doc._id+' with User '+doc.createdBy);
                     }
                     dequeueUpdate();
                 })

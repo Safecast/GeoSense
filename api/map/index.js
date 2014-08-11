@@ -70,8 +70,8 @@ var MapAPI = function(app)
 		app.post('/api/map', config.ANONYMOUS_MAP_CREATION ? [] : [permissions.requireLogin], function(req, res)
 		{
 			if (!permissions.canCreateMap(req)) {
-	            res.send('Cannot create map', 403);
-	            return;
+				res.send('Cannot create map', 403);
+				return;
 			}
 
 			var currDate = Math.round((new Date).getTime() / 1000);
@@ -97,7 +97,7 @@ var MapAPI = function(app)
 					makeUniqueSlugAndSave();
 					return;
 				}
-			    console.log('post new map, looking for existing slug "'+map.slug+'"')
+				console.log('post new map, looking for existing slug "'+map.slug+'"')
 				Map.findOne({slug: map.slug}, function(err, existingMap) {
 					if (handleDbOp(req, res, err, true)) return;
 					if (existingMap) {
@@ -111,11 +111,11 @@ var MapAPI = function(app)
 							if (config.ANONYMOUS_MAP_CREATION && !req.user) {
 								permissions.allowSessionAdmin(req, map);
 							}
-						 	if (req.xhr) {
-						 		res.send(prepareMapResult(req, map));
-						 	} else {
-						 		res.redirect(config.BASE_URL + 'admin/' + map.slug);
-						 	}
+							if (req.xhr) {
+								res.send(prepareMapResult(req, map));
+							} else {
+								res.redirect(config.BASE_URL + 'admin/' + map.slug);
+							}
 						});
 					}
 				});
@@ -130,7 +130,7 @@ var MapAPI = function(app)
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canViewMap)) return;
 					var preparedMap = prepareMapResult(req, map);
-			       	res.send(preparedMap);
+					res.send(preparedMap);
 				});
 		};
 
@@ -197,21 +197,21 @@ var MapAPI = function(app)
 							if (handleDbOp(req, res, err, user, 'user')) return;
 							map.createdBy = map.modifiedBy = user;
 							map.save(function(err, map) {
-								console.success('map updated', err);
+								console[console.success ? 'success' : 'info']('map updated', err);
 								if (handleDbOp(req, res, err, map, 'map')) return;
 
 								// find again since createdBy and modifiedBy won't be populated after map.save()
 								apiUtil.findMapForRequest(req)
 									.exec(function(err, map) {
 										if (handleDbOp(req, res, err, map, 'map')) return;
-									 	res.send(prepareMapResult(req, map));
-									 	if (prevEmail != user.email && config.SMTP_HOST) {
+										res.send(prepareMapResult(req, map));
+										if (prevEmail != user.email && config.SMTP_HOST) {
 											console.log('emailing info to user');
-										 	utils.sendEmail(user.email, 'Your map URLs', 'urls', {
-										 		adminUrl: config.BASE_URL + 'admin/' + map.adminslug,
-										 		publicUrl: config.BASE_URL + map.slug
-										 	});
-									 	}
+											utils.sendEmail(user.email, 'Your map URLs', 'urls', {
+												adminUrl: config.BASE_URL + 'admin/' + map.adminslug,
+												publicUrl: config.BASE_URL + map.slug
+											});
+										}
 									});
 							});
 						});
@@ -221,11 +221,11 @@ var MapAPI = function(app)
 						}
 						map.save(function(err, map) {
 							if (handleDbOp(req, res, err, map, 'map')) return;
-							console.success('map updated');
-						 	res.send(prepareMapResult(req, map));
+							console[console.success ? 'success' : 'info']('map updated');
+							res.send(prepareMapResult(req, map));
 						});
 					}
-			  	});
+				});
 		};
 
 		app.patch('/api/map/s/:secretSlug', mapPatchRoute);
@@ -244,11 +244,11 @@ var MapAPI = function(app)
 					}
 
 					map.remove(function(err) {
-					    if (handleDbOp(req, res, err, true)) return;
+						if (handleDbOp(req, res, err, true)) return;
 						console.log('map removed');
 						res.send({_id: map._id});
 					});
-			  	});
+				});
 		};
 
 		app.delete('/api/map/s/:secretSlug', mapDeleteRoute);
@@ -329,7 +329,7 @@ var MapAPI = function(app)
 						mapLayer.layerOptions.save(function(err, opts) {
 							if (handleDbOp(req, res, err, true)) return;
 
-							console.success('layerOptions updated');
+							console[console.success ? 'success' : 'info']('layerOptions updated');
 							
 							if (req.body.position != undefined) {
 								var newPosition = parseInt(req.body.position);
@@ -357,7 +357,7 @@ var MapAPI = function(app)
 							res.send(prepareLayerResult(req, mapLayer, map));
 						});
 					});
-			  	});
+				});
 		};
 
 		app.put('/api/map/s/:secretSlug/layer/:layerId', mapLayerPutRoute);
@@ -372,11 +372,11 @@ var MapAPI = function(app)
 			apiUtil.findMapForRequest(req)
 				.exec(function(err, map) {
 					if (handleDbOp(req, res, err, map, 'map', permissions.canAdminMap)) return;
-				    GeoFeatureCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
-				    	// TODO: check ownership instead of (unreliably) checking for status
-				    	{status: {$in: [config.DataStatus.IMPORTING]}}]})
-				    	.populate('defaults')
-				    	.exec(function(err, collection) {
+					GeoFeatureCollection.findOne({_id: req.body.featureCollection._id, $or: [{active: true}, 
+						// TODO: check ownership instead of (unreliably) checking for status
+						{status: {$in: [config.DataStatus.IMPORTING]}}]})
+						.populate('defaults')
+						.exec(function(err, collection) {
 							if (handleDbOp(req, res, err, collection, 'collection')) return;
 
 
@@ -396,32 +396,32 @@ var MapAPI = function(app)
 
 							getDefaults.call(collection, function(err, layerOptions) {
 								var sortedLayers = sortByPosition(map.layers);
-							    var layer = {
-							    	// set _id so it can be referenced below
-							    	_id: new mongoose.Types.ObjectId(),
-							    	featureCollection: collection,
-							    	layerOptions: layerOptions,
-							    	position: (sortedLayers.length ? 
-							    		(sortedLayers[sortedLayers.length - 1].position != null ?
-							    		sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
-							    };    
+								var layer = {
+									// set _id so it can be referenced below
+									_id: new mongoose.Types.ObjectId(),
+									featureCollection: collection,
+									layerOptions: layerOptions,
+									position: (sortedLayers.length ? 
+										(sortedLayers[sortedLayers.length - 1].position != null ?
+										sortedLayers[sortedLayers.length - 1].position + 1 : null) : 0)
+								};    
 
-						      	map.layers.push(layer);
-						      	map.save(function(err, map) {
-								    if (handleDbOp(req, res, err, map)) return;
-							        console.log("map layer created");
+								map.layers.push(layer);
+								map.save(function(err, map) {
+									if (handleDbOp(req, res, err, map)) return;
+									console.log("map layer created");
 									Map.findOne({_id: map._id})
 										.populate('layers.featureCollection')
 										.populate('layers.layerOptions')
 										.exec(function(err, map) {
-										    if (handleDbOp(req, res, err, map)) return;
-									       	res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
+											if (handleDbOp(req, res, err, map)) return;
+											res.send(prepareLayerResult(req, map.layers.id(layer._id), map));
 										});
-							  	});
+								});
 							});
 
-					    });
-			    });
+						});
+				});
 		};
 
 		app.post('/api/map/s/:secretSlug/layer', mapLayerPostRoute);
@@ -442,7 +442,7 @@ var MapAPI = function(app)
 						console.log('map layer deleted');
 						res.send({_id: mapLayer._id});
 					});
-			  	});
+				});
 		};
 
 		app.delete('/api/map/s/:secretSlug/layer/:layerId', mapLayerDeleteRoute);

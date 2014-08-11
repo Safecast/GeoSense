@@ -7,9 +7,9 @@ var	models = require('../../models.js'),
 	config = require('../../config.js'),
 	utils = require('../../utils.js'),
 	abstraction = require('./mapreduce_abstraction'),
-	runMapReduce = abstraction.runMapReduce,
+	runMapReduce = abstraction.mongoose.runMapReduce,
 	Mapper = abstraction.Mapper,
-	getAttr = abstraction.scopeFunctions.getAttr,
+	getAttr = require('transmeta').util.getAttr,
 	console = require('../../ext-console.js'),
 	_ = require('underscore');
 
@@ -106,7 +106,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 		if (utils.callbackOrThrow(new Error('No MapReduce types specified'))) return;
 	}
 
-	console.success('*** MapReduce with types:', params.types.join(', '));
+	console[console.success ? 'success' : 'info']('*** MapReduce with types:', params.types.join(', '));
 	if (params.zoom) {
 		console.info('*** zoom levels:', params.zoom);
 	}
@@ -259,7 +259,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 						var dequeueMapReduceCall = function() 
 						{
 							if (!mapReduceArguments.length) {
-								console.success('*** MapReduce completed ***');
+								console[console.success ? 'success' : 'info']('*** MapReduce completed ***');
 								collection.status = config.DataStatus.COMPLETE;
 								collection.lastReducedAt = reducedAt;
 								collection.save(function(err, collection) {

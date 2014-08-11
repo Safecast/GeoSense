@@ -7,7 +7,7 @@ var config = require('../../config'),
 	errors = require('../../errors'),
 	url = require('url'),
 	console = require('../../ext-console.js'),
-	getAttr = require('../aggregate/mapreduce_abstraction').scopeFunctions.getAttr,
+	getAttr = require('transmeta').util.getAttr,
 	mongoose = require('mongoose'),
 	moment = require('moment');
 
@@ -150,20 +150,20 @@ var FeatureAPI = function(app)
 				.populate('modifiedBy')
 				.exec(function(err, collections) {
 					if (handleDbOp(req, res, err, collections)) return;
-			    	var countQueue = collections.map(function(collection) {
-		    			return collection;
-			    	});
-			    	console.log('found collections: '+collections.length);
-			    	
-			    	var dequeueCount = function() {
-			    		if (!countQueue.length) {
-				    		res.send(collections.map(function(collection) {
-					    		return apiUtil.prepareFeatureCollectionResult(req, collection, null, collection.extraAttrs);
-				    		}));
-					    	return;
-			    		}
+					var countQueue = collections.map(function(collection) {
+						return collection;
+					});
+					console.log('found collections: '+collections.length);
+					
+					var dequeueCount = function() {
+						if (!countQueue.length) {
+							res.send(collections.map(function(collection) {
+								return apiUtil.prepareFeatureCollectionResult(req, collection, null, collection.extraAttrs);
+							}));
+							return;
+						}
 						var collection = countQueue.shift();
-			    		collection.getFeatureModel().count(featureCountQuery, function(err, c) {
+						collection.getFeatureModel().count(featureCountQuery, function(err, c) {
 							if (handleDbOp(req, res, err, true)) return;
 							collection.extraAttrs = {
 								counts: {
@@ -171,9 +171,9 @@ var FeatureAPI = function(app)
 								}
 							};
 							dequeueCount();
-			    		});
-			    	};
-			    	dequeueCount();
+						});
+					};
+					dequeueCount();
 				});
 		});
 
@@ -203,8 +203,8 @@ var FeatureAPI = function(app)
 						Object.keys(config.GRID_SIZES).length, zoom + adjustZoom));
 				}
 
-                var enableTiles = !returnOriginal && featureCollection.tile && featureCollection.tile.length,
-                	tileSize = enableTiles ? config.GRID_SIZES[zoom] : 0,
+				var enableTiles = !returnOriginal && featureCollection.tile && featureCollection.tile.length,
+					tileSize = enableTiles ? config.GRID_SIZES[zoom] : 0,
 					mapReduceOpts = {
 						tileSize: (enableTiles ? tileSize : undefined)
 					},
@@ -221,121 +221,121 @@ var FeatureAPI = function(app)
 				}
 
 				var isMapReduced = (mapReduceOpts.tileSize 
-                		&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
-                		|| (featureCollection.timebased && datetimeAttr),
-                	FeatureModel = featureCollection.getFeatureModel(),
-			        FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel,
-			        findQueue;
+						&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
+						|| (featureCollection.timebased && datetimeAttr),
+					FeatureModel = featureCollection.getFeatureModel(),
+					FindFeatureModel = isMapReduced ? featureCollection.getMapReducedFeatureModel(mapReduceOpts) : FeatureModel,
+					findQueue;
 
-                if (bbox && bbox.length == 4) {
-                	bbox = bbox.map(function(c, i) {
-                        return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
-                	});
-                	if (bbox.some(isNaN)) {
-                		bbox = null;
-                	} else {
-                		var bboxW = Math.abs(bbox[2] - bbox[0]),
-                			bboxH = Math.abs(bbox[3] - bbox[1]);
+				if (bbox && bbox.length == 4) {
+					bbox = bbox.map(function(c, i) {
+						return Number(c) + (i < 2 ? -tileSize / 2 : tileSize / 2);
+					});
+					if (bbox.some(isNaN)) {
+						bbox = null;
+					} else {
+						var bboxW = Math.abs(bbox[2] - bbox[0]),
+							bboxH = Math.abs(bbox[3] - bbox[1]);
 						// MongoDB manual: "Any geometry specified with GeoJSON to $geoIntersects queries, 
 						// must fit within a single hemisphere"
-	                	if (bboxW > 180 || bboxH > 90) {
-	                		/*
+						if (bboxW > 180 || bboxH > 90) {
+							/*
 							// TODO: this solution is still not reliable and won't find some features in the middle of the circle:
 							// just disabling filtering will at least not lose any features
-	                		console.warn('bbox is wider than 180°, using $near instead');
-                			var center = [bbox[0] + bboxW / 2, bbox[1] + bboxH / 2];
-	                		findQueue = [
-	                			FindFeatureModel.near({type: 'Point', coordinates: center}, 
-	                				coordinates.haversineDistance(center, [bbox[0], bbox[1]]))
-	                		];*/
-	                	} else {
-	                		var geometry = coordinates.polygonFromBbox(bbox);
-		                	geometry.coordinates[0] = geometry.coordinates[0].map(function(c) {
-		                		return coordinates.coordinates2d(c);
-		                	});
-	                		console.info('Finding with $geoIntersects', JSON.stringify(geometry));
-	                		findQueue = [
-	                			FindFeatureModel.geoIntersects(geometry)
-	                		];
-		                }
-                	}
-                }
-                if (!findQueue) {
-                	findQueue = [FindFeatureModel.where()];
-                }
+							console.warn('bbox is wider than 180°, using $near instead');
+							var center = [bbox[0] + bboxW / 2, bbox[1] + bboxH / 2];
+							findQueue = [
+								FindFeatureModel.near({type: 'Point', coordinates: center}, 
+									coordinates.haversineDistance(center, [bbox[0], bbox[1]]))
+							];*/
+						} else {
+							var geometry = coordinates.polygonFromBbox(bbox);
+							geometry.coordinates[0] = geometry.coordinates[0].map(function(c) {
+								return coordinates.coordinates2d(c);
+							});
+							console.info('Finding with $geoIntersects', JSON.stringify(geometry));
+							findQueue = [
+								FindFeatureModel.geoIntersects(geometry)
+							];
+						}
+					}
+				}
+				if (!findQueue) {
+					findQueue = [FindFeatureModel.where()];
+				}
 
-                var manyQueries = findQueue.length > 1;
-			    if (isMapReduced && mapReduceOpts.tileSize) {
+				var manyQueries = findQueue.length > 1;
+				if (isMapReduced && mapReduceOpts.tileSize) {
 					extraAttrs.properties.gridSize = [tileSize, tileSize];
-			    }
+				}
 
-			    if (isMapReduced && mapReduceOpts.timeGrid) {
-			    	switch (mapReduceOpts.timeGrid) {
-			    		case 'yearly':
-					    	date = new Date(strDate, 0, 1, 0, 0, 0);
-					    	break;
-					    // TODO treat other cases
-			    	}
-			    	var err;
-			    	if (!strDate) {
-			    		err = new errors.ValidationError("required parameter: d");
-			    	} else if (!moment(date).isValid()) {
-			    		err = new errors.ValidationError("invalid date: " + strDate);
-			    	}
-		    		if (handleDbOp(req, res, err, true)) return;
-		    		// TODO: might conflict with counts
-		    		filterQuery['value.' + datetimeAttr + '.min'] = date;
-			    }
+				if (isMapReduced && mapReduceOpts.timeGrid) {
+					switch (mapReduceOpts.timeGrid) {
+						case 'yearly':
+							date = new Date(strDate, 0, 1, 0, 0, 0);
+							break;
+						// TODO treat other cases
+					}
+					var err;
+					if (!strDate) {
+						err = new errors.ValidationError("required parameter: d");
+					} else if (!moment(date).isValid()) {
+						err = new errors.ValidationError("invalid date: " + strDate);
+					}
+					if (handleDbOp(req, res, err, true)) return;
+					// TODO: might conflict with counts
+					filterQuery['value.' + datetimeAttr + '.min'] = date;
+				}
 
-                console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ' manyQueries:', manyQueries, ', mapReduceOpts: ', mapReduceOpts);
+				console.log('Querying '+FindFeatureModel.collection.name, ', filterQuery:', filterQuery, ', zoom:', zoom, ' manyQueries:', manyQueries, ', mapReduceOpts: ', mapReduceOpts);
 
-                var sendFeatures = function(features) {
-            		if (manyQueries) {
-            			var ids = {};
-            			features = features.filter(function(feature) {
-            				var exists = ids[feature._id];
-            				ids[feature._id] = true;
-            				return !exists;
-            			});
-            		}
+				var sendFeatures = function(features) {
+					if (manyQueries) {
+						var ids = {};
+						features = features.filter(function(feature) {
+							var exists = ids[feature._id];
+							ids[feature._id] = true;
+							return !exists;
+						});
+					}
 
-            		extraAttrs.properties.counts.result = features.length;
-            		if (isMapReduced) {
-            			// this is the result of a MapReduce: determine counts
-                		features.reduce(function(a, b) {
-                			v = b.get('value');
-                			a.max = Math.max(a.max, v.count);
-                			a.original += v.count;
-                			return a;
-                		}, extraAttrs.properties.counts);
+					extraAttrs.properties.counts.result = features.length;
+					if (isMapReduced) {
+						// this is the result of a MapReduce: determine counts
+						features.reduce(function(a, b) {
+							v = b.get('value');
+							a.max = Math.max(a.max, v.count);
+							a.original += v.count;
+							return a;
+						}, extraAttrs.properties.counts);
 
-            		} else {
-            			// this is the original collection
+					} else {
+						// this is the original collection
 						extraAttrs.properties.counts.max = extraAttrs.properties.counts.result;
 						extraAttrs.properties.counts.original = extraAttrs.properties.counts.result;                    			
-            		}
+					}
 
-            		extraAttrs.features = features;
-            		if (bbox) {
-	            		extraAttrs.bbox = bbox;
-            		}
-            		console.success('Sending features:', features.length);
-            		res.send(featureCollection.toGeoJSON(extraAttrs));
-            	};
+					extraAttrs.features = features;
+					if (bbox) {
+						extraAttrs.bbox = bbox;
+					}
+					console[console.success ? 'success' : 'info']('Sending features:', features.length);
+					res.send(featureCollection.toGeoJSON(extraAttrs));
+				};
 
-                var dequeueFind = function() {
-                	if (!findQueue.length 
-                		|| (queryOptions.limit != undefined && queryOptions.limit <= 0)) {
-                    		sendFeatures(features);
-                    		return;
-                	}
-                	findQueue.shift()
+				var dequeueFind = function() {
+					if (!findQueue.length 
+						|| (queryOptions.limit != undefined && queryOptions.limit <= 0)) {
+							sendFeatures(features);
+							return;
+					}
+					findQueue.shift()
 						.find(filterQuery)
 						.setOptions(queryOptions)
 						.select(queryFields)
 						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, true)) return;
-							console.success('Found features:', docs.length);
+							console[console.success ? 'success' : 'info']('Found features:', docs.length);
 							docs.forEach(function(doc) {
 								features.push(doc);
 							});
@@ -344,12 +344,12 @@ var FeatureAPI = function(app)
 							}
 							dequeueFind();
 						});
-                };
+				};
 
-                var cacheKey = FeatureModel.collection.name + JSON.stringify(filterQuery),
-                	countOp = function(callback) {
-                		FeatureModel.count(filterQuery, callback);
-                	};
+				var cacheKey = FeatureModel.collection.name + JSON.stringify(filterQuery),
+					countOp = function(callback) {
+						FeatureModel.count(filterQuery, callback);
+					};
 
 				utils.cachedOp(countOp, cacheKey, config.EXPENSIVE_OPERATION_CACHE_TIME, function(err, count) {
 					if (isMapReduced) {
@@ -362,16 +362,16 @@ var FeatureAPI = function(app)
 					if (handleDbOp(req, res, err, true)) return;
 					extraAttrs.properties.counts.full = count;
 					console.info('full count: ', count);
-                    dequeueFind();
+					dequeueFind();
 				});
 
 			});
-        };
+		};
 
 		app.get('/api/map/s/:secretSlug/layer/:layerId/features', mapFeaturesRoute);
 		app.get('/api/map/:slug/layer/:layerId/features', mapFeaturesRoute);
 
-    }
+	}
 };
 
 

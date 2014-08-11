@@ -25,7 +25,7 @@ exports.connectDB = function(callback, exitProcessOnError)
     }
 
     mongoose.connection.on('open', function (ref) {
-        console.success('Connected to mongoDB server.');
+        console[console.success ? 'success' : 'info']('Connected to mongoDB server.');
         if (callback) {
             callback();
         }

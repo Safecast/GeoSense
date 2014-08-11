@@ -104,7 +104,7 @@ var ImportAPI = function(app)
                         return;
                     }
                     var err = false;
-                    console.success('*** import request completed');
+                    console[console.success ? 'success' : 'info']('*** import request completed');
                     if (!req.body.background) {
                         res.send({
                             collection: collection,
@@ -134,7 +134,7 @@ var ImportAPI = function(app)
                     },
                     start: function(err, collection, dataTransform) {
                         if (req.body.background) {
-                            console.success('import request started, performing in background and responding immediately');
+                            console[console.success ? 'success' : 'info']('import request started, performing in background and responding immediately');
                             res.send({
                                 collection: collection,
                             });
@@ -352,7 +352,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
             var newCollectionId = collection.get('_id');
             if (!params.dry) {
-                console.success('*** running import for '+collection._id+' ('+collection.get('title')+')');
+                console[console.success ? 'success' : 'info']('*** running import for '+collection._id+' ('+collection.get('title')+')');
             } else {
                 console.warn('*** dry run: data will not be saved');
             }
@@ -370,7 +370,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     return;
                 }
 
-                console.success('*** job started ***');
+                console[console.success ? 'success' : 'info']('*** job started ***');
 
                 if (dataCallbacks.start) {
                     dataCallbacks.start(false, collection, dataTransform);
@@ -1071,7 +1071,7 @@ ImportAPI.prototype.cli = {
         if (utils.connectDB()) {
             models.GeoFeatureCollection.find({}).exec(function(err, docs) {
                 if (!err) {
-                    console.success('Existing collections:', docs.length);
+                    console[console.success ? 'success' : 'info']('Existing collections:', docs.length);
                     docs.forEach(function(doc) {
                         var dump = {title: doc.title, status: doc.status,
                             createdAt: doc.createdAt, updatedAt: doc.updatedAt, lastReducedAt: doc.lastReducedAt};
@@ -1099,7 +1099,7 @@ ImportAPI.prototype.cli = {
                     console.info('Existing collection:', params.featureCollectionId);
                     models.GeoFeatureCollection.update({_id: params.featureCollectionId}, {$set: {status: 'C', progress: null}}, function(err, collection) {
                         if (!err) {
-                            console.success('Collection reset:', params.featureCollectionId);
+                            console[console.success ? 'success' : 'info']('Collection reset:', params.featureCollectionId);
                         }
                         callback(err);
                     });
