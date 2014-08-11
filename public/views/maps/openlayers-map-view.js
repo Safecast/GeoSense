@@ -1,16 +1,12 @@
 require.config({
     paths: {
         openlayers: 'lib/openlayers/OpenLayers-2.13.1/OpenLayers',
-        openlayers_cloudmade: 'lib/openlayers/cloudmade',
         openlayers_stamen: 'lib/openlayers/stamen',
     },
 
     shim: {
         'openlayers': {
             exports: 'OpenLayers'
-        },
-        'openlayers_cloudmade': {
-            deps: ['openlayers']
         },
         'openlayers_stamen': {
             deps: ['openlayers']
@@ -30,7 +26,6 @@ define([
     'views/maps/feature-layer-base',
     'views/data-detail-view',
     'openlayers',
-    'openlayers_cloudmade',
     'openlayers_stamen'
 ], function($, _, Backbone, config, utils, templateHtml, MapViewBase, FeatureLayerBase, DataDetailView, OpenLayers) {
     "use strict";
@@ -669,41 +664,6 @@ define([
             'dark': 'Dark', 
             'light':'Light', 
             'full': 'Full'
-        }
-
-    });
-
-    ViewBase.cm = OpenLayers.Class(Baselayer,
-    {
-        providerName: 'CloudMade',  
-        initMapLayer: function(change)
-        {
-            var self = this;
-            this.mapLayer = this.mapLayer = new OpenLayers.Layer.CloudMade("CloudMade", {
-                key: CLOUDMADE_KEY,
-                styleId: this.styleIds[this.mapStyle],
-                baselayer: true,
-                numZoomLevels: MAP_NUM_ZOOM_LEVELS,
-                eventListeners: {
-                    loadend: function() {
-                        if (!change) {
-                            self.mapView.trigger('view:ready');
-                        }
-                    }
-                }
-            });
-        },
-
-        mapStyles: {
-            'dark': 'Dark', 
-            'light': 'Light', 
-            'full': 'Full'
-        },
-
-        styleIds: {
-            'dark': 74569,
-            'light': 74513,
-            'full': 998
         }
 
     });
