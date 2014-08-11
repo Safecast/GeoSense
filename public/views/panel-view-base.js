@@ -5,20 +5,20 @@ define([
 	'config',
 	'utils',
 ], function($, _, Backbone, config, utils) {
-    "use strict";
+	"use strict";
 
 	var PanelViewBase = Backbone.View.extend({
 
-	    className: 'panel panel-default',
-	    draggable: true,
-	    subViewContainer: '.panel-body',
-	    showEffect: 'fadeIn',
-	    hideEffect: 'fadeOut',
+		className: 'panel panel-default',
+		draggable: true,
+		subViewContainer: '.panel-body',
+		showEffect: 'fadeIn',
+		hideEffect: 'fadeOut',
 
-	    initialize: function(options) 
-	    {
-	    	var options = options || {};
-		    this.subViews = [];
+		initialize: function(options) 
+		{
+			var options = options || {};
+			this.subViews = [];
 		},
 
 		updatePanelState: function(expand) 
@@ -143,18 +143,18 @@ define([
 			if (this.isDraggable()) {
 				this.$el.draggable('option', 'containment', parentElement);
 			}
-            if (this.$el.is('.panel-center')) {
-                this.$el.css({
-                	left: Math.max(15, $(parentElement).innerWidth() / 2 - this.$el.outerWidth() / 2) + 'px',
-                	top: Math.max(15, $(parentElement).innerHeight() / 2 - this.$el.outerHeight() / 2 * 1.5) + 'px'
-                });
-            }
+			if (this.$el.is('.panel-center')) {
+				this.$el.css({
+					left: Math.max(15, $(parentElement).innerWidth() / 2 - this.$el.outerWidth() / 2) + 'px',
+					top: Math.max(15, $(parentElement).innerHeight() / 2 - this.$el.outerHeight() / 2 * 1.5) + 'px'
+				});
+			}
 			this.isAttached = true;
 			return this;
 		},
 
-	    render: function() 
-	    {
+		render: function() 
+		{
 			this.$el.html(this.template());
 			var self = this;
 
@@ -211,13 +211,13 @@ define([
 			this.$('.panel-extend').click(function() {
 				$(self.el).toggleClass('extended');			
 				if ($(self.el).is('.extended')) {
-					self.updatePanelState(true);
+					self.expand();
 				}
 				self.trigger('panel:resize', self);
 			});
 
 			this.$('.panel-collapse').click(function() {
-				self.updatePanelState();
+				self.collapse();
 			})
 
 			this.$('.panel-close').click(function() {
@@ -231,14 +231,24 @@ define([
 			};
 			$(window).on('resize', this.windowResized);
 
-	        return this;
-	    },
+			return this;
+		},
+
+		expand: function() 
+		{
+			return this.updatePanelState(true);
+		},
+
+		collapse: function() 
+		{
+			return this.updatePanelState();
+		},
 
 		remove: function() 
 		{
-    		$(window).off('resize', this.windowResized);
-	    	PanelViewBase.__super__.remove.apply(this, arguments);
-  		},
+			$(window).off('resize', this.windowResized);
+			PanelViewBase.__super__.remove.apply(this, arguments);
+		},
 
 		detach: function() 
 		{

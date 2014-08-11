@@ -99,7 +99,7 @@ define([
 		toggleGraphViewClicked: function(evt) 
 		{
 			this.toggleGraphView($(evt.currentTarget).attr('data-value'));
-			this.updatePanelState(true);
+			this.expand();
 		},
 
 		toggleGraphView: function(key)

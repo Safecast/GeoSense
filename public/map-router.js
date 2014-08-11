@@ -846,7 +846,7 @@ define([
                         if (!view.isAttached) {
                             self.attachPanelView(view).hide();
                         }
-                        view.show('fast');
+                        view.expand().show('fast');
                     } else {
                         setTimeout(function() {
                             view.hide('fast');
