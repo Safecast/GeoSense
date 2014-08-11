@@ -3,11 +3,11 @@ define([
 	'underscore',
 	'backbone',
 	'models/map-layer',
-    'deepextend',
-    'deepmodel',
+	'deepextend',
+	'deepmodel',
 ], function($, _, Backbone, MapLayer) {
-    "use strict";
-    
+	"use strict";
+	
 	var Map = Backbone.DeepModel.extend({
 		
 		idAttribute: 'slug',
@@ -39,14 +39,14 @@ define([
 						(o.slug ? o.slug : 
 							secret ? 
 								's/' + this.attributes.secretSlug : this.attributes.slug) 
-						+ (o.view ? '/' + o.view : '') : '')
-					+ (o.view ? o.view : '');
+						: '')
+					+ (o.view ? '/' + o.view : '');
 
 			if (o.x != undefined && o.y != undefined) {
-		    	uri += '/' + (o.x || 0) + ',' + (o.y || 0);
-		    	if (o.zoom != undefined) {
-		    		uri += ',' + o.zoom;
-		    	}
+				uri += '/' + (o.x || 0) + ',' + (o.y || 0);
+				if (o.zoom != undefined) {
+					uri += ',' + o.zoom;
+				}
 			}
 
 			return uri;
