@@ -132,7 +132,12 @@ var FeatureAPI = function(app)
 
 			switch (type) {
 				case 'user':
-					filterQuery.createdBy = req.user._id;
+					if (req.user) {
+						filterQuery.createdBy = req.user._id;
+					} else {
+						utils.handleDbOp(req, res, new errors.HTTPError('Permission Denied', 403));
+						return;
+					}
 					break;
 				case 'public':
 					permissions.queryPublic(filterQuery);

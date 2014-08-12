@@ -127,18 +127,23 @@ var canImportData = function (req)
 
 var requireLogin = function (req, res, next) 
 {
-    console.log('--requireLogin');
+    console.log('requireLogin');
     if (req.isAuthenticated()) {
         next();
     } else {
-        if (req.xhr) {
-            res.redirect(config.BASE_URL + 'login', 403);
-        } else {
-            var nextUrl = utils.fullUrl(req.method != 'POST' || !req.headers.referer ? 
-                req.url : req.headers.referer);
-            // sending a 403 will result in browser displaying the "Forbidden. Redirecting to /login" message
-            res.redirect(config.BASE_URL + 'login' + (nextUrl ? '?next=' + nextUrl : ''));
-        }
+        permissionDeniedRedirect(req, res);
+    }
+};
+
+var permissionDeniedRedirect = function(req, res)
+{
+    if (req.xhr) {
+        res.redirect(config.BASE_URL + 'login', 403);
+    } else {
+        var nextUrl = utils.fullUrl(req.method != 'POST' || !req.headers.referer ? 
+            req.url : req.headers.referer);
+        // sending a 403 will result in browser displaying the "Forbidden. Redirecting to /login" message
+        res.redirect(config.BASE_URL + 'login' + (nextUrl ? '?next=' + nextUrl : ''));
     }
 };
 
@@ -166,5 +171,6 @@ module.exports = {
     sameUser: sameUser,
     allowSessionAdmin: allowSessionAdmin,
     setUserForSessionAdminModels: setUserForSessionAdminModels,
-    authenticateWithEmailAndPassword: authenticateWithEmailAndPassword
+    authenticateWithEmailAndPassword: authenticateWithEmailAndPassword,
+    permissionDeniedRedirect: permissionDeniedRedirect
 };

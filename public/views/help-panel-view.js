@@ -34,7 +34,7 @@ define([
 			this.listenTo(app, 'user:login', function(model) {
 				self.updateButtonStates();
 			});
-			this.listenTo(app, 'layer:added', function(model) {
+			this.listenTo(app, 'mapLayer:added', function(model) {
 				self.updateButtonStates();
 			});
 		},

@@ -163,6 +163,7 @@ var serveError = function(err, req, res)
         res.send(err.statusCode || 500, err);
     }
 }
+exports.serveError = serveError;
 
 exports.handleDbOp = function(req, res, err, op, name, permissionCallback) 
 {
@@ -193,7 +194,7 @@ exports.handleDbOp = function(req, res, err, op, name, permissionCallback)
         serveError(new HTTPError((name ? name + ' ' : '') + 'not found', 404), req, res);
         return true;
     } else if (permissionCallback && !permissionCallback(req, op)) {
-        serveError(new HTTPError('permission denied', 403), req, res);
+        serveError(new HTTPError('Permission Denied', 403), req, res);
         return true;
     }
 

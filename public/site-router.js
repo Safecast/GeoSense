@@ -2,11 +2,12 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'utils',
     'views/featurettes-view',
     'views/user-maps-view',
     'views/data-library-dashboard-view',
     'models/map',
-], function($, _, Backbone, FeaturettesView, UserMapsView, DataLibraryDashboardView, Map) {
+], function($, _, Backbone, utils, FeaturettesView, UserMapsView, DataLibraryDashboardView, Map) {
         "use strict";
         var SiteRouter = Backbone.Router.extend({
 
@@ -71,6 +72,7 @@ define([
         });
 
         var initialize = function() {
+            utils.initAjaxErrorNotification();
             window.app = new SiteRouter();
             if (!Backbone.history.start({
                 pushState: true,

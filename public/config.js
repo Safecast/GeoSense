@@ -19,6 +19,8 @@ var MapStatus = {
 	PUBLIC: 'A'
 }
 
+var NOTIFICATION_VISIBLE_TIME = 2000;
+
 var SHOW_DETAIL_DATA_ON_MAP = true;
 
 var DEFAULT_COLOR_EDITOR_COLOR = '#999999',

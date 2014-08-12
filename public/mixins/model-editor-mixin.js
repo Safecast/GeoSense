@@ -37,13 +37,13 @@ define([
 			var self = this;
 			$(self.modelInputs[name]).each(function() {
 				if ($(this).is('.btn-group')) {
-			    	$('.btn', this).each(function() {
-				    	if ($(this).val() != val) {
-					    	$(this).removeClass('active');
-				    	} else {
-					    	$(this).addClass('active');
-				    	}
-			    	});
+					$('.btn', this).each(function() {
+						if ($(this).val() != val) {
+							$(this).removeClass('active');
+						} else {
+							$(this).addClass('active');
+						}
+					});
 				} else if ($(this).is('input[type=checkbox], input[type=radio]')) {
 					$(this).attr('checked', val == true);
 				} else {
@@ -52,18 +52,18 @@ define([
 			})
 		},
 
-	    populateFromModel: function()
-	    {
+		populateFromModel: function()
+		{
 			this.populateModelInputs();
 			if (this.customPopulateFromModel) {
 				this.customPopulateFromModel();
 			}
 		},
 
-	    /*modelInputChanged: function(event) 
-	    {
-	    	console.log('change:', $(event.currentTarget).attr('name'), $(event.currentTarget).val());
-	    },*/
+		/*modelInputChanged: function(event) 
+		{
+			console.log('change:', $(event.currentTarget).attr('name'), $(event.currentTarget).val());
+		},*/
 
 		getValueFromModelInput: function(name)
 		{
@@ -99,9 +99,13 @@ define([
 		handleValidationErrors: function(xhr) 
 		{
 			// TODO: handleValidationErrors
-			var data = $.parseJSON(xhr.responseText);
-			if (data && data.errors) {
-				console.error('errors:', data.errors);
+			try {
+				var data = $.parseJSON(xhr.responseText);
+				if (data && data.errors) {
+					console.error('errors:', data.errors);
+				}
+			} catch (e) {
+				// noop for invalid response				
 			}
 		},
 

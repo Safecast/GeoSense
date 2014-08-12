@@ -1,5 +1,26 @@
-define([], function() {
-	return {};
+define(['jquery', 'views/notification-bubble-view'], function($, NotificationBubbleView) {
+	return {
+		initAjaxErrorNotification: function() {
+			$(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+				var message = 'A network error occured. Please try again later.';
+				if (jqxhr && jqxhr.responseText && jqxhr.responseText != '') {
+					message = jqxhr.responseText;
+					try {
+						var parsed = $.parseJSON(jqxhr.responseText);
+						if (parsed.message) {
+							message = parsed.message;
+						}
+					} catch (e) {
+						// noop
+					}
+				} else if (thrownError && thrownError != '') {
+					message = thrownError;	
+				}
+				console.error(thrownError);
+				NotificationBubbleView.error(message);
+			});		
+		}
+	};
 });
 
 /*
@@ -142,51 +163,51 @@ $.fn.blink = function() {
 	var cycle;
 	(cycle = function() {
 	   progressElement.delay(1000)
-	        .animate({opacity: 1}, 'slow')
-	        .delay(1000)
-	        .animate({opacity: .2}, 'slow', cycle);
+			.animate({opacity: 1}, 'slow')
+			.delay(1000)
+			.animate({opacity: .2}, 'slow', cycle);
 	})();
 };
 */
 
 var lpad = function(str, padString, length) {
 	var s = new String(str);
-    while (s.length < length) {
-        s = padString + s;
-    }
-    return s;
+	while (s.length < length) {
+		s = padString + s;
+	}
+	return s;
 };
 
 function mathEval(exp) {
-    var reg = /(?:[a-z$_][a-z0-9$_]*)|(?:[;={}\[\]"'!&<>^\\?:])/ig,
-        valid = true;
+	var reg = /(?:[a-z$_][a-z0-9$_]*)|(?:[;={}\[\]"'!&<>^\\?:])/ig,
+		valid = true;
 
-    // Detect valid JS identifier names and replace them
-    var evalExp = exp.replace(reg, function ($0) {
-        // If the name is a direct member of Math, allow
-        if (Math.hasOwnProperty($0))
-            return "Math."+$0;
-        // Otherwise the expression is invalid
-        else
-            valid = false;
-    });
+	// Detect valid JS identifier names and replace them
+	var evalExp = exp.replace(reg, function ($0) {
+		// If the name is a direct member of Math, allow
+		if (Math.hasOwnProperty($0))
+			return "Math."+$0;
+		// Otherwise the expression is invalid
+		else
+			valid = false;
+	});
 
-    // Don't eval if our replace function flagged as invalid
-    if (!valid) {
-    	var msg = "Invalid arithmetic expression: "+exp;
-    	console.error(msg);
-    	if (DEV) throw new Error(msg);
-    	return false;
-    } else {
-        try { 
-        	return(eval(evalExp)); 
-        } catch (e) { 
-	    	var msg = "Eval error: " + evalExp;
-	    	console.error(msg);
-	    	if (DEV) throw e;
-	    	return false;
-        };
-    }
+	// Don't eval if our replace function flagged as invalid
+	if (!valid) {
+		var msg = "Invalid arithmetic expression: "+exp;
+		console.error(msg);
+		if (DEV) throw new Error(msg);
+		return false;
+	} else {
+		try { 
+			return(eval(evalExp)); 
+		} catch (e) { 
+			var msg = "Eval error: " + evalExp;
+			console.error(msg);
+			if (DEV) throw e;
+			return false;
+		};
+	}
 }
 
 function ValFormatter(format)
@@ -324,27 +345,27 @@ function hsb2rgb(_hsb) {
 function circleToGeoJSON(ctr, xRadius, yRadius, numSegments, internalProjection, externalProjection)
 {
 	var corners = [];
-    var step = 2 * Math.PI / numSegments;
-    for (var i = 0; i < Math.PI * 2; i += step) {
-        var x = ctr.x + Math.cos(i) * xRadius,
-        	y = ctr.y + Math.sin(i) * yRadius;
-        if (internalProjection && externalProjection) {
-        	var pt = new OpenLayers.Geometry.Point(x, y);
-        	pt.transform(internalProjection, externalProjection);
-        	x = pt.x; y = pt.y;
-        }
-        corners.push([x, y]);
-    }
-    corners.push(corners[0]);
-    return {
-    	type: 'LineString',
-    	coordinates: corners
-    };
+	var step = 2 * Math.PI / numSegments;
+	for (var i = 0; i < Math.PI * 2; i += step) {
+		var x = ctr.x + Math.cos(i) * xRadius,
+			y = ctr.y + Math.sin(i) * yRadius;
+		if (internalProjection && externalProjection) {
+			var pt = new OpenLayers.Geometry.Point(x, y);
+			pt.transform(internalProjection, externalProjection);
+			x = pt.x; y = pt.y;
+		}
+		corners.push([x, y]);
+	}
+	corners.push(corners[0]);
+	return {
+		type: 'LineString',
+		coordinates: corners
+	};
 }
 
 if (!Array.isArray) {
   Array.isArray = function (vArg) {
-    return Object.prototype.toString.call(vArg) === "[object Array]";
+	return Object.prototype.toString.call(vArg) === "[object Array]";
   };
 }
 

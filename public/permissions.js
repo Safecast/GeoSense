@@ -11,7 +11,7 @@ define([], function() {
 	{
 		__user = user;
 		if (app) {
-			console.log(app, app.trigger);
+			//console.log(app, app.trigger);
 			app.trigger(user ? 'user:login' : 'user:logout');
 		}
 	};

@@ -3,6 +3,7 @@ define([
     'underscore',
     'backbone',
     'config',
+    'utils',
     'permissions',
     'views/login-signup-view',
     'views/header-view',
@@ -21,14 +22,16 @@ define([
     'views/graphs-panel-view',
     'views/graphs/timeline-scatter-plot-view',
     'views/graphs/histogram-view',
+    'views/notification-bubble-view',
     'models/map',
     'models/map-layer',
     'text!templates/help/about.html'
-], function($, _, Backbone, config, permissions, LoginSignupView,
+], function($, _, Backbone, config, utils, permissions, LoginSignupView,
     HeaderView, SetupView, HelpPanelView, LayersPanelView, 
     DataDetailView, MapInfoView, BaselayerEditorView, MapLayerEditorView,
     MapLayerView, DataLibraryPanelView, DataImportView,
     ModalView, ShareView, GraphsPanelView, TimelineScatterPlotView, HistogramView,
+    NotificationBubbleView,
     Map, MapLayer,
     aboutHtml) {
         "use strict";
@@ -276,6 +279,10 @@ define([
 
             mapViewReady: function() 
             {
+                if (this.__mapViewReady) {
+                    //throw new Error('mapViewReady already triggered');
+                }
+                this.__mapViewReady = true;
                 var self = this;
                 // give map a moment to load tiles
                 setTimeout(function() {
@@ -330,6 +337,7 @@ define([
 
                 this.listenTo(model, 'destroy', function() {
                     self.stopListening(model);
+                    delete self.mapLayersById[model.id];
                 });
 
                 if (model.getDataStatus() != DataStatus.COMPLETE) {
@@ -486,6 +494,9 @@ define([
 
                 if (this.isMapAdmin()) {
                     this.setupView = new SetupView({model: this.map}).render();
+                    this.setupView.on('map:saved', function(model) {
+                        NotificationBubbleView.success(__('Map information saved.'));
+                    });
                     if (this.setupRoute) {
                         this.showSetupView();
                     }
@@ -715,6 +726,7 @@ define([
                     opts = this.sessionOptions.viewOptions;
                 }
                 if (this.mapView) {
+                    this.__mapViewReady = false;
                     this.mapView.updateViewOptions(opts);
                 }
             },
@@ -865,6 +877,12 @@ define([
                     this.mapLayerEditorViews[layerId] = new MapLayerEditorView({
                         model: this.getMapLayer(layerId)
                     }).render();
+                    this.mapLayerEditorViews[layerId].on('mapLayer:saved', function() {
+                        NotificationBubbleView.success(__('Layer saved.'));
+                    });
+                    this.mapLayerEditorViews[layerId].on('mapLayer:destroyed', function() {
+                        NotificationBubbleView.success(__('Layer removed.'));
+                    });
                 }
 
                 for (var k in this.mapLayerEditorViews) {
@@ -902,22 +920,24 @@ define([
                 // success will before before attributes are set, hence wait for sync:
                 layer.once('sync', function() { 
                     self.initMapLayer(layer, true);
-                    self.trigger('layer:added', layer);
+                    self.trigger('mapLayer:added', layer);
                 });
                 layer.save({}, {
                     success: function(model, response, options) {
                         console.log('new map layer saved', model);
                         self.layersPanelView.show('fast');
+                        NotificationBubbleView.success(__('Layer added to map.'));
                     },
                     error: function(model, xhr, options) {
                         console.error('failed to save new map layer');
                     }
                 }); 
-            }
+            }, 
 
         });
 
         var initialize = function(mapAttributes, isCustomHost) {
+            utils.initAjaxErrorNotification();
             return new MapRouter(mapAttributes, isCustomHost);
         };
         var start = function() {
