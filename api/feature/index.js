@@ -118,7 +118,7 @@ var FeatureAPI = function(app)
 				limit = isNaN(limit) ? 20 : Math.max(1, Math.min(40, limit)),
 				filterQuery = {$and: [{active: true}, {status: config.DataStatus.COMPLETE}]},
 				query,
-				featureCountQuery = {geometry: {$ne: null}};
+				featureCountQuery = {};
 				type = ['user', 'public'].indexOf(urlObj.query.t) != -1 ? urlObj.query.t : 'public';
 			
 			if (urlObj.query.q && typeof urlObj.query.q == 'string') {
@@ -153,7 +153,7 @@ var FeatureAPI = function(app)
 					var countQueue = collections.map(function(collection) {
 						return collection;
 					});
-					console.log('found collections: '+collections.length);
+					console.log('Found collections: '+collections.length);
 					
 					var dequeueCount = function() {
 						if (!countQueue.length) {
@@ -162,8 +162,12 @@ var FeatureAPI = function(app)
 							}));
 							return;
 						}
-						var collection = countQueue.shift();
-						collection.getFeatureModel().count(featureCountQuery, function(err, c) {
+						var collection = countQueue.shift(),
+							featureModel = collection.getFeatureModel();						
+						console.log('Counting features for "' + collection.title + '" in ' + featureModel.collection.name
+								+ (config.COUNT_WITH_GEOMETRY_ONLY ? '[withGeometry() only]' : ''));
+						var q = config.COUNT_WITH_GEOMETRY_ONLY ? featureModel.withGeometry() : featureModel;
+						q.count(featureCountQuery, function(err, c) {
 							if (handleDbOp(req, res, err, true)) return;
 							collection.extraAttrs = {
 								counts: {

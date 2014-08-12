@@ -88,6 +88,9 @@ var config = {
 	},
 
 	DEFAULT_LABEL_FIELDS: ['title', 'Title', 'name', 'Name', 'label', 'Label'],
+
+	// counting without a query is much faster
+	COUNT_WITH_GEOMETRY_ONLY: false
 };
 
 for (var zoom = 0; zoom < config.MAP_RESOLUTIONS.length; zoom++) {
@@ -101,10 +104,10 @@ if (typeof require == 'function') {
 	// re-define import function instead
 	utils = {
 		import: function(into, mod) {
-		    for (var k in mod) {
-		        into[k] = mod[k];
-		    }
-		    return mod;
+			for (var k in mod) {
+				into[k] = mod[k];
+			}
+			return mod;
 		}
 	};
 } 
