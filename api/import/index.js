@@ -88,7 +88,7 @@ var ImportAPI = function(app)
                 res.send(err, 403);
             } else {
                 var sendItems = req.body.preview || req.body.inspect ? [] : null,
-                    descripts, autoTransform;
+                    meta, autoTransform;
                 self.import(params, req, res, function(err, collection) {
                     var err = err;
                     if (err && !err.statusCode) {
@@ -109,7 +109,7 @@ var ImportAPI = function(app)
                         res.send({
                             collection: collection,
                             autoTransform: autoTransform,
-                            descripts: descripts,
+                            meta: meta,
                             items: sendItems
                         });
                     }
@@ -139,7 +139,7 @@ var ImportAPI = function(app)
                                 collection: collection,
                             });
                         }
-                        descripts = dataTransform.descripts;
+                        meta = dataTransform.meta;
                     },
                 });
             }
@@ -293,7 +293,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                 }
                 throw err;
             }
-            dataTransform.addFields(customTransform.descripts);
+            dataTransform.addFields(customTransform.meta);
         }
 
         if (params.layerOptions) {
@@ -321,7 +321,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
         if (!params.dry && (params.saveParams == undefined || params.saveParams)) {
             collection.importParams = _.extend(_.clone(params), {
-                transform: customTransform ? customTransform.descripts : null
+                transform: customTransform ? customTransform.meta : null
             });
         }
 
