@@ -1,0 +1,202 @@
+.data-import-view .modal-body .add .tab-content .input-large
+{
+	width:440px;
+	height:40px;
+	font-size:15pt;
+	line-height:28px;
+}
+.data-import-view .modal-body .add .tab-content .btn.large
+{
+	width:50px;
+	height:40px;
+}
+.data-import-view .step.source fieldset {
+	margin-left: auto;
+	margin-right: auto;
+	width: 492px;
+}
+.data-import-view .modal-body .add .tab-content .btn.large p
+{
+	padding-top:10px;
+	font-size:10pt;
+	font-weight:bold;
+	color:#666;
+}
+.data-import-view .modal-body .add .well.form-inline .input-small
+{
+	width:180px;
+}
+.data-import-view .modal-body .add .well.form-inline .color-picker
+{
+	width:100px;
+}
+.data-import-view .target {
+	margin-top: 20px;
+}
+.data-import-view .target .table-container {
+	background: url(../assets/field-map-howto.png) 30px 70px no-repeat;
+}
+.data-import-view .target.mapped .table-container {
+	background-image: none;
+}
+.data-import-view th {
+	border: none !important;
+}
+.data-import-view td.conversion-error {
+	color: #ff3333;
+}
+.data-import-view td.conversion-blank {
+	color: #ddd;
+}
+.data-import-view .table-container {
+	overflow: auto;
+	height: 190px;
+	overflow: auto;
+}
+.data-import-view form h4 {
+	font-size: 13px;
+	margin: 0 auto 10px auto;
+	width: 100%;
+	text-align: center;
+}
+.data-import-view .modal-body table th, .data-import-view .modal-body table td {
+	padding: .4em;
+	width: 20%;
+	max-width: 250px;
+	overflow: hidden;
+}
+.data-import-view th {
+	vertical-align: top !important;
+}
+.data-import-view .from-field {
+	cursor: move;
+	display: block;
+	margin: 2px;	
+	float: left;
+	white-space: nowrap;
+	max-width: 120px;
+	overflow: hidden;
+	text-align: right;
+	text-shadow:rgba(50,50,50,.5) 1px 1px 1px;
+	box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, .2);
+	border-width: 1px;
+	border-color: #aaa;
+	border-style: solid;
+	z-index: 999;
+}
+.data-import-view .btn.back {
+	float: left;
+}
+.data-import-view .from-field .remove:hover, .data-import-view .from-field .remove:active {
+	opacity: 1;
+}
+.data-import-view td {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 11px;
+}
+.data-import-view .to-field {
+	-webkit-transition: background-color 300ms ease-out;
+	-moz-transition: background-color 300ms ease-out;
+	transition: background-color 300ms ease-out;
+}
+.data-import-view .to-field.highlight {
+	background-color: lightyellow; 
+}
+.data-import-view .from-field .remove {
+	opacity: .75;
+	display: none;
+	margin-right: 3px;
+}
+.data-import-view .from-field.mapped .remove {
+	color: #fff;
+	display: inline-block;
+}
+.data-import-view table .well {
+	display: block;
+	min-height: 40px;
+	margin: 0 0 .5em 0;
+	padding: 2px;
+	border-color: #ddd;
+	background: none;
+}
+.data-import-view .to-field .from-field {
+}
+.drop-field.sortable .drag-field:last-child {
+	margin-right: .25em;
+}
+.data-import-view .modal-body .alert
+{
+	display:none;
+}
+.data-import-view .label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+    padding: .3em .7em .35em;
+    line-height: 20px;
+}
+.data-import-view .modal.large
+{
+}
+.data-import-view button.show-field-settings {
+	margin-bottom: 2px;
+	white-space: nowrap;
+	width: 100%;
+}
+.data-import-view .field-label {
+	font-weight: bold;
+}
+.data-import-view .modal-body .add .nav.nav-tabs .label
+{
+	position:relative;
+	top:7px;
+	margin-right:10px;
+}
+.data-import-view .modal-footer .btn.btn-success
+{
+	display:none;
+}
+.data-import-view .show-field-settings {
+	display: inline-block;
+}
+.data-import-view .field-settings {
+	font-size: 12px;
+	white-space: nowrap;
+}
+.data-import-view .state-indicator {
+	position: relative;
+	height: 28px;
+	margin-right: 1em;
+}
+.data-import-view .btn-group.select-filetype .btn {
+	padding: 12px 0 8px 0;
+}
+.data-import-view .btn.source-submit {
+	display: block;
+	margin: 20px auto 0 auto;
+	width: 150px;
+	height: 40px;
+}
+.icon.icon-filetype {
+	background-image: url(../assets/filetypes.png);
+	width: 50px;
+	height: 50px;
+}
+.icon.icon-filetype span {
+	display: none;
+}
+.icon.icon-filetype.csv {
+	background-position: 0px 0%;
+}
+.icon.icon-filetype.geojson {
+	background-position: -50px 0%;
+}
+.icon.icon-filetype.kml {
+	background-position: -100px 0%;
+}
+.icon.icon-filetype.rss {
+	background-position: -150px 0%;
+}
+.icon.icon-filetype.esri-grid {
+	background-position: -200px 0%;
+}

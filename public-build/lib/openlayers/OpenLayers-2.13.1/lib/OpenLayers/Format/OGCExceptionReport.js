@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Format.OGCExceptionReport=OpenLayers.Class(OpenLayers.Format.XML,{namespaces:{ogc:"http://www.opengis.net/ogc"},regExes:{trimSpace:/^\s*|\s*$/g,removeSpace:/\s*/g,splitSpace:/\s+/,trimComma:/\s*,\s*/g},defaultPrefix:"ogc",read:function(e){var t;typeof e=="string"&&(e=OpenLayers.Format.XML.prototype.read.apply(this,[e]));var n=e.documentElement,r={exceptionReport:null};return n&&(this.readChildNodes(e,r),r.exceptionReport===null&&(r=(new OpenLayers.Format.OWSCommon).read(e))),r},readers:{ogc:{ServiceExceptionReport:function(e,t){t.exceptionReport={exceptions:[]},this.readChildNodes(e,t.exceptionReport)},ServiceException:function(e,t){var n={code:e.getAttribute("code"),locator:e.getAttribute("locator"),text:this.getChildValue(e)};t.exceptions.push(n)}}},CLASS_NAME:"OpenLayers.Format.OGCExceptionReport"});

@@ -1,0 +1,27 @@
+.header-view .navbar-right {
+	padding-right: 0;
+}
+.header-view .search-form .input-group {
+	width: 12em;
+}
+.header-view .btn-inverse {
+	background-color: #444;
+	color: #eee;
+}
+.header-view .btn-inverse:hover, .header-view .btn-inverse:focus {
+	background-color: #555;
+	color: #fff;
+}
+.header-view input {
+}
+@media only screen and (max-width : 1200px) {
+	.header-view .search-query {
+		
+	}
+	.header-view .admin-tools .caption {
+		display: none;
+	}
+}
+.header-view .navbar-brand {
+	padding: 14px 15px 0 15px;
+}

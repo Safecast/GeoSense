@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Protocol=OpenLayers.Class({format:null,options:null,autoDestroy:!0,defaultFilter:null,initialize:function(e){e=e||{},OpenLayers.Util.extend(this,e),this.options=e},mergeWithDefaultFilter:function(e){var t;return e&&this.defaultFilter?t=new OpenLayers.Filter.Logical({type:OpenLayers.Filter.Logical.AND,filters:[this.defaultFilter,e]}):t=e||this.defaultFilter||undefined,t},destroy:function(){this.options=null,this.format=null},read:function(e){e=e||{},e.filter=this.mergeWithDefaultFilter(e.filter)},create:function(){},update:function(){},"delete":function(){},commit:function(){},abort:function(e){},createCallback:function(e,t,n){return OpenLayers.Function.bind(function(){e.apply(this,[t,n])},this)},CLASS_NAME:"OpenLayers.Protocol"}),OpenLayers.Protocol.Response=OpenLayers.Class({code:null,requestType:null,last:!0,features:null,data:null,reqFeatures:null,priv:null,error:null,initialize:function(e){OpenLayers.Util.extend(this,e)},success:function(){return this.code>0},CLASS_NAME:"OpenLayers.Protocol.Response"}),OpenLayers.Protocol.Response.SUCCESS=1,OpenLayers.Protocol.Response.FAILURE=0;

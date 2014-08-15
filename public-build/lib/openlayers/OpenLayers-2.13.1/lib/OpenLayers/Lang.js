@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Lang={code:null,defaultCode:"en",getCode:function(){return OpenLayers.Lang.code||OpenLayers.Lang.setCode(),OpenLayers.Lang.code},setCode:function(e){var t;e||(e=OpenLayers.BROWSER_NAME=="msie"?navigator.userLanguage:navigator.language);var n=e.split("-");n[0]=n[0].toLowerCase(),typeof OpenLayers.Lang[n[0]]=="object"&&(t=n[0]);if(n[1]){var r=n[0]+"-"+n[1].toUpperCase();typeof OpenLayers.Lang[r]=="object"&&(t=r)}t||(OpenLayers.Console.warn("Failed to find OpenLayers.Lang."+n.join("-")+" dictionary, falling back to default language"),t=OpenLayers.Lang.defaultCode),OpenLayers.Lang.code=t},translate:function(e,t){var n=OpenLayers.Lang[OpenLayers.Lang.getCode()],r=n&&n[e];return r||(r=e),t&&(r=OpenLayers.String.format(r,t)),r}},OpenLayers.i18n=OpenLayers.Lang.translate;
