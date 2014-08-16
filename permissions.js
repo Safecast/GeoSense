@@ -75,9 +75,14 @@ var sameUser = function (u1, u2)
     return _id1.toString() == _id2.toString();
 };
 
+var isSuperuser(req)
+{
+    return (req.user && req.user.superuser) || false;
+};
+
 var canAdminModel = function (req, doc) 
 {
-    var res = sameUser(req.user || {}, doc.createdBy);
+    var res = isSuperuser(req) || sameUser(req.user || {}, doc.createdBy);
     if (config.VERBOSE) {
         console[res ? 'success' : 'warn']('canAdminModel '+(doc.collection ? doc.collection.name : ''), (req.user ? req.user.email : '(no user)'), (res ? 'YES' : 'NO'), '_id:', doc._id, 
                 'createdBy:', (doc.createdBy ? (doc.createdBy._id ? doc.createdBy._id : doc.createdBy) : '(no user)'));
@@ -98,7 +103,7 @@ var queryPublic = function(query)
 
 var canViewMap = function (req, map) 
 {
-    var userIsOwner = sameUser(req.user, map.createdBy);
+    var userIsOwner = isSuperuser(req) || sameUser(req.user, map.createdBy);
     return (map.active || userIsOwner) &&
         (isPublic(map) 
         || userIsOwner
@@ -117,12 +122,12 @@ var canViewFeatureCollection = function (req, map, featureCollection)
 
 var canCreateMap = function (req) 
 {
-    return !config.LIMITED_PROD_ACCESS;
+    return isSuperuser(req) || !config.LIMITED_PROD_ACCESS;
 };
 
 var canImportData = function (req) 
 {
-    return !config.LIMITED_PROD_ACCESS;
+    return isSuperuser(req) || !config.LIMITED_PROD_ACCESS;
 };
 
 var requireLogin = function (req, res, next) 

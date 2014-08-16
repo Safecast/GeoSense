@@ -33,7 +33,8 @@ mongooseTypes.loadTypes(mongoose);
 var UserSchema = new mongoose.Schema({
     name: String,
     email: {type: mongoose.SchemaTypes.Email, required: true, unique: true},
-    password: {type: String, required: true}
+    password: {type: String, required: true},
+    superuser: {type: Boolean, default: false}
 });
 
 UserSchema.plugin(useTimestamps);
