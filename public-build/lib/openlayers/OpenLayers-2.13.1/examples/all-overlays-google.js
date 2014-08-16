@@ -1,1 +1,0 @@
-function init(){map=new OpenLayers.Map({div:"map",allOverlays:!0});var e=new OpenLayers.Layer.OSM,t=new OpenLayers.Layer.Google("Google Streets",{visibility:!1});map.addLayers([e,t]),map.addControl(new OpenLayers.Control.LayerSwitcher),map.zoomToMaxExtent()}var map;
