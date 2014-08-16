@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Layer.KaMapCache=OpenLayers.Class(OpenLayers.Layer.KaMap,{IMAGE_EXTENSIONS:{jpeg:"jpg",gif:"gif",png:"png",png8:"png",png24:"png",dithered:"png"},DEFAULT_FORMAT:"jpeg",initialize:function(e,t,n,r){OpenLayers.Layer.KaMap.prototype.initialize.apply(this,arguments),this.extension=this.IMAGE_EXTENSIONS[this.params.i.toLowerCase()||this.DEFAULT_FORMAT]},getURL:function(e){e=this.adjustBounds(e);var t=this.map.getResolution(),n=Math.round(this.map.getScale()*1e4)/1e4,r=Math.round(e.left/t),i=-Math.round(e.top/t),s=Math.floor(r/this.tileSize.w/this.params.metaTileSize.w)*this.tileSize.w*this.params.metaTileSize.w,o=Math.floor(i/this.tileSize.h/this.params.metaTileSize.h)*this.tileSize.h*this.params.metaTileSize.h,u=["/",this.params.map,"/",n,"/",this.params.g.replace(/\s/g,"_"),"/def/t",o,"/l",s,"/t",i,"l",r,".",this.extension],a=this.url;return OpenLayers.Util.isArray(a)&&(a=this.selectUrl(u.join(""),a)),a+u.join("")},CLASS_NAME:"OpenLayers.Layer.KaMapCache"});

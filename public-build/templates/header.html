@@ -1,0 +1,97 @@
+<header class="navbar navbar-inverse navbar-fixed-top bs-docs-nav" role="banner">
+
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <div class="navbar-brand">
+	    <a class="app-title" href="#"><span class="app-title">GeoSense</a> <a class="map-title"></a>
+	  </div>
+  </div>
+
+  <!-- Collect the nav links, forms, and other content for toggling -->
+  <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+    <ul class="nav navbar-nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+					<li id="aboutMap"><a href="#">About this map</a></li>
+					<li id="authorLink"><a href="#"><span class="text"></span> <span class="glyphicon glyphicon-chevron-right half-opacity" /></span></a></li>
+					<li class="divider"></li>
+					<li id="aboutGeoSense"><a href="#">About GeoSense</a></li>
+					<li><a href="http://www.media.mit.edu/" target="_blank">MIT Media Lab <span class="glyphicon glyphicon-chevron-right half-opacity" /></a></li>
+        </ul>
+      </li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Share <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+					<li id="shareLink"><a href="#">Link or embed</a></li>
+					<li id="postTwitter"><a href="#">Post to Twitter</a></li>
+					<li id="postFacebook"><a href="#">Share on Facebook</a></li>
+        </ul>
+      </li>
+    </ul>
+		<ul id="mapView" class="nav navbar-nav">
+			<li class="map-view-toggle map">
+		    	<a href="#map">Map</a>
+		  	</li>
+		</ul>
+
+		<ul class="nav navbar-nav">
+			<li id="viewBase" class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">Base: <span id="viewBaseCurrent"></span>	<b class="caret"></b></a>
+				<ul class="dropdown-menu">
+          <li>
+          	<ul class="base-choices"></ul>
+          </li>
+				</ul>
+			</li>
+      <li id="viewStyle" class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Style: <span id="viewStyleCurrent"></span> <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li>
+            <ul id="viewStyleChoices" class="style-choices"></ul>
+          </li>
+          <li class="divider"></li>
+          <li><a id="customizeViewOptions" href="#">Customize…</a></li>
+        </ul>
+      </li>
+		</ul>
+
+    <ul class="nav navbar-nav navbar-right user-nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li class="logged-in"><a href="#" disabled><strong class="user-name"></strong></a></li>
+          <li class="logged-in divider"></li>
+          <li class="logged-in"><a href="<%= BASE_URL %>dashboard" class="user-dashboard">Dashboard</a></li>
+          <li class=""><a href="#" class="public-map">Show public map</a></li>
+          <li class=""><a href="#" class="admin-map">Edit this map</a></li>
+          <li class="logged-in"><a href="<%= BASE_URL %>logout" class="user-logout">Log out</a></li>
+          <li class="logged-out"><a href="<%= BASE_URL %>signup" class="user-signup">Sign up</a></li>
+          <li class="logged-out"><a href="<%= BASE_URL %>login" class="user-login">Log in</a></li>
+        </ul>
+      </li>
+    </ul>
+
+    <form class="navbar-form navbar-right search-form" role="search">
+      <div class="input-group">
+        <input type="text" class="form-control search-query" placeholder="Search address">
+        <span class="input-group-btn">
+          <button type="submit" class="btn btn-inverse"><span class="glyphicon glyphicon-search" /></button>
+        </span>
+      </div>
+    </form>
+
+    <form class="nav navbar-form navbar-right admin-tools">
+			<button type="submit" class="btn btn-inverse admin-tool map-tool setup"><span class="glyphicon glyphicon-cog"></span><span class="caption"> Setup</span></button>
+			<button type="submit" class="btn btn-inverse admin-tool map-tool data-import"><span class="glyphicon glyphicon-cloud-upload"></span><span class="caption"> Import</span></button>
+			<button type="submit" class="btn btn-inverse admin-tool map-tool data-library"><span class="glyphicon glyphicon-th-list"></span><span class="caption"> Library</span></button>
+    </form>
+
+  </nav><!-- /.navbar-collapse -->
+</header>

@@ -1,0 +1,6 @@
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
+OpenLayers.Date={dateRegEx:/^(?:(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?)?(?:(?:T(\d{1,2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|(?:[+-]\d{1,2}(?::(\d{2}))?)))|Z)?$/,toISOString:function(){return"toISOString"in Date.prototype?function(e){return e.toISOString()}:function(e){var t;return isNaN(e.getTime())?t="Invalid Date":t=e.getUTCFullYear()+"-"+OpenLayers.Number.zeroPad(e.getUTCMonth()+1,2)+"-"+OpenLayers.Number.zeroPad(e.getUTCDate(),2)+"T"+OpenLayers.Number.zeroPad(e.getUTCHours(),2)+":"+OpenLayers.Number.zeroPad(e.getUTCMinutes(),2)+":"+OpenLayers.Number.zeroPad(e.getUTCSeconds(),2)+"."+OpenLayers.Number.zeroPad(e.getUTCMilliseconds(),3)+"Z",t}}(),parse:function(e){var t,n=e.match(this.dateRegEx);if(n&&(n[1]||n[7])){var r=parseInt(n[1],10)||0,i=parseInt(n[2],10)-1||0,s=parseInt(n[3],10)||1;t=new Date(Date.UTC(r,i,s));var o=n[7];if(o){var u=parseInt(n[4],10),a=parseInt(n[5],10),f=parseFloat(n[6]),l=f|0,c=Math.round(1e3*(f-l));t.setUTCHours(u,a,l,c);if(o!=="Z"){var h=parseInt(o,10),p=parseInt(n[8],10)||0,d=-1e3*(60*h*60+p*60);t=new Date(t.getTime()+d)}}}else t=new Date("invalid");return t}};
