@@ -57,6 +57,7 @@ exports.connectDB = function(callback, exitProcessOnError)
 *
 *   "%(foo)s, %(bar)s!".format({foo: 'Hello', bar: 'world'})
 */
+/*
 String.prototype.format = function(replacements) {
     return this.replace(/\%\((.+?)\)(s|i)/ig, function(match, name, type) { 
         return typeof replacements[name] != 'undefined'
@@ -72,6 +73,7 @@ function __(str, replacements) {
     }
     return s;
 }
+*/
 
 /**
 * Simple Python-style date formatting.
