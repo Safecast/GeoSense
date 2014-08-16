@@ -348,7 +348,7 @@ app.get(/^\/([a-zA-Z0-9\-\_]+)/, function(req, res)
 });
 
 if (!process.env.NODE_ENV) {
-    console.error('NODE_ENV is not defined');
+    throw new Error('NODE_ENV is not defined');
 } else {
     console.info('Environment:', process.env.NODE_ENV);
 }
@@ -356,7 +356,7 @@ if (!process.env.NODE_ENV) {
 // Connect to DB, load templates and start listening
 
 if (!config.BASE_URL) {
-    console.error('config.BASE_URL is not defined');
+    throw new Error('config.BASE_URL is not defined');
 } else {
     console.info('Base URL:', config.BASE_URL);
 }
