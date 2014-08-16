@@ -699,6 +699,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
                 function onTransformData(saveModel, transformed)
                 {
+                    var self = parser;
+                    
                     if (dataCallbacks.transform) {
                         dataCallbacks.transform(false, saveModel, transformed);
                     }
