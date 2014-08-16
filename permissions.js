@@ -75,7 +75,7 @@ var sameUser = function (u1, u2)
     return _id1.toString() == _id2.toString();
 };
 
-var isSuperuser(req)
+var isSuperuser = function(req)
 {
     return (req.user && req.user.superuser) || false;
 };
