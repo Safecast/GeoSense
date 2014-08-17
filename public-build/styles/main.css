@@ -6580,7 +6580,7 @@ footer .dot {
   text-decoration: none;
 }
 .page .jumbotron {
-	color: white;
+  color: white;
   text-align: center;
   border-bottom: 1px solid #e5e5e5;
   background: #333 url(../assets/homepage-topotexture-dark.jpg);
@@ -6601,10 +6601,10 @@ footer .dot {
   font-size: 18px
 }
 .page .jumbotron form {
-	margin: 40px 0 20px 0;
+  margin: 40px 0 20px 0;
 } 
 .page .jumbotron h2 {
-	color: #aaa;
+  color: #aaa;
   font-size: 25px;
   margin-bottom: 18px;
   white-space: nowrap;
@@ -6655,6 +6655,11 @@ form.login .btn {
 .marketing .col-lg-4 p {
   margin-left: 10px;
   margin-right: 10px;
+}
+.marketing img.framed {
+  border-bottom: 2px solid #e5e5e5;
+  
+  margin: 0 auto;
 }
 .popover-title {
   font-size: 14px !important;
