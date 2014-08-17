@@ -6656,10 +6656,11 @@ form.login .btn {
   margin-left: 10px;
   margin-right: 10px;
 }
-.marketing img.framed {
-  border-bottom: 2px solid #e5e5e5;
+.marketing .img-circle.framed {
+  border-bottom: 2px solid #ccc;
   
   margin: 0 auto;
+  overflow: hidden;
 }
 .popover-title {
   font-size: 14px !important;
