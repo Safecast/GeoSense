@@ -33,9 +33,10 @@ define([
 		publicUri: function(options)
 		{
 			var o = options || {},
+				omitSlug = this.isCustomHost || o.omitSlug,
 				secret = o.secret != undefined ? 
 					o.secret : this.isPrivate(),
-				uri = (!this.isCustomHost || (o.omitSlug != undefined && !o.omitSlug) ? 
+				uri = (!omitSlug ? 
 						(o.slug ? o.slug : 
 							secret ? 
 								's/' + this.attributes.secretSlug : this.attributes.slug) 
@@ -59,7 +60,13 @@ define([
 
 		publicUrl: function(options)
 		{
-			return BASE_URL + this.publicUri(options);
+			var base = BASE_URL,
+				opts = _.extend({}, options);
+			if (this.attributes.host && this.attributes.host != '') {
+				opts.omitSlug = true;
+				base = 'http://' + this.attributes.host + '/';
+			}
+			return base + this.publicUri(opts);
 		},
 
 		newLayerInstance: function(attributes, options) 

@@ -153,10 +153,15 @@ form.login .btn {
 }
 
 .marketing .img-circle.framed {
-  border-bottom: 2px solid #ccc;
   /* center */
   margin: 0 auto;
   overflow: hidden;
+}
+
+.framed {
+  padding: 4px;
+  background: white;
+  border: 1px solid #ccc;
 }
 
 .popover-title {
@@ -168,7 +173,7 @@ form.login .btn {
 
 .featurettes-headline h2 {
   text-align: center;
-  margin: -10px 0 30px 0;
+  margin: -10px 0 50px 0;
   font-size: 19px;
 }
 
@@ -181,10 +186,6 @@ form.login .btn {
   line-height: 1;
   margin-top: 0;
 }
-
-.featurette-image {
-  background: #efefef;
-} 
 
 .featurettes {
   min-height: 100px;

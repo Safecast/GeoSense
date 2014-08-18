@@ -7,18 +7,18 @@ define([
 	'text!templates/featurettes.html',
 	'views/map-list-view-base'
 ], function($, _, Backbone, config, utils, templateHtml, MapListViewBase) {
-    "use strict";
+	"use strict";
 
-    var FeaturetteView = Backbone.View.extend({
+	var FeaturetteView = Backbone.View.extend({
 
-    	initialize: function(options)
-    	{
-	    	this.template = _.template(options.templateHtml);
-    		this.index = options.index;
-    	},
+		initialize: function(options)
+		{
+			this.template = _.template(options.templateHtml);
+			this.index = options.index;
+		},
 
-	    render: function() 
-	    {
+		render: function() 
+		{
 			this.$el.html(this.template());
 			this.populateFromModel();
 			return this;
@@ -26,7 +26,7 @@ define([
 
 		populateFromModel: function()
 		{
-	    	var self = this,
+			var self = this,
 				$el = this.$el,
 				url = this.model.publicUrl();
 
@@ -50,29 +50,29 @@ define([
 			}
 		}
 
-    });
+	});
 
 	var FeaturettesView = MapListViewBase.extend({
 
-	    initialize: function(options) 
-	    {
-		    this.template = _.template(templateHtml);
-		    this.mapType = 'featured';
+		initialize: function(options) 
+		{
+			this.template = _.template(templateHtml);
+			this.mapType = 'featured';
 		},
 
-	    render: function() 
-	    {
-	    	FeaturettesView.__super__.render.apply(this, arguments);
-	    	this.itemTemplateHtml = this.$('.element-template').remove()
-	    		.clone().removeClass('element-template').html();
-	        return this;
-	    },
+		render: function() 
+		{
+			FeaturettesView.__super__.render.apply(this, arguments);
+			this.itemTemplateHtml = this.$('.element-template').remove()
+				.clone().removeClass('element-template').html();
+			return this;
+		},
 
-	    createSubView: function(options)
-	    {
-	    	return new FeaturetteView(_.extend(
-	    		{templateHtml: this.itemTemplateHtml}, options));
-	    }
+		createSubView: function(options)
+		{
+			return new FeaturetteView(_.extend(
+				{templateHtml: this.itemTemplateHtml}, options));
+		}
 
 	
 	});
