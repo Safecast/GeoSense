@@ -33,7 +33,7 @@ define([
 		publicUri: function(options)
 		{
 			var o = options || {},
-				omitSlug = this.isCustomHost || o.omitSlug,
+				omitSlug = this.isCustomHost && (o.omitSlug || o.omitSlug == undefined),
 				secret = o.secret != undefined ? 
 					o.secret : this.isPrivate(),
 				uri = (!omitSlug ? 
