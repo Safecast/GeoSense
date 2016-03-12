@@ -23,7 +23,7 @@ for (var k in config.MAPREDUCE_SETTINGS.DB_OPTIONS) {
 	opts[k] = config.MAPREDUCE_SETTINGS.DB_OPTIONS[k];
 }
 
-var runMapReduceForFeatureCollection = function(collection, mappers, opts, callback) 
+var runMapReduceForFeatureCollection = function(collection, mappers, opts, callback)
 {
 	var collectionName = collection.getFeatureModel().collection.name;
 	var info = ['r', collectionName];
@@ -62,8 +62,8 @@ var runMapReduceForFeatureCollection = function(collection, mappers, opts, callb
 	}
 
 	var callRunMapReduce = function() {
-		runMapReduce(collectionName, outputCollectionName, mappers, opts, callback);	
-	}; 
+		runMapReduce(collectionName, outputCollectionName, mappers, opts, callback);
+	};
 
 	if (opts.removeFirst) {
 		var db = mongoose.connection;
@@ -82,7 +82,7 @@ var runMapReduceForFeatureCollection = function(collection, mappers, opts, callb
 
 };
 
-var AggregateAPI = function(app) 
+var AggregateAPI = function(app)
 {
 };
 
@@ -152,8 +152,8 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 					//var statsTotal = db.points.count(opts.query ... and GeoFeatureCollection) * (config.NUM_ZOOM_LEVELS + numHistograms);
 					//opts.stats = {total: statsTotal, collectionId: collection._id};
 					//db.GeoFeatureCollections.update({_id: collection._id}, {$set: {status: config.DataStatus.REDUCING, progress: 0, numBusy: statsTotal}});
-					
-					collection.status = !incremental ? 
+
+					collection.status = !incremental ?
 						config.DataStatus.REDUCING : config.DataStatus.REDUCING_INC;
 					//collection.progress = 0;
 					//collection.numBusy: statsTotal;
@@ -189,7 +189,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
 								}
 								mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
-										//'featureCollection', new Mapper.Copy(), 
+										//'featureCollection', new Mapper.Copy(),
 										attrMap.numeric, new Mapper.Histogram(
 											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
 										{ events: null, indexes: {'bin': 1}, aggregates: false, copy: "bin"}
@@ -213,13 +213,13 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 								}
 
 								// Initialize MapReduce for tiles
-								if (params.types.indexOf('tile') != -1 
-									&& (!params.zoom || params.zoom.indexOf(g) != -1) 
-									&& (!collection.gridSize || gridSize > collection.gridSize) 
+								if (params.types.indexOf('tile') != -1
+									&& (!params.zoom || params.zoom.indexOf(g) != -1)
+									&& (!collection.gridSize || gridSize > collection.gridSize)
 									&& (!collection.maxReduceZoom || g <= collection.maxReduceZoom)) {
 
 									mr('*** MapReduce for tiles at zoom = ' + g + ' ***', makeObj(
-										//'featureCollection', new Mapper.Copy(), 
+										//'featureCollection', new Mapper.Copy(),
 										geometryAttr, new Mapper.Tile[collection.tile](gridSize, gridSize, {index: false})),
 										{ events: tileEvents, indexes: tileIndexes }
 									);
@@ -232,8 +232,8 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 											tileIndexes[attrMap.datetime] = '1';
 
 											mr('*** MapReduce for ' + timebase.toLowerCase() + ' tiles at zoom = '+g+' ***', makeObj(
-												//'featureCollection', new Mapper.Copy(), 
-												geometryAttr, new Mapper.Tile.Rect(gridSize, gridSize, {index: false}), 
+												//'featureCollection', new Mapper.Copy(),
+												geometryAttr, new Mapper.Tile.Rect(gridSize, gridSize, {index: false}),
 												attrMap.datetime, new Mapper.Time[timebase]()),
 												{ events: tileEvents, indexes: tileIndexes }
 											);
@@ -248,7 +248,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 							for (var timebase in Mapper.Time) {
 								if (params.types.indexOf(timebase.toLowerCase()) != -1) {
 									mr('*** MapReduce for ' + timebase.toLowerCase() + ' overall ***', makeObj(
-										//'featureCollection', new Mapper.Copy(), 
+										//'featureCollection', new Mapper.Copy(),
 										attrMap.datetime, new Mapper.Time[timebase]()),
 										{ events: null, indexes: null }
 									);
@@ -256,7 +256,7 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 							}
 						}
 
-						var dequeueMapReduceCall = function() 
+						var dequeueMapReduceCall = function()
 						{
 							if (!mapReduceArguments.length) {
 								console[console.success ? 'success' : 'info']('*** MapReduce completed ***');
@@ -279,14 +279,14 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 								runMapReduceForFeatureCollection.call(this, collection, args[1], _.extend(_.clone(opts), args[2]), function(err, res) {
 									if (err) {
 										console.error('*** error during MapReduce ***')
-										callback(err);									
+										callback(err);
 									} else {
 										dequeueMapReduceCall();
 									}
 								});
 							}
 						};
-						
+
 						dequeueMapReduceCall();
 
 					});
@@ -324,8 +324,8 @@ AggregateAPI.prototype.aggregateAll = function(params, req, res, callback)
 }
 
 AggregateAPI.prototype.cli = {
-	
-	aggregate: function(params, callback, showHelp) 
+
+	aggregate: function(params, callback, showHelp)
 	{
 		var help = "Usage: node manage.js aggregate [params]\n"
 			+ "\nRuns MapReduce for currently unreduced collections.\n"
@@ -334,6 +334,8 @@ AggregateAPI.prototype.cli = {
 			+ '          Performs selective MapReduce only of the entered types.\n'
 			+ '\n    --rebuild\n'
 			+ '          Force complete rebuild even if MapReduce was already completed.\n'
+			+ '\n    --zoom level[-tolevel]\n'
+			+ '          Performs aggregation for the supplied range of zoom levels.\n'
 
 		if (!showHelp && utils.connectDB()) {
 			if (params._.length) {
