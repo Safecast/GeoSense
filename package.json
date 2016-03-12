@@ -29,7 +29,7 @@
 		"togeojson": "0.0.1",
 		"xml-stream": "0.x",
 		"connect-flash": "0.1.x",
-		"bcrypt": "0.7.x",
+		"bcrypt": "0.8.x",
 		"passport": "0.1.x",
 		"passport-local": "0.1.x",
 		"underscore": ">=1.5",
@@ -39,4 +39,3 @@
 		"rejuice": "git://github.com/samluescher/rejuice"
 	}
 }
-
