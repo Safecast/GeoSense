@@ -15,9 +15,9 @@ var config = require('../../config'),
 	GeoFeatureCollection = models.GeoFeatureCollection,
 	handleDbOp = utils.handleDbOp;
 
-var FeatureAPI = function(app) 
+var FeatureAPI = function(app)
 {
-	var retrieveLayer = function(req, res, callback) 
+	var retrieveLayer = function(req, res, callback)
 	{
 		apiUtil.findMapForRequest(req)
 			.populate('layers.featureCollection')
@@ -29,11 +29,11 @@ var FeatureAPI = function(app)
 				var mapLayer = map.layers.id(req.params.layerId),
 					featureCollection = mapLayer ? mapLayer.featureCollection : null;
 
-				if (!mapLayer || !featureCollection 
+				if (!mapLayer || !featureCollection
 					|| !permissions.canViewFeatureCollection(req, map, featureCollection)) {
 						res.send('map layer not found', 404);
 						return;
-				} 
+				}
 
 				callback(map, mapLayer, featureCollection);
 		});
@@ -84,7 +84,7 @@ var FeatureAPI = function(app)
 						FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts),
 						numericExtremes = getAttr(featureCollection.extremes, attrMap.numeric),
 						binSize = (numericExtremes.max - numericExtremes.min) / numBins;
-	
+
 					console.log('Loading histogram for', FindFeatureModel.collection.name);
 					FindFeatureModel.find()
 						.sort({'_id': 1})
@@ -94,7 +94,7 @@ var FeatureAPI = function(app)
 								properties: {
 									numBins: numBins,
 									binSize: binSize
-								}, 
+								},
 								items: docs.map(function(doc) {
 									var value = doc.get('value');
 									return {
@@ -120,7 +120,7 @@ var FeatureAPI = function(app)
 				query,
 				featureCountQuery = {};
 				type = ['user', 'public'].indexOf(urlObj.query.t) != -1 ? urlObj.query.t : 'public';
-			
+
 			if (urlObj.query.q && typeof urlObj.query.q == 'string') {
 				query = urlObj.query.q;
 				var rx = {$regex: '.*' + query + '.*', $options: 'i'};
@@ -159,7 +159,7 @@ var FeatureAPI = function(app)
 						return collection;
 					});
 					console.log('Found collections: '+collections.length);
-					
+
 					var dequeueCount = function() {
 						if (!countQueue.length) {
 							res.send(collections.map(function(collection) {
@@ -168,7 +168,7 @@ var FeatureAPI = function(app)
 							return;
 						}
 						var collection = countQueue.shift(),
-							featureModel = collection.getFeatureModel();						
+							featureModel = collection.getFeatureModel();
 						console.log('Counting features for "' + collection.title + '" in ' + featureModel.collection.name
 								+ (config.COUNT_WITH_GEOMETRY_ONLY ? '[withGeometry() only]' : ''));
 						var q = config.COUNT_WITH_GEOMETRY_ONLY ? featureModel.withGeometry() : featureModel;
@@ -186,24 +186,25 @@ var FeatureAPI = function(app)
 				});
 		});
 
-		var mapFeaturesRoute = function(req, res) 
+		var mapFeaturesRoute = function(req, res)
 		{
 			retrieveLayer(req, res, function(map, mapLayer, featureCollection) {
 				var urlObj = url.parse(req.url, true),
-					filterQuery = {'geometry': {$ne: undefined}},
+					filterQuery = {},
 					queryFields = null,
 					queryOptions = {'limit': config.MAX_RESULT_COUNT},
 					zoom = parseInt(urlObj.query.z) || 0,
 					bbox = urlObj.query.b,
+					findWithBbox,
 					timeGrid = urlObj.query.t,
 					strDate = urlObj.query.d,
 					returnOriginal = urlObj.query.o && Number(urlObj.query.o) != 0,
 					date,
 					features = [],
-					datetimeAttr = mapLayer.layerOptions && mapLayer.layerOptions.attrMap ? 
+					datetimeAttr = mapLayer.layerOptions && mapLayer.layerOptions.attrMap ?
 						mapLayer.layerOptions.attrMap.datetime : null;
 
-				// adjust zoom						
+				// adjust zoom
 				if (isNaN(zoom)) {
 					zoom = 0;
 				} else {
@@ -217,11 +218,11 @@ var FeatureAPI = function(app)
 					mapReduceOpts = {
 						tileSize: (enableTiles ? tileSize : undefined)
 					},
-					extraAttrs = { 
+					extraAttrs = {
 						properties: {
 							counts: {
 								full: 0, original: 0, max: 0, result: 0
-							}						
+							}
 						}
 					};
 
@@ -229,7 +230,7 @@ var FeatureAPI = function(app)
 					mapReduceOpts.timeGrid = timeGrid;
 				}
 
-				var isMapReduced = (mapReduceOpts.tileSize 
+				var isMapReduced = (mapReduceOpts.tileSize
 						&& (featureCollection.maxReduceZoom == undefined || zoom < featureCollection.maxReduceZoom))
 						|| (featureCollection.timebased && datetimeAttr),
 					FeatureModel = featureCollection.getFeatureModel(),
@@ -245,7 +246,7 @@ var FeatureAPI = function(app)
 					} else {
 						var bboxW = Math.abs(bbox[2] - bbox[0]),
 							bboxH = Math.abs(bbox[3] - bbox[1]);
-						// MongoDB manual: "Any geometry specified with GeoJSON to $geoIntersects queries, 
+						// MongoDB manual: "Any geometry specified with GeoJSON to $geoIntersects queries,
 						// must fit within a single hemisphere"
 						if (bboxW > 180 || bboxH > 90) {
 							/*
@@ -254,7 +255,7 @@ var FeatureAPI = function(app)
 							console.warn('bbox is wider than 180°, using $near instead');
 							var center = [bbox[0] + bboxW / 2, bbox[1] + bboxH / 2];
 							findQueue = [
-								FindFeatureModel.near({type: 'Point', coordinates: center}, 
+								FindFeatureModel.near({type: 'Point', coordinates: center},
 									coordinates.haversineDistance(center, [bbox[0], bbox[1]]))
 							];*/
 						} else {
@@ -263,12 +264,19 @@ var FeatureAPI = function(app)
 								return coordinates.coordinates2d(c);
 							});
 							console.info('Finding with $geoIntersects', JSON.stringify(geometry));
+							findWithBbox = true;
 							findQueue = [
 								FindFeatureModel.geoIntersects(geometry)
 							];
 						}
 					}
 				}
+
+				if (!findWithBbox) {
+					// make sure to include only features that have geometry
+					filterQuery['geometry'] = {$ne: undefined};
+				}
+
 				if (!findQueue) {
 					findQueue = [FindFeatureModel.where()];
 				}
@@ -321,7 +329,7 @@ var FeatureAPI = function(app)
 					} else {
 						// this is the original collection
 						extraAttrs.properties.counts.max = extraAttrs.properties.counts.result;
-						extraAttrs.properties.counts.original = extraAttrs.properties.counts.result;                    			
+						extraAttrs.properties.counts.original = extraAttrs.properties.counts.result;
 					}
 
 					extraAttrs.features = features;
@@ -333,7 +341,7 @@ var FeatureAPI = function(app)
 				};
 
 				var dequeueFind = function() {
-					if (!findQueue.length 
+					if (!findQueue.length
 						|| (queryOptions.limit != undefined && queryOptions.limit <= 0)) {
 							sendFeatures(features);
 							return;
