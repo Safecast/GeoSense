@@ -2,8 +2,8 @@
 	"name": "geosense",
 	"version": "0.1.0",
 	"engines": {
-		"node": "0.8",
-		"npm":  "1.1"
+		"node": "5.9.1",
+		"npm":  "3.7.3"
 	},
 	"dependencies": {
 		"csv":"0.0.13",
@@ -23,8 +23,8 @@
 		"JSONStream": "0.4.3",
 		"request": ">=2.10",
 		"cron": "1.0.1",
-		"node-compress": "0.1.0",
-		"time": "0.8.4",
+		"compression": ">=1.0.0",
+		"time": "0.11.4",
 		"jsdom": "0.5.0",
 		"togeojson": "0.0.1",
 		"xml-stream": "0.x",
