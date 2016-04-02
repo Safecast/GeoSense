@@ -12,8 +12,6 @@ if (IS_BROWSER) {
 var DEV = IS_BROWSER && window.location.href.indexOf(':3000') != -1;
 var DEBUG = DEV;
 
-var CLOUDMADE_KEY = '0a77f5f7d290465f9fe419f4ee788c50';
-
 var MapStatus = {
 	PRIVATE: 'P',
 	PUBLIC: 'A'
@@ -41,7 +39,7 @@ var FeatureType = {
 	POINTS: 'P',
 	SQUARE_TILES: 'ST',
 	BUBBLES: 'B',
-	SHAPES: 'S' 
+	SHAPES: 'S'
 };
 
 FeatureType.DEFAULT = FeatureType.POINTS;
@@ -118,6 +116,5 @@ if (!IS_BROWSER) {
 	};
 } else {
 	// Browser: define console.log if undefined
-	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {}, error: function() {} }; 
+	if (!DEBUG || typeof console == "undefined" || typeof console.log == "undefined") var console = { log: function() {}, error: function() {} };
 }
-

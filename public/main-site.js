@@ -4,7 +4,7 @@ require.config({
         jqueryui: 'lib/jquery-ui/js/jquery-ui-1.10.3.custom.min',
         underscore: 'lib/underscore/underscore-min',
         backbone: 'lib/backbone/backbone',
-        bootstrap: 'lib/bootstrap/dist/js/bootstrap.min', 
+        bootstrap: 'lib/bootstrap/dist/js/bootstrap.min',
         d3: 'lib/d3/d3.v2.min',
         text: 'lib/require/text',
         locale: 'locale/locale.en',
@@ -64,4 +64,3 @@ define([
 ], function($, _, Backbone, App) {
     return App;
 });
-
