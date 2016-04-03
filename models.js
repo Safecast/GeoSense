@@ -14,7 +14,7 @@ var useTimestamps = function (schema, options) {
         createdAt: {type: Date, index: 1},
         updatedAt: {type: Date, index: 1}
     });
-    schema.pre('save', function (next) {    
+    schema.pre('save', function (next) {
       if (!this.createdAt) {
         this.createdAt = this.updatedAt = new Date;
       } else {
@@ -24,7 +24,7 @@ var useTimestamps = function (schema, options) {
     });
 };
 
-var SharingType = {type: String, enum: [config.SharingType.PRIVATE, config.SharingType.WORLD], 
+var SharingType = {type: String, enum: [config.SharingType.PRIVATE, config.SharingType.WORLD],
     default: config.SharingType.DEFAULT};
 
 mongooseTypes.loadTypes(mongoose);
@@ -54,18 +54,18 @@ UserSchema.methods.validPassword = function(password)
     return bcrypt.compareSync(password, this.password);
 };
 
-UserSchema.methods.toJSON = function() 
+UserSchema.methods.toJSON = function()
 {
     var obj = {
         _id: this._id.toString(),
         name: this.get('name')
-    };  
+    };
     return obj;
 }
 
-UserSchema.methods.toJSONSelf = function() 
+UserSchema.methods.toJSONSelf = function()
 {
-    var obj = this.toJSON();  
+    var obj = this.toJSON();
     obj.email = this.get('email');
     return obj;
 }
@@ -170,7 +170,7 @@ var MapSchema = new mongoose.Schema({
     secretSlug: {type: String, index: {unique: true, sparse: true}},
     slug: {type: String, required: true, index: {unique: true}},
     host: {type: String, required: false, index: {unique: true, sparse: true}},
-    featured: {type: Number, default: 0}, 
+    featured: {type: Number, default: 0},
     previewImage: String,
     initialArea: {
         center: [Number, Number],
@@ -243,6 +243,13 @@ var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema(
     sourceFieldNames: {type: Array, default: []},
     fields: {type: Array},
     extremes: { type: mongoose.Schema.Types.Mixed, /*index: 1,*/ default: {} },
+    histogramProperties: {
+        name: {type: String},
+        min: {type: Number},
+        max: {type: Number},
+        numBins: {type: Number},
+        binSize: {type: Number}
+    },
     importParams: mongoose.Schema.Types.Mixed,
     gridSize: Number,
     defaults: { type: mongoose.Schema.ObjectId, ref: 'LayerOptions', index: 1 },
@@ -265,13 +272,22 @@ var GeoFeatureCollectionSchema = new geogoose.models.GeoFeatureCollectionSchema(
 GeoFeatureCollectionSchema.plugin(useTimestamps);
 
 GeoFeatureCollectionSchema.methods.getMapReducedFeatureModel = function(opts) {
-    var collectionName = 
+    var collectionName =
         'r_'
         + this.getFeatureModel().collection.name
         + (opts.tileSize != undefined ? '_tile_rect_' + opts.tileSize : '')
         + (opts.timeGrid != undefined ? '_' + opts.timeGrid : '')
         + (opts.histogram != undefined ? '_histogram_' + opts.histogram : '');
     return this.getFeatureModel({collectionName: collectionName, schema: GeoFeatureMapReducedSchema});
+};
+
+GeoFeatureCollectionSchema.methods.getAttributeField = function(name) {
+    var index = _.findIndex(this.fields, function(f) {
+        return f.name === name;
+    });
+    if (index !== -1) {
+        return this.fields[index];
+    }
 };
 
 cloneLayerOptionsDefaults = function(featureCollection, callback)
@@ -297,9 +313,9 @@ var GeoFeatureCollection = mongoose.model('GeoFeatureCollection', GeoFeatureColl
 
 
 module.exports = {
-    User: User, 
-    Job: Job, 
-    LayerOptions: LayerOptions, 
+    User: User,
+    Job: Job,
+    LayerOptions: LayerOptions,
     Map: Map,
     GeoFeatureCollection: GeoFeatureCollection,
     adHocModel: geogoose.util.adHocModel,

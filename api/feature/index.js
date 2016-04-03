@@ -9,7 +9,8 @@ var config = require('../../config'),
 	console = require('../../ext-console.js'),
 	getAttr = require('transmeta').util.getAttr,
 	mongoose = require('mongoose'),
-	moment = require('moment');
+	moment = require('moment'),
+	rejuice = require('rejuice');
 
 	Map = models.Map,
 	GeoFeatureCollection = models.GeoFeatureCollection,
@@ -78,23 +79,20 @@ var FeatureAPI = function(app)
 				.populate('defaults')
 				.exec(function(err, featureCollection) {
 					if (handleDbOp(req, res, err, featureCollection, 'feature collection')) return;
-					var	numBins = config.HISTOGRAM_SIZES[0],
-						mapReduceOpts = {histogram: numBins},
-						attrMap = featureCollection.defaults.attrMap,
-						FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts),
+
+					var	attrMap = featureCollection.defaults.attrMap,
 						numericExtremes = getAttr(featureCollection.extremes, attrMap.numeric),
-						binSize = (numericExtremes.max - numericExtremes.min) / numBins;
+						mapReduceOpts = {histogram: featureCollection.histogramProperties.name},
+						FindFeatureModel = featureCollection.getMapReducedFeatureModel(mapReduceOpts);
 
 					console.log('Loading histogram for', FindFeatureModel.collection.name);
+
 					FindFeatureModel.find()
 						.sort({'_id': 1})
 						.exec(function(err, docs) {
 							if (handleDbOp(req, res, err, docs.length)) return;
 							var result = {
-								properties: {
-									numBins: numBins,
-									binSize: binSize
-								},
+								properties: featureCollection.histogramProperties,
 								items: docs.map(function(doc) {
 									var value = doc.get('value');
 									return {

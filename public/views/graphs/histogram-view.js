@@ -17,7 +17,7 @@ define([
 		events: {
 		},
 
-		initialize: function(options) 
+		initialize: function(options)
 		{
 			var self = this,
 				options = _.extend({renderAxes: true}, options);
@@ -25,23 +25,23 @@ define([
 			this.template = _.template(templateHtml);
 		},
 
-		renderGraph: function() 
+		renderGraph: function()
 		{
 			var self = this,
 				valFormatter = this.model.getValFormatter();
 
 			HistogramView.__super__.renderGraph.apply(this, arguments);
 
-			var numBins = this.collection.properties.numBins, 
-				binSize = this.collection.properties.binSize, 
+			var numBins = this.collection.properties.numBins,
+				binSize = this.collection.properties.binSize,
 				data = this.collection.models,
 				xLabel = valFormatter.unit || (this.model.getNumericField() || '').split('.').pop(),
 				yLabel = this.model.getDisplay('itemTitlePlural'),
 				extremes = this.model.getMappedExtremes(),
-				getCount = function(d) { 
+				getCount = function(d) {
 					return d.attributes.count || 0;
 				},
-				getVal = function(d) { 
+				getVal = function(d) {
 					var v = d.getNumericVal();
 						v = v.avg ? v.avg : v;
 					return v;
@@ -51,11 +51,11 @@ define([
 
 			var	x = d3.scale.linear()
 					.range(this.getXRange())
-					.domain([extremes.numeric.min, extremes.numeric.max]),
+					.domain([extremes.numeric.min, extremes.numeric.max + binSize]),
 				y = d3.scale[yScale]()
 					.range(this.getYRange())
-					.domain(d3.extent(data, getCount)),
-				binWidth = this.graphWidth / numBins;
+					.domain([0, d3.max(data, getCount)]),
+				binWidth = Math.max(1, this.graphWidth / numBins - 1);
 
 			if (this.renderAxes) {
 				var xAxis = d3.svg.axis()
@@ -75,11 +75,11 @@ define([
 			this.svg.selectAll("rect")
 					.data(data)
 				.enter().append("rect")
-					.attr("x", function(d, i) { 
+					.attr("x", function(d, i) {
 						return x(getVal(d))
 					})
 					.attr("y", function(d, i) { return y(getCount(d)) })
-					.attr("height", function(d, i) { 
+					.attr("height", function(d, i) {
 						return self.graphHeight - y(getCount(d));
 					})
 					.attr("width", binWidth)

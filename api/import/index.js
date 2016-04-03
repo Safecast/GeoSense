@@ -24,7 +24,7 @@ var config = require('../../config'),
 var LayerOptions = models.LayerOptions,
     handleDbOp = utils.handleDbOp;
 
-var ImportAPI = function(app) 
+var ImportAPI = function(app)
 {
     var self = this;
     if (app) {
@@ -56,11 +56,11 @@ var ImportAPI = function(app)
 
             // prevent arbitrary script inclusion
             if (req.body.transform) {
-                params.transform = (typeof req.body.transform != 'object') ? 
+                params.transform = (typeof req.body.transform != 'object') ?
                     path.basename('' + req.body.transform) : req.body.transform;
             }
             if (req.body.format) {
-                params.format = path.basename('' + req.body.format);                
+                params.format = path.basename('' + req.body.format);
             }
 
             // prevent arbitrary file import
@@ -171,7 +171,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     var params = _.extend(_.clone(defaultParams), params),
         ToCollectionModel = models.GeoFeatureCollection;
 
-    var runImport = function(params, collection, collectionDefaults) 
+    var runImport = function(params, collection, collectionDefaults)
     {
         if (!params.format) {
             if (params.path) {
@@ -226,7 +226,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                         return;
                     }
                     throw err;
-            } 
+            }
         }
 
         var formatModule, format, parser, dataTransform;
@@ -311,7 +311,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
         var sendItems,
             ToSaveModel = collection.getFeatureModel(),
             headerValues = {};
-        
+
         if (!params.append) {
             collection.active = false;
             collection.status = config.DataStatus.IMPORTING;
@@ -374,11 +374,12 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
 
                 if (dataCallbacks.start) {
                     dataCallbacks.start(false, collection, dataTransform);
-                }           
+                }
 
                 var extremes = _.clone(collection.extremes || {}),
                     bounds = collection.bbox && collection.bbox.length ? coordinates.boundsFromBbox(collection.bbox) : null,
                     propertyTypes = {},
+                    propertyValueInfo = {},
                     numRead = 0,
                     numImport = 0,
                     numSaving = 0,
@@ -387,7 +388,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     ended = false,
                     finalized = false;
 
-                var finalize = function(parserErr) 
+                var finalize = function(parserErr)
                 {
                     ended = true;
                     finalized = true;
@@ -430,6 +431,14 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                         }
                     }
 
+                    for (var key in propertyValueInfo) {
+                        var field = collection.getAttributeField('properties.' + key);
+                        if (field.info === undefined) {
+                            field.info = {};
+                        }
+                        field.info = _.extend(field.info, propertyValueInfo[key]);
+                    }
+
                     console.info('* Detected fields:', collection.fields.reduce(function(previousValue, currentValue) {
                         return previousValue.concat(['`' + currentValue.name + '` (' + currentValue.type + ')']);
                     }, []).join(', '));
@@ -447,10 +456,10 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                         collection.limitFeatures = numSaved >= config.MIN_FEATURES_LIMIT;
                     }
 
-                    collection.status = collection.tile ? 
-                        (!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.COMPLETE;
+                    collection.status = collection.tile ?
+                        (!params.append ? config.DataStatus.UNREDUCED : config.DataStatus.UNREDUCED_INC) : config.DataStatus.UNREDUCED;
 
-                    // determine default field mappings by finding first 
+                    // determine default field mappings by finding first
                     // Number and Date field and collection.fields
                     if (!params.append) {
                         if (!collectionDefaults.attrMap) {
@@ -525,7 +534,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                                 }
                                 return;
                             }
-                        
+
                             if (!params.dry) {
                                 debugStats('*** finalized and activated collection ***', 'success', null, true);
                             } else {
@@ -564,7 +573,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     });
                 };
 
-                var debugStats = function(pos, func, info, force) 
+                var debugStats = function(pos, func, info, force)
                 {
                     if (!func) {
                         func = 'log';
@@ -574,7 +583,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     }
                 };
 
-                function postSave(self) 
+                function postSave(self)
                 {
                     if (numSaving == 0) {
                         if (ended) {
@@ -589,7 +598,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                             // They are not paused, but read() must be explicitly called.
                             if (!parser.readStream.read) {
                                 debugStats('resume');
-                                parser.readStream.resume()                          
+                                parser.readStream.resume()
                             } else {
                                 debugStats('read');
                                 parser.readStream.read();
@@ -598,7 +607,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     }
                 }
 
-                function makeSaveHandler(model, self) 
+                function makeSaveHandler(model, self)
                 {
                     return function(err, result) {
                         if (err) {
@@ -632,9 +641,9 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     if (header.totalCount) {
                         collection.numBusy = header.totalCount;
                     }
-                } 
+                }
 
-                function onData(data, index) 
+                function onData(data, index)
                 {
                     var self = this;
                     if (ended) return;
@@ -700,7 +709,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                 function onTransformData(saveModel, transformed)
                 {
                     var self = parser;
-                    
+
                     if (dataCallbacks.transform) {
                         dataCallbacks.transform(false, saveModel, transformed);
                     }
@@ -713,18 +722,18 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                             incrementor = saveModel.incrementor;
 
                         doSave = saveModel
-                            && (!loc || !loc.length || !params.bounds 
+                            && (!loc || !loc.length || !params.bounds
                                 || (loc[0] >= params.bounds[0][0] && loc[1] >= params.bounds[0][1] && loc[0] <= params.bounds[1][0] && loc[1] <= params.bounds[1][1]))
                             && (!datetime || !params.from || datetime >= params.from)
                             && (!datetime || !params.to || datetime <= params.to)
-                            && (!params.incremental || !collection.extremes || collection.extremes.incrementor == undefined 
+                            && (!params.incremental || !collection.extremes || collection.extremes.incrementor == undefined
                                 || incrementor == undefined || incrementor >= collection.extremes.incrementor.max);
                     }
 
                     if (doSave) {
                         if (parser.readStream) {
                             // unless paused, incoming data will pile up since saving
-                            // is slow. pausing the readStream until all are saved keeps 
+                            // is slow. pausing the readStream until all are saved keeps
                             // memory consumption low.
                             // Update: Node 0.10+ creates streams in non-flowing mode by default.
                             // They are not paused, but read() must be explicitly called.
@@ -743,7 +752,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                         }
                         for (var key in saveModel.properties) {
                             // determine type for each property as long as it remains constant
-                            var propertyType = saveModel.properties[key] == null || saveModel.properties[key] == undefined ? null 
+                            var propertyType = saveModel.properties[key] == null || saveModel.properties[key] == undefined ? null
                                 : Array.isArray(saveModel.properties[key]) ? 'array'
                                 : typeof saveModel.properties[key];
 
@@ -774,17 +783,26 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                                 if (propertyTypes[key] == undefined) {
                                     propertyTypes[key] = propertyType;
                                 } else {
-                                    // if the property type is inconsistent, set to false (except: 
+                                    // if the property type is inconsistent, set to false (except:
                                     // if one was a Date and the other was a string, then reset to string,
                                     // since some random strings parse as Date)
                                     if (propertyTypes[key] != propertyType && !isEmpty) {
                                         if ((propertyType == 'string' && ['Number', 'Date'].indexOf(propertyTypes[key]) != -1)
-                                            || (propertyTypes[key] == 'string' && ['Number', 'Date'].indexOf(propertyType) != -1)) {
-                                                propertyTypes[key] = 'string';                                      
+                                            || (propertyTypes[key] == 'string' && ['Number', 'number', 'Date'].indexOf(propertyType) != -1)) {
+                                                propertyTypes[key] = 'string';
                                         } else {
-                                            propertyTypes[key] = false;                                     
+                                            propertyTypes[key] = false;
                                         }
                                     }
+                                }
+
+                                if (['Number', 'number'].indexOf(propertyTypes[key]) !== -1) {
+                                    if (propertyValueInfo[key] == undefined) {
+                                        propertyValueInfo[key] = {};
+                                    }
+                                    propertyValueInfo[key].isInteger =
+                                        (propertyValueInfo[key].isInteger || propertyValueInfo[key].isInteger === undefined)
+                                        && transmeta.Filter.isInteger(saveModel.properties[key]);
                                 }
                             }
 
@@ -830,7 +848,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     }
                 }
 
-                function onEnd(count) 
+                function onEnd(count)
                 {
                     ended = true;
                     debugStats('on end');
@@ -839,7 +857,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     }
                 }
 
-                function onError(err) 
+                function onError(err)
                 {
                     if (ended) return;
 
@@ -860,8 +878,8 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
                     finalize(err);
                 }
 
-                parser.on('header', onHeader)                               
-                    .on('data', onData)                             
+                parser.on('header', onHeader)
+                    .on('data', onData)
                     .on('end', onEnd)
                     .on('error', onError);
 
@@ -955,7 +973,7 @@ ImportAPI.prototype.import = function(params, req, res, callback, dataCallbacks)
     }
 }
 
-ImportAPI.prototype.sync = function(params, req, res, callback) 
+ImportAPI.prototype.sync = function(params, req, res, callback)
 {
     var self = this;
     if (!params) {
@@ -1006,13 +1024,13 @@ ImportAPI.prototype.syncAll = function(params, req, res, callback)
     });
 }
 
-function getImportParams(params) 
+function getImportParams(params)
 {
     return utils.deleteUndefined({
         url: params.u || params.url,
         path: params.p || params.path,
         format: params.f || params.format,
-        transform: params.t || params.transform, 
+        transform: params.t || params.transform,
         layerOptions: params.layerOptions,
         append: params.append,
         from: params.from,
@@ -1021,7 +1039,7 @@ function getImportParams(params)
         skip: params.skip,
         dry: (params.dry ? params.dry && params.dry != 'off' : undefined),
         incremental: (params.incremental ? params.incremental && params.incremental != 'off' : undefined),
-        break: (params.break ? params.break && params.break != 'off' : undefined), 
+        break: (params.break ? params.break && params.break != 'off' : undefined),
         interval: params.interval,
         bounds: params.bounds,
         aggregate: (params.aggregate ? params.aggregate && params.aggregate != 'off' : undefined),
@@ -1032,8 +1050,8 @@ function getImportParams(params)
 }
 
 ImportAPI.prototype.cli = {
-    
-    import: function(params, callback, showHelp) 
+
+    import: function(params, callback, showHelp)
     {
         var help = "Usage: node manage.js import [import-params]\n"
             + "\nImports records from a URL or a file into a new point collection.\n";
@@ -1048,8 +1066,8 @@ ImportAPI.prototype.cli = {
             callback(false, help, true);
         }
     },
-    
-    sync: function(params, callback, showHelp) 
+
+    sync: function(params, callback, showHelp)
     {
         var help = "Usage: node manage.js sync <object-id> [import-params]\n"
             + "\nSynchronizes a point collection using the same import parameters "
@@ -1068,7 +1086,7 @@ ImportAPI.prototype.cli = {
         }
     },
 
-    'list-collections': function(params, callback, showHelp) 
+    'list-collections': function(params, callback, showHelp)
     {
         if (utils.connectDB()) {
             models.GeoFeatureCollection.find({}).exec(function(err, docs) {
@@ -1086,7 +1104,7 @@ ImportAPI.prototype.cli = {
         }
     },
 
-    'reset-collection': function(params, callback, showHelp) 
+    'reset-collection': function(params, callback, showHelp)
     {
         var help = "Usage: node manage.js reset-collection [params]\n"
             + "\nResets the status for a collection that is left busy to 'Complete', for instance after an aggregation operation was forcefully cancelled.\n"

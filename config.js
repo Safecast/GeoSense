@@ -4,7 +4,7 @@ var DEV = typeof process != 'undefined' && process.env.NODE_ENV == 'development'
 var config = {
 
 	DEV: DEV,
-	DEBUG: true,	
+	DEBUG: true,
 	VERBOSE: false,
 	DEBUG_MAPREDUCE: DEV && 0,
 	LIMITED_PROD_ACCESS: false,//!DEV,
@@ -13,7 +13,7 @@ var config = {
 
 	EXPENSIVE_OPERATION_CACHE_TIME: 60 * 60000,
 
-	// since dev server restarts frequently and sessions are lost, circumvent 
+	// since dev server restarts frequently and sessions are lost, circumvent
 	// session-based permissions in debug mode.
 	DEBUG_CIRCUMVENT_PERMISSIONS: true,
 
@@ -50,10 +50,10 @@ var config = {
 		limit: 2000
 	},
 
-	HISTOGRAM_SIZES: [80],
+	HISTOGRAM_DESIRED_SIZE: 100,
 
 	// Reserve certain URIs and do not allow them for slugs without modification, such as:
-	// "admin", short words, short numbers, base64 uuids 
+	// "admin", short words, short numbers, base64 uuids
 	RESERVED_URI: /^(admin|[a-z0-9]{1,7}|[0-9]{1,5}|[A-Za-z0-9\+\/]{24})$/,
 
 	MAPREDUCE_SETTINGS: {
@@ -100,7 +100,7 @@ for (var zoom = 0; zoom < config.MAP_RESOLUTIONS.length; zoom++) {
 var utils;
 if (typeof require == 'function') {
 	// can't import utils since that would result in a circular import
-	// utils = require("./utils.js");	
+	// utils = require("./utils.js");
 	// re-define import function instead
 	utils = {
 		import: function(into, mod) {
@@ -110,7 +110,7 @@ if (typeof require == 'function') {
 			return mod;
 		}
 	};
-} 
+}
 
 // import custom settings
 if (utils) {

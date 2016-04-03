@@ -182,19 +182,25 @@ AggregateAPI.prototype.aggregate = function(params, req, res, callback)
 						}
 
 						// Initialize MapReduce for histograms
-						for (var i = 0; i < config.HISTOGRAM_SIZES.length; i++) {
-							if (attrMap.numeric && params.types.indexOf('histogram') != -1) {
-								var numericExtremes = getAttr(collection.extremes, attrMap.numeric);
-								if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
-									if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
-								}
-								mr('*** MapReduce for histogram = '+config.HISTOGRAM_SIZES[i], makeObj(
-										//'featureCollection', new Mapper.Copy(),
-										attrMap.numeric, new Mapper.Histogram(
-											numericExtremes.min, numericExtremes.max, config.HISTOGRAM_SIZES[i])),
-										{ events: null, indexes: {'bin': 1}, aggregates: false, copy: "bin"}
-									);
+						if (attrMap.numeric && params.types.indexOf('histogram') != -1) {
+							var numericExtremes = getAttr(collection.extremes, attrMap.numeric),
+								numericField = collection.getAttributeField(attrMap.numeric),
+								isInteger = numericField && numericField.info && numericField.info.isInteger,
+								properties = rejuice.util.getHistogramDimensions(numericExtremes.min, numericExtremes.max, config.HISTOGRAM_DESIRED_SIZE, isInteger);
+							if (numericExtremes == undefined || numericExtremes.min == undefined || numericExtremes.max == undefined) {
+								if (utils.callbackOrThrow(new Error('undefined extremes for ' + attrMap.numeric), callback)) return;
 							}
+							properties.name = 'auto';
+							var mapper = new Mapper.Histogram(properties.min, properties.max, properties.numBins, properties.binSize);
+							mapper.name = 'histogram_' + properties.name;
+
+							collection.histogramProperties = properties;
+
+							mr('*** MapReduce for histogram ' + properties.min + ' .. ' + properties.max + ', isInteger = ' + isInteger + ', bins = ' + properties.numBins, makeObj(
+								//'featureCollection', new Mapper.Copy(),
+								attrMap.numeric, mapper),
+									{ events: null, indexes: {'bin': 1}, aggregates: false, copy: "bin"}
+							);
 						}
 
 						if (collection.tile) {
