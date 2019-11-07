@@ -18,7 +18,7 @@
 		"mongoose-types": "1.0.3",
 		"moment": "2.x",
 		"mailer": "0.6.7",
-		"ejs": "0.7.2",
+		"ejs": "2.7.1",
 		"optimist": "0.3.4",
 		"JSONStream": "0.4.3",
 		"request": ">=2.10",
